@@ -41,9 +41,9 @@ Useful isolation steps:
 
 ## The mask is transparent but not blurred on Linux
 
-Blur-behind is compositor-specific. Big Pixels, Scramble, Loupes and Blackout are compositor-independent
+Blur-behind is compositor-specific. Big Pixels, Scramble, Glass Blocks and Blackout are compositor-independent
 privacy modes and will still hide the underlying content.
 
 ## Right-click seems to do nothing
 
-The mode changes immediately. The tray tooltip shows the current mode. Big Pixels, Scramble, Loupes and Blackout are visually obvious; Blur depends on the OS compositor.
+The mode changes immediately. The tray tooltip shows the current mode. Big Pixels, Scramble, Glass Blocks and Blackout are visually obvious; Blur depends on the OS compositor.

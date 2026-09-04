@@ -107,9 +107,9 @@ public sealed partial class App : Application
     private static string ModeName(PrivacyMode mode) => mode switch
     {
         PrivacyMode.Blur => "Blur",
-        PrivacyMode.BigPixels => "Big Pixels",
+        PrivacyMode.BigPixels => "Pixel Blur",
         PrivacyMode.Scramble => "Scramble",
-        PrivacyMode.Loupes => "Loupes",
+        PrivacyMode.GlassBlocks => "Glass Blocks",
         PrivacyMode.Blackout => "Blackout",
         _ => mode.ToString()
     };

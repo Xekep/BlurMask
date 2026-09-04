@@ -24,13 +24,12 @@ switch privacy effects without doing post-production blur work.
 Right-click the rectangle to cycle:
 
 1. **Blur** - compositor blur-behind when available.
-2. **Big Pixels** - very coarse opaque pixel blocks for obvious privacy masking.
+2. **Pixel Blur** - transparent coarse pixel tiles over compositor blur.
 3. **Scramble** - a deliberately shuffled block pattern with stronger visual breakup.
-4. **Loupes** - a field of large circular privacy cells, visually distinct from the rectangular modes.
+4. **Glass Blocks** - transparent square glass-block cells over compositor blur, inspired by refractive glass mosaic.
 5. **Blackout** - solid black privacy mask.
 
-The non-blur modes are intentionally privacy-safe overlays: they do not screen-capture the
-content beneath the window, so they cannot recursively capture BlurMask itself while recording.
+The visual modes do not screen-capture the content beneath the window, so they cannot recursively capture BlurMask itself while recording. Blackout and Scramble are the strongest privacy modes; Pixel Blur and Glass Blocks intentionally preserve some visual context.
 The tray tooltip shows the current mode.
 
 

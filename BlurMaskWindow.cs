@@ -11,7 +11,7 @@ public enum PrivacyMode
     Blur,
     BigPixels,
     Scramble,
-    Loupes,
+    GlassBlocks,
     Blackout
 }
 
@@ -30,7 +30,7 @@ public sealed class BlurMaskWindow : Window
     private readonly Border _inputSurface;
     private readonly UniformGrid _bigPixels;
     private readonly UniformGrid _scramble;
-    private readonly UniformGrid _loupes;
+    private readonly UniformGrid _glassBlocks;
 
     public PrivacyMode Mode { get; private set; } = PrivacyMode.Blur;
 
@@ -63,13 +63,19 @@ public sealed class BlurMaskWindow : Window
         _scramble.IsHitTestVisible = false;
         _root.Children.Add(_scramble);
 
-        _loupes = CreateLoupes();
-        _loupes.IsHitTestVisible = false;
-        _root.Children.Add(_loupes);
+        _glassBlocks = CreateGlassBlocks();
+        _glassBlocks.IsHitTestVisible = false;
+        _root.Children.Add(_glassBlocks);
 
-        // One full-window interaction surface is deliberately used instead of separate
-        // move/resize controls. It makes all mouse buttons deterministic regardless of
-        // which visual privacy layer is currently visible.
+        _outline = new Border
+        {
+            BorderBrush = new SolidColorBrush(Color.FromArgb(180, 255, 255, 255)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(8),
+            IsHitTestVisible = false,
+            Opacity = 0.0
+        };
+
         _inputSurface = new Border
         {
             Background = Brushes.Transparent,
@@ -80,15 +86,6 @@ public sealed class BlurMaskWindow : Window
         _inputSurface.PointerEntered += (_, _) => _outline.Opacity = 1;
         _inputSurface.PointerExited += (_, _) => _outline.Opacity = 0;
         _root.Children.Add(_inputSurface);
-
-        _outline = new Border
-        {
-            BorderBrush = new SolidColorBrush(Color.FromArgb(180, 255, 255, 255)),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(8),
-            IsHitTestVisible = false,
-            Opacity = 0.0
-        };
         _root.Children.Add(_outline);
 
         Content = _root;
@@ -166,17 +163,30 @@ public sealed class BlurMaskWindow : Window
 
     private static UniformGrid CreateBigPixels()
     {
-        const int columns = 7;
-        const int rows = 5;
+        const int columns = 9;
+        const int rows = 7;
         var grid = NewPrivacyGrid(columns, rows);
-        var brushes = CreatePrivacyBrushes();
+
+        var brushes = new IBrush[]
+        {
+            new SolidColorBrush(Color.FromArgb(96, 248, 248, 250)),
+            new SolidColorBrush(Color.FromArgb(76, 216, 220, 228)),
+            new SolidColorBrush(Color.FromArgb(108, 186, 192, 205)),
+            new SolidColorBrush(Color.FromArgb(72, 156, 164, 176)),
+            new SolidColorBrush(Color.FromArgb(84, 232, 236, 242))
+        };
 
         for (var y = 0; y < rows; y++)
         {
             for (var x = 0; x < columns; x++)
             {
-                var index = (x * 5 + y * 3 + ((x + y) & 1)) % brushes.Length;
-                grid.Children.Add(new Border { Background = brushes[index] });
+                var index = (x * 7 + y * 5 + ((x ^ y) & 3)) % brushes.Length;
+                grid.Children.Add(new Border
+                {
+                    Background = brushes[index],
+                    Margin = new Thickness(1 + ((x + y) & 1), 1 + (y & 1), 1, 1),
+                    CornerRadius = new CornerRadius(1)
+                });
             }
         }
 
@@ -207,23 +217,58 @@ public sealed class BlurMaskWindow : Window
         return grid;
     }
 
-    private static UniformGrid CreateLoupes()
+    private static UniformGrid CreateGlassBlocks()
     {
-        const int columns = 5;
-        const int rows = 4;
+        // Square translucent lens tiles inspired by old glass-block walls: the desktop
+        // remains visible through the compositor blur while every cell gets a slightly
+        // different tint/highlight so the whole mask reads as refractive glass mosaic.
+        const int columns = 8;
+        const int rows = 6;
         var grid = NewPrivacyGrid(columns, rows);
-        var brushes = CreatePrivacyBrushes();
 
-        for (var i = 0; i < columns * rows; i++)
+        var fills = new IBrush[]
         {
-            grid.Children.Add(new Border
+            new SolidColorBrush(Color.FromArgb(44, 255, 255, 255)),
+            new SolidColorBrush(Color.FromArgb(58, 228, 236, 246)),
+            new SolidColorBrush(Color.FromArgb(36, 205, 218, 232)),
+            new SolidColorBrush(Color.FromArgb(64, 244, 247, 251)),
+            new SolidColorBrush(Color.FromArgb(30, 188, 204, 222)),
+            new SolidColorBrush(Color.FromArgb(52, 236, 242, 248))
+        };
+
+        for (var y = 0; y < rows; y++)
+        {
+            for (var x = 0; x < columns; x++)
             {
-                Margin = new Thickness(4 + (i % 2)),
-                CornerRadius = new CornerRadius(999),
-                BorderThickness = new Thickness(2),
-                BorderBrush = new SolidColorBrush(Color.FromArgb(140, 220, 220, 225)),
-                Background = brushes[(i * 3 + i / columns) % brushes.Length]
-            });
+                var index = (x * 7 + y * 11 + ((x ^ y) * 3)) % fills.Length;
+                var phase = (x * 5 + y * 3) % 4;
+
+                var tile = new Border
+                {
+                    Margin = new Thickness(1.2),
+                    CornerRadius = new CornerRadius(1.5 + (phase * 0.35)),
+                    BorderThickness = new Thickness(0.8 + ((x + y) & 1) * 0.45),
+                    BorderBrush = new SolidColorBrush(Color.FromArgb(92, 245, 248, 252)),
+                    Background = fills[index]
+                };
+
+                var inner = new Grid();
+                inner.Children.Add(new Border
+                {
+                    Margin = new Thickness(3 + phase, 2 + (phase % 2), 5 - (phase % 2), 4 + (phase / 2)),
+                    Background = new SolidColorBrush(Color.FromArgb((byte)(18 + phase * 7), 255, 255, 255)),
+                    CornerRadius = new CornerRadius(1)
+                });
+                inner.Children.Add(new Border
+                {
+                    Margin = new Thickness(7 - (phase % 2), 8 + (phase % 2), 3 + phase, 3),
+                    Background = new SolidColorBrush(Color.FromArgb((byte)(12 + phase * 5), 120, 145, 170)),
+                    CornerRadius = new CornerRadius(1)
+                });
+
+                tile.Child = inner;
+                grid.Children.Add(tile);
+            }
         }
 
         return grid;
@@ -254,8 +299,8 @@ public sealed class BlurMaskWindow : Window
         {
             PrivacyMode.Blur => PrivacyMode.BigPixels,
             PrivacyMode.BigPixels => PrivacyMode.Scramble,
-            PrivacyMode.Scramble => PrivacyMode.Loupes,
-            PrivacyMode.Loupes => PrivacyMode.Blackout,
+            PrivacyMode.Scramble => PrivacyMode.GlassBlocks,
+            PrivacyMode.GlassBlocks => PrivacyMode.Blackout,
             _ => PrivacyMode.Blur
         };
 
@@ -269,7 +314,7 @@ public sealed class BlurMaskWindow : Window
         _root.Background = Brushes.Transparent;
         _bigPixels.IsVisible = false;
         _scramble.IsVisible = false;
-        _loupes.IsVisible = false;
+        _glassBlocks.IsVisible = false;
 
         switch (Mode)
         {
@@ -284,14 +329,13 @@ public sealed class BlurMaskWindow : Window
                 break;
 
             case PrivacyMode.BigPixels:
-                // Do not make the window click-through. The opaque pattern is rendered inside
-                // the same top-level so the input layer remains active on every privacy mode.
                 TransparencyLevelHint =
                 [
-                    WindowTransparencyLevel.Transparent,
-                    WindowTransparencyLevel.None
+                    WindowTransparencyLevel.Blur,
+                    WindowTransparencyLevel.AcrylicBlur,
+                    WindowTransparencyLevel.Transparent
                 ];
-                _root.Background = new SolidColorBrush(Color.FromRgb(30, 30, 34));
+                _root.Background = new SolidColorBrush(Color.FromArgb(16, 245, 247, 250));
                 _bigPixels.IsVisible = true;
                 break;
 
@@ -305,14 +349,15 @@ public sealed class BlurMaskWindow : Window
                 _scramble.IsVisible = true;
                 break;
 
-            case PrivacyMode.Loupes:
+            case PrivacyMode.GlassBlocks:
                 TransparencyLevelHint =
                 [
-                    WindowTransparencyLevel.Transparent,
-                    WindowTransparencyLevel.None
+                    WindowTransparencyLevel.Blur,
+                    WindowTransparencyLevel.AcrylicBlur,
+                    WindowTransparencyLevel.Transparent
                 ];
-                _root.Background = new SolidColorBrush(Color.FromRgb(22, 22, 26));
-                _loupes.IsVisible = true;
+                _root.Background = new SolidColorBrush(Color.FromArgb(12, 245, 248, 252));
+                _glassBlocks.IsVisible = true;
                 break;
 
             case PrivacyMode.Blackout:
