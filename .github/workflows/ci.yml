@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build:
+    name: Build / ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 11.0.100-preview.7.26381.103
+      - run: dotnet restore
+      - run: dotnet build -c Release --no-restore -p:PublishAot=false
+
+  native-aot-windows:
+    name: Native AOT / Windows x64
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 11.0.100-preview.7.26381.103
+      - run: dotnet restore
+      - name: Publish
+        shell: pwsh
+        run: .\build.ps1 win-x64
+      - name: Verify native dependencies
+        shell: pwsh
+        run: |
+          $dir = "bin\Release\net11.0\win-x64\publish"
+          $required = @("av_libglesv2.dll", "libSkiaSharp.dll", "libHarfBuzzSharp.dll")
+          foreach ($name in $required) {
+            if (-not (Test-Path (Join-Path $dir $name))) {
+              throw "Required Native AOT dependency is missing: $name"
+            }
+          }
+      - name: Startup smoke test
+        shell: pwsh
+        run: |
+          $exe = Resolve-Path "bin\Release\net11.0\win-x64\publish\BlurMask.exe"
+          $p = Start-Process -FilePath $exe -ArgumentList "--smoke-test" -PassThru
+          if (-not $p.WaitForExit(15000)) {
+            $p.Kill()
+            throw "BlurMask smoke test timed out"
+          }
+          if ($p.ExitCode -ne 0) {
+            throw "BlurMask exited with code $($p.ExitCode)"
+          }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BlurMask-win-x64
+          path: bin/Release/net11.0/win-x64/publish/
+
+  native-aot-linux:
+    name: Native AOT / Linux x64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 11.0.100-preview.7.26381.103
+      - name: Install Native AOT and X11 smoke-test dependencies
+        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev xvfb libx11-6 libice6 libsm6 libfontconfig1
+      - run: dotnet restore
+      - run: ./build.sh linux-x64
+      - name: Startup smoke test
+        run: xvfb-run -a ./bin/Release/net11.0/linux-x64/publish/BlurMask --smoke-test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BlurMask-linux-x64
+          path: bin/Release/net11.0/linux-x64/publish/
+
+  native-aot-macos:
+    name: Native AOT / macOS host architecture
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 11.0.100-preview.7.26381.103
+      - run: dotnet restore
+      - name: Publish for runner architecture
+        shell: bash
+        run: |
+          if [[ "$(uname -m)" == "arm64" ]]; then RID=osx-arm64; else RID=osx-x64; fi
+          echo "RID=$RID" >> "$GITHUB_ENV"
+          ./build.sh "$RID"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BlurMask-macos
+          path: bin/Release/net11.0/${{ env.RID }}/publish/

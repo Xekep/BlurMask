@@ -1,0 +1,39 @@
+name: Bug report
+description: Report a reproducible BlurMask problem
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows x64
+        - Windows ARM64
+        - Linux x64
+        - Linux ARM64
+        - macOS Intel
+        - macOS Apple Silicon
+    validations:
+      required: true
+  - type: dropdown
+    id: build
+    attributes:
+      label: Build type
+      options:
+        - Native AOT
+        - dotnet run / normal build
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Include exact error text and steps to reproduce.
+    validations:
+      required: true
+  - type: textarea
+    id: files
+    attributes:
+      label: Native AOT publish files
+      description: On Windows, confirm whether av_libglesv2.dll, libSkiaSharp.dll and libHarfBuzzSharp.dll are next to BlurMask.exe.
