@@ -50,17 +50,36 @@ jobs:
               throw "Required Native AOT dependency is missing: $name"
             }
           }
-      - name: Startup smoke test
+      - name: Startup and single-instance smoke test
         shell: pwsh
         run: |
           $exe = Resolve-Path "bin\Release\net11.0\win-x64\publish\BlurMask.exe"
-          $p = Start-Process -FilePath $exe -ArgumentList "--smoke-test" -PassThru
-          if (-not $p.WaitForExit(15000)) {
-            $p.Kill()
+
+          # First process owns the single-instance mutex and remains alive long enough
+          # for a duplicate launch to be tested.
+          $first = Start-Process -FilePath $exe -ArgumentList "--smoke-test" -PassThru
+          Start-Sleep -Milliseconds 500
+
+          if ($first.HasExited) {
+            throw "First BlurMask instance exited before duplicate-launch test (code $($first.ExitCode))"
+          }
+
+          # A duplicate launch must terminate silently and successfully.
+          $second = Start-Process -FilePath $exe -PassThru
+          if (-not $second.WaitForExit(3000)) {
+            $second.Kill()
+            throw "Second BlurMask instance did not exit promptly"
+          }
+          if ($second.ExitCode -ne 0) {
+            throw "Second BlurMask instance exited with code $($second.ExitCode)"
+          }
+
+          if (-not $first.WaitForExit(15000)) {
+            $first.Kill()
             throw "BlurMask smoke test timed out"
           }
-          if ($p.ExitCode -ne 0) {
-            throw "BlurMask exited with code $($p.ExitCode)"
+          if ($first.ExitCode -ne 0) {
+            throw "BlurMask exited with code $($first.ExitCode)"
           }
       - uses: actions/upload-artifact@v4
         with:

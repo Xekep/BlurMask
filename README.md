@@ -33,6 +33,12 @@ Right-click the rectangle to cycle:
 
 The tray tooltip shows the current mode.
 
+
+### Tray and single-instance behavior
+
+- Right-click the tray icon to open the application menu: create a mask, close the mask, or exit BlurMask.
+- Only one BlurMask process is allowed per OS user/session. Launching it again exits silently with code `0`; it does not show a dialog, notification, or second tray icon.
+
 ## Build requirements
 
 - .NET SDK `11.0.100-preview.7.26381.103` or a compatible .NET 11 SDK;

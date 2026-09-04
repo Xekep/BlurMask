@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using Avalonia.Themes.Fluent;
 
 namespace BlurMask;
 
@@ -13,6 +14,9 @@ public sealed class App : Application
 
     public override void Initialize()
     {
+        // TrayIcon on Windows renders its right-click menu using Avalonia controls.
+        // A code-only app therefore still needs a base theme for those controls.
+        Styles.Add(new FluentTheme());
     }
 
     public override void OnFrameworkInitializationCompleted()
@@ -59,6 +63,7 @@ public sealed class App : Application
         {
             ToolTipText = "BlurMask — клик: маска; ПКМ по маске: режим",
             Icon = LoadIcon(),
+            IsVisible = true,
             Menu = new NativeMenu
             {
                 create,
