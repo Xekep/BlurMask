@@ -17,7 +17,7 @@ switch privacy effects without doing post-production blur work.
 - hover-only outline so the editing border normally stays out of recordings;
 - .NET 11 + Avalonia 12;
 - Native AOT deployment;
-- no XAML and no application-level runtime reflection.
+- Native AOT-safe code path; tray resources are defined in compiled Avalonia XAML.
 
 ## Privacy modes
 
@@ -26,10 +26,10 @@ Right-click the rectangle to cycle:
 1. **Blur** - compositor blur-behind when available.
 2. **Pixel Blur** - transparent coarse pixel tiles over compositor blur.
 3. **Scramble** - a deliberately shuffled block pattern with stronger visual breakup.
-4. **Glass Blocks** - transparent square glass-block cells over compositor blur, inspired by refractive glass mosaic.
+4. **Glass Refraction** - on Windows, fixed 30×30 px optical cells on a 32 px pitch. The cells are assigned to four persistent Magnification planes with slightly different zoom/offset/color transforms, so lines and text genuinely break at cell boundaries. Resizing adds/removes square cells instead of stretching them. Other platforms currently use the translucent glass-block fallback.
 5. **Blackout** - solid black privacy mask.
 
-The visual modes do not screen-capture the content beneath the window, so they cannot recursively capture BlurMask itself while recording. Blackout and Scramble are the strongest privacy modes; Pixel Blur and Glass Blocks intentionally preserve some visual context.
+None of the modes performs an application-level desktop capture. On Windows, Glass Refraction uses the system Magnification API with exactly four child Magnifier windows for the whole mask, regardless of how many cells are visible. Each plane is clipped by a disjoint Win32 region. There is no 60 Hz polling/render timer and no child HWND per cell; BlurMask only updates the four source rectangles when the mask actually moves or resizes. Blackout and Scramble remain the strongest privacy modes; Pixel Blur and Glass Refraction intentionally preserve some visual context.
 The tray tooltip shows the current mode.
 
 
@@ -105,8 +105,7 @@ This is used by CI to catch startup/native-loader failures that a compile-only w
 
 ### Windows
 
-Avalonia compositor blur/acrylic is used. Native AOT output must be kept together with
-its native rendering DLLs.
+Avalonia compositor blur/acrylic is used for the basic blur modes. Glass Refraction uses the Windows Magnification API through four constant optical planes clipped into 30×30 px cells on a 32 px pitch. The project targets `net11.0`. Native AOT output must be kept together with its native rendering DLLs.
 
 ### Linux
 

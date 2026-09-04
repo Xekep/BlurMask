@@ -109,7 +109,7 @@ public sealed partial class App : Application
         PrivacyMode.Blur => "Blur",
         PrivacyMode.BigPixels => "Pixel Blur",
         PrivacyMode.Scramble => "Scramble",
-        PrivacyMode.GlassBlocks => "Glass Blocks",
+        PrivacyMode.GlassBlocks => "Glass Refraction",
         PrivacyMode.Blackout => "Blackout",
         _ => mode.ToString()
     };

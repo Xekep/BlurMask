@@ -31,6 +31,7 @@ public sealed class BlurMaskWindow : Window
     private readonly UniformGrid _bigPixels;
     private readonly UniformGrid _scramble;
     private readonly UniformGrid _glassBlocks;
+    private WindowsGlassRefraction? _windowsGlass;
 
     public PrivacyMode Mode { get; private set; } = PrivacyMode.Blur;
 
@@ -91,7 +92,17 @@ public sealed class BlurMaskWindow : Window
         Content = _root;
 
         ApplyMode();
-        Opened += (_, _) => PlatformBlur.TryApplyNativeEnhancements(this);
+        Opened += (_, _) =>
+        {
+            PlatformBlur.TryApplyNativeEnhancements(this);
+            _windowsGlass = WindowsGlassRefraction.TryCreate(this);
+            ApplyMode();
+        };
+        Closed += (_, _) =>
+        {
+            _windowsGlass?.Dispose();
+            _windowsGlass = null;
+        };
     }
 
     private void InputSurfaceOnPointerPressed(object? sender, PointerPressedEventArgs e)
@@ -291,7 +302,15 @@ public sealed class BlurMaskWindow : Window
         new SolidColorBrush(Color.FromRgb(70, 70, 78))
     ];
 
-    internal void CycleModeForSmokeTest() => CycleMode();
+    internal void CycleModeForSmokeTest()
+    {
+        CycleMode();
+
+        // Windows CI must exercise the real optical backend rather than silently passing
+        // through the decorative fallback if native Magnification interop breaks under Native AOT.
+        if (OperatingSystem.IsWindows() && Mode == PrivacyMode.GlassBlocks && _windowsGlass is null)
+            throw new InvalidOperationException("Windows Glass Refraction optical backend failed to initialize.");
+    }
 
     private void CycleMode()
     {
@@ -315,6 +334,7 @@ public sealed class BlurMaskWindow : Window
         _bigPixels.IsVisible = false;
         _scramble.IsVisible = false;
         _glassBlocks.IsVisible = false;
+        _windowsGlass?.SetEnabled(false);
 
         switch (Mode)
         {
@@ -350,14 +370,31 @@ public sealed class BlurMaskWindow : Window
                 break;
 
             case PrivacyMode.GlassBlocks:
-                TransparencyLevelHint =
-                [
-                    WindowTransparencyLevel.Blur,
-                    WindowTransparencyLevel.AcrylicBlur,
-                    WindowTransparencyLevel.Transparent
-                ];
-                _root.Background = new SolidColorBrush(Color.FromArgb(12, 245, 248, 252));
-                _glassBlocks.IsVisible = true;
+                if (_windowsGlass is not null)
+                {
+                    // Windows: four fixed Magnifier planes cover all glass cells through disjoint
+                    // Win32 regions. Native window count stays constant as the mask grows.
+                    // There is no polling/render timer; source geometry changes only on move/resize.
+                    TransparencyLevelHint =
+                    [
+                        WindowTransparencyLevel.Transparent,
+                        WindowTransparencyLevel.Blur
+                    ];
+                    _root.Background = Brushes.Transparent;
+                    _windowsGlass.SetEnabled(true);
+                }
+                else
+                {
+                    // Cross-platform fallback until native optical backends are added.
+                    TransparencyLevelHint =
+                    [
+                        WindowTransparencyLevel.Blur,
+                        WindowTransparencyLevel.AcrylicBlur,
+                        WindowTransparencyLevel.Transparent
+                    ];
+                    _root.Background = new SolidColorBrush(Color.FromArgb(12, 245, 248, 252));
+                    _glassBlocks.IsVisible = true;
+                }
                 break;
 
             case PrivacyMode.Blackout:

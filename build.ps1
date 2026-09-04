@@ -28,7 +28,8 @@ if ($LASTEXITCODE -ne 0) {
     throw "Native AOT publish failed with exit code $LASTEXITCODE."
 }
 
-$publishDir = Join-Path $PSScriptRoot "bin\Release\net11.0\$Runtime\publish"
+$targetFramework = "net11.0"
+$publishDir = Join-Path $PSScriptRoot "bin\Release\$targetFramework\$Runtime\publish"
 
 if ($Runtime.StartsWith('win-')) {
     $required = @('av_libglesv2.dll', 'libSkiaSharp.dll', 'libHarfBuzzSharp.dll')
