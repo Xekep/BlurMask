@@ -5,13 +5,13 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$isWindows = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Windows)
-$isLinux = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Linux)
-$isMacOS = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::OSX)
+$runningOnWindows = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Windows)
+$runningOnLinux = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Linux)
+$runningOnMacOS = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::OSX)
 
-$valid = ($isWindows -and $Runtime.StartsWith('win-')) -or
-         ($isLinux -and $Runtime.StartsWith('linux-')) -or
-         ($isMacOS -and $Runtime.StartsWith('osx-'))
+$valid = ($runningOnWindows -and $Runtime.StartsWith('win-')) -or
+         ($runningOnLinux -and $Runtime.StartsWith('linux-')) -or
+         ($runningOnMacOS -and $Runtime.StartsWith('osx-'))
 
 if (-not $valid) {
     throw "Native AOT does not support cross-OS publishing. Requested RID: $Runtime"

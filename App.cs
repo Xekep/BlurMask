@@ -1,22 +1,21 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Platform;
+using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
-using Avalonia.Themes.Fluent;
 
 namespace BlurMask;
 
-public sealed class App : Application
+public sealed partial class App : Application
 {
     private BlurMaskWindow? _mask;
     private TrayIcon? _tray;
 
     public override void Initialize()
     {
-        // TrayIcon on Windows renders its right-click menu using Avalonia controls.
-        // A code-only app therefore still needs a base theme for those controls.
-        Styles.Add(new FluentTheme());
+        // Keep the tray icon/menu in compiled XAML. Besides being simpler, this is the
+        // path Avalonia documents and keeps the Windows tray popup templates rooted for AOT.
+        AvaloniaXamlLoader.Load(this);
     }
 
     public override void OnFrameworkInitializationCompleted()
@@ -24,8 +23,7 @@ public sealed class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
-            InstallTray(desktop);
-            desktop.Exit += (_, _) => DisposeTray();
+            _tray = TrayIcon.GetIcons(this)?.FirstOrDefault();
 
             if (Program.SmokeTest)
             {
@@ -39,66 +37,35 @@ public sealed class App : Application
 
     private async Task ShutdownAfterSmokeTestAsync(IClassicDesktopStyleApplicationLifetime desktop)
     {
-        await Task.Delay(1500).ConfigureAwait(false);
+        // Exercise every privacy mode during CI. This is not a replacement for real pointer
+        // input testing, but it catches broken mode rendering/AOT trimming before packaging.
+        for (var i = 0; i < 5; i++)
+        {
+            await Task.Delay(120).ConfigureAwait(false);
+            Dispatcher.UIThread.Post(() => _mask?.CycleModeForSmokeTest());
+        }
+
+        await Task.Delay(800).ConfigureAwait(false);
         Dispatcher.UIThread.Post(() => desktop.Shutdown());
     }
 
-    private void InstallTray(IClassicDesktopStyleApplicationLifetime desktop)
+    // XAML event handlers -----------------------------------------------------
+
+    private void TrayOnClicked(object? sender, EventArgs e) => ShowMask();
+
+    private void NewMaskOnClicked(object? sender, EventArgs e) => ShowMask();
+
+    private void CloseMaskOnClicked(object? sender, EventArgs e) => _mask?.Close();
+
+    private void ExitOnClicked(object? sender, EventArgs e)
     {
-        var create = new NativeMenuItem("Новая маска");
-        create.Click += (_, _) => ShowMask();
+        _mask?.Close();
 
-        var close = new NativeMenuItem("Закрыть маску");
-        close.Click += (_, _) => _mask?.Close();
-
-        var exit = new NativeMenuItem("Закрыть программу");
-        exit.Click += (_, _) =>
-        {
-            _mask?.Close();
-            DisposeTray();
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             desktop.Shutdown();
-        };
-
-        var tray = new TrayIcon
-        {
-            ToolTipText = "BlurMask — клик: маска; ПКМ по маске: режим",
-            Icon = LoadIcon(),
-            IsVisible = true,
-            Menu = new NativeMenu
-            {
-                create,
-                close,
-                new NativeMenuItemSeparator(),
-                exit
-            }
-        };
-
-        tray.Clicked += (_, _) => ShowMask();
-        _tray = tray;
-        TrayIcon.SetIcons(this, new TrayIcons { tray });
     }
 
-    private void DisposeTray()
-    {
-        if (_tray is null)
-            return;
-
-        TrayIcon.SetIcons(this, null);
-        _tray.Dispose();
-        _tray = null;
-    }
-
-    private static WindowIcon? LoadIcon()
-    {
-        try
-        {
-            return new WindowIcon(AssetLoader.Open(new Uri("avares://BlurMask/Assets/BlurMask.ico")));
-        }
-        catch
-        {
-            return null;
-        }
-    }
+    // Mask -------------------------------------------------------------------
 
     private void ShowMask()
     {
@@ -108,23 +75,27 @@ public sealed class App : Application
             return;
         }
 
-        _mask = new BlurMaskWindow();
-        _mask.ModeChanged += MaskOnModeChanged;
-        _mask.Closed += (_, _) =>
+        var mask = new BlurMaskWindow();
+        _mask = mask;
+        mask.ModeChanged += MaskOnModeChanged;
+        mask.Closed += (_, _) =>
         {
-            if (_mask is not null)
-                _mask.ModeChanged -= MaskOnModeChanged;
-            _mask = null;
+            mask.ModeChanged -= MaskOnModeChanged;
+            if (ReferenceEquals(_mask, mask))
+                _mask = null;
+
             UpdateTrayTooltip(null);
         };
-        _mask.Show();
-        UpdateTrayTooltip(_mask.Mode);
+
+        mask.Show();
+        UpdateTrayTooltip(mask.Mode);
     }
 
     private void MaskOnModeChanged(PrivacyMode mode) => UpdateTrayTooltip(mode);
 
     private void UpdateTrayTooltip(PrivacyMode? mode)
     {
+        _tray ??= TrayIcon.GetIcons(this)?.FirstOrDefault();
         if (_tray is null)
             return;
 
@@ -136,9 +107,9 @@ public sealed class App : Application
     private static string ModeName(PrivacyMode mode) => mode switch
     {
         PrivacyMode.Blur => "Blur",
-        PrivacyMode.Acrylic => "Acrylic",
-        PrivacyMode.Frosted => "Frosted",
-        PrivacyMode.PixelMosaic => "Pixel Mosaic",
+        PrivacyMode.BigPixels => "Big Pixels",
+        PrivacyMode.Scramble => "Scramble",
+        PrivacyMode.Loupes => "Loupes",
         PrivacyMode.Blackout => "Blackout",
         _ => mode.ToString()
     };

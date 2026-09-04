@@ -40,7 +40,7 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
       - run: dotnet restore
       - run: |
-          ./build.sh linux-x64
+          bash ./build.sh linux-x64
           tar -C bin/Release/net11.0/linux-x64/publish -czf BlurMask-linux-x64.tar.gz .
       - uses: actions/upload-artifact@v4
         with:
@@ -58,7 +58,7 @@ jobs:
       - shell: bash
         run: |
           if [[ "$(uname -m)" == "arm64" ]]; then RID=osx-arm64; else RID=osx-x64; fi
-          ./build.sh "$RID"
+          bash ./build.sh "$RID"
           tar -C "bin/Release/net11.0/$RID/publish" -czf "BlurMask-$RID.tar.gz" .
       - uses: actions/upload-artifact@v4
         with:

@@ -1,0 +1,26 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="BlurMask.App"
+             RequestedThemeVariant="Default">
+  <Application.Styles>
+    <FluentTheme />
+  </Application.Styles>
+
+  <TrayIcon.Icons>
+    <TrayIcons>
+      <TrayIcon Icon="/Assets/BlurMask.ico"
+                ToolTipText="BlurMask — клик: маска"
+                IsVisible="True"
+                Clicked="TrayOnClicked">
+        <TrayIcon.Menu>
+          <NativeMenu>
+            <NativeMenuItem Header="Новая маска" Click="NewMaskOnClicked" />
+            <NativeMenuItem Header="Закрыть маску" Click="CloseMaskOnClicked" />
+            <NativeMenuItemSeparator />
+            <NativeMenuItem Header="Закрыть программу" Click="ExitOnClicked" />
+          </NativeMenu>
+        </TrayIcon.Menu>
+      </TrayIcon>
+    </TrayIcons>
+  </TrayIcon.Icons>
+</Application>

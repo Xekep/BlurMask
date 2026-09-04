@@ -24,13 +24,13 @@ switch privacy effects without doing post-production blur work.
 Right-click the rectangle to cycle:
 
 1. **Blur** - compositor blur-behind when available.
-2. **Acrylic** - acrylic/blur preference with a stronger tint.
-3. **Frosted** - heavier translucent privacy layer.
-4. **Pixel Mosaic** - opaque coarse mosaic. This intentionally hides the source
-   content instead of screen-capturing and re-pixelating it, so it cannot recurse
-   into itself during recording.
+2. **Big Pixels** - very coarse opaque pixel blocks for obvious privacy masking.
+3. **Scramble** - a deliberately shuffled block pattern with stronger visual breakup.
+4. **Loupes** - a field of large circular privacy cells, visually distinct from the rectangular modes.
 5. **Blackout** - solid black privacy mask.
 
+The non-blur modes are intentionally privacy-safe overlays: they do not screen-capture the
+content beneath the window, so they cannot recursively capture BlurMask itself while recording.
 The tray tooltip shows the current mode.
 
 
@@ -81,13 +81,13 @@ Copy/distribute the **whole publish directory**.
 ### Linux
 
 ```bash
-./build.sh linux-x64
+bash ./build.sh linux-x64
 ```
 
 ### macOS
 
 ```bash
-./build.sh osx-arm64
+bash ./build.sh osx-arm64
 ```
 
 Native AOT is OS-specific: publish Windows on Windows, Linux on Linux, and macOS on macOS.
