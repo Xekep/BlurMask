@@ -59,7 +59,9 @@ test('security: authorization, validation, no-op writes and bounded resource use
     const over=pendingRequest(path+'/changes',access.editKey,4*1024*1024+1);
     try { assert.equal(await over.status,413); } finally { over.socket.destroy(); }
     const content=Array.from({length:550},()=>mark('a'.repeat(4000)));
-    assert.equal((await request(path+'/changes',access.editKey,patch({add:content}))).status,200);
+    const written=await request(path+'/changes',access.editKey,patch({add:content}));
+    assert.equal(written.status,200);
+    await written.arrayBuffer(); // Release the concurrency lease of this large response.
     const before=await (await request(path,access.editKey)).json();
     assert.equal((await request(path+'/changes',access.editKey,patch({add:content.map(m=>({...m,id:crypto.randomUUID()}))}))).status,413);
     const after=await (await request(path,access.editKey)).json();
@@ -73,6 +75,7 @@ test('security: authorization, validation, no-op writes and bounded resource use
     assert.equal(response.headers.get('cache-control'),'no-store');
     assert.equal(response.headers.get('referrer-policy'),'no-referrer');
     assert.match(response.headers.get('content-security-policy'),/frame-ancestors 'none'/);
+    await response.arrayBuffer();
   });
   await t.test('eight pending requests bound global concurrency; rejected requests recover after disconnect',async()=>{
     assert.equal(base.protocol,'http:');
