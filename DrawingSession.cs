@@ -42,6 +42,7 @@ internal sealed class DrawingSession : IDisposable
     public double PenSize { get; set; } = 4;
     public double TextSize { get; set; } = 28;
     public double FadeSeconds { get; private set; }
+    private double _previousFadeSeconds = 10;
     public BoardMode Board { get; private set; }
     public bool InkVisible { get; private set; } = true;
     public bool AttachMasksToWindows { get; private set; }
@@ -104,6 +105,11 @@ internal sealed class DrawingSession : IDisposable
         if (InkVisible) ToggleInk();
         Canvas?.Hide(); Toolbar.Hide();
     }
+    internal void ToggleToolbarVisibility()
+    {
+        if (Toolbar.IsVisible) { Toolbar.CloseFlyout(); Toolbar.Hide(); }
+        else Show();
+    }
 
     private void OnScreensChanged(object? sender, EventArgs e)
     {
@@ -152,6 +158,7 @@ internal sealed class DrawingSession : IDisposable
     {
         FinishInput();
         FadeSeconds = seconds;
+        if (seconds > 0) _previousFadeSeconds = seconds;
         NotifySettings();
     }
     public void NewMask() { SelectScreen(); SelectTool(InkTool.Cursor); _newMask(); }
@@ -249,8 +256,8 @@ internal sealed class DrawingSession : IDisposable
             case ShortcutAction.Whiteboard: SelectScreen(); SetBoard(Board == BoardMode.White ? BoardMode.Desktop : BoardMode.White); break;
             case ShortcutAction.Blackboard: SelectScreen(); SetBoard(Board == BoardMode.Black ? BoardMode.Desktop : BoardMode.Black); break;
             case ShortcutAction.LastColor: Color = _previousColor; NotifySettings(); break;
-            case ShortcutAction.ToggleToolbar: if (Toolbar.IsVisible) MinimizeToTray(); else Show(); break;
-            case ShortcutAction.ToggleFading: SetFading(FadeSeconds > 0 ? 0 : 10); break;
+            case ShortcutAction.ToggleToolbar: ToggleToolbarVisibility(); break;
+            case ShortcutAction.ToggleFading: SetFading(FadeSeconds > 0 ? 0 : _previousFadeSeconds); break;
             case >= ShortcutAction.QuickColor1 and <= ShortcutAction.QuickColor6:
                 Color = Color.Parse(QuickColors[(int)action - (int)ShortcutAction.QuickColor1]); NotifySettings(); break;
         }

@@ -390,6 +390,7 @@ internal sealed class DrawingToolbarWindow : Window
         MenuItem(panel, UiText.T("Настройки"), _session.ShowSettings);
         MenuItem(panel, AppSettings.Label(ShortcutAction.Screenshot), () => _ = _session.CaptureScreenshotAsync(), ShortcutAction.Screenshot);
         MenuItem(panel, UiText.T("Свернуть панель"), ToggleCollapsed);
+        MenuItem(panel, AppSettings.Label(ShortcutAction.ToggleToolbar), _session.ToggleToolbarVisibility, ShortcutAction.ToggleToolbar);
         MenuItem(panel, UiText.T("Свернуть в трей"), _session.MinimizeToTray);
         MenuItem(panel, UiText.T("Выход"), _session.Exit);
         ShowFlyout("menu", panel, _menu);

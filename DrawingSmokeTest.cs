@@ -517,6 +517,14 @@ internal static class DrawingSmokeTest
             var size = session.PenSize;
             session.HandleShortcut(ShortcutAction.IncreaseSize); Check(session.PenSize == size + 1, "Pen-size shortcut failed.");
             session.PenSize = size;
+            var inkVisible = session.InkVisible;
+            session.HandleShortcut(ShortcutAction.ToggleToolbar);
+            Check(!session.Toolbar.IsVisible && session.InkVisible == inkVisible, "Hiding the toolbar changed ink visibility.");
+            session.HandleShortcut(ShortcutAction.ToggleToolbar); await Task.Delay(50);
+            Check(session.Toolbar.IsVisible && session.InkVisible == inkVisible, "Toolbar shortcut did not restore the toolbar.");
+            var fading = session.FadeSeconds;
+            session.SetFading(30); session.HandleShortcut(ShortcutAction.ToggleFading); session.HandleShortcut(ShortcutAction.ToggleFading);
+            Check(session.FadeSeconds == 30, "Fading shortcut forgot the selected duration."); session.SetFading(fading);
         }
         finally { window.Close(); session.SaveSettings(original); session.SelectTool(InkTool.Cursor); }
     }
