@@ -237,16 +237,15 @@ internal sealed class CanvasWindow : Window
     {
         var panel = new StackPanel { Margin = new Thickness(18), Spacing = 10 };
         panel.Children.Add(new TextBlock { Text = "Открыть общее полотно", FontSize = 18 });
-        var link = new TextBox { PlaceholderText = "Вставьте ссылку с pen.kiiko.ru" };
+        var link = new TextBox { PlaceholderText = "Код приглашения или ссылка" };
         panel.Children.Add(link);
         var error = new TextBlock { TextWrapping = TextWrapping.Wrap, Foreground = Brushes.DarkRed };
-        var open = new Button { Content = "Открыть по ссылке" }; panel.Children.Add(open);
+        var open = new Button { Content = "Подключиться" }; panel.Children.Add(open);
         panel.Children.Add(new TextBlock { Text = "Или сохранить текущее полотно на сервере", Margin = new Thickness(0, 12, 0, 0) });
-        var server = new TextBox { Text = _connection?.Server ?? CanvasCloudClient.DefaultServer }; panel.Children.Add(server);
         var create = new Button { Content = "Создать облачную копию" }; panel.Children.Add(create); panel.Children.Add(error);
         var dialog = Dialog("Подключить полотно", panel);
         open.Click += async (_, _) => { open.IsEnabled = false; try { await ConnectAsync(link.Text ?? ""); dialog.Close(); } catch (Exception ex) { error.Text = ex.Message; } finally { open.IsEnabled = true; } };
-        create.Click += async (_, _) => { create.IsEnabled = false; try { await CreateCloudAsync(server.Text ?? ""); dialog.Close(); } catch (Exception ex) { error.Text = ex.Message; } finally { create.IsEnabled = true; } };
+        create.Click += async (_, _) => { create.IsEnabled = false; try { await CreateCloudAsync(CanvasCloudClient.DefaultServer); dialog.Close(); } catch (Exception ex) { error.Text = ex.Message; } finally { create.IsEnabled = true; } };
     }
     private async Task ShareAsync()
     {
@@ -254,7 +253,7 @@ internal sealed class CanvasWindow : Window
         await SyncAsync();
         var panel = new StackPanel { Margin = new Thickness(18), Spacing = 9 };
         panel.Children.Add(new TextBlock { Text = "Поделиться полотном", FontSize = 18 });
-        panel.Children.Add(new TextBlock { Text = "Ссылка даёт доступ к этому полотну в браузере и BlurMask.", TextWrapping = TextWrapping.Wrap });
+        panel.Children.Add(new TextBlock { Text = "Отправьте код приглашения. Получатель вставит его в «Подключить». Можно также скопировать ссылку для браузера.", TextWrapping = TextWrapping.Wrap });
         AddLink(panel, ReadOnly ? "Только просмотр" : "Можно рисовать", CanvasCloudClient.Link(_connection));
         if (!ReadOnly && _viewKey is not null) AddLink(panel, "Только просмотр", CanvasCloudClient.Link(_connection with { Key = _viewKey }));
         Dialog("Ссылка на полотно", panel);
@@ -262,10 +261,14 @@ internal sealed class CanvasWindow : Window
     private void AddLink(StackPanel panel, string label, string link)
     {
         panel.Children.Add(new TextBlock { Text = label, FontSize = 12 });
-        panel.Children.Add(new TextBox { Text = link, IsReadOnly = true });
-        var copy = new Button { Content = "Копировать" };
-        copy.Click += async (_, _) => { if (Clipboard is not null) { await Clipboard.SetTextAsync(link); copy.Content = "Скопировано"; } };
+        var code = link[(link.IndexOf('#') + 1)..];
+        panel.Children.Add(new TextBox { Text = code, IsReadOnly = true });
+        var copy = new Button { Content = "Копировать код" };
+        copy.Click += async (_, _) => { if (Clipboard is not null) { await Clipboard.SetTextAsync(code); copy.Content = "Скопировано"; } };
         panel.Children.Add(copy);
+        var copyLink = new Button { Content = "Копировать ссылку" };
+        copyLink.Click += async (_, _) => { if (Clipboard is not null) { await Clipboard.SetTextAsync(link); copyLink.Content = "Скопировано"; } };
+        panel.Children.Add(copyLink);
     }
     private void SavePng()
     {

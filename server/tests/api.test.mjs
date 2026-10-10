@@ -1,12 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { parseInvite } from '../wwwroot/invite.js';
 const base=process.env.PEN_TEST_URL || 'http://127.0.0.1:5079';
 const request=(path,key,body)=>fetch(base+path,{method:body?'POST':'GET',headers:{...(key?{Authorization:'Bearer '+key}:{}),...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});
 const mark=()=>({id:crypto.randomUUID(),tool:'Pen',color:'#ff001180',width:4,points:[{x:50,y:50},{x:150,y:150}],text:'',fontSize:28});
 test('Postgres API: access keys, idempotent retries, concurrency, validation, targeted erase',async()=>{
   const created=await request('/api/boards',null,{title:'Integration test',background:'white'});
   assert.equal(created.status,201); const access=await created.json(), path='/api/boards/'+access.board.id;
-  assert.equal(new URL(access.editUrl).hash.includes(access.editKey),true);
+  assert.deepEqual(parseInvite(access.editUrl),{id:access.board.id,key:access.editKey});
+  assert.deepEqual(parseInvite(access.viewUrl),{id:access.board.id,key:access.viewKey});
+  assert.equal(new URL(access.editUrl).hash.includes('='),false);
   assert.equal((await request(path)).status,404);
   assert.equal((await request(path,'x'.repeat(43))).status,404);
   const a=mark(), patch={operationId:crypto.randomUUID(),add:[a],remove:[]};

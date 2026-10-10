@@ -1,0 +1,65 @@
+name: Windows Installer
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g. 1.2.3 or 1.2.3-rc.1); empty uses 1.0.0-dev.<run>'
+        required: false
+        type: string
+  workflow_call:
+    inputs:
+      publish-artifact:
+        description: 'Existing Windows Native AOT artifact from this workflow run'
+        required: false
+        default: ''
+        type: string
+      version:
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  installer:
+    runs-on: windows-latest
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      INSTALLER_VERSION: ${{ inputs.version }}
+      PUBLISH_ARTIFACT: ${{ inputs.publish-artifact }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        if: inputs.publish-artifact == ''
+        with:
+          dotnet-version: 11.0.100-preview.7.26381.103
+      - uses: actions/download-artifact@v4
+        if: inputs.publish-artifact != ''
+        with:
+          name: ${{ inputs.publish-artifact }}
+          path: .artifacts/installer-publish/win-x64
+      - name: Build installer with Inno Setup 7.1.0 x64
+        shell: pwsh
+        run: |
+          $reusePublish = -not [string]::IsNullOrEmpty($env:PUBLISH_ARTIFACT)
+          .\build-installer.ps1 -Version $env:INSTALLER_VERSION -SkipPublish:$reusePublish
+      - name: Verify installation, upgrade, startup and uninstall
+        shell: pwsh
+        run: |
+          $installers = @(Get-ChildItem .artifacts/installers/*-Setup.exe)
+          if ($installers.Count -ne 1) { throw 'Expected exactly one installer.' }
+          $installer = $installers[0]
+          .\tools\test-installer.ps1 -InstallerPath $installer.FullName -PublishDirectory .artifacts/installer-publish/win-x64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BlurMask-Windows-Installer
+          path: .artifacts/installers/*
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: BlurMask-Installer-Test-Logs
+          path: .artifacts/installer-test/**/*.log

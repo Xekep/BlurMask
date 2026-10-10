@@ -13,6 +13,12 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 
 jobs:
+  installer:
+    name: Windows installer / Inno Setup 7.1.0
+    needs: native-aot-windows
+    uses: ./.github/workflows/installer.yml
+    with:
+      publish-artifact: BlurMask-win-x64
   server:
     name: Web canvas / PostgreSQL
     runs-on: ubuntu-latest
@@ -42,7 +48,7 @@ jobs:
         with:
           node-version: 22
       - run: dotnet build -c Release
-      - run: node --test tests/ink.test.mjs
+      - run: node --test tests/ink.test.mjs tests/invite.test.mjs
       - name: API integration test
         shell: bash
         run: |
@@ -77,7 +83,7 @@ jobs:
       - run: dotnet restore
       - name: Publish
         shell: pwsh
-        run: .\build.ps1 win-x64
+        run: .\build.ps1 win-x64 -Version "1.0.0-dev.$env:GITHUB_RUN_NUMBER"
       - name: Verify native dependencies
         shell: pwsh
         run: |

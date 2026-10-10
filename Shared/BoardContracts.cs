@@ -38,6 +38,31 @@ public sealed record CreateBoardRequest(string Title = "Новое полотн�
 public sealed record BoardAccess(BoardSnapshot Board, string EditKey, string ViewKey, string EditUrl, string ViewUrl);
 public sealed record BoardConnection(string Server, Guid Id, string Key);
 
+public static class BoardInvite
+{
+    // Pack the UUID and the complete 256-bit access key into one URL-safe code.
+    public static string Code(Guid id, string key)
+    {
+        if (id == Guid.Empty || key.Length != 43 || !key.All(c => char.IsAsciiLetterOrDigit(c) || c is '-' or '_'))
+            throw new ArgumentException("Некорректный код доступа.");
+        var secret = Convert.FromBase64String(key.Replace('-', '+').Replace('_', '/') + "=");
+        if (Encode(secret) != key) throw new ArgumentException("Некорректный код доступа.");
+        return Encode([.. Convert.FromHexString(id.ToString("N")), .. secret]);
+    }
+
+    public static (Guid Id, string Key) Parse(string code)
+    {
+        if (code.Length != 64 || !code.All(c => char.IsAsciiLetterOrDigit(c) || c is '-' or '_'))
+            throw new ArgumentException("Вставьте корректный код приглашения или ссылку.");
+        var bytes = Convert.FromBase64String(code.Replace('-', '+').Replace('_', '/'));
+        var id = Guid.ParseExact(Convert.ToHexString(bytes.AsSpan(0, 16)), "N");
+        if (id == Guid.Empty) throw new ArgumentException("Некорректный код доступа.");
+        return (id, Encode(bytes[16..]));
+    }
+
+    private static string Encode(byte[] bytes) => Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+}
+
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 [JsonSerializable(typeof(BoardSnapshot))]
 [JsonSerializable(typeof(BoardPatch))]

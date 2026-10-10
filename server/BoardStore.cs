@@ -111,6 +111,6 @@ public sealed class BoardStore(NpgsqlDataSource source)
     private static byte[] Hash(string key) => SHA256.HashData(Encoding.UTF8.GetBytes(key));
     private static bool Matches(string key, byte[] hash) => key.Length == 43 && CryptographicOperations.FixedTimeEquals(Hash(key), hash);
     private static bool Authorized(string key, byte[] edit, byte[] view) => Matches(key, edit) || Matches(key, view);
-    private static string Link(string server, Guid id, string key) => $"{server.TrimEnd('/')}/#board={id}&key={key}";
+    private static string Link(string server, Guid id, string key) => $"{server.TrimEnd('/')}/#{BoardInvite.Code(id, key)}";
 }
 public sealed class BoardLimitException : Exception;

@@ -56,8 +56,11 @@ Use the board flyout or **Ctrl+Shift+5** to open a separate, zoomable 2400×1600
 documents and undo histories. Both use the same drawing tools, sizes and colors. The canvas
 supports panning, white/black backgrounds, PNG export and automatic local persistence.
 
-The canvas **Connect** button opens a shared link or creates a server copy. **Share** provides
-edit and view links. Browser and desktop changes synchronize every 1.3 seconds, preserving
+The canvas **Connect** button accepts an invitation code or link, or creates a server copy
+on the built-in `https://pen.kiiko.ru` service. **Share** displays separate edit and view codes,
+with buttons to copy the code or a browser link. Links use one opaque fragment (`/#<code>`)
+without visible board/key parameters. The code retains the full 256-bit access key; existing
+parameter-based invitations still work. Browser and desktop changes synchronize every 1.3 seconds, preserving
 concurrent strokes and pending offline edits. Screen annotations remain local.
 
 The web canvas, ASP.NET Core server, PostgreSQL storage and Docker/Caddy configuration for
@@ -140,6 +143,62 @@ bash ./build.sh osx-arm64
 ```
 
 Native AOT is OS-specific: publish Windows on Windows, Linux on Linux, and macOS on macOS.
+
+### Windows installer (Inno Setup)
+
+```powershell
+.\build-installer.ps1 -Version 1.2.3
+```
+
+This publishes Windows x64 Native AOT, downloads **Inno Setup 7.1.0 x64** from the
+official immutable release, verifies its pinned SHA-256, and compiles
+[`installer/BlurMask.iss`](installer/BlurMask.iss). The compiler is installed for
+the current user under `.artifacts/tools`; no existing Inno Setup installation is required.
+Version 7.1.0 was the latest stable release on 2026-10-10; see the
+[official downloads](https://jrsoftware.org/isdl.php).
+
+Output: `.artifacts/installers/BlurMask-1.2.3-win-x64-Setup.exe`, accompanied by
+SHA-256 and JSON build metadata. The installer contains the executable and all
+native rendering DLLs, excludes PDBs, and does not require an installed .NET runtime.
+It supports English/Russian, installs into `%LOCALAPPDATA%/Programs/BlurMask`
+without elevation, creates a Start Menu shortcut, and offers optional desktop
+shortcut and Windows startup tasks. Close BlurMask before updating or uninstalling.
+Uninstall removes the program, shortcuts and its startup entry while preserving local canvases.
+
+To package an existing Windows publish directory:
+
+```powershell
+.\build-installer.ps1 -Version 1.2.3 -SkipPublish -PublishDirectory bin/Release/net11.0/win-x64/publish
+```
+
+Use the version corresponding to that payload. To verify installation, reinstallation,
+startup and removal on a clean Windows user/runner:
+
+```powershell
+.\tools\test-installer.ps1 -InstallerPath .artifacts/installers/BlurMask-1.2.3-win-x64-Setup.exe -PublishDirectory bin/Release/net11.0/win-x64/publish
+```
+
+The test refuses to touch an existing BlurMask installation, shortcuts or startup
+entry, and refuses to close a running BlurMask. It installs into a unique test
+directory, checks payload hashes, launches the installed application's smoke mode,
+reinstalls to verify replacement of outdated files, then uninstalls and checks cleanup.
+Logs remain in `.artifacts/installer-test`. `-SkipLaunch` skips only the app startup check.
+
+GitHub Actions:
+
+- **CI** calls the reusable [Windows Installer workflow](.github/workflows/installer.yml)
+  after the Windows Native AOT job, reusing its artifact. The setup executable and
+  checksums appear as **BlurMask-Windows-Installer**.
+- **Windows Installer → Run workflow** builds manually; an optional version accepts
+  values such as `1.2.3` or `1.2.3-rc.1`. CI/manual builds without a version use
+  `1.0.0-dev.<run number>`.
+- A `v1.2.3` tag triggers **Release**, builds the application and installer with
+  that version, tests the installer, and attaches the setup executable/checksums
+  to the GitHub Release alongside the portable archives.
+
+The stable installer AppId is shared by all versions so upgrades use the same
+installation. When updating the Inno Setup dependency, change the version and hash
+in `tools/install-inno-setup.ps1` together with workflow labels/build metadata.
 
 ## Smoke test
 

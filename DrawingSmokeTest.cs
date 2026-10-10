@@ -12,6 +12,14 @@ internal static class DrawingSmokeTest
 {
     public static void VerifyDocument(InkDocument document)
     {
+        var invite = new BoardConnection(CanvasCloudClient.DefaultServer, Guid.Parse("00112233-4455-6677-8899-aabbccddeeff"),
+            "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8");
+        const string code = "ABEiM0RVZneImaq7zN3u_wABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4f";
+        Check(BoardInvite.Code(invite.Id, invite.Key) == code, "Native invitation differs from browser format.");
+        Check(CanvasCloudClient.ParseLink(code) == invite, "Invitation code roundtrip failed.");
+        Check(CanvasCloudClient.ParseLink(CanvasCloudClient.Link(invite)) == invite, "Invitation link roundtrip failed.");
+        Check(CanvasCloudClient.ParseLink($"{invite.Server}/#board={invite.Id}&key={invite.Key}") == invite,
+            "Already issued invitation stopped working.");
         var pen = new InkMark(InkTool.Pen, Colors.Red, 4, new Point(-100, 100));
         pen.AddPoint(new Point(100, 100));
         Check(pen.Hit(new Point(0, 101), 2), "Eraser misses line crossing a negative monitor origin.");

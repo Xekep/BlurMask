@@ -1,6 +1,8 @@
 param(
     [ValidateSet('win-x64','win-arm64','linux-x64','linux-arm64','osx-x64','osx-arm64')]
-    [string]$Runtime = 'win-x64'
+    [string]$Runtime = 'win-x64',
+    [string]$Version,
+    [string]$OutputDirectory
 )
 
 $ErrorActionPreference = 'Stop'
@@ -18,11 +20,16 @@ if (-not $valid) {
 }
 
 Write-Host "Publishing BlurMask (.NET 11 Native AOT) for $Runtime..."
-dotnet publish .\BlurMask.csproj `
-    -c Release `
-    -r $Runtime `
-    --self-contained true `
-    -p:PublishAot=true
+$publishArguments = @('publish', (Join-Path $PSScriptRoot 'BlurMask.csproj'), '-c', 'Release',
+    '-r', $Runtime, '--self-contained', 'true', '-p:PublishAot=true')
+if ($Version) {
+    if ($Version -notmatch '^\d+\.\d+\.\d+(?:\.\d+)?(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$') { throw 'Invalid application version.' }
+    $publishArguments += "-p:Version=$Version"
+}
+if ($OutputDirectory) { $publishArguments += @('-o', [IO.Path]::GetFullPath($OutputDirectory)) }
+Push-Location $PSScriptRoot
+try { dotnet @publishArguments }
+finally { Pop-Location }
 
 if ($LASTEXITCODE -ne 0) {
     throw "Native AOT publish failed with exit code $LASTEXITCODE."
@@ -30,6 +37,7 @@ if ($LASTEXITCODE -ne 0) {
 
 $targetFramework = "net11.0"
 $publishDir = Join-Path $PSScriptRoot "bin\Release\$targetFramework\$Runtime\publish"
+if ($OutputDirectory) { $publishDir = [IO.Path]::GetFullPath($OutputDirectory) }
 
 if ($Runtime.StartsWith('win-')) {
     $required = @('av_libglesv2.dll', 'libSkiaSharp.dll', 'libHarfBuzzSharp.dll')

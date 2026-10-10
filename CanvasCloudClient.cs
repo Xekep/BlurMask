@@ -56,15 +56,30 @@ internal sealed class CanvasCloudClient : IDisposable
     }
     public static BoardConnection ParseLink(string link)
     {
-        if (!Uri.TryCreate(link.Trim(), UriKind.Absolute, out var uri)) throw new ArgumentException("Вставьте ссылку на полотно.");
+        link = link.Trim();
+        if (!Uri.TryCreate(link, UriKind.Absolute, out var uri))
+        {
+            var invite = BoardInvite.Parse(link);
+            return new(DefaultServer, invite.Id, invite.Key);
+        }
+        var server = Server(uri.GetLeftPart(UriPartial.Authority));
+        if (server != DefaultServer && !uri.IsLoopback)
+            throw new ArgumentException("Приглашение должно быть с pen.kiiko.ru.");
+        if (!uri.Fragment.Contains('='))
+        {
+            var invite = BoardInvite.Parse(uri.Fragment.TrimStart('#'));
+            return new(server, invite.Id, invite.Key);
+        }
+        // Keep already issued invitations working.
         var values = uri.Fragment.TrimStart('#').Split('&').Select(part => part.Split('=', 2))
             .Where(part => part.Length == 2).ToDictionary(part => part[0], part => Uri.UnescapeDataString(part[1]));
         if (!values.TryGetValue("board", out var id) || !Guid.TryParse(id, out var boardId) ||
             !values.TryGetValue("key", out var key) || key.Length != 43 || !key.All(c => char.IsAsciiLetterOrDigit(c) || c is '-' or '_'))
             throw new ArgumentException("В ссылке отсутствует номер полотна или ключ доступа.");
-        return new(Server(uri.GetLeftPart(UriPartial.Authority)), boardId, key);
+        _ = BoardInvite.Code(boardId, key);
+        return new(server, boardId, key);
     }
-    public static string Link(BoardConnection connection) => $"{Server(connection.Server)}/#board={connection.Id}&key={connection.Key}";
+    public static string Link(BoardConnection connection) => $"{Server(connection.Server)}/#{BoardInvite.Code(connection.Id, connection.Key)}";
     private static void Ensure(HttpResponseMessage response)
     {
         if (response.IsSuccessStatusCode) return;
