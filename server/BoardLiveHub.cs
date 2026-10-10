@@ -20,20 +20,22 @@ public sealed class BoardLiveHub(LiveLimits limits) : BackgroundService
         public HashSet<Guid> Committed = [];
         public long Revision;
         public int PreviewPoints;
+        public bool Initialized;
     }
+    private readonly record struct Packet(byte[] Bytes, bool Binary);
     private sealed class Peer(string address)
     {
         public readonly Guid Id = Guid.NewGuid();
         public readonly string Address = address;
-        public readonly Channel<byte[]> Outgoing = Channel.CreateBounded<byte[]>(64);
+        public readonly Channel<Packet> Outgoing = Channel.CreateBounded<Packet>(64);
         public readonly CancellationTokenSource Stop = new();
         public InkMarkDto? Preview;
         public long Touched = Stopwatch.GetTimestamp();
         public int QueuedBytes;
-        public void Enqueue(byte[] bytes)
+        public void Enqueue(byte[] bytes, bool binary = false)
         {
             // Run cancellation callbacks outside room locks (registry -> room is the lock order).
-            if (Interlocked.Add(ref QueuedBytes, bytes.Length) > 128 * 1024 || !Outgoing.Writer.TryWrite(bytes)) _ = Stop.CancelAsync();
+            if (Interlocked.Add(ref QueuedBytes, bytes.Length) > 128 * 1024 || !Outgoing.Writer.TryWrite(new(bytes, binary))) _ = Stop.CancelAsync();
         }
     }
     private static byte[] Encode(LiveFrame frame) => JsonSerializer.SerializeToUtf8Bytes(frame, BoardJsonContext.Default.LiveFrame);
@@ -54,8 +56,13 @@ public sealed class BoardLiveHub(LiveLimits limits) : BackgroundService
     }
     private static void Broadcast(Room room, LiveFrame frame, Peer? except = null)
     {
-        var bytes = Encode(frame);
-        foreach (var peer in room.Peers) if (peer != except) peer.Enqueue(bytes);
+        var binary = LiveWire.IsDelta(frame);
+        var bytes = binary ? LiveWire.Encode(frame) : Encode(frame);
+        foreach (var peer in room.Peers)
+            if (peer != except)
+            {
+                peer.Enqueue(bytes, binary);
+            }
     }
     public void Changed(BoardSnapshot board, BoardPatch patch)
     {
@@ -66,6 +73,7 @@ public sealed class BoardLiveHub(LiveLimits limits) : BackgroundService
         {
             if (board.Revision < room.Revision) return;
             room.Revision = board.Revision;
+            room.Initialized = true;
             room.Committed = board.Marks.Select(m => m.Id).ToHashSet();
             foreach (var peer in room.Peers)
                 if (peer.Preview is { } preview && room.Committed.Contains(preview.Id))
@@ -76,10 +84,11 @@ public sealed class BoardLiveHub(LiveLimits limits) : BackgroundService
             var notification = new LiveFrame { Type = "changed", Revision = board.Revision, BaseRevision = board.Revision - 1, Patch = patch };
             if (patch.Add.Concat(patch.Update).Any(m => m.Image is not null) ||
                 patch.Add.Concat(patch.Update).Sum(m => m.Points.Count + m.Text.Length) > 1024) notification = notification with { Patch = null };
-            var bytes = Encode(notification);
+            var binary = notification.Patch is not null;
+            var bytes = binary ? LiveWire.EncodeChange(notification) : Encode(notification);
             // Large image/batch changes use the existing authenticated HTTP fallback.
-            if (bytes.Length >= LiveProtocol.MaxPacketBytes) bytes = Encode(notification with { Patch = null });
-            foreach (var peer in room.Peers) peer.Enqueue(bytes);
+            if (bytes.Length >= LiveProtocol.MaxPacketBytes) { bytes = Encode(notification with { Patch = null }); binary = false; }
+            foreach (var peer in room.Peers) peer.Enqueue(bytes, binary);
         }
     }
     public async Task HandleAsync(Guid id, HttpContext context, BoardStore store, string key)
@@ -87,6 +96,8 @@ public sealed class BoardLiveHub(LiveLimits limits) : BackgroundService
         if (!context.WebSockets.IsWebSocketRequest) { context.Response.StatusCode = 400; return; }
         // Native clients authenticate with a header, never cookies/query strings.
         if (context.Request.Headers.ContainsKey("Origin")) { context.Response.StatusCode = 403; return; }
+        if (!context.WebSockets.WebSocketRequestedProtocols.Contains(LiveWire.Protocol))
+        { context.Response.StatusCode = StatusCodes.Status426UpgradeRequired; return; }
         var peer = new Peer(context.Connection.RemoteIpAddress?.ToString() ?? "unknown");
         Room room;
         lock (_gate)
@@ -104,24 +115,31 @@ public sealed class BoardLiveHub(LiveLimits limits) : BackgroundService
         }
         try
         {
-            var board = await store.ReadAsync(id, key, context.RequestAborted);
-            if (board is null) { context.Response.StatusCode = 404; return; }
-            using var socket = await context.WebSockets.AcceptWebSocketAsync();
+            long? known; lock (room.Gate) known = room.Initialized ? room.Revision : null;
+            var access = await store.ReadLiveAccessAsync(id, key, known, context.RequestAborted);
+            if (access is not { } board) { context.Response.StatusCode = 404; return; }
+            using var socket = await context.WebSockets.AcceptWebSocketAsync(LiveWire.Protocol);
             using var stop = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted, peer.Stop.Token);
             lock (room.Gate)
             {
-                if (board.Revision >= room.Revision) { room.Revision = board.Revision; room.Committed = board.Marks.Select(m => m.Id).ToHashSet(); }
+                if (board.Revision >= room.Revision && board.Committed is { } committed)
+                { room.Revision = board.Revision; room.Committed = committed.ToHashSet(); room.Initialized = true; }
                 peer.Enqueue(Encode(new() { Type = "ready", Peer = peer.Id, Revision = room.Revision }));
                 foreach (var other in room.Peers)
                     if (other != peer && other.Preview is { } preview)
-                        foreach (var frame in LiveProtocol.Chunks(preview)) peer.Enqueue(Encode(frame with { Peer = other.Id }));
+                        foreach (var frame in LiveProtocol.Chunks(preview))
+                        {
+                            var current = frame with { Peer = other.Id };
+                            if (LiveWire.IsDelta(current)) peer.Enqueue(LiveWire.Encode(current), true);
+                            else peer.Enqueue(Encode(current));
+                        }
             }
             var sending = SendAsync(socket, peer, stop.Token);
             var receiving = ReceiveAsync(socket, room, peer, board.ReadOnly, stop.Token);
             await Task.WhenAny(sending, receiving);
             stop.Cancel(); socket.Abort();
             try { await Task.WhenAll(sending, receiving); }
-            catch (Exception ex) when (ex is OperationCanceledException or WebSocketException or JsonException) { }
+            catch (Exception ex) when (ex is OperationCanceledException or WebSocketException or JsonException or InvalidDataException) { }
         }
         catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested || peer.Stop.IsCancellationRequested) { }
         catch (WebSocketException) { }
@@ -144,10 +162,10 @@ public sealed class BoardLiveHub(LiveLimits limits) : BackgroundService
     }
     private static async Task SendAsync(WebSocket socket, Peer peer, CancellationToken ct)
     {
-        await foreach (var bytes in peer.Outgoing.Reader.ReadAllAsync(ct))
+        await foreach (var packet in peer.Outgoing.Reader.ReadAllAsync(ct))
         {
-            Interlocked.Add(ref peer.QueuedBytes, -bytes.Length);
-            await socket.SendAsync(bytes.AsMemory(), WebSocketMessageType.Text, true, ct);
+            Interlocked.Add(ref peer.QueuedBytes, -packet.Bytes.Length);
+            await socket.SendAsync(packet.Bytes.AsMemory(), packet.Binary ? WebSocketMessageType.Binary : WebSocketMessageType.Text, true, ct);
         }
     }
     private async Task ReceiveAsync(WebSocket socket, Room room, Peer peer, bool readOnly, CancellationToken ct)
@@ -167,7 +185,8 @@ public sealed class BoardLiveHub(LiveLimits limits) : BackgroundService
                     Array.Resize(ref buffer, Math.Min(buffer.Length * 2, LiveProtocol.MaxPacketBytes));
                 }
                 result = await socket.ReceiveAsync(buffer.AsMemory(length), ct);
-                if (result.MessageType != WebSocketMessageType.Text || length + result.Count >= LiveProtocol.MaxPacketBytes) return;
+                if (result.MessageType is not (WebSocketMessageType.Text or WebSocketMessageType.Binary) ||
+                    length + result.Count >= LiveProtocol.MaxPacketBytes) return;
                 length += result.Count;
             } while (!result.EndOfMessage);
             var now = Stopwatch.GetTimestamp(); var seconds = Stopwatch.GetElapsedTime(previousTime, now).TotalSeconds;
@@ -175,8 +194,11 @@ public sealed class BoardLiveHub(LiveLimits limits) : BackgroundService
             byteTokens = Math.Min(2 * 1024 * 1024, byteTokens + seconds * 1024 * 1024) - length;
             previousTime = now;
             if (readOnly || tokens < 0 || byteTokens < 0) return;
-            var frame = JsonSerializer.Deserialize(buffer.AsSpan(0, length), BoardJsonContext.Default.LiveFrame);
+            var frame = result.MessageType == WebSocketMessageType.Binary ? LiveWire.Decode(buffer.AsSpan(0, length)) :
+                JsonSerializer.Deserialize(buffer.AsSpan(0, length), BoardJsonContext.Default.LiveFrame);
             if (frame is null) return;
+            if ((result.MessageType == WebSocketMessageType.Text && (frame.Type == "points" || frame.Type == "preview" && frame.Offset != 0)) ||
+                (result.MessageType == WebSocketMessageType.Binary && frame.Type != "points")) return;
             lock (room.Gate)
             {
                 if (frame.Type == "touch" && frame.Mark is null) { peer.Touched = now; continue; }
@@ -186,7 +208,7 @@ public sealed class BoardLiveHub(LiveLimits limits) : BackgroundService
                     Broadcast(room, new() { Type = "clear", Peer = peer.Id }, peer); continue;
                 }
                 var previousCount = peer.Preview?.Points.Count ?? 0;
-                var count = (frame.Offset == 0 ? 0 : previousCount) + (frame.Mark?.Points?.Count ?? 0);
+                var count = (frame.Offset == 0 ? 0 : previousCount) + (frame.Points?.Count ?? frame.Mark?.Points?.Count ?? 0);
                 var delta = count - previousCount;
                 if (room.PreviewPoints + delta > 40000 || !ReservePoints(delta)) return;
                 if (!LiveProtocol.TryMerge(frame, peer.Preview, out var merged))

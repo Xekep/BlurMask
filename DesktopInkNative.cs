@@ -32,7 +32,7 @@ internal sealed partial class DesktopInkNative : IDisposable
             {
                 if (!binding.Enabled || !binding.Valid) continue;
                 var id = (int)action + 1;
-                if (RegisterHotKey(_handle, id, binding.NativeModifiers, binding.VirtualKey) != 0) _registered.Add(id);
+                if (Program.SmokeTest || RegisterHotKey(_handle, id, binding.NativeModifiers, binding.VirtualKey) != 0) _registered.Add(id);
                 else failed.Add(action);
             }
         Failed = failed;
@@ -145,7 +145,7 @@ internal sealed partial class DesktopInkNative : IDisposable
 
     public void Dispose()
     {
-        foreach (var id in _registered) UnregisterHotKey(_handle, id);
+        if (!Program.SmokeTest) foreach (var id in _registered) UnregisterHotKey(_handle, id);
         _registered.Clear();
         Win32Properties.RemoveWndProcHookCallback(_window, OnMessage);
     }

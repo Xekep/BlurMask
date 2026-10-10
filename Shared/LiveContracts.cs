@@ -7,6 +7,10 @@ public sealed record LiveFrame
     public Guid Peer { get; init; }
     public InkMarkDto? Mark { get; init; }
     public int Offset { get; init; }
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+    public Guid MarkId { get; init; }
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public List<InkPointDto>? Points { get; init; }
     public long Revision { get; init; }
     [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
     public long BaseRevision { get; init; }
@@ -36,21 +40,24 @@ public static class LiveProtocol
     public static bool TryMerge(LiveFrame frame, InkMarkDto? previous, out InkMarkDto? merged)
     {
         merged = null;
+        if (frame.Type == "points")
+        {
+            if (previous is null || previous.Id != frame.MarkId || previous.Tool is not ("Pen" or "Highlighter") ||
+                frame.Offset <= 0 || frame.Offset != previous.Points.Count || frame.Mark is not null ||
+                frame.Points is not { Count: > 0 and <= ChunkPoints } delta || frame.Offset + delta.Count > 20000 ||
+                !delta.All(p => p is not null && double.IsFinite(p.X) && double.IsFinite(p.Y) && Math.Abs(p.X) <= 100000 && Math.Abs(p.Y) <= 100000)) return false;
+            previous.Points.AddRange(delta); merged = previous; return true;
+        }
         if (frame.Type != "preview" || frame.Mark is not { } mark ||
-            !BoardValidation.Valid(mark) || mark.Tool is "Image" || mark.Points.Count > ChunkPoints || frame.Offset < 0) return false;
+            !BoardValidation.Valid(mark) || mark.Tool is "Image" || mark.Points.Count > ChunkPoints || frame.Offset != 0) return false;
         // The accumulator owns its list; never mutate a received/queued packet.
-        if (frame.Offset == 0) { merged = mark with { Points = new(mark.Points) }; return true; }
-        if (previous is null || previous.Id != mark.Id || previous.Tool is not ("Pen" or "Highlighter") ||
-            previous.Tool != mark.Tool || previous.Color != mark.Color || previous.Width != mark.Width ||
-            previous.Text != mark.Text || previous.FontSize != mark.FontSize ||
-            previous.Points.Count != frame.Offset || frame.Offset + mark.Points.Count > 20000) return false;
-        previous.Points.AddRange(mark.Points);
-        merged = previous;
+        merged = mark with { Points = new(mark.Points) };
         return true;
     }
     public static IEnumerable<LiveFrame> Chunks(InkMarkDto mark, int offset = 0)
     {
         for (var i = offset; i < mark.Points.Count; i += ChunkPoints)
-            yield return new() { Mark = mark with { Points = mark.Points.Skip(i).Take(ChunkPoints).ToList() }, Offset = i };
+            yield return i == 0 ? new() { Mark = mark with { Points = mark.Points.Take(ChunkPoints).ToList() } } :
+                new() { Type = "points", MarkId = mark.Id, Points = mark.Points.Skip(i).Take(ChunkPoints).ToList(), Offset = i };
     }
 }

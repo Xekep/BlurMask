@@ -49,6 +49,22 @@ public sealed class BoardStore(NpgsqlDataSource source)
     public async Task<BoardSnapshot?> ReadAsync(Guid id, string key, CancellationToken ct)
         => (await ReadChangedAsync(id, key, null, ct)).Board;
 
+    public async Task<(long Revision, bool ReadOnly, Guid[]? Committed)?> ReadLiveAccessAsync(Guid id, string key, long? knownRevision, CancellationToken ct)
+    {
+        if (!ValidKey(key)) return null;
+        await using var command = source.CreateCommand("""
+            SELECT revision, edit_hash <> $2,
+                CASE WHEN revision = $3 THEN NULL ELSE
+                    ARRAY(SELECT (mark->>'id')::uuid FROM jsonb_array_elements(document->'marks') AS items(mark)) END
+            FROM pen_boards WHERE id = $1 AND (edit_hash = $2 OR view_hash = $2)
+            """);
+        command.Parameters.Add(new() { Value = id }); command.Parameters.Add(new() { Value = Hash(key) });
+        command.Parameters.Add(new() { Value = knownRevision ?? -1 });
+        await using var reader = await command.ExecuteReaderAsync(ct);
+        if (!await reader.ReadAsync(ct)) return null;
+        return (reader.GetInt64(0), reader.GetBoolean(1), reader.IsDBNull(2) ? null : reader.GetFieldValue<Guid[]>(2));
+    }
+
     public async Task<(BoardSnapshot? Board, long? Revision, bool ReadOnly)> ReadChangedAsync(Guid id, string key, long? knownRevision, CancellationToken ct, bool knownReadOnly = false)
     {
         if (!ValidKey(key)) return (null, null, false);

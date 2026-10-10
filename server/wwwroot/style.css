@@ -13,7 +13,7 @@ header, footer { display: flex; align-items: center; justify-content: space-betw
 main { flex: 1; padding: clamp(64px, 12vh, 140px) 0 88px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); align-items: center; gap: 32px; }
 .hero-copy { min-width: 0; }
 .app-preview { min-width: 0; filter: drop-shadow(0 24px 26px #39403218); }
-.app-preview img { display: block; width: 100%; height: auto; }
+.app-preview img { display: block; width: 100%; height: auto; border-radius: 8px; }
 .eyebrow { display: flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 550; letter-spacing: .6px; color: #74786e; }
 .eyebrow span { width: 6px; height: 6px; border-radius: 50%; background: #799675; }
 h1 { margin: 26px 0; font-size: clamp(42px, 4.4vw, 64px); line-height: 1.08; font-weight: 650; letter-spacing: -.055em; max-width: 880px; }

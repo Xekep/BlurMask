@@ -28,7 +28,9 @@ public sealed partial class App : Application
             ShowDrawing();
             desktop.Exit += (_, _) => _drawing?.Dispose();
 
-            if (Program.SmokeTest)
+            if (Program.WebsitePreview)
+                _ = SaveWebsitePreviewAsync(desktop);
+            else if (Program.SmokeTest)
             {
                 ShowMask();
                 _ = ShutdownAfterSmokeTestAsync(desktop);
@@ -82,6 +84,12 @@ public sealed partial class App : Application
     private void CloseAllMasks()
     {
         foreach (var mask in _masks.ToArray()) mask.Close();
+    }
+
+    private async Task SaveWebsitePreviewAsync(IClassicDesktopStyleApplicationLifetime desktop)
+    {
+        try { await WebsitePreview.SaveAsync(_drawing!); desktop.Shutdown(); }
+        catch (Exception ex) { Console.Error.WriteLine(ex); desktop.Shutdown(1); }
     }
 
     private void ExitOnClicked(object? sender, EventArgs e)

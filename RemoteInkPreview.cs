@@ -14,7 +14,7 @@ internal sealed class RemoteInkPreview
         {
             var document = new InkDocument(); document.Import([dto!]); Mark = document.Marks[0];
         }
-        else foreach (var point in frame.Mark!.Points) Mark!.AddPoint(new Point(point.X, point.Y));
+        else foreach (var point in frame.Points ?? frame.Mark!.Points) Mark!.AddPoint(new Point(point.X, point.Y));
         Dto = dto;
         return true;
     }

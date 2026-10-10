@@ -51,12 +51,14 @@ internal sealed class CanvasLiveClient : IDisposable
             {
                 using var socket = new ClientWebSocket();
                 socket.Options.SetRequestHeader("Authorization", "Bearer " + connection.Key);
+                socket.Options.AddSubProtocol(LiveWire.Protocol);
                 socket.Options.KeepAliveInterval = TimeSpan.FromSeconds(10);
                 socket.Options.KeepAliveTimeout = TimeSpan.FromSeconds(10);
                 var server = new Uri(CanvasCloudClient.Server(connection.Server));
                 var uri = new UriBuilder(server) { Scheme = server.Scheme == "https" ? "wss" : "ws", Path = $"/api/boards/{connection.Id}/live" }.Uri;
                 using (var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct))
                 { timeout.CancelAfter(TimeSpan.FromSeconds(8)); await socket.ConnectAsync(uri, timeout.Token); }
+                if (socket.SubProtocol != LiveWire.Protocol) throw new InvalidDataException("Unsupported live protocol.");
                 Connected = true; retry = 1;
                 using var linked = CancellationTokenSource.CreateLinkedTokenSource(ct);
                 var sending = SendAsync(socket, linked.Token);
@@ -66,7 +68,7 @@ internal sealed class CanvasLiveClient : IDisposable
                 try { await Task.WhenAll(sending, receiving); }
                 catch (Exception ex) when (ex is WebSocketException or OperationCanceledException or JsonException or InvalidDataException) { }
             }
-            catch (Exception ex) when (ex is WebSocketException or HttpRequestException or OperationCanceledException) { }
+            catch (Exception ex) when (ex is WebSocketException or HttpRequestException or OperationCanceledException or InvalidDataException) { }
             finally { Connected = false; _received(null); }
             try { await Task.Delay(TimeSpan.FromSeconds(retry), ct); }
             catch (OperationCanceledException) { break; }
@@ -109,9 +111,10 @@ internal sealed class CanvasLiveClient : IDisposable
     }
     private static async Task SendFrameAsync(ClientWebSocket socket, LiveFrame frame, CancellationToken ct)
     {
-        var bytes = JsonSerializer.SerializeToUtf8Bytes(frame, BoardJsonContext.Default.LiveFrame);
+        var compact = LiveWire.IsDelta(frame);
+        var bytes = compact ? LiveWire.Encode(frame) : JsonSerializer.SerializeToUtf8Bytes(frame, BoardJsonContext.Default.LiveFrame);
         if (bytes.Length >= LiveProtocol.MaxPacketBytes) throw new InvalidDataException("Live packet limit exceeded.");
-        await socket.SendAsync(bytes.AsMemory(), WebSocketMessageType.Text, true, ct);
+        await socket.SendAsync(bytes.AsMemory(), compact ? WebSocketMessageType.Binary : WebSocketMessageType.Text, true, ct);
     }
     private async Task ReceiveAsync(ClientWebSocket socket, CancellationToken ct)
     {
@@ -123,11 +126,12 @@ internal sealed class CanvasLiveClient : IDisposable
             {
                 result = await socket.ReceiveAsync(buffer.AsMemory(length), ct);
                 if (result.MessageType == WebSocketMessageType.Close) return;
-                if (result.MessageType != WebSocketMessageType.Text || length + result.Count >= buffer.Length)
+                if (result.MessageType is not (WebSocketMessageType.Text or WebSocketMessageType.Binary) || length + result.Count >= buffer.Length)
                     throw new InvalidDataException("Invalid live packet.");
                 length += result.Count;
             } while (!result.EndOfMessage);
-            var frame = JsonSerializer.Deserialize(buffer.AsSpan(0, length), BoardJsonContext.Default.LiveFrame);
+            var frame = result.MessageType == WebSocketMessageType.Binary ? LiveWire.Decode(buffer.AsSpan(0, length)) :
+                JsonSerializer.Deserialize(buffer.AsSpan(0, length), BoardJsonContext.Default.LiveFrame);
             if (frame is not null) _received(frame);
         }
     }

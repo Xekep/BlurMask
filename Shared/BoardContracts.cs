@@ -31,8 +31,7 @@ public sealed record BoardPatch
     // A unique operation id makes retries safe, including a lost HTTP response.
     public Guid OperationId { get; init; } = Guid.NewGuid();
     public List<InkMarkDto> Add { get; init; } = [];
-    // A setter preserves the default for older requests which omit this field
-    // when deserialized by the .NET 10 source-generated serializer.
+    // A setter preserves the default for omitted fields in the .NET 10 generated serializer.
     public List<InkMarkDto> Update { get; set; } = [];
     public List<Guid> Remove { get; init; } = [];
     public string? Title { get; init; }

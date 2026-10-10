@@ -27,8 +27,8 @@ internal static class PerformanceProbe
         }
         var points = Enumerable.Range(0, 20000).Select(i => new InkPointDto(i, i % 1000)).ToList();
         var mark = new InkMarkDto { Points = points };
-        var frames = Enumerable.Range(0, 400).Select(i => new LiveFrame
-            { Mark = mark with { Points = points.GetRange(i * 50, 50) }, Offset = i * 50 }).ToArray();
+        var frames = Enumerable.Range(0, 400).Select(i => i == 0 ? new LiveFrame { Mark = mark with { Points = points.GetRange(0, 50) } } :
+            new LiveFrame { Type = "points", MarkId = mark.Id, Points = points.GetRange(i * 50, 50), Offset = i * 50 }).ToArray();
         report["merge_20000_points"] = Measure(() =>
         {
             InkMarkDto? preview = null;
@@ -48,6 +48,7 @@ internal static class PerformanceProbe
         { InkMarkDto? preview = null; for (var i = 0; i < 400; i++) preview = LivePreviewCapture.Capture(ink, preview); }, 3);
         var packet = JsonSerializer.SerializeToUtf8Bytes(new LiveFrame { Mark = mark with { Points = points.GetRange(0, 6) } }, BoardJsonContext.Default.LiveFrame);
         report["live_packet_6_points"] = new(0, packet.Length, 1);
+        report["binary_live_packet_6_points"] = new(0, LiveWire.Encode(new() { Mark = mark with { Points = points.GetRange(0, 6) }, Offset = 6 }).Length, 1);
         Console.WriteLine(JsonSerializer.Serialize(report, PerformanceJsonContext.Default.DictionaryStringPerformanceMetric));
     }
 }

@@ -60,6 +60,7 @@ internal sealed class CanvasWindow : Window
         Title = UiText.T("BlurMask — Полотно");
         Width = 1100; Height = 760; MinWidth = 650; MinHeight = 450;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        ShowInTaskbar = !Program.SmokeTest;
         RequestedThemeVariant = ThemeVariant.Light;
         Background = new SolidColorBrush(Color.Parse("#F0F3F5"));
         var storage = Program.SmokeTest
@@ -285,7 +286,7 @@ internal sealed class CanvasWindow : Window
                 if (frame.Revision > _board.Revision) _previewClears[frame.Peer] = frame.Revision;
                 else { _remotePreviews.Remove(frame.Peer); _previewClears.Remove(frame.Peer); }
             }
-            else if (frame.Type == "preview")
+            else if (frame.Type is "preview" or "points")
             {
                 var preview = _remotePreviews.GetValueOrDefault(frame.Peer) ?? new RemoteInkPreview();
                 if (preview.Apply(frame))

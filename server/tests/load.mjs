@@ -3,7 +3,7 @@
 import http from 'node:http';
 import https from 'node:https';
 import { randomUUID } from 'node:crypto';
-import { writeFile, mkdir, access as exists } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, access as exists } from 'node:fs/promises';
 import { connect } from './live-client.mjs';
 
 const base = new URL(process.env.PEN_TEST_URL || 'http://127.0.0.1:5094');
@@ -19,7 +19,9 @@ if (hostname && hostname !== '127.0.0.1') throw new Error('Host override is only
 if (!Number.isInteger(boards) || boards < 1 || boards > 400 || !Number.isInteger(perBoard) || perBoard < 2 || perBoard > 128 ||
     !Number.isInteger(writers) || writers < 1 || writers > perBoard || seconds < 3 || seconds > 180 || idleSeconds < 0 || idleSeconds > 60)
   throw new Error('Invalid load parameters.');
-const prefix = 'Load-' + new Date().toISOString().replaceAll(':', '-') + '-' + randomUUID().slice(0, 8);
+const seed = process.env.PEN_LOAD_ACCESS_FILE ? JSON.parse(await readFile(process.env.PEN_LOAD_ACCESS_FILE,'utf8')) : null;
+if(seed && (!/^Load-[A-Za-z0-9T.\-]+$/.test(seed.prefix)||seed.rooms.length!==boards||seed.rooms.some((a,i)=>a.board.title!==seed.prefix+'-'+i||a.board.marks.length)))throw new Error('Invalid fresh load seed');
+const prefix = seed?.prefix || 'Load-' + new Date().toISOString().replaceAll(':', '-') + '-' + randomUUID().slice(0, 8);
 const output = process.env.PEN_LOAD_OUTPUT || '.artifacts/load-' + prefix + '.json';
 const ids = [], clients = [], errors = [], previews = new Map(), offsets = new Map(), latency = [], httpLatency = [];
 const runStarted = performance.now();
@@ -71,8 +73,8 @@ try {
   await health();
   const rooms = [];
   for (let i = 0; i < boards; i++) {
-    const result = await api('/api/boards', null, { title: prefix + '-' + i, background: 'white' }, address(i));
-    const access = JSON.parse(result.text); ids.push(access.board.id); rooms.push(access);
+    const result = seed ? null : await api('/api/boards', null, { title: prefix + '-' + i, background: 'white' }, address(i));
+    const access = seed?.rooms[i] || JSON.parse(result.text); ids.push(access.board.id); rooms.push(access);
     await writeFile(output + '.boards.json', JSON.stringify({ prefix, ids }));
     await sleep(65); // Respect the public proxy's request limiter.
   }
@@ -135,6 +137,7 @@ try {
   }
   activeElapsed = performance.now() - activeStart;
   await commitTail;
+  if(errors.length)throw new Error(errors[0]);
   await sleep(1000);
   if (received !== expected || [...previews.values()].some(p => p.count !== perBoard - 1)) throw new Error(`Preview delivery mismatch: ${received}/${expected}`);
   await bounded(rooms.map((access, i) => ({ access, i })), async ({ access, i }) => {

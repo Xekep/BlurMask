@@ -90,7 +90,7 @@ internal static class DrawingSmokeTest
         var source = new InkMarkDto { Points = [new(1, 2)] };
         Check(LiveProtocol.TryMerge(new() { Mark = source }, null, out var merged), "Initial preview rejected.");
         var points = merged!.Points;
-        Check(LiveProtocol.TryMerge(new() { Mark = source with { Points = [new(3, 4)] }, Offset = 1 }, merged, out merged), "Preview append rejected.");
+        Check(LiveProtocol.TryMerge(new() { Type = "points", MarkId = source.Id, Points = [new(3, 4)], Offset = 1 }, merged, out merged), "Preview append rejected.");
         Check(source.Points.Count == 1 && ReferenceEquals(points, merged!.Points) && merged.Points.Count == 2,
             "Preview accumulator copies every stroke or mutates a received packet.");
         Check(!LiveProtocol.TryMerge(new() { Mark = source, Offset = 5 }, merged, out _), "Out-of-order preview accepted.");
@@ -105,6 +105,16 @@ internal static class DrawingSmokeTest
         Check(LiveProtocol.TryApply(before, delta, out var after) && after!.ReadOnly && after.Title == "Updated" &&
             after.Marks[0].Points[0].X == 30 && before.Marks[0].Points[0].X == 1, "Saved delta corrupts canvas or access role.");
         Check(!LiveProtocol.TryApply(before, delta with { BaseRevision = 3 }, out _), "Missing revision applied without full resync.");
+        var wire = LiveWire.Encode(new() { Mark = source with { Points = [new(-12345.67890123, 99999.987654321)] }, Offset = 1, Peer = Guid.NewGuid() });
+        var decoded = LiveWire.Decode(wire);
+        Check(wire.Length == 58 && decoded.MarkId == source.Id && decoded.Points![0] == new InkPointDto(-12345.67890123, 99999.987654321), "Binary ink lost coordinate precision/UUID.");
+        Check(LiveProtocol.TryMerge(decoded, source with { Points = new(source.Points) }, out _), "Binary points did not merge with style metadata.");
+        var saved = LiveWire.Decode(LiveWire.EncodeChange(delta));
+        Check(LiveProtocol.TryApply(before, saved, out after) && after!.Marks[0].Points[0] == new InkPointDto(30, 40) &&
+            after.Title == "Updated", "Binary saved patch lost updates/title.");
+        var truncated = LiveWire.EncodeChange(delta)[..^1];
+        try { LiveWire.Decode(truncated); throw new InvalidOperationException("Truncated saved patch accepted."); }
+        catch (InvalidDataException) { }
     }
     private static void VerifySelection()
     {
@@ -726,7 +736,7 @@ internal static class DrawingSmokeTest
         await Wait(() => received.Any(f => f.Mark?.Id == own.Id), "Native stroke was invisible before pointer release.");
         for (var i = 1; i <= 600; i++) own.AddPoint(new Point(30 + i, 30 + i));
         document.Notify();
-        await Wait(() => received.Where(f => f.Mark?.Id == own.Id).Sum(f => f.Mark!.Points.Count) == 601, "Native point deltas lost stroke detail.");
+        await Wait(() => received.Where(f => (f.Mark?.Id ?? f.MarkId) == own.Id).Sum(f => f.Points?.Count ?? f.Mark!.Points.Count) == 601, "Native point deltas lost stroke detail.");
         var draft = new InkMarkDto { Tool = "Ellipse", Points = [new(120, 180), new(400, 320)], Color = "#00C9ED" };
         peer.Preview(draft);
         await Wait(() => window.RemotePreviewCount == 1, "Remote preview was hidden during a local drawing gesture.");

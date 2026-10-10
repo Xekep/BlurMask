@@ -9,5 +9,6 @@
     <PackageReference Include="Npgsql" Version="10.0.3" />
     <Compile Include="../Shared/BoardContracts.cs" Link="Shared/BoardContracts.cs" />
     <Compile Include="../Shared/LiveContracts.cs" Link="Shared/LiveContracts.cs" />
+    <Compile Include="../Shared/LiveWire.cs" Link="Shared/LiveWire.cs" />
   </ItemGroup>
 </Project>

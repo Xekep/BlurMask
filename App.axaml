@@ -11,7 +11,7 @@
     <TrayIcons>
       <TrayIcon Icon="/Assets/BlurMask.ico"
                 ToolTipText="{x:Static local:UiText.TrayTooltip}"
-                IsVisible="True"
+                IsVisible="{x:Static local:Program.ShowTray}"
                 Clicked="TrayOnClicked">
         <TrayIcon.Menu>
           <NativeMenu>

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { connect as openLive } from './live-client.mjs';
+import { encodeDelta } from './live-wire.mjs';
 
 const base = new URL(process.env.PEN_TEST_URL || 'http://127.0.0.1:5079');
 const request = (path, key, body) => fetch(new URL(path, base), {
@@ -21,6 +22,7 @@ test('live collaboration: incremental ink, late join, cancel, commit, permission
   t.after(() => sockets.forEach(s => s.close()));
   const open = async key => { const s = await connect(access.board.id, key); sockets.push(s); await s.next('ready'); return s; };
   const writer = await open(access.editKey), viewer = await open(access.viewKey);
+  assert.equal(writer.binary,true);assert.equal(viewer.binary,true);
   const unrelated = await connect(other.board.id, other.viewKey); sockets.push(unrelated); await unrelated.next('ready');
   const draft = mark(), started = performance.now();
   const spoofedPeer = crypto.randomUUID();
@@ -31,10 +33,13 @@ test('live collaboration: incremental ink, late join, cancel, commit, permission
   const append = { ...draft, points: Array.from({ length: 512 }, (_, i) => ({ x: 21 + i, y: 31 + i })) };
   writer.send({ type: 'preview', offset: 1, mark: append });
   const continued = await viewer.next('preview'); assert.equal(continued.offset, 1); assert.equal(continued.mark.points.length, 512); assert.equal(continued.peer, begin.peer);
+  await assert.rejects(openLive(base, access.board.id, access.viewKey, {compact:false}), /HTTP 426/);
+  writer.send({type:'preview',offset:513,mark:{...draft,points:[{x:-12345.67890123,y:99999.987654321}]}});
+  assert.deepEqual((await viewer.next('preview')).mark.points,[{x:-12345.67890123,y:99999.987654321}]);
   assert.equal((await (await request(path, access.editKey)).json()).marks.length, 0, 'Unfinished ink was persisted');
   await assert.rejects(unrelated.next('preview', 250), /Timeout/);
   const late = await open(access.viewKey), first = await late.next('preview'), second = await late.next('preview');
-  assert.equal(first.offset, 0); assert.equal(second.offset, 512); assert.deepEqual([...first.mark.points, ...second.mark.points], [...draft.points, ...append.points]);
+  assert.equal(first.offset, 0); assert.equal(second.offset, 512); assert.deepEqual([...first.mark.points, ...second.mark.points], [...draft.points, ...append.points,{x:-12345.67890123,y:99999.987654321}]);
   writer.send({ type: 'clear' }); assert.equal((await viewer.next('clear')).revision, 0); await late.next('clear');
   const rectangle = { ...mark('Rectangle'), points: [{ x: 10, y: 10 }, { x: 60, y: 70 }] };
   writer.send({ type: 'preview', offset: 0, mark: rectangle }); await viewer.next('preview');
@@ -86,6 +91,8 @@ test('live security: authentication, packet/point limits, isolation of request c
   await assert.rejects(connect(access.board.id, access.editKey, { Origin: 'https://evil.example' }), /HTTP 403/);
   for (const payload of [
     { type: 'preview', offset: 1, mark: mark() },
+    Buffer.from(JSON.stringify({type:'preview',offset:1,mark:mark()})),
+    Buffer.from(JSON.stringify({type:'points',offset:1,markId:crypto.randomUUID(),points:[{x:1,y:2}]})),
     { type: 'preview', offset: 0, mark: { ...mark(), points: [{ x: 100001, y: 0 }] } },
     { type: 'preview', offset: 0, mark: { ...mark(), points: Array.from({ length: 513 }, () => ({ x: 1, y: 2 })) } },
     Buffer.from(' '.repeat(65536)),
@@ -93,7 +100,15 @@ test('live security: authentication, packet/point limits, isolation of request c
   ]) {
     const s = await connect(access.board.id, access.editKey); sockets.push(s); await s.next('ready'); s.send(payload); await waitClosed(s);
   }
+  const seed=mark(), valid=encodeDelta({offset:1,mark:{...seed,points:[{x:1,y:2}]}});
+  for(const payload of [Buffer.from('BM'), valid.subarray(0,valid.length-1),
+    encodeDelta({offset:1,mark:{...seed,points:[{x:NaN,y:2}]}}),
+    encodeDelta({offset:1,mark:{...seed,points:Array.from({length:513},()=>({x:1,y:2}))}})]) {
+    const s=await connect(access.board.id,access.editKey);sockets.push(s);await s.next('ready');s.send(payload,2);await waitClosed(s);
+  }
   // Long-lived channels have their own limit and do not consume the eight API slots.
+  // Replenish the independent per-IP API bucket after malformed/authentication probes.
+  await new Promise(done=>setTimeout(done,1100));
   for (let i = 0; i < 16; i++) { const s = await connect(access.board.id, access.viewKey); sockets.push(s); await s.next('ready'); }
   assert.equal((await request('/healthz')).status, 200);
   assert.equal((await request(`/api/boards/${access.board.id}`, access.viewKey)).status, 200);
