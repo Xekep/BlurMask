@@ -11,12 +11,17 @@ var connection = builder.Configuration.GetConnectionString("Postgres")
 var publicUrl = builder.Configuration["PublicUrl"] ?? "https://pen.kiiko.ru";
 builder.Services.AddSingleton(NpgsqlDataSource.Create(connection));
 builder.Services.AddSingleton<BoardStore>();
+builder.Services.AddSingleton<BoardLiveHub>();
+builder.Services.AddHostedService(provider => provider.GetRequiredService<BoardLiveHub>());
 builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.TypeInfoResolverChain.Insert(0, BoardJsonContext.Default));
 builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = BoardValidation.MaxDocumentBytes);
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = 429;
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+        context.GetEndpoint()?.Metadata.GetMetadata<BoardLiveEndpoint>() is not null
+            ? RateLimitPartition.GetConcurrencyLimiter("live", _ => new ConcurrencyLimiterOptions
+                { PermitLimit = 64, QueueLimit = 0 }) :
         context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase) || context.Request.Path == "/healthz"
             ? RateLimitPartition.GetConcurrencyLimiter("backend", _ => new ConcurrencyLimiterOptions
                 { PermitLimit = 8, QueueLimit = 0 })
@@ -51,6 +56,7 @@ app.Use(async (context, next) =>
     }
 });
 app.UseRouting();
+app.UseWebSockets(new WebSocketOptions { KeepAliveInterval = TimeSpan.FromSeconds(10), KeepAliveTimeout = TimeSpan.FromSeconds(10) });
 app.UseRateLimiter();
 app.Use(async (context, next) =>
 {
@@ -79,11 +85,15 @@ api.MapGet("/{id:guid}", async (Guid id, HttpRequest request, BoardStore store, 
     var board = await store.ReadAsync(id, Key(request), ct);
     return board is null ? Results.NotFound() : Results.Ok(board);
 }).WithMetadata(new BoardKeyRequired());
-api.MapPost("/{id:guid}/changes", async (Guid id, BoardPatch patch, HttpRequest request, BoardStore store, CancellationToken ct) =>
+api.MapGet("/{id:guid}/live", async (Guid id, HttpContext context, BoardStore store, BoardLiveHub live) =>
+    await live.HandleAsync(id, context, store, Key(context.Request)))
+    .WithMetadata(new BoardKeyRequired(), new BoardLiveEndpoint());
+api.MapPost("/{id:guid}/changes", async (Guid id, BoardPatch patch, HttpRequest request, BoardStore store, BoardLiveHub live, CancellationToken ct) =>
 {
     if (!BoardValidation.Valid(patch)) return Results.BadRequest(new { error = "Некорректный рисунок." });
     var result = await store.UpdateAsync(id, Key(request), patch, ct);
     if (result.ReadOnly) return Results.StatusCode(403);
+    if (result.Board is not null) live.Changed(result.Board);
     return result.Board is null ? Results.NotFound() : Results.Ok(result.Board);
 }).WithMetadata(new BoardKeyRequired());
 await app.Services.GetRequiredService<BoardStore>().InitializeAsync();
@@ -94,3 +104,4 @@ static string Key(HttpRequest request)
     return header.StartsWith("Bearer ", StringComparison.Ordinal) ? header[7..] : "";
 }
 sealed class BoardKeyRequired;
+sealed class BoardLiveEndpoint;

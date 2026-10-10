@@ -641,6 +641,7 @@ internal static class DrawingSmokeTest
             using var client = new CanvasCloudClient();
             var remote = await client.ReadAsync(state.Connection!);
             Check(remote.Marks.Count == 1, "Native cloud upload failed.");
+            await VerifyLiveAsync(window, session.CanvasDocument, state.Connection!, client);
             var peer = new InkMarkDto { Points = [new(500, 300), new(900, 500)], Tool = "Arrow", Color = "#00C9ED" };
             await client.ApplyAsync(state.Connection!, new BoardPatch { Add = [peer] });
             await window.SyncAsync();
@@ -678,6 +679,48 @@ internal static class DrawingSmokeTest
         session.Undo();
         Check(session.DesktopDocument.Marks.Count == 0 && session.CanvasDocument.Marks.Count > 0,
             "Screen undo changed independent canvas.");
+    }
+    private static async Task VerifyLiveAsync(CanvasWindow window, InkDocument document, BoardConnection connection, CanvasCloudClient cloud)
+    {
+        var received = new System.Collections.Concurrent.ConcurrentQueue<LiveFrame>();
+        using var peer = new CanvasLiveClient(connection, frame => { if (frame is not null) received.Enqueue(frame); });
+        async Task Wait(Func<bool> predicate, string error)
+        {
+            var deadline = DateTime.UtcNow.AddSeconds(8);
+            while (!predicate()) { Check(DateTime.UtcNow < deadline, error); await Task.Delay(15); }
+        }
+        await Wait(() => window.LiveConnected && peer.Connected && received.Any(f => f.Type == "ready"), "Native live channel did not connect.");
+        var count = document.Marks.Count;
+        document.BeginEdit();
+        var own = new InkMark(InkTool.Pen, Colors.Red, 4, new Point(30, 30));
+        document.Preview = own; document.Notify();
+        await Wait(() => received.Any(f => f.Mark?.Id == own.Id), "Native stroke was invisible before pointer release.");
+        for (var i = 1; i <= 600; i++) own.AddPoint(new Point(30 + i, 30 + i));
+        document.Notify();
+        await Wait(() => received.Where(f => f.Mark?.Id == own.Id).Sum(f => f.Mark!.Points.Count) == 601, "Native point deltas lost stroke detail.");
+        var draft = new InkMarkDto { Tool = "Ellipse", Points = [new(120, 180), new(400, 320)], Color = "#00C9ED" };
+        peer.Preview(draft);
+        await Wait(() => window.RemotePreviewCount == 1, "Remote preview was hidden during a local drawing gesture.");
+        Check(document.HasActiveEdit && document.Marks.Count == count && !window.Snapshot().Marks.Any(m => m.Id == draft.Id), "Live preview entered saved ink/history.");
+        peer.Preview(draft with { Points = [new(120, 180), new(800, 600)] });
+        await Wait(() => window.RemotePreviews.Single().Points[^1] == new Point(800, 600), "Native shape preview did not resize.");
+        document.Cancel();
+        await Wait(() => received.Any(f => f.Type == "clear"), "Cancelled native stroke remained visible to peers.");
+        peer.Preview(null, true);
+        await Wait(() => window.RemotePreviewCount == 0, "Cancelled peer preview remained on canvas.");
+        peer.Preview(draft);
+        await Wait(() => window.RemotePreviewCount == 1, "Peer preview did not restart.");
+        peer.Preview(null);
+        await cloud.ApplyAsync(connection, new BoardPatch { Add = [draft] });
+        await window.SyncAsync();
+        await Wait(() => document.Marks.Any(m => m.Id == draft.Id) && window.RemotePreviewCount == 0, "Preview-to-committed transition duplicated/lost ink.");
+        await cloud.ApplyAsync(connection, new BoardPatch { Remove = [draft.Id] });
+        await window.SyncAsync();
+        Check(document.Marks.Count == count, "Live integration changed existing canvas ink.");
+        peer.Preview(draft with { Id = Guid.NewGuid() });
+        await Wait(() => window.RemotePreviewCount == 1, "Disconnect test preview did not appear.");
+        peer.Dispose();
+        await Wait(() => window.RemotePreviewCount == 0, "Disconnected peer left unfinished ink behind.");
     }
     private static void SaveFlyout(DrawingSession session, string directory, string name)
     {

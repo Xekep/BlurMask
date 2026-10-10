@@ -63,6 +63,7 @@ jobs:
           trap 'kill "$server_pid"' EXIT
           curl --fail --silent --retry 20 --retry-connrefused --retry-delay 1 http://127.0.0.1:5079/healthz
           node --test tests/api.test.mjs
+          node --test tests/live.test.mjs
           node --test tests/security.test.mjs
   build:
     name: Build / ${{ matrix.os }}
@@ -161,6 +162,48 @@ jobs:
         with:
           name: BlurMask-linux-x64
           path: bin/Release/net11.0/linux-x64/publish/
+
+  native-cloud:
+    name: Native AOT / live collaboration / PostgreSQL
+    needs: native-aot-linux
+    runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: pen_live_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres -d pen_live_test"
+          --health-interval 5s --health-timeout 5s --health-retries 15
+    env:
+      ConnectionStrings__Postgres: Host=127.0.0.1;Database=pen_live_test;Username=postgres;Password=postgres
+      PublicUrl: http://127.0.0.1:5079
+      BLURMASK_TEST_SERVER: http://127.0.0.1:5079
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/download-artifact@v4
+        with:
+          name: BlurMask-linux-x64
+          path: .artifacts/native-cloud
+      - run: sudo apt-get update && sudo apt-get install -y xvfb libx11-6 libice6 libsm6 libfontconfig1
+      - name: Exercise native clients against the real API and live channel
+        shell: bash
+        run: |
+          cd server
+          dotnet build -c Release
+          dotnet run --no-build -c Release --urls http://127.0.0.1:5079 > /tmp/pen-live.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          curl --fail --silent --retry 20 --retry-connrefused --retry-delay 1 http://127.0.0.1:5079/healthz
+          cd ..
+          chmod +x .artifacts/native-cloud/BlurMask
+          xvfb-run -a .artifacts/native-cloud/BlurMask --isolated-smoke-test --software-rendering
 
   native-aot-macos:
     name: Native AOT / macOS host architecture

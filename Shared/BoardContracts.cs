@@ -73,6 +73,7 @@ public static class BoardInvite
 [JsonSerializable(typeof(CreateBoardRequest))]
 [JsonSerializable(typeof(BoardAccess))]
 [JsonSerializable(typeof(BoardConnection))]
+[JsonSerializable(typeof(LiveFrame))]
 public partial class BoardJsonContext : JsonSerializerContext;
 
 public static class BoardValidation

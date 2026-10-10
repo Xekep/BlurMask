@@ -1,0 +1,168 @@
+using System.Diagnostics;
+using System.Net.WebSockets;
+using System.Text.Json;
+using System.Threading.Channels;
+using BlurMask.Shared;
+
+namespace BlurMask.Server;
+
+// One process owns the transient channel; PostgreSQL remains the durable source.
+public sealed class BoardLiveHub : BackgroundService
+{
+    private readonly object _gate = new();
+    private readonly Dictionary<Guid, Room> _rooms = [];
+    private sealed class Room
+    {
+        public readonly List<Peer> Peers = [];
+        public HashSet<Guid> Committed = [];
+        public long Revision;
+    }
+    private sealed class Peer(string address)
+    {
+        public readonly Guid Id = Guid.NewGuid();
+        public readonly string Address = address;
+        public readonly Channel<byte[]> Outgoing = Channel.CreateBounded<byte[]>(256);
+        public readonly CancellationTokenSource Stop = new();
+        public InkMarkDto? Preview;
+        public long Touched = Stopwatch.GetTimestamp();
+        public int QueuedBytes;
+        public void Enqueue(byte[] bytes)
+        {
+            if (Interlocked.Add(ref QueuedBytes, bytes.Length) > 2 * 1024 * 1024 || !Outgoing.Writer.TryWrite(bytes)) Stop.Cancel();
+        }
+    }
+    private static byte[] Encode(LiveFrame frame) => JsonSerializer.SerializeToUtf8Bytes(frame, BoardJsonContext.Default.LiveFrame);
+    private static void Broadcast(Room room, LiveFrame frame, Peer? except = null)
+    {
+        var bytes = Encode(frame);
+        foreach (var peer in room.Peers) if (peer != except) peer.Enqueue(bytes);
+    }
+    public void Changed(BoardSnapshot board)
+    {
+        lock (_gate)
+        {
+            if (!_rooms.TryGetValue(board.Id, out var room) || board.Revision < room.Revision) return;
+            room.Revision = board.Revision;
+            room.Committed = board.Marks.Select(m => m.Id).ToHashSet();
+            foreach (var peer in room.Peers)
+                if (peer.Preview is { } preview && room.Committed.Contains(preview.Id))
+                {
+                    peer.Preview = null;
+                    Broadcast(room, new() { Type = "clear", Peer = peer.Id, Revision = board.Revision });
+                }
+            Broadcast(room, new() { Type = "changed", Revision = board.Revision });
+        }
+    }
+    public async Task HandleAsync(Guid id, HttpContext context, BoardStore store, string key)
+    {
+        if (!context.WebSockets.IsWebSocketRequest) { context.Response.StatusCode = 400; return; }
+        // Native clients authenticate with a header, never cookies/query strings.
+        if (context.Request.Headers.ContainsKey("Origin")) { context.Response.StatusCode = 403; return; }
+        var peer = new Peer(context.Connection.RemoteIpAddress?.ToString() ?? "unknown");
+        Room room;
+        lock (_gate)
+        {
+            if ((_rooms.TryGetValue(id, out var existing) && existing.Peers.Count >= 16) ||
+                _rooms.Values.Sum(r => r.Peers.Count(p => p.Address == peer.Address)) >= 16)
+            { peer.Stop.Dispose(); context.Response.StatusCode = 429; return; }
+            if (!_rooms.TryGetValue(id, out room!)) _rooms.Add(id, room = new());
+            room.Peers.Add(peer);
+        }
+        try
+        {
+            var board = await store.ReadAsync(id, key, context.RequestAborted);
+            if (board is null) { context.Response.StatusCode = 404; return; }
+            using var socket = await context.WebSockets.AcceptWebSocketAsync();
+            using var stop = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted, peer.Stop.Token);
+            lock (_gate)
+            {
+                if (board.Revision >= room.Revision) { room.Revision = board.Revision; room.Committed = board.Marks.Select(m => m.Id).ToHashSet(); }
+                peer.Enqueue(Encode(new() { Type = "ready", Peer = peer.Id, Revision = room.Revision }));
+                foreach (var other in room.Peers)
+                    if (other != peer && other.Preview is { } preview)
+                        foreach (var frame in LiveProtocol.Chunks(preview)) peer.Enqueue(Encode(frame with { Peer = other.Id }));
+            }
+            var sending = SendAsync(socket, peer, stop.Token);
+            var receiving = ReceiveAsync(socket, room, peer, board.ReadOnly, stop.Token);
+            await Task.WhenAny(sending, receiving);
+            stop.Cancel(); socket.Abort();
+            try { await Task.WhenAll(sending, receiving); }
+            catch (Exception ex) when (ex is OperationCanceledException or WebSocketException or JsonException) { }
+        }
+        catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested || peer.Stop.IsCancellationRequested) { }
+        catch (WebSocketException) { }
+        finally
+        {
+            lock (_gate)
+            {
+                room.Peers.Remove(peer);
+                Broadcast(room, new() { Type = "clear", Peer = peer.Id });
+                if (room.Peers.Count == 0) _rooms.Remove(id);
+                peer.Stop.Dispose();
+            }
+        }
+    }
+    private static async Task SendAsync(WebSocket socket, Peer peer, CancellationToken ct)
+    {
+        await foreach (var bytes in peer.Outgoing.Reader.ReadAllAsync(ct))
+        {
+            Interlocked.Add(ref peer.QueuedBytes, -bytes.Length);
+            await socket.SendAsync(bytes.AsMemory(), WebSocketMessageType.Text, true, ct);
+        }
+    }
+    private async Task ReceiveAsync(WebSocket socket, Room room, Peer peer, bool readOnly, CancellationToken ct)
+    {
+        var buffer = new byte[LiveProtocol.MaxPacketBytes];
+        var tokens = 80d; var byteTokens = 2 * 1024 * 1024d; var previousTime = Stopwatch.GetTimestamp();
+        while (!ct.IsCancellationRequested)
+        {
+            var length = 0;
+            ValueWebSocketReceiveResult result;
+            do
+            {
+                result = await socket.ReceiveAsync(buffer.AsMemory(length), ct);
+                if (result.MessageType != WebSocketMessageType.Text || length + result.Count >= buffer.Length) return;
+                length += result.Count;
+            } while (!result.EndOfMessage);
+            var now = Stopwatch.GetTimestamp(); var seconds = Stopwatch.GetElapsedTime(previousTime, now).TotalSeconds;
+            tokens = Math.Min(80, tokens + seconds * 40) - 1;
+            byteTokens = Math.Min(2 * 1024 * 1024, byteTokens + seconds * 1024 * 1024) - length;
+            previousTime = now;
+            if (readOnly || tokens < 0 || byteTokens < 0) return;
+            var frame = JsonSerializer.Deserialize(buffer.AsSpan(0, length), BoardJsonContext.Default.LiveFrame);
+            if (frame is null) return;
+            lock (_gate)
+            {
+                if (frame.Type == "touch" && frame.Mark is null) { peer.Touched = now; continue; }
+                if (frame.Type == "clear" && frame.Mark is null)
+                {
+                    peer.Preview = null;
+                    Broadcast(room, new() { Type = "clear", Peer = peer.Id }, peer); continue;
+                }
+                if (!LiveProtocol.TryMerge(frame, peer.Preview, out var merged)) return;
+                // An HTTP commit may win the race with the final preview packet.
+                if (room.Committed.Contains(merged!.Id)) continue;
+                if (room.Peers.Where(p => p != peer).Sum(p => p.Preview?.Points.Count ?? 0) + merged.Points.Count > 40000) return;
+                peer.Preview = merged; peer.Touched = now;
+                Broadcast(room, frame with { Peer = peer.Id, Revision = 0 }, peer);
+            }
+        }
+    }
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        try
+        {
+            using var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+            while (await timer.WaitForNextTickAsync(stoppingToken))
+                lock (_gate)
+                    foreach (var room in _rooms.Values)
+                        foreach (var peer in room.Peers)
+                            if (peer.Preview is not null && Stopwatch.GetElapsedTime(peer.Touched).TotalSeconds > 30)
+                            { peer.Preview = null; Broadcast(room, new() { Type = "clear", Peer = peer.Id }); }
+        }
+        finally
+        {
+            lock (_gate) foreach (var room in _rooms.Values) foreach (var peer in room.Peers) peer.Stop.Cancel();
+        }
+    }
+}

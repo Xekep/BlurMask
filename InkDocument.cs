@@ -264,14 +264,15 @@ internal sealed class InkDocument
         for (var i = 0; i < to.Count; i++)
             if (!previous.Contains(to[i].Id) && existing.Add(to[i].Id)) Marks.Insert(Math.Min(i, Marks.Count), to[i]);
     }
-    public List<InkMarkDto> Export() => Marks.Select(mark => new InkMarkDto
+    public List<InkMarkDto> Export() => Marks.Select(ExportMark).ToList();
+    internal static InkMarkDto ExportMark(InkMark mark) => new()
     {
         Id = mark.Id, Tool = mark.Tool.ToString(), Color = mark.Color.A == 255
             ? $"#{mark.Color.R:X2}{mark.Color.G:X2}{mark.Color.B:X2}"
             : $"#{mark.Color.R:X2}{mark.Color.G:X2}{mark.Color.B:X2}{mark.Color.A:X2}", Width = mark.Width,
         FontSize = mark.FontSize, Text = mark.Text, Image = mark.Image,
         Points = mark.Points.Select(p => new InkPointDto(p.X, p.Y)).ToList()
-    }).ToList();
+    };
     public void Import(List<InkMarkDto> marks, bool resetHistory = false)
     {
         if (HasActiveEdit) throw new InvalidOperationException("Finish the drawing gesture before importing.");

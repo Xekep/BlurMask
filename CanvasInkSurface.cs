@@ -60,6 +60,7 @@ internal sealed class CanvasInkSurface : Grid
     internal void UpdateBounds()
     {
         foreach (var mark in _session.CanvasDocument.Marks.Concat(_session.CanvasDocument.FadingMarks)) BoardBounds = CanvasGeometry.Grow(BoardBounds, mark.Bounds);
+        foreach (var mark in _window.RemotePreviews) BoardBounds = CanvasGeometry.Grow(BoardBounds, mark.Bounds);
         if (_session.CanvasDocument.Preview is { } preview) BoardBounds = CanvasGeometry.Grow(BoardBounds, preview.Bounds);
     }
     internal Point ToBoard(Point point) => new((point.X - Offset.X) / Zoom, (point.Y - Offset.Y) / Zoom);
@@ -209,6 +210,7 @@ internal sealed class CanvasInkSurface : Grid
             if (!owner._session.InkVisible) return;
             foreach (var mark in owner._session.CanvasDocument.Marks) mark.Draw(context);
             foreach (var mark in owner._session.CanvasDocument.FadingMarks) mark.Draw(context);
+            foreach (var mark in owner._window.RemotePreviews) mark.Draw(context);
             owner._session.CanvasDocument.Preview?.Draw(context);
             if (owner._session.Tool == InkTool.Select && !owner._window.ReadOnly) owner._session.CanvasSelection.Draw(context, owner.Zoom);
         }

@@ -23,6 +23,15 @@ internal sealed class CanvasWindow : Window
     private readonly Border _zoomBadge;
     private readonly CanvasCloudClient _cloud = new();
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(1300) };
+    private readonly DispatcherTimer _liveTimer = new() { Interval = TimeSpan.FromMilliseconds(50) };
+    private CanvasLiveClient? _live;
+    private readonly Dictionary<Guid, (InkMarkDto Dto, InkMark Mark)> _remotePreviews = [];
+    private readonly Dictionary<Guid, long> _previewClears = [];
+    private Guid? _localLiveId;
+    private bool _previewDirty;
+    internal IEnumerable<InkMark> RemotePreviews => _remotePreviews.Values.Select(p => p.Mark);
+    internal int RemotePreviewCount => _remotePreviews.Count;
+    internal bool LiveConnected => _live?.Connected == true;
     private readonly string _statePath;
     private BoardSnapshot _board = new() { Title = UiText.T("Новое полотно") };
     private BoardSnapshot _baseline = new();
@@ -31,7 +40,8 @@ internal sealed class CanvasWindow : Window
     private BoardSnapshot? _pendingBefore;
     private string? _viewKey;
     private (BoardSnapshot Remote, BoardSnapshot Before)? _deferred;
-    private bool _busy, _shutdown, _loading, _dirty;
+    private bool _busy, _shutdown, _loading, _dirty, _changingBoard;
+    private Task? _syncTask;
     private int _generation;
     public bool ReadOnly => _board.ReadOnly;
     public string BoardBackground => _board.Background;
@@ -112,13 +122,16 @@ internal sealed class CanvasWindow : Window
         session.CanvasDocument.Changed += OnDocumentChanged;
         _timer.Tick += (_, _) => { if (_dirty && !session.CanvasDocument.HasActiveEdit) SaveState(); _ = SyncAsync(); };
         _timer.Start();
+        _liveTimer.Tick += (_, _) => PublishPreview();
+        _liveTimer.Start();
+        ResetLive();
         Activated += (_, _) => { if (!_shutdown) session.ActivateCanvas(); };
         Closing += (_, e) =>
         {
             if (_shutdown) return;
             e.Cancel = true; FinishInput(); SaveState(); Hide(); session.SelectScreen();
         };
-        Closed += (_, _) => { _timer.Stop(); session.CanvasDocument.Changed -= OnDocumentChanged; _cloud.Dispose(); };
+        Closed += (_, _) => { _timer.Stop(); _liveTimer.Stop(); _live?.Dispose(); session.CanvasDocument.Changed -= OnDocumentChanged; _cloud.Dispose(); };
     }
 
     private static Button CanvasButton(object content, string tip, Action action)
@@ -200,7 +213,64 @@ internal sealed class CanvasWindow : Window
         _session.ActivateCanvas(); _session.CanvasDocument.Add(mark); _session.SelectTool(InkTool.Select);
         _session.CanvasSelection.Begin(mark.Bounds.Center, 0); _session.CanvasSelection.Complete(); SaveState();
     }
-    private void OnDocumentChanged() { if (!_loading) _dirty = true; }
+    private void OnDocumentChanged()
+    {
+        if (_loading) return;
+        _dirty = true; _previewDirty = true;
+        if (!_session.CanvasDocument.HasActiveEdit)
+        {
+            PublishPreview();
+            // Commit immediately; the timer remains the offline/retry fallback.
+            Dispatcher.UIThread.Post(() => _ = SyncAsync());
+        }
+    }
+    private void PublishPreview()
+    {
+        if (_live is null || !_previewDirty || ReadOnly) return;
+        _previewDirty = false;
+        var mark = _session.CanvasDocument.Preview;
+        if (mark is { FadeSeconds: <= 0 })
+        { _localLiveId = mark.Id; _live.Preview(InkDocument.ExportMark(mark)); }
+        else if (_localLiveId is { } id)
+        {
+            _live.Preview(null, !_session.CanvasDocument.Marks.Any(m => m.Id == id));
+            _localLiveId = null;
+        }
+    }
+    private void ResetLive()
+    {
+        _live?.Dispose(); _live = null; _remotePreviews.Clear(); _previewClears.Clear(); _localLiveId = null;
+        if (_connection is null || _shutdown) return;
+        var generation = _generation;
+        _live = new CanvasLiveClient(_connection, frame => Dispatcher.UIThread.Post(() =>
+        {
+            if (_shutdown || generation != _generation) return;
+            if (frame is null) { _remotePreviews.Clear(); _previewClears.Clear(); Refresh(); return; }
+            if (frame.Type is "ready" or "changed") { _ = SyncAsync(); return; }
+            if (frame.Type == "clear")
+            {
+                if (frame.Revision > _board.Revision) _previewClears[frame.Peer] = frame.Revision;
+                else { _remotePreviews.Remove(frame.Peer); _previewClears.Remove(frame.Peer); }
+            }
+            else if (frame.Type == "preview")
+            {
+                _remotePreviews.TryGetValue(frame.Peer, out var previous);
+                if (LiveProtocol.TryMerge(frame, previous.Dto, out var dto))
+                {
+                    var document = new InkDocument(); document.Import([dto!]);
+                    _remotePreviews[frame.Peer] = (dto!, document.Marks[0]); _previewClears.Remove(frame.Peer);
+                }
+            }
+            Refresh();
+        }));
+    }
+    private void ClearCommittedPreviews()
+    {
+        foreach (var peer in _remotePreviews.Keys.ToArray())
+            if ((_previewClears.TryGetValue(peer, out var revision) && revision <= _board.Revision) ||
+                _board.Marks.Any(m => m.Id == _remotePreviews[peer].Dto.Id))
+            { _remotePreviews.Remove(peer); _previewClears.Remove(peer); }
+    }
     private void NewLocal()
     {
         if (_busy) { _status.Text = UiText.T("Дождитесь текущего сохранения."); return; }
@@ -209,6 +279,7 @@ internal sealed class CanvasWindow : Window
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         { _status.Text = UiText.T("Не удалось сохранить резервную копию: ") + ex.Message; return; }
         _generation++; _connection = null; _pending = null; _pendingBefore = null; _viewKey = null; _deferred = null;
+        ResetLive();
         _baseline = new(); Apply(new() { Title = UiText.T("Новое полотно") }, true); SaveState(); _surface.Fit();
         _status.Text = UiText.T("Сохранено на устройстве");
     }
@@ -220,7 +291,7 @@ internal sealed class CanvasWindow : Window
     {
         if (!BoardValidation.Valid(board)) throw new InvalidDataException(UiText.T("Сервер вернул некорректное полотно."));
         _loading = true;
-        try { _board = board; _session.CanvasDocument.Import(board.Marks, resetHistory); if (resetHistory) _surface.ResetBounds(); if (!_title.IsFocused) _title.Text = board.Title; Refresh(); }
+        try { _board = board; _session.CanvasDocument.Import(board.Marks, resetHistory); ClearCommittedPreviews(); if (resetHistory) _surface.ResetBounds(); if (!_title.IsFocused) _title.Text = board.Title; Refresh(); }
         finally { _loading = false; }
     }
     private void LoadState()
@@ -251,6 +322,14 @@ internal sealed class CanvasWindow : Window
     }
 
     public async Task SyncAsync()
+    {
+        if (_syncTask is { } running) await running;
+        if (_busy || _changingBoard || _shutdown || _connection is null || _session.CanvasDocument.HasActiveEdit) return;
+        var task = SyncCoreAsync(); _syncTask = task;
+        try { await task; }
+        finally { if (_syncTask == task) _syncTask = null; }
+    }
+    private async Task SyncCoreAsync()
     {
         if (_busy || _shutdown || _connection is null || _session.CanvasDocument.HasActiveEdit) return;
         if (_deferred is { } deferred)
@@ -288,27 +367,32 @@ internal sealed class CanvasWindow : Window
     }
     internal async Task CreateCloudAsync(string server)
     {
-        if (_busy) throw new InvalidOperationException(UiText.T("Дождитесь текущего сохранения."));
-        FinishInput(); _busy = true;
+        if (_changingBoard || (_busy && _syncTask is null)) throw new InvalidOperationException(UiText.T("Дождитесь текущего сохранения."));
+        _changingBoard = true;
         try
         {
+            if (_syncTask is { } running) await running;
+            FinishInput(); _busy = true;
             var local = Snapshot();
             var created = await _cloud.CreateAsync(server, local);
             if (_shutdown) return;
             _generation++; _connection = new(CanvasCloudClient.Server(server), created.Board.Id, created.EditKey);
+            ResetLive();
             _viewKey = created.ViewKey; _baseline = created.Board;
             _board = local with { Id = created.Board.Id, Revision = 0, ReadOnly = false };
             _pending = null; _pendingBefore = null; SaveState();
         }
-        finally { _busy = false; }
+        finally { _busy = false; _changingBoard = false; }
         await SyncAsync();
     }
     internal async Task ConnectAsync(string link)
     {
-        if (_busy) throw new InvalidOperationException(UiText.T("Дождитесь текущего сохранения."));
-        FinishInput(); _busy = true;
+        if (_changingBoard || (_busy && _syncTask is null)) throw new InvalidOperationException(UiText.T("Дождитесь текущего сохранения."));
+        _changingBoard = true;
         try
         {
+            if (_syncTask is { } running) await running;
+            FinishInput(); _busy = true;
             var connection = CanvasCloudClient.ParseLink(link);
             var remote = await _cloud.ReadAsync(connection);
             if (_shutdown) return;
@@ -316,11 +400,12 @@ internal sealed class CanvasWindow : Window
             var backup = _statePath + $".backup-{DateTime.Now:yyyyMMdd-HHmmss}.json";
             if (File.Exists(_statePath)) File.Copy(_statePath, backup, true);
             _generation++; _connection = connection; _viewKey = null;
+            ResetLive();
             _pending = null; _pendingBefore = null; _deferred = null; _baseline = remote;
             Apply(remote, true); SaveState(); _surface.Fit();
             _status.Text = remote.ReadOnly ? UiText.T("Только просмотр · подключено") : UiText.T("Сохранено · подключено");
         }
-        finally { _busy = false; }
+        finally { _busy = false; _changingBoard = false; }
     }
     private Window Dialog(string title, StackPanel panel)
     {

@@ -78,8 +78,12 @@ The canvas menu's **Connect** button accepts an invitation code or link.
 **Collaborate** creates a shared copy on the built-in `https://pen.kiiko.ru` service on first click and displays separate **Draw together** and view codes,
 with buttons to copy the code or invitation link. Links use one opaque fragment (`/#<code>`)
 without visible board/key parameters. The code retains the full 256-bit access key.
-Only this invitation format is supported. Native clients synchronize every 1.3 seconds, preserving
-concurrent strokes and pending offline edits. Screen annotations remain local.
+Only this invitation format is supported. Pens, highlighters and shapes appear for other participants
+while they are being drawn: an authenticated WebSocket sends new points about every 50 ms.
+Finished strokes save immediately through the PostgreSQL API; a 1.3-second polling fallback preserves
+concurrent strokes and pending offline edits. Unfinished previews stay outside saved documents,
+exports and undo history; cancellation or disconnection clears them. View-only participants also
+receive live previews. Screen annotations and fading ink remain local.
 
 The minimalist software download page, ASP.NET Core API, PostgreSQL storage and Docker/Caddy configuration for
 `pen.kiiko.ru` are in [`server/`](server/README.md). Deployment requires a server and DNS
