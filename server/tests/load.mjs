@@ -22,6 +22,8 @@ if (!Number.isInteger(boards) || boards < 1 || boards > 400 || !Number.isInteger
 const prefix = 'Load-' + new Date().toISOString().replaceAll(':', '-') + '-' + randomUUID().slice(0, 8);
 const output = process.env.PEN_LOAD_OUTPUT || '.artifacts/load-' + prefix + '.json';
 const ids = [], clients = [], errors = [], previews = new Map(), offsets = new Map(), latency = [], httpLatency = [];
+const runStarted = performance.now();
+let idleStartedMs = 0, drawingStartedMs = 0;
 let bytesSent = 0, bytesReceived = 0, expected = 0, received = 0, commits = 0, notModified = 0, healthRequests = 0, healthMaxMs = 0, stopping = false;
 let nextApiAt = 0;
 const address = i => hostname ? `127.0.${1 + Math.floor(i / 200)}.${1 + i % 200}` : undefined;
@@ -93,13 +95,15 @@ try {
       });
       await client.socket.next('ready', 8000); clients.push(client);
       client.socket.closed.then(() => { if (!stopping) errors.push('Unexpected disconnect'); });
-      await sleep(25); // <40 handshakes/s, below public admission limits.
+      await sleep(hostname || loopback ? 25 : 65); // Also respect the public 20/s per-IP limiter.
     }
     if (i % 10 === 0) await health();
   }
-  console.log(JSON.stringify({ phase: 'connected', connections: clients.length }));
+  idleStartedMs = performance.now() - runStarted;
+  console.log(JSON.stringify({ phase: 'connected', connections: clients.length, elapsedMs: idleStartedMs }));
   for (let i = 0; i < idleSeconds; i++) { await sleep(1000); await health(); }
-  console.log(JSON.stringify({ phase: 'drawing', connections: clients.length }));
+  drawingStartedMs = performance.now() - runStarted;
+  console.log(JSON.stringify({ phase: 'drawing', connections: clients.length, elapsedMs: drawingStartedMs }));
   const active = clients.filter(c => c.writer);
   activeStart = performance.now();
   const cycles = Math.ceil(seconds / 3);
@@ -127,6 +131,7 @@ try {
     }));
     // Propagate failures while subsequent strokes continue, without unhandled rejection.
     commitTail.catch(error => { errors.push(error.message); });
+    console.log(JSON.stringify({ phase: 'stroke', cycle: cycle + 1, elapsedMs: performance.now() - activeStart, deliveries: received }));
   }
   activeElapsed = performance.now() - activeStart;
   await commitTail;
@@ -147,6 +152,8 @@ finally {
   const report = { prefix, route: hostname ? 'server TLS proxy, verified certificate, loopback transport' : base.origin,
     boards: ids.length, connections: clients.length, activeWriters: clients.filter(c => c.writer).length,
     activeElapsedMs: activeElapsed, previewsSent: previews.size, deliveriesExpected: expected, deliveriesReceived: received,
+    idleStartedMs, drawingStartedMs, targetFramesPerSecond: 20,
+    achievedFramesPerWriterPerSecond: activeElapsed ? previews.size / clients.filter(c => c.writer).length / (activeElapsed / 1000) : 0,
     latencyMs: distribution(latency), commitLatencyMs: distribution(httpLatency), commits, conditionalReads304: notModified,
     bytesSent, bytesReceived, healthRequests, healthMaxMs, errors };
   await writeFile(output, JSON.stringify(report, null, 2)); console.log(JSON.stringify(report));

@@ -51,6 +51,16 @@ Online probes require explicit `PEN_LOAD_ONLINE=yes`. `PEN_LOAD_HOST=127.0.0.1` 
 
 Local 16-client / four-board run: eight simultaneous writers, 960 preview packets, all 2,880 expected deliveries; p95 1.22 ms, p99 1.42 ms, 16 successful saves and four HTTP 304s. This is a loopback integration measurement, not an Internet latency promise.
 
-Online capacity results are recorded after staged production probes. The production host has three vCPUs and about 3.3 GiB RAM; the application service is constrained to 150% CPU and 768 MiB memory. Load generation also consumes resources on that host for loopback TLS tests.
+The production host has three vCPUs and about 3.3 GiB RAM; the application service is constrained to 150% CPU and 768 MiB memory. Load generation also consumes resources on that host for loopback TLS tests. Results from 2026-10-10 UTC:
+
+| Route | Boards / connections / writers | Deliveries | Preview p95 / p99 | Result |
+|---|---|---:|---:|---|
+| External HTTPS from development PC | 8 / 16 / 16 | 9,600 | 49 / 184 ms | All delivered; 160 saves, 8 conditional 304s |
+| Server TLS proxy, loopback generator | 20 / 200 / 40 | 86,400 | 78 / 108 ms | All delivered; 160 saves, 20 conditional 304s |
+| Server TLS proxy after nginx tuning | 200 / 2,000 / 200 | 1,080,000 | 555 / 683 ms | All delivered; 2,000 saves, 200 conditional 304s |
+
+No unexpected disconnects, cross-board ink, point-order errors, OOMs or application restarts occurred in these successful runs. The 2,000-connection run targeted 20 frames/s per writer but took 117.07 seconds for 600 frames per writer: **only 5.13 frames/s were actually generated**. It demonstrates connection admission and delivery integrity under this workload; it does not demonstrate 200 writers at 20 Hz or smooth drawing at that scale. Its generator shared the production host's three CPUs, so the result mixes generator/proxy/application costs. Health latency remained below 457 ms. The service cgroup's kernel-recorded memory peak was 242.82 MiB; this includes its charged file/socket memory, not just managed allocations.
+
+The expected aggregate traffic and active-writer count must accompany any capacity claim. Thousands of idle connections, hundreds of active writers, and thousands of users drawing on one board are separate cases. A sustained high-write workload additionally needs stronger CPU resources and, for multiple server processes, an event broker and board routing. The PostgreSQL row/JSONB snapshot write and full HTTP snapshot acknowledgement remain candidates for the next storage/protocol redesign.
 
 The first large admission probe stopped at 993 established sockets because nginx logged `2048 worker_connections are not enough`. Each proxied socket needs a client and upstream connection; this is a per-worker limit, not an application failure. The host setting was raised to 16,384 per worker, keeping the existing 65,535 file-descriptor limit; `nginx -t` passed before reload. The site's connection limits are 4,224 total / 1,088 per address, leaving HTTP headroom above the application limits. These host settings live in the deployment configuration, outside this repository.
