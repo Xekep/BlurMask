@@ -10,6 +10,7 @@ const base = new URL(process.env.PEN_TEST_URL || 'http://127.0.0.1:5094');
 const boards = Number(process.env.PEN_LOAD_BOARDS || 8);
 const perBoard = Number(process.env.PEN_LOAD_USERS || 2);
 const writers = Number(process.env.PEN_LOAD_WRITERS || 1);
+const activeBoards = Number(process.env.PEN_LOAD_ACTIVE_BOARDS || boards);
 const seconds = Number(process.env.PEN_LOAD_SECONDS || 30);
 const idleSeconds = Number(process.env.PEN_LOAD_IDLE_SECONDS || 5);
 const hostname = process.env.PEN_LOAD_HOST;
@@ -17,7 +18,8 @@ const loopback = ['127.0.0.1', 'localhost', '[::1]'].includes(base.hostname);
 if (!loopback && process.env.PEN_LOAD_ONLINE !== 'yes') throw new Error('Set PEN_LOAD_ONLINE=yes for an explicitly authorized online test.');
 if (hostname && hostname !== '127.0.0.1') throw new Error('Host override is only available for local TLS proxy testing.');
 if (!Number.isInteger(boards) || boards < 1 || boards > 400 || !Number.isInteger(perBoard) || perBoard < 2 || perBoard > 128 ||
-    !Number.isInteger(writers) || writers < 1 || writers > perBoard || seconds < 3 || seconds > 180 || idleSeconds < 0 || idleSeconds > 60)
+    !Number.isInteger(writers) || writers < 1 || writers > perBoard || !Number.isInteger(activeBoards) || activeBoards < 1 || activeBoards > boards ||
+    seconds < 3 || seconds > 180 || idleSeconds < 0 || idleSeconds > 60)
   throw new Error('Invalid load parameters.');
 const seed = process.env.PEN_LOAD_ACCESS_FILE ? JSON.parse(await readFile(process.env.PEN_LOAD_ACCESS_FILE,'utf8')) : null;
 if(seed && (!/^Load-[A-Za-z0-9T.\-]+$/.test(seed.prefix)||seed.rooms.length!==boards||seed.rooms.some((a,i)=>a.board.title!==seed.prefix+'-'+i||a.board.marks.length)))throw new Error('Invalid fresh load seed');
@@ -67,7 +69,7 @@ async function health() {
   if (response.ms > 2000) throw new Error('Health latency exceeded 2s; stopping load.');
 }
 await mkdir(output.slice(0, Math.max(output.lastIndexOf('/'), output.lastIndexOf('\\'))) || '.', { recursive: true });
-console.log(JSON.stringify({ phase: 'start', prefix, boards, perBoard, writers, seconds, idleSeconds, route: hostname ? 'TLS proxy on server loopback' : base.origin }));
+console.log(JSON.stringify({ phase: 'start', prefix, boards, perBoard, writers, activeBoards, seconds, idleSeconds, route: hostname ? 'TLS proxy on server loopback' : base.origin }));
 let activeStart = 0, activeElapsed = 0;
 try {
   await health();
@@ -80,7 +82,7 @@ try {
   }
   for (let i = 0; i < boards; i++) {
     for (let j = 0; j < perBoard; j++) {
-      const access = rooms[i], writer = j < writers, index = clients.length;
+      const access = rooms[i], writer = i < activeBoards && j < writers, index = clients.length;
       const client = { access, index, writer, room: i, marks: [], address: address(i) };
       client.socket = await connect(base, access.board.id, writer ? access.editKey : access.viewKey, {
         hostname, localAddress: client.address,

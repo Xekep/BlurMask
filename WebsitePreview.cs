@@ -1,12 +1,13 @@
 using Avalonia;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using System.Runtime.InteropServices;
 
 namespace BlurMask;
 
 // Reproducible screenshot of the real app, with a small sketch drawn using its ink tools.
 // Run --website-preview --software-rendering with BLURMASK_SITE_PREVIEW pointing to a PNG.
-internal static class WebsitePreview
+internal static partial class WebsitePreview
 {
     internal static async Task SaveAsync(DrawingSession session)
     {
@@ -58,7 +59,11 @@ internal static class WebsitePreview
         if (OperatingSystem.IsWindows())
         {
             using var catalog = new WindowsWindowCatalog();
-            var bounds = catalog.Read((nuint)window.TryGetPlatformHandle()!.Handle)!.Bounds;
+            var handle = window.TryGetPlatformHandle()!.Handle;
+            var bounds = catalog.Read((nuint)handle)!.Bounds;
+            // GetWindowRect includes invisible resize borders: capture only the visible frame.
+            if (DwmGetWindowAttribute(handle, 9, out var frame, 16) == 0)
+                bounds = new PixelRect(frame.Left, frame.Top, frame.Right - frame.Left, frame.Bottom - frame.Top);
             DesktopInkNative.SaveScreenshot(path, bounds);
         }
         else
@@ -68,4 +73,6 @@ internal static class WebsitePreview
         }
         session.Toolbar.Position = original;
     }
+    [StructLayout(LayoutKind.Sequential)] private struct FrameRect { public int Left, Top, Right, Bottom; }
+    [LibraryImport("dwmapi.dll")] private static partial int DwmGetWindowAttribute(nint window, uint attribute, out FrameRect rect, uint size);
 }
