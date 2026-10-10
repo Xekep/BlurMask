@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using Avalonia.Controls;
+using Avalonia.Threading;
 
 namespace BlurMask;
 
@@ -13,8 +14,8 @@ namespace BlurMask;
 /// different source offset/scale/color transform. Neighboring cells therefore sample different
 /// desktop pixels while the native window count stays constant as the mask grows.
 ///
-/// There is no polling/render timer. Magnifier controls keep live desktop content themselves;
-/// BlurMask only updates source geometry when Avalonia reports a move or resize.
+/// A small timer refreshes the four sources while visible; window movement also
+/// updates geometry immediately. The native window count is independent of mask size.
 /// </summary>
 internal sealed partial class WindowsGlassRefraction : IDisposable
 {
@@ -44,7 +45,9 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
     private readonly Plane[] _planes = new Plane[PlaneCount];
 
     private bool _enabled;
+    private bool _scramble;
     private bool _disposed;
+    private readonly DispatcherTimer _refresh = new() { Interval = TimeSpan.FromMilliseconds(100) };
     private int _lastWidth = -1;
     private int _lastHeight = -1;
     private int _lastOriginX = int.MinValue;
@@ -58,6 +61,15 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
         _host = host;
 
         CreatePlanes();
+        _refresh.Tick += (_, _) =>
+        {
+            if (!_enabled || _disposed || !_window.IsVisible || _lastWidth <= 0 || _lastHeight <= 0) return;
+            // Session changes can invalidate native magnification. Stop the effect
+            // rather than touching stale geometry after all monitors disappear.
+            if (RemoteDesktopSupport.IsRemoteSession || _window.Screens.All.Count == 0) { SetEnabled(false); return; }
+            for (var i = 0; i < PlaneCount; i++)
+                UpdatePlaneSource(_planes[i], _lastOriginX, _lastOriginY, _lastWidth, _lastHeight);
+        };
 
         _window.PositionChanged += OnWindowPositionChanged;
         _window.Resized += OnWindowResized;
@@ -167,9 +179,11 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
                 if (plane is not null)
                     _ = ShowWindow(plane.Hwnd, SwShowNa);
             }
+            _refresh.Start();
         }
         else
         {
+            _refresh.Stop();
             foreach (var plane in _planes)
             {
                 if (plane is not null)
@@ -177,6 +191,26 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
             }
         }
     }
+
+    public void SetScramble(bool scramble)
+    {
+        if (_disposed || _scramble == scramble) return;
+        SetEnabled(false); _scramble = scramble;
+        for (var i = 0; i < PlaneCount; i++)
+        {
+            var optics = scramble ? ScrambleOptics(i) : OpticsForPlane(i);
+            var plane = _planes[i]; plane.Scale = optics.Scale; plane.OffsetX = optics.OffsetX; plane.OffsetY = optics.OffsetY;
+            var transform = MagTransform.Scale(plane.Scale);
+            _ = MagSetWindowTransform(plane.Hwnd, ref transform);
+            var color = scramble ? new MagColorEffect { M11 = 1, M22 = 1, M33 = 1, M44 = 1, M55 = 1 } : MagColorEffect.Frosted(i);
+            _ = MagSetColorEffect(plane.Hwnd, ref color);
+        }
+    }
+
+    // Swap each adjacent 2x2 group diagonally: every tile moves, sources remain
+    // inside the covered area, and four native planes suffice at any mask size.
+    internal static (float Scale, int OffsetX, int OffsetY) ScrambleOptics(int plane) =>
+        (1f, (plane & 1) == 0 ? 8 : -8, (plane & 2) == 0 ? 8 : -8);
 
     private void OnWindowPositionChanged(object? sender, PixelPointEventArgs e)
     {
@@ -213,8 +247,8 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
         _lastOriginX = origin.X;
         _lastOriginY = origin.Y;
 
-        var columns = Math.Max(1, (width + TilePitch - 1) / TilePitch);
-        var rows = Math.Max(1, (height + TilePitch - 1) / TilePitch);
+        var columns = _scramble ? width / 16 * 2 : Math.Max(1, (width + TilePitch - 1) / TilePitch);
+        var rows = _scramble ? height / 16 * 2 : Math.Max(1, (height + TilePitch - 1) / TilePitch);
         var gridChanged = columns != _lastColumns || rows != _lastRows;
 
         if (force || sizeChanged)
@@ -254,7 +288,7 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
         }
     }
 
-    private static void RebuildPlaneRegion(nint hwnd, int planeIndex, int columns, int rows)
+    private void RebuildPlaneRegion(nint hwnd, int planeIndex, int columns, int rows)
     {
         var combined = CreateRectRgn(0, 0, 0, 0);
         if (combined == IntPtr.Zero)
@@ -267,13 +301,13 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
             {
                 for (var column = 0; column < columns; column++)
                 {
-                    if (PlaneForCell(column, row) != planeIndex)
+                    if ((_scramble ? (column & 1) + (row & 1) * 2 : PlaneForCell(column, row)) != planeIndex)
                         continue;
 
-                    var left = column * TilePitch + Seam;
-                    var top = row * TilePitch + Seam;
-                    var right = left + TileSide;
-                    var bottom = top + TileSide;
+                    var left = _scramble ? column * 8 : column * TilePitch + Seam;
+                    var top = _scramble ? row * 8 : row * TilePitch + Seam;
+                    var right = left + (_scramble ? 8 : TileSide);
+                    var bottom = top + (_scramble ? 8 : TileSide);
 
                     var cell = CreateRectRgn(left, top, right, bottom);
                     if (cell == IntPtr.Zero)
@@ -357,6 +391,7 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
             return;
 
         _disposed = true;
+        _refresh.Stop();
         _enabled = false;
 
         _window.PositionChanged -= OnWindowPositionChanged;
@@ -381,9 +416,9 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
     private sealed class Plane
     {
         public nint Hwnd { get; }
-        public float Scale { get; }
-        public int OffsetX { get; }
-        public int OffsetY { get; }
+        public float Scale { get; set; }
+        public int OffsetX { get; set; }
+        public int OffsetY { get; set; }
 
         public Plane(nint hwnd, float scale, int offsetX, int offsetY)
         {

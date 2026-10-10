@@ -47,6 +47,8 @@ public sealed partial class App : Application
             await DrawingSmokeTest.VerifyRenderingAsync(_drawing!);
             foreach (var mask in _masks) mask.Hide();
             await DrawingSmokeTest.VerifyCanvasAsync(_drawing!);
+            await DrawingSmokeTest.VerifyScrambleAsync();
+            await DrawingSmokeTest.VerifyWindowAttachmentAsync();
         }
         catch (Exception ex)
         {
@@ -97,7 +99,7 @@ public sealed partial class App : Application
         if (_drawing is null)
         {
             var drawing = new DrawingSession(ShowMask, () => ExitOnClicked(this, EventArgs.Empty),
-                mode => ShowMask(mode), CloseAllMasks);
+                mode => ShowMask(mode), CloseAllMasks, enabled => { foreach (var mask in _masks.ToArray()) mask.SetWindowAttachment(enabled); });
             _drawing = drawing;
             drawing.Toolbar.Closed += (_, _) =>
             {
@@ -124,6 +126,7 @@ public sealed partial class App : Application
         };
 
         mask.Show();
+        mask.SetWindowAttachment(_drawing?.AttachMasksToWindows == true);
         UpdateTrayTooltip(mask.Mode);
     }
 

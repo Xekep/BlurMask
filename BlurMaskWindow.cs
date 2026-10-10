@@ -32,8 +32,10 @@ public sealed class BlurMaskWindow : Window
     private readonly UniformGrid _scramble;
     private readonly UniformGrid _glassBlocks;
     private WindowsGlassRefraction? _windowsGlass;
+    private MaskWindowAttachment? _attachment;
 
     public PrivacyMode Mode { get; private set; } = PrivacyMode.Blur;
+    internal bool HasNativeOptics => _windowsGlass is not null;
 
     public event Action<PrivacyMode>? ModeChanged;
 
@@ -42,8 +44,8 @@ public sealed class BlurMaskWindow : Window
         Title = "BlurMask";
         Width = 360;
         Height = 360;
-        MinWidth = 120;
-        MinHeight = 80;
+        MinWidth = 60;
+        MinHeight = 40;
         Topmost = true;
         ShowInTaskbar = false;
         CanResize = true;
@@ -100,9 +102,17 @@ public sealed class BlurMaskWindow : Window
         };
         Closed += (_, _) =>
         {
+            _attachment?.Dispose(); _attachment = null;
             _windowsGlass?.Dispose();
             _windowsGlass = null;
         };
+    }
+
+    internal void SetWindowAttachment(bool enabled)
+    {
+        if (enabled && _attachment is not null) return;
+        _attachment?.Detach(); _attachment = null;
+        if (enabled && NativeWindowCatalog.TryCreate() is { } catalog) _attachment = new(this, catalog);
     }
 
     private void InputSurfaceOnPointerPressed(object? sender, PointerPressedEventArgs e)
@@ -338,10 +348,11 @@ public sealed class BlurMaskWindow : Window
         _scramble.IsVisible = false;
         _glassBlocks.IsVisible = false;
         _windowsGlass?.SetEnabled(false);
+        _windowsGlass?.SetScramble(Mode == PrivacyMode.Scramble);
 
         // Software/RDP composition cannot blur the pixels behind the window.
         // Use an opaque cover so a rendering fallback never exposes private content.
-        if (Program.SoftwareRendering && Mode is PrivacyMode.Blur or PrivacyMode.BigPixels or PrivacyMode.GlassBlocks)
+        if (Program.SoftwareRendering && Mode is PrivacyMode.Blur or PrivacyMode.BigPixels or PrivacyMode.Scramble or PrivacyMode.GlassBlocks)
         {
             TransparencyLevelHint = [WindowTransparencyLevel.None];
             Background = Brushes.Black;
@@ -380,8 +391,9 @@ public sealed class BlurMaskWindow : Window
                     WindowTransparencyLevel.Transparent,
                     WindowTransparencyLevel.None
                 ];
-                _root.Background = new SolidColorBrush(Color.FromRgb(24, 24, 28));
-                _scramble.IsVisible = true;
+                _root.Background = Brushes.Black;
+                if (_windowsGlass is not null) _windowsGlass.SetEnabled(true);
+                else _scramble.IsVisible = true;
                 break;
 
             case PrivacyMode.GlassBlocks:

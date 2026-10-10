@@ -36,10 +36,11 @@ and [official tool guide](https://epicpen.com/userguide).
 - Click to place text; Enter commits, Shift+Enter adds a line, and Esc cancels.
 - Choose five stroke widths, four quick colors, 24 palette colors, or enter a custom hex color.
 - Switch between the desktop, whiteboard, and blackboard without losing annotations.
-- The eye button collapses the toolbar with an animation and hides ink; only the closed eye remains. Click it to restore the toolbar.
+- The eye button collapses the toolbar with an animation and hides ink; the chalk logo remains above the closed eye. Click the eye to restore the toolbar. **Minimize to tray** hides it completely; click the tray icon to restore it.
 - The cursor button opens two modes: normal cursor and **Select and move**. Click a drawn object and drag it on the screen or canvas; Delete removes it. Moves support undo/redo.
 - Shapes have a separate button. The mask button opens a horizontal strip: each icon creates a new independent mask, and the last button removes all masks.
-- The analog timer selects temporary ink: quick (2 s), long (10 s), very long (30 s). Temporary ink fades locally and is excluded from saved/shared boards.
+- **Follow window** below the mask icons automatically detects the window under each mask's centre. Masks keep their relative position as that window moves, hide while it is minimized, and close with it. Moving a mask by hand updates its attachment. This works on Windows, macOS and Linux/X11; Wayland disables the switch because it does not expose foreign window geometry.
+- The analog timer opens a horizontal strip: off, quick (2 s), long (10 s), very long (30 s), with progressively filled timer icons. Temporary ink fades locally and is excluded from saved/shared boards.
 - The canvas uses a compact floating menu; **Tab** hides/restores it. **Ctrl+V** pastes a screenshot from the clipboard as a movable image that is saved, shared and included in PNG exports.
 - Pasted images are normalized to PNG (up to 2048 px on the longest side); shared documents are limited to 4 MiB and 32 megapixels of raster content.
 - Interface language follows the system UI language: English, French, German or Russian; other languages fall back to English.
@@ -57,13 +58,17 @@ Desktop annotations and toolbar settings are session-local. The separate canvas 
 
 ## Independent canvas and shared boards
 
-Use the board flyout or **Ctrl+Shift+5** to open a separate, zoomable 2400×1600 canvas.
+Use the board flyout or **Ctrl+Shift+5** to open a separate canvas that starts at 2400×1600 and grows in all directions as ink approaches its edges.
 **Ctrl+Shift+6** returns drawing input to the screen. Screen and canvas drawings have independent
 documents and undo histories. Both use the same drawing tools, sizes and colors. The canvas
 supports panning, white/black backgrounds, PNG export and automatic local persistence.
+The wheel zooms around the pointer; bottom-right controls and **Ctrl +/-** change zoom,
+**Ctrl+0** fits the board. Middle-button dragging or cursor mode pans. Growing never shifts
+object coordinates, including negative coordinates and shared peer drawings. PNG export
+includes extended content and scales large boards to at most 4096 pixels on either side.
 
 The canvas **Connect** button accepts an invitation code or link, or creates a server copy
-on the built-in `https://pen.kiiko.ru` service. **Share** displays separate edit and view codes,
+on the built-in `https://pen.kiiko.ru` service. **Collaborate** creates a shared copy on first click and displays separate **Draw together** and view codes,
 with buttons to copy the code or a browser link. Links use one opaque fragment (`/#<code>`)
 without visible board/key parameters. The code retains the full 256-bit access key.
 Only this invitation format is supported. Browser and desktop changes synchronize every 1.3 seconds, preserving
@@ -84,11 +89,11 @@ Right-click the rectangle to cycle:
 
 1. **Blur** - compositor blur-behind when available.
 2. **Pixel Blur** - transparent coarse pixel tiles over compositor blur.
-3. **Scramble** - a deliberately shuffled block pattern with stronger visual breakup.
+3. **Scramble** - on Windows, live 8×8 pixel source tiles swap diagonally in adjacent groups using four Magnification planes. Unsupported platforms use an opaque mosaic.
 4. **Glass Refraction** - on Windows, fixed 30×30 px optical cells on a 32 px pitch. The cells are assigned to four persistent Magnification planes with slightly different zoom/offset/color transforms, so lines and text genuinely break at cell boundaries. Resizing adds/removes square cells instead of stretching them. Other platforms currently use the translucent glass-block fallback.
 5. **Blackout** - solid black privacy mask.
 
-None of the modes performs an application-level desktop capture. On Windows, Glass Refraction uses the system Magnification API with exactly four child Magnifier windows for the whole mask, regardless of how many cells are visible. Each plane is clipped by a disjoint Win32 region. There is no 60 Hz polling/render timer and no child HWND per cell; BlurMask only updates the four source rectangles when the mask actually moves or resizes. Blackout and Scramble remain the strongest privacy modes; Pixel Blur and Glass Refraction intentionally preserve some visual context.
+No mask writes desktop captures to disk. On Windows, Glass Refraction and Scramble use the system Magnification API with exactly four child Magnifier windows per mask, regardless of cell count. Each plane is clipped by a disjoint Win32 region; sources refresh at 10 Hz while visible and immediately on move/resize. Blackout provides a solid cover; other effects preserve some visual context. Native optical effects are disabled in RDP/software mode, with opaque fallback. The minimum mask size is 60×40.
 The tray tooltip shows the current mode.
 
 

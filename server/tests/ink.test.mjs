@@ -1,7 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { emptyBoard, diff, rebase, History, hit, constrain, validBoard } from '../wwwroot/ink.js';
+import { emptyBoard, diff, rebase, History, hit, constrain, validBoard, boardBounds, exportSize } from '../wwwroot/ink.js';
 const mark = () => ({id: crypto.randomUUID(), tool:'Pen', color:'#111111', width:4, fontSize:28, text:'', points:[{x:0,y:0},{x:100,y:100}]});
+test('canvas grows in all directions without moving shared objects; large PNG exports stay bounded', () => {
+  const ink={...mark(),points:[{x:-3500,y:-2200},{x:8500,y:6500}]},board={...emptyBoard(),marks:[ink]},original=structuredClone(board);
+  const bounds=boardBounds(board);
+  assert.ok(bounds.left < -3500 && bounds.top < -2200 && bounds.right > 8500 && bounds.bottom > 6500);
+  assert.deepEqual(board,original);
+  assert.deepEqual(boardBounds(structuredClone(board)),bounds);
+  const size=exportSize(bounds);assert.ok(size.width <= 4096 && size.height <= 4096 && size.scale < 1);
+  const peer={...mark(),points:[{x:-9000,y:12000}]};
+  const rebased=rebase({...board,marks:[ink,peer]},emptyBoard(),board);
+  assert.deepEqual(rebased.marks,[ink,peer]);assert.ok(boardBounds(rebased).left < -9000);
+});
 test('moving an object keeps its layer and peer ink; undo preserves concurrent peer moves', () => {
   const a=mark(), peer=mark(), moved={...a,points:[{x:40,y:30},{x:140,y:130}]};
   const before={...emptyBoard(),marks:[a]}, after={...before,marks:[moved]};

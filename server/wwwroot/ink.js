@@ -12,6 +12,31 @@ export const sameMark = (a, b) => a.tool === b.tool && a.color === b.color && a.
   a.fontSize === b.fontSize && (a.image ?? null) === (b.image ?? null) && JSON.stringify(a.points) === JSON.stringify(b.points);
 export const emptyBoard = () => ({ id: null, revision: 0, title: 'Новое полотно', background: 'white', width: 2400, height: 1600, marks: [], readOnly: false });
 export const clone = value => structuredClone(value);
+export function growBounds(board, ink) {
+  const left=ink.left<board.left+256?Math.floor((ink.left-256)/1024)*1024:board.left;
+  const top=ink.top<board.top+256?Math.floor((ink.top-256)/1024)*1024:board.top;
+  const right=ink.right>board.right-256?Math.ceil((ink.right+256)/1024)*1024:board.right;
+  const bottom=ink.bottom>board.bottom-256?Math.ceil((ink.bottom+256)/1024)*1024:board.bottom;
+  return {left,top,right,bottom,width:right-left,height:bottom-top};
+}
+export function boardBounds(board, measureText=null) {
+  let bounds={left:0,top:0,right:board.width,bottom:board.height,width:board.width,height:board.height};
+  for(const mark of board.marks) {
+    const xs=mark.points.map(p=>p.x), ys=mark.points.map(p=>p.y), margin=mark.width*5;
+    let left=Math.min(...xs),top=Math.min(...ys),right=Math.max(...xs),bottom=Math.max(...ys);
+    if(mark.tool==='Text') {
+      const lines=mark.text.split('\n');
+      right=left+Math.max(...lines.map(line=>measureText?measureText(line,mark.fontSize):Array.from(line).length*mark.fontSize*1.5));
+      bottom=top+lines.length*mark.fontSize*1.2+mark.fontSize;
+    }
+    bounds=growBounds(bounds,{left:left-margin,top:top-margin,right:right+margin,bottom:bottom+margin});
+  }
+  return bounds;
+}
+export function exportSize(bounds) {
+  const scale=Math.min(1,4096/bounds.width,4096/bounds.height);
+  return {width:Math.max(1,Math.ceil(bounds.width*scale)),height:Math.max(1,Math.ceil(bounds.height*scale)),scale};
+}
 export function validBoard(board) {
   if (!board || !Number.isInteger(board.width) || board.width<100 || board.width>10000 ||
       !Number.isInteger(board.height) || board.height<100 || board.height>10000 ||

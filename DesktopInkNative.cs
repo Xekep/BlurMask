@@ -165,6 +165,13 @@ internal sealed partial class DesktopInkNative : IDisposable
     [LibraryImport("user32.dll")] private static partial nint GetAncestor(nint hwnd, uint flags);
     [LibraryImport("user32.dll")] private static partial nint SendMessageW(nint hwnd, uint message, nint wParam, nint lParam);
     [LibraryImport("user32.dll")] private static partial nint GetDC(nint hwnd);
+    [LibraryImport("gdi32.dll")] private static partial uint GetPixel(nint dc, int x, int y);
+    internal static uint ReadScreenPixel(PixelPoint point)
+    {
+        var dc = GetDC(0);
+        try { return dc == 0 ? uint.MaxValue : GetPixel(dc, point.X, point.Y); }
+        finally { if (dc != 0) ReleaseDC(0, dc); }
+    }
     [LibraryImport("user32.dll")] private static partial int ReleaseDC(nint hwnd, nint dc);
     [LibraryImport("gdi32.dll")] private static partial nint CreateCompatibleDC(nint dc);
     [LibraryImport("gdi32.dll", SetLastError = true)] private static partial nint CreateDIBSection(nint dc, ref BitmapInfo info, uint usage, out nint bits, nint section, uint offset);

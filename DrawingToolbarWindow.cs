@@ -42,6 +42,7 @@ internal sealed class DrawingToolbarWindow : Window
     private PixelPoint _windowStart;
     private IPointer? _dragPointer;
     private readonly Button _handle;
+    private readonly Button _eye;
 
     public DrawingToolbarWindow(DrawingSession session)
     {
@@ -72,7 +73,8 @@ internal sealed class DrawingToolbarWindow : Window
         _handle.PointerCaptureLost += (_, _) => _dragPointer = null;
         column.Children.Add(_handle);
 
-        _body.Children.Add(IconButton(ToolbarGlyph.Eye, UiText.T("Свернуть панель / скрыть рисунок"), ToggleCollapsed));
+        _eye = IconButton(ToolbarGlyph.Eye, UiText.T("Свернуть панель / скрыть рисунок"), ToggleCollapsed);
+        _body.Children.Add(_eye);
         _cursor = IconButton(ToolbarGlyph.Cursor, UiText.T("Курсор · Ctrl+Shift+1"), ShowCursorModes);
         _body.Children.Add(_cursor);
         _drawing = AddTool(ToolbarGlyph.Pen, UiText.T("Инструменты рисования · Ctrl+Shift+2"), () =>
@@ -219,6 +221,7 @@ internal sealed class DrawingToolbarWindow : Window
         _shapes.Background = isShape ? Cyan : Brushes.Transparent;
         _shapes.Content = new ToolbarIcon(isShape ? GlyphFor(_session.Tool) : ToolbarGlyph.Shapes) { Width = 23, Height = 23 };
         _fading.Background = _session.FadeSeconds > 0 ? Cyan : Brushes.Transparent;
+        _fading.Content = new ToolbarIcon(ToolbarGlyph.Fading, timerFraction: _session.FadeSeconds switch { 2 => .25, 10 => .5, 30 => .9, _ => 0 }) { Width = 23, Height = 23 };
         _selectedColor.Background = new SolidColorBrush(_session.Color);
         _undo.Opacity = _session.Document.CanUndo ? 1 : 0.4;
         foreach (var (tool, button) in _toolButtons)
@@ -260,18 +263,17 @@ internal sealed class DrawingToolbarWindow : Window
     }
     internal void ShowFading()
     {
-        var panel = new StackPanel { Width = 200, Margin = new Thickness(5), Spacing = 3 };
-        panel.Children.Add(new TextBlock { Text = UiText.T("Исчезающие чернила"), FontWeight = FontWeight.SemiBold, Margin = new Thickness(7, 3) });
+        var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 2 };
         foreach (var (seconds, label) in new[] { (0d, UiText.T("Выключены")), (2d, UiText.T("Быстро")),
             (10d, UiText.T("Долго")), (30d, UiText.T("Очень долго")) })
         {
-            var button = MenuItem(panel, label, () => _session.SetFading(seconds));
+            var button = IconButton(ToolbarGlyph.Fading, label, () => { CloseFlyout(); _session.SetFading(seconds); });
+            button.Content = new ToolbarIcon(ToolbarGlyph.Fading, timerFraction: seconds switch { 2 => .25, 10 => .5, 30 => .9, _ => 0 }) { Width = 23, Height = 23 };
             button.Background = _session.FadeSeconds == seconds ? Cyan : Brushes.Transparent;
-            if (seconds > 0) ToolTip.SetTip(button, UiText.F("{0} секунд", seconds));
+            if (seconds > 0) ToolTip.SetTip(button, label + " · " + UiText.F("{0} секунд", seconds));
+            row.Children.Add(button);
         }
-        panel.Children.Add(new TextBlock { Text = UiText.T("Временные пометки на этом устройстве"), FontSize = 10,
-            TextWrapping = TextWrapping.Wrap, Foreground = Brushes.Gray, Margin = new Thickness(7, 4) });
-        ShowFlyout("fading", panel, _fading);
+        ShowFlyout("fading", row, _fading);
     }
     internal void ShowMasks()
     {
@@ -285,7 +287,13 @@ internal sealed class DrawingToolbarWindow : Window
             (PrivacyMode.Blackout, ToolbarGlyph.MaskBlackout, "Чёрная маска")
         }) row.Children.Add(IconButton(glyph, UiText.T(label), () => { CloseFlyout(); _session.CreateMask(mode); }));
         row.Children.Add(IconButton(ToolbarGlyph.Trash, UiText.T("Удалить все маски"), () => { CloseFlyout(); _session.CloseAllMasks(); }));
-        ShowFlyout("masks", row, _masks);
+        var panel = new StackPanel { Spacing = 5 }; panel.Children.Add(row);
+        using var catalog = NativeWindowCatalog.TryCreate();
+        var attach = new ToggleSwitch { Content = UiText.T("Привязать к окну"), IsChecked = _session.AttachMasksToWindows,
+            IsEnabled = catalog is not null, FontSize = 12, Margin = new Thickness(4, 0) };
+        ToolTip.SetTip(attach, UiText.T(catalog is null ? "Привязка недоступна в этой оконной системе" : "Определять окно под маской автоматически"));
+        attach.IsCheckedChanged += (_, _) => _session.SetMaskWindowAttachment(attach.IsChecked == true);
+        panel.Children.Add(attach); ShowFlyout("masks", panel, _masks);
     }
     internal void ShowSizes()
     {
@@ -366,6 +374,7 @@ internal sealed class DrawingToolbarWindow : Window
         MenuItem(panel, UiText.T("Горячие клавиши"), ShowShortcuts);
         MenuItem(panel, UiText.T("Снимок экрана                   Ctrl+Shift+S"), () => _ = _session.CaptureScreenshotAsync());
         MenuItem(panel, UiText.T("Свернуть панель"), ToggleCollapsed);
+        MenuItem(panel, UiText.T("Свернуть в трей"), _session.MinimizeToTray);
         MenuItem(panel, UiText.T("Выход"), _session.Exit);
         ShowFlyout("menu", panel, _menu);
     }
@@ -473,12 +482,9 @@ internal sealed class DrawingToolbarWindow : Window
     internal void ToggleCollapsed()
     {
         _collapsed = !_collapsed;
-        ((StackPanel)Content!).Spacing = _collapsed ? 0 : 3;
-        _bodyContainer.Height = _collapsed ? 0 : _body.Children.Sum(c => c.DesiredSize.Height) + 2;
-        _bodyContainer.Opacity = _collapsed ? 0 : 1;
-        _bodyContainer.IsHitTestVisible = !_collapsed;
-        _handle.Content = new ToolbarIcon(_collapsed ? ToolbarGlyph.ClosedEye : ToolbarGlyph.Nib, !_collapsed) { Width = 34, Height = 34 };
-        ToolTip.SetTip(_handle, _collapsed ? UiText.T("Развернуть панель") : UiText.T("Перетащить панель · двойной щелчок — свернуть"));
+        _bodyContainer.Height = _collapsed ? _eye.Height + 2 : _body.Children.Sum(c => c.DesiredSize.Height) + 2;
+        _eye.Content = new ToolbarIcon(_collapsed ? ToolbarGlyph.ClosedEye : ToolbarGlyph.Eye) { Width = 23, Height = 23 };
+        ToolTip.SetTip(_eye, _collapsed ? UiText.T("Развернуть панель") : UiText.T("Свернуть панель / скрыть рисунок"));
         CloseFlyout();
         if (_collapsed && _session.InkVisible) _session.ToggleInk();
         else if (!_collapsed && !_session.InkVisible) _session.ToggleInk();

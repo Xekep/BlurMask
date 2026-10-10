@@ -15,10 +15,12 @@ internal sealed class DrawingSession : IDisposable
     private readonly Action _exit;
     private readonly Action<PrivacyMode> _selectMask;
     private readonly Action _closeMask;
+    private readonly Action<bool>? _setMaskAttachment;
     private DesktopInkNative? _hotkeys;
     private InkTool _toolBeforeHide = InkTool.Cursor;
     private bool _disposed;
     private bool _capturing;
+    private bool _inTray, _trayInkVisible;
     private readonly DispatcherTimer _fadeTimer = new() { Interval = TimeSpan.FromMilliseconds(33) };
     private readonly DispatcherTimer _screenTimer = new() { Interval = TimeSpan.FromMilliseconds(300) };
     public InkDocument DesktopDocument { get; } = new();
@@ -35,11 +37,12 @@ internal sealed class DrawingSession : IDisposable
     public double FadeSeconds { get; private set; }
     public BoardMode Board { get; private set; }
     public bool InkVisible { get; private set; } = true;
+    public bool AttachMasksToWindows { get; private set; }
     public DrawingToolbarWindow Toolbar { get; }
     internal IReadOnlyList<DesktopInkWindow> Overlays => _overlays;
     public event Action? StateChanged;
 
-    public DrawingSession(Action newMask, Action exit, Action<PrivacyMode> selectMask, Action closeMask)
+    public DrawingSession(Action newMask, Action exit, Action<PrivacyMode> selectMask, Action closeMask, Action<bool>? setMaskAttachment = null)
     {
         DesktopSelection = new(DesktopDocument);
         CanvasSelection = new(CanvasDocument);
@@ -47,6 +50,7 @@ internal sealed class DrawingSession : IDisposable
         _exit = exit;
         _selectMask = selectMask;
         _closeMask = closeMask;
+        _setMaskAttachment = setMaskAttachment;
         _screenTimer.Tick += (_, _) => { _screenTimer.Stop(); RebuildOverlays(); };
         Toolbar = new DrawingToolbarWindow(this);
         DesktopDocument.Changed += RefreshDocument;
@@ -76,8 +80,22 @@ internal sealed class DrawingSession : IDisposable
 
     public void Show()
     {
+        if (_inTray)
+        {
+            _inTray = false;
+            if (_trayInkVisible && !InkVisible) ToggleInk();
+        }
         if (!Toolbar.IsVisible) Toolbar.Show();
         else Toolbar.Activate();
+    }
+
+    public void MinimizeToTray()
+    {
+        if (_inTray) return;
+        FinishInput(); Toolbar.CloseFlyout();
+        _trayInkVisible = InkVisible; _inTray = true;
+        if (InkVisible) ToggleInk();
+        Canvas?.Hide(); Toolbar.Hide();
     }
 
     private void OnScreensChanged(object? sender, EventArgs e)
@@ -132,6 +150,10 @@ internal sealed class DrawingSession : IDisposable
     public void NewMask() { SelectScreen(); SelectTool(InkTool.Cursor); _newMask(); }
     public void CreateMask(PrivacyMode mode) { SelectScreen(); SelectTool(InkTool.Cursor); _selectMask(mode); }
     public void CloseAllMasks() => _closeMask();
+    public void SetMaskWindowAttachment(bool enabled)
+    {
+        AttachMasksToWindows = enabled; _setMaskAttachment?.Invoke(enabled); NotifySettings();
+    }
     public void OpenCanvas()
     {
         FinishInput();

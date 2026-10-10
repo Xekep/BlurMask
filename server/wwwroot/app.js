@@ -1,4 +1,4 @@
-import { tools, emptyBoard, clone, diff, hasChanges, rebase, History, hit, constrain, drawMark, validBoard, raster, pruneRasters } from './ink.js';
+import { tools, emptyBoard, clone, diff, hasChanges, rebase, History, hit, constrain, drawMark, validBoard, raster, pruneRasters, boardBounds, exportSize } from './ink.js';
 import { inviteCode, parseInvite } from './invite.js';
 
 const $ = id => document.getElementById(id);
@@ -24,6 +24,8 @@ let board = emptyBoard(), baseline = emptyBoard(), access = null, pending = null
 let tool = 'Pen', color = '#111111', width = 4, textSize = 28, preview = null, gesture = null;
 let history = new History(), busy = false, generation = 0, frame = 0, deferred = null, fitView = true, view = { zoom:1, x:0, y:0 };
 const canvas = $('canvas'), ctx = canvas.getContext('2d'), storageKey = 'kiiko-pen-board-v1';
+let workspaceBounds=boardBounds(board);
+const measureText=(text,size)=>{ctx.font=`${size}px sans-serif`;return ctx.measureText(text).width;};
 let hashConnection = null, invalidInvite = false;
 if (location.hash) { try { hashConnection = parseInvite(location.hash); } catch { invalidInvite = true; } }
 const cacheKey = connection => `${storageKey}:${connection.id}:${connection.key}`;
@@ -58,14 +60,19 @@ function render() {
   if (canvas.width!==Math.round(rect.width*ratio)||canvas.height!==Math.round(rect.height*ratio)) { canvas.width=Math.round(rect.width*ratio);canvas.height=Math.round(rect.height*ratio); }
   ctx.setTransform(ratio,0,0,ratio,0,0);ctx.clearRect(0,0,rect.width,rect.height);
   ctx.translate(view.x,view.y);ctx.scale(view.zoom,view.zoom);
-  ctx.save();ctx.shadowColor='#182c4320';ctx.shadowBlur=24/view.zoom;ctx.shadowOffsetY=5/view.zoom;ctx.fillStyle=board.background==='black'?'#111111':'#ffffff';ctx.fillRect(0,0,board.width,board.height);ctx.restore();
-  ctx.save();ctx.beginPath();ctx.rect(0,0,board.width,board.height);ctx.clip();
+  const nextBounds=boardBounds({...board,marks:preview?[...board.marks,preview]:board.marks},measureText);
+  workspaceBounds={left:Math.min(workspaceBounds.left,nextBounds.left),top:Math.min(workspaceBounds.top,nextBounds.top),
+    right:Math.max(workspaceBounds.right,nextBounds.right),bottom:Math.max(workspaceBounds.bottom,nextBounds.bottom)};
+  workspaceBounds.width=workspaceBounds.right-workspaceBounds.left;workspaceBounds.height=workspaceBounds.bottom-workspaceBounds.top;
+  const bounds=workspaceBounds;
+  ctx.save();ctx.shadowColor='#182c4320';ctx.shadowBlur=24/view.zoom;ctx.shadowOffsetY=5/view.zoom;ctx.fillStyle=board.background==='black'?'#111111':'#ffffff';ctx.fillRect(bounds.left,bounds.top,bounds.width,bounds.height);ctx.restore();
+  ctx.save();ctx.beginPath();ctx.rect(bounds.left,bounds.top,bounds.width,bounds.height);ctx.clip();
   for (const mark of board.marks) drawMark(ctx,mark);
   if (preview) drawMark(ctx,preview);ctx.restore();
 }
-function fit() { fitView=true;const rect=canvas.getBoundingClientRect();view.zoom=Math.min((rect.width-100)/board.width,(rect.height-100)/board.height,1);view.zoom=Math.max(.08,view.zoom);view.x=(rect.width-board.width*view.zoom)/2;view.y=(rect.height-board.height*view.zoom)/2;update(); }
-function zoom(factor,position=null) { fitView=false;const rect=canvas.getBoundingClientRect(), p=position??{x:rect.width/2,y:rect.height/2};const next=Math.max(.08,Math.min(4,view.zoom*factor));view.x=p.x-(p.x-view.x)*next/view.zoom;view.y=p.y-(p.y-view.y)*next/view.zoom;view.zoom=next;update(); }
-function point(e) { const rect=canvas.getBoundingClientRect();return {x:(e.clientX-rect.left-view.x)/view.zoom,y:(e.clientY-rect.top-view.y)/view.zoom}; }
+function fit() { fitView=true;const rect=canvas.getBoundingClientRect(),b=boardBounds(board,measureText);workspaceBounds=b;view.zoom=Math.max(.002,Math.min((rect.width-100)/b.width,(rect.height-100)/b.height,1));view.x=(rect.width-b.width*view.zoom)/2-b.left*view.zoom;view.y=(rect.height-b.height*view.zoom)/2-b.top*view.zoom;update(); }
+function zoom(factor,position=null) { fitView=false;const rect=canvas.getBoundingClientRect(), p=position??{x:rect.width/2,y:rect.height/2};const next=Math.max(.002,Math.min(8,view.zoom*factor));view.x=p.x-(p.x-view.x)*next/view.zoom;view.y=p.y-(p.y-view.y)*next/view.zoom;view.zoom=next;update(); }
+function point(e) { const rect=canvas.getBoundingClientRect();return {x:Math.max(-100000,Math.min(100000,(e.clientX-rect.left-view.x)/view.zoom)),y:Math.max(-100000,Math.min(100000,(e.clientY-rect.top-view.y)/view.zoom))}; }
 function local(e) { const rect=canvas.getBoundingClientRect();return {x:e.clientX-rect.left,y:e.clientY-rect.top}; }
 function commit(before) { history.push(before,board);saveLocal();status(access?'Сохранение…':'Сохранено на устройстве',!access);update(); }
 function selectTool(value) { if (gesture) cancelGesture();tool=value;hideFlyout();update(); }
@@ -75,7 +82,7 @@ canvas.addEventListener('pointerdown',e=>{
   if (gesture) return;
   hideFlyout();const p=point(e);
   if (tool==='Hand'||e.button===1||board.readOnly) { fitView=false;gesture={id:e.pointerId,pan:true,start:local(e),view:{...view}};canvas.setPointerCapture(e.pointerId);return; }
-  if (p.x<0||p.y<0||p.x>board.width||p.y>board.height) return;
+  fitView=false;
   if (tool==='Text') { textDialog(p);return; }
   gesture={id:e.pointerId,before:clone(board),last:p};canvas.setPointerCapture(e.pointerId);
   if (tool==='Eraser') erase(p);
@@ -89,7 +96,7 @@ canvas.addEventListener('pointermove',e=>{
   if (tool==='Eraser') { const previous=gesture.last;const steps=Math.max(1,Math.ceil(Math.hypot(p.x-previous.x,p.y-previous.y)/Math.max(2,width)));for(let i=1;i<=steps;i++) erase({x:previous.x+(p.x-previous.x)*i/steps,y:previous.y+(p.y-previous.y)*i/steps});gesture.last=p; }
   else if (preview) {
     if (tool==='Pen'||tool==='Highlighter') { const coalesced=e.getCoalescedEvents?.(); const events=coalesced?.length?coalesced:[e];for(const move of events) { const q=point(move),last=preview.points.at(-1);if(preview.points.length<20000&&Math.hypot(q.x-last.x,q.y-last.y)>.65)preview.points.push(q); } }
-    else { if(e.shiftKey)p=constrain(preview.points[0],p,tool);preview.points[1]=p; }
+    else { if(e.shiftKey)p=constrain(preview.points[0],p,tool);preview.points[1]={x:Math.max(-100000,Math.min(100000,p.x)),y:Math.max(-100000,Math.min(100000,p.y))}; }
   }
   requestRender();
 });
@@ -122,7 +129,7 @@ document.addEventListener('pointerdown',e=>{if(!e.target.closest('.toolkit'))hid
 function showDialog(title,description=''){const content=$('dialog-content');content.replaceChildren();const h=document.createElement('h2');h.textContent=title;content.append(h);if(description){const p=document.createElement('p');p.textContent=description;content.append(p);}if(!$('dialog').open)$('dialog').showModal();return content;}
 $('dialog-close').onclick=()=>$('dialog').close();
 function textDialog(p){const content=showDialog('Текст');const input=document.createElement('textarea');input.maxLength=4000;input.placeholder='Напишите здесь…';input.setAttribute('aria-label','Текст на полотне');content.append(input);const apply=button('Добавить',()=>{if(input.value.trim()){const before=clone(board);board.marks.push({id:crypto.randomUUID(),tool:'Text',color,width:1,points:[p],text:input.value,fontSize:textSize});commit(before);}$('dialog').close();});apply.className='primary';content.append(apply);input.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();apply.click();}};input.focus();}
-async function exportPng(){const snapshot=clone(board);await Promise.all(snapshot.marks.filter(m=>m.tool==='Image').map(m=>raster(m.image)?.decode().catch(()=>{})));const out=document.createElement('canvas');out.width=snapshot.width;out.height=snapshot.height;const context=out.getContext('2d');context.fillStyle=snapshot.background==='black'?'#111111':'white';context.fillRect(0,0,out.width,out.height);snapshot.marks.forEach(m=>drawMark(context,m));out.toBlob(blob=>download(blob,`${safeName(snapshot.title)}.png`));}
+async function exportPng(){const snapshot=clone(board);await Promise.all(snapshot.marks.filter(m=>m.tool==='Image').map(m=>raster(m.image)?.decode().catch(()=>{})));const out=document.createElement('canvas'),bounds=boardBounds(snapshot,measureText),size=exportSize(bounds);out.width=size.width;out.height=size.height;const context=out.getContext('2d');context.fillStyle=snapshot.background==='black'?'#111111':'white';context.fillRect(0,0,out.width,out.height);context.scale(size.scale,size.scale);context.translate(-bounds.left,-bounds.top);snapshot.marks.forEach(m=>drawMark(context,m));out.toBlob(blob=>download(blob,`${safeName(snapshot.title)}.png`));}
 function safeName(name){return name.replace(/[\\/:*?"<>|]/g,'_').slice(0,80)||'полотно';}
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 $('export').onclick=exportPng;

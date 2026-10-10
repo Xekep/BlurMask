@@ -17,12 +17,19 @@ internal sealed class InkSelection(InkDocument document)
         if (_original is not null) document.BeginEdit();
         document.Notify();
     }
-    internal void Move(Point point)
+    internal void Move(Point point, bool limitToCanvas = false)
     {
         if (_original is null) return;
         var index = document.Marks.FindIndex(m => m.Id == _original.Id);
         if (index < 0) return;
-        document.Marks[index] = _original.Translate(point - _start);
+        var delta = point - _start;
+        if (limitToCanvas)
+        {
+            var limit = CanvasGeometry.CoordinateLimit;
+            delta = new Point(Math.Clamp(delta.X, -limit - _original.Points.Min(p => p.X), limit - _original.Points.Max(p => p.X)),
+                Math.Clamp(delta.Y, -limit - _original.Points.Min(p => p.Y), limit - _original.Points.Max(p => p.Y)));
+        }
+        document.Marks[index] = _original.Translate(delta);
         document.Notify();
     }
     internal void Complete() { if (_original is not null) document.Commit(); _original = null; }

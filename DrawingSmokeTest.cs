@@ -16,6 +16,7 @@ internal static class DrawingSmokeTest
     public static void VerifyDocument(InkDocument document)
     {
         VerifySelection();
+        VerifyCanvasGeometry();
         var invite = new BoardConnection(CanvasCloudClient.DefaultServer, Guid.Parse("00112233-4455-6677-8899-aabbccddeeff"),
             "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8");
         const string code = "ABEiM0RVZneImaq7zN3u_wABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4f";
@@ -56,6 +57,23 @@ internal static class DrawingSmokeTest
         document.Clear();
         VerifyFading();
         VerifyLocalization();
+    }
+    private static void VerifyCanvasGeometry()
+    {
+        var mark = new InkMark(InkTool.Rectangle, Colors.Blue, 4, new Point(-3500, -2200));
+        mark.AddPoint(new Point(8500, 6500));
+        var original = mark.Points.ToArray();
+        var bounds = CanvasGeometry.ForMarks(2400, 1600, [mark]);
+        Check(bounds.Left < -3500 && bounds.Top < -2200 && bounds.Right > 8500 && bounds.Bottom > 6500,
+            "Board did not grow on all four edges.");
+        Check(mark.Points.SequenceEqual(original), "Growing a board moved existing ink.");
+        var (size, scale) = CanvasGeometry.ExportSize(bounds);
+        Check(size.Width <= 4096 && size.Height <= 4096 && scale < 1, "Large export exceeds raster allocation limits.");
+        var doc = new InkDocument(); doc.Add(mark);
+        var selection = new InkSelection(doc); selection.Begin(mark.Points[0], 4);
+        selection.Move(new Point(999999, -999999), true); selection.Complete();
+        Check(BoardValidation.Valid(new BoardSnapshot { Marks = doc.Export() }), "Moving beyond the canvas coordinate limit corrupts shared ink.");
+        doc.Undo(); Check(doc.Marks[0].Same(mark), "Canvas boundary move cannot be undone.");
     }
     private static void VerifySelection()
     {
@@ -178,6 +196,7 @@ internal static class DrawingSmokeTest
             Check(session.Document.FadingMarks[0].FadeOpacity(Stopwatch.GetTimestamp()) is > 0 and < 1,
                 "Live temporary ink did not begin fading.");
             await Task.Delay(650);
+            for (var i = 0; i < 10 && session.Document.FadingMarks.Count != 0; i++) await Task.Delay(100);
             Check(session.Document.FadingMarks.Count == 0, "Fade timer did not remove the stroke.");
             session.SetFading(0);
             session.SelectTool(InkTool.Cursor);
@@ -238,6 +257,104 @@ internal static class DrawingSmokeTest
             session.Clear();
         }
     }
+    internal static async Task VerifyScrambleAsync()
+    {
+        var minimum = new BlurMaskWindow();
+        Check(minimum.MinWidth == 60 && minimum.MinHeight == 40, "Mask minimum dimensions were not halved.");
+        minimum.Close();
+        if (!OperatingSystem.IsWindows() || Program.SoftwareRendering) return;
+        var source = new ScramblePattern();
+        var pattern = new Window { Width = 200, Height = 200, WindowDecorations = WindowDecorations.None,
+            ShowInTaskbar = false, Topmost = true, Position = new PixelPoint(400, 150), Content = source };
+        pattern.Show(); await Task.Delay(150);
+        var origin = pattern.PointToScreen(default);
+        var before = DesktopInkNative.ReadScreenPixel(origin + new PixelPoint(4, 4));
+        var mask = new BlurMaskWindow { Width = 128 / pattern.RenderScaling, Height = 128 / pattern.RenderScaling,
+            MinWidth = 1, MinHeight = 1, WindowStartupLocation = WindowStartupLocation.Manual, Position = origin };
+        try
+        {
+            mask.SetMode(PrivacyMode.Scramble); mask.Show(); await Task.Delay(350);
+            var artifacts = Environment.GetEnvironmentVariable("BLURMASK_SMOKE_ARTIFACTS");
+            if (!string.IsNullOrEmpty(artifacts)) DesktopInkNative.SaveScreenshot(Path.Combine(artifacts, "native-scramble.png"), new PixelRect(origin, new PixelSize(128, 128)));
+            if (mask.HasNativeOptics)
+            {
+                var after = DesktopInkNative.ReadScreenPixel(origin + new PixelPoint(4, 4));
+                Check(before == 0x000000FF && after == 0x0000FFFF, $"Native scramble did not swap live source tiles: {before:X8} -> {after:X8}.");
+                source.Flip = true; source.InvalidateVisual(); await Task.Delay(300);
+                Check(DesktopInkNative.ReadScreenPixel(origin + new PixelPoint(4, 4)) == 0x000000FF, "Scramble did not refresh live desktop content.");
+            }
+            mask.Width = 60; mask.Height = 40;
+            foreach (var mode in Enum.GetValues<PrivacyMode>()) { mask.SetMode(mode); await Task.Delay(60); }
+        }
+        finally { mask.Close(); pattern.Close(); }
+    }
+    private sealed class ScramblePattern : Control
+    {
+        internal bool Flip;
+        public override void Render(DrawingContext context)
+        {
+            var scale = TopLevel.GetTopLevel(this)!.RenderScaling;
+            for (var y = 0; y < 32; y++) for (var x = 0; x < 32; x++)
+                context.DrawRectangle((((x & 1) + (y & 1) * 2) ^ (Flip ? 3 : 0)) switch { 0 => Brushes.Red, 1 => Brushes.Green, 2 => Brushes.Blue, _ => Brushes.Yellow },
+                    null, new Rect(x * 8 / scale, y * 8 / scale, 8 / scale, 8 / scale));
+        }
+    }
+    internal static async Task VerifyWindowAttachmentAsync()
+    {
+        var mask = new BlurMaskWindow { Width = 100, Height = 80, WindowStartupLocation = WindowStartupLocation.Manual, Position = new PixelPoint(450, 250) };
+        mask.SetMode(PrivacyMode.Blackout); mask.Show();
+        var catalog = new TestWindowCatalog { Target = new(1, 123, new PixelRect(400, 200, 400, 300), true) };
+        using var attachment = new MaskWindowAttachment(mask, catalog);
+        try
+        {
+            await Task.Delay(450); attachment.Update();
+            catalog.Target = catalog.Target with { Bounds = new PixelRect(500, 250, 600, 400) };
+            attachment.Update(); await Task.Delay(100);
+            Check(mask.Position == new PixelPoint(550, 300), "Mask did not follow its automatically detected window.");
+            catalog.Target = catalog.Target with { Visible = false }; attachment.Update();
+            Check(!mask.IsVisible, "Mask did not hide with minimized target.");
+            catalog.Target = catalog.Target with { Visible = true }; attachment.Update(); await Task.Delay(100);
+            Check(mask.IsVisible && mask.Position == new PixelPoint(550, 300), "Mask did not return with restored target.");
+            mask.Position = new PixelPoint(650, 350); await Task.Delay(450); attachment.Update();
+            catalog.Target = catalog.Target with { Bounds = new PixelRect(600, 300, 600, 400) }; attachment.Update(); await Task.Delay(100);
+            Check(mask.Position == new PixelPoint(750, 400), "Manual mask placement did not update its attachment offset.");
+            var closed = false; mask.Closed += (_, _) => closed = true;
+            catalog.Target = null; attachment.Update(); Check(closed, "Mask outlived its closed target.");
+        }
+        finally { mask.Close(); }
+        using var native = NativeWindowCatalog.TryCreate();
+        if (native is not null)
+        {
+            // Exercise foreign-window enumeration, even on systems with no foreign windows.
+            var found = native.FindAt(new PixelPoint(500, 300));
+            Check(found is null || found.ProcessId != Environment.ProcessId, "Auto attachment picked one of its own overlays.");
+            Check(native.Read(nuint.MaxValue) is null, "Native tracker accepted an invalid/recycled window ID.");
+            var probe = new Window { Title = "BlurMask tracking probe", Width = 180, Height = 120, WindowDecorations = WindowDecorations.None,
+                WindowStartupLocation = WindowStartupLocation.Manual, Position = new PixelPoint(400, 200), ShowInTaskbar = false };
+            try
+            {
+                probe.Show(); await Task.Delay(150);
+                var handle = probe.TryGetPlatformHandle()!;
+                var id = OperatingSystem.IsMacOS() ? MacWindowCatalog.WindowNumber(handle.Handle) : (nuint)handle.Handle;
+                var first = native.Read(id);
+                Check(first is { Visible: true } && first.ProcessId == Environment.ProcessId, "Native tracker cannot read a real window.");
+                probe.Position = new PixelPoint(460, 230); await Task.Delay(150);
+                var second = native.Read(id)!;
+                Check(second.Bounds.X - first!.Bounds.X == 60 && second.Bounds.Y - first.Bounds.Y == 30, "Native tracker used incorrect screen coordinates.");
+                probe.Hide(); await Task.Delay(100);
+                Check(native.Read(id) is not { Visible: true }, "Native tracker reports a hidden window as visible.");
+                probe.Close(); Check(native.Read(id) is null, "Native tracker retained a destroyed window.");
+            }
+            finally { probe.Close(); }
+        }
+    }
+    private sealed class TestWindowCatalog : IWindowCatalog
+    {
+        internal TrackedWindow? Target;
+        public TrackedWindow? FindAt(PixelPoint point) => Target is { Visible: true } && Target.Bounds.Contains(point) ? Target : null;
+        public TrackedWindow? Read(nuint id) => Target?.Id == id ? Target : null;
+        public void Dispose() { }
+    }
     private static async Task VerifyToolbarAsync(DrawingSession session)
     {
         var toolbar = session.Toolbar;
@@ -274,10 +391,14 @@ internal static class DrawingSmokeTest
             await Task.Delay(70);
             Check(toolbar.Bounds.Height > 50 && toolbar.Bounds.Height < expandedHeight, "Toolbar collapse is not animated.");
             await Task.Delay(180);
-            Check(toolbar.Bounds.Height < 55, "Collapsed toolbar contains more than the eye button.");
+            Check(toolbar.Bounds.Height is > 75 and < 95, "Collapsed toolbar must retain the logo above the eye button.");
             toolbar.ToggleCollapsed();
             await Task.Delay(240);
             Check(Math.Abs(toolbar.Bounds.Height - expandedHeight) < 2, "Toolbar does not restore its full height.");
+            var visible = session.InkVisible;
+            session.MinimizeToTray(); Check(!toolbar.IsVisible && !session.InkVisible, "Minimize to tray left the toolbar or ink visible.");
+            session.Show(); await Task.Delay(100);
+            Check(toolbar.IsVisible && session.InkVisible == visible, "Tray restore did not restore toolbar and ink.");
             if (Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
             {
                 var previous = desktop.Windows.OfType<BlurMaskWindow>().Count();
@@ -332,6 +453,10 @@ internal static class DrawingSmokeTest
         session.OpenCanvas();
         await Task.Delay(250);
         var window = session.Canvas!;
+        var anchor = new Point(330, 220); var world = window.Surface.ToBoard(anchor);
+        window.Surface.ZoomAt(1.5, anchor);
+        Check(((Vector)(window.Surface.ToBoard(anchor) - world)).Length < 0.000001, "Canvas zoom moved the point under the pointer.");
+        window.Surface.Fit();
         Check(session.Target == DrawingTarget.Canvas, "Canvas mode did not activate.");
         Check(session.Overlays.All(o => !o.IsVisible), "Screen board obscures independent canvas.");
         if (OperatingSystem.IsWindows())
@@ -349,6 +474,19 @@ internal static class DrawingSmokeTest
         Check(session.DesktopDocument.Marks.SequenceEqual(new[] { desktopMark }), "Canvas changed desktop ink.");
         session.Undo(); Check(session.CanvasDocument.Marks.Count == 0, "Canvas undo failed.");
         session.Redo(); Check(session.CanvasDocument.Marks.Count == 1, "Canvas redo failed.");
+        var fixedMark = session.CanvasDocument.Marks[0]; var fixedOffset = window.Surface.Offset; var fixedZoom = window.Surface.Zoom;
+        var extension = new InkMark(InkTool.Rectangle, Colors.Blue, 4, new Point(-3500, -2200)); extension.AddPoint(new Point(8500, 6500));
+        session.CanvasDocument.Add(extension);
+        Check(window.Surface.BoardBounds.Contains(extension.Bounds) && session.CanvasDocument.Marks[0].Same(fixedMark) &&
+            window.Surface.Offset == fixedOffset && window.Surface.Zoom == fixedZoom, "Auto-growing canvas shifted existing ink or the viewport.");
+        var exportDirectory = Environment.GetEnvironmentVariable("BLURMASK_SMOKE_ARTIFACTS");
+        if (!string.IsNullOrEmpty(exportDirectory))
+        {
+            var path = Path.Combine(exportDirectory, "native-canvas-extended.png"); window.ExportPng(path);
+            using var large = new Bitmap(path); Check(large.PixelSize.Width <= 4096 && large.PixelSize.Height <= 4096, "Extended PNG allocation exceeded the limit.");
+        }
+        session.Undo(); Check(session.CanvasDocument.Marks.SequenceEqual(new[] { fixedMark }), "Undo after canvas growth moved old ink.");
+        window.Surface.ResetBounds(); window.Surface.Fit();
         var alpha = new InkDocument();
         alpha.Add(new InkMark(InkTool.Pen, Color.FromArgb(128, 255, 0, 17), 4, new Point(10, 10)));
         var imported = new InkDocument(); imported.Import(alpha.Export());
@@ -394,7 +532,14 @@ internal static class DrawingSmokeTest
         session.Undo(); Check(session.CanvasDocument.Marks.Count == 1, "Raster paste undo failed.");
         if (Environment.GetEnvironmentVariable("BLURMASK_TEST_SERVER") is { Length: > 0 } server)
         {
-            await window.CreateCloudAsync(server);
+            await window.ShareAsync(server);
+            if (Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime sharingDesktop)
+            {
+                var invitation = sharingDesktop.Windows.Single(w => w.Title == UiText.T("Ссылка на полотно"));
+                Check(invitation.GetVisualDescendants().OfType<TextBox>().Count(b => b.IsReadOnly) == 2,
+                    "Collaboration did not show separate edit and view invitations.");
+                invitation.Close();
+            }
             var storage = Path.Combine(artifacts ?? Path.GetTempPath(), "canvas-smoke", "canvas.json");
             var state = JsonSerializer.Deserialize(File.ReadAllText(storage), CanvasJsonContext.Default.CanvasState)!;
             using var client = new CanvasCloudClient();

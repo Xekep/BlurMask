@@ -23,6 +23,16 @@ public static class UiText
     public static string ExitApp => T("Закрыть программу");
     internal static IReadOnlyDictionary<string, string[]> Translations { get; } = new Dictionary<string, string[]>
     {
+        ["Свернуть в трей"] = ["Minimize to tray", "Réduire dans la zone de notification", "In den Infobereich minimieren"],
+        ["Совместная работа"] = ["Collaborate", "Collaborer", "Zusammenarbeiten"],
+        ["Привязать к окну"] = ["Follow window", "Suivre la fenêtre", "Fenster folgen"],
+        ["Определять окно под маской автоматически"] = ["Automatically detect the window under the mask", "Détecter automatiquement la fenêtre sous le masque", "Fenster unter der Maske automatisch erkennen"],
+        ["Привязка недоступна в этой оконной системе"] = ["Window following is unavailable in this window system", "Le suivi des fenêtres est indisponible sur ce système", "Fensterverfolgung ist in diesem Fenstersystem nicht verfügbar"],
+        ["Рисовать вместе"] = ["Draw together", "Dessiner ensemble", "Gemeinsam zeichnen"],
+        ["Чтобы пригласить других в текущее полотно, нажмите «Совместная работа»."] = ["To invite others to this canvas, click Collaborate.", "Pour inviter d’autres personnes sur cette toile, cliquez sur Collaborer.", "Um andere zu dieser Zeichenfläche einzuladen, klicken Sie auf Zusammenarbeiten."],
+        ["Уменьшить масштаб"] = ["Zoom out", "Dézoomer", "Verkleinern"],
+        ["Увеличить масштаб"] = ["Zoom in", "Zoomer", "Vergrößern"],
+        ["Масштаб 100%"] = ["Zoom 100%", "Zoom à 100%", "Zoom 100%"],
         ["Обычный курсор"] = ["Normal cursor", "Curseur normal", "Normaler Mauszeiger"],
         ["Выделить и переместить"] = ["Select and move", "Sélectionner et déplacer", "Auswählen und verschieben"],
         ["Меню полотна"] = ["Canvas menu", "Menu de la toile", "Zeichenflächenmenü"],

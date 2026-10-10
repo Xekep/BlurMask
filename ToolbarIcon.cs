@@ -6,7 +6,7 @@ namespace BlurMask;
 
 internal enum ToolbarGlyph { Nib, Eye, ClosedEye, Cursor, Select, Pen, Highlighter, Text, Line, Arrow, Rectangle, Ellipse, Eraser, Size, Undo, Redo, Trash, Board, Camera, Menu, Mask, Shapes, Fading, MaskBlur, MaskPixels, MaskScramble, MaskGlass, MaskBlackout }
 
-internal sealed class ToolbarIcon(ToolbarGlyph glyph, bool circle = false) : Control
+internal sealed class ToolbarIcon(ToolbarGlyph glyph, bool circle = false, double timerFraction = .5) : Control
 {
     private static readonly IBrush Ink = new SolidColorBrush(Color.Parse("#333333"));
     private static readonly Pen Outline = new(Ink, 1.25, lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round);
@@ -104,6 +104,23 @@ internal sealed class ToolbarIcon(ToolbarGlyph glyph, bool circle = false) : Con
                 context.DrawLine(new Pen(Ink, 1.5), new Point(12, 3), new Point(12, 5));
                 context.DrawLine(new Pen(Ink, 2), new Point(18, 5), new Point(20, 7));
                 context.DrawEllipse(Brushes.White, new Pen(Ink, 1.5), new Point(12, 14), 8.5, 8.5);
+                if (timerFraction > 0)
+                {
+                    var sector = new StreamGeometry();
+                    using (var path = sector.Open())
+                    {
+                        path.BeginFigure(new Point(12, 14), true);
+                        var steps = (int)Math.Ceiling(timerFraction * 64);
+                        for (var i = 0; i <= steps; i++)
+                        {
+                            var angle = -Math.PI / 2 + Math.PI * 2 * timerFraction * i / steps;
+                            path.LineTo(new Point(12 + 7.4 * Math.Cos(angle), 14 + 7.4 * Math.Sin(angle)));
+                        }
+                        path.EndFigure(true);
+                    }
+                    context.DrawGeometry(new SolidColorBrush(Color.Parse("#8BABB6")), null, sector);
+                }
+                else context.DrawLine(new Pen(Ink, 1.6), new Point(5, 21), new Point(19, 7));
                 context.DrawGeometry(null, Outline, Geometry.Parse("M12,7 L12,8 M12,20 L12,21 M5,14 L6,14 M18,14 L19,14"));
                 context.DrawGeometry(null, new Pen(Ink, 1.7, lineCap: PenLineCap.Round), Geometry.Parse("M12,9 L12,14 L16,16"));
                 context.DrawEllipse(Ink, null, new Point(12, 14), 1, 1);
