@@ -4,7 +4,7 @@
 
 Desktop probes measure CPU time and managed allocations on a single thread, not GPU frame time, process RSS or network latency. Each probe warms up, forces GC and then runs the reported iteration count. No timing thresholds run in CI: shared runners cannot produce stable performance comparisons.
 
-Isolated desktop smoke tests suppress the OS tray icon/taskbar entry and do not register global hotkeys; synthetic hotkey messages address only the app's own HWND. Full desktop/mask smoke tests run on CI runners. After an Explorer crash on the development desktop, further local full UI stress runs were stopped. Windows recorded `explorer.exe` / `twinui.pcshell.dll` / `0xc0000005`; that identifies the faulting module, not a proven root cause or a verified fix for Explorer.
+Isolated desktop smoke tests suppress the OS tray icon/taskbar entry and do not register global hotkeys; synthetic hotkey messages address only the app's own HWND. Full desktop/mask smoke tests run on CI runners. After an Explorer crash on the development desktop, further local full UI stress runs were stopped. Windows recorded `explorer.exe` / `twinui.pcshell.dll` / `0xc0000005`. Offline analysis with the matching Microsoft PDBs located a null read in `IWindowTabView::Id`, called by `WindowTabHost::OnActiveTabChanged` and `WindowTabDataModel::UpdateActiveTab` through `UpdateTabsForWindow`. This identifies the Windows window-tab handler that failed; it does not establish which application/event triggered it, or verify a fix for Explorer. The recovered Explorer process remained running through the subsequent server-only load tests.
 
 ```powershell
 dotnet build -c Release -p:PublishAot=false
