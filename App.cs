@@ -52,6 +52,7 @@ public sealed partial class App : Application
         }
         catch (Exception ex)
         {
+            Console.Error.WriteLine(ex);
             File.WriteAllText(Path.Combine(Path.GetTempPath(), "BlurMask-smoke-error.txt"), ex.ToString());
             desktop.Shutdown(1);
             return;

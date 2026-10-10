@@ -14,15 +14,27 @@ internal sealed class MaskWindowAttachment : IDisposable
     private PixelPoint _offset;
     private long _manualAt;
     private bool _applying, _hidden;
+    private PixelPoint? _expectedPosition;
+    private Size _lastSize;
     internal MaskWindowAttachment(BlurMaskWindow mask, IWindowCatalog catalog)
     {
         _mask = mask; _catalog = catalog;
+        _lastSize = mask.ClientSize;
         mask.PositionChanged += OnMoved; mask.Resized += OnResized;
         _timer.Tick += (_, _) => Update();
         _manualAt = Stopwatch.GetTimestamp(); _timer.Start();
     }
-    private void OnMoved(object? sender, PixelPointEventArgs e) { if (!_applying) _manualAt = Stopwatch.GetTimestamp(); }
-    private void OnResized(object? sender, WindowResizedEventArgs e) { if (!_applying) _manualAt = Stopwatch.GetTimestamp(); }
+    private void OnMoved(object? sender, PixelPointEventArgs e)
+    {
+        if (_expectedPosition == _mask.Position) { _expectedPosition = null; return; }
+        if (!_applying) _manualAt = Stopwatch.GetTimestamp();
+    }
+    private void OnResized(object? sender, WindowResizedEventArgs e)
+    {
+        if (_lastSize == e.ClientSize) return;
+        _lastSize = e.ClientSize;
+        if (!_applying) _manualAt = Stopwatch.GetTimestamp();
+    }
     internal void Update()
     {
         try
@@ -42,7 +54,8 @@ internal sealed class MaskWindowAttachment : IDisposable
             try
             {
                 if (!target.Visible) { if (!_hidden) { _hidden = true; _mask.Hide(); } return; }
-                _mask.Position = new PixelPoint(target.Bounds.X + _offset.X, target.Bounds.Y + _offset.Y);
+                var position = new PixelPoint(target.Bounds.X + _offset.X, target.Bounds.Y + _offset.Y);
+                if (_mask.Position != position) { _expectedPosition = position; _mask.Position = position; }
                 if (_hidden) { _hidden = false; _mask.Show(); }
             }
             finally { _applying = false; }

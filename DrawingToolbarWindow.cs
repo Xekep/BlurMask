@@ -290,7 +290,7 @@ internal sealed class DrawingToolbarWindow : Window
         var panel = new StackPanel { Spacing = 5 }; panel.Children.Add(row);
         using var catalog = NativeWindowCatalog.TryCreate();
         var attach = new ToggleSwitch { Content = UiText.T("Привязать к окну"), IsChecked = _session.AttachMasksToWindows,
-            IsEnabled = catalog is not null, FontSize = 12, Margin = new Thickness(4, 0) };
+            IsEnabled = catalog is not null, FontSize = 12, Margin = new Thickness(4, 0), OnContent = UiText.T("Включено"), OffContent = UiText.T("Выключено") };
         ToolTip.SetTip(attach, UiText.T(catalog is null ? "Привязка недоступна в этой оконной системе" : "Определять окно под маской автоматически"));
         attach.IsCheckedChanged += (_, _) => _session.SetMaskWindowAttachment(attach.IsChecked == true);
         panel.Children.Add(attach); ShowFlyout("masks", panel, _masks);

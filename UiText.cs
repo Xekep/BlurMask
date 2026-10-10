@@ -26,6 +26,8 @@ public static class UiText
         ["Свернуть в трей"] = ["Minimize to tray", "Réduire dans la zone de notification", "In den Infobereich minimieren"],
         ["Совместная работа"] = ["Collaborate", "Collaborer", "Zusammenarbeiten"],
         ["Привязать к окну"] = ["Follow window", "Suivre la fenêtre", "Fenster folgen"],
+        ["Включено"] = ["On", "Activé", "Ein"],
+        ["Выключено"] = ["Off", "Désactivé", "Aus"],
         ["Определять окно под маской автоматически"] = ["Automatically detect the window under the mask", "Détecter automatiquement la fenêtre sous le masque", "Fenster unter der Maske automatisch erkennen"],
         ["Привязка недоступна в этой оконной системе"] = ["Window following is unavailable in this window system", "Le suivi des fenêtres est indisponible sur ce système", "Fensterverfolgung ist in diesem Fenstersystem nicht verfügbar"],
         ["Рисовать вместе"] = ["Draw together", "Dessiner ensemble", "Gemeinsam zeichnen"],
