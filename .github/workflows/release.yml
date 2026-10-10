@@ -6,7 +6,7 @@ on:
       - "v*"
 
 permissions:
-  contents: write
+  contents: read
 
 env:
   DOTNET_NOLOGO: true
@@ -77,6 +77,8 @@ jobs:
           path: BlurMask-osx-*.tar.gz
 
   publish-release:
+    permissions:
+      contents: write
     needs: [windows, linux, macos]
     runs-on: ubuntu-latest
     steps:

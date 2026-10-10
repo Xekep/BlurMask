@@ -57,6 +57,7 @@ jobs:
           trap 'kill "$server_pid"' EXIT
           curl --fail --silent --retry 20 --retry-connrefused --retry-delay 1 http://127.0.0.1:5079/healthz
           node --test tests/api.test.mjs
+          node --test tests/security.test.mjs
   build:
     name: Build / ${{ matrix.os }}
     strategy:

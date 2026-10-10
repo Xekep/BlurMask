@@ -1,1 +1,1 @@
-{"private":true,"type":"module","scripts":{"test":"node --test tests/ink.test.mjs tests/invite.test.mjs","test:api":"node --test tests/api.test.mjs"}}
+{"private":true,"type":"module","scripts":{"test":"node --test tests/ink.test.mjs tests/invite.test.mjs","test:api":"node --test tests/api.test.mjs","test:security":"node --test tests/security.test.mjs"}}

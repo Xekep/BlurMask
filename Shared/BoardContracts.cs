@@ -75,6 +75,7 @@ public static class BoardValidation
 {
     public const int MaxMarks = 5000;
     public const int MaxPoints = 200000;
+    public const int MaxDocumentBytes = 4 * 1024 * 1024;
     public static bool Valid(InkMarkDto? mark) => mark is not null && mark.Id != Guid.Empty &&
         mark.Tool is "Pen" or "Highlighter" or "Line" or "Arrow" or "Rectangle" or "Ellipse" or "Text" &&
         mark.Color is { Length: 7 or 9 } && mark.Color[0] == '#' && mark.Color.Skip(1).All(Uri.IsHexDigit) &&
@@ -84,7 +85,8 @@ public static class BoardValidation
         mark.Points.All(p => p is not null && double.IsFinite(p.X) && double.IsFinite(p.Y) && Math.Abs(p.X) <= 100000 && Math.Abs(p.Y) <= 100000);
     public static bool Valid(BoardPatch? patch) => patch is not null && patch.OperationId != Guid.Empty &&
         patch.Add is { Count: <= MaxMarks } && patch.Remove is { Count: <= MaxMarks } &&
-        patch.Add.All(Valid) && patch.Add.Select(m => m.Id).Distinct().Count() == patch.Add.Count &&
+        patch.Add.All(Valid) && patch.Add.Sum(m => m.Points.Count) <= MaxPoints &&
+        patch.Add.Select(m => m.Id).Distinct().Count() == patch.Add.Count &&
         (patch.Title is null || (!string.IsNullOrWhiteSpace(patch.Title) && patch.Title.Length <= 120)) &&
         (patch.Background is null or "white" or "black");
     public static bool Valid(BoardSnapshot? board) => board is not null &&
