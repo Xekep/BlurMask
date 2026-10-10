@@ -1,0 +1,1 @@
+{"private":true,"type":"module","scripts":{"test":"node --test tests/ink.test.mjs","test:api":"node --test tests/api.test.mjs"}}

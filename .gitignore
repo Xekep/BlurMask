@@ -6,3 +6,9 @@ obj/
 *.suo
 .DS_Store
 .artifacts/
+server/bin/
+server/obj/
+server/.env
+server/.data/
+server/tests/.data/
+server/node_modules/

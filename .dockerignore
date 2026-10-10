@@ -1,0 +1,7 @@
+.git
+.artifacts
+**/bin
+**/obj
+server/.env
+server/.data
+server/node_modules

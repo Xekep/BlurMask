@@ -47,7 +47,27 @@ If another application owns a shortcut, use the corresponding toolbar button.
 
 Windows supports click-through ink and desktop screenshots. Other platforms currently hide the
 ink overlay in cursor mode; desktop screenshots and global hotkeys are Windows-only.
-Annotations and toolbar settings are session-local and are not restored after exiting.
+Desktop annotations and toolbar settings are session-local. The separate canvas is saved locally.
+
+## Independent canvas and shared boards
+
+Use the board flyout or **Ctrl+Shift+5** to open a separate, zoomable 2400×1600 canvas.
+**Ctrl+Shift+6** returns drawing input to the screen. Screen and canvas drawings have independent
+documents and undo histories. Both use the same drawing tools, sizes and colors. The canvas
+supports panning, white/black backgrounds, PNG export and automatic local persistence.
+
+The canvas **Connect** button opens a shared link or creates a server copy. **Share** provides
+edit and view links. Browser and desktop changes synchronize every 1.3 seconds, preserving
+concurrent strokes and pending offline edits. Screen annotations remain local.
+
+The web canvas, ASP.NET Core server, PostgreSQL storage and Docker/Caddy configuration for
+`pen.kiiko.ru` are in [`server/`](server/README.md). Deployment requires a server and DNS
+configuration; see that README for launch commands. Accounts are not required: shared links
+carry permission to edit or view a particular board.
+
+Epic Pen's [official guide](https://epicpen.com/userguide) describes desktop annotation and
+white/black screen boards. The independent persistent canvas and browser synchronization
+are BlurMask additions.
 
 ## Privacy modes
 

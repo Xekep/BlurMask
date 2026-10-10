@@ -45,6 +45,8 @@ public sealed partial class App : Application
         {
             _drawing?.SmokeTest();
             await DrawingSmokeTest.VerifyRenderingAsync(_drawing!);
+            _mask?.Hide();
+            await DrawingSmokeTest.VerifyCanvasAsync(_drawing!);
         }
         catch (Exception ex)
         {

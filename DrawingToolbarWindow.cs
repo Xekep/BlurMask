@@ -241,12 +241,13 @@ internal sealed class DrawingToolbarWindow : Window
             (BoardMode.White, "Белая доска", "#FFFFFF"), (BoardMode.Black, "Чёрная доска", "#111111")
         })
         {
-            var button = IconButton(ToolbarGlyph.Board, name, () => { _session.SetBoard(board); CloseFlyout(); });
+            var button = IconButton(ToolbarGlyph.Board, name, () => { _session.SelectScreen(); _session.SetBoard(board); CloseFlyout(); });
             button.Background = new SolidColorBrush(Color.Parse(color));
             button.BorderBrush = board == _session.Board ? Cyan : Edge;
             button.BorderThickness = new Thickness(2);
             row.Children.Add(button);
         }
+        row.Children.Add(IconButton(ToolbarGlyph.Pen, "Отдельное полотно · Ctrl+Shift+5", () => { _session.OpenCanvas(); CloseFlyout(); }));
         ShowFlyout("boards", row, 248);
     }
     public void ShowPalette()
@@ -278,11 +279,13 @@ internal sealed class DrawingToolbarWindow : Window
     {
         var panel = new StackPanel { Width = 230, Spacing = 3, Margin = new Thickness(7) };
         panel.Children.Add(new TextBlock { Text = "BlurMask", FontSize = 18, FontWeight = FontWeight.SemiBold, Margin = new Thickness(5, 0, 0, 7) });
+        MenuItem(panel, "Полотно                            Ctrl+Shift+5", _session.OpenCanvas);
+        MenuItem(panel, "Рисовать на экране          Ctrl+Shift+6", _session.SelectScreen);
         MenuItem(panel, "Новая маска", _session.NewMask);
         MenuItem(panel, "Отменить                         Ctrl+Shift+Z", _session.Undo);
         MenuItem(panel, "Повторить                       Ctrl+Shift+Y", _session.Redo);
         MenuItem(panel, _session.InkVisible ? "Скрыть рисунок                  Ctrl+Shift+H" : "Показать рисунок                Ctrl+Shift+H", _session.ToggleInk);
-        MenuItem(panel, "Очистить экран                  Ctrl+Shift+F", _session.Clear);
+        MenuItem(panel, _session.Target == DrawingTarget.Canvas ? "Очистить полотно             Ctrl+Shift+F" : "Очистить экран                  Ctrl+Shift+F", _session.Clear);
         panel.Children.Add(new Border { Height = 1, Background = Edge, Margin = new Thickness(0, 5) });
         panel.Children.Add(new TextBlock { Text = "Размер текста", FontSize = 12, Margin = new Thickness(5, 3) });
         var textSize = new Slider { Minimum = 14, Maximum = 72, Value = _session.TextSize, TickFrequency = 2, IsSnapToTickEnabled = true };
@@ -302,7 +305,7 @@ internal sealed class DrawingToolbarWindow : Window
         panel.Children.Add(button);
     }
     private void ShowShortcuts() => ShowMessage("Горячие клавиши",
-        "Ctrl+Shift+1   Курсор\nCtrl+Shift+2   Перо\nCtrl+Shift+3   Маркер\nCtrl+Shift+4   Ластик\nCtrl+Shift+Z   Отменить\nCtrl+Shift+Y   Повторить\nCtrl+Shift+F   Очистить\nCtrl+Shift+H   Скрыть / показать рисунок\nCtrl+Shift+S   Снимок экрана\n\nEsc или ПКМ на экране — курсор\nShift — квадрат, круг, угол 45°\nТекст: Enter — готово; Shift+Enter — новая строка");
+        "Ctrl+Shift+1   Курсор\nCtrl+Shift+2   Перо\nCtrl+Shift+3   Маркер\nCtrl+Shift+4   Ластик\nCtrl+Shift+5   Полотно\nCtrl+Shift+6   Экран\nCtrl+Shift+Z   Отменить\nCtrl+Shift+Y   Повторить\nCtrl+Shift+F   Очистить\nCtrl+Shift+H   Скрыть / показать рисунок\nCtrl+Shift+S   Снимок экрана\n\nEsc или ПКМ на экране — курсор\nShift — квадрат, круг, угол 45°\nТекст: Enter — готово; Shift+Enter — новая строка");
 
     public void ShowMessage(string title, string message)
     {

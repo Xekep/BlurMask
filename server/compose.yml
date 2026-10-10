@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kiiko_pen
+      POSTGRES_USER: kiiko_pen
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in server/.env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kiiko_pen -d kiiko_pen"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    networks: [pen]
+
+  app:
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
+    restart: unless-stopped
+    environment:
+      ConnectionStrings__Postgres: Host=postgres;Database=kiiko_pen;Username=kiiko_pen;Password=${POSTGRES_PASSWORD};Maximum Pool Size=20;Timeout=10
+      PublicUrl: https://${PEN_DOMAIN:-pen.kiiko.ru}
+      TrustedProxy: 10.78.0.2
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [pen]
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    environment:
+      PEN_DOMAIN: ${PEN_DOMAIN:-pen.kiiko.ru}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [app]
+    networks:
+      pen:
+        ipv4_address: 10.78.0.2
+
+networks:
+  pen:
+    ipam:
+      config:
+        - subnet: 10.78.0.0/24
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:

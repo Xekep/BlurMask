@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ru">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f2f4f6"><title>Kiiko Pen — полотно</title><link rel="stylesheet" href="/style.css"><script type="module" src="/app.js"></script></head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Kiiko Pen"><span class="brand-nib">✒</span><span>KIIKO <b>PEN</b></span></a>
+    <span class="divider"></span><input id="title" aria-label="Название полотна" maxlength="120" value="Новое полотно">
+    <div class="status" id="status" role="status"><i></i><span>Подключение…</span></div>
+    <button id="screen" class="quiet">Экран ↗</button><button id="new" class="quiet">Новое полотно</button><button id="share" class="primary">Поделиться</button>
+  </header>
+  <main id="workspace"><canvas id="canvas" aria-label="Полотно для рисования" tabindex="0"></canvas></main>
+  <aside class="toolkit" aria-label="Инструменты рисования">
+    <button id="grip" title="Переместить панель" aria-label="Переместить панель" class="nib">✒</button>
+    <div class="tool-column">
+      <button data-tool="Hand" title="Перемещение · H" aria-label="Перемещение"></button>
+      <button data-tool="Pen" title="Перо · P" aria-label="Перо" class="active"></button>
+      <button data-tool="Highlighter" title="Маркер · M" aria-label="Маркер"></button>
+      <button data-tool="Eraser" title="Ластик · E" aria-label="Ластик"></button>
+      <button data-tool="Text" title="Текст · T" aria-label="Текст"></button>
+      <button id="shapes" title="Линии и фигуры" aria-label="Линии и фигуры"></button>
+      <button id="size" title="Толщина пера" aria-label="Толщина пера"><span class="size-dot"></span></button>
+      <button id="undo" title="Отменить · Ctrl+Z" aria-label="Отменить"></button>
+      <button id="redo" title="Повторить · Ctrl+Shift+Z" aria-label="Повторить"></button>
+      <button id="clear" title="Очистить полотно" aria-label="Очистить полотно"></button>
+      <button id="board" title="Белая / чёрная доска" aria-label="Белая / чёрная доска"></button>
+      <button id="export" title="Скачать PNG" aria-label="Скачать PNG"></button>
+      <button id="menu" title="Меню" aria-label="Меню"></button>
+      <div id="quick-colors"></div><button id="palette" title="Цвет пера" aria-label="Цвет пера"><span>◢</span></button>
+    </div>
+    <div id="flyout" hidden></div>
+  </aside>
+  <div class="zoom"><button id="zoom-out" aria-label="Уменьшить">−</button><button id="fit" title="Вместить полотно">100%</button><button id="zoom-in" aria-label="Увеличить">+</button></div>
+  <div id="hint" class="hint">Перо — рисовать · H — перемещать · Shift — ровные фигуры</div>
+  <dialog id="dialog"><div id="dialog-content"></div><button id="dialog-close" class="quiet">Закрыть</button></dialog>
+</body></html>

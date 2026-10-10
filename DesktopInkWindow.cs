@@ -55,11 +55,17 @@ internal sealed class DesktopInkWindow : Window
 
     public void ApplyState()
     {
-        var drawing = _session.Tool != InkTool.Cursor && _session.InkVisible;
+        var drawing = _session.Target == DrawingTarget.Screen && _session.Tool != InkTool.Cursor && _session.InkVisible;
         _surface.Cursor = new Cursor(drawing ? StandardCursorType.Cross : StandardCursorType.Arrow);
         _surface.InvalidateVisual();
         if (OperatingSystem.IsWindows())
         {
+            if (_session.Target == DrawingTarget.Canvas)
+            {
+                DesktopInkNative.SetClickThrough(this, true);
+                if (IsVisible) Hide();
+                return;
+            }
             if (!IsVisible) Show();
             DesktopInkNative.SetClickThrough(this, !drawing);
         }
@@ -83,7 +89,7 @@ internal sealed class DesktopInkWindow : Window
             e.Handled = true;
             return;
         }
-        if (!point.Properties.IsLeftButtonPressed || _session.Tool == InkTool.Cursor) return;
+        if (!point.Properties.IsLeftButtonPressed || _session.Tool == InkTool.Cursor || _session.Target != DrawingTarget.Screen) return;
         _session.Toolbar.CloseFlyout();
         e.Handled = true;
         FinishText();
@@ -96,7 +102,7 @@ internal sealed class DesktopInkWindow : Window
         if (_pointer is not null) return;
         _pointer = e.Pointer;
         e.Pointer.Capture(_surface);
-        _session.Document.BeginEdit();
+        _session.DesktopDocument.BeginEdit();
         if (_session.Tool == InkTool.Eraser)
         {
             _lastErase = origin;
@@ -105,8 +111,8 @@ internal sealed class DesktopInkWindow : Window
         else
         {
             var width = _session.PenSize * RenderScaling * (_session.Tool == InkTool.Highlighter ? 4 : 1);
-            _session.Document.Preview = new InkMark(_session.Tool, _session.Color, width, origin);
-            _session.Document.Notify();
+            _session.DesktopDocument.Preview = new InkMark(_session.Tool, _session.Color, width, origin);
+            _session.DesktopDocument.Notify();
         }
     }
 
@@ -121,7 +127,7 @@ internal sealed class DesktopInkWindow : Window
             for (var i = 1; i <= steps; i++) Erase(_lastErase + (point - _lastErase) * ((double)i / steps));
             _lastErase = point;
         }
-        else if (_session.Document.Preview is { } mark)
+        else if (_session.DesktopDocument.Preview is { } mark)
         {
             if (e.KeyModifiers.HasFlag(KeyModifiers.Shift) && mark.Tool is not (InkTool.Pen or InkTool.Highlighter))
             {
@@ -139,22 +145,22 @@ internal sealed class DesktopInkWindow : Window
                 }
             }
             mark.AddPoint(point);
-            _session.Document.Notify();
+            _session.DesktopDocument.Notify();
         }
         e.Handled = true;
     }
 
     private void Erase(Point point)
     {
-        if (_session.Document.Marks.RemoveAll(mark => mark.Hit(point, Math.Max(8, _session.PenSize * 2) * RenderScaling)) > 0)
-            _session.Document.Notify();
+        if (_session.DesktopDocument.Marks.RemoveAll(mark => mark.Hit(point, Math.Max(8, _session.PenSize * 2) * RenderScaling)) > 0)
+            _session.DesktopDocument.Notify();
     }
 
     private void OnReleased(object? sender, PointerReleasedEventArgs e)
     {
         if (_pointer != e.Pointer) return;
-        if (_session.Document.Preview is { } mark) _session.Document.Marks.Add(mark);
-        _session.Document.Commit();
+        if (_session.DesktopDocument.Preview is { } mark) _session.DesktopDocument.Marks.Add(mark);
+        _session.DesktopDocument.Commit();
         _pointer = null;
         e.Pointer.Capture(null);
         e.Handled = true;
@@ -167,7 +173,7 @@ internal sealed class DesktopInkWindow : Window
         if (pointer is not null)
         {
             pointer.Capture(null);
-            _session.Document.Cancel();
+            _session.DesktopDocument.Cancel();
         }
     }
 
@@ -201,7 +207,7 @@ internal sealed class DesktopInkWindow : Window
         _textBox = null;
         _editLayer.Children.Remove(box);
         if (!cancel && !string.IsNullOrWhiteSpace(box.Text))
-            _session.Document.Add(new InkMark(InkTool.Text, _session.Color, 1, _textOrigin)
+            _session.DesktopDocument.Add(new InkMark(InkTool.Text, _session.Color, 1, _textOrigin)
             { Text = box.Text, FontSize = _session.TextSize * RenderScaling });
     }
 
@@ -217,8 +223,8 @@ internal sealed class DesktopInkWindow : Window
         else if (e.Key == Key.Z && e.KeyModifiers.HasFlag(KeyModifiers.Control))
         {
             CancelGesture();
-            if (e.KeyModifiers.HasFlag(KeyModifiers.Shift)) _session.Document.Redo();
-            else _session.Document.Undo();
+            if (e.KeyModifiers.HasFlag(KeyModifiers.Shift)) _session.DesktopDocument.Redo();
+            else _session.DesktopDocument.Undo();
             e.Handled = true;
         }
     }
@@ -227,7 +233,7 @@ internal sealed class DesktopInkWindow : Window
     {
         public override void Render(DrawingContext context)
         {
-            var active = session.Tool != InkTool.Cursor && session.InkVisible;
+            var active = session.Target == DrawingTarget.Screen && session.Tool != InkTool.Cursor && session.InkVisible;
             // A non-zero alpha over the entire screen makes empty desktop areas accept ink.
             context.DrawRectangle(active ? new SolidColorBrush(Color.FromArgb(1, 0, 0, 0)) : Brushes.Transparent,
                 null, new Rect(Bounds.Size));
@@ -236,8 +242,8 @@ internal sealed class DesktopInkWindow : Window
                 context.DrawRectangle(session.Board == BoardMode.White ? Brushes.White : Brushes.Black, null, new Rect(Bounds.Size));
             using var transform = context.PushTransform(
                 Matrix.CreateTranslation(-window.Position.X, -window.Position.Y) * Matrix.CreateScale(1 / window.RenderScaling, 1 / window.RenderScaling));
-            foreach (var mark in session.Document.Marks) mark.Draw(context);
-            session.Document.Preview?.Draw(context);
+            foreach (var mark in session.DesktopDocument.Marks) mark.Draw(context);
+            session.DesktopDocument.Preview?.Draw(context);
         }
     }
 }

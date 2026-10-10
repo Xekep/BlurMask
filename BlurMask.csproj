@@ -28,5 +28,8 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets/**" />
+    <Compile Remove="server/**" />
+    <EmbeddedResource Remove="server/**" />
+    <None Remove="server/**" />
   </ItemGroup>
 </Project>

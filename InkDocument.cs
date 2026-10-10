@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Media;
 using System.Globalization;
+using BlurMask.Shared;
 
 namespace BlurMask;
 
@@ -11,6 +12,7 @@ internal enum BoardMode { Desktop, White, Black }
 // monitor transforms the same document into its own logical coordinate space.
 internal sealed class InkMark(InkTool tool, Color color, double width, Point start)
 {
+    public Guid Id { get; init; } = Guid.NewGuid();
     public InkTool Tool { get; } = tool;
     public Color Color { get; } = color;
     public double Width { get; } = width;
@@ -134,6 +136,7 @@ internal sealed class InkDocument
     public InkMark? Preview { get; set; }
     public bool CanUndo => _undo.Count > 0;
     public bool CanRedo => _redo.Count > 0;
+    public bool HasActiveEdit => _before is not null;
     public event Action? Changed;
 
     public void BeginEdit() { _before ??= new List<InkMark>(Marks); }
@@ -165,7 +168,7 @@ internal sealed class InkDocument
         if (_undo.Count == 0) return;
         var edit = _undo[^1];
         _undo.RemoveAt(_undo.Count - 1);
-        Marks = new List<InkMark>(edit.Before);
+        ApplyHistory(edit.After, edit.Before);
         _redo.Push(edit);
         Notify();
     }
@@ -173,8 +176,43 @@ internal sealed class InkDocument
     {
         Cancel();
         if (!_redo.TryPop(out var edit)) return;
-        Marks = new List<InkMark>(edit.After);
+        ApplyHistory(edit.Before, edit.After);
         _undo.Add(edit);
+        Notify();
+    }
+    private void ApplyHistory(List<InkMark> from, List<InkMark> to)
+    {
+        var keep = to.Select(m => m.Id).ToHashSet();
+        var remove = from.Where(m => !keep.Contains(m.Id)).Select(m => m.Id).ToHashSet();
+        Marks.RemoveAll(m => remove.Contains(m.Id));
+        var existing = Marks.Select(m => m.Id).ToHashSet();
+        var previous = from.Select(m => m.Id).ToHashSet();
+        for (var i = 0; i < to.Count; i++)
+            if (!previous.Contains(to[i].Id) && existing.Add(to[i].Id)) Marks.Insert(Math.Min(i, Marks.Count), to[i]);
+    }
+    public List<InkMarkDto> Export() => Marks.Select(mark => new InkMarkDto
+    {
+        Id = mark.Id, Tool = mark.Tool.ToString(), Color = mark.Color.A == 255
+            ? $"#{mark.Color.R:X2}{mark.Color.G:X2}{mark.Color.B:X2}"
+            : $"#{mark.Color.R:X2}{mark.Color.G:X2}{mark.Color.B:X2}{mark.Color.A:X2}", Width = mark.Width,
+        FontSize = mark.FontSize, Text = mark.Text,
+        Points = mark.Points.Select(p => new InkPointDto(p.X, p.Y)).ToList()
+    }).ToList();
+    public void Import(List<InkMarkDto> marks, bool resetHistory = false)
+    {
+        if (HasActiveEdit) throw new InvalidOperationException("Finish the drawing gesture before importing.");
+        var previous = Marks.ToDictionary(m => m.Id);
+        Marks = marks.Select(dto =>
+        {
+            if (previous.TryGetValue(dto.Id, out var existing)) return existing;
+            var cssColor = dto.Color.Length == 9 ? "#" + dto.Color[7..9] + dto.Color[1..7] : dto.Color;
+            var mark = new InkMark(Enum.Parse<InkTool>(dto.Tool), Color.Parse(cssColor), dto.Width,
+                new Point(dto.Points[0].X, dto.Points[0].Y))
+            { Id = dto.Id, Text = dto.Text, FontSize = dto.FontSize };
+            foreach (var point in dto.Points.Skip(1)) mark.AddPoint(new Point(point.X, point.Y));
+            return mark;
+        }).ToList();
+        if (resetHistory) { _undo.Clear(); _redo.Clear(); }
         Notify();
     }
 }

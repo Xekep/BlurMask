@@ -5,6 +5,8 @@ using Avalonia.Threading;
 
 namespace BlurMask;
 
+internal enum DrawingTarget { Screen, Canvas }
+
 internal sealed class DrawingSession : IDisposable
 {
     private readonly List<DesktopInkWindow> _overlays = [];
@@ -14,7 +16,11 @@ internal sealed class DrawingSession : IDisposable
     private InkTool _toolBeforeHide = InkTool.Cursor;
     private bool _disposed;
     private bool _capturing;
-    public InkDocument Document { get; } = new();
+    public InkDocument DesktopDocument { get; } = new();
+    public InkDocument CanvasDocument { get; } = new();
+    public InkDocument Document => Target == DrawingTarget.Screen ? DesktopDocument : CanvasDocument;
+    public DrawingTarget Target { get; private set; }
+    public CanvasWindow? Canvas { get; private set; }
     public InkTool Tool { get; private set; } = InkTool.Cursor;
     public Color Color { get; set; } = Color.Parse("#FFF400");
     public double PenSize { get; set; } = 4;
@@ -30,7 +36,8 @@ internal sealed class DrawingSession : IDisposable
         _newMask = newMask;
         _exit = exit;
         Toolbar = new DrawingToolbarWindow(this);
-        Document.Changed += RefreshDocument;
+        DesktopDocument.Changed += RefreshDocument;
+        CanvasDocument.Changed += RefreshDocument;
         Toolbar.Screens.Changed += OnScreensChanged;
         Toolbar.Opened += (_, _) =>
         {
@@ -68,6 +75,7 @@ internal sealed class DrawingSession : IDisposable
     {
         Toolbar.CloseFlyout();
         foreach (var overlay in _overlays) { overlay.FinishText(); overlay.CancelGesture(); }
+        Canvas?.FinishInput();
         Tool = tool;
         if (tool != InkTool.Cursor) InkVisible = true;
         UpdateState();
@@ -75,6 +83,7 @@ internal sealed class DrawingSession : IDisposable
     public void ToggleInk()
     {
         foreach (var overlay in _overlays) { overlay.FinishText(); overlay.CancelGesture(); }
+        Canvas?.FinishInput();
         if (InkVisible) _toolBeforeHide = Tool;
         InkVisible = !InkVisible;
         Tool = InkVisible ? _toolBeforeHide : InkTool.Cursor;
@@ -82,24 +91,51 @@ internal sealed class DrawingSession : IDisposable
     }
     public void SetBoard(BoardMode board) { Board = board; UpdateState(); }
     public void NotifySettings() => StateChanged?.Invoke();
-    public void NewMask() { SelectTool(InkTool.Cursor); _newMask(); }
+    public void NewMask() { SelectScreen(); SelectTool(InkTool.Cursor); _newMask(); }
+    public void OpenCanvas()
+    {
+        FinishInput();
+        if (Canvas is null) { Canvas = new CanvasWindow(this); Color = Colors.Black; }
+        Target = DrawingTarget.Canvas;
+        InkVisible = true;
+        if (Tool == InkTool.Cursor) Tool = InkTool.Pen;
+        Canvas.Show();
+        Canvas.Activate();
+        UpdateState();
+    }
+    public void SelectScreen()
+    {
+        FinishInput();
+        Target = DrawingTarget.Screen;
+        UpdateState();
+    }
+    public void ActivateCanvas()
+    {
+        if (Target == DrawingTarget.Canvas) return;
+        FinishInput();
+        Target = DrawingTarget.Canvas;
+        UpdateState();
+    }
     public void Exit() => _exit();
-    public void Undo() { FinishInput(); Document.Undo(); }
-    public void Redo() { FinishInput(); Document.Redo(); }
-    public void Clear() { FinishInput(); Document.Clear(); }
+    public void Undo() { if (Target == DrawingTarget.Canvas && Canvas?.ReadOnly == true) return; FinishInput(); Document.Undo(); }
+    public void Redo() { if (Target == DrawingTarget.Canvas && Canvas?.ReadOnly == true) return; FinishInput(); Document.Redo(); }
+    public void Clear() { if (Target == DrawingTarget.Canvas && Canvas?.ReadOnly == true) return; FinishInput(); Document.Clear(); }
     private void FinishInput()
     {
         foreach (var overlay in _overlays) { overlay.FinishText(); overlay.CancelGesture(); }
+        Canvas?.FinishInput();
     }
     private void UpdateState()
     {
         foreach (var overlay in _overlays) overlay.ApplyState();
+        Canvas?.Refresh();
         Toolbar.RaiseAboveInk();
         StateChanged?.Invoke();
     }
     private void RefreshDocument()
     {
         foreach (var overlay in _overlays) overlay.Refresh();
+        Canvas?.Refresh();
         StateChanged?.Invoke();
     }
 
@@ -116,6 +152,8 @@ internal sealed class DrawingSession : IDisposable
             case 7: ToggleInk(); break;
             case 8: Redo(); break;
             case 9: _ = CaptureScreenshotAsync(); break;
+            case 10: OpenCanvas(); break;
+            case 11: SelectScreen(); break;
         }
     }
 
@@ -173,7 +211,9 @@ internal sealed class DrawingSession : IDisposable
         _disposed = true;
         _hotkeys?.Dispose();
         Toolbar.Screens.Changed -= OnScreensChanged;
-        Document.Changed -= RefreshDocument;
+        DesktopDocument.Changed -= RefreshDocument;
+        CanvasDocument.Changed -= RefreshDocument;
+        Canvas?.Shutdown();
         Toolbar.CloseFlyout();
         foreach (var overlay in _overlays) overlay.Close();
         _overlays.Clear();

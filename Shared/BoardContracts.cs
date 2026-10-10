@@ -1,0 +1,71 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace BlurMask.Shared;
+
+public sealed record InkPointDto(double X, double Y);
+public sealed record InkMarkDto
+{
+    public Guid Id { get; init; } = Guid.NewGuid();
+    public string Tool { get; init; } = "Pen";
+    public string Color { get; init; } = "#111111";
+    public double Width { get; init; } = 4;
+    public List<InkPointDto> Points { get; init; } = [];
+    public string Text { get; init; } = "";
+    public double FontSize { get; init; } = 28;
+}
+public sealed record BoardSnapshot
+{
+    public Guid Id { get; init; }
+    public long Revision { get; init; }
+    public bool ReadOnly { get; init; }
+    public string Title { get; init; } = "Новое полотно";
+    public string Background { get; init; } = "white";
+    public int Width { get; init; } = 2400;
+    public int Height { get; init; } = 1600;
+    public List<InkMarkDto> Marks { get; init; } = [];
+}
+public sealed record BoardPatch
+{
+    // A unique operation id makes retries safe, including a lost HTTP response.
+    public Guid OperationId { get; init; } = Guid.NewGuid();
+    public List<InkMarkDto> Add { get; init; } = [];
+    public List<Guid> Remove { get; init; } = [];
+    public string? Title { get; init; }
+    public string? Background { get; init; }
+}
+public sealed record CreateBoardRequest(string Title = "Новое полотно", string Background = "white");
+public sealed record BoardAccess(BoardSnapshot Board, string EditKey, string ViewKey, string EditUrl, string ViewUrl);
+public sealed record BoardConnection(string Server, Guid Id, string Key);
+
+[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
+[JsonSerializable(typeof(BoardSnapshot))]
+[JsonSerializable(typeof(BoardPatch))]
+[JsonSerializable(typeof(CreateBoardRequest))]
+[JsonSerializable(typeof(BoardAccess))]
+[JsonSerializable(typeof(BoardConnection))]
+public partial class BoardJsonContext : JsonSerializerContext;
+
+public static class BoardValidation
+{
+    public const int MaxMarks = 5000;
+    public const int MaxPoints = 200000;
+    public static bool Valid(InkMarkDto? mark) => mark is not null && mark.Id != Guid.Empty &&
+        mark.Tool is "Pen" or "Highlighter" or "Line" or "Arrow" or "Rectangle" or "Ellipse" or "Text" &&
+        mark.Color is { Length: 7 or 9 } && mark.Color[0] == '#' && mark.Color.Skip(1).All(Uri.IsHexDigit) &&
+        double.IsFinite(mark.Width) && mark.Width is >= 0.5 and <= 200 &&
+        double.IsFinite(mark.FontSize) && mark.FontSize is >= 8 and <= 300 &&
+        mark.Text is { Length: <= 4000 } && mark.Points is { Count: > 0 and <= 20000 } &&
+        mark.Points.All(p => p is not null && double.IsFinite(p.X) && double.IsFinite(p.Y) && Math.Abs(p.X) <= 100000 && Math.Abs(p.Y) <= 100000);
+    public static bool Valid(BoardPatch? patch) => patch is not null && patch.OperationId != Guid.Empty &&
+        patch.Add is { Count: <= MaxMarks } && patch.Remove is { Count: <= MaxMarks } &&
+        patch.Add.All(Valid) && patch.Add.Select(m => m.Id).Distinct().Count() == patch.Add.Count &&
+        (patch.Title is null || (!string.IsNullOrWhiteSpace(patch.Title) && patch.Title.Length <= 120)) &&
+        (patch.Background is null or "white" or "black");
+    public static bool Valid(BoardSnapshot? board) => board is not null &&
+        board.Width is >= 100 and <= 10000 && board.Height is >= 100 and <= 10000 &&
+        board.Title is { Length: > 0 and <= 120 } && board.Background is "white" or "black" &&
+        board.Marks is { Count: <= MaxMarks } && board.Marks.All(Valid) &&
+        board.Marks.Sum(m => m.Points.Count) <= MaxPoints &&
+        board.Marks.Select(m => m.Id).Distinct().Count() == board.Marks.Count;
+}

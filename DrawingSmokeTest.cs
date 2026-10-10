@@ -3,6 +3,8 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Controls;
 using Avalonia.VisualTree;
+using BlurMask.Shared;
+using System.Text.Json;
 
 namespace BlurMask;
 
@@ -130,6 +132,70 @@ internal static class DrawingSmokeTest
             DesktopInkNative.SaveScreenshot(Path.Combine(directory, "drawing-desktop-cursor.png"));
             session.Clear();
         }
+    }
+    internal static async Task VerifyCanvasAsync(DrawingSession session)
+    {
+        var desktopMark = new InkMark(InkTool.Pen, Colors.Red, 4, new Point(100, 100));
+        session.DesktopDocument.Add(desktopMark);
+        session.SetBoard(BoardMode.Black);
+        session.OpenCanvas();
+        await Task.Delay(250);
+        var window = session.Canvas!;
+        Check(session.Target == DrawingTarget.Canvas, "Canvas mode did not activate.");
+        Check(session.Overlays.All(o => !o.IsVisible), "Screen board obscures independent canvas.");
+        if (OperatingSystem.IsWindows())
+        {
+            foreach (var overlay in session.Overlays) DesktopInkNative.VerifyClickThrough(overlay);
+            session.SelectTool(InkTool.Pen);
+            var a = window.Surface.TranslatePoint(new Point(220, 230), window)!.Value;
+            var b = window.Surface.TranslatePoint(new Point(450, 330), window)!.Value;
+            DesktopInkNative.TestMouseGesture(window, (int)a.X, (int)a.Y, (int)b.X, (int)b.Y);
+            await Task.Delay(100);
+            Check(session.CanvasDocument.Marks.Count == 1, "Canvas pointer gesture did not create a stroke.");
+            Check(session.CanvasDocument.Marks[0].Points.Count > 1, "Canvas motion did not extend stroke.");
+        }
+        else session.CanvasDocument.Add(new InkMark(InkTool.Pen, Colors.Black, 4, new Point(100, 100)));
+        Check(session.DesktopDocument.Marks.SequenceEqual(new[] { desktopMark }), "Canvas changed desktop ink.");
+        session.Undo(); Check(session.CanvasDocument.Marks.Count == 0, "Canvas undo failed.");
+        session.Redo(); Check(session.CanvasDocument.Marks.Count == 1, "Canvas redo failed.");
+        var alpha = new InkDocument();
+        alpha.Add(new InkMark(InkTool.Pen, Color.FromArgb(128, 255, 0, 17), 4, new Point(10, 10)));
+        var imported = new InkDocument(); imported.Import(alpha.Export());
+        Check(imported.Marks[0].Color == alpha.Marks[0].Color, "CSS alpha color roundtrip failed.");
+        var artifacts = Environment.GetEnvironmentVariable("BLURMASK_SMOKE_ARTIFACTS");
+        if (!string.IsNullOrEmpty(artifacts))
+        {
+            SaveWindow(window, Path.Combine(artifacts, "native-canvas.png"));
+            window.ExportPng(Path.Combine(artifacts, "native-canvas-export.png"));
+        }
+        if (Environment.GetEnvironmentVariable("BLURMASK_TEST_SERVER") is { Length: > 0 } server)
+        {
+            await window.CreateCloudAsync(server);
+            var storage = Path.Combine(artifacts ?? Path.GetTempPath(), "canvas-smoke", "canvas.json");
+            var state = JsonSerializer.Deserialize(File.ReadAllText(storage), CanvasJsonContext.Default.CanvasState)!;
+            using var client = new CanvasCloudClient();
+            var remote = await client.ReadAsync(state.Connection!);
+            Check(remote.Marks.Count == 1, "Native cloud upload failed.");
+            var peer = new InkMarkDto { Points = [new(500, 300), new(900, 500)], Tool = "Arrow", Color = "#00C9ED" };
+            await client.ApplyAsync(state.Connection!, new BoardPatch { Add = [peer] });
+            await window.SyncAsync();
+            Check(session.CanvasDocument.Marks.Count == 2, "Native canvas did not receive peer stroke.");
+            session.Undo();
+            Check(session.CanvasDocument.Marks.Count == 1 && session.CanvasDocument.Marks[0].Id == peer.Id,
+                "Undo removed peer stroke.");
+            await window.SyncAsync();
+            Check((await client.ReadAsync(state.Connection!)).Marks.Count == 1, "Native erasure did not synchronize.");
+            var viewLink = CanvasCloudClient.Link(state.Connection! with { Key = state.ViewKey! });
+            await window.ConnectAsync(viewLink);
+            Check(window.ReadOnly, "Native viewer is editable.");
+            session.Clear(); session.Undo();
+            Check(session.CanvasDocument.Marks.Count == 1, "Read-only history changed canvas.");
+        }
+        session.SelectScreen();
+        session.SetBoard(BoardMode.Desktop);
+        session.Undo();
+        Check(session.DesktopDocument.Marks.Count == 0 && session.CanvasDocument.Marks.Count > 0,
+            "Screen undo changed independent canvas.");
     }
     private static void SaveFlyout(DrawingSession session, string directory, string name)
     {

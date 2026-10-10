@@ -25,7 +25,7 @@ internal sealed partial class DesktopInkNative : IDisposable
         Win32Properties.AddWndProcHookCallback(window, OnMessage);
         // Ctrl+Shift follows Epic Pen's tool shortcuts. Conflicting combinations
         // are skipped individually; the toolbar remains available in all cases.
-        uint[] keys = [0x31, 0x32, 0x33, 0x34, 0x5A, 0x46, 0x48, 0x59, 0x53];
+        uint[] keys = [0x31, 0x32, 0x33, 0x34, 0x5A, 0x46, 0x48, 0x59, 0x53, 0x35, 0x36];
         for (var i = 0; i < keys.Length; i++)
             if (RegisterHotKey(_handle, i + 1, 0x4000 | 0x2 | 0x4, keys[i]) != 0) _registered.Add(i + 1);
     }
