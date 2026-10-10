@@ -1,11 +1,13 @@
 using Avalonia;
 using Avalonia.Media;
 using System.Globalization;
+using System.Diagnostics;
 using BlurMask.Shared;
+using Avalonia.Media.Imaging;
 
 namespace BlurMask;
 
-internal enum InkTool { Cursor, Pen, Highlighter, Eraser, Line, Arrow, Rectangle, Ellipse, Text }
+internal enum InkTool { Cursor, Select, Pen, Highlighter, Eraser, Line, Arrow, Rectangle, Ellipse, Text, Image }
 internal enum BoardMode { Desktop, White, Black }
 
 // Coordinates are physical desktop pixels, including negative monitor origins. Each
@@ -19,7 +21,20 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
     public List<Point> Points { get; } = [start];
     public string Text { get; set; } = "";
     public double FontSize { get; set; } = 28;
+    public string? Image { get; init; }
+    private Bitmap? _bitmap;
+    private bool _imageDecoded;
+    public double FadeSeconds { get; init; }
+    internal long FadeStartedAt { get; private set; }
     private StreamGeometry? _geometry;
+
+    internal void StartFading() => FadeStartedAt = Stopwatch.GetTimestamp();
+    internal double FadeOpacity(long now)
+    {
+        if (FadeSeconds <= 0 || FadeStartedAt == 0) return 1;
+        var remaining = FadeSeconds - Stopwatch.GetElapsedTime(FadeStartedAt, now).TotalSeconds;
+        return Math.Clamp(remaining / Math.Min(1, FadeSeconds / 3), 0, 1);
+    }
 
     public void AddPoint(Point point)
     {
@@ -40,9 +55,18 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
         var start = Points[0];
         var end = Points[^1];
         var rect = new Rect(start, end).Normalize();
-        using var opacity = context.PushOpacity(Tool == InkTool.Highlighter ? 0.35 : 1);
+        using var opacity = context.PushOpacity(FadeOpacity(Stopwatch.GetTimestamp()) * (Tool == InkTool.Highlighter ? 0.35 : 1));
         switch (Tool)
         {
+            case InkTool.Image:
+                if (!_imageDecoded)
+                {
+                    _imageDecoded = true;
+                    try { if (BoardValidation.ValidImage(Image)) _bitmap = new Bitmap(new MemoryStream(Convert.FromBase64String(Image!))); }
+                    catch (Exception ex) when (ex is ArgumentException or InvalidDataException or NotSupportedException) { }
+                }
+                if (_bitmap is not null) context.DrawImage(_bitmap, rect);
+                break;
             case InkTool.Text:
                 context.DrawText(new FormattedText(Text, CultureInfo.CurrentCulture,
                     FlowDirection.LeftToRight, Typeface.Default, FontSize, brush), start);
@@ -83,6 +107,7 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
         var start = Points[0];
         var end = Points[^1];
         var rect = new Rect(start, end).Normalize();
+        if (Tool == InkTool.Image) return rect.Inflate(radius).Contains(point);
         if (Tool == InkTool.Text)
         {
             var text = new FormattedText(Text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
@@ -124,6 +149,31 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
         var t = Math.Clamp((offset.X * segment.X + offset.Y * segment.Y) / square, 0, 1);
         return ((Vector)(point - (a + segment * t))).Length;
     }
+
+    internal Rect Bounds
+    {
+        get
+        {
+            if (Tool == InkTool.Text)
+            {
+                var text = new FormattedText(Text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, Typeface.Default, FontSize, Brushes.Black);
+                return new Rect(Points[0], new Size(text.Width, text.Height));
+            }
+            return new Rect(new Point(Points.Min(p => p.X), Points.Min(p => p.Y)),
+                new Point(Points.Max(p => p.X), Points.Max(p => p.Y))).Inflate(Math.Max(Width / 2, Tool == InkTool.Arrow ? Width * 3.5 : 0));
+        }
+    }
+    internal InkMark Translate(Vector delta)
+    {
+        if (delta == default) return this;
+        var copy = new InkMark(Tool, Color, Width, Points[0] + delta)
+            { Id = Id, Text = Text, FontSize = FontSize, Image = Image, FadeSeconds = FadeSeconds, FadeStartedAt = FadeStartedAt,
+                _bitmap = _bitmap, _imageDecoded = _imageDecoded };
+        copy.Points.Clear(); copy.Points.AddRange(Points.Select(p => p + delta));
+        return copy;
+    }
+    internal bool Same(InkMark other) => Tool == other.Tool && Color == other.Color && Width == other.Width &&
+        Text == other.Text && FontSize == other.FontSize && Image == other.Image && Points.SequenceEqual(other.Points);
 }
 
 internal sealed class InkDocument
@@ -133,8 +183,10 @@ internal sealed class InkDocument
     private readonly Stack<Edit> _redo = [];
     private List<InkMark>? _before;
     public List<InkMark> Marks { get; private set; } = [];
+    // Presentation ink is local and never enters saved/shared documents or undo history.
+    public List<InkMark> FadingMarks { get; } = [];
     public InkMark? Preview { get; set; }
-    public bool CanUndo => _undo.Count > 0;
+    public bool CanUndo => _undo.Count > 0 || FadingMarks.Count > 0;
     public bool CanRedo => _redo.Count > 0;
     public bool HasActiveEdit => _before is not null;
     public event Action? Changed;
@@ -160,11 +212,28 @@ internal sealed class InkDocument
         Preview = null;
         Notify();
     }
-    public void Add(InkMark mark) { BeginEdit(); Marks.Add(mark); Commit(); }
-    public void Clear() { BeginEdit(); Marks.Clear(); Commit(); }
+    public void Add(InkMark mark) { BeginEdit(); Append(mark); Commit(); }
+    public void CompletePreview()
+    {
+        if (Preview is { } mark) Append(mark);
+        Commit();
+    }
+    private void Append(InkMark mark)
+    {
+        if (mark.FadeSeconds > 0)
+        {
+            mark.StartFading();
+            if (FadingMarks.Count >= 5000) FadingMarks.RemoveAt(0);
+            FadingMarks.Add(mark);
+        }
+        else Marks.Add(mark);
+    }
+    internal void ExpireFading(long now) => FadingMarks.RemoveAll(m => m.FadeOpacity(now) <= 0);
+    public void Clear() { BeginEdit(); Marks.Clear(); FadingMarks.Clear(); Commit(); }
     public void Undo()
     {
         Cancel();
+        if (FadingMarks.Count > 0) { FadingMarks.RemoveAt(FadingMarks.Count - 1); Notify(); return; }
         if (_undo.Count == 0) return;
         var edit = _undo[^1];
         _undo.RemoveAt(_undo.Count - 1);
@@ -187,6 +256,11 @@ internal sealed class InkDocument
         Marks.RemoveAll(m => remove.Contains(m.Id));
         var existing = Marks.Select(m => m.Id).ToHashSet();
         var previous = from.Select(m => m.Id).ToHashSet();
+        var fromById = from.ToDictionary(m => m.Id);
+        var toById = to.ToDictionary(m => m.Id);
+        for (var i = 0; i < Marks.Count; i++)
+            if (fromById.TryGetValue(Marks[i].Id, out var old) && toById.TryGetValue(Marks[i].Id, out var replacement) &&
+                !old.Same(replacement) && Marks[i].Same(old)) Marks[i] = replacement;
         for (var i = 0; i < to.Count; i++)
             if (!previous.Contains(to[i].Id) && existing.Add(to[i].Id)) Marks.Insert(Math.Min(i, Marks.Count), to[i]);
     }
@@ -195,7 +269,7 @@ internal sealed class InkDocument
         Id = mark.Id, Tool = mark.Tool.ToString(), Color = mark.Color.A == 255
             ? $"#{mark.Color.R:X2}{mark.Color.G:X2}{mark.Color.B:X2}"
             : $"#{mark.Color.R:X2}{mark.Color.G:X2}{mark.Color.B:X2}{mark.Color.A:X2}", Width = mark.Width,
-        FontSize = mark.FontSize, Text = mark.Text,
+        FontSize = mark.FontSize, Text = mark.Text, Image = mark.Image,
         Points = mark.Points.Select(p => new InkPointDto(p.X, p.Y)).ToList()
     }).ToList();
     public void Import(List<InkMarkDto> marks, bool resetHistory = false)
@@ -204,15 +278,15 @@ internal sealed class InkDocument
         var previous = Marks.ToDictionary(m => m.Id);
         Marks = marks.Select(dto =>
         {
-            if (previous.TryGetValue(dto.Id, out var existing)) return existing;
             var cssColor = dto.Color.Length == 9 ? "#" + dto.Color[7..9] + dto.Color[1..7] : dto.Color;
             var mark = new InkMark(Enum.Parse<InkTool>(dto.Tool), Color.Parse(cssColor), dto.Width,
                 new Point(dto.Points[0].X, dto.Points[0].Y))
-            { Id = dto.Id, Text = dto.Text, FontSize = dto.FontSize };
+            { Id = dto.Id, Text = dto.Text, FontSize = dto.FontSize, Image = dto.Image };
             foreach (var point in dto.Points.Skip(1)) mark.AddPoint(new Point(point.X, point.Y));
+            if (previous.TryGetValue(dto.Id, out var existing) && existing.Same(mark)) return existing;
             return mark;
         }).ToList();
-        if (resetHistory) { _undo.Clear(); _redo.Clear(); }
+        if (resetHistory) { _undo.Clear(); _redo.Clear(); FadingMarks.Clear(); }
         Notify();
     }
 }

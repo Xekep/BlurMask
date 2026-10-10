@@ -8,7 +8,7 @@ namespace BlurMask;
 
 public sealed partial class App : Application
 {
-    private BlurMaskWindow? _mask;
+    private readonly List<BlurMaskWindow> _masks = [];
     private TrayIcon? _tray;
     private DrawingSession? _drawing;
 
@@ -45,7 +45,7 @@ public sealed partial class App : Application
         {
             _drawing?.SmokeTest();
             await DrawingSmokeTest.VerifyRenderingAsync(_drawing!);
-            _mask?.Hide();
+            foreach (var mask in _masks) mask.Hide();
             await DrawingSmokeTest.VerifyCanvasAsync(_drawing!);
         }
         catch (Exception ex)
@@ -59,7 +59,7 @@ public sealed partial class App : Application
         for (var i = 0; i < 5; i++)
         {
             await Task.Delay(120).ConfigureAwait(false);
-            Dispatcher.UIThread.Post(() => _mask?.CycleModeForSmokeTest());
+            Dispatcher.UIThread.Post(() => { foreach (var mask in _masks) mask.CycleModeForSmokeTest(); });
         }
 
         await Task.Delay(800).ConfigureAwait(false);
@@ -74,11 +74,16 @@ public sealed partial class App : Application
 
     private void NewMaskOnClicked(object? sender, EventArgs e) => ShowMask();
 
-    private void CloseMaskOnClicked(object? sender, EventArgs e) => _mask?.Close();
+    private void CloseMaskOnClicked(object? sender, EventArgs e) => _masks.LastOrDefault()?.Close();
+
+    private void CloseAllMasks()
+    {
+        foreach (var mask in _masks.ToArray()) mask.Close();
+    }
 
     private void ExitOnClicked(object? sender, EventArgs e)
     {
-        _mask?.Close();
+        CloseAllMasks();
         _drawing?.Dispose();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -91,7 +96,8 @@ public sealed partial class App : Application
     {
         if (_drawing is null)
         {
-            var drawing = new DrawingSession(ShowMask, () => ExitOnClicked(this, EventArgs.Empty));
+            var drawing = new DrawingSession(ShowMask, () => ExitOnClicked(this, EventArgs.Empty),
+                mode => ShowMask(mode), CloseAllMasks);
             _drawing = drawing;
             drawing.Toolbar.Closed += (_, _) =>
             {
@@ -101,25 +107,20 @@ public sealed partial class App : Application
         _drawing.Show();
     }
 
-    private void ShowMask()
+    private void ShowMask() => ShowMask(PrivacyMode.Blur);
+
+    private void ShowMask(PrivacyMode mode)
     {
         _drawing?.SelectTool(InkTool.Cursor);
-        if (_mask is { IsVisible: true })
-        {
-            _mask.Activate();
-            return;
-        }
-
         var mask = new BlurMaskWindow();
-        _mask = mask;
+        mask.SetMode(mode);
+        _masks.Add(mask);
         mask.ModeChanged += MaskOnModeChanged;
         mask.Closed += (_, _) =>
         {
             mask.ModeChanged -= MaskOnModeChanged;
-            if (ReferenceEquals(_mask, mask))
-                _mask = null;
-
-            UpdateTrayTooltip(null);
+            _masks.Remove(mask);
+            UpdateTrayTooltip(_masks.LastOrDefault()?.Mode);
         };
 
         mask.Show();
@@ -135,17 +136,17 @@ public sealed partial class App : Application
             return;
 
         _tray.ToolTipText = mode is null
-            ? "BlurMask — клик: инструменты рисования"
-            : $"BlurMask — {ModeName(mode.Value)}; ПКМ по маске: следующий режим";
+            ? UiText.T("BlurMask — клик: инструменты рисования")
+            : UiText.F("BlurMask — {0}; ПКМ по маске: следующий режим", ModeName(mode.Value));
     }
 
     private static string ModeName(PrivacyMode mode) => mode switch
     {
-        PrivacyMode.Blur => "Blur",
-        PrivacyMode.BigPixels => "Pixel Blur",
-        PrivacyMode.Scramble => "Scramble",
-        PrivacyMode.GlassBlocks => "Glass Refraction",
-        PrivacyMode.Blackout => "Blackout",
+        PrivacyMode.Blur => UiText.T("Размытие"),
+        PrivacyMode.BigPixels => UiText.T("Крупные пиксели"),
+        PrivacyMode.Scramble => UiText.T("Перемешивание"),
+        PrivacyMode.GlassBlocks => UiText.T("Преломление стекла"),
+        PrivacyMode.Blackout => UiText.T("Чёрная маска"),
         _ => mode.ToString()
     };
 }

@@ -31,7 +31,7 @@ function Invoke-TestProcess([string]$File, [string[]]$Arguments) {
     if ($testProcess.ExitCode -ne 0) { throw "Process failed ($($testProcess.ExitCode)): $File. Logs: $testRoot" }
 }
 function Assert-Payload {
-    foreach ($name in @('BlurMask.exe', 'av_libglesv2.dll', 'libSkiaSharp.dll', 'libHarfBuzzSharp.dll')) {
+    foreach ($name in @('BlurMask.exe')) {
         $installed = Join-Path $installDir $name
         if (-not (Test-Path -LiteralPath $installed) -or
             (Get-FileHash -LiteralPath $installed).Hash -ne (Get-FileHash -LiteralPath (Join-Path $payload $name)).Hash) {
@@ -39,12 +39,13 @@ function Assert-Payload {
         }
     }
     if (Get-ChildItem -LiteralPath $installDir -Filter '*.pdb') { throw 'Installer contains debug symbols.' }
+    if (Get-ChildItem -LiteralPath $installDir -Filter '*.dll') { throw 'Single-executable installer left native DLLs.' }
 }
 
 $installedSuccessfully = $false
 try {
     $arguments = @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-', '/LANG=english',
-        '/NOCLOSEAPPLICATIONS', '/NORESTARTAPPLICATIONS', '/TASKS=desktopicon,startup',
+        '/NOCLOSEAPPLICATIONS', '/NORESTARTAPPLICATIONS', '/MERGETASKS=desktopicon',
         "/DIR=`"$installDir`"", "/LOG=`"$(Join-Path $testRoot 'install.log')`"")
     Invoke-TestProcess $installer $arguments
     $installedSuccessfully = $true
@@ -56,11 +57,13 @@ try {
     if ($startup -ne ('"' + (Join-Path $installDir 'BlurMask.exe') + '"')) { throw 'Startup command does not quote the executable path.' }
     if (-not $SkipLaunch) { Invoke-TestProcess (Join-Path $installDir 'BlurMask.exe') @('--smoke-test') }
 
-    # Reinstall is the same AppId/path used by upgrades. Replace a native DLL to
-    # prove the payload is restored even when assembly versions remain unchanged.
+    # Reinstall must replace the executable and remove the old dynamic graphics DLLs.
     $marker = Join-Path $installDir 'user-file.txt'
     'keep this file' | Set-Content -LiteralPath $marker
-    'outdated native library' | Set-Content -LiteralPath (Join-Path $installDir 'libHarfBuzzSharp.dll')
+    'outdated executable' | Set-Content -LiteralPath (Join-Path $installDir 'BlurMask.exe')
+    foreach ($name in @('libHarfBuzzSharp.dll', 'libSkiaSharp.dll', 'av_libglesv2.dll')) {
+        'outdated native library' | Set-Content -LiteralPath (Join-Path $installDir $name)
+    }
     $arguments[-1] = "/LOG=`"$(Join-Path $testRoot 'upgrade.log')`""
     Invoke-TestProcess $installer $arguments
     Assert-Payload

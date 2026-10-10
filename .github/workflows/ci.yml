@@ -19,6 +19,12 @@ jobs:
     uses: ./.github/workflows/installer.yml
     with:
       publish-artifact: BlurMask-win-x64
+  deb:
+    name: Debian installer / Linux x64
+    needs: native-aot-linux
+    uses: ./.github/workflows/deb.yml
+    with:
+      publish-artifact: BlurMask-linux-x64
   server:
     name: Web canvas / PostgreSQL
     runs-on: ubuntu-latest
@@ -85,16 +91,13 @@ jobs:
       - name: Publish
         shell: pwsh
         run: .\build.ps1 win-x64 -Version "1.0.0-dev.$env:GITHUB_RUN_NUMBER"
-      - name: Verify native dependencies
+      - name: Verify single-executable native payload
         shell: pwsh
         run: |
           $dir = "bin\Release\net11.0\win-x64\publish"
-          $required = @("av_libglesv2.dll", "libSkiaSharp.dll", "libHarfBuzzSharp.dll")
-          foreach ($name in $required) {
-            if (-not (Test-Path (Join-Path $dir $name))) {
-              throw "Required Native AOT dependency is missing: $name"
-            }
-          }
+          if (-not (Test-Path (Join-Path $dir 'BlurMask.exe'))) { throw 'Native executable is missing.' }
+          if (Get-ChildItem $dir -Filter '*.dll') { throw 'Static native build contains external DLLs.' }
+          if (Get-ChildItem $dir -Filter '*.pdb') { throw 'Native payload contains debug symbols.' }
       - name: Startup and single-instance smoke test
         shell: pwsh
         run: |
@@ -119,7 +122,7 @@ jobs:
             throw "Second BlurMask instance exited with code $($second.ExitCode)"
           }
 
-          if (-not $first.WaitForExit(15000)) {
+          if (-not $first.WaitForExit(45000)) {
             $first.Kill()
             throw "BlurMask smoke test timed out"
           }
@@ -130,10 +133,19 @@ jobs:
         with:
           name: BlurMask-win-x64
           path: bin/Release/net11.0/win-x64/publish/
+      - name: Software rendering / simulated RDP session
+        shell: pwsh
+        env:
+          BLURMASK_TEST_REMOTE_SESSION: '1'
+        run: |
+          $exe = Resolve-Path "bin\Release\net11.0\win-x64\publish\BlurMask.exe"
+          $test = Start-Process -FilePath $exe -ArgumentList '--smoke-test' -WindowStyle Hidden -PassThru
+          if (-not $test.WaitForExit(45000)) { $test.Kill(); throw 'Software rendering smoke test timed out.' }
+          if ($test.ExitCode -ne 0) { throw "Software rendering failed ($($test.ExitCode))." }
 
   native-aot-linux:
     name: Native AOT / Linux x64
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4

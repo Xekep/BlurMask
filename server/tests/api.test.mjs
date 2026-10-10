@@ -22,6 +22,12 @@ test('Postgres API: access keys, idempotent retries, concurrency, validation, ta
   const results=await Promise.all([b,c].map(m=>request(path+'/changes',access.editKey,{operationId:crypto.randomUUID(),add:[m],remove:[]})));
   assert.equal(results.every(r=>r.status===200),true);
   const merged=await (await request(path,access.editKey)).json(); assert.equal(merged.marks.length,3); assert.equal(merged.revision,3);
+  const moved={...b,points:[{x:250,y:250},{x:350,y:350}]}, movePatch={operationId:crypto.randomUUID(),add:[],remove:[],update:[moved]};
+  const movedBoard=await (await request(path+'/changes',access.editKey,movePatch)).json();
+  assert.deepEqual(movedBoard.marks.map(m=>m.id),merged.marks.map(m=>m.id));
+  assert.deepEqual(movedBoard.marks.find(m=>m.id===b.id).points,moved.points);
+  assert.equal((await (await request(path+'/changes',access.editKey,movePatch)).json()).revision,movedBoard.revision);
+  assert.equal((await request(path+'/changes',access.viewKey,{...movePatch,operationId:crypto.randomUUID()})).status,403);
   assert.equal((await request(path+'/changes',access.editKey,{operationId:crypto.randomUUID(),add:[{...mark(),tool:'Unknown'}],remove:[]})).status,400);
   assert.equal((await request(path+'/changes',access.editKey,{operationId:crypto.randomUUID(),add:[{...mark(),points:null}],remove:[]})).status,400);
   const erased=await (await request(path+'/changes',access.editKey,{operationId:crypto.randomUUID(),add:[],remove:[a.id]})).json();
@@ -32,4 +38,9 @@ test('Postgres API: access keys, idempotent retries, concurrency, validation, ta
   const offline=Array.from({length:501},mark);
   const uploaded=await request(path+'/changes',access.editKey,{operationId:crypto.randomUUID(),add:offline,remove:[]});
   assert.equal(uploaded.status,200); assert.equal((await uploaded.json()).marks.length,503);
+  const image={...mark(),tool:'Image',image:'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aR1cAAAAASUVORK5CYII='};
+  const raster=await request(path+'/changes',access.editKey,{operationId:crypto.randomUUID(),add:[image],remove:[]});
+  assert.equal(raster.status,200); assert.equal((await raster.json()).marks.at(-1).image,image.image);
+  assert.equal((await request(path+'/changes',access.editKey,{operationId:crypto.randomUUID(),add:[],remove:[],update:[{...image,image:'invalid'}]})).status,400);
+  assert.equal((await request(path+'/changes',access.editKey,{operationId:crypto.randomUUID(),add:[image],remove:[],update:[image]})).status,400);
 });

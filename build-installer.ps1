@@ -25,10 +25,12 @@ $outputDir = [IO.Path]::GetFullPath($OutputDirectory)
 if (-not $SkipPublish) {
     & (Join-Path $PSScriptRoot 'build.ps1') -Runtime win-x64 -Version $Version -OutputDirectory $publishDir
 }
-$required = @('BlurMask.exe', 'av_libglesv2.dll', 'libSkiaSharp.dll', 'libHarfBuzzSharp.dll')
+$required = @('BlurMask.exe')
 foreach ($name in $required) {
     if (-not (Test-Path -LiteralPath (Join-Path $publishDir $name))) { throw "Incomplete publish directory: missing $name" }
 }
+$nativeDlls = @(Get-ChildItem -LiteralPath $publishDir -Filter '*.dll')
+if ($nativeDlls.Count -ne 0) { throw 'The Windows installer expects the single-executable Native AOT build.' }
 $compiler = & (Join-Path $PSScriptRoot 'tools\install-inno-setup.ps1')
 New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
 & $compiler '--quiet-progress' "--define=AppVersion=$Version" "--define=NumericVersion=$numericVersion" "--define=PublishDir=$publishDir" "--define=InstallerOutputDir=$outputDir" (Join-Path $PSScriptRoot 'installer\BlurMask.iss')

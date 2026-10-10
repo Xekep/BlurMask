@@ -51,7 +51,7 @@ internal sealed class CanvasCloudClient : IDisposable
     {
         if (!Uri.TryCreate(server.Trim(), UriKind.Absolute, out var uri) ||
             (uri.Scheme != "https" && !(uri.Scheme == "http" && uri.IsLoopback)) || !string.IsNullOrEmpty(uri.UserInfo))
-            throw new ArgumentException("Нужен HTTPS-адрес сервера; для localhost разрешён HTTP.");
+            throw new ArgumentException(UiText.T("Нужен HTTPS-адрес сервера; для localhost разрешён HTTP."));
         return uri.GetLeftPart(UriPartial.Authority);
     }
     public static BoardConnection ParseLink(string link)
@@ -59,25 +59,30 @@ internal sealed class CanvasCloudClient : IDisposable
         link = link.Trim();
         if (!Uri.TryCreate(link, UriKind.Absolute, out var uri))
         {
-            var invite = BoardInvite.Parse(link);
+            var invite = ParseInvite(link);
             return new(DefaultServer, invite.Id, invite.Key);
         }
         var server = Server(uri.GetLeftPart(UriPartial.Authority));
         if (server != DefaultServer && !uri.IsLoopback)
-            throw new ArgumentException("Приглашение должно быть с pen.kiiko.ru.");
-        var invitation = BoardInvite.Parse(uri.Fragment.TrimStart('#'));
+            throw new ArgumentException(UiText.T("Приглашение должно быть с pen.kiiko.ru."));
+        var invitation = ParseInvite(uri.Fragment.TrimStart('#'));
         return new(server, invitation.Id, invitation.Key);
     }
     public static string Link(BoardConnection connection) => $"{Server(connection.Server)}/#{BoardInvite.Code(connection.Id, connection.Key)}";
+    private static (Guid Id, string Key) ParseInvite(string code)
+    {
+        try { return BoardInvite.Parse(code); }
+        catch (ArgumentException) { throw new ArgumentException(UiText.T("Вставьте корректный код приглашения или ссылку.")); }
+    }
     private static void Ensure(HttpResponseMessage response)
     {
         if (response.IsSuccessStatusCode) return;
         throw new HttpRequestException(response.StatusCode switch
         {
-            HttpStatusCode.Forbidden => "По этой ссылке разрешён только просмотр.",
-            HttpStatusCode.NotFound => "Полотно недоступно: проверьте ссылку.",
-            HttpStatusCode.RequestEntityTooLarge => "Полотно слишком большое.",
-            _ => "Сервер полотна временно недоступен."
+            HttpStatusCode.Forbidden => UiText.T("По этой ссылке разрешён только просмотр."),
+            HttpStatusCode.NotFound => UiText.T("Полотно недоступно: проверьте ссылку."),
+            HttpStatusCode.RequestEntityTooLarge => UiText.T("Полотно слишком большое."),
+            _ => UiText.T("Сервер полотна временно недоступен.")
         }, null, response.StatusCode);
     }
     public void Dispose() => _http.Dispose();

@@ -1,4 +1,4 @@
-import { tools, emptyBoard, clone, diff, hasChanges, rebase, History, hit, constrain, drawMark, validBoard } from './ink.js';
+import { tools, emptyBoard, clone, diff, hasChanges, rebase, History, hit, constrain, drawMark, validBoard, raster } from './ink.js';
 import { inviteCode, parseInvite } from './invite.js';
 
 const $ = id => document.getElementById(id);
@@ -50,6 +50,7 @@ function update() {
   requestRender();
 }
 function requestRender() { if (!frame) frame = requestAnimationFrame(render); }
+window.addEventListener('blurmask-image-loaded', requestRender);
 function render() {
   frame=0;
   const ratio=devicePixelRatio||1, rect=canvas.getBoundingClientRect();
@@ -120,7 +121,7 @@ document.addEventListener('pointerdown',e=>{if(!e.target.closest('.toolkit'))hid
 function showDialog(title,description=''){const content=$('dialog-content');content.replaceChildren();const h=document.createElement('h2');h.textContent=title;content.append(h);if(description){const p=document.createElement('p');p.textContent=description;content.append(p);}if(!$('dialog').open)$('dialog').showModal();return content;}
 $('dialog-close').onclick=()=>$('dialog').close();
 function textDialog(p){const content=showDialog('Текст');const input=document.createElement('textarea');input.maxLength=4000;input.placeholder='Напишите здесь…';input.setAttribute('aria-label','Текст на полотне');content.append(input);const apply=button('Добавить',()=>{if(input.value.trim()){const before=clone(board);board.marks.push({id:crypto.randomUUID(),tool:'Text',color,width:1,points:[p],text:input.value,fontSize:textSize});commit(before);}$('dialog').close();});apply.className='primary';content.append(apply);input.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();apply.click();}};input.focus();}
-function exportPng(){const out=document.createElement('canvas');out.width=board.width;out.height=board.height;const context=out.getContext('2d');context.fillStyle=board.background==='black'?'#111111':'white';context.fillRect(0,0,out.width,out.height);board.marks.forEach(m=>drawMark(context,m));out.toBlob(blob=>download(blob,`${safeName(board.title)}.png`));}
+async function exportPng(){const snapshot=clone(board);await Promise.all(snapshot.marks.filter(m=>m.tool==='Image').map(m=>raster(m.image)?.decode().catch(()=>{})));const out=document.createElement('canvas');out.width=snapshot.width;out.height=snapshot.height;const context=out.getContext('2d');context.fillStyle=snapshot.background==='black'?'#111111':'white';context.fillRect(0,0,out.width,out.height);snapshot.marks.forEach(m=>drawMark(context,m));out.toBlob(blob=>download(blob,`${safeName(snapshot.title)}.png`));}
 function safeName(name){return name.replace(/[\\/:*?"<>|]/g,'_').slice(0,80)||'полотно';}
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 $('export').onclick=exportPng;

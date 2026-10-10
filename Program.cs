@@ -1,10 +1,12 @@
 using Avalonia;
+using System.Globalization;
 
 namespace BlurMask;
 
 internal static class Program
 {
     internal static bool SmokeTest { get; private set; }
+    internal static bool SoftwareRendering { get; private set; }
 
     [STAThread]
     public static void Main(string[] args)
@@ -18,6 +20,13 @@ internal static class Program
 
         SmokeTest = isolatedSmoke || args.Any(static arg =>
             string.Equals(arg, "--smoke-test", StringComparison.OrdinalIgnoreCase));
+        if (SmokeTest && Environment.GetEnvironmentVariable("BLURMASK_TEST_LANGUAGE") is { Length: > 0 } language)
+        {
+            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(language);
+            CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture;
+        }
+        SoftwareRendering = args.Contains("--software-rendering", StringComparer.OrdinalIgnoreCase) ||
+            RemoteDesktopSupport.IsRemoteSession;
 
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(
             args,
@@ -25,7 +34,16 @@ internal static class Program
     }
 
     public static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>()
+    {
+        var builder = AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .LogToTrace();
+        if (OperatingSystem.IsWindows() && SoftwareRendering)
+            builder.With(new Win32PlatformOptions
+            {
+                RenderingMode = [Win32RenderingMode.Software],
+                CompositionMode = [Win32CompositionMode.RedirectionSurface]
+            });
+        return builder;
+    }
 }

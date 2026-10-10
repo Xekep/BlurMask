@@ -1,5 +1,7 @@
 using Avalonia;
 using Avalonia.Automation;
+using Avalonia.Animation;
+using Avalonia.Animation.Easings;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
@@ -8,6 +10,7 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Styling;
+using Avalonia.Threading;
 
 namespace BlurMask;
 
@@ -17,12 +20,19 @@ internal sealed class DrawingToolbarWindow : Window
     private static readonly IBrush Edge = new SolidColorBrush(Color.Parse("#A8A8A8"));
     private static readonly ControlTheme FlatButton = CreateButtonTheme();
     private readonly DrawingSession _session;
-    private readonly StackPanel _body = new() { Spacing = 0, Width = 32 };
+    private readonly StackPanel _body = new() { Spacing = 0, Width = 32, ClipToBounds = true };
+    private readonly Border _bodyContainer;
     private readonly Button _cursor;
     private readonly Button _drawing;
     private readonly Button _eraser;
     private readonly Button _undo;
     private readonly Button _selectedColor;
+    private readonly Button _sizes;
+    private readonly Button _boards;
+    private readonly Button _menu;
+    private readonly Button _shapes;
+    private readonly Button _fading;
+    private readonly Button _masks;
     private readonly Dictionary<InkTool, Button> _toolButtons = [];
     private Window? _flyout;
     private string? _flyoutName;
@@ -36,8 +46,8 @@ internal sealed class DrawingToolbarWindow : Window
     public DrawingToolbarWindow(DrawingSession session)
     {
         _session = session;
-        Title = "BlurMask — инструменты рисования";
-        Width = 42;
+        Title = UiText.T("BlurMask — инструменты рисования");
+        Width = 52;
         SizeToContent = SizeToContent.Height;
         WindowDecorations = WindowDecorations.None;
         Background = Brushes.Transparent;
@@ -51,8 +61,8 @@ internal sealed class DrawingToolbarWindow : Window
         CanMaximize = false;
         RequestedThemeVariant = ThemeVariant.Light;
 
-        var column = new StackPanel { Spacing = 3, Margin = new Thickness(3) };
-        _handle = IconButton(ToolbarGlyph.Nib, "Перетащить панель · двойной щелчок — свернуть", ToggleCollapsed, 36, 36);
+        var column = new StackPanel { Spacing = 3, Margin = new Thickness(8) };
+        _handle = IconButton(ToolbarGlyph.Nib, UiText.T("Перетащить панель · двойной щелчок — свернуть"), ToggleCollapsed, 36, 36);
         _handle.Cursor = new Cursor(StandardCursorType.SizeAll);
         // Use explicit pointer capture so moving the toolbar does not activate the
         // program behind it and works across monitors with different scale factors.
@@ -62,24 +72,34 @@ internal sealed class DrawingToolbarWindow : Window
         _handle.PointerCaptureLost += (_, _) => _dragPointer = null;
         column.Children.Add(_handle);
 
-        _body.Children.Add(IconButton(ToolbarGlyph.Eye, "Свернуть панель / скрыть рисунок", ToggleCollapsed));
-        _cursor = AddTool(ToolbarGlyph.Cursor, "Курсор · Ctrl+Shift+1", () => session.SelectTool(InkTool.Cursor));
-        _drawing = AddTool(ToolbarGlyph.Pen, "Инструменты рисования · Ctrl+Shift+2", () =>
+        _body.Children.Add(IconButton(ToolbarGlyph.Eye, UiText.T("Свернуть панель / скрыть рисунок"), ToggleCollapsed));
+        _cursor = IconButton(ToolbarGlyph.Cursor, UiText.T("Курсор · Ctrl+Shift+1"), ShowCursorModes);
+        _body.Children.Add(_cursor);
+        _drawing = AddTool(ToolbarGlyph.Pen, UiText.T("Инструменты рисования · Ctrl+Shift+2"), () =>
         {
-            if (session.Tool is InkTool.Cursor or InkTool.Eraser) session.SelectTool(InkTool.Pen);
+            if (session.Tool is InkTool.Cursor or InkTool.Select or InkTool.Eraser) session.SelectTool(InkTool.Pen);
             ShowTools();
         });
-        _eraser = AddTool(ToolbarGlyph.Eraser, "Ластик · Ctrl+Shift+4", () => session.SelectTool(InkTool.Eraser));
-        _body.Children.Add(IconButton(ToolbarGlyph.Size, "Толщина пера", ShowSizes));
-        _undo = AddTool(ToolbarGlyph.Undo, "Отменить · Ctrl+Shift+Z · ПКМ — повторить", session.Undo);
+        _shapes = IconButton(ToolbarGlyph.Shapes, UiText.T("Линии и фигуры"), ShowShapes);
+        _body.Children.Add(_shapes);
+        _eraser = AddTool(ToolbarGlyph.Eraser, UiText.T("Ластик · Ctrl+Shift+4"), () => session.SelectTool(InkTool.Eraser));
+        _sizes = IconButton(ToolbarGlyph.Size, UiText.T("Толщина пера"), ShowSizes);
+        _body.Children.Add(_sizes);
+        _fading = IconButton(ToolbarGlyph.Fading, UiText.T("Исчезающие чернила"), ShowFading);
+        _body.Children.Add(_fading);
+        _undo = AddTool(ToolbarGlyph.Undo, UiText.T("Отменить · Ctrl+Shift+Z · ПКМ — повторить"), session.Undo);
         _undo.PointerPressed += (_, e) =>
         {
             if (e.GetCurrentPoint(_undo).Properties.IsRightButtonPressed) { session.Redo(); e.Handled = true; }
         };
-        _body.Children.Add(IconButton(ToolbarGlyph.Trash, "Очистить экран · Ctrl+Shift+F", session.Clear));
-        _body.Children.Add(IconButton(ToolbarGlyph.Board, "Рабочий стол / белая / чёрная доска", ShowBoards));
-        _body.Children.Add(IconButton(ToolbarGlyph.Camera, "Снимок экрана · Ctrl+Shift+S", () => _ = session.CaptureScreenshotAsync()));
-        _body.Children.Add(IconButton(ToolbarGlyph.Menu, "Меню BlurMask", ShowMenu));
+        _body.Children.Add(IconButton(ToolbarGlyph.Trash, UiText.T("Очистить экран · Ctrl+Shift+F"), session.Clear));
+        _boards = IconButton(ToolbarGlyph.Board, UiText.T("Рабочий стол / белая / чёрная доска"), ShowBoards);
+        _body.Children.Add(_boards);
+        _masks = IconButton(ToolbarGlyph.Mask, UiText.T("Маски приватности"), ShowMasks);
+        _body.Children.Add(_masks);
+        _body.Children.Add(IconButton(ToolbarGlyph.Camera, UiText.T("Снимок экрана · Ctrl+Shift+S"), () => _ = session.CaptureScreenshotAsync()));
+        _menu = IconButton(ToolbarGlyph.Menu, UiText.T("Меню BlurMask"), ShowMenu);
+        _body.Children.Add(_menu);
 
         var quick = new UniformGrid { Columns = 2, Rows = 2, Height = 30 };
         foreach (var color in new[] { "#00C9ED", "#FFF400", "#FF0099", "#111111" })
@@ -95,19 +115,29 @@ internal sealed class DrawingToolbarWindow : Window
                 HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Bottom }
         };
         _selectedColor.Click += (_, _) => ShowPalette();
-        ToolTip.SetTip(_selectedColor, "Палитра цветов");
-        AutomationProperties.SetName(_selectedColor, "Палитра цветов");
+        ToolTip.SetTip(_selectedColor, UiText.T("Палитра цветов"));
+        AutomationProperties.SetName(_selectedColor, UiText.T("Палитра цветов"));
         _body.Children.Add(_selectedColor);
-        column.Children.Add(new Border
+        _bodyContainer = new Border
         {
             BorderBrush = Edge, BorderThickness = new Thickness(1), Background = Brushes.White,
-            BoxShadow = new BoxShadows(new BoxShadow { Blur = 3, OffsetX = 1, OffsetY = 1, Color = Color.FromArgb(75, 0, 0, 0) }),
+            BoxShadow = new BoxShadows(new BoxShadow { Blur = 8, Spread = 1, OffsetX = 0, OffsetY = 0, Color = Color.FromArgb(100, 0, 0, 0) }),
             Child = _body, HorizontalAlignment = HorizontalAlignment.Center
-        });
+        };
+        column.Children.Add(_bodyContainer);
         Content = column;
         session.StateChanged += Refresh;
         Opened += (_, _) =>
         {
+            if (!_collapsed && _bodyContainer.Bounds.Height > 0)
+            {
+                _bodyContainer.Height = _bodyContainer.Bounds.Height;
+                _bodyContainer.Transitions =
+                [
+                    new DoubleTransition { Property = HeightProperty, Duration = TimeSpan.FromMilliseconds(180), Easing = new CubicEaseInOut() },
+                    new DoubleTransition { Property = OpacityProperty, Duration = TimeSpan.FromMilliseconds(150) }
+                ];
+            }
             if (!_placed && Screens.Primary is { } screen)
             {
                 _placed = true;
@@ -116,6 +146,7 @@ internal sealed class DrawingToolbarWindow : Window
             }
         };
         PositionChanged += (_, _) => PlaceFlyout();
+        LayoutUpdated += (_, _) => PlaceFlyout();
         KeyDown += (_, e) =>
         {
             if (e.Key == Key.Escape) { CloseFlyout(); session.SelectTool(InkTool.Cursor); e.Handled = true; }
@@ -153,7 +184,7 @@ internal sealed class DrawingToolbarWindow : Window
         var button = new Button
         {
             Theme = FlatButton, Width = width, Height = height, Padding = new Thickness(0),
-            Content = new ToolbarIcon(glyph) { Width = glyph == ToolbarGlyph.Nib ? 34 : 23, Height = glyph == ToolbarGlyph.Nib ? 34 : 23 }
+            Content = new ToolbarIcon(glyph, glyph == ToolbarGlyph.Nib) { Width = glyph == ToolbarGlyph.Nib ? 34 : 23, Height = glyph == ToolbarGlyph.Nib ? 34 : 23 }
         };
         button.Click += (_, _) => click();
         ToolTip.SetTip(button, tip);
@@ -171,17 +202,23 @@ internal sealed class DrawingToolbarWindow : Window
     {
         var button = new Button { Theme = FlatButton, Width = width, Height = height, Background = new SolidColorBrush(color) };
         ToolTip.SetTip(button, color.ToString());
-        AutomationProperties.SetName(button, $"Цвет {color}");
+        AutomationProperties.SetName(button, UiText.F("Цвет {0}", color));
         button.Click += (_, _) => { _session.Color = color; _session.NotifySettings(); CloseFlyout(); };
         return button;
     }
 
     private void Refresh()
     {
-        _cursor.Background = _session.Tool == InkTool.Cursor ? Cyan : Brushes.Transparent;
+        _cursor.Background = _session.Tool is InkTool.Cursor or InkTool.Select ? Cyan : Brushes.Transparent;
+        _cursor.Content = new ToolbarIcon(_session.Tool == InkTool.Select ? ToolbarGlyph.Select : ToolbarGlyph.Cursor) { Width = 23, Height = 23 };
         _eraser.Background = _session.Tool == InkTool.Eraser ? Cyan : Brushes.Transparent;
-        _drawing.Background = _session.Tool is not (InkTool.Cursor or InkTool.Eraser) ? Cyan : Brushes.Transparent;
-        _drawing.Content = new ToolbarIcon(GlyphFor(_session.Tool)) { Width = 23, Height = 23 };
+        var isShape = _session.Tool is InkTool.Line or InkTool.Arrow or InkTool.Rectangle or InkTool.Ellipse;
+        _drawing.Background = _session.Tool is InkTool.Pen or InkTool.Highlighter or InkTool.Text ? Cyan : Brushes.Transparent;
+        _drawing.Content = new ToolbarIcon(isShape || _session.Tool is InkTool.Cursor or InkTool.Select or InkTool.Eraser
+            ? ToolbarGlyph.Pen : GlyphFor(_session.Tool)) { Width = 23, Height = 23 };
+        _shapes.Background = isShape ? Cyan : Brushes.Transparent;
+        _shapes.Content = new ToolbarIcon(isShape ? GlyphFor(_session.Tool) : ToolbarGlyph.Shapes) { Width = 23, Height = 23 };
+        _fading.Background = _session.FadeSeconds > 0 ? Cyan : Brushes.Transparent;
         _selectedColor.Background = new SolidColorBrush(_session.Color);
         _undo.Opacity = _session.Document.CanUndo ? 1 : 0.4;
         foreach (var (tool, button) in _toolButtons)
@@ -189,6 +226,7 @@ internal sealed class DrawingToolbarWindow : Window
     }
     private static ToolbarGlyph GlyphFor(InkTool tool) => tool switch
     {
+        InkTool.Cursor => ToolbarGlyph.Cursor, InkTool.Select => ToolbarGlyph.Select,
         InkTool.Highlighter => ToolbarGlyph.Highlighter, InkTool.Text => ToolbarGlyph.Text,
         InkTool.Line => ToolbarGlyph.Line, InkTool.Arrow => ToolbarGlyph.Arrow,
         InkTool.Rectangle => ToolbarGlyph.Rectangle, InkTool.Ellipse => ToolbarGlyph.Ellipse,
@@ -196,26 +234,60 @@ internal sealed class DrawingToolbarWindow : Window
     };
 
     public void ShowTools()
+        => ShowToolChoices("tools", _drawing, [(InkTool.Pen, UiText.T("Перо")), (InkTool.Highlighter, UiText.T("Маркер")), (InkTool.Text, UiText.T("Текст"))]);
+
+    internal void ShowCursorModes() => ShowToolChoices("cursor", _cursor,
+        [(InkTool.Cursor, UiText.T("Обычный курсор")), (InkTool.Select, UiText.T("Выделить и переместить"))]);
+
+    internal void ShowShapes()
+        => ShowToolChoices("shapes", _shapes, [(InkTool.Line, UiText.T("Линия")), (InkTool.Arrow, UiText.T("Стрелка")),
+            (InkTool.Rectangle, UiText.T("Прямоугольник")), (InkTool.Ellipse, UiText.T("Эллипс"))]);
+
+    private void ShowToolChoices(string name, Button anchor, (InkTool Tool, string Label)[] choices)
     {
         var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 1 };
         var buttons = new Dictionary<InkTool, Button>();
-        foreach (var (tool, name) in new[]
+        foreach (var (tool, label) in choices)
         {
-            (InkTool.Pen, "Перо"), (InkTool.Highlighter, "Маркер"), (InkTool.Text, "Текст"),
-            (InkTool.Line, "Линия"), (InkTool.Arrow, "Стрелка"),
-            (InkTool.Rectangle, "Прямоугольник"), (InkTool.Ellipse, "Эллипс")
-        })
-        {
-            var button = IconButton(GlyphFor(tool), name, () => { _session.SelectTool(tool); CloseFlyout(); });
+            var button = IconButton(GlyphFor(tool), label, () => { _session.SelectTool(tool); CloseFlyout(); });
             buttons[tool] = button;
             row.Children.Add(button);
         }
-        ShowFlyout("tools", row, 98);
-        if (_flyoutName == "tools")
+        ShowFlyout(name, row, anchor);
+        if (_flyoutName == name)
             foreach (var (tool, button) in buttons) _toolButtons[tool] = button;
         Refresh();
     }
-    private void ShowSizes()
+    internal void ShowFading()
+    {
+        var panel = new StackPanel { Width = 200, Margin = new Thickness(5), Spacing = 3 };
+        panel.Children.Add(new TextBlock { Text = UiText.T("Исчезающие чернила"), FontWeight = FontWeight.SemiBold, Margin = new Thickness(7, 3) });
+        foreach (var (seconds, label) in new[] { (0d, UiText.T("Выключены")), (2d, UiText.T("Быстро")),
+            (10d, UiText.T("Долго")), (30d, UiText.T("Очень долго")) })
+        {
+            var button = MenuItem(panel, label, () => _session.SetFading(seconds));
+            button.Background = _session.FadeSeconds == seconds ? Cyan : Brushes.Transparent;
+            if (seconds > 0) ToolTip.SetTip(button, UiText.F("{0} секунд", seconds));
+        }
+        panel.Children.Add(new TextBlock { Text = UiText.T("Временные пометки на этом устройстве"), FontSize = 10,
+            TextWrapping = TextWrapping.Wrap, Foreground = Brushes.Gray, Margin = new Thickness(7, 4) });
+        ShowFlyout("fading", panel, _fading);
+    }
+    internal void ShowMasks()
+    {
+        var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 2 };
+        foreach (var (mode, glyph, label) in new[]
+        {
+            (PrivacyMode.Blur, ToolbarGlyph.MaskBlur, "Размытие"),
+            (PrivacyMode.BigPixels, ToolbarGlyph.MaskPixels, "Крупные пиксели"),
+            (PrivacyMode.Scramble, ToolbarGlyph.MaskScramble, "Перемешивание"),
+            (PrivacyMode.GlassBlocks, ToolbarGlyph.MaskGlass, "Преломление стекла"),
+            (PrivacyMode.Blackout, ToolbarGlyph.MaskBlackout, "Чёрная маска")
+        }) row.Children.Add(IconButton(glyph, UiText.T(label), () => { CloseFlyout(); _session.CreateMask(mode); }));
+        row.Children.Add(IconButton(ToolbarGlyph.Trash, UiText.T("Удалить все маски"), () => { CloseFlyout(); _session.CloseAllMasks(); }));
+        ShowFlyout("masks", row, _masks);
+    }
+    internal void ShowSizes()
     {
         var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 2 };
         foreach (var size in new[] { 2d, 4d, 8d, 12d, 20d })
@@ -230,15 +302,15 @@ internal sealed class DrawingToolbarWindow : Window
             button.Click += (_, _) => { _session.PenSize = size; _session.NotifySettings(); CloseFlyout(); };
             row.Children.Add(button);
         }
-        ShowFlyout("sizes", row, 158);
+        ShowFlyout("sizes", row, _sizes);
     }
     private void ShowBoards()
     {
         var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 2 };
         foreach (var (board, name, color) in new[]
         {
-            (BoardMode.Desktop, "Рабочий стол", "#D1E8EF"),
-            (BoardMode.White, "Белая доска", "#FFFFFF"), (BoardMode.Black, "Чёрная доска", "#111111")
+            (BoardMode.Desktop, UiText.T("Рабочий стол"), "#D1E8EF"),
+            (BoardMode.White, UiText.T("Белая доска"), "#FFFFFF"), (BoardMode.Black, UiText.T("Чёрная доска"), "#111111")
         })
         {
             var button = IconButton(ToolbarGlyph.Board, name, () => { _session.SelectScreen(); _session.SetBoard(board); CloseFlyout(); });
@@ -247,8 +319,8 @@ internal sealed class DrawingToolbarWindow : Window
             button.BorderThickness = new Thickness(2);
             row.Children.Add(button);
         }
-        row.Children.Add(IconButton(ToolbarGlyph.Pen, "Отдельное полотно · Ctrl+Shift+5", () => { _session.OpenCanvas(); CloseFlyout(); }));
-        ShowFlyout("boards", row, 248);
+        row.Children.Add(IconButton(ToolbarGlyph.Pen, UiText.T("Отдельное полотно · Ctrl+Shift+5"), () => { _session.OpenCanvas(); CloseFlyout(); }));
+        ShowFlyout("boards", row, _boards);
     }
     public void ShowPalette()
     {
@@ -264,70 +336,81 @@ internal sealed class DrawingToolbarWindow : Window
         panel.Children.Add(colors);
         var custom = new TextBox { Text = _session.Color.ToString(), PlaceholderText = "#RRGGBB", FontSize = 13 };
         panel.Children.Add(custom);
-        var apply = new Button { Content = "Применить цвет", HorizontalAlignment = HorizontalAlignment.Stretch };
+        var apply = new Button { Content = UiText.T("Применить цвет"), HorizontalAlignment = HorizontalAlignment.Stretch };
         apply.Click += (_, _) =>
         {
             if (Color.TryParse(custom.Text, out var color))
             { _session.Color = color; _session.NotifySettings(); CloseFlyout(); }
-            else custom.PlaceholderText = "Введите #RRGGBB";
+            else custom.PlaceholderText = UiText.T("Введите #RRGGBB");
         };
         panel.Children.Add(apply);
-        ShowFlyout("palette", panel, 350);
+        ShowFlyout("palette", panel, _selectedColor);
     }
 
     internal void ShowMenu()
     {
-        var panel = new StackPanel { Width = 230, Spacing = 3, Margin = new Thickness(7) };
+        var panel = new StackPanel { Width = 270, Spacing = 3, Margin = new Thickness(7) };
         panel.Children.Add(new TextBlock { Text = "BlurMask", FontSize = 18, FontWeight = FontWeight.SemiBold, Margin = new Thickness(5, 0, 0, 7) });
-        MenuItem(panel, "Полотно                            Ctrl+Shift+5", _session.OpenCanvas);
-        MenuItem(panel, "Рисовать на экране          Ctrl+Shift+6", _session.SelectScreen);
-        MenuItem(panel, "Новая маска", _session.NewMask);
-        MenuItem(panel, "Отменить                         Ctrl+Shift+Z", _session.Undo);
-        MenuItem(panel, "Повторить                       Ctrl+Shift+Y", _session.Redo);
-        MenuItem(panel, _session.InkVisible ? "Скрыть рисунок                  Ctrl+Shift+H" : "Показать рисунок                Ctrl+Shift+H", _session.ToggleInk);
-        MenuItem(panel, _session.Target == DrawingTarget.Canvas ? "Очистить полотно             Ctrl+Shift+F" : "Очистить экран                  Ctrl+Shift+F", _session.Clear);
+        MenuItem(panel, UiText.T("Полотно                            Ctrl+Shift+5"), _session.OpenCanvas);
+        MenuItem(panel, UiText.T("Рисовать на экране          Ctrl+Shift+6"), _session.SelectScreen);
+        MenuItem(panel, UiText.T("Новая маска"), _session.NewMask);
+        MenuItem(panel, UiText.T("Отменить                         Ctrl+Shift+Z"), _session.Undo);
+        MenuItem(panel, UiText.T("Повторить                       Ctrl+Shift+Y"), _session.Redo);
+        MenuItem(panel, _session.InkVisible ? UiText.T("Скрыть рисунок                  Ctrl+Shift+H") : UiText.T("Показать рисунок                Ctrl+Shift+H"), _session.ToggleInk);
+        MenuItem(panel, _session.Target == DrawingTarget.Canvas ? UiText.T("Очистить полотно             Ctrl+Shift+F") : UiText.T("Очистить экран                  Ctrl+Shift+F"), _session.Clear);
         panel.Children.Add(new Border { Height = 1, Background = Edge, Margin = new Thickness(0, 5) });
-        panel.Children.Add(new TextBlock { Text = "Размер текста", FontSize = 12, Margin = new Thickness(5, 3) });
+        panel.Children.Add(new TextBlock { Text = UiText.T("Размер текста"), FontSize = 12, Margin = new Thickness(5, 3) });
         var textSize = new Slider { Minimum = 14, Maximum = 72, Value = _session.TextSize, TickFrequency = 2, IsSnapToTickEnabled = true };
         textSize.ValueChanged += (_, _) => _session.TextSize = textSize.Value;
         panel.Children.Add(textSize);
-        MenuItem(panel, "Горячие клавиши", ShowShortcuts);
-        MenuItem(panel, "Снимок экрана                   Ctrl+Shift+S", () => _ = _session.CaptureScreenshotAsync());
-        MenuItem(panel, "Свернуть панель", ToggleCollapsed);
-        MenuItem(panel, "Выход", _session.Exit);
-        ShowFlyout("menu", panel, 280);
+        MenuItem(panel, UiText.T("Горячие клавиши"), ShowShortcuts);
+        MenuItem(panel, UiText.T("Снимок экрана                   Ctrl+Shift+S"), () => _ = _session.CaptureScreenshotAsync());
+        MenuItem(panel, UiText.T("Свернуть панель"), ToggleCollapsed);
+        MenuItem(panel, UiText.T("Выход"), _session.Exit);
+        ShowFlyout("menu", panel, _menu);
     }
-    private void MenuItem(StackPanel panel, string text, Action click)
+    private Button MenuItem(StackPanel panel, string text, Action click)
     {
-        var button = new Button { Theme = FlatButton, Content = new TextBlock { Text = text, Margin = new Thickness(7, 6) }, FontSize = 12, MinHeight = 30, HorizontalAlignment = HorizontalAlignment.Stretch,
+        Control content = new TextBlock { Text = text, TextWrapping = TextWrapping.Wrap };
+        var shortcutAt = text.IndexOf("Ctrl+", StringComparison.Ordinal);
+        if (shortcutAt > 0)
+        {
+            var row = new DockPanel { LastChildFill = true };
+            var shortcut = new TextBlock { Text = text[shortcutAt..], Foreground = Brushes.Gray, FontSize = 11, Margin = new Thickness(12, 0, 0, 0) };
+            DockPanel.SetDock(shortcut, Dock.Right); row.Children.Add(shortcut);
+            row.Children.Add(new TextBlock { Text = text[..shortcutAt].TrimEnd(), TextWrapping = TextWrapping.Wrap });
+            content = row;
+        }
+        var button = new Button { Theme = FlatButton, Content = new Border { Padding = new Thickness(7, 6), Child = content }, FontSize = 12, MinHeight = 30, HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Left, Padding = new Thickness(7, 6) };
         button.Click += (_, _) => { CloseFlyout(); click(); };
         panel.Children.Add(button);
+        return button;
     }
-    private void ShowShortcuts() => ShowMessage("Горячие клавиши",
-        "Ctrl+Shift+1   Курсор\nCtrl+Shift+2   Перо\nCtrl+Shift+3   Маркер\nCtrl+Shift+4   Ластик\nCtrl+Shift+5   Полотно\nCtrl+Shift+6   Экран\nCtrl+Shift+Z   Отменить\nCtrl+Shift+Y   Повторить\nCtrl+Shift+F   Очистить\nCtrl+Shift+H   Скрыть / показать рисунок\nCtrl+Shift+S   Снимок экрана\n\nEsc или ПКМ на экране — курсор\nShift — квадрат, круг, угол 45°\nТекст: Enter — готово; Shift+Enter — новая строка");
+    private void ShowShortcuts() => ShowMessage(UiText.T("Горячие клавиши"),
+        UiText.T("shortcuts_help"));
 
     public void ShowMessage(string title, string message)
     {
         var panel = new StackPanel { Width = 290, Margin = new Thickness(12), Spacing = 10 };
         panel.Children.Add(new TextBlock { Text = title, FontWeight = FontWeight.SemiBold, FontSize = 15 });
         panel.Children.Add(new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap, FontSize = 12 });
-        var close = new Button { Content = "Закрыть", HorizontalAlignment = HorizontalAlignment.Right };
+        var close = new Button { Content = UiText.T("Закрыть"), HorizontalAlignment = HorizontalAlignment.Right };
         close.Click += (_, _) => CloseFlyout();
         panel.Children.Add(close);
-        ShowFlyout("message", panel, 220);
+        ShowFlyout("message", panel, _menu);
     }
 
-    private double _flyoutOffset;
-    private void ShowFlyout(string name, Control content, double offset)
+    private Control? _flyoutAnchor;
+    private void ShowFlyout(string name, Control content, Control anchor)
     {
         if (_flyoutName == name) { CloseFlyout(); return; }
         CloseFlyout();
         _flyoutName = name;
-        _flyoutOffset = offset;
+        _flyoutAnchor = anchor;
         _flyout = new Window
         {
-            Title = "BlurMask — меню", WindowDecorations = WindowDecorations.None,
+            Title = UiText.T("BlurMask — меню"), WindowDecorations = WindowDecorations.None,
             SizeToContent = SizeToContent.WidthAndHeight, ShowInTaskbar = false, Topmost = true,
             CanResize = false, CanMinimize = false, CanMaximize = false,
             RequestedThemeVariant = ThemeVariant.Light,
@@ -340,34 +423,40 @@ internal sealed class DrawingToolbarWindow : Window
             if (!ReferenceEquals(_flyout, openedFlyout)) return;
             _flyout = null;
             _flyoutName = null;
+            _flyoutAnchor = null;
             _toolButtons.Clear();
         };
         _flyout.KeyDown += (_, e) => { if (e.Key == Key.Escape) CloseFlyout(); };
         _flyout.Opened += (_, _) => PlaceFlyout();
         _flyout.Resized += (_, _) => PlaceFlyout();
+        _flyout.LayoutUpdated += (_, _) => PlaceFlyout();
         _flyout.Show(this);
         PlaceFlyout();
+        Dispatcher.UIThread.Post(PlaceFlyout, DispatcherPriority.Loaded);
     }
     private void PlaceFlyout()
     {
-        if (_flyout is not { IsVisible: true } flyout) return;
+        if (_flyout is not { IsVisible: true } flyout || _flyoutAnchor is not { } anchor) return;
         var screen = Screens.ScreenFromWindow(this) ?? Screens.Primary;
         if (screen is null) return;
         var area = screen.WorkingArea;
         var scale = RenderScaling;
-        var width = (int)Math.Ceiling(flyout.Bounds.Width * scale);
-        var height = (int)Math.Ceiling(flyout.Bounds.Height * scale);
-        var x = Position.X + (int)(Width * scale);
+        var width = (int)Math.Ceiling(flyout.Bounds.Width * flyout.RenderScaling);
+        var height = (int)Math.Ceiling(flyout.Bounds.Height * flyout.RenderScaling);
+        var x = Position.X + (int)Math.Ceiling(Bounds.Width * scale);
         if (x + width > area.Right) x = Position.X - width;
-        var y = Position.Y + (int)(_flyoutOffset * scale);
-        flyout.Position = new PixelPoint(Math.Clamp(x, area.X, Math.Max(area.X, area.Right - width)),
+        // Anchor to the actual button after layout, including borders, margins and DPI.
+        var y = anchor.PointToScreen(default).Y - (int)Math.Round(4 * scale);
+        var position = new PixelPoint(Math.Clamp(x, area.X, Math.Max(area.X, area.Right - width)),
             Math.Clamp(y, area.Y, Math.Max(area.Y, area.Bottom - height)));
+        if (flyout.Position != position) flyout.Position = position;
     }
     public void CloseFlyout()
     {
         var flyout = _flyout;
         _flyout = null;
         _flyoutName = null;
+        _flyoutAnchor = null;
         _toolButtons.Clear();
         flyout?.Close();
     }
@@ -381,10 +470,15 @@ internal sealed class DrawingToolbarWindow : Window
         Position = new PixelPoint(Math.Clamp(Position.X, area.X, Math.Max(area.X, area.Right - (int)(Width * RenderScaling))),
             Math.Clamp(Position.Y, area.Y, Math.Max(area.Y, area.Bottom - (int)(Bounds.Height * RenderScaling))));
     }
-    private void ToggleCollapsed()
+    internal void ToggleCollapsed()
     {
         _collapsed = !_collapsed;
-        ((Control)_body.Parent!).IsVisible = !_collapsed;
+        ((StackPanel)Content!).Spacing = _collapsed ? 0 : 3;
+        _bodyContainer.Height = _collapsed ? 0 : _body.Children.Sum(c => c.DesiredSize.Height) + 2;
+        _bodyContainer.Opacity = _collapsed ? 0 : 1;
+        _bodyContainer.IsHitTestVisible = !_collapsed;
+        _handle.Content = new ToolbarIcon(_collapsed ? ToolbarGlyph.ClosedEye : ToolbarGlyph.Nib, !_collapsed) { Width = 34, Height = 34 };
+        ToolTip.SetTip(_handle, _collapsed ? UiText.T("Развернуть панель") : UiText.T("Перетащить панель · двойной щелчок — свернуть"));
         CloseFlyout();
         if (_collapsed && _session.InkVisible) _session.ToggleInk();
         else if (!_collapsed && !_session.InkVisible) _session.ToggleInk();

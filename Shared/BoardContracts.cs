@@ -13,6 +13,7 @@ public sealed record InkMarkDto
     public List<InkPointDto> Points { get; init; } = [];
     public string Text { get; init; } = "";
     public double FontSize { get; init; } = 28;
+    public string? Image { get; init; }
 }
 public sealed record BoardSnapshot
 {
@@ -30,6 +31,9 @@ public sealed record BoardPatch
     // A unique operation id makes retries safe, including a lost HTTP response.
     public Guid OperationId { get; init; } = Guid.NewGuid();
     public List<InkMarkDto> Add { get; init; } = [];
+    // A setter preserves the default for older requests which omit this field
+    // when deserialized by the .NET 10 source-generated serializer.
+    public List<InkMarkDto> Update { get; set; } = [];
     public List<Guid> Remove { get; init; } = [];
     public string? Title { get; init; }
     public string? Background { get; init; }
@@ -77,15 +81,34 @@ public static class BoardValidation
     public const int MaxPoints = 200000;
     public const int MaxDocumentBytes = 4 * 1024 * 1024;
     public static bool Valid(InkMarkDto? mark) => mark is not null && mark.Id != Guid.Empty &&
-        mark.Tool is "Pen" or "Highlighter" or "Line" or "Arrow" or "Rectangle" or "Ellipse" or "Text" &&
+        mark.Tool is "Pen" or "Highlighter" or "Line" or "Arrow" or "Rectangle" or "Ellipse" or "Text" or "Image" &&
         mark.Color is { Length: 7 or 9 } && mark.Color[0] == '#' && mark.Color.Skip(1).All(Uri.IsHexDigit) &&
         double.IsFinite(mark.Width) && mark.Width is >= 0.5 and <= 200 &&
         double.IsFinite(mark.FontSize) && mark.FontSize is >= 8 and <= 300 &&
         mark.Text is { Length: <= 4000 } && mark.Points is { Count: > 0 and <= 20000 } &&
-        mark.Points.All(p => p is not null && double.IsFinite(p.X) && double.IsFinite(p.Y) && Math.Abs(p.X) <= 100000 && Math.Abs(p.Y) <= 100000);
+        mark.Points.All(p => p is not null && double.IsFinite(p.X) && double.IsFinite(p.Y) && Math.Abs(p.X) <= 100000 && Math.Abs(p.Y) <= 100000) &&
+        (mark.Tool == "Image" ? mark.Points.Count == 2 && ValidImage(mark.Image) : mark.Image is null);
+    public static bool ValidImage(string? image)
+    {
+        if (image is null || image.Length > 2 * 1024 * 1024 || !image.StartsWith("iVBORw0KGgo", StringComparison.Ordinal)) return false;
+        try
+        {
+            var bytes = Convert.FromBase64String(image);
+            if (bytes.Length < 33 || !bytes.AsSpan(0, 8).SequenceEqual(new byte[] {137, 80, 78, 71, 13, 10, 26, 10}) ||
+                !bytes.AsSpan(12, 4).SequenceEqual("IHDR"u8)) return false;
+            var width = System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(bytes.AsSpan(16, 4));
+            var height = System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(bytes.AsSpan(20, 4));
+            return width is > 0 and <= 4096 && height is > 0 and <= 4096 && (long)width * height <= 16 * 1024 * 1024;
+        }
+        catch (FormatException) { return false; }
+    }
+    public static bool Same(InkMarkDto a, InkMarkDto b) => a.Tool == b.Tool && a.Color == b.Color && a.Width == b.Width &&
+        a.FontSize == b.FontSize && a.Text == b.Text && a.Image == b.Image && a.Points.SequenceEqual(b.Points);
     public static bool Valid(BoardPatch? patch) => patch is not null && patch.OperationId != Guid.Empty &&
-        patch.Add is { Count: <= MaxMarks } && patch.Remove is { Count: <= MaxMarks } &&
-        patch.Add.All(Valid) && patch.Add.Sum(m => m.Points.Count) <= MaxPoints &&
+        patch.Add is { Count: <= MaxMarks } && patch.Update is { Count: <= MaxMarks } && patch.Remove is { Count: <= MaxMarks } &&
+        patch.Add.All(Valid) && patch.Update.All(Valid) && patch.Add.Concat(patch.Update).Sum(m => m.Points.Count) <= MaxPoints &&
+        patch.Add.Concat(patch.Update).Select(m => m.Id).Distinct().Count() == patch.Add.Count + patch.Update.Count &&
+        !patch.Update.Any(m => patch.Remove.Contains(m.Id)) &&
         patch.Add.Select(m => m.Id).Distinct().Count() == patch.Add.Count &&
         (patch.Title is null || (!string.IsNullOrWhiteSpace(patch.Title) && patch.Title.Length <= 120)) &&
         (patch.Background is null or "white" or "black");

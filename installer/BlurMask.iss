@@ -46,19 +46,31 @@ WizardStyle=modern
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
+Name: "french"; MessagesFile: "compiler:Languages\French.isl"
+Name: "german"; MessagesFile: "compiler:Languages\German.isl"
 Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "startup"; Description: "{cm:StartupTask}"; Flags: unchecked
+Name: "startup"; Description: "{cm:StartupTask}"; Flags: checkedonce
 
 [CustomMessages]
 english.StartupTask=Start BlurMask when I sign in to Windows
+french.StartupTask=Lancer BlurMask à l’ouverture de session Windows
+german.StartupTask=BlurMask bei der Windows-Anmeldung starten
 russian.StartupTask=Запускать BlurMask при входе в Windows
 
 [Files]
 Source: "{#PublishDir}\*"; DestDir: "{app}"; Excludes: "*.pdb"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
+
+[InstallDelete]
+; Upgrades from the old dynamic build must not keep unused graphics dependencies.
+Type: files; Name: "{app}\av_libglesv2.dll"
+Type: files; Name: "{app}\libSkiaSharp.dll"
+Type: files; Name: "{app}\libHarfBuzzSharp.dll"
+Type: files; Name: "{app}\libSkiaSharp.pdb"
+Type: files; Name: "{app}\libHarfBuzzSharp.pdb"
 
 [Icons]
 Name: "{autoprograms}\BlurMask"; Filename: "{app}\BlurMask.exe"; WorkingDir: "{app}"

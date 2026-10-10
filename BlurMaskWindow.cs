@@ -308,21 +308,24 @@ public sealed class BlurMaskWindow : Window
 
         // Windows CI must exercise the real optical backend rather than silently passing
         // through the decorative fallback if native Magnification interop breaks under Native AOT.
-        if (OperatingSystem.IsWindows() && Mode == PrivacyMode.GlassBlocks && _windowsGlass is null)
+        if (OperatingSystem.IsWindows() && !Program.SoftwareRendering && !RemoteDesktopSupport.IsRemoteSession && Mode == PrivacyMode.GlassBlocks && _windowsGlass is null)
             throw new InvalidOperationException("Windows Glass Refraction optical backend failed to initialize.");
     }
 
     private void CycleMode()
     {
-        Mode = Mode switch
+        SetMode(Mode switch
         {
             PrivacyMode.Blur => PrivacyMode.BigPixels,
             PrivacyMode.BigPixels => PrivacyMode.Scramble,
             PrivacyMode.Scramble => PrivacyMode.GlassBlocks,
             PrivacyMode.GlassBlocks => PrivacyMode.Blackout,
             _ => PrivacyMode.Blur
-        };
-
+        });
+    }
+    internal void SetMode(PrivacyMode mode)
+    {
+        Mode = mode;
         ApplyMode();
         ModeChanged?.Invoke(Mode);
     }
@@ -335,6 +338,18 @@ public sealed class BlurMaskWindow : Window
         _scramble.IsVisible = false;
         _glassBlocks.IsVisible = false;
         _windowsGlass?.SetEnabled(false);
+
+        // Software/RDP composition cannot blur the pixels behind the window.
+        // Use an opaque cover so a rendering fallback never exposes private content.
+        if (Program.SoftwareRendering && Mode is PrivacyMode.Blur or PrivacyMode.BigPixels or PrivacyMode.GlassBlocks)
+        {
+            TransparencyLevelHint = [WindowTransparencyLevel.None];
+            Background = Brushes.Black;
+            _root.Background = Brushes.Black;
+            _bigPixels.IsVisible = Mode == PrivacyMode.BigPixels;
+            _glassBlocks.IsVisible = Mode == PrivacyMode.GlassBlocks;
+            return;
+        }
 
         switch (Mode)
         {

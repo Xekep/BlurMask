@@ -2,14 +2,16 @@
 
 ## Windows: "stack-based buffer overrun" / immediate native crash
 
-First make sure you did not copy only `BlurMask.exe` out of the Native AOT publish folder.
-Avalonia Native AOT on Windows requires native rendering libraries alongside the executable:
+The default Windows Native AOT build links rendering libraries into `BlurMask.exe`.
+It runs as a single executable. Older builds and the diagnostic
+`-DynamicNativeLibraries` build require these libraries alongside the executable:
 
 - `av_libglesv2.dll`
 - `libSkiaSharp.dll`
 - `libHarfBuzzSharp.dll`
 
-`build.ps1` checks for them after publishing. Distribute the complete `publish` directory.
+`build.ps1` verifies the selected payload type. For a dynamic build distribute its
+complete publish folder; for the default static build the executable is sufficient.
 
 A missing native DLL usually causes a loader/DLL error rather than a true managed stack
 overflow, so if the complete publish directory is present and the program still terminates,
@@ -35,9 +37,18 @@ Useful isolation steps:
    .\bin\Release\net11.0\win-x64\publish\BlurMask.exe --smoke-test
    ```
 
-4. If non-AOT works but Native AOT fails with all three DLLs present, capture the Windows
+4. If non-AOT works but the complete Native AOT payload fails, capture the Windows
    Event Viewer/Application Error entry and the process exit code. That separates a native
    renderer failure from application logic.
+
+## Remote Desktop / GPU device changes
+
+Launch `BlurMask.exe --software-rendering` before connecting over RDP to keep the
+renderer independent of GPU/compositor changes. Sessions already using RDP select
+this profile automatically at startup. It disables native glass magnification and
+uses an opaque cover for effects requiring compositor blur. Existing ink is retained
+across monitor changes. Live RDP reconnect behavior depends on the Windows session
+and driver and needs an actual disconnect/reconnect test.
 
 ## The mask is transparent but not blurred on Linux
 

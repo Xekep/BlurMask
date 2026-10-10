@@ -21,7 +21,7 @@ internal sealed class DesktopInkWindow : Window
     {
         _session = session;
         _screenBounds = screen.Bounds;
-        Title = "BlurMask — слой рисования";
+        Title = UiText.T("BlurMask — слой рисования");
         WindowDecorations = WindowDecorations.None;
         ShowInTaskbar = false;
         ShowActivated = false;
@@ -56,7 +56,7 @@ internal sealed class DesktopInkWindow : Window
     public void ApplyState()
     {
         var drawing = _session.Target == DrawingTarget.Screen && _session.Tool != InkTool.Cursor && _session.InkVisible;
-        _surface.Cursor = new Cursor(drawing ? StandardCursorType.Cross : StandardCursorType.Arrow);
+        _surface.Cursor = new Cursor(_session.Tool == InkTool.Select ? StandardCursorType.SizeAll : drawing ? StandardCursorType.Cross : StandardCursorType.Arrow);
         _surface.InvalidateVisual();
         if (OperatingSystem.IsWindows())
         {
@@ -102,6 +102,7 @@ internal sealed class DesktopInkWindow : Window
         if (_pointer is not null) return;
         _pointer = e.Pointer;
         e.Pointer.Capture(_surface);
+        if (_session.Tool == InkTool.Select) { _session.DesktopSelection.Begin(origin, 6 * RenderScaling); return; }
         _session.DesktopDocument.BeginEdit();
         if (_session.Tool == InkTool.Eraser)
         {
@@ -111,7 +112,8 @@ internal sealed class DesktopInkWindow : Window
         else
         {
             var width = _session.PenSize * RenderScaling * (_session.Tool == InkTool.Highlighter ? 4 : 1);
-            _session.DesktopDocument.Preview = new InkMark(_session.Tool, _session.Color, width, origin);
+            _session.DesktopDocument.Preview = new InkMark(_session.Tool, _session.Color, width, origin)
+                { FadeSeconds = _session.FadeSeconds };
             _session.DesktopDocument.Notify();
         }
     }
@@ -120,6 +122,7 @@ internal sealed class DesktopInkWindow : Window
     {
         if (_pointer != e.Pointer) return;
         var point = DesktopPoint(e.GetPosition(_surface));
+        if (_session.Tool == InkTool.Select) { _session.DesktopSelection.Move(point); e.Handled = true; return; }
         if (_session.Tool == InkTool.Eraser)
         {
             var distance = ((Vector)(point - _lastErase)).Length;
@@ -152,15 +155,18 @@ internal sealed class DesktopInkWindow : Window
 
     private void Erase(Point point)
     {
-        if (_session.DesktopDocument.Marks.RemoveAll(mark => mark.Hit(point, Math.Max(8, _session.PenSize * 2) * RenderScaling)) > 0)
+        var radius = Math.Max(8, _session.PenSize * 2) * RenderScaling;
+        var removed = _session.DesktopDocument.Marks.RemoveAll(mark => mark.Hit(point, radius));
+        removed += _session.DesktopDocument.FadingMarks.RemoveAll(mark => mark.Hit(point, radius));
+        if (removed > 0)
             _session.DesktopDocument.Notify();
     }
 
     private void OnReleased(object? sender, PointerReleasedEventArgs e)
     {
         if (_pointer != e.Pointer) return;
-        if (_session.DesktopDocument.Preview is { } mark) _session.DesktopDocument.Marks.Add(mark);
-        _session.DesktopDocument.Commit();
+        if (_session.Tool == InkTool.Select) _session.DesktopSelection.Complete();
+        else _session.DesktopDocument.CompletePreview();
         _pointer = null;
         e.Pointer.Capture(null);
         e.Handled = true;
@@ -173,6 +179,7 @@ internal sealed class DesktopInkWindow : Window
         if (pointer is not null)
         {
             pointer.Capture(null);
+            _session.DesktopSelection.Cancel();
             _session.DesktopDocument.Cancel();
         }
     }
@@ -187,7 +194,7 @@ internal sealed class DesktopInkWindow : Window
             FontSize = _session.TextSize,
             Foreground = new SolidColorBrush(_session.Color),
             Background = new SolidColorBrush(Color.FromArgb(235, 255, 255, 255)),
-            PlaceholderText = "Текст · Enter — готово",
+            PlaceholderText = UiText.T("Текст · Enter — готово"),
             AcceptsReturn = true,
             TextWrapping = TextWrapping.Wrap
         };
@@ -208,7 +215,7 @@ internal sealed class DesktopInkWindow : Window
         _editLayer.Children.Remove(box);
         if (!cancel && !string.IsNullOrWhiteSpace(box.Text))
             _session.DesktopDocument.Add(new InkMark(InkTool.Text, _session.Color, 1, _textOrigin)
-            { Text = box.Text, FontSize = _session.TextSize * RenderScaling });
+            { Text = box.Text, FontSize = _session.TextSize * RenderScaling, FadeSeconds = _session.FadeSeconds });
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs e)
@@ -220,6 +227,8 @@ internal sealed class DesktopInkWindow : Window
             return;
         }
         if (e.Key == Key.Escape) { _session.SelectTool(InkTool.Cursor); e.Handled = true; }
+        else if (e.Key is Key.Delete or Key.Back && _session.Tool == InkTool.Select)
+        { _session.DesktopSelection.Delete(); e.Handled = true; }
         else if (e.Key == Key.Z && e.KeyModifiers.HasFlag(KeyModifiers.Control))
         {
             CancelGesture();
@@ -243,7 +252,9 @@ internal sealed class DesktopInkWindow : Window
             using var transform = context.PushTransform(
                 Matrix.CreateTranslation(-window.Position.X, -window.Position.Y) * Matrix.CreateScale(1 / window.RenderScaling, 1 / window.RenderScaling));
             foreach (var mark in session.DesktopDocument.Marks) mark.Draw(context);
+            foreach (var mark in session.DesktopDocument.FadingMarks) mark.Draw(context);
             session.DesktopDocument.Preview?.Draw(context);
+            if (session.Tool == InkTool.Select) session.DesktopSelection.Draw(context, 1 / window.RenderScaling);
         }
     }
 }

@@ -51,7 +51,7 @@ test('security: authorization, validation, no-op writes and bounded resource use
   await t.test('null members, duplicate ids and cumulative point excess are rejected',async()=>{
     const m=mark('test');
     const manyPoints=Array.from({length:11},()=>({...mark(''),points:Array.from({length:20000},()=>({x:0,y:0}))}));
-    for(const bad of [patch({add:[null]}),patch({add:[m,m]}),patch({add:null}),patch({remove:null}),
+    for(const bad of [patch({add:[null]}),patch({add:[m,m]}),patch({add:null}),patch({remove:null}),patch({update:null}),patch({update:[null]}),patch({update:[m,m]}),
       patch({add:manyPoints})])
       assert.equal((await request(path+'/changes',access.editKey,bad)).status,400);
   });

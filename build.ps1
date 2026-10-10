@@ -2,7 +2,8 @@ param(
     [ValidateSet('win-x64','win-arm64','linux-x64','linux-arm64','osx-x64','osx-arm64')]
     [string]$Runtime = 'win-x64',
     [string]$Version,
-    [string]$OutputDirectory
+    [string]$OutputDirectory,
+    [switch]$DynamicNativeLibraries
 )
 
 $ErrorActionPreference = 'Stop'
@@ -26,7 +27,12 @@ if ($Version) {
     if ($Version -notmatch '^\d+\.\d+\.\d+(?:\.\d+)?(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$') { throw 'Invalid application version.' }
     $publishArguments += "-p:Version=$Version"
 }
-if ($OutputDirectory) { $publishArguments += @('-o', [IO.Path]::GetFullPath($OutputDirectory)) }
+if ($OutputDirectory) {
+    $publishArguments += @('-o', [IO.Path]::GetFullPath($OutputDirectory))
+    # Keep installer/custom builds separate from a running binary in bin/Release.
+    $publishArguments += "-p:OutputPath=$(Join-Path $PSScriptRoot ".artifacts\build-output\$Runtime\")"
+}
+if ($Runtime.StartsWith('win-')) { $publishArguments += "-p:StaticNativeLibraries=$((-not $DynamicNativeLibraries).ToString().ToLowerInvariant())" }
 Push-Location $PSScriptRoot
 try { dotnet @publishArguments }
 finally { Pop-Location }
@@ -40,7 +46,8 @@ $publishDir = Join-Path $PSScriptRoot "bin\Release\$targetFramework\$Runtime\pub
 if ($OutputDirectory) { $publishDir = [IO.Path]::GetFullPath($OutputDirectory) }
 
 if ($Runtime.StartsWith('win-')) {
-    $required = @('av_libglesv2.dll', 'libSkiaSharp.dll', 'libHarfBuzzSharp.dll')
+    $required = @('BlurMask.exe')
+    if ($DynamicNativeLibraries) { $required += @('av_libglesv2.dll', 'libSkiaSharp.dll', 'libHarfBuzzSharp.dll') }
     foreach ($name in $required) {
         $path = Join-Path $publishDir $name
         if (-not (Test-Path $path)) {
@@ -48,7 +55,11 @@ if ($Runtime.StartsWith('win-')) {
         }
     }
 
-    Write-Host "Verified Avalonia native dependencies. Keep the entire publish directory together."
+    if (-not $DynamicNativeLibraries) {
+        if (Get-ChildItem -LiteralPath $publishDir -Filter '*.dll') { throw 'Static Native AOT publish unexpectedly contains DLLs.' }
+        Write-Host 'Verified single-executable Native AOT payload. Rendering libraries are statically linked.'
+    }
+    else { Write-Host 'Verified dynamic native dependencies. Keep the entire publish directory together.' }
 }
 
 Write-Host "Published to: $publishDir"

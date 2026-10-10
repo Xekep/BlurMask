@@ -14,7 +14,7 @@ internal sealed class CanvasInkSurface : Grid
     private TextBox? _editor;
     private Point _textPoint;
     private IPointer? _pointer;
-    private bool _panning, _fitted;
+    private bool _panning, _autoFit = true;
     private Point _panStart, _offsetStart, _lastErase;
     internal double Zoom { get; private set; } = 1;
     internal Vector Offset { get; private set; } = new(20, 20);
@@ -30,18 +30,20 @@ internal sealed class CanvasInkSurface : Grid
         _surface.PointerCaptureLost += (_, _) => CancelGesture();
         _surface.PointerWheelChanged += (_, e) =>
         {
+            _autoFit = false;
             var local = e.GetPosition(this); var point = ToBoard(local);
             Zoom = Math.Clamp(Zoom * Math.Pow(1.15, e.Delta.Y), 0.08, 4);
             Offset = (Vector)local - (Vector)point * Zoom; InvalidateVisual(); e.Handled = true;
         };
         AddHandler(KeyDownEvent, KeyPressed, Avalonia.Interactivity.RoutingStrategies.Tunnel);
-        SizeChanged += (_, _) => { if (!_fitted && Bounds.Width > 0 && Bounds.Height > 0) { _fitted = true; Fit(); } };
+        SizeChanged += (_, _) => { if (_autoFit && Bounds.Width > 0 && Bounds.Height > 0) Fit(); };
         Focusable = true;
     }
     public void Fit()
     {
+        _autoFit = true;
         if (Bounds.Width <= 0 || Bounds.Height <= 0) return;
-        Zoom = Math.Clamp(Math.Min((Bounds.Width - 70) / _window.BoardWidth, (Bounds.Height - 70) / _window.BoardHeight), .08, 1);
+        Zoom = Math.Clamp(Math.Min((Bounds.Width - 24) / _window.BoardWidth, (Bounds.Height - 24) / _window.BoardHeight), .08, 1);
         Offset = new Vector((Bounds.Width - _window.BoardWidth * Zoom) / 2, (Bounds.Height - _window.BoardHeight * Zoom) / 2);
         InvalidateVisual();
     }
@@ -57,16 +59,19 @@ internal sealed class CanvasInkSurface : Grid
         var local = current.Position; var point = ToBoard(local);
         if (_session.Tool == InkTool.Cursor || current.Properties.IsMiddleButtonPressed || _window.ReadOnly)
         {
+            _autoFit = false;
             _panning = true; _panStart = local; _offsetStart = (Point)Offset;
             _pointer = e.Pointer; e.Pointer.Capture(_surface); e.Handled = true; return;
         }
         if (point.X < 0 || point.Y < 0 || point.X > _window.BoardWidth || point.Y > _window.BoardHeight) return;
         if (_session.Tool == InkTool.Text) { StartText(local, point); e.Handled = true; return; }
         _pointer = e.Pointer; e.Pointer.Capture(_surface); Focus();
+        if (_session.Tool == InkTool.Select) { _session.CanvasSelection.Begin(point, 6 / Zoom); e.Handled = true; return; }
         _session.CanvasDocument.BeginEdit();
         if (_session.Tool == InkTool.Eraser) { _lastErase = point; Erase(point); }
         else _session.CanvasDocument.Preview = new InkMark(_session.Tool, _session.Color,
-            _session.PenSize * (_session.Tool == InkTool.Highlighter ? 4 : 1), point);
+            _session.PenSize * (_session.Tool == InkTool.Highlighter ? 4 : 1), point)
+            { FadeSeconds = _session.FadeSeconds };
         _session.CanvasDocument.Notify(); e.Handled = true;
     }
     private void Moved(object? sender, PointerEventArgs e)
@@ -75,6 +80,7 @@ internal sealed class CanvasInkSurface : Grid
         var local = e.GetPosition(this);
         if (_panning) { Offset = (Vector)_offsetStart + (Vector)(local - _panStart); InvalidateVisual(); return; }
         var point = ToBoard(local);
+        if (_session.Tool == InkTool.Select && !_window.ReadOnly) { _session.CanvasSelection.Move(point); e.Handled = true; return; }
         if (_session.Tool == InkTool.Eraser)
         {
             var steps = Math.Max(1, (int)Math.Ceiling(((Vector)(point - _lastErase)).Length / Math.Max(2, _session.PenSize)));
@@ -104,7 +110,10 @@ internal sealed class CanvasInkSurface : Grid
     }
     private void Erase(Point point)
     {
-        if (_session.CanvasDocument.Marks.RemoveAll(mark => mark.Hit(point, Math.Max(8, _session.PenSize * 2))) > 0)
+        var radius = Math.Max(8, _session.PenSize * 2);
+        var removed = _session.CanvasDocument.Marks.RemoveAll(mark => mark.Hit(point, radius));
+        removed += _session.CanvasDocument.FadingMarks.RemoveAll(mark => mark.Hit(point, radius));
+        if (removed > 0)
             _session.CanvasDocument.Notify();
     }
     private void Released(object? sender, PointerReleasedEventArgs e)
@@ -113,9 +122,9 @@ internal sealed class CanvasInkSurface : Grid
         var pointer = _pointer; _pointer = null;
         if (!_panning)
         {
-            if (_session.CanvasDocument.Preview is { } mark && _session.CanvasDocument.Marks.Count < 5000)
-                _session.CanvasDocument.Marks.Add(mark);
-            _session.CanvasDocument.Commit();
+            if (_session.Tool == InkTool.Select) _session.CanvasSelection.Complete();
+            else if (_session.CanvasDocument.Marks.Count < 5000) _session.CanvasDocument.CompletePreview();
+            else _session.CanvasDocument.Cancel();
         }
         _panning = false; pointer.Capture(null); e.Handled = true;
     }
@@ -125,7 +134,7 @@ internal sealed class CanvasInkSurface : Grid
         if (pointer is not null)
         {
             pointer.Capture(null);
-            if (!_panning) _session.CanvasDocument.Cancel();
+            if (!_panning) { _session.CanvasSelection.Cancel(); _session.CanvasDocument.Cancel(); }
         }
         _panning = false;
     }
@@ -135,7 +144,7 @@ internal sealed class CanvasInkSurface : Grid
             Math.Clamp(local.Y, 0, Math.Max(0, Bounds.Height - 60))));
         _editor = new TextBox { Width = 340, MinHeight = 48, FontSize = Math.Max(14, _session.TextSize * Zoom),
             Foreground = new SolidColorBrush(_session.Color), Background = Brushes.White, AcceptsReturn = true,
-            MaxLength = 4000, PlaceholderText = "Текст · Enter — готово" };
+            MaxLength = 4000, PlaceholderText = UiText.T("Текст · Enter — готово") };
         Canvas.SetLeft(_editor, Math.Clamp(local.X, 0, Math.Max(0, Bounds.Width - 340)));
         Canvas.SetTop(_editor, Math.Clamp(local.Y, 0, Math.Max(0, Bounds.Height - 60)));
         _editorLayer.Children.Add(_editor); _editor.Focus();
@@ -145,7 +154,8 @@ internal sealed class CanvasInkSurface : Grid
         if (_editor is not { } box) return;
         _editor = null; _editorLayer.Children.Remove(box);
         if (!cancel && !_window.ReadOnly && !string.IsNullOrWhiteSpace(box.Text))
-            _session.CanvasDocument.Add(new InkMark(InkTool.Text, _session.Color, 1, _textPoint) { Text = box.Text, FontSize = _session.TextSize });
+            _session.CanvasDocument.Add(new InkMark(InkTool.Text, _session.Color, 1, _textPoint)
+                { Text = box.Text, FontSize = _session.TextSize, FadeSeconds = _session.FadeSeconds });
     }
     public void FinishInput() { FinishText(); CancelGesture(); }
     private void KeyPressed(object? sender, KeyEventArgs e)
@@ -157,6 +167,8 @@ internal sealed class CanvasInkSurface : Grid
             return;
         }
         if (e.Key == Key.Escape) { CancelGesture(); _session.SelectTool(InkTool.Cursor); e.Handled = true; }
+        else if (!_window.ReadOnly && e.Key is Key.Delete or Key.Back && _session.Tool == InkTool.Select)
+        { _session.CanvasSelection.Delete(); e.Handled = true; }
         else if (!_window.ReadOnly && e.Key == Key.Z && e.KeyModifiers.HasFlag(KeyModifiers.Control))
         {
             CancelGesture();
@@ -169,7 +181,7 @@ internal sealed class CanvasInkSurface : Grid
     {
         public override void Render(DrawingContext context)
         {
-            context.DrawRectangle(new SolidColorBrush(Color.Parse("#F0F3F5")), null, new Rect(Bounds.Size));
+            context.DrawRectangle(new SolidColorBrush(Color.Parse("#E9EDF1")), null, new Rect(Bounds.Size));
             using var transform = context.PushTransform(Matrix.CreateScale(owner.Zoom, owner.Zoom) * Matrix.CreateTranslation(owner.Offset));
             var rect = new Rect(0, 0, owner._window.BoardWidth, owner._window.BoardHeight);
             context.DrawRectangle(owner._window.BoardBackground == "black" ? Brushes.Black : Brushes.White,
@@ -177,7 +189,9 @@ internal sealed class CanvasInkSurface : Grid
             using var clip = context.PushClip(rect);
             if (!owner._session.InkVisible) return;
             foreach (var mark in owner._session.CanvasDocument.Marks) mark.Draw(context);
+            foreach (var mark in owner._session.CanvasDocument.FadingMarks) mark.Draw(context);
             owner._session.CanvasDocument.Preview?.Draw(context);
+            if (owner._session.Tool == InkTool.Select && !owner._window.ReadOnly) owner._session.CanvasSelection.Draw(context, owner.Zoom);
         }
     }
 }

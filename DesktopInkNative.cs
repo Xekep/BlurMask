@@ -53,7 +53,7 @@ internal sealed partial class DesktopInkNative : IDisposable
         if (next == style) return;
         SetWindowLongPtrW(hwnd, ExStyle, (nint)next);
         if (enabled && SetLayeredWindowAttributes(hwnd, 0, 255, 2) == 0)
-            throw new Win32Exception(Marshal.GetLastPInvokeError(), "Не удалось включить режим курсора.");
+            throw new Win32Exception(Marshal.GetLastPInvokeError(), UiText.T("Не удалось включить режим курсора."));
         SetWindowPos(hwnd, 0, 0, 0, 0, 0, 0x1 | 0x2 | 0x4 | 0x10 | 0x20);
     }
 
@@ -98,12 +98,12 @@ internal sealed partial class DesktopInkNative : IDisposable
 
     public static unsafe void SaveScreenshot(string path, PixelRect? region = null)
     {
-        if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException("Снимки рабочего стола поддерживаются в Windows.");
+        if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException(UiText.T("Снимки рабочего стола поддерживаются в Windows."));
         var x = region?.X ?? GetSystemMetrics(76);
         var y = region?.Y ?? GetSystemMetrics(77);
         var width = region?.Width ?? GetSystemMetrics(78);
         var height = region?.Height ?? GetSystemMetrics(79);
-        if (width <= 0 || height <= 0) throw new InvalidOperationException("Рабочий стол недоступен.");
+        if (width <= 0 || height <= 0) throw new InvalidOperationException(UiText.T("Рабочий стол недоступен."));
         var desktop = GetDC(0);
         if (desktop == 0) throw new Win32Exception(Marshal.GetLastPInvokeError());
         nint memory = 0, bitmap = 0, previous = 0;

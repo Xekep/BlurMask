@@ -18,10 +18,12 @@ internal sealed class CanvasWindow : Window
     private readonly CanvasInkSurface _surface;
     private readonly TextBox _title;
     private readonly TextBlock _status;
+    private readonly Border _chrome;
+    private readonly Border _statusBadge;
     private readonly CanvasCloudClient _cloud = new();
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(1300) };
     private readonly string _statePath;
-    private BoardSnapshot _board = new();
+    private BoardSnapshot _board = new() { Title = UiText.T("Новое полотно") };
     private BoardSnapshot _baseline = new();
     private BoardConnection? _connection;
     private BoardPatch? _pending;
@@ -39,7 +41,7 @@ internal sealed class CanvasWindow : Window
     public CanvasWindow(DrawingSession session)
     {
         _session = session;
-        Title = "BlurMask — Полотно";
+        Title = UiText.T("BlurMask — Полотно");
         Width = 1100; Height = 760; MinWidth = 650; MinHeight = 450;
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         RequestedThemeVariant = ThemeVariant.Light;
@@ -49,44 +51,51 @@ internal sealed class CanvasWindow : Window
             : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "BlurMask");
         _statePath = Path.Combine(storage, "canvas.json");
         if (!Program.SmokeTest) LoadState();
-        var dock = new DockPanel();
-        var top = new WrapPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(12, 8), ItemSpacing = 7, LineSpacing = 7 };
-        _title = new TextBox { Text = _board.Title, Width = 220, MaxLength = 120, IsReadOnly = ReadOnly };
+        _surface = new CanvasInkSurface(session, this);
+        var workspace = new Grid();
+        workspace.Children.Add(_surface);
+        var top = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4 };
+        _title = new TextBox { Text = _board.Title, Width = 210, MaxLength = 120, IsReadOnly = ReadOnly,
+            FontSize = 13, BorderThickness = new Thickness(0), Background = Brushes.Transparent };
         _title.LostFocus += (_, _) =>
         {
             if (ReadOnly) return;
-            _board = _board with { Title = string.IsNullOrWhiteSpace(_title.Text) ? "Новое полотно" : _title.Text.Trim() };
+            _board = _board with { Title = string.IsNullOrWhiteSpace(_title.Text) ? UiText.T("Новое полотно") : _title.Text.Trim() };
             SaveState();
         };
         top.Children.Add(_title);
-        AddButton(top, "Новое", NewLocal);
-        AddButton(top, "Экран", session.SelectScreen);
-        AddButton(top, "Перо", () => { session.ActivateCanvas(); session.SelectTool(InkTool.Pen); });
-        AddButton(top, "Ластик", () => { session.ActivateCanvas(); session.SelectTool(InkTool.Eraser); });
-        AddButton(top, "↶", session.Undo);
-        AddButton(top, "↷", session.Redo);
-        AddButton(top, "Вместить", () => _surface?.Fit());
-        AddButton(top, "Фон", () =>
+        top.Children.Add(CanvasButton("⊡", UiText.T("Вместить"), () => _surface.Fit()));
+        top.Children.Add(CanvasButton("↗", UiText.T("Поделиться"), () => _ = ShareAsync()));
+        var menuButton = CanvasButton("···", UiText.T("Меню полотна"), () => { });
+        var menu = new ContextMenu();
+        foreach (var (label, action) in new (string, Action)[]
         {
-            if (ReadOnly) return;
-            _board = _board with { Background = _board.Background == "white" ? "black" : "white" };
-            if (BoardBackground == "black" && session.Color == Colors.Black) session.Color = Colors.White;
-            SaveState(); Refresh();
-        });
-        AddButton(top, "Подключить", ShowConnection);
-        AddButton(top, "Поделиться", () => _ = ShareAsync());
-        AddButton(top, "PNG", SavePng);
-        var header = new Border { Background = Brushes.White, BorderBrush = new SolidColorBrush(Color.Parse("#D8DFE4")),
-            BorderThickness = new Thickness(0, 0, 0, 1), Child = top };
-        DockPanel.SetDock(header, Dock.Top); dock.Children.Add(header);
-        var footer = new DockPanel { Margin = new Thickness(12, 5) };
-        _status = new TextBlock { Text = _connection is null ? "Сохранено на устройстве" : "Подключение…", FontSize = 12 };
-        footer.Children.Add(_status);
-        footer.Children.Add(new TextBlock { Text = "Ctrl+Shift+5 — полотно · Ctrl+Shift+6 — экран · колесо — масштаб",
-            FontSize = 11, Foreground = Brushes.Gray, HorizontalAlignment = HorizontalAlignment.Right });
-        DockPanel.SetDock(footer, Dock.Bottom); dock.Children.Add(footer);
-        _surface = new CanvasInkSurface(session, this);
-        dock.Children.Add(_surface); Content = dock;
+            ("Вставить изображение · Ctrl+V", () => _ = PasteImageAsync()), ("Новое", NewLocal),
+            ("Подключить", ShowConnection), ("Фон", ToggleBackground), ("Сохранить PNG", SavePng),
+            ("Экран", session.SelectScreen), ("Скрыть меню · Tab", ToggleChrome)
+        })
+        {
+            var item = new MenuItem { Header = UiText.T(label) };
+            item.Click += (_, _) => action(); menu.Items.Add(item);
+        }
+        menuButton.Click += (_, _) => menu.Open(menuButton);
+        top.Children.Add(menuButton);
+        _chrome = new Border { Child = top, Background = Brushes.White, CornerRadius = new CornerRadius(12),
+            Padding = new Thickness(8, 5), Margin = new Thickness(62, 12, 12, 0),
+            HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top,
+            BoxShadow = new BoxShadows(new BoxShadow { Blur = 18, OffsetY = 4, Color = Color.FromArgb(30, 0, 0, 0) }) };
+        workspace.Children.Add(_chrome);
+        var reveal = CanvasButton(new ToolbarIcon(ToolbarGlyph.Nib, true) { Width = 28, Height = 28 }, UiText.T("Показать / скрыть меню · Tab"), ToggleChrome);
+        reveal.Margin = new Thickness(12, 12, 0, 0); reveal.Width = 40; reveal.Height = 40;
+        reveal.HorizontalAlignment = HorizontalAlignment.Left; reveal.VerticalAlignment = VerticalAlignment.Top;
+        workspace.Children.Add(reveal);
+        _status = new TextBlock { Text = _connection is null ? UiText.T("Сохранено на устройстве") : UiText.T("Подключение…"), FontSize = 12 };
+        _statusBadge = new Border { Child = _status, Background = new SolidColorBrush(Color.FromArgb(225, 255, 255, 255)),
+            CornerRadius = new CornerRadius(8), Padding = new Thickness(10, 5), Margin = new Thickness(12),
+            MaxWidth = 500, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Bottom,
+            IsHitTestVisible = false };
+        workspace.Children.Add(_statusBadge); Content = workspace;
+        AddHandler(KeyDownEvent, CanvasKeyDown, Avalonia.Interactivity.RoutingStrategies.Tunnel);
         session.CanvasDocument.Changed += OnDocumentChanged;
         _timer.Tick += (_, _) => { if (_dirty && !session.CanvasDocument.HasActiveEdit) SaveState(); _ = SyncAsync(); };
         _timer.Start();
@@ -99,22 +108,88 @@ internal sealed class CanvasWindow : Window
         Closed += (_, _) => { _timer.Stop(); session.CanvasDocument.Changed -= OnDocumentChanged; _cloud.Dispose(); };
     }
 
-    private static void AddButton(Panel panel, string text, Action action)
+    private static Button CanvasButton(object content, string tip, Action action)
     {
-        var button = new Button { Content = text, Padding = new Thickness(9, 6), FontSize = 12 };
-        button.Click += (_, _) => action(); panel.Children.Add(button);
+        var button = new Button { Content = content, Padding = new Thickness(8, 4), FontSize = 20,
+            Height = 32, MinWidth = 32, CornerRadius = new CornerRadius(8), Background = Brushes.Transparent,
+            BorderThickness = new Thickness(0) };
+        ToolTip.SetTip(button, tip); Avalonia.Automation.AutomationProperties.SetName(button, tip);
+        button.Click += (_, _) => action(); return button;
+    }
+    internal void ToggleChrome() { _chrome.IsVisible = !_chrome.IsVisible; _statusBadge.IsVisible = _chrome.IsVisible; _surface.Focus(); }
+    private void ToggleBackground()
+    {
+        if (ReadOnly) return;
+        _board = _board with { Background = _board.Background == "white" ? "black" : "white" };
+        if (BoardBackground == "black" && _session.Color == Colors.Black) _session.Color = Colors.White;
+        SaveState(); Refresh();
+    }
+    private void CanvasKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (FocusManager?.GetFocusedElement() is TextBox) return;
+        if (e.Key == Key.Tab && e.KeyModifiers == KeyModifiers.None) { ToggleChrome(); e.Handled = true; }
+        else if (e.Key == Key.V && e.KeyModifiers.HasFlag(KeyModifiers.Control))
+        { _ = PasteImageAsync(); e.Handled = true; }
+    }
+    internal async Task PasteImageAsync()
+    {
+        if (ReadOnly || Clipboard is null) return;
+        var generation = _generation;
+        try
+        {
+            using var source = await Clipboard.TryGetBitmapAsync();
+            if (generation != _generation || _shutdown || ReadOnly) return;
+            if (source is null) { _status.Text = UiText.T("В буфере нет изображения"); return; }
+            InsertImage(source);
+        }
+        catch (Exception ex) when (ex is IOException or ArgumentException or InvalidOperationException or NotSupportedException)
+        { _status.Text = UiText.T("Не удалось вставить изображение"); }
+    }
+    internal void InsertImage(Bitmap source)
+    {
+        if (ReadOnly || _session.CanvasDocument.Marks.Count >= BoardValidation.MaxMarks) return;
+        FinishInput();
+        var original = source.PixelSize;
+        if (original.Width <= 0 || original.Height <= 0 || (long)original.Width * original.Height > 64 * 1024 * 1024)
+            throw new ArgumentException("Image dimensions exceed the limit.");
+        var ratio = Math.Min(1, 2048d / Math.Max(original.Width, original.Height));
+        byte[] png;
+        while (true)
+        {
+            var size = new PixelSize(Math.Max(1, (int)(original.Width * ratio)), Math.Max(1, (int)(original.Height * ratio)));
+            var view = new Image { Source = source, Width = size.Width, Height = size.Height, Stretch = Stretch.Fill };
+            view.Measure(new Size(size.Width, size.Height)); view.Arrange(new Rect(0, 0, size.Width, size.Height));
+            using var bitmap = new RenderTargetBitmap(size, new Vector(96, 96)); bitmap.Render(view);
+            using var stream = new MemoryStream(); bitmap.Save(stream, PngBitmapEncoderOptions.Default); png = stream.ToArray();
+            if (png.Length <= 1500 * 1024) break;
+            ratio *= .75;
+            if (Math.Max(original.Width, original.Height) * ratio < 128) throw new ArgumentException("Image exceeds the size limit.");
+        }
+        var scale = Math.Min(1, Math.Min(BoardWidth * .7 / original.Width, BoardHeight * .7 / original.Height));
+        var dimensions = new Size(original.Width * scale, original.Height * scale);
+        var center = _surface.ToBoard(new Point(_surface.Bounds.Width / 2, _surface.Bounds.Height / 2));
+        var origin = new Point(Math.Clamp(center.X - dimensions.Width / 2, 0, BoardWidth - dimensions.Width),
+            Math.Clamp(center.Y - dimensions.Height / 2, 0, BoardHeight - dimensions.Height));
+        var mark = new InkMark(InkTool.Image, Colors.Black, 1, origin) { Image = Convert.ToBase64String(png) };
+        mark.AddPoint(origin + new Vector(dimensions.Width, dimensions.Height));
+        var candidate = Snapshot() with { Marks = [.. _session.CanvasDocument.Export(), new InkMarkDto
+            { Id = mark.Id, Tool = "Image", Image = mark.Image, Points = mark.Points.Select(p => new InkPointDto(p.X, p.Y)).ToList() }] };
+        if (System.Text.Encoding.UTF8.GetByteCount(JsonSerializer.Serialize(candidate, BoardJsonContext.Default.BoardSnapshot)) > BoardValidation.MaxDocumentBytes)
+        { _status.Text = UiText.T("Полотно достигло лимита размера"); return; }
+        _session.ActivateCanvas(); _session.CanvasDocument.Add(mark); _session.SelectTool(InkTool.Select);
+        _session.CanvasSelection.Begin(mark.Bounds.Center, 0); _session.CanvasSelection.Complete(); SaveState();
     }
     private void OnDocumentChanged() { if (!_loading) _dirty = true; }
     private void NewLocal()
     {
-        if (_busy) { _status.Text = "Дождитесь текущего сохранения."; return; }
+        if (_busy) { _status.Text = UiText.T("Дождитесь текущего сохранения."); return; }
         FinishInput(); SaveState();
         try { if (File.Exists(_statePath)) File.Copy(_statePath, _statePath + $".backup-{DateTime.Now:yyyyMMdd-HHmmss-fff}.json", true); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        { _status.Text = "Не удалось сохранить резервную копию: " + ex.Message; return; }
+        { _status.Text = UiText.T("Не удалось сохранить резервную копию: ") + ex.Message; return; }
         _generation++; _connection = null; _pending = null; _pendingBefore = null; _viewKey = null; _deferred = null;
-        _baseline = new(); Apply(new(), true); SaveState(); _surface.Fit();
-        _status.Text = "Сохранено на устройстве";
+        _baseline = new(); Apply(new() { Title = UiText.T("Новое полотно") }, true); SaveState(); _surface.Fit();
+        _status.Text = UiText.T("Сохранено на устройстве");
     }
     public void Refresh() { _surface.InvalidateVisual(); _title.IsReadOnly = ReadOnly; }
     public void FinishInput() => _surface.FinishInput();
@@ -122,7 +197,7 @@ internal sealed class CanvasWindow : Window
     internal BoardSnapshot Snapshot() => _board with { Marks = _session.CanvasDocument.Export() };
     private void Apply(BoardSnapshot board, bool resetHistory = false)
     {
-        if (!BoardValidation.Valid(board)) throw new InvalidDataException("Сервер вернул некорректное полотно.");
+        if (!BoardValidation.Valid(board)) throw new InvalidDataException(UiText.T("Сервер вернул некорректное полотно."));
         _loading = true;
         try { _board = board; _session.CanvasDocument.Import(board.Marks, resetHistory); if (!_title.IsFocused) _title.Text = board.Title; Refresh(); }
         finally { _loading = false; }
@@ -151,7 +226,7 @@ internal sealed class CanvasWindow : Window
             File.WriteAllText(_statePath + ".tmp", JsonSerializer.Serialize(state, CanvasJsonContext.Default.CanvasState));
             File.Move(_statePath + ".tmp", _statePath, true); _dirty = false;
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { _status.Text = "Не удалось сохранить на устройстве."; }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { _status.Text = UiText.T("Не удалось сохранить на устройстве."); }
     }
 
     public async Task SyncAsync()
@@ -184,15 +259,15 @@ internal sealed class CanvasWindow : Window
                 Apply(CanvasMerge.Rebase(remote, before, Snapshot()));
                 _baseline = remote; SaveState();
             }
-            _status.Text = remote.ReadOnly ? "Только просмотр · подключено" : "Сохранено · подключено";
+            _status.Text = remote.ReadOnly ? UiText.T("Только просмотр · подключено") : UiText.T("Сохранено · подключено");
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or InvalidDataException)
-        { if (!_shutdown) _status.Text = $"Локально · {ex.Message}"; }
+        { if (!_shutdown) _status.Text = UiText.F("Локально · {0}", ex.Message); }
         finally { _busy = false; }
     }
     internal async Task CreateCloudAsync(string server)
     {
-        if (_busy) throw new InvalidOperationException("Дождитесь текущего сохранения.");
+        if (_busy) throw new InvalidOperationException(UiText.T("Дождитесь текущего сохранения."));
         FinishInput(); _busy = true;
         try
         {
@@ -209,7 +284,7 @@ internal sealed class CanvasWindow : Window
     }
     internal async Task ConnectAsync(string link)
     {
-        if (_busy) throw new InvalidOperationException("Дождитесь текущего сохранения.");
+        if (_busy) throw new InvalidOperationException(UiText.T("Дождитесь текущего сохранения."));
         FinishInput(); _busy = true;
         try
         {
@@ -222,7 +297,7 @@ internal sealed class CanvasWindow : Window
             _generation++; _connection = connection; _viewKey = null;
             _pending = null; _pendingBefore = null; _deferred = null; _baseline = remote;
             Apply(remote, true); SaveState(); _surface.Fit();
-            _status.Text = remote.ReadOnly ? "Только просмотр · подключено" : "Сохранено · подключено";
+            _status.Text = remote.ReadOnly ? UiText.T("Только просмотр · подключено") : UiText.T("Сохранено · подключено");
         }
         finally { _busy = false; }
     }
@@ -236,14 +311,14 @@ internal sealed class CanvasWindow : Window
     private void ShowConnection()
     {
         var panel = new StackPanel { Margin = new Thickness(18), Spacing = 10 };
-        panel.Children.Add(new TextBlock { Text = "Открыть общее полотно", FontSize = 18 });
-        var link = new TextBox { PlaceholderText = "Код приглашения или ссылка" };
+        panel.Children.Add(new TextBlock { Text = UiText.T("Открыть общее полотно"), FontSize = 18 });
+        var link = new TextBox { PlaceholderText = UiText.T("Код приглашения или ссылка") };
         panel.Children.Add(link);
         var error = new TextBlock { TextWrapping = TextWrapping.Wrap, Foreground = Brushes.DarkRed };
-        var open = new Button { Content = "Подключиться" }; panel.Children.Add(open);
-        panel.Children.Add(new TextBlock { Text = "Или сохранить текущее полотно на сервере", Margin = new Thickness(0, 12, 0, 0) });
-        var create = new Button { Content = "Создать облачную копию" }; panel.Children.Add(create); panel.Children.Add(error);
-        var dialog = Dialog("Подключить полотно", panel);
+        var open = new Button { Content = UiText.T("Подключиться") }; panel.Children.Add(open);
+        panel.Children.Add(new TextBlock { Text = UiText.T("Или сохранить текущее полотно на сервере"), Margin = new Thickness(0, 12, 0, 0) });
+        var create = new Button { Content = UiText.T("Создать облачную копию") }; panel.Children.Add(create); panel.Children.Add(error);
+        var dialog = Dialog(UiText.T("Подключить полотно"), panel);
         open.Click += async (_, _) => { open.IsEnabled = false; try { await ConnectAsync(link.Text ?? ""); dialog.Close(); } catch (Exception ex) { error.Text = ex.Message; } finally { open.IsEnabled = true; } };
         create.Click += async (_, _) => { create.IsEnabled = false; try { await CreateCloudAsync(CanvasCloudClient.DefaultServer); dialog.Close(); } catch (Exception ex) { error.Text = ex.Message; } finally { create.IsEnabled = true; } };
     }
@@ -252,22 +327,22 @@ internal sealed class CanvasWindow : Window
         if (_connection is null) { ShowConnection(); return; }
         await SyncAsync();
         var panel = new StackPanel { Margin = new Thickness(18), Spacing = 9 };
-        panel.Children.Add(new TextBlock { Text = "Поделиться полотном", FontSize = 18 });
-        panel.Children.Add(new TextBlock { Text = "Отправьте код приглашения. Получатель вставит его в «Подключить». Можно также скопировать ссылку для браузера.", TextWrapping = TextWrapping.Wrap });
-        AddLink(panel, ReadOnly ? "Только просмотр" : "Можно рисовать", CanvasCloudClient.Link(_connection));
-        if (!ReadOnly && _viewKey is not null) AddLink(panel, "Только просмотр", CanvasCloudClient.Link(_connection with { Key = _viewKey }));
-        Dialog("Ссылка на полотно", panel);
+        panel.Children.Add(new TextBlock { Text = UiText.T("Поделиться полотном"), FontSize = 18 });
+        panel.Children.Add(new TextBlock { Text = UiText.T("Отправьте код приглашения. Получатель вставит его в «Подключить». Можно также скопировать ссылку для браузера."), TextWrapping = TextWrapping.Wrap });
+        AddLink(panel, ReadOnly ? UiText.T("Только просмотр") : UiText.T("Можно рисовать"), CanvasCloudClient.Link(_connection));
+        if (!ReadOnly && _viewKey is not null) AddLink(panel, UiText.T("Только просмотр"), CanvasCloudClient.Link(_connection with { Key = _viewKey }));
+        Dialog(UiText.T("Ссылка на полотно"), panel);
     }
     private void AddLink(StackPanel panel, string label, string link)
     {
         panel.Children.Add(new TextBlock { Text = label, FontSize = 12 });
         var code = link[(link.IndexOf('#') + 1)..];
         panel.Children.Add(new TextBox { Text = code, IsReadOnly = true });
-        var copy = new Button { Content = "Копировать код" };
-        copy.Click += async (_, _) => { if (Clipboard is not null) { await Clipboard.SetTextAsync(code); copy.Content = "Скопировано"; } };
+        var copy = new Button { Content = UiText.T("Копировать код") };
+        copy.Click += async (_, _) => { if (Clipboard is not null) { await Clipboard.SetTextAsync(code); copy.Content = UiText.T("Скопировано"); } };
         panel.Children.Add(copy);
-        var copyLink = new Button { Content = "Копировать ссылку" };
-        copyLink.Click += async (_, _) => { if (Clipboard is not null) { await Clipboard.SetTextAsync(link); copyLink.Content = "Скопировано"; } };
+        var copyLink = new Button { Content = UiText.T("Копировать ссылку") };
+        copyLink.Click += async (_, _) => { if (Clipboard is not null) { await Clipboard.SetTextAsync(link); copyLink.Content = UiText.T("Скопировано"); } };
         panel.Children.Add(copyLink);
     }
     private void SavePng()
@@ -278,7 +353,7 @@ internal sealed class CanvasWindow : Window
             var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "BlurMask");
             Directory.CreateDirectory(directory);
             var path = Path.Combine(directory, $"Canvas-{DateTime.Now:yyyy-MM-dd-HH-mm-ss-fff}.png");
-            ExportPng(path); _status.Text = $"PNG сохранён: {path}";
+            ExportPng(path); _status.Text = UiText.F("PNG сохранён: {0}", path);
         }
         catch (IOException ex) { _status.Text = ex.Message; }
     }

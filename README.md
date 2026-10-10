@@ -36,7 +36,12 @@ and [official tool guide](https://epicpen.com/userguide).
 - Click to place text; Enter commits, Shift+Enter adds a line, and Esc cancels.
 - Choose five stroke widths, four quick colors, 24 palette colors, or enter a custom hex color.
 - Switch between the desktop, whiteboard, and blackboard without losing annotations.
-- The eye button collapses the toolbar and hides ink; click the round handle to restore it.
+- The eye button collapses the toolbar with an animation and hides ink; only the closed eye remains. Click it to restore the toolbar.
+- The cursor button opens two modes: normal cursor and **Select and move**. Click a drawn object and drag it on the screen or canvas; Delete removes it. Moves support undo/redo.
+- Shapes have a separate button. The mask button opens a horizontal strip: each icon creates a new independent mask, and the last button removes all masks.
+- The analog timer selects temporary ink: quick (2 s), long (10 s), very long (30 s). Temporary ink fades locally and is excluded from saved/shared boards.
+- The canvas uses a compact floating menu; **Tab** hides/restores it. **Ctrl+V** pastes a screenshot from the clipboard as a movable image that is saved, shared and included in PNG exports.
+- Interface language follows the system UI language: English, French, German or Russian; other languages fall back to English.
 - Screenshots include all monitors and visible annotations, exclude the toolbar, and save PNG files to `Pictures/BlurMask`.
 - The menu includes **New mask**, text size, history actions, visibility, shortcuts, and exit.
 - Multiple monitors use separate transparent windows and a shared document with physical desktop coordinates.
@@ -121,19 +126,18 @@ Output:
 bin\Release\net11.0\win-x64\publish\
 ```
 
-**Do not copy only `BlurMask.exe`.** Avalonia Native AOT on Windows still requires
-native DLLs next to the executable. The build script verifies the expected files:
-
-- `av_libglesv2.dll`
-- `libSkiaSharp.dll`
-- `libHarfBuzzSharp.dll`
-
-Copy/distribute the **whole publish directory**.
+The default Windows build is one native `BlurMask.exe`: Skia, HarfBuzz and ANGLE
+are statically linked using StaticLink.Avalonia. No external rendering DLLs or
+installed .NET runtime are required. Windows system libraries are still used.
+For renderer diagnostics, `./build.ps1 win-x64 -DynamicNativeLibraries` produces
+the traditional build with three adjacent native DLLs; distribute that entire folder.
 
 ### Linux
 
 ```bash
 bash ./build.sh linux-x64
+bash ./build-deb.sh linux-x64 1.2.3
+sudo apt install ./.artifacts/installers/blurmask_1.2.3_amd64.deb
 ```
 
 ### macOS
@@ -143,6 +147,13 @@ bash ./build.sh osx-arm64
 ```
 
 Native AOT is OS-specific: publish Windows on Windows, Linux on Linux, and macOS on macOS.
+Linux payloads include their native `.so` libraries. Debian packaging requires `dpkg-dev`;
+the package installs into `/opt/blurmask`, adds an application launcher, and enables
+login startup through `/etc/xdg/autostart/blurmask.desktop`. Disable startup in the
+desktop's Startup Applications settings. Builds use Ubuntu 22.04 for the glibc baseline.
+The reusable/manual **Debian Installer** workflow verifies installation, startup,
+reinstallation and removal. CI uploads `.deb` and SHA-256 as **BlurMask-Debian-Installer**;
+the Release workflow attaches them alongside Linux tar archives and Windows installers.
 
 ### Windows installer (Inno Setup)
 
@@ -158,11 +169,12 @@ Version 7.1.0 was the latest stable release on 2026-10-10; see the
 [official downloads](https://jrsoftware.org/isdl.php).
 
 Output: `.artifacts/installers/BlurMask-1.2.3-win-x64-Setup.exe`, accompanied by
-SHA-256 and JSON build metadata. The installer contains the executable and all
-native rendering DLLs, excludes PDBs, and does not require an installed .NET runtime.
-It supports English/Russian, installs into `%LOCALAPPDATA%/Programs/BlurMask`
+SHA-256 and JSON build metadata. The installer contains the single native executable,
+excludes debug symbols, and does not require an installed .NET runtime.
+It supports English/French/German/Russian, installs into `%LOCALAPPDATA%/Programs/BlurMask`
 without elevation, creates a Start Menu shortcut, and offers optional desktop
-shortcut and Windows startup tasks. Close BlurMask before updating or uninstalling.
+shortcut and Windows startup tasks. Startup is selected by default on first install;
+the user's choice is retained during upgrades. Close BlurMask before updating or uninstalling.
 Uninstall removes the program, shortcuts and its startup entry while preserving local canvases.
 
 To package an existing Windows publish directory:
@@ -218,7 +230,14 @@ when this environment variable is explicitly set or the user clicks the screensh
 
 ### Windows
 
-Avalonia compositor blur/acrylic is used for the basic blur modes. Glass Refraction uses the Windows Magnification API through four constant optical planes clipped into 30×30 px cells on a 32 px pitch. The project targets `net11.0`. Native AOT output must be kept together with its native rendering DLLs.
+Avalonia compositor blur/acrylic is used for the basic blur modes. Glass Refraction uses the Windows Magnification API through four constant optical planes clipped into 30×30 px cells on a 32 px pitch. The project targets `net11.0`; the default Windows output statically links its rendering libraries.
+
+RDP is detected at startup and selects software rendering without GPU composition or
+native magnifier planes. Blur/glass modes use an opaque privacy cover in this profile.
+For an app started locally before connecting through RDP, launch with
+`BlurMask.exe --software-rendering`. Screen topology changes are debounced and preserve
+ink when the OS temporarily reports no monitors. CI exercises the software profile;
+a real RDP disconnect/reconnect is still required to validate a specific driver/session.
 
 ### Linux
 

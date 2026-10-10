@@ -88,6 +88,10 @@ public sealed class BoardStore(NpgsqlDataSource source)
         var removed = patch.Remove.ToHashSet();
         var marks = board.Marks.Where(m => !removed.Contains(m.Id)).ToList();
         var changed = marks.Count != board.Marks.Count;
+        var updated = patch.Update.ToDictionary(m => m.Id);
+        for (var i = 0; i < marks.Count; i++)
+            if (updated.TryGetValue(marks[i].Id, out var replacement) && !BoardValidation.Same(marks[i], replacement))
+            { marks[i] = replacement; changed = true; }
         var existing = marks.Select(m => m.Id).ToHashSet();
         foreach (var mark in patch.Add) if (existing.Add(mark.Id)) { marks.Add(mark); changed = true; }
         if (!changed && (patch.Title is null || patch.Title.Trim() == board.Title) &&

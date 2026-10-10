@@ -42,21 +42,27 @@ jobs:
           if-no-files-found: error
 
   linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    env:
+      RELEASE_VERSION: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 11.0.100-preview.7.26381.103
-      - run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
+      - run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev dpkg-dev desktop-file-utils xvfb libx11-6 libice6 libsm6 libfontconfig1
       - run: dotnet restore
       - run: |
           bash ./build.sh linux-x64
           tar -C bin/Release/net11.0/linux-x64/publish -czf BlurMask-linux-x64.tar.gz .
+          bash ./build-deb.sh linux-x64 "${RELEASE_VERSION#v}"
+          bash ./tools/test-deb.sh .artifacts/installers/*.deb
       - uses: actions/upload-artifact@v4
         with:
           name: release-linux
-          path: BlurMask-linux-x64.tar.gz
+          path: |
+            BlurMask-linux-x64.tar.gz
+            .artifacts/installers/*
 
   macos:
     runs-on: macos-latest

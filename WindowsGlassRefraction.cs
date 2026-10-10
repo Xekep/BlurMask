@@ -65,7 +65,7 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
 
     public static WindowsGlassRefraction? TryCreate(Window window)
     {
-        if (!OperatingSystem.IsWindows())
+        if (!OperatingSystem.IsWindows() || Program.SoftwareRendering || RemoteDesktopSupport.IsRemoteSession)
             return null;
 
         try

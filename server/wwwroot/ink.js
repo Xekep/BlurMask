@@ -1,4 +1,15 @@
-export const tools = ['Pen', 'Highlighter', 'Text', 'Line', 'Arrow', 'Rectangle', 'Ellipse'];
+export const tools = ['Pen', 'Highlighter', 'Text', 'Line', 'Arrow', 'Rectangle', 'Ellipse', 'Image'];
+export function validImage(image) {
+  if (typeof image !== 'string' || image.length > 2 * 1024 * 1024 || !image.startsWith('iVBORw0KGgo') || !/^[A-Za-z0-9+/]*={0,2}$/.test(image)) return false;
+  try {
+    const data = atob(image); if (data.length < 33 || data.slice(12, 16) !== 'IHDR') return false;
+    const value = offset => ((data.charCodeAt(offset) * 0x1000000) + (data.charCodeAt(offset+1) << 16) + (data.charCodeAt(offset+2) << 8) + data.charCodeAt(offset+3));
+    const width = value(16), height = value(20);
+    return width > 0 && height > 0 && width <= 4096 && height <= 4096 && width * height <= 16 * 1024 * 1024;
+  } catch { return false; }
+}
+export const sameMark = (a, b) => a.tool === b.tool && a.color === b.color && a.width === b.width && a.text === b.text &&
+  a.fontSize === b.fontSize && (a.image ?? null) === (b.image ?? null) && JSON.stringify(a.points) === JSON.stringify(b.points);
 export const emptyBoard = () => ({ id: null, revision: 0, title: 'Новое полотно', background: 'white', width: 2400, height: 1600, marks: [], readOnly: false });
 export const clone = value => structuredClone(value);
 export function validBoard(board) {
@@ -11,25 +22,28 @@ export function validBoard(board) {
     if (!m || typeof m.id!=='string' || !/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(m.id) || ids.has(m.id) ||
         !tools.includes(m.tool) || typeof m.color!=='string' || !/^#[0-9a-f]{6}([0-9a-f]{2})?$/i.test(m.color) ||
         !Number.isFinite(m.width) || m.width<.5 || m.width>200 || !Number.isFinite(m.fontSize) || m.fontSize<8 || m.fontSize>300 ||
-        typeof m.text!=='string' || m.text.length>4000 || !Array.isArray(m.points) || !m.points.length || m.points.length>20000) return false;
+        typeof m.text!=='string' || m.text.length>4000 || !Array.isArray(m.points) || !m.points.length || m.points.length>20000 ||
+        (m.tool === 'Image' ? m.points.length !== 2 || !validImage(m.image) : m.image != null)) return false;
     ids.add(m.id);points+=m.points.length;
     return points<=200000 && m.points.every(p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&Math.abs(p.x)<=100000&&Math.abs(p.y)<=100000);
   });
 }
 
 export function diff(before, after) {
-  const old = new Set(before.marks.map(m => m.id));
+  const old = new Map(before.marks.map(m => [m.id, m]));
   const current = new Set(after.marks.map(m => m.id));
   return { operationId: crypto.randomUUID(), add: after.marks.filter(m => !old.has(m.id)),
+    update: after.marks.filter(m => old.has(m.id) && !sameMark(old.get(m.id), m)),
     remove: before.marks.filter(m => !current.has(m.id)).map(m => m.id),
     title: before.title === after.title ? null : after.title,
     background: before.background === after.background ? null : after.background };
 }
-export const hasChanges = patch => patch.add.length || patch.remove.length || patch.title !== null || patch.background !== null;
+export const hasChanges = patch => patch.add.length || (patch.update?.length ?? 0) || patch.remove.length || patch.title !== null || patch.background !== null;
 export function rebase(remote, before, current) {
   const patch = diff(before, current);
   const removed = new Set(patch.remove);
-  const marks = remote.marks.filter(m => !removed.has(m.id));
+  const updated = new Map(patch.update.map(m => [m.id, m]));
+  const marks = remote.marks.filter(m => !removed.has(m.id)).map(m => updated.get(m.id) ?? m);
   const ids = new Set(marks.map(m => m.id));
   for (const mark of patch.add) if (!ids.has(mark.id)) { marks.push(mark); ids.add(mark.id); }
   return { ...remote, marks, title: patch.title ?? remote.title, background: patch.background ?? remote.background };
@@ -39,7 +53,7 @@ export class History {
   push(before, after) {
     const patch = diff(before, after);
     if (!hasChanges(patch)) return;
-    this.undoStack.push({ added: patch.add, removed: before.marks.map((mark, index) => ({ mark, index })).filter(x => patch.remove.includes(x.mark.id)) });
+    this.undoStack.push({ added: patch.add, updated: patch.update.map(after => ({before: before.marks.find(m => m.id === after.id), after})), removed: before.marks.map((mark, index) => ({ mark, index })).filter(x => patch.remove.includes(x.mark.id)) });
     if (this.undoStack.length > 100) this.undoStack.shift();
     this.redoStack = [];
   }
@@ -48,6 +62,11 @@ export class History {
   apply(board, edit, reverse) {
     const remove = new Set((reverse ? edit.added : edit.removed.map(x => x.mark)).map(m => m.id));
     const marks = board.marks.filter(m => !remove.has(m.id));
+    for (const editMark of edit.updated ?? []) {
+      const from = reverse ? editMark.after : editMark.before, to = reverse ? editMark.before : editMark.after;
+      const index = marks.findIndex(m => m.id === from.id && sameMark(m, from));
+      if (index >= 0) marks[index] = to;
+    }
     const insert = reverse ? edit.removed : edit.added.map((mark, i) => ({ mark, index: marks.length + i }));
     for (const item of insert) if (!marks.some(m => m.id === item.mark.id)) marks.splice(Math.min(item.index, marks.length), 0, item.mark);
     return { ...board, marks };
@@ -62,6 +81,7 @@ export function hit(mark, p, radius) {
   radius += mark.width / 2;
   const a = mark.points[0], b = mark.points.at(-1);
   const left = Math.min(a.x, b.x), right = Math.max(a.x, b.x), top = Math.min(a.y, b.y), bottom = Math.max(a.y, b.y);
+  if (mark.tool === 'Image') return p.x >= left-radius && p.x <= right+radius && p.y >= top-radius && p.y <= bottom+radius;
   if (mark.tool === 'Text') return p.x >= a.x - radius && p.x <= a.x + Math.max(...mark.text.split('\n').map(s => s.length)) * mark.fontSize * .7 + radius &&
     p.y >= a.y - radius && p.y <= a.y + mark.text.split('\n').length * mark.fontSize * 1.2 + radius;
   if (mark.tool === 'Rectangle') return p.x >= left - radius && p.x <= right + radius && p.y >= top - radius && p.y <= bottom + radius &&
@@ -87,12 +107,24 @@ export function constrain(a, b, tool) {
   const angle = Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) * Math.PI / 4, length = Math.hypot(dx, dy);
   return { x: a.x + Math.cos(angle) * length, y: a.y + Math.sin(angle) * length };
 }
+const imageCache = new Map();
+export function raster(image) {
+  if (imageCache.has(image)) return imageCache.get(image);
+  if (!validImage(image)) return null;
+  const bitmap = new Image(); bitmap.onload = () => window.dispatchEvent(new Event('blurmask-image-loaded'));
+  bitmap.src = 'data:image/png;base64,' + image;
+  if (imageCache.size >= 32) imageCache.delete(imageCache.keys().next().value);
+  imageCache.set(image, bitmap); return bitmap;
+}
 export function drawMark(ctx, mark) {
   const a = mark.points[0], b = mark.points.at(-1);
   ctx.save(); ctx.strokeStyle = mark.color; ctx.fillStyle = mark.color; ctx.lineWidth = mark.width;
   ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.globalAlpha = mark.tool === 'Highlighter' ? .35 : 1;
   ctx.beginPath();
-  if (mark.tool === 'Text') {
+  if (mark.tool === 'Image') {
+    const image = raster(mark.image);
+    if (image?.complete && image.naturalWidth) ctx.drawImage(image, Math.min(a.x,b.x), Math.min(a.y,b.y), Math.abs(b.x-a.x), Math.abs(b.y-a.y));
+  } else if (mark.tool === 'Text') {
     ctx.font = `${mark.fontSize}px sans-serif`; ctx.textBaseline = 'top';
     mark.text.split('\n').forEach((line, i) => ctx.fillText(line, a.x, a.y + i * mark.fontSize * 1.2));
   } else if (mark.tool === 'Rectangle') ctx.rect(Math.min(a.x, b.x), Math.min(a.y, b.y), Math.abs(b.x - a.x), Math.abs(b.y - a.y));
