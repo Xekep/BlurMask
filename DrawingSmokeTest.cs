@@ -18,8 +18,10 @@ internal static class DrawingSmokeTest
         Check(BoardInvite.Code(invite.Id, invite.Key) == code, "Native invitation differs from browser format.");
         Check(CanvasCloudClient.ParseLink(code) == invite, "Invitation code roundtrip failed.");
         Check(CanvasCloudClient.ParseLink(CanvasCloudClient.Link(invite)) == invite, "Invitation link roundtrip failed.");
-        Check(CanvasCloudClient.ParseLink($"{invite.Server}/#board={invite.Id}&key={invite.Key}") == invite,
-            "Already issued invitation stopped working.");
+        var rejectedOldInvite = false;
+        try { CanvasCloudClient.ParseLink($"{invite.Server}/#board={invite.Id}&key={invite.Key}"); }
+        catch (ArgumentException) { rejectedOldInvite = true; }
+        Check(rejectedOldInvite, "Parameter-based invitation was accepted.");
         var pen = new InkMark(InkTool.Pen, Colors.Red, 4, new Point(-100, 100));
         pen.AddPoint(new Point(100, 100));
         Check(pen.Hit(new Point(0, 101), 2), "Eraser misses line crossing a negative monitor origin.");

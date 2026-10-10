@@ -59,8 +59,8 @@ supports panning, white/black backgrounds, PNG export and automatic local persis
 The canvas **Connect** button accepts an invitation code or link, or creates a server copy
 on the built-in `https://pen.kiiko.ru` service. **Share** displays separate edit and view codes,
 with buttons to copy the code or a browser link. Links use one opaque fragment (`/#<code>`)
-without visible board/key parameters. The code retains the full 256-bit access key; existing
-parameter-based invitations still work. Browser and desktop changes synchronize every 1.3 seconds, preserving
+without visible board/key parameters. The code retains the full 256-bit access key.
+Only this invitation format is supported. Browser and desktop changes synchronize every 1.3 seconds, preserving
 concurrent strokes and pending offline edits. Screen annotations remain local.
 
 The web canvas, ASP.NET Core server, PostgreSQL storage and Docker/Caddy configuration for

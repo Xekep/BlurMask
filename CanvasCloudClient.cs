@@ -65,19 +65,8 @@ internal sealed class CanvasCloudClient : IDisposable
         var server = Server(uri.GetLeftPart(UriPartial.Authority));
         if (server != DefaultServer && !uri.IsLoopback)
             throw new ArgumentException("Приглашение должно быть с pen.kiiko.ru.");
-        if (!uri.Fragment.Contains('='))
-        {
-            var invite = BoardInvite.Parse(uri.Fragment.TrimStart('#'));
-            return new(server, invite.Id, invite.Key);
-        }
-        // Keep already issued invitations working.
-        var values = uri.Fragment.TrimStart('#').Split('&').Select(part => part.Split('=', 2))
-            .Where(part => part.Length == 2).ToDictionary(part => part[0], part => Uri.UnescapeDataString(part[1]));
-        if (!values.TryGetValue("board", out var id) || !Guid.TryParse(id, out var boardId) ||
-            !values.TryGetValue("key", out var key) || key.Length != 43 || !key.All(c => char.IsAsciiLetterOrDigit(c) || c is '-' or '_'))
-            throw new ArgumentException("В ссылке отсутствует номер полотна или ключ доступа.");
-        _ = BoardInvite.Code(boardId, key);
-        return new(server, boardId, key);
+        var invitation = BoardInvite.Parse(uri.Fragment.TrimStart('#'));
+        return new(server, invitation.Id, invitation.Key);
     }
     public static string Link(BoardConnection connection) => $"{Server(connection.Server)}/#{BoardInvite.Code(connection.Id, connection.Key)}";
     private static void Ensure(HttpResponseMessage response)

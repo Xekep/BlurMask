@@ -10,8 +10,10 @@ test('invitation matches the native UUID byte order and preserves the full key',
   for(const input of [code,`#${code}`,`https://pen.kiiko.ru/#${code}`,`http://127.0.0.1:5079/#${code}`])
     assert.deepEqual(parseInvite(input),connection);
 });
-test('already issued parameter-based invitations remain valid',()=>{
-  assert.deepEqual(parseInvite(`https://pen.kiiko.ru/#board=${connection.id}&key=${connection.key}`),connection);
+test('parameter-based invitations are rejected',()=>{
+  const oldFragment = `board=${connection.id}&key=${connection.key}`;
+  for(const input of [oldFragment,`#${oldFragment}`,`https://pen.kiiko.ru/#${oldFragment}`])
+    assert.throws(()=>parseInvite(input));
 });
 test('malformed invitations and unrelated servers are rejected',()=>{
   for(const input of ['',code.slice(1),code+'!',`https://other.example/#${code}`,'A'.repeat(64),'board=x&key=y'])

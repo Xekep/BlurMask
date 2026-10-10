@@ -17,12 +17,6 @@ export function parseInvite(input) {
     if (url.origin !== 'https://pen.kiiko.ru' && !['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)) throw new Error('Приглашение должно быть с pen.kiiko.ru');
     code = url.hash.slice(1);
   } else code = code.replace(/^#/, '');
-  if (code.includes('=')) {
-    const values = new URLSearchParams(code);
-    const connection = {id:values.get('board') ?? '', key:values.get('key') ?? ''};
-    inviteCode(connection); // Validate legacy invitations as well.
-    return connection;
-  }
   if (code.length !== 64 || !alphabet.test(code)) throw new Error('Вставьте корректный код приглашения или ссылку');
   const bytes = decode(code), hex = Array.from(bytes.slice(0,16), b => b.toString(16).padStart(2,'0')).join('');
   const connection = {id:`${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`, key:encode(bytes.slice(16))};
