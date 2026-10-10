@@ -16,6 +16,7 @@ export async function connect(base, id, key, options = {}) {
     req.on('error', reject);
     req.on('response', response => { response.resume(); reject(new Error(`HTTP ${response.statusCode}`)); });
     req.on('upgrade', (response, socket, head) => {
+      socket.setNoDelay(true);
       assert.equal(response.headers['sec-websocket-accept'], createHash('sha1').update(nonce + '258EAFA5-E914-47DA-95CA-C5AB0DC85B11').digest('base64'));
       let buffer = Buffer.alloc(0), ended = false;
       const frames = [], waiters = [];

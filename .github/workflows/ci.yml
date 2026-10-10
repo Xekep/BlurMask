@@ -48,6 +48,8 @@ jobs:
       Live__MaxConnections: 64
       Live__MaxPerAddress: 16
       Live__MaxPerBoard: 16
+      Live__MaxPreviewPoints: 40000
+      PEN_TEST_PREVIEW_CAP: 40000
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4

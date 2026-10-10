@@ -12,12 +12,14 @@ public sealed class BoardLiveHub(LiveLimits limits) : BackgroundService
     private readonly object _gate = new();
     private readonly Dictionary<Guid, Room> _rooms = [];
     private readonly Dictionary<string, int> _addresses = [];
+    private int _previewPoints;
     private sealed class Room
     {
         public readonly object Gate = new();
         public readonly List<Peer> Peers = [];
         public HashSet<Guid> Committed = [];
         public long Revision;
+        public int PreviewPoints;
     }
     private sealed class Peer(string address)
     {
@@ -30,10 +32,26 @@ public sealed class BoardLiveHub(LiveLimits limits) : BackgroundService
         public int QueuedBytes;
         public void Enqueue(byte[] bytes)
         {
-            if (Interlocked.Add(ref QueuedBytes, bytes.Length) > 128 * 1024 || !Outgoing.Writer.TryWrite(bytes)) Stop.Cancel();
+            // Run cancellation callbacks outside room locks (registry -> room is the lock order).
+            if (Interlocked.Add(ref QueuedBytes, bytes.Length) > 128 * 1024 || !Outgoing.Writer.TryWrite(bytes)) _ = Stop.CancelAsync();
         }
     }
     private static byte[] Encode(LiveFrame frame) => JsonSerializer.SerializeToUtf8Bytes(frame, BoardJsonContext.Default.LiveFrame);
+    private bool ReservePoints(int delta)
+    {
+        while (true)
+        {
+            var previous = Volatile.Read(ref _previewPoints);
+            if (previous + delta > limits.MaxPreviewPoints) return false;
+            if (Interlocked.CompareExchange(ref _previewPoints, previous + delta, previous) == previous) return true;
+        }
+    }
+    private void ClearPreview(Room room, Peer peer)
+    {
+        if (peer.Preview is not { } preview) return;
+        room.PreviewPoints -= preview.Points.Count;
+        Interlocked.Add(ref _previewPoints, -preview.Points.Count); peer.Preview = null;
+    }
     private static void Broadcast(Room room, LiveFrame frame, Peer? except = null)
     {
         var bytes = Encode(frame);
@@ -52,7 +70,7 @@ public sealed class BoardLiveHub(LiveLimits limits) : BackgroundService
             foreach (var peer in room.Peers)
                 if (peer.Preview is { } preview && room.Committed.Contains(preview.Id))
                 {
-                    peer.Preview = null;
+                    ClearPreview(room, peer);
                     Broadcast(room, new() { Type = "clear", Peer = peer.Id, Revision = board.Revision });
                 }
             var notification = new LiveFrame { Type = "changed", Revision = board.Revision, BaseRevision = board.Revision - 1, Patch = patch };
@@ -114,7 +132,8 @@ public sealed class BoardLiveHub(LiveLimits limits) : BackgroundService
                 lock (room.Gate)
                 {
                     room.Peers.Remove(peer);
-                    if (peer.Preview is not null) Broadcast(room, new() { Type = "clear", Peer = peer.Id });
+                    if (peer.Preview is not null)
+                    { ClearPreview(room, peer); Broadcast(room, new() { Type = "clear", Peer = peer.Id }); }
                     if (room.Peers.Count == 0) _rooms.Remove(id);
                     peer.Stop.Dispose();
                 }
@@ -163,14 +182,18 @@ public sealed class BoardLiveHub(LiveLimits limits) : BackgroundService
                 if (frame.Type == "touch" && frame.Mark is null) { peer.Touched = now; continue; }
                 if (frame.Type == "clear" && frame.Mark is null)
                 {
-                    peer.Preview = null;
+                    ClearPreview(room, peer);
                     Broadcast(room, new() { Type = "clear", Peer = peer.Id }, peer); continue;
                 }
-                if (!LiveProtocol.TryMerge(frame, peer.Preview, out var merged)) return;
+                var previousCount = peer.Preview?.Points.Count ?? 0;
+                var count = (frame.Offset == 0 ? 0 : previousCount) + (frame.Mark?.Points?.Count ?? 0);
+                var delta = count - previousCount;
+                if (room.PreviewPoints + delta > 40000 || !ReservePoints(delta)) return;
+                if (!LiveProtocol.TryMerge(frame, peer.Preview, out var merged))
+                { Interlocked.Add(ref _previewPoints, -delta); return; }
                 // An HTTP commit may win the race with the final preview packet.
-                if (room.Committed.Contains(merged!.Id)) continue;
-                if (room.Peers.Where(p => p != peer).Sum(p => p.Preview?.Points.Count ?? 0) + merged.Points.Count > 40000) return;
-                peer.Preview = merged; peer.Touched = now;
+                if (room.Committed.Contains(merged!.Id)) { Interlocked.Add(ref _previewPoints, -delta); continue; }
+                room.PreviewPoints += delta; peer.Preview = merged; peer.Touched = now;
                 Broadcast(room, frame with { Peer = peer.Id, Revision = 0 }, peer);
             }
         }
@@ -187,12 +210,12 @@ public sealed class BoardLiveHub(LiveLimits limits) : BackgroundService
                     lock (room.Gate)
                         foreach (var peer in room.Peers)
                             if (peer.Preview is not null && Stopwatch.GetElapsedTime(peer.Touched).TotalSeconds > 30)
-                            { peer.Preview = null; Broadcast(room, new() { Type = "clear", Peer = peer.Id }); }
+                            { ClearPreview(room, peer); Broadcast(room, new() { Type = "clear", Peer = peer.Id }); }
             }
         }
         finally
         {
-            lock (_gate) foreach (var room in _rooms.Values) lock (room.Gate) foreach (var peer in room.Peers) peer.Stop.Cancel();
+            lock (_gate) foreach (var room in _rooms.Values) lock (room.Gate) foreach (var peer in room.Peers) _ = peer.Stop.CancelAsync();
         }
     }
 }

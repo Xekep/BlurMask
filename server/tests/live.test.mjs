@@ -59,6 +59,26 @@ test('live collaboration: incremental ink, late join, cancel, commit, permission
   viewer.send({ type: 'preview', offset: 0, mark: mark() }); await waitClosed(viewer);
 });
 
+test('global preview budget releases capacity after cancellation and rejection', async t => {
+  assert.equal(process.env.PEN_TEST_PREVIEW_CAP, '40000', 'Set Live__MaxPreviewPoints=40000 and PEN_TEST_PREVIEW_CAP=40000 on the isolated test server.');
+  const a=await create(), b=await create(), c=await create(), sockets=[];
+  t.after(()=>sockets.forEach(s=>s.close()));
+  const open=async (access, key=access.editKey)=>{const s=await connect(access.board.id,key);sockets.push(s);await s.next('ready');return s;};
+  const wa=await open(a), va=await open(a,a.viewKey), wb=await open(b), vb=await open(b,b.viewKey), vc=await open(c,c.viewKey);
+  for(const [writer,viewer] of [[wa,va],[wb,vb]]) {
+    const draft=mark();
+    for(let offset=0;offset<20000;offset+=512) {
+      const points=Array.from({length:Math.min(512,20000-offset)},(_,i)=>({x:offset+i,y:offset+i}));
+      writer.send({type:'preview',offset,mark:{...draft,points}});await viewer.next('preview');
+    }
+  }
+  const rejected=await open(c); rejected.send({type:'preview',offset:0,mark:mark()}); await waitClosed(rejected);
+  wa.send({type:'clear'});await va.next('clear');
+  const recovered=await open(c), small=mark(); recovered.send({type:'preview',offset:0,mark:small});
+  assert.equal((await vc.next('preview')).mark.id,small.id);
+  recovered.send({type:'clear'});await vc.next('clear');
+});
+
 test('live security: authentication, packet/point limits, isolation of request capacity', async t => {
   assert.ok(['127.0.0.1', 'localhost', '[::1]'].includes(base.hostname), 'Run boundary tests on loopback only');
   const access = await create(), sockets = []; t.after(() => sockets.forEach(s => s.close()));
