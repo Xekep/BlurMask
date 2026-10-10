@@ -45,6 +45,9 @@ jobs:
     env:
       ConnectionStrings__Postgres: Host=127.0.0.1;Database=pen_test;Username=postgres;Password=postgres
       PublicUrl: http://127.0.0.1:5079
+      Live__MaxConnections: 64
+      Live__MaxPerAddress: 16
+      Live__MaxPerBoard: 16
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -65,6 +68,7 @@ jobs:
           node --test tests/api.test.mjs
           node --test tests/live.test.mjs
           node --test tests/security.test.mjs
+          PEN_TEST_URL=http://127.0.0.1:5079 PEN_LOAD_BOARDS=4 PEN_LOAD_USERS=4 PEN_LOAD_WRITERS=2 PEN_LOAD_SECONDS=6 PEN_LOAD_IDLE_SECONDS=1 node tests/load.mjs
   build:
     name: Build / ${{ matrix.os }}
     strategy:
@@ -99,6 +103,11 @@ jobs:
           if (-not (Test-Path (Join-Path $dir 'BlurMask.exe'))) { throw 'Native executable is missing.' }
           if (Get-ChildItem $dir -Filter '*.dll') { throw 'Static native build contains external DLLs.' }
           if (Get-ChildItem $dir -Filter '*.pdb') { throw 'Native payload contains debug symbols.' }
+      - name: Native hot-path performance probe
+        shell: pwsh
+        run: |
+          & ./bin/Release/net11.0/win-x64/publish/BlurMask.exe --performance-test | Out-Default
+          if ($LASTEXITCODE -ne 0) { throw 'Native performance probe failed.' }
       - name: Startup and single-instance smoke test
         shell: pwsh
         run: |

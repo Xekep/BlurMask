@@ -4,6 +4,29 @@ import { parseInvite } from '../wwwroot/invite.js';
 const base=process.env.PEN_TEST_URL || 'http://127.0.0.1:5079';
 const request=(path,key,body)=>fetch(base+path,{method:body?'POST':'GET',headers:{...(key?{Authorization:'Bearer '+key}:{}),...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});
 const mark=()=>({id:crypto.randomUUID(),tool:'Pen',color:'#ff001180',width:4,points:[{x:50,y:50},{x:150,y:150}],text:'',fontSize:28});
+
+test('conditional reads validate credentials, role and current revision before returning 304',async()=>{
+  const access=await (await request('/api/boards',null,{title:'ETag integration',background:'white'})).json();
+  const path='/api/boards/'+access.board.id;
+  const first=await request(path,access.editKey), tag=first.headers.get('etag');
+  assert.equal(first.status,200); assert.ok(tag); await first.json();
+  const read=(key,etag)=>fetch(base+path,{headers:{Authorization:'Bearer '+key,'If-None-Match':etag}});
+  const unchanged=await read(access.editKey,tag);
+  assert.equal(unchanged.status,304); assert.equal(await unchanged.text(),'');
+  const denied=await read('x'.repeat(43),tag);
+  assert.equal(denied.status,404); assert.equal(denied.headers.get('etag'),null);
+  const view=await read(access.viewKey,tag);
+  assert.equal(view.status,200); assert.equal((await view.json()).readOnly,true);
+  const viewTag=view.headers.get('etag'); assert.notEqual(viewTag,tag);
+  assert.equal((await read(access.viewKey,viewTag)).status,304);
+  assert.equal((await read(access.editKey,viewTag)).status,200);
+  for(const invalid of ['"bad"', '"'+crypto.randomUUID()+'-0-e"', '"'+access.board.id.replaceAll('-','')+'--e"'])
+    assert.equal((await read(access.editKey,invalid)).status,200);
+  await request(path+'/changes',access.editKey,{operationId:crypto.randomUUID(),add:[mark()],remove:[]});
+  const changed=await read(access.editKey,tag);
+  assert.equal(changed.status,200); assert.equal((await changed.json()).marks.length,1);
+  assert.notEqual(changed.headers.get('etag'),tag);
+});
 test('Postgres API: access keys, idempotent retries, concurrency, validation, targeted erase',async()=>{
   const created=await request('/api/boards',null,{title:'Integration test',background:'white'});
   assert.equal(created.status,201); const access=await created.json(), path='/api/boards/'+access.board.id;

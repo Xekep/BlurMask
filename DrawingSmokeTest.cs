@@ -18,6 +18,7 @@ internal static class DrawingSmokeTest
     {
         VerifySelection();
         VerifyCanvasGeometry();
+        VerifyPreviewOwnership();
         var invite = new BoardConnection(CanvasCloudClient.DefaultServer, Guid.Parse("00112233-4455-6677-8899-aabbccddeeff"),
             "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8");
         const string code = "ABEiM0RVZneImaq7zN3u_wABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4f";
@@ -76,6 +77,34 @@ internal static class DrawingSmokeTest
         selection.Move(new Point(999999, -999999), true); selection.Complete();
         Check(BoardValidation.Valid(new BoardSnapshot { Marks = doc.Export() }), "Moving beyond the canvas coordinate limit corrupts shared ink.");
         doc.Undo(); Check(doc.Marks[0].Same(mark), "Canvas boundary move cannot be undone.");
+        var pen = new InkMark(InkTool.Pen, Colors.Red, 4, default);
+        _ = pen.Bounds; pen.AddPoint(new Point(500, -300));
+        Check(pen.Bounds.Contains(new Point(500, -300)), "Cached pen bounds lost appended ink.");
+        var translated = pen.Translate(new Vector(20, 40));
+        Check(translated.Bounds.Contains(new Point(520, -260)), "Moved ink retained old cached bounds.");
+        _ = mark.Bounds; mark.AddPoint(new Point(10, 20));
+        Check(mark.Bounds.Right < 100, "Resized shape retained old cached bounds.");
+    }
+    private static void VerifyPreviewOwnership()
+    {
+        var source = new InkMarkDto { Points = [new(1, 2)] };
+        Check(LiveProtocol.TryMerge(new() { Mark = source }, null, out var merged), "Initial preview rejected.");
+        var points = merged!.Points;
+        Check(LiveProtocol.TryMerge(new() { Mark = source with { Points = [new(3, 4)] }, Offset = 1 }, merged, out merged), "Preview append rejected.");
+        Check(source.Points.Count == 1 && ReferenceEquals(points, merged!.Points) && merged.Points.Count == 2,
+            "Preview accumulator copies every stroke or mutates a received packet.");
+        Check(!LiveProtocol.TryMerge(new() { Mark = source, Offset = 5 }, merged, out _), "Out-of-order preview accepted.");
+        var ink = new InkMark(InkTool.Pen, Colors.Red, 4, default);
+        var captured = LivePreviewCapture.Capture(ink, null);
+        ink.AddPoint(new Point(100, 200));
+        captured = LivePreviewCapture.Capture(ink, captured);
+        Check(captured.Points.Count == 2 && captured.Points[^1].X == 100, "Incremental capture lost points.");
+        var before = new BoardSnapshot { Id = Guid.NewGuid(), ReadOnly = true, Marks = [source], Revision = 4 };
+        var delta = new LiveFrame { Type = "changed", BaseRevision = 4, Revision = 5,
+            Patch = new BoardPatch { Update = [source with { Points = [new(30, 40)] }], Title = " Updated " } };
+        Check(LiveProtocol.TryApply(before, delta, out var after) && after!.ReadOnly && after.Title == "Updated" &&
+            after.Marks[0].Points[0].X == 30 && before.Marks[0].Points[0].X == 1, "Saved delta corrupts canvas or access role.");
+        Check(!LiveProtocol.TryApply(before, delta with { BaseRevision = 3 }, out _), "Missing revision applied without full resync.");
     }
     private static void VerifySelection()
     {
@@ -721,6 +750,16 @@ internal static class DrawingSmokeTest
         await Wait(() => window.RemotePreviewCount == 1, "Disconnect test preview did not appear.");
         peer.Dispose();
         await Wait(() => window.RemotePreviewCount == 0, "Disconnected peer left unfinished ink behind.");
+        var board = await cloud.ReadAsync(connection);
+        Check(await cloud.ReadChangedAsync(connection, board.Revision) is null, "Native conditional read downloaded unchanged canvas.");
+        await window.SyncAsync(); await Task.Delay(150);
+        var storage = Path.Combine(Environment.GetEnvironmentVariable("BLURMASK_SMOKE_ARTIFACTS") ?? Path.GetTempPath(), "canvas-smoke", "canvas.json");
+        if (File.Exists(storage))
+        {
+            var modified = File.GetLastWriteTimeUtc(storage);
+            await Task.Delay(2800);
+            Check(File.GetLastWriteTimeUtc(storage) == modified, "Idle shared canvas rewrites its disk cache.");
+        }
     }
     private static void SaveFlyout(DrawingSession session, string directory, string name)
     {

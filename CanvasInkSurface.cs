@@ -208,9 +208,10 @@ internal sealed class CanvasInkSurface : Grid
                 new Pen(new SolidColorBrush(Color.Parse("#D8E0E5")), 1 / owner.Zoom), rect);
             using var clip = context.PushClip(rect);
             if (!owner._session.InkVisible) return;
-            foreach (var mark in owner._session.CanvasDocument.Marks) mark.Draw(context);
-            foreach (var mark in owner._session.CanvasDocument.FadingMarks) mark.Draw(context);
-            foreach (var mark in owner._window.RemotePreviews) mark.Draw(context);
+            var visible = new Rect(owner.ToBoard(default), owner.ToBoard(new Point(Bounds.Width, Bounds.Height))).Normalize();
+            foreach (var mark in owner._session.CanvasDocument.Marks) if (mark.Bounds.Intersects(visible)) mark.Draw(context);
+            foreach (var mark in owner._session.CanvasDocument.FadingMarks) if (mark.Bounds.Intersects(visible)) mark.Draw(context);
+            foreach (var mark in owner._window.RemotePreviews) if (mark.Bounds.Intersects(visible)) mark.Draw(context);
             owner._session.CanvasDocument.Preview?.Draw(context);
             if (owner._session.Tool == InkTool.Select && !owner._window.ReadOnly) owner._session.CanvasSelection.Draw(context, owner.Zoom);
         }

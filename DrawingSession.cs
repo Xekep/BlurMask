@@ -30,6 +30,7 @@ internal sealed class DrawingSession : IDisposable
     private bool _inTray, _trayInkVisible;
     private readonly DispatcherTimer _fadeTimer = new() { Interval = TimeSpan.FromMilliseconds(33) };
     private readonly DispatcherTimer _screenTimer = new() { Interval = TimeSpan.FromMilliseconds(300) };
+    private (bool Undo, bool Redo) _historyState;
     public InkDocument DesktopDocument { get; } = new();
     public InkDocument CanvasDocument { get; } = new();
     internal InkSelection DesktopSelection { get; }
@@ -61,18 +62,18 @@ internal sealed class DrawingSession : IDisposable
         _setMaskAttachment = setMaskAttachment;
         _screenTimer.Tick += (_, _) => { _screenTimer.Stop(); RebuildOverlays(); };
         Toolbar = new DrawingToolbarWindow(this);
-        DesktopDocument.Changed += RefreshDocument;
-        CanvasDocument.Changed += RefreshDocument;
+        DesktopDocument.Changed += RefreshDesktopDocument;
+        CanvasDocument.Changed += RefreshCanvasDocument;
         _fadeTimer.Tick += (_, _) =>
         {
-            var previousCount = DesktopDocument.FadingMarks.Count + CanvasDocument.FadingMarks.Count;
+            var previousDesktop = DesktopDocument.FadingMarks.Count;
+            var previousCanvas = CanvasDocument.FadingMarks.Count;
             var now = Stopwatch.GetTimestamp();
             DesktopDocument.ExpireFading(now);
             CanvasDocument.ExpireFading(now);
-            foreach (var overlay in _overlays) overlay.Refresh();
-            Canvas?.Refresh();
-            if (previousCount != DesktopDocument.FadingMarks.Count + CanvasDocument.FadingMarks.Count)
-                StateChanged?.Invoke();
+            if (previousDesktop > 0) foreach (var overlay in _overlays) overlay.Refresh();
+            if (previousCanvas > 0) Canvas?.Refresh();
+            if (previousDesktop != DesktopDocument.FadingMarks.Count || previousCanvas != CanvasDocument.FadingMarks.Count) RefreshHistory();
             if (DesktopDocument.FadingMarks.Count == 0 && CanvasDocument.FadingMarks.Count == 0)
                 _fadeTimer.Stop();
         };
@@ -206,14 +207,25 @@ internal sealed class DrawingSession : IDisposable
         foreach (var overlay in _overlays) overlay.ApplyState();
         Canvas?.Refresh();
         Toolbar.RaiseAboveInk();
+        _historyState = (Document.CanUndo, Document.CanRedo);
         StateChanged?.Invoke();
     }
-    private void RefreshDocument()
+    private void RefreshDesktopDocument()
     {
-        if (DesktopDocument.FadingMarks.Count > 0 || CanvasDocument.FadingMarks.Count > 0) _fadeTimer.Start();
+        if (DesktopDocument.FadingMarks.Count > 0) _fadeTimer.Start();
         foreach (var overlay in _overlays) overlay.Refresh();
-        Canvas?.Refresh();
-        StateChanged?.Invoke();
+        RefreshHistory();
+    }
+    private void RefreshCanvasDocument()
+    {
+        if (CanvasDocument.FadingMarks.Count > 0) _fadeTimer.Start();
+        Canvas?.Refresh(); RefreshHistory();
+    }
+    private void RefreshHistory()
+    {
+        var state = (Document.CanUndo, Document.CanRedo);
+        if (_historyState == state) return;
+        _historyState = state; StateChanged?.Invoke();
     }
 
     internal string ShortcutText(ShortcutAction action) => Settings.Shortcuts[action].ToString();
@@ -348,8 +360,8 @@ internal sealed class DrawingSession : IDisposable
         _hotkeys?.Dispose();
         _settingsWindow?.Close();
         Toolbar.Screens.Changed -= OnScreensChanged;
-        DesktopDocument.Changed -= RefreshDocument;
-        CanvasDocument.Changed -= RefreshDocument;
+        DesktopDocument.Changed -= RefreshDesktopDocument;
+        CanvasDocument.Changed -= RefreshCanvasDocument;
         Canvas?.Shutdown();
         Toolbar.CloseFlyout();
         foreach (var overlay in _overlays) overlay.Close();

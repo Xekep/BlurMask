@@ -47,23 +47,32 @@ public sealed class BoardStore(NpgsqlDataSource source)
     }
 
     public async Task<BoardSnapshot?> ReadAsync(Guid id, string key, CancellationToken ct)
+        => (await ReadChangedAsync(id, key, null, ct)).Board;
+
+    public async Task<(BoardSnapshot? Board, long? Revision, bool ReadOnly)> ReadChangedAsync(Guid id, string key, long? knownRevision, CancellationToken ct, bool knownReadOnly = false)
     {
-        if (!ValidKey(key)) return null;
+        if (!ValidKey(key)) return (null, null, false);
         await using var command = source.CreateCommand("""
-            SELECT document::text, revision, edit_hash FROM pen_boards
+            SELECT CASE WHEN revision = $3 AND (edit_hash <> $2) = $4 THEN NULL ELSE document::text END,
+                revision, edit_hash <> $2 FROM pen_boards
             WHERE id = $1 AND (edit_hash = $2 OR view_hash = $2)
             """);
         command.Parameters.Add(new() { Value = id });
         command.Parameters.Add(new() { Value = Hash(key) });
+        command.Parameters.Add(new() { Value = knownRevision ?? -1 });
+        command.Parameters.Add(new() { Value = knownReadOnly });
         await using var reader = await command.ExecuteReaderAsync(ct);
-        if (!await reader.ReadAsync(ct)) return null;
-        return JsonSerializer.Deserialize(reader.GetString(0), BoardJsonContext.Default.BoardSnapshot)! with
-        { Revision = reader.GetInt64(1), ReadOnly = !Matches(key, reader.GetFieldValue<byte[]>(2)) };
+        if (!await reader.ReadAsync(ct)) return (null, null, false);
+        var revision = reader.GetInt64(1);
+        var readOnly = reader.GetBoolean(2);
+        if (reader.IsDBNull(0)) return (null, revision, readOnly);
+        return (JsonSerializer.Deserialize(reader.GetString(0), BoardJsonContext.Default.BoardSnapshot)! with
+        { Revision = revision, ReadOnly = readOnly }, revision, readOnly);
     }
 
-    public async Task<(BoardSnapshot? Board, bool ReadOnly)> UpdateAsync(Guid id, string key, BoardPatch patch, CancellationToken ct)
+    public async Task<(BoardSnapshot? Board, bool ReadOnly, BoardPatch? Change)> UpdateAsync(Guid id, string key, BoardPatch patch, CancellationToken ct)
     {
-        if (!ValidKey(key)) return (null, false);
+        if (!ValidKey(key)) return (null, false, null);
         await using var connection = await source.OpenConnectionAsync(ct);
         await using var transaction = await connection.BeginTransactionAsync(ct);
         await using var select = new NpgsqlCommand("""
@@ -75,8 +84,8 @@ public sealed class BoardStore(NpgsqlDataSource source)
         BoardSnapshot board;
         await using (var reader = await select.ExecuteReaderAsync(ct))
         {
-            if (!await reader.ReadAsync(ct)) return (null, false);
-            if (!Matches(key, reader.GetFieldValue<byte[]>(2))) return (null, true);
+            if (!await reader.ReadAsync(ct)) return (null, false, null);
+            if (!Matches(key, reader.GetFieldValue<byte[]>(2))) return (null, true, null);
             board = JsonSerializer.Deserialize(reader.GetString(0), BoardJsonContext.Default.BoardSnapshot)! with { Revision = reader.GetInt64(1) };
         }
         await using var previousOperation = new NpgsqlCommand("""
@@ -84,7 +93,7 @@ public sealed class BoardStore(NpgsqlDataSource source)
             """, connection, transaction);
         previousOperation.Parameters.Add(new() { Value = id });
         previousOperation.Parameters.Add(new() { Value = patch.OperationId });
-        if ((bool)(await previousOperation.ExecuteScalarAsync(ct))!) return (board, false);
+        if ((bool)(await previousOperation.ExecuteScalarAsync(ct))!) return (board, false, null);
         var removed = patch.Remove.ToHashSet();
         var marks = board.Marks.Where(m => !removed.Contains(m.Id)).ToList();
         var changed = marks.Count != board.Marks.Count;
@@ -95,7 +104,7 @@ public sealed class BoardStore(NpgsqlDataSource source)
         var existing = marks.Select(m => m.Id).ToHashSet();
         foreach (var mark in patch.Add) if (existing.Add(mark.Id)) { marks.Add(mark); changed = true; }
         if (!changed && (patch.Title is null || patch.Title.Trim() == board.Title) &&
-            (patch.Background is null || patch.Background == board.Background)) return (board, false);
+            (patch.Background is null || patch.Background == board.Background)) return (board, false, null);
         board = board with
         {
             Revision = board.Revision + 1, Marks = marks,
@@ -116,7 +125,7 @@ public sealed class BoardStore(NpgsqlDataSource source)
         update.Parameters.Add(new() { Value = board.Revision });
         await update.ExecuteNonQueryAsync(ct);
         await transaction.CommitAsync(ct);
-        return (board, false);
+        return (board, false, patch);
     }
 
     public async Task<bool> PingAsync(CancellationToken ct)

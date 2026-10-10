@@ -4,16 +4,19 @@ body { margin: 0; background: radial-gradient(ellipse at 85% 25%, #e3eadd70, tra
 a { color: inherit; text-decoration: none; }
 button { font: inherit; cursor: pointer; }
 a:focus-visible, button:focus-visible { outline: 3px solid #799675; outline-offset: 5px; }
-.page { min-height: 100svh; max-width: 1080px; margin: auto; padding: 36px 52px 24px; display: flex; flex-direction: column; }
+.page { min-height: 100svh; max-width: 1320px; margin: auto; padding: 36px 52px 24px; display: flex; flex-direction: column; }
 header, footer { display: flex; align-items: center; justify-content: space-between; }
 .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 650; letter-spacing: -.5px; }
 .logo { width: 42px; height: 42px; background: #22231f; border-radius: 50%; display: grid; place-items: center; }
 .source { color: #6b6e66; font-size: 14px; }
 .source:hover { color: #232421; }
-main { flex: 1; padding: clamp(64px, 12vh, 140px) 0 88px; }
+main { flex: 1; padding: clamp(64px, 12vh, 140px) 0 88px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); align-items: center; gap: 32px; }
+.hero-copy { min-width: 0; }
+.app-preview { min-width: 0; filter: drop-shadow(0 24px 26px #39403218); }
+.app-preview img { display: block; width: 100%; height: auto; }
 .eyebrow { display: flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 550; letter-spacing: .6px; color: #74786e; }
 .eyebrow span { width: 6px; height: 6px; border-radius: 50%; background: #799675; }
-h1 { margin: 26px 0; font-size: clamp(52px, 7.8vw, 88px); line-height: 1.04; font-weight: 650; letter-spacing: -.055em; max-width: 880px; }
+h1 { margin: 26px 0; font-size: clamp(42px, 4.4vw, 64px); line-height: 1.08; font-weight: 650; letter-spacing: -.055em; max-width: 880px; }
 .description { max-width: 570px; font-size: 19px; line-height: 1.6; color: #72756c; margin: 0; }
 .downloads { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 38px; }
 .download { display: inline-flex; align-items: center; justify-content: center; gap: 12px; padding: 15px 22px; border: 1px solid #dadcd4; border-radius: 12px; font-size: 14px; font-weight: 550; transition: background .18s, transform .18s; }
@@ -27,6 +30,11 @@ h1 { margin: 26px 0; font-size: clamp(52px, 7.8vw, 88px); line-height: 1.04; fon
 .invitation button { background: transparent; border: 0; padding: 0; color: #33442c; text-decoration: underline; text-underline-offset: 4px; font-size: 13px; }
 .invitation[hidden] { display: none; }
 footer { padding-top: 20px; border-top: 1px solid #e1e3db; font-size: 12px; color: #979b8e; }
+@media (max-width: 960px) {
+  main { grid-template-columns: 1fr; gap: 44px; }
+  h1 { font-size: clamp(42px, 7.8vw, 72px); }
+  .app-preview { max-width: 680px; width: 100%; margin: auto; }
+}
 @media (max-width: 600px) {
   .page { padding: 24px; }
   main { padding-top: 64px; padding-bottom: 64px; }

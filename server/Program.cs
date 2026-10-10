@@ -9,6 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
 var connection = builder.Configuration.GetConnectionString("Postgres")
     ?? throw new InvalidOperationException("Set ConnectionStrings__Postgres to a PostgreSQL connection string.");
 var publicUrl = builder.Configuration["PublicUrl"] ?? "https://pen.kiiko.ru";
+var liveLimits = new LiveLimits();
+builder.Configuration.GetSection("Live").Bind(liveLimits); liveLimits.Validate();
+builder.Services.AddSingleton(liveLimits);
 builder.Services.AddSingleton(NpgsqlDataSource.Create(connection));
 builder.Services.AddSingleton<BoardStore>();
 builder.Services.AddSingleton<BoardLiveHub>();
@@ -21,7 +24,7 @@ builder.Services.AddRateLimiter(options =>
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
         context.GetEndpoint()?.Metadata.GetMetadata<BoardLiveEndpoint>() is not null
             ? RateLimitPartition.GetConcurrencyLimiter("live", _ => new ConcurrencyLimiterOptions
-                { PermitLimit = 64, QueueLimit = 0 }) :
+                { PermitLimit = liveLimits.MaxConnections, QueueLimit = 0 }) :
         context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase) || context.Request.Path == "/healthz"
             ? RateLimitPartition.GetConcurrencyLimiter("backend", _ => new ConcurrencyLimiterOptions
                 { PermitLimit = 8, QueueLimit = 0 })
@@ -80,10 +83,19 @@ api.MapPost("", async (CreateBoardRequest request, BoardStore store, Cancellatio
     var access = await store.CreateAsync(request, publicUrl, ct);
     return Results.Created($"/api/boards/{access.Board.Id}", access);
 }).RequireRateLimiting("create");
-api.MapGet("/{id:guid}", async (Guid id, HttpRequest request, BoardStore store, CancellationToken ct) =>
+api.MapGet("/{id:guid}", async (Guid id, HttpContext context, BoardStore store, CancellationToken ct) =>
 {
-    var board = await store.ReadAsync(id, Key(request), ct);
-    return board is null ? Results.NotFound() : Results.Ok(board);
+    var tag = context.Request.Headers.IfNoneMatch.ToString();
+    var prefix = $"\"{id:N}-";
+    var readOnly = tag.EndsWith("-v\"", StringComparison.Ordinal);
+    long? known = tag.StartsWith(prefix, StringComparison.Ordinal) && tag.Length > prefix.Length + 3 &&
+        (readOnly || tag.EndsWith("-e\"", StringComparison.Ordinal)) &&
+        long.TryParse(tag.AsSpan(prefix.Length, tag.Length - prefix.Length - 3), System.Globalization.NumberStyles.None,
+            System.Globalization.CultureInfo.InvariantCulture, out var revision) && revision >= 0 ? revision : null;
+    var result = await store.ReadChangedAsync(id, Key(context.Request), known, ct, readOnly);
+    if (result.Revision is not { } current) return Results.NotFound();
+    context.Response.Headers.ETag = $"\"{id:N}-{current}-{(result.ReadOnly ? "v" : "e")}\"";
+    return result.Board is null ? Results.StatusCode(304) : Results.Ok(result.Board);
 }).WithMetadata(new BoardKeyRequired());
 api.MapGet("/{id:guid}/live", async (Guid id, HttpContext context, BoardStore store, BoardLiveHub live) =>
     await live.HandleAsync(id, context, store, Key(context.Request)))
@@ -93,7 +105,7 @@ api.MapPost("/{id:guid}/changes", async (Guid id, BoardPatch patch, HttpRequest 
     if (!BoardValidation.Valid(patch)) return Results.BadRequest(new { error = "Некорректный рисунок." });
     var result = await store.UpdateAsync(id, Key(request), patch, ct);
     if (result.ReadOnly) return Results.StatusCode(403);
-    if (result.Board is not null) live.Changed(result.Board);
+    if (result.Board is not null && result.Change is not null) live.Changed(result.Board, result.Change);
     return result.Board is null ? Results.NotFound() : Results.Ok(result.Board);
 }).WithMetadata(new BoardKeyRequired());
 await app.Services.GetRequiredService<BoardStore>().InitializeAsync();

@@ -19,14 +19,28 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
     public Color Color { get; } = color;
     public double Width { get; } = width;
     public List<Point> Points { get; } = [start];
-    public string Text { get; set; } = "";
-    public double FontSize { get; set; } = 28;
+    private string _text = "";
+    private double _fontSize = 28;
+    public string Text { get => _text; set { if (_text != value) { _text = value; _bounds = null; _formatted = null; } } }
+    public double FontSize { get => _fontSize; set { if (_fontSize != value) { _fontSize = value; _bounds = null; _formatted = null; } } }
     public string? Image { get; init; }
     private Bitmap? _bitmap;
     private bool _imageDecoded;
     public double FadeSeconds { get; init; }
     internal long FadeStartedAt { get; private set; }
     private StreamGeometry? _geometry;
+    private Rect? _bounds;
+    private SolidColorBrush? _brush;
+    private Pen? _pen;
+    private FormattedText? _formatted;
+    private string? _textCulture;
+    private FormattedText Formatted()
+    {
+        var culture = CultureInfo.CurrentCulture;
+        if (_formatted is null || _textCulture != culture.Name)
+        { _formatted = new(Text, culture, FlowDirection.LeftToRight, Typeface.Default, FontSize, _brush ??= new(Color)); _textCulture = culture.Name; _bounds = null; }
+        return _formatted;
+    }
 
     internal void StartFading() => FadeStartedAt = Stopwatch.GetTimestamp();
     internal double FadeOpacity(long now)
@@ -42,16 +56,21 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
         {
             if (((Vector)(point - Points[^1])).Length < 0.65) return;
             Points.Add(point);
+            if (_bounds is { } bounds) _bounds = bounds.Union(new Rect(point, point).Inflate(Width / 2));
         }
-        else if (Points.Count == 1) Points.Add(point);
-        else Points[1] = point;
+        else
+        {
+            if (Points.Count == 1) Points.Add(point);
+            else Points[1] = point;
+            _bounds = null;
+        }
         _geometry = null;
     }
 
     public void Draw(DrawingContext context)
     {
-        var brush = new SolidColorBrush(Color);
-        var pen = new Pen(brush, Width, lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round);
+        var brush = _brush ??= new SolidColorBrush(Color);
+        var pen = _pen ??= new Pen(brush, Width, lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round);
         var start = Points[0];
         var end = Points[^1];
         var rect = new Rect(start, end).Normalize();
@@ -68,8 +87,7 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
                 if (_bitmap is not null) context.DrawImage(_bitmap, rect);
                 break;
             case InkTool.Text:
-                context.DrawText(new FormattedText(Text, CultureInfo.CurrentCulture,
-                    FlowDirection.LeftToRight, Typeface.Default, FontSize, brush), start);
+                context.DrawText(Formatted(), start);
                 break;
             case InkTool.Rectangle: context.DrawRectangle(null, pen, rect); break;
             case InkTool.Ellipse: context.DrawEllipse(null, pen, rect); break;
@@ -104,14 +122,14 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
     public bool Hit(Point point, double radius)
     {
         radius += Width / 2;
+        if (!Bounds.Inflate(radius).Contains(point)) return false;
         var start = Points[0];
         var end = Points[^1];
         var rect = new Rect(start, end).Normalize();
         if (Tool == InkTool.Image) return rect.Inflate(radius).Contains(point);
         if (Tool == InkTool.Text)
         {
-            var text = new FormattedText(Text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
-                Typeface.Default, FontSize, Brushes.Black);
+            var text = Formatted();
             return new Rect(start, new Size(text.Width, text.Height)).Inflate(radius).Contains(point);
         }
         if (Tool == InkTool.Rectangle)
@@ -154,13 +172,17 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
     {
         get
         {
+            if (_bounds is { } cached && (Tool != InkTool.Text || _textCulture == CultureInfo.CurrentCulture.Name)) return cached;
             if (Tool == InkTool.Text)
             {
-                var text = new FormattedText(Text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, Typeface.Default, FontSize, Brushes.Black);
-                return new Rect(Points[0], new Size(text.Width, text.Height));
+                var text = Formatted();
+                return (_bounds = new Rect(Points[0], new Size(text.Width, text.Height))).Value;
             }
-            return new Rect(new Point(Points.Min(p => p.X), Points.Min(p => p.Y)),
-                new Point(Points.Max(p => p.X), Points.Max(p => p.Y))).Inflate(Math.Max(Width / 2, Tool == InkTool.Arrow ? Width * 3.5 : 0));
+            var minX = Points[0].X; var maxX = minX; var minY = Points[0].Y; var maxY = minY;
+            foreach (var point in Points)
+            { minX = Math.Min(minX, point.X); maxX = Math.Max(maxX, point.X); minY = Math.Min(minY, point.Y); maxY = Math.Max(maxY, point.Y); }
+            return (_bounds = new Rect(new Point(minX, minY), new Point(maxX, maxY))
+                .Inflate(Tool == InkTool.Arrow ? Math.Max(14, Width * 3.5) + Width / 2 : Width / 2)).Value;
         }
     }
     internal InkMark Translate(Vector delta)

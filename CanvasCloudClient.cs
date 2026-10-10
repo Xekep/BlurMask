@@ -25,9 +25,14 @@ internal sealed class CanvasCloudClient : IDisposable
         return (await JsonSerializer.DeserializeAsync(stream, BoardJsonContext.Default.BoardAccess))!;
     }
     public async Task<BoardSnapshot> ReadAsync(BoardConnection connection)
+        => (await ReadChangedAsync(connection, null))!;
+
+    public async Task<BoardSnapshot?> ReadChangedAsync(BoardConnection connection, long? revision, bool readOnly = false)
     {
         using var request = Request(connection, HttpMethod.Get, "");
+        if (revision is { } known) request.Headers.IfNoneMatch.Add(new($"\"{connection.Id:N}-{known}-{(readOnly ? "v" : "e")}\""));
         using var response = await _http.SendAsync(request);
+        if (response.StatusCode == HttpStatusCode.NotModified) return null;
         Ensure(response);
         await using var stream = await response.Content.ReadAsStreamAsync();
         return (await JsonSerializer.DeserializeAsync(stream, BoardJsonContext.Default.BoardSnapshot))!;

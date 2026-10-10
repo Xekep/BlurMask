@@ -25,11 +25,16 @@ internal sealed class CanvasWindow : Window
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(1300) };
     private readonly DispatcherTimer _liveTimer = new() { Interval = TimeSpan.FromMilliseconds(50) };
     private CanvasLiveClient? _live;
-    private readonly Dictionary<Guid, (InkMarkDto Dto, InkMark Mark)> _remotePreviews = [];
+    private readonly Dictionary<Guid, RemoteInkPreview> _remotePreviews = [];
     private readonly Dictionary<Guid, long> _previewClears = [];
     private Guid? _localLiveId;
     private bool _previewDirty;
-    internal IEnumerable<InkMark> RemotePreviews => _remotePreviews.Values.Select(p => p.Mark);
+    private bool _liveReady, _syncQueued, _localChanges = true;
+    private long _remoteRevision, _localVersion;
+    private DateTime _nextPoll = DateTime.MinValue;
+    private BoardSnapshot? _announcedBoard;
+    private bool NeedsSync => _localChanges || _pending is not null || _deferred is not null || _remoteRevision > _baseline.Revision;
+    internal IEnumerable<InkMark> RemotePreviews => _remotePreviews.Values.Select(p => p.Mark!);
     internal int RemotePreviewCount => _remotePreviews.Count;
     internal bool LiveConnected => _live?.Connected == true;
     private readonly string _statePath;
@@ -71,7 +76,9 @@ internal sealed class CanvasWindow : Window
         _title.LostFocus += (_, _) =>
         {
             if (ReadOnly) return;
-            _board = _board with { Title = string.IsNullOrWhiteSpace(_title.Text) ? UiText.T("Новое полотно") : _title.Text.Trim() };
+            var title = string.IsNullOrWhiteSpace(_title.Text) ? UiText.T("Новое полотно") : _title.Text.Trim();
+            if (title == _board.Title) return;
+            _board = _board with { Title = title }; _localChanges = true; _localVersion++; RequestSync();
             SaveState();
         };
         top.Children.Add(_title);
@@ -120,10 +127,13 @@ internal sealed class CanvasWindow : Window
         _surface.ViewChanged += () => zoomLevel.Content = _surface.Zoom < .01 ? $"{_surface.Zoom * 100:0.0}%" : $"{_surface.Zoom * 100:0}%";
         AddHandler(KeyDownEvent, CanvasKeyDown, Avalonia.Interactivity.RoutingStrategies.Tunnel);
         session.CanvasDocument.Changed += OnDocumentChanged;
-        _timer.Tick += (_, _) => { if (_dirty && !session.CanvasDocument.HasActiveEdit) SaveState(); _ = SyncAsync(); };
+        _timer.Tick += (_, _) =>
+        {
+            if (_dirty && !session.CanvasDocument.HasActiveEdit) SaveState();
+            if (NeedsSync || !_liveReady || DateTime.UtcNow > _nextPoll) RequestSync(true);
+        };
         _timer.Start();
         _liveTimer.Tick += (_, _) => PublishPreview();
-        _liveTimer.Start();
         ResetLive();
         Activated += (_, _) => { if (!_shutdown) session.ActivateCanvas(); };
         Closing += (_, e) =>
@@ -147,6 +157,7 @@ internal sealed class CanvasWindow : Window
     {
         if (ReadOnly) return;
         _board = _board with { Background = _board.Background == "white" ? "black" : "white" };
+        _localChanges = true; _localVersion++; RequestSync();
         if (BoardBackground == "black" && _session.Color == Colors.Black) _session.Color = Colors.White;
         SaveState(); Refresh();
     }
@@ -216,13 +227,27 @@ internal sealed class CanvasWindow : Window
     private void OnDocumentChanged()
     {
         if (_loading) return;
-        _dirty = true; _previewDirty = true;
+        _dirty = true; _previewDirty = true; _localChanges = true; _localVersion++;
         if (!_session.CanvasDocument.HasActiveEdit)
         {
             PublishPreview();
             // Commit immediately; the timer remains the offline/retry fallback.
-            Dispatcher.UIThread.Post(() => _ = SyncAsync());
+            RequestSync();
         }
+    }
+    private void RequestSync(bool poll = false)
+    {
+        if (_syncQueued || _shutdown || _connection is null) return;
+        _syncQueued = true;
+        Dispatcher.UIThread.Post(async () =>
+        {
+            try
+            {
+                if (_syncTask is { } running) await running;
+                if (NeedsSync || poll) await SyncAsync();
+            }
+            finally { _syncQueued = false; }
+        });
     }
     private void PublishPreview()
     {
@@ -230,7 +255,7 @@ internal sealed class CanvasWindow : Window
         _previewDirty = false;
         var mark = _session.CanvasDocument.Preview;
         if (mark is { FadeSeconds: <= 0 })
-        { _localLiveId = mark.Id; _live.Preview(InkDocument.ExportMark(mark)); }
+        { _localLiveId = mark.Id; _live.PreviewInk(mark); }
         else if (_localLiveId is { } id)
         {
             _live.Preview(null, !_session.CanvasDocument.Marks.Any(m => m.Id == id));
@@ -239,14 +264,22 @@ internal sealed class CanvasWindow : Window
     }
     private void ResetLive()
     {
-        _live?.Dispose(); _live = null; _remotePreviews.Clear(); _previewClears.Clear(); _localLiveId = null;
+        _liveTimer.Stop(); _live?.Dispose(); _live = null; _remotePreviews.Clear(); _previewClears.Clear(); _localLiveId = null;
+        _liveReady = false; _remoteRevision = 0; _announcedBoard = null;
         if (_connection is null || _shutdown) return;
+        _liveTimer.Start();
         var generation = _generation;
         _live = new CanvasLiveClient(_connection, frame => Dispatcher.UIThread.Post(() =>
         {
             if (_shutdown || generation != _generation) return;
-            if (frame is null) { _remotePreviews.Clear(); _previewClears.Clear(); Refresh(); return; }
-            if (frame.Type is "ready" or "changed") { _ = SyncAsync(); return; }
+            if (frame is null) { _liveReady = false; _remotePreviews.Clear(); _previewClears.Clear(); Refresh(); return; }
+            if (frame.Type is "ready" or "changed")
+            {
+                if (frame.Type == "ready") _liveReady = true;
+                if (_connection is not null && _baseline.Id == _connection.Id &&
+                    LiveProtocol.TryApply(_announcedBoard ?? _baseline, frame, out var updated)) _announcedBoard = updated;
+                _remoteRevision = Math.Max(_remoteRevision, frame.Revision); RequestSync(); return;
+            }
             if (frame.Type == "clear")
             {
                 if (frame.Revision > _board.Revision) _previewClears[frame.Peer] = frame.Revision;
@@ -254,11 +287,10 @@ internal sealed class CanvasWindow : Window
             }
             else if (frame.Type == "preview")
             {
-                _remotePreviews.TryGetValue(frame.Peer, out var previous);
-                if (LiveProtocol.TryMerge(frame, previous.Dto, out var dto))
+                var preview = _remotePreviews.GetValueOrDefault(frame.Peer) ?? new RemoteInkPreview();
+                if (preview.Apply(frame))
                 {
-                    var document = new InkDocument(); document.Import([dto!]);
-                    _remotePreviews[frame.Peer] = (dto!, document.Marks[0]); _previewClears.Remove(frame.Peer);
+                    _remotePreviews[frame.Peer] = preview; _previewClears.Remove(frame.Peer);
                 }
             }
             Refresh();
@@ -268,7 +300,7 @@ internal sealed class CanvasWindow : Window
     {
         foreach (var peer in _remotePreviews.Keys.ToArray())
             if ((_previewClears.TryGetValue(peer, out var revision) && revision <= _board.Revision) ||
-                _board.Marks.Any(m => m.Id == _remotePreviews[peer].Dto.Id))
+                _board.Marks.Any(m => m.Id == _remotePreviews[peer].Dto!.Id))
             { _remotePreviews.Remove(peer); _previewClears.Remove(peer); }
     }
     private void NewLocal()
@@ -336,14 +368,16 @@ internal sealed class CanvasWindow : Window
         {
             Apply(CanvasMerge.Rebase(deferred.Remote, deferred.Before, Snapshot()));
             _baseline = deferred.Remote; _deferred = null; SaveState();
+            if (_announcedBoard?.Revision <= _baseline.Revision) _announcedBoard = null;
         }
         _busy = true;
         var generation = _generation;
+        var version = _localVersion;
         try
         {
-            var before = _pendingBefore ?? Snapshot();
-            var patch = _pending ?? CanvasMerge.Difference(_baseline, before);
-            BoardSnapshot remote;
+            var before = _pendingBefore ?? (_localChanges ? Snapshot() : _board);
+            var patch = _pending ?? (_localChanges ? CanvasMerge.Difference(_baseline, before) : new BoardPatch());
+            BoardSnapshot? remote;
             if (!ReadOnly && CanvasMerge.HasChanges(patch))
             {
                 _pending = patch; _pendingBefore = before; SaveState();
@@ -351,13 +385,19 @@ internal sealed class CanvasWindow : Window
                 if (generation != _generation || _shutdown) return;
                 _pending = null; _pendingBefore = null;
             }
-            else remote = await _cloud.ReadAsync(_connection);
+            else if (_announcedBoard is { } announced && announced.Revision >= _remoteRevision && announced.Revision > _baseline.Revision) remote = announced;
+            else remote = await _cloud.ReadChangedAsync(_connection, _baseline.Id == _connection.Id ? _baseline.Revision : null, _baseline.ReadOnly);
             if (generation != _generation || _shutdown) return;
+            _nextPoll = DateTime.UtcNow.AddSeconds(Random.Shared.Next(25, 36));
+            if (_announcedBoard is { } newer && newer.Revision >= _remoteRevision && newer.Revision > (remote?.Revision ?? _baseline.Revision)) remote = newer;
+            if (version == _localVersion) _localChanges = false;
+            if (remote is null) return; // No full import, redraw, serialization or disk write on 304.
             if (_session.CanvasDocument.HasActiveEdit) _deferred = (remote, before);
             else
             {
                 Apply(CanvasMerge.Rebase(remote, before, Snapshot()));
                 _baseline = remote; SaveState();
+                if (_announcedBoard?.Revision <= _baseline.Revision) _announcedBoard = null;
             }
             _status.Text = remote.ReadOnly ? UiText.T("Только просмотр · подключено") : UiText.T("Сохранено · подключено");
         }
@@ -380,6 +420,7 @@ internal sealed class CanvasWindow : Window
             ResetLive();
             _viewKey = created.ViewKey; _baseline = created.Board;
             _board = local with { Id = created.Board.Id, Revision = 0, ReadOnly = false };
+            _localChanges = true;
             _pending = null; _pendingBefore = null; SaveState();
         }
         finally { _busy = false; _changingBoard = false; }
@@ -403,6 +444,7 @@ internal sealed class CanvasWindow : Window
             ResetLive();
             _pending = null; _pendingBefore = null; _deferred = null; _baseline = remote;
             Apply(remote, true); SaveState(); _surface.Fit();
+            _localChanges = false;
             _status.Text = remote.ReadOnly ? UiText.T("Только просмотр · подключено") : UiText.T("Сохранено · подключено");
         }
         finally { _busy = false; _changingBoard = false; }

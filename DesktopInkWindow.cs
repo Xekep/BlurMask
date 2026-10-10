@@ -252,8 +252,9 @@ internal sealed class DesktopInkWindow : Window
                 context.DrawRectangle(session.Board == BoardMode.White ? Brushes.White : Brushes.Black, null, new Rect(Bounds.Size));
             using var transform = context.PushTransform(
                 Matrix.CreateTranslation(-window.Position.X, -window.Position.Y) * Matrix.CreateScale(1 / window.RenderScaling, 1 / window.RenderScaling));
-            foreach (var mark in session.DesktopDocument.Marks) mark.Draw(context);
-            foreach (var mark in session.DesktopDocument.FadingMarks) mark.Draw(context);
+            var visible = new Rect(window.Position.X, window.Position.Y, Bounds.Width * window.RenderScaling, Bounds.Height * window.RenderScaling);
+            foreach (var mark in session.DesktopDocument.Marks) if (mark.Bounds.Intersects(visible)) mark.Draw(context);
+            foreach (var mark in session.DesktopDocument.FadingMarks) if (mark.Bounds.Intersects(visible)) mark.Draw(context);
             session.DesktopDocument.Preview?.Draw(context);
             if (session.Tool == InkTool.Select) session.DesktopSelection.Draw(context, 1 / window.RenderScaling);
         }

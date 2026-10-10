@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="520" viewBox="0 0 640 520">
+  <defs>
+    <pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r=".8" fill="#cbd0d8"/></pattern>
+    <filter id="shadow" x="-80%" y="-20%" width="260%" height="140%"><feDropShadow dx="0" dy="4" stdDeviation="7" flood-opacity=".16"/></filter>
+  </defs>
+  <!-- A static illustration of the native canvas and desktop toolbar. -->
+  <rect x="38" y="48" width="590" height="434" rx="14" fill="#e8edf3" stroke="#d3d9df"/>
+  <path d="M52 48h562a14 14 0 0 1 14 14v22H38V62a14 14 0 0 1 14-14" fill="#f9fafc"/>
+  <text x="63" y="71" font-family="Segoe UI, sans-serif" font-size="12" fill="#434953">BlurMask</text>
+  <g stroke="#77818b" stroke-width="1.3" fill="none"><path d="M540 65h10"/><rect x="574" y="61" width="9" height="9"/><path d="m605 61 9 9m0-9-9 9"/></g>
+  <rect x="50" y="96" width="566" height="374" rx="3" fill="white"/>
+  <rect x="50" y="96" width="566" height="374" fill="url(#dots)"/>
+  <circle cx="66" cy="112" r="11" fill="#20211f"/>
+  <g transform="translate(58 102) rotate(35 8 10)"><rect x="5" y="1" width="7" height="19" rx="2" fill="#eeeeda" stroke="#888a7b"/><path d="M7 3v13" stroke="white"/></g>
+  <!-- Hand-drawn marks, with a screenshot-like raster card selected on the canvas. -->
+  <g fill="none" stroke="#6f9463" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M137 184c-7-36 124-53 142-16 16 34-20 61-82 56-46-3-69-19-60-40m-4-3c-9-30 117-49 143-24"/>
+    <path d="M167 177h65m-51 17h40"/>
+    <path d="M281 193c53 2 83 16 99 43m-20-8 20 8-1-20"/>
+    <path d="M169 310c17-30 36 38 56 4s43 34 65 4"/>
+  </g>
+  <rect x="385" y="227" width="160" height="124" rx="5" fill="#f2f1e9"/>
+  <path d="M399 244h90m-90 10h60" stroke="#b6b9ab" stroke-width="4"/>
+  <rect x="399" y="263" width="131" height="73" rx="3" fill="#dfe9da"/>
+  <path d="m400 322 36-33 30 23 24-15 39 26v13H400" fill="#a9bea1"/>
+  <circle cx="511" cy="280" r="7" fill="#f8f8ec"/>
+  <rect x="380" y="222" width="170" height="134" fill="none" stroke="#27b7cd" stroke-width="1.3" stroke-dasharray="5 4"/>
+  <g fill="white" stroke="#27b7cd"><rect x="377" y="219" width="6" height="6"/><rect x="547" y="219" width="6" height="6"/><rect x="377" y="353" width="6" height="6"/><rect x="547" y="353" width="6" height="6"/></g>
+  <g transform="translate(10 126)">
+    <rect x="0" y="40" width="40" height="274" rx="5" fill="white" filter="url(#shadow)"/>
+    <circle cx="20" cy="16" r="18" fill="#20211f"/>
+    <g transform="rotate(35 20 16)"><rect x="15" y="2" width="10" height="28" rx="3" fill="#efefdf" stroke="#929489"/><path d="M18 5v19" stroke="white" stroke-width="2"/></g>
+    <rect y="72" width="40" height="32" fill="#29bdd2"/>
+    <g stroke="#454b4d" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 56q10-12 20 0-10 12-20 0"/><circle cx="20" cy="56" r="3"/>
+      <path d="m13 80 0 19 5-6 5 6 3-2-5-7 8-1z" fill="white"/>
+      <path d="m11 126 3-8 14-14 5 5-14 14z"/>
+      <rect x="10" y="137" width="12" height="12" rx="1"/><circle cx="25" cy="151" r="6"/>
+      <path d="m12 181 11-11 8 8-11 11h-5zm7 7 9 0"/>
+      <circle cx="20" cy="217" r="8"/><path d="M20 203v3m-4-3h8m-4 6v8l-4 3m9-12 3-3"/>
+      <path d="m15 242-5 5 5 5m-5-5h13a6 6 0 0 1 0 12h-5"/>
+      <path d="M12 276h16m-13 0 1 15h8l1-15m-7-3h4m-3 6v9m3-9v9"/>
+    </g>
+    <circle cx="20" cy="199" r="2.5" fill="#454b4d"/>
+    <rect x="7" y="302" width="26" height="6" rx="2" fill="#6f9463"/>
+  </g>
+</svg>

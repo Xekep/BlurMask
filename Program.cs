@@ -12,6 +12,7 @@ internal static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        if (args.Contains("--performance-test", StringComparer.OrdinalIgnoreCase)) { PerformanceProbe.Run(); return; }
         var isolatedSmoke = args.Contains("--isolated-smoke-test", StringComparer.OrdinalIgnoreCase);
         // Acquire the single-instance guard before Avalonia or any native UI code starts.
         // A second launch exits silently with success and never creates a tray icon/window.

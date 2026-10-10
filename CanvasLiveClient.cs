@@ -9,19 +9,38 @@ internal sealed class CanvasLiveClient : IDisposable
 {
     private readonly CancellationTokenSource _stop = new();
     private readonly object _gate = new();
+    private readonly SemaphoreSlim _wake = new(0, 1);
+    private int _disposed;
     private InkMarkDto? _desired;
     private bool _clear;
-    private long _version;
     private readonly Action<LiveFrame?> _received;
     internal bool Connected { get; private set; }
     public CanvasLiveClient(BoardConnection connection, Action<LiveFrame?> received)
     {
         _received = received;
-        _ = RunAsync(connection, _stop.Token);
+        _ = Task.Run(async () =>
+        {
+            try { await RunAsync(connection, _stop.Token); }
+            finally { lock (_gate) { _disposed = 1; _stop.Dispose(); _wake.Dispose(); } }
+        });
     }
     public void Preview(InkMarkDto? mark, bool canceled = false)
     {
-        lock (_gate) { _desired = mark; _clear |= canceled; _version++; }
+        lock (_gate)
+        {
+            if (_disposed != 0) return;
+            _desired = mark is null ? null : mark with { Points = new(mark.Points) }; _clear |= canceled;
+            if (_wake.CurrentCount == 0) _wake.Release();
+        }
+    }
+    public void PreviewInk(InkMark mark)
+    {
+        lock (_gate)
+        {
+            if (_disposed != 0) return;
+            _desired = LivePreviewCapture.Capture(mark, _desired);
+            if (_wake.CurrentCount == 0) _wake.Release();
+        }
     }
     private async Task RunAsync(BoardConnection connection, CancellationToken ct)
     {
@@ -57,28 +76,35 @@ internal sealed class CanvasLiveClient : IDisposable
     private async Task SendAsync(ClientWebSocket socket, CancellationToken ct)
     {
         InkMarkDto? sent = null;
-        long seen = -1;
+        var sentPoints = 0;
         var touched = DateTime.UtcNow;
-        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(50));
-        while (await timer.WaitForNextTickAsync(ct))
+        while (!ct.IsCancellationRequested)
         {
-            InkMarkDto? desired; bool clear; long version;
-            lock (_gate) { desired = _desired; clear = _clear; _clear = false; version = _version; }
-            if (clear) { await SendFrameAsync(socket, new() { Type = "clear" }, ct); sent = null; }
-            if (desired is null) { sent = null; seen = version; continue; }
-            if (version != seen)
+            bool active, clear;
+            LiveFrame[] frames = [];
+            lock (_gate)
             {
-                if (sent is null || sent.Id != desired.Id || !BoardValidation.Same(sent, desired))
+                clear = _clear; _clear = false;
+                if (clear) { sent = null; sentPoints = 0; }
+                var desired = _desired; active = desired is not null;
+                if (desired is null) { sent = null; sentPoints = 0; }
+                else if (desired.Tool is "Pen" or "Highlighter")
                 {
-                    var offset = sent?.Id == desired.Id && desired.Tool is ("Pen" or "Highlighter") && desired.Points.Count >= sent.Points.Count
-                        ? sent.Points.Count : 0;
-                    foreach (var frame in LiveProtocol.Chunks(desired, offset)) await SendFrameAsync(socket, frame, ct);
-                    sent = desired; touched = DateTime.UtcNow;
+                    var offset = sent?.Id == desired.Id && sent.Tool == desired.Tool && sent.Color == desired.Color && sent.Width == desired.Width &&
+                        sent.FontSize == desired.FontSize && sent.Text == desired.Text && desired.Points.Count >= sentPoints ? sentPoints : 0;
+                    if (offset < desired.Points.Count)
+                    { frames = LiveProtocol.Chunks(desired, offset).ToArray(); sent = desired with { Points = [] }; sentPoints = desired.Points.Count; }
                 }
-                seen = version;
+                else if (sent?.Id != desired.Id || !BoardValidation.Same(sent, desired))
+                { frames = LiveProtocol.Chunks(desired).ToArray(); sent = desired; sentPoints = desired.Points.Count; }
             }
-            if (DateTime.UtcNow - touched > TimeSpan.FromSeconds(2))
+            if (clear) await SendFrameAsync(socket, new() { Type = "clear" }, ct);
+            foreach (var frame in frames) await SendFrameAsync(socket, frame, ct);
+            if (frames.Length > 0) touched = DateTime.UtcNow;
+            if (active && DateTime.UtcNow - touched > TimeSpan.FromSeconds(2))
             { await SendFrameAsync(socket, new() { Type = "touch" }, ct); touched = DateTime.UtcNow; }
+            if (active) await Task.Delay(50, ct);
+            else await _wake.WaitAsync(ct);
         }
     }
     private static async Task SendFrameAsync(ClientWebSocket socket, LiveFrame frame, CancellationToken ct)
@@ -105,5 +131,8 @@ internal sealed class CanvasLiveClient : IDisposable
             if (frame is not null) _received(frame);
         }
     }
-    public void Dispose() => _stop.Cancel();
+    public void Dispose()
+    {
+        lock (_gate) if (Interlocked.Exchange(ref _disposed, 1) == 0) _stop.Cancel();
+    }
 }
