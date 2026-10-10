@@ -95,4 +95,13 @@ jobs:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --generate-notes
+        run: |
+          mkdir release-assets
+          # Mixed upload paths preserve .artifacts/installers as a nested directory.
+          # Gather every file, including hidden directories, before attaching assets.
+          while IFS= read -r -d '' file; do
+            target="release-assets/$(basename "$file")"
+            if [[ -e "$target" ]]; then echo "Duplicate release asset: $target" >&2; exit 1; fi
+            cp "$file" "$target"
+          done < <(find dist -type f -print0)
+          gh release create "$GITHUB_REF_NAME" release-assets/* --repo "$GITHUB_REPOSITORY" --generate-notes
