@@ -1,35 +1,37 @@
 <!doctype html>
-<html lang="ru">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f2f4f6"><title>Kiiko Pen — полотно</title><link rel="stylesheet" href="/style.css"><script type="module" src="/app.js"></script></head>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="BlurMask — native desktop drawing, privacy masks and shared canvases for Windows, macOS and Linux.">
+  <meta name="color-scheme" content="light">
+  <title>BlurMask</title>
+  <link rel="icon" href="/chalk.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/download.js"></script>
+</head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="/" aria-label="Kiiko Pen"><span class="brand-nib">✒</span><span>KIIKO <b>PEN</b></span></a>
-    <span class="divider"></span><input id="title" aria-label="Название полотна" maxlength="120" value="Новое полотно">
-    <div class="status" id="status" role="status"><i></i><span>Подключение…</span></div>
-    <button id="screen" class="quiet">Экран ↗</button><button id="connect" class="quiet">Подключить</button><button id="new" class="quiet">Новое полотно</button><button id="share" class="primary">Поделиться</button>
-  </header>
-  <main id="workspace"><canvas id="canvas" aria-label="Полотно для рисования" tabindex="0"></canvas></main>
-  <aside class="toolkit" aria-label="Инструменты рисования">
-    <button id="grip" title="Переместить панель" aria-label="Переместить панель" class="nib">✒</button>
-    <div class="tool-column">
-      <button data-tool="Hand" title="Перемещение · H" aria-label="Перемещение"></button>
-      <button data-tool="Pen" title="Перо · P" aria-label="Перо" class="active"></button>
-      <button data-tool="Highlighter" title="Маркер · M" aria-label="Маркер"></button>
-      <button data-tool="Eraser" title="Ластик · E" aria-label="Ластик"></button>
-      <button data-tool="Text" title="Текст · T" aria-label="Текст"></button>
-      <button id="shapes" title="Линии и фигуры" aria-label="Линии и фигуры"></button>
-      <button id="size" title="Толщина пера" aria-label="Толщина пера"><span class="size-dot"></span></button>
-      <button id="undo" title="Отменить · Ctrl+Z" aria-label="Отменить"></button>
-      <button id="redo" title="Повторить · Ctrl+Shift+Z" aria-label="Повторить"></button>
-      <button id="clear" title="Очистить полотно" aria-label="Очистить полотно"></button>
-      <button id="board" title="Белая / чёрная доска" aria-label="Белая / чёрная доска"></button>
-      <button id="export" title="Скачать PNG" aria-label="Скачать PNG"></button>
-      <button id="menu" title="Меню" aria-label="Меню"></button>
-      <div id="quick-colors"></div><button id="palette" title="Цвет пера" aria-label="Цвет пера"><span>◢</span></button>
-    </div>
-    <div id="flyout" hidden></div>
-  </aside>
-  <div class="zoom"><button id="zoom-out" aria-label="Уменьшить">−</button><button id="fit" title="Вместить полотно">100%</button><button id="zoom-in" aria-label="Увеличить">+</button></div>
-  <div id="hint" class="hint">Перо — рисовать · H — перемещать · Shift — ровные фигуры</div>
-  <dialog id="dialog"><div id="dialog-content"></div><button id="dialog-close" class="quiet">Закрыть</button></dialog>
-</body></html>
+  <div class="page">
+    <header>
+      <a class="brand" href="/" aria-label="BlurMask"><span class="logo"><img src="/chalk.svg" width="30" height="30" alt=""></span>BlurMask</a>
+      <a class="source" href="https://github.com/Xekep/BlurMask" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+    </header>
+    <main>
+      <p class="eyebrow"><span aria-hidden="true"></span>Windows · macOS · Linux</p>
+      <h1 data-text="title">Ideas over<br>any window.</h1>
+      <p class="description" data-text="description">Draw on your screen, hide distractions, and work together on a canvas.</p>
+      <nav class="downloads" aria-label="Downloads">
+        <a class="download primary" id="windows" href="https://github.com/Xekep/BlurMask/releases/latest"><span aria-hidden="true">↓</span><span data-text="windows">Download for Windows</span></a>
+        <a class="download" id="linux" href="https://github.com/Xekep/BlurMask/releases/latest"><span data-text="linux">Linux .deb</span></a>
+        <a class="download" id="macos" href="https://github.com/Xekep/BlurMask/releases/latest">macOS Apple Silicon</a>
+      </nav>
+      <p class="details" data-text="details">Native app. Free and open source.</p>
+      <section class="invitation" id="invitation" hidden aria-live="polite">
+        <p data-text="invite">You have a canvas invitation. In BlurMask, open Canvas → Menu → Connect and paste the code.</p>
+        <button id="copy-invite" type="button" data-text="copy">Copy invitation</button>
+      </section>
+    </main>
+    <footer><span>BlurMask</span><span data-text="footer">A little chalk. A lot of ideas.</span></footer>
+  </div>
+</body>
+</html>

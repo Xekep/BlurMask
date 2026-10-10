@@ -67,20 +67,21 @@ The wheel zooms around the pointer; bottom-right controls and **Ctrl +/-** chang
 object coordinates, including negative coordinates and shared peer drawings. PNG export
 includes extended content and scales large boards to at most 4096 pixels on either side.
 
-The canvas **Connect** button accepts an invitation code or link, or creates a server copy
-on the built-in `https://pen.kiiko.ru` service. **Collaborate** creates a shared copy on first click and displays separate **Draw together** and view codes,
-with buttons to copy the code or a browser link. Links use one opaque fragment (`/#<code>`)
+The canvas menu's **Connect** button accepts an invitation code or link.
+**Collaborate** creates a shared copy on the built-in `https://pen.kiiko.ru` service on first click and displays separate **Draw together** and view codes,
+with buttons to copy the code or invitation link. Links use one opaque fragment (`/#<code>`)
 without visible board/key parameters. The code retains the full 256-bit access key.
-Only this invitation format is supported. Browser and desktop changes synchronize every 1.3 seconds, preserving
+Only this invitation format is supported. Native clients synchronize every 1.3 seconds, preserving
 concurrent strokes and pending offline edits. Screen annotations remain local.
 
-The web canvas, ASP.NET Core server, PostgreSQL storage and Docker/Caddy configuration for
+The minimalist software download page, ASP.NET Core API, PostgreSQL storage and Docker/Caddy configuration for
 `pen.kiiko.ru` are in [`server/`](server/README.md). Deployment requires a server and DNS
 configuration; see that README for launch commands. Accounts are not required: shared links
-carry permission to edit or view a particular board.
+carry permission to edit or view a particular board. The website has no drawing editor;
+opening an invitation there offers software downloads and a button to copy the invitation into BlurMask.
 
 Epic Pen's [official guide](https://epicpen.com/userguide) describes desktop annotation and
-white/black screen boards. The independent persistent canvas and browser synchronization
+white/black screen boards. The independent persistent canvas and shared native drawing
 are BlurMask additions.
 
 ## Privacy modes

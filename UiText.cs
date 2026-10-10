@@ -135,7 +135,7 @@ public static class UiText
         ["Создать облачную копию"] = ["Create cloud copy", "Créer une copie en ligne", "Cloud-Kopie erstellen"],
         ["Подключить полотно"] = ["Connect canvas", "Connecter une toile", "Zeichenfläche verbinden"],
         ["Поделиться полотном"] = ["Share canvas", "Partager la toile", "Zeichenfläche teilen"],
-        ["Отправьте код приглашения. Получатель вставит его в «Подключить». Можно также скопировать ссылку для браузера."] = ["Send the invitation code. The recipient enters it in Connect. You can also copy a browser link.", "Envoyez le code d’invitation. Le destinataire le saisit dans « Connecter ». Vous pouvez aussi copier un lien pour le navigateur.", "Senden Sie den Einladungscode. Der Empfänger gibt ihn unter „Verbinden“ ein. Sie können auch einen Link für den Browser kopieren."],
+        ["Отправьте приглашение. Получатель откроет в BlurMask «Полотно → Меню → Подключить» и вставит код или ссылку."] = ["Send the invitation. In BlurMask, the recipient opens Canvas → Menu → Connect and pastes the code or link.", "Envoyez l’invitation. Dans BlurMask, le destinataire ouvre Toile → Menu → Connecter et colle le code ou le lien.", "Senden Sie die Einladung. Der Empfänger öffnet in BlurMask Zeichenfläche → Menü → Verbinden und fügt den Code oder Link ein."],
         ["Только просмотр"] = ["View only", "Lecture seule", "Nur ansehen"],
         ["Можно рисовать"] = ["Can draw", "Dessin autorisé", "Zeichnen erlaubt"],
         ["Ссылка на полотно"] = ["Canvas invitation", "Invitation à la toile", "Einladung zur Zeichenfläche"],

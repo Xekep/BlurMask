@@ -279,15 +279,20 @@ internal static class DrawingSmokeTest
             if (mask.HasNativeOptics)
             {
                 var after = DesktopInkNative.ReadScreenPixel(origin + new PixelPoint(4, 4));
-                Check(before == 0x000000FF && after == 0x0000FFFF, $"Native scramble did not swap live source tiles: {before:X8} -> {after:X8}.");
+                Check(ScreenColorNear(before, 0x000000FF) && ScreenColorNear(after, 0x0000FFFF), $"Native scramble did not swap live source tiles: {before:X8} -> {after:X8}.");
                 source.Flip = true; source.InvalidateVisual(); await Task.Delay(300);
-                Check(DesktopInkNative.ReadScreenPixel(origin + new PixelPoint(4, 4)) == 0x000000FF, "Scramble did not refresh live desktop content.");
+                Check(ScreenColorNear(DesktopInkNative.ReadScreenPixel(origin + new PixelPoint(4, 4)), 0x000000FF), "Scramble did not refresh live desktop content.");
             }
             mask.Width = 60; mask.Height = 40;
             foreach (var mode in Enum.GetValues<PrivacyMode>()) { mask.SetMode(mode); await Task.Delay(60); }
         }
         finally { mask.Close(); pattern.Close(); }
     }
+    // GPU color conversion can differ by one channel unit from GDI's COLORREF.
+    private static bool ScreenColorNear(uint actual, uint expected) =>
+        Math.Abs((int)(actual & 255) - (int)(expected & 255)) <= 2 &&
+        Math.Abs((int)((actual >> 8) & 255) - (int)((expected >> 8) & 255)) <= 2 &&
+        Math.Abs((int)((actual >> 16) & 255) - (int)((expected >> 16) & 255)) <= 2;
     private sealed class ScramblePattern : Control
     {
         internal bool Flip;
@@ -343,7 +348,11 @@ internal static class DrawingSmokeTest
                 Check(second.Bounds.X - first!.Bounds.X == 60 && second.Bounds.Y - first.Bounds.Y == 30, "Native tracker used incorrect screen coordinates.");
                 probe.Hide(); await Task.Delay(100);
                 Check(native.Read(id) is not { Visible: true }, "Native tracker reports a hidden window as visible.");
-                probe.Close(); Check(native.Read(id) is null, "Native tracker retained a destroyed window.");
+                probe.Close();
+                // X11 queues destruction on Avalonia's separate connection. Let the UI
+                // flush it before asking the catalog connection whether the ID survives.
+                for (var attempt = 0; attempt < 20 && native.Read(id) is not null; attempt++) await Task.Delay(50);
+                Check(native.Read(id) is null, "Native tracker retained a destroyed window.");
             }
             finally { probe.Close(); }
         }

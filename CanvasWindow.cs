@@ -351,7 +351,7 @@ internal sealed class CanvasWindow : Window
             await SyncAsync();
             var panel = new StackPanel { Margin = new Thickness(18), Spacing = 9 };
             panel.Children.Add(new TextBlock { Text = UiText.T("Поделиться полотном"), FontSize = 18 });
-            panel.Children.Add(new TextBlock { Text = UiText.T("Отправьте код приглашения. Получатель вставит его в «Подключить». Можно также скопировать ссылку для браузера."), TextWrapping = TextWrapping.Wrap });
+            panel.Children.Add(new TextBlock { Text = UiText.T("Отправьте приглашение. Получатель откроет в BlurMask «Полотно → Меню → Подключить» и вставит код или ссылку."), TextWrapping = TextWrapping.Wrap });
             AddLink(panel, ReadOnly ? UiText.T("Только просмотр") : UiText.T("Рисовать вместе"), CanvasCloudClient.Link(_connection));
             if (!ReadOnly && _viewKey is not null) AddLink(panel, UiText.T("Только просмотр"), CanvasCloudClient.Link(_connection with { Key = _viewKey }));
             Dialog(UiText.T("Ссылка на полотно"), panel);

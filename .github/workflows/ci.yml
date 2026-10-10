@@ -26,7 +26,7 @@ jobs:
     with:
       publish-artifact: BlurMask-linux-x64
   server:
-    name: Web canvas / PostgreSQL
+    name: Download page / API / PostgreSQL
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -54,7 +54,7 @@ jobs:
         with:
           node-version: 22
       - run: dotnet build -c Release
-      - run: node --test tests/ink.test.mjs tests/invite.test.mjs
+      - run: node --test tests/invite.test.mjs tests/landing.test.mjs
       - name: API integration test
         shell: bash
         run: |
