@@ -1,14 +1,15 @@
 # BlurMask
 
-A small cross-platform always-on-top privacy mask for screen recording and streaming.
+A small desktop annotation toolbar and always-on-top privacy mask for screen recording and streaming.
 Create a rectangle from the system tray, move/resize it over sensitive content, and
 switch privacy effects without doing post-production blur work.
 
 ## Features
 
 - system tray application;
-- click the tray icon to create or activate the mask;
-- tray context menu: create mask, close mask, exit application;
+- Epic Pen-style floating drawing toolbar, shown on startup;
+- click the tray icon to show the drawing toolbar;
+- tray context menu: drawing tools, create mask, close mask, exit application;
 - always-on-top frameless rectangle;
 - drag the center with the left mouse button to move it;
 - drag edges/corners to resize it;
@@ -18,6 +19,35 @@ switch privacy effects without doing post-production blur work.
 - .NET 11 + Avalonia 12;
 - Native AOT deployment;
 - Native AOT-safe code path; tray resources are defined in compiled Avalonia XAML.
+
+## Desktop drawing
+
+The narrow white toolbar follows the classic Epic Pen layout: drag handle, visibility,
+cursor, drawing tools, eraser, pen size, undo, clear, board, screenshot, menu, and colors.
+Icons are drawn as local vector geometry. Reference: [Epic Pen toolbar screenshot](https://software.thaiware.com/13290.html)
+and [official tool guide](https://epicpen.com/userguide).
+
+- Select the pen button to open a side menu with **pen, highlighter, text, line, arrow, rectangle, ellipse**.
+- Draw directly over the desktop and applications. On Windows, cursor mode leaves the ink visible
+  and passes clicks to applications underneath. Right-click the drawing surface or press Esc to return to cursor mode.
+- The eraser removes entire strokes. Each eraser gesture, drawing operation, and clear can be undone.
+  Right-click Undo or use the menu for Redo.
+- Hold Shift while drawing shapes for a square/circle or 45° line/arrow angles.
+- Click to place text; Enter commits, Shift+Enter adds a line, and Esc cancels.
+- Choose five stroke widths, four quick colors, 24 palette colors, or enter a custom hex color.
+- Switch between the desktop, whiteboard, and blackboard without losing annotations.
+- The eye button collapses the toolbar and hides ink; click the round handle to restore it.
+- Screenshots include all monitors and visible annotations, exclude the toolbar, and save PNG files to `Pictures/BlurMask`.
+- The menu includes **New mask**, text size, history actions, visibility, shortcuts, and exit.
+- Multiple monitors use separate transparent windows and a shared document with physical desktop coordinates.
+
+Global Windows shortcuts: **Ctrl+Shift+1** cursor, **2** pen, **3** highlighter, **4** eraser;
+**Ctrl+Shift+Z/Y** undo/redo, **F** clear, **H** hide/show ink, **S** screenshot.
+If another application owns a shortcut, use the corresponding toolbar button.
+
+Windows supports click-through ink and desktop screenshots. Other platforms currently hide the
+ink overlay in cursor mode; desktop screenshots and global hotkeys are Windows-only.
+Annotations and toolbar settings are session-local and are not restored after exiting.
 
 ## Privacy modes
 
@@ -35,7 +65,7 @@ The tray tooltip shows the current mode.
 
 ### Tray and single-instance behavior
 
-- Right-click the tray icon to open the application menu: create a mask, close the mask, or exit BlurMask.
+- Right-click the tray icon to open the application menu: drawing tools, create a mask, close the mask, or exit BlurMask.
 - Only one BlurMask process is allowed per OS user/session. Launching it again exits silently with code `0`; it does not show a dialog, notification, or second tray icon.
 
 ## Build requirements
@@ -93,13 +123,17 @@ Native AOT is OS-specific: publish Windows on Windows, Linux on Linux, and macOS
 
 ## Smoke test
 
-The app has a CI-only smoke mode that creates a mask and exits automatically:
+The app has a CI-only smoke mode that creates a mask, exercises the drawing document,
+toolbar, board modes, Windows mouse input/eraser, and click-through styles, then exits automatically:
 
 ```powershell
 .\bin\Release\net11.0\win-x64\publish\BlurMask.exe --smoke-test
 ```
 
 This is used by CI to catch startup/native-loader failures that a compile-only workflow misses.
+Set `BLURMASK_SMOKE_ARTIFACTS` to a directory to also save rendered toolbar/menu images
+and Windows desktop screenshots for visual verification. Desktop captures are generated only
+when this environment variable is explicitly set or the user clicks the screenshot button.
 
 ## Platform notes
 

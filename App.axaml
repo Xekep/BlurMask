@@ -9,11 +9,12 @@
   <TrayIcon.Icons>
     <TrayIcons>
       <TrayIcon Icon="/Assets/BlurMask.ico"
-                ToolTipText="BlurMask — клик: маска"
+                ToolTipText="BlurMask — клик: инструменты рисования"
                 IsVisible="True"
                 Clicked="TrayOnClicked">
         <TrayIcon.Menu>
           <NativeMenu>
+            <NativeMenuItem Header="Рисовать на рабочем столе" Click="DrawingOnClicked" />
             <NativeMenuItem Header="Новая маска" Click="NewMaskOnClicked" />
             <NativeMenuItem Header="Закрыть маску" Click="CloseMaskOnClicked" />
             <NativeMenuItemSeparator />

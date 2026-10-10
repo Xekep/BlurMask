@@ -10,6 +10,7 @@ public sealed partial class App : Application
 {
     private BlurMaskWindow? _mask;
     private TrayIcon? _tray;
+    private DrawingSession? _drawing;
 
     public override void Initialize()
     {
@@ -24,6 +25,8 @@ public sealed partial class App : Application
         {
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             _tray = TrayIcon.GetIcons(this)?.FirstOrDefault();
+            ShowDrawing();
+            desktop.Exit += (_, _) => _drawing?.Dispose();
 
             if (Program.SmokeTest)
             {
@@ -37,6 +40,18 @@ public sealed partial class App : Application
 
     private async Task ShutdownAfterSmokeTestAsync(IClassicDesktopStyleApplicationLifetime desktop)
     {
+        await Task.Delay(200);
+        try
+        {
+            _drawing?.SmokeTest();
+            await DrawingSmokeTest.VerifyRenderingAsync(_drawing!);
+        }
+        catch (Exception ex)
+        {
+            File.WriteAllText(Path.Combine(Path.GetTempPath(), "BlurMask-smoke-error.txt"), ex.ToString());
+            desktop.Shutdown(1);
+            return;
+        }
         // Exercise every privacy mode during CI. This is not a replacement for real pointer
         // input testing, but it catches broken mode rendering/AOT trimming before packaging.
         for (var i = 0; i < 5; i++)
@@ -51,7 +66,9 @@ public sealed partial class App : Application
 
     // XAML event handlers -----------------------------------------------------
 
-    private void TrayOnClicked(object? sender, EventArgs e) => ShowMask();
+    private void TrayOnClicked(object? sender, EventArgs e) => ShowDrawing();
+
+    private void DrawingOnClicked(object? sender, EventArgs e) => ShowDrawing();
 
     private void NewMaskOnClicked(object? sender, EventArgs e) => ShowMask();
 
@@ -60,6 +77,7 @@ public sealed partial class App : Application
     private void ExitOnClicked(object? sender, EventArgs e)
     {
         _mask?.Close();
+        _drawing?.Dispose();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             desktop.Shutdown();
@@ -67,8 +85,23 @@ public sealed partial class App : Application
 
     // Mask -------------------------------------------------------------------
 
+    private void ShowDrawing()
+    {
+        if (_drawing is null)
+        {
+            var drawing = new DrawingSession(ShowMask, () => ExitOnClicked(this, EventArgs.Empty));
+            _drawing = drawing;
+            drawing.Toolbar.Closed += (_, _) =>
+            {
+                if (ReferenceEquals(_drawing, drawing)) _drawing = null;
+            };
+        }
+        _drawing.Show();
+    }
+
     private void ShowMask()
     {
+        _drawing?.SelectTool(InkTool.Cursor);
         if (_mask is { IsVisible: true })
         {
             _mask.Activate();
@@ -100,7 +133,7 @@ public sealed partial class App : Application
             return;
 
         _tray.ToolTipText = mode is null
-            ? "BlurMask — клик: создать маску"
+            ? "BlurMask — клик: инструменты рисования"
             : $"BlurMask — {ModeName(mode.Value)}; ПКМ по маске: следующий режим";
     }
 
