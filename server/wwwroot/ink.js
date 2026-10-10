@@ -17,7 +17,7 @@ export function validBoard(board) {
       !Number.isInteger(board.height) || board.height<100 || board.height>10000 ||
       typeof board.title!=='string' || !board.title.trim() || board.title.length>120 ||
       !['white','black'].includes(board.background) || !Array.isArray(board.marks) || board.marks.length>5000) return false;
-  let points=0;const ids=new Set();
+  let points=0,pixels=0;const ids=new Set();
   return board.marks.every(m=>{
     if (!m || typeof m.id!=='string' || !/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(m.id) || ids.has(m.id) ||
         !tools.includes(m.tool) || typeof m.color!=='string' || !/^#[0-9a-f]{6}([0-9a-f]{2})?$/i.test(m.color) ||
@@ -25,7 +25,8 @@ export function validBoard(board) {
         typeof m.text!=='string' || m.text.length>4000 || !Array.isArray(m.points) || !m.points.length || m.points.length>20000 ||
         (m.tool === 'Image' ? m.points.length !== 2 || !validImage(m.image) : m.image != null)) return false;
     ids.add(m.id);points+=m.points.length;
-    return points<=200000 && m.points.every(p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&Math.abs(p.x)<=100000&&Math.abs(p.y)<=100000);
+    if (m.tool === 'Image') { const bytes=atob(m.image.slice(0,44));const view=new DataView(Uint8Array.from(bytes,c=>c.charCodeAt(0)).buffer);pixels+=view.getUint32(16)*view.getUint32(20); }
+    return points<=200000 && pixels<=32*1024*1024 && m.points.every(p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&Math.abs(p.x)<=100000&&Math.abs(p.y)<=100000);
   });
 }
 
@@ -108,12 +109,15 @@ export function constrain(a, b, tool) {
   return { x: a.x + Math.cos(angle) * length, y: a.y + Math.sin(angle) * length };
 }
 const imageCache = new Map();
+export function pruneRasters(marks) {
+  const images = new Set(marks.filter(m => m.tool === 'Image').map(m => m.image));
+  for (const key of imageCache.keys()) if (!images.has(key)) imageCache.delete(key);
+}
 export function raster(image) {
   if (imageCache.has(image)) return imageCache.get(image);
   if (!validImage(image)) return null;
   const bitmap = new Image(); bitmap.onload = () => window.dispatchEvent(new Event('blurmask-image-loaded'));
   bitmap.src = 'data:image/png;base64,' + image;
-  if (imageCache.size >= 32) imageCache.delete(imageCache.keys().next().value);
   imageCache.set(image, bitmap); return bitmap;
 }
 export function drawMark(ctx, mark) {

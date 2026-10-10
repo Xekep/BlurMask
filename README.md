@@ -41,6 +41,7 @@ and [official tool guide](https://epicpen.com/userguide).
 - Shapes have a separate button. The mask button opens a horizontal strip: each icon creates a new independent mask, and the last button removes all masks.
 - The analog timer selects temporary ink: quick (2 s), long (10 s), very long (30 s). Temporary ink fades locally and is excluded from saved/shared boards.
 - The canvas uses a compact floating menu; **Tab** hides/restores it. **Ctrl+V** pastes a screenshot from the clipboard as a movable image that is saved, shared and included in PNG exports.
+- Pasted images are normalized to PNG (up to 2048 px on the longest side); shared documents are limited to 4 MiB and 32 megapixels of raster content.
 - Interface language follows the system UI language: English, French, German or Russian; other languages fall back to English.
 - Screenshots include all monitors and visible annotations, exclude the toolbar, and save PNG files to `Pictures/BlurMask`.
 - The menu includes **New mask**, text size, history actions, visibility, shortcuts, and exit.

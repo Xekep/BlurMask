@@ -80,6 +80,14 @@ public static class BoardValidation
     public const int MaxMarks = 5000;
     public const int MaxPoints = 200000;
     public const int MaxDocumentBytes = 4 * 1024 * 1024;
+    public const long MaxImagePixels = 32 * 1024 * 1024;
+    public static long ImagePixels(string image)
+    {
+        Span<byte> header = stackalloc byte[33];
+        if (image.Length < 44 || !Convert.TryFromBase64Chars(image.AsSpan(0, 44), header, out var length) || length < 24) return long.MaxValue;
+        return (long)System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(header[16..20]) *
+            System.Buffers.Binary.BinaryPrimitives.ReadUInt32BigEndian(header[20..24]);
+    }
     public static bool Valid(InkMarkDto? mark) => mark is not null && mark.Id != Guid.Empty &&
         mark.Tool is "Pen" or "Highlighter" or "Line" or "Arrow" or "Rectangle" or "Ellipse" or "Text" or "Image" &&
         mark.Color is { Length: 7 or 9 } && mark.Color[0] == '#' && mark.Color.Skip(1).All(Uri.IsHexDigit) &&
@@ -117,5 +125,6 @@ public static class BoardValidation
         board.Title is { Length: > 0 and <= 120 } && board.Background is "white" or "black" &&
         board.Marks is { Count: <= MaxMarks } && board.Marks.All(Valid) &&
         board.Marks.Sum(m => m.Points.Count) <= MaxPoints &&
+        board.Marks.Where(m => m.Tool == "Image").Sum(m => ImagePixels(m.Image!)) <= MaxImagePixels &&
         board.Marks.Select(m => m.Id).Distinct().Count() == board.Marks.Count;
 }

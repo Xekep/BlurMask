@@ -7,7 +7,7 @@ payload="${3:-bin/Release/net11.0/$rid/publish}"
 output="${4:-.artifacts/installers}"
 case "$rid" in linux-x64) arch=amd64;; linux-arm64) arch=arm64;; *) echo 'Debian packaging requires a Linux RID.' >&2; exit 2;; esac
 [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][A-Za-z0-9.-]+)?$ ]] || { echo 'Invalid version' >&2; exit 2; }
-version="${version/-/~}"
+version="${version/-/\~}"
 [[ -f "$payload/BlurMask" ]] || { echo 'Native publish payload is missing.' >&2; exit 2; }
 stage="$(mktemp -d)"
 trap 'rm -rf -- "$stage"' EXIT

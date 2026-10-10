@@ -1,4 +1,4 @@
-import { tools, emptyBoard, clone, diff, hasChanges, rebase, History, hit, constrain, drawMark, validBoard, raster } from './ink.js';
+import { tools, emptyBoard, clone, diff, hasChanges, rebase, History, hit, constrain, drawMark, validBoard, raster, pruneRasters } from './ink.js';
 import { inviteCode, parseInvite } from './invite.js';
 
 const $ = id => document.getElementById(id);
@@ -53,6 +53,7 @@ function requestRender() { if (!frame) frame = requestAnimationFrame(render); }
 window.addEventListener('blurmask-image-loaded', requestRender);
 function render() {
   frame=0;
+  pruneRasters(board.marks);
   const ratio=devicePixelRatio||1, rect=canvas.getBoundingClientRect();
   if (canvas.width!==Math.round(rect.width*ratio)||canvas.height!==Math.round(rect.height*ratio)) { canvas.width=Math.round(rect.width*ratio);canvas.height=Math.round(rect.height*ratio); }
   ctx.setTransform(ratio,0,0,ratio,0,0);ctx.clearRect(0,0,rect.width,rect.height);

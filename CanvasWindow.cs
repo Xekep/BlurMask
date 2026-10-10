@@ -174,7 +174,7 @@ internal sealed class CanvasWindow : Window
         mark.AddPoint(origin + new Vector(dimensions.Width, dimensions.Height));
         var candidate = Snapshot() with { Marks = [.. _session.CanvasDocument.Export(), new InkMarkDto
             { Id = mark.Id, Tool = "Image", Image = mark.Image, Points = mark.Points.Select(p => new InkPointDto(p.X, p.Y)).ToList() }] };
-        if (System.Text.Encoding.UTF8.GetByteCount(JsonSerializer.Serialize(candidate, BoardJsonContext.Default.BoardSnapshot)) > BoardValidation.MaxDocumentBytes)
+        if (!BoardValidation.Valid(candidate) || System.Text.Encoding.UTF8.GetByteCount(JsonSerializer.Serialize(candidate, BoardJsonContext.Default.BoardSnapshot)) > BoardValidation.MaxDocumentBytes)
         { _status.Text = UiText.T("Полотно достигло лимита размера"); return; }
         _session.ActivateCanvas(); _session.CanvasDocument.Add(mark); _session.SelectTool(InkTool.Select);
         _session.CanvasSelection.Begin(mark.Bounds.Center, 0); _session.CanvasSelection.Complete(); SaveState();
