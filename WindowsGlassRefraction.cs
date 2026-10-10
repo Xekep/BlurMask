@@ -365,10 +365,10 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
 
     private static (float Scale, int OffsetX, int OffsetY) OpticsForPlane(int plane) => plane switch
     {
-        0 => (1.010f, -3, -2),
-        1 => (1.016f,  3, -2),
-        2 => (1.022f, -2,  3),
-        _ => (1.013f,  3,  2)
+        0 => (1.014f, -4, -3),
+        1 => (1.021f,  4, -3),
+        2 => (1.029f, -3,  4),
+        _ => (1.018f,  4,  3)
     };
 
     private static uint Hash(int x, int y)

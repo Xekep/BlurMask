@@ -7,6 +7,7 @@ internal static class Program
 {
     internal static bool SmokeTest { get; private set; }
     internal static bool SoftwareRendering { get; private set; }
+    internal static AppSettings Settings { get; set; } = new();
 
     [STAThread]
     public static void Main(string[] args)
@@ -20,6 +21,7 @@ internal static class Program
 
         SmokeTest = isolatedSmoke || args.Any(static arg =>
             string.Equals(arg, "--smoke-test", StringComparison.OrdinalIgnoreCase));
+        Settings = SmokeTest ? new() : SettingsStore.Load();
         if (SmokeTest && Environment.GetEnvironmentVariable("BLURMASK_TEST_LANGUAGE") is { Length: > 0 } language)
         {
             CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(language);

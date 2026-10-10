@@ -14,31 +14,39 @@ internal sealed partial class DesktopInkNative : IDisposable
     private const long Transparent = 0x20;
     private const long Layered = 0x80000;
     private readonly Window _window;
-    private readonly Action<int> _callback;
+    private readonly Action<ShortcutAction> _callback;
     private readonly List<int> _registered = [];
     private readonly nint _handle;
-    private DesktopInkNative(Window window, Action<int> callback)
+    internal IReadOnlyList<ShortcutAction> Failed { get; }
+    internal bool Registered(ShortcutAction action) => _registered.Contains((int)action + 1);
+    internal static void TestShortcutMessage(Window window, ShortcutAction action) => SendMessageW(Handle(window), 0x0312, (nint)((int)action + 1), 0);
+    private DesktopInkNative(Window window, Action<ShortcutAction> callback, AppSettings settings)
     {
         _window = window;
         _callback = callback;
         _handle = Handle(window);
         Win32Properties.AddWndProcHookCallback(window, OnMessage);
-        // Ctrl+Shift follows Epic Pen's tool shortcuts. Conflicting combinations
-        // are skipped individually; the toolbar remains available in all cases.
-        uint[] keys = [0x31, 0x32, 0x33, 0x34, 0x5A, 0x46, 0x48, 0x59, 0x53, 0x35, 0x36];
-        for (var i = 0; i < keys.Length; i++)
-            if (RegisterHotKey(_handle, i + 1, 0x4000 | 0x2 | 0x4, keys[i]) != 0) _registered.Add(i + 1);
+        var failed = new List<ShortcutAction>();
+        if (settings.HotkeysEnabled)
+            foreach (var (action, binding) in settings.Shortcuts)
+            {
+                if (!binding.Enabled || !binding.Valid) continue;
+                var id = (int)action + 1;
+                if (RegisterHotKey(_handle, id, binding.NativeModifiers, binding.VirtualKey) != 0) _registered.Add(id);
+                else failed.Add(action);
+            }
+        Failed = failed;
     }
 
-    public static DesktopInkNative? TryRegisterHotkeys(Window window, Action<int> callback) =>
-        OperatingSystem.IsWindows() ? new DesktopInkNative(window, callback) : null;
+    public static DesktopInkNative? TryRegisterHotkeys(Window window, Action<ShortcutAction> callback, AppSettings settings) =>
+        OperatingSystem.IsWindows() ? new DesktopInkNative(window, callback, settings) : null;
 
     private nint OnMessage(nint hwnd, uint message, nint wParam, nint lParam, ref bool handled)
     {
         if (message == 0x0312 && _registered.Contains((int)wParam))
         {
             var id = (int)wParam;
-            Dispatcher.UIThread.Post(() => _callback(id));
+            Dispatcher.UIThread.Post(() => _callback((ShortcutAction)(id - 1)));
             handled = true;
         }
         return 0;

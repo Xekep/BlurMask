@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Threading;
 using System.Diagnostics;
+using Avalonia.Input;
 
 namespace BlurMask;
 
@@ -17,6 +18,12 @@ internal sealed class DrawingSession : IDisposable
     private readonly Action _closeMask;
     private readonly Action<bool>? _setMaskAttachment;
     private DesktopInkNative? _hotkeys;
+    private SettingsWindow? _settingsWindow;
+    private Color _color = Color.Parse("#FFF400"), _previousColor = Colors.Black;
+    internal static readonly string[] QuickColors = ["#00C9ED", "#FFF400", "#FF0099", "#111111", "#FFFFFF", "#FF4D4D"];
+    internal AppSettings Settings { get; private set; } = Program.Settings.CloneSettings();
+    internal IReadOnlyList<ShortcutAction> UnavailableHotkeys => _hotkeys?.Failed ?? [];
+    internal SettingsWindow? OpenSettingsWindow => _settingsWindow;
     private InkTool _toolBeforeHide = InkTool.Cursor;
     private bool _disposed;
     private bool _capturing;
@@ -31,7 +38,7 @@ internal sealed class DrawingSession : IDisposable
     public DrawingTarget Target { get; private set; }
     public CanvasWindow? Canvas { get; private set; }
     public InkTool Tool { get; private set; } = InkTool.Cursor;
-    public Color Color { get; set; } = Color.Parse("#FFF400");
+    public Color Color { get => _color; set { if (_color != value) { _previousColor = _color; _color = value; } } }
     public double PenSize { get; set; } = 4;
     public double TextSize { get; set; } = 28;
     public double FadeSeconds { get; private set; }
@@ -72,7 +79,7 @@ internal sealed class DrawingSession : IDisposable
         Toolbar.Opened += (_, _) =>
         {
             if (_overlays.Count == 0) RebuildOverlays();
-            _hotkeys ??= DesktopInkNative.TryRegisterHotkeys(Toolbar, HandleShortcut);
+            _hotkeys ??= DesktopInkNative.TryRegisterHotkeys(Toolbar, HandleShortcut, Settings);
             Toolbar.RaiseAboveInk();
         };
         Toolbar.Closed += (_, _) => Dispose();
@@ -202,22 +209,74 @@ internal sealed class DrawingSession : IDisposable
         StateChanged?.Invoke();
     }
 
-    private void HandleShortcut(int id)
+    internal string ShortcutText(ShortcutAction action) => Settings.Shortcuts[action].ToString();
+    internal bool HandleLocalShortcut(KeyEventArgs e)
     {
-        switch (id)
+        if (e.Handled || _settingsWindow is not null || !Settings.HotkeysEnabled) return false;
+        foreach (var (action, binding) in Settings.Shortcuts)
         {
-            case 1: SelectTool(InkTool.Cursor); break;
-            case 2: SelectTool(InkTool.Pen); break;
-            case 3: SelectTool(InkTool.Highlighter); break;
-            case 4: SelectTool(InkTool.Eraser); break;
-            case 5: Undo(); break;
-            case 6: Clear(); break;
-            case 7: ToggleInk(); break;
-            case 8: Redo(); break;
-            case 9: _ = CaptureScreenshotAsync(); break;
-            case 10: OpenCanvas(); break;
-            case 11: SelectScreen(); break;
+            if (!binding.Enabled || binding.Key != e.Key || binding.Modifiers != e.KeyModifiers) continue;
+            // A registered Windows hotkey arrives as WM_HOTKEY, not WM_KEYDOWN.
+            // Only use the local route for unregistered combinations and other OSes.
+            if (_hotkeys?.Registered(action) == true) return false;
+            HandleShortcut(action); e.Handled = true; return true;
         }
+        return false;
+    }
+    internal void HandleShortcut(ShortcutAction action)
+    {
+        if (_settingsWindow is not null) return;
+        switch (action)
+        {
+            case ShortcutAction.Cursor: SelectTool(InkTool.Cursor); break;
+            case ShortcutAction.Pen: SelectTool(InkTool.Pen); break;
+            case ShortcutAction.Highlighter: SelectTool(InkTool.Highlighter); break;
+            case ShortcutAction.Eraser: SelectTool(InkTool.Eraser); break;
+            case ShortcutAction.Line: SelectTool(InkTool.Line); break;
+            case ShortcutAction.Arrow: SelectTool(InkTool.Arrow); break;
+            case ShortcutAction.Ellipse: SelectTool(InkTool.Ellipse); break;
+            case ShortcutAction.Rectangle: SelectTool(InkTool.Rectangle); break;
+            case ShortcutAction.Text: SelectTool(InkTool.Text); break;
+            case ShortcutAction.Undo: Undo(); break;
+            case ShortcutAction.Redo: Redo(); break;
+            case ShortcutAction.Clear: Clear(); break;
+            case ShortcutAction.ToggleInk: ToggleInk(); break;
+            case ShortcutAction.Screenshot: _ = CaptureScreenshotAsync(); break;
+            case ShortcutAction.Canvas: OpenCanvas(); break;
+            case ShortcutAction.Screen: SelectScreen(); break;
+            case ShortcutAction.IncreaseSize: PenSize = Math.Min(18, PenSize + 1); NotifySettings(); break;
+            case ShortcutAction.DecreaseSize: PenSize = Math.Max(1, PenSize - 1); NotifySettings(); break;
+            case ShortcutAction.Whiteboard: SelectScreen(); SetBoard(Board == BoardMode.White ? BoardMode.Desktop : BoardMode.White); break;
+            case ShortcutAction.Blackboard: SelectScreen(); SetBoard(Board == BoardMode.Black ? BoardMode.Desktop : BoardMode.Black); break;
+            case ShortcutAction.LastColor: Color = _previousColor; NotifySettings(); break;
+            case ShortcutAction.ToggleToolbar: if (Toolbar.IsVisible) MinimizeToTray(); else Show(); break;
+            case ShortcutAction.ToggleFading: SetFading(FadeSeconds > 0 ? 0 : 10); break;
+            case >= ShortcutAction.QuickColor1 and <= ShortcutAction.QuickColor6:
+                Color = Color.Parse(QuickColors[(int)action - (int)ShortcutAction.QuickColor1]); NotifySettings(); break;
+        }
+    }
+    internal void ShowSettings()
+    {
+        if (_settingsWindow is not null) { _settingsWindow.Activate(); return; }
+        FinishInput(); Toolbar.CloseFlyout(); SelectTool(InkTool.Cursor);
+        var unavailable = UnavailableHotkeys.ToArray();
+        _hotkeys?.Dispose(); _hotkeys = null;
+        _settingsWindow = new SettingsWindow(this, unavailable);
+        _settingsWindow.Closed += (_, _) =>
+        {
+            _settingsWindow = null;
+            if (!_disposed) _hotkeys = DesktopInkNative.TryRegisterHotkeys(Toolbar, HandleShortcut, Settings);
+        };
+        _settingsWindow.Show(Toolbar);
+    }
+    internal void SaveSettings(AppSettings settings)
+    {
+        if (!Program.SmokeTest) SettingsStore.Save(settings);
+        Settings = settings.CloneSettings();
+        if (!Program.SmokeTest) Program.Settings = settings.CloneSettings();
+        if (_settingsWindow is null)
+        { _hotkeys?.Dispose(); _hotkeys = DesktopInkNative.TryRegisterHotkeys(Toolbar, HandleShortcut, Settings); }
+        NotifySettings();
     }
 
     public async Task CaptureScreenshotAsync()
@@ -280,6 +339,7 @@ internal sealed class DrawingSession : IDisposable
         _fadeTimer.Stop();
         _screenTimer.Stop();
         _hotkeys?.Dispose();
+        _settingsWindow?.Close();
         Toolbar.Screens.Changed -= OnScreensChanged;
         DesktopDocument.Changed -= RefreshDocument;
         CanvasDocument.Changed -= RefreshDocument;

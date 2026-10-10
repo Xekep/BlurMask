@@ -4,7 +4,7 @@ namespace BlurMask;
 
 public static class UiText
 {
-    public static string Language { get; } = ResolveLanguage(CultureInfo.CurrentUICulture.Name);
+    public static string Language { get; } = Program.Settings.Language == "system" ? ResolveLanguage(CultureInfo.CurrentUICulture.Name) : Program.Settings.Language;
     internal static string ResolveLanguage(string culture) => culture.Split('-', '_')[0].ToLowerInvariant() switch
     {
         "ru" => "ru", "fr" => "fr", "de" => "de", _ => "en"
@@ -23,6 +23,39 @@ public static class UiText
     public static string ExitApp => T("Закрыть программу");
     internal static IReadOnlyDictionary<string, string[]> Translations { get; } = new Dictionary<string, string[]>
     {
+        ["Настройки"] = ["Settings", "Paramètres", "Einstellungen"],
+        ["Общие"] = ["General", "Général", "Allgemein"],
+        ["Сохранить"] = ["Save", "Enregistrer", "Speichern"],
+        ["Отмена"] = ["Cancel", "Annuler", "Abbrechen"],
+        ["Язык интерфейса"] = ["Interface language", "Langue de l’interface", "Sprache der Oberfläche"],
+        ["Как в системе"] = ["System language", "Langue du système", "Systemsprache"],
+        ["Изменение языка вступит в силу после перезапуска."] = ["The language changes after restarting the app.", "La langue changera après le redémarrage de l’application.", "Die Sprache wird nach dem Neustart geändert."],
+        ["Включить горячие клавиши"] = ["Enable keyboard shortcuts", "Activer les raccourcis clavier", "Tastenkürzel aktivieren"],
+        ["На Windows клавиши работают поверх других приложений."] = ["On Windows, shortcuts work while other apps are active.", "Sous Windows, les raccourcis fonctionnent dans les autres applications.", "Unter Windows funktionieren Tastenkürzel auch in anderen Anwendungen."],
+        ["На этой платформе клавиши работают, когда окно BlurMask активно."] = ["On this platform, shortcuts work when a BlurMask window is active.", "Sur cette plateforme, les raccourcis fonctionnent quand BlurMask est actif.", "Auf dieser Plattform funktionieren Tastenkürzel bei aktivem BlurMask-Fenster."],
+        ["Некоторые сочетания заняты другим приложением:"] = ["Some shortcuts are used by another app:", "Certains raccourcis sont utilisés par une autre application :", "Einige Tastenkürzel werden von einer anderen Anwendung verwendet:"],
+        ["Нажмите сочетание справа и введите новое. Backspace — отключить, Esc — отменить."] = ["Click a shortcut on the right and press a new combination. Backspace disables it; Esc cancels.", "Cliquez sur un raccourci à droite, puis saisissez la combinaison. Retour arrière le désactive ; Échap annule.", "Klicken Sie rechts auf ein Kürzel und drücken Sie die neue Kombination. Rücktaste deaktiviert; Esc bricht ab."],
+        ["Сбросить клавиши как в Epic Pen"] = ["Reset to Epic Pen shortcuts", "Rétablir les raccourcis Epic Pen", "Epic-Pen-Tastenkürzel wiederherstellen"],
+        ["Нажмите клавиши…"] = ["Press keys…", "Appuyez sur les touches…", "Tasten drücken…"],
+        ["Добавьте Ctrl, Alt или Meta, либо используйте F1–F24."] = ["Add Ctrl, Alt or Meta, or use F1–F24.", "Ajoutez Ctrl, Alt ou Meta, ou utilisez F1–F24.", "Verwenden Sie Ctrl, Alt oder Meta, oder F1–F24."],
+        ["Не удалось сохранить настройки"] = ["Could not save settings", "Impossible d’enregistrer les paramètres", "Einstellungen konnten nicht gespeichert werden"],
+        ["Некорректные настройки"] = ["Invalid settings", "Paramètres invalides", "Ungültige Einstellungen"],
+        ["Некорректное сочетание клавиш"] = ["Invalid key combination", "Combinaison de touches invalide", "Ungültige Tastenkombination"],
+        ["Сочетание уже назначено другой команде"] = ["This shortcut is already assigned to another action", "Ce raccourci est déjà associé à une autre action", "Dieses Kürzel ist bereits einer anderen Aktion zugewiesen"],
+        ["Не назначено"] = ["Not assigned", "Non attribué", "Nicht zugewiesen"],
+        ["Скрыть / показать рисунок"] = ["Hide / show ink", "Masquer / afficher le dessin", "Zeichnung ausblenden / anzeigen"],
+        ["Скрыть / показать панель"] = ["Hide / show toolbar", "Masquer / afficher la barre", "Leiste ausblenden / anzeigen"],
+        ["Отменить"] = ["Undo", "Annuler", "Rückgängig"],
+        ["Повторить"] = ["Redo", "Rétablir", "Wiederholen"],
+        ["Очистить"] = ["Clear", "Effacer", "Leeren"],
+        ["Снимок экрана"] = ["Screenshot", "Capture d’écran", "Bildschirmfoto"],
+        ["Увеличить толщину"] = ["Increase pen thickness", "Augmenter l’épaisseur", "Stiftbreite erhöhen"],
+        ["Уменьшить толщину"] = ["Decrease pen thickness", "Réduire l’épaisseur", "Stiftbreite verringern"],
+        ["Предыдущий цвет"] = ["Previous color", "Couleur précédente", "Vorherige Farbe"],
+        ["Быстрый цвет"] = ["Quick color", "Couleur rapide", "Schnellfarbe"],
+        ["Отдельное полотно"] = ["Separate canvas", "Toile indépendante", "Separate Zeichenfläche"],
+        ["Рисовать на экране"] = ["Draw on screen", "Dessiner à l’écran", "Auf Bildschirm zeichnen"],
+        ["ПКМ — повторить"] = ["Right-click to redo", "Clic droit pour rétablir", "Rechtsklick zum Wiederholen"],
         ["Свернуть в трей"] = ["Minimize to tray", "Réduire dans la zone de notification", "In den Infobereich minimieren"],
         ["Совместная работа"] = ["Collaborate", "Collaborer", "Zusammenarbeiten"],
         ["Привязать к окну"] = ["Follow window", "Suivre la fenêtre", "Fenster folgen"],

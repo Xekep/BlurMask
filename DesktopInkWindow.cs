@@ -226,6 +226,7 @@ internal sealed class DesktopInkWindow : Window
             else if (e.Key == Key.Enter && !e.KeyModifiers.HasFlag(KeyModifiers.Shift)) { FinishText(); e.Handled = true; }
             return;
         }
+        if (_session.HandleLocalShortcut(e)) return;
         if (e.Key == Key.Escape) { _session.SelectTool(InkTool.Cursor); e.Handled = true; }
         else if (e.Key is Key.Delete or Key.Back && _session.Tool == InkTool.Select)
         { _session.DesktopSelection.Delete(); e.Handled = true; }

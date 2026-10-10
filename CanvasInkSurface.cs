@@ -184,6 +184,7 @@ internal sealed class CanvasInkSurface : Grid
             else if (e.Key == Key.Enter && !e.KeyModifiers.HasFlag(KeyModifiers.Shift)) { FinishText(); e.Handled = true; }
             return;
         }
+        if (_session.HandleLocalShortcut(e)) return;
         if (e.Key == Key.Escape) { CancelGesture(); _session.SelectTool(InkTool.Cursor); e.Handled = true; }
         else if (!_window.ReadOnly && e.Key is Key.Delete or Key.Back && _session.Tool == InkTool.Select)
         { _session.CanvasSelection.Delete(); e.Handled = true; }

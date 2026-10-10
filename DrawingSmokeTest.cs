@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Diagnostics;
 using Avalonia.Automation;
 using Avalonia.Input.Platform;
+using Avalonia.Input;
 
 namespace BlurMask;
 
@@ -57,6 +58,7 @@ internal static class DrawingSmokeTest
         document.Clear();
         VerifyFading();
         VerifyLocalization();
+        VerifySettingsStorage();
     }
     private static void VerifyCanvasGeometry()
     {
@@ -127,6 +129,7 @@ internal static class DrawingSmokeTest
 
     public static async Task VerifyRenderingAsync(DrawingSession session)
     {
+        await VerifySettingsWindowAsync(session);
         var originalOverlays = session.Overlays.ToArray();
         session.Toolbar.Hide();
         session.Toolbar.Show();
@@ -313,15 +316,24 @@ internal static class DrawingSmokeTest
         try
         {
             await Task.Delay(450); attachment.Update();
-            catalog.Target = catalog.Target with { Bounds = new PixelRect(500, 250, 600, 400) };
+            catalog.Target = catalog.Target with { Bounds = new PixelRect(500, 250, 400, 300) };
             attachment.Update(); await Task.Delay(100);
             Check(mask.Position == new PixelPoint(550, 300), "Mask did not follow its automatically detected window.");
+            catalog.Target = catalog.Target with { Bounds = new PixelRect(500, 250, 800, 600) };
+            attachment.Update(); await Task.Delay(100);
+            Check(mask.Position == new PixelPoint(600, 350) && Math.Abs(mask.Width - 200) < 1 && Math.Abs(mask.Height - 160) < 1,
+                "Mask did not scale its position and size with the target window.");
+            await Task.Delay(350); attachment.Update();
+            catalog.Target = catalog.Target with { Bounds = new PixelRect(500, 250, 400, 300) };
+            attachment.Update(); await Task.Delay(100);
+            Check(mask.Position == new PixelPoint(550, 300) && Math.Abs(mask.Width - 100) < 1,
+                "Programmatic resizing incorrectly rebound the mask.");
             catalog.Target = catalog.Target with { Visible = false }; attachment.Update();
             Check(!mask.IsVisible, "Mask did not hide with minimized target.");
             catalog.Target = catalog.Target with { Visible = true }; attachment.Update(); await Task.Delay(100);
             Check(mask.IsVisible && mask.Position == new PixelPoint(550, 300), "Mask did not return with restored target.");
             mask.Position = new PixelPoint(650, 350); await Task.Delay(450); attachment.Update();
-            catalog.Target = catalog.Target with { Bounds = new PixelRect(600, 300, 600, 400) }; attachment.Update(); await Task.Delay(100);
+            catalog.Target = catalog.Target with { Bounds = new PixelRect(600, 300, 400, 300) }; attachment.Update(); await Task.Delay(100);
             Check(mask.Position == new PixelPoint(750, 400), "Manual mask placement did not update its attachment offset.");
             var closed = false; mask.Closed += (_, _) => closed = true;
             catalog.Target = null; attachment.Update(); Check(closed, "Mask outlived its closed target.");
@@ -343,7 +355,10 @@ internal static class DrawingSmokeTest
                 var id = OperatingSystem.IsMacOS() ? MacWindowCatalog.WindowNumber(handle.Handle) : (nuint)handle.Handle;
                 var first = native.Read(id);
                 Check(first is { Visible: true } && first.ProcessId == Environment.ProcessId, "Native tracker cannot read a real window.");
+                var windowEvents = 0;
+                using var events = WindowsWindowEvents.TryCreate(first!, () => windowEvents++);
                 probe.Position = new PixelPoint(460, 230); await Task.Delay(150);
+                if (OperatingSystem.IsWindows()) Check(events is not null && windowEvents > 0, "Windows geometry events did not report a real move.");
                 var second = native.Read(id)!;
                 Check(second.Bounds.X - first!.Bounds.X == 60 && second.Bounds.Y - first.Bounds.Y == 30, "Native tracker used incorrect screen coordinates.");
                 probe.Hide(); await Task.Delay(100);
@@ -383,7 +398,8 @@ internal static class DrawingSmokeTest
                     open();
                     await Task.Delay(90);
                     var flyout = toolbar.OpenFlyout ?? throw new InvalidOperationException("Toolbar menu did not open.");
-                    var anchor = toolbar.GetVisualDescendants().OfType<Button>().Single(b => AutomationProperties.GetName(b) == UiText.T(name));
+                    var anchor = toolbar.GetVisualDescendants().OfType<Button>().Single(b =>
+                        AutomationProperties.GetName(b) == UiText.T(name) || AutomationProperties.GetName(b)?.StartsWith(UiText.T(name) + " · ", StringComparison.Ordinal) == true);
                     var anchorTop = anchor.PointToScreen(default).Y;
                     var height = (int)Math.Ceiling(flyout.Bounds.Height * flyout.RenderScaling);
                     Check(flyout.Position.Y >= area.Y && flyout.Position.Y + height <= area.Bottom + 1, "Toolbar menu is outside the working area.");
@@ -440,6 +456,69 @@ internal static class DrawingSmokeTest
             using var bitmap = new RenderTargetBitmap(new PixelSize(size, size), new Vector(96, 96));
             bitmap.Render(icon); bitmap.Save(Path.Combine(directory, $"chalk-icon-{size}.png"), PngBitmapEncoderOptions.Default);
         }
+    }
+    private static void VerifySettingsStorage()
+    {
+        var settings = new AppSettings();
+        Check(settings.Validate() is null, "Epic Pen default shortcuts conflict.");
+        Check(settings.Shortcuts[ShortcutAction.Cursor].Key == Key.D2 && settings.Shortcuts[ShortcutAction.Pen].Key == Key.D3 &&
+            settings.Shortcuts[ShortcutAction.Undo].Key == Key.D6 && settings.Shortcuts[ShortcutAction.Screenshot].VirtualKey == 44,
+            "Epic Pen shortcut layout was not retained.");
+        var directory = Path.Combine(Path.GetTempPath(), "BlurMask-settings-" + Guid.NewGuid().ToString("N"));
+        var path = Path.Combine(directory, "settings.json");
+        try
+        {
+            settings = settings with { Language = "de", HotkeysEnabled = false };
+            settings.Shortcuts[ShortcutAction.Pen] = new(Key.F12, KeyModifiers.Control | KeyModifiers.Alt);
+            settings.Shortcuts[ShortcutAction.Eraser] = ShortcutBinding.None;
+            SettingsStore.Save(settings, path);
+            var loaded = SettingsStore.Load(path);
+            Check(loaded.Language == "de" && !loaded.HotkeysEnabled && loaded.Shortcuts[ShortcutAction.Pen] == settings.Shortcuts[ShortcutAction.Pen] &&
+                !loaded.Shortcuts[ShortcutAction.Eraser].Enabled, "AOT settings serialization lost customized/disabled shortcuts.");
+            loaded.Shortcuts[ShortcutAction.Cursor] = loaded.Shortcuts[ShortcutAction.Pen];
+            Check(loaded.Validate() is not null, "Duplicate shortcuts were accepted.");
+            File.WriteAllText(path, "{broken"); Check(SettingsStore.Load(path).Validate() is null, "Damaged settings prevent app startup.");
+        }
+        finally { if (File.Exists(path)) File.Delete(path); if (Directory.Exists(directory)) Directory.Delete(directory); }
+    }
+    private static async Task VerifySettingsWindowAsync(DrawingSession session)
+    {
+        var original = session.Settings.CloneSettings();
+        session.ShowSettings();
+        var window = session.OpenSettingsWindow!;
+        try
+        {
+            await Task.Delay(100); window.ShowKeyboardTab(); await Task.Delay(100);
+            var button = window.GetVisualDescendants().OfType<Button>().Single(b => b.Name == "ShortcutPen");
+            button.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+            window.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.F12, KeyModifiers = KeyModifiers.Control | KeyModifiers.Alt });
+            Check(window.Draft.Shortcuts[ShortcutAction.Pen] == new ShortcutBinding(Key.F12, KeyModifiers.Control | KeyModifiers.Alt), "Settings did not capture a new shortcut.");
+            button.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+            window.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.D2, KeyModifiers = KeyModifiers.Control | KeyModifiers.Shift });
+            Check(window.Draft.Shortcuts[ShortcutAction.Pen].Key == Key.F12, "Conflicting shortcut overwrote the current binding.");
+            window.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.Escape });
+            await Task.Delay(100);
+            var artifacts = Environment.GetEnvironmentVariable("BLURMASK_SMOKE_ARTIFACTS");
+            if (!string.IsNullOrEmpty(artifacts) && OperatingSystem.IsWindows())
+            { Directory.CreateDirectory(artifacts); SaveWindow(window, Path.Combine(artifacts, "settings-keyboard.png")); }
+            Check(window.Save(), "Settings window could not apply changes.");
+            Check(session.ShortcutText(ShortcutAction.Pen) == "Ctrl+Alt+F12", "Saving settings did not change active shortcuts.");
+            if (OperatingSystem.IsWindows())
+            {
+                Check(!session.UnavailableHotkeys.Contains(ShortcutAction.Pen), "Customized Windows hotkey did not register.");
+                DesktopInkNative.TestShortcutMessage(session.Toolbar, ShortcutAction.Pen); await Task.Delay(50);
+            }
+            else
+            {
+                var key = new KeyEventArgs { Key = Key.F12, KeyModifiers = KeyModifiers.Control | KeyModifiers.Alt };
+                Check(session.HandleLocalShortcut(key) && key.Handled, "Focused-window shortcut did not dispatch.");
+            }
+            Check(session.Tool == InkTool.Pen, "Configured pen action failed.");
+            var size = session.PenSize;
+            session.HandleShortcut(ShortcutAction.IncreaseSize); Check(session.PenSize == size + 1, "Pen-size shortcut failed.");
+            session.PenSize = size;
+        }
+        finally { window.Close(); session.SaveSettings(original); session.SelectTool(InkTool.Cursor); }
     }
     private static void VerifyLocalization()
     {
@@ -612,10 +691,13 @@ internal static class DrawingSmokeTest
         bitmap.Render(window);
         bitmap.Save(Path.Combine(directory, name), PngBitmapEncoderOptions.Default);
     }
-    private static void SaveWindow(Avalonia.Controls.Window window, string path) =>
-        DesktopInkNative.SaveScreenshot(path, new PixelRect(window.Position, new PixelSize(
-            (int)Math.Ceiling(window.Bounds.Width * window.RenderScaling),
-            (int)Math.Ceiling(window.Bounds.Height * window.RenderScaling))));
+    private static void SaveWindow(Avalonia.Controls.Window window, string path)
+    {
+        using var catalog = new WindowsWindowCatalog();
+        var bounds = catalog.Read((nuint)window.TryGetPlatformHandle()!.Handle)?.Bounds ?? new PixelRect(window.Position, new PixelSize(
+            (int)Math.Ceiling(window.Bounds.Width * window.RenderScaling), (int)Math.Ceiling(window.Bounds.Height * window.RenderScaling)));
+        DesktopInkNative.SaveScreenshot(path, bounds);
+    }
     private static void Check(bool condition, string message)
     {
         if (!condition) throw new InvalidOperationException(message);

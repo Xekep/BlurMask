@@ -34,6 +34,7 @@ internal sealed class DrawingToolbarWindow : Window
     private readonly Button _fading;
     private readonly Button _masks;
     private readonly Dictionary<InkTool, Button> _toolButtons = [];
+    private readonly Dictionary<Button, ShortcutAction> _shortcutTips = [];
     private Window? _flyout;
     private string? _flyoutName;
     private bool _collapsed;
@@ -77,29 +78,36 @@ internal sealed class DrawingToolbarWindow : Window
         _body.Children.Add(_eye);
         _cursor = IconButton(ToolbarGlyph.Cursor, UiText.T("Курсор · Ctrl+Shift+1"), ShowCursorModes);
         _body.Children.Add(_cursor);
+        _shortcutTips[_cursor] = ShortcutAction.Cursor;
         _drawing = AddTool(ToolbarGlyph.Pen, UiText.T("Инструменты рисования · Ctrl+Shift+2"), () =>
         {
             if (session.Tool is InkTool.Cursor or InkTool.Select or InkTool.Eraser) session.SelectTool(InkTool.Pen);
             ShowTools();
         });
         _shapes = IconButton(ToolbarGlyph.Shapes, UiText.T("Линии и фигуры"), ShowShapes);
+        _shortcutTips[_drawing] = ShortcutAction.Pen;
         _body.Children.Add(_shapes);
         _eraser = AddTool(ToolbarGlyph.Eraser, UiText.T("Ластик · Ctrl+Shift+4"), () => session.SelectTool(InkTool.Eraser));
+        _shortcutTips[_eraser] = ShortcutAction.Eraser;
         _sizes = IconButton(ToolbarGlyph.Size, UiText.T("Толщина пера"), ShowSizes);
         _body.Children.Add(_sizes);
         _fading = IconButton(ToolbarGlyph.Fading, UiText.T("Исчезающие чернила"), ShowFading);
         _body.Children.Add(_fading);
+        _shortcutTips[_fading] = ShortcutAction.ToggleFading;
         _undo = AddTool(ToolbarGlyph.Undo, UiText.T("Отменить · Ctrl+Shift+Z · ПКМ — повторить"), session.Undo);
+        _shortcutTips[_undo] = ShortcutAction.Undo;
         _undo.PointerPressed += (_, e) =>
         {
             if (e.GetCurrentPoint(_undo).Properties.IsRightButtonPressed) { session.Redo(); e.Handled = true; }
         };
-        _body.Children.Add(IconButton(ToolbarGlyph.Trash, UiText.T("Очистить экран · Ctrl+Shift+F"), session.Clear));
+        var clear = IconButton(ToolbarGlyph.Trash, UiText.T("Очистить"), session.Clear);
+        _body.Children.Add(clear); _shortcutTips[clear] = ShortcutAction.Clear;
         _boards = IconButton(ToolbarGlyph.Board, UiText.T("Рабочий стол / белая / чёрная доска"), ShowBoards);
         _body.Children.Add(_boards);
         _masks = IconButton(ToolbarGlyph.Mask, UiText.T("Маски приватности"), ShowMasks);
         _body.Children.Add(_masks);
-        _body.Children.Add(IconButton(ToolbarGlyph.Camera, UiText.T("Снимок экрана · Ctrl+Shift+S"), () => _ = session.CaptureScreenshotAsync()));
+        var camera = IconButton(ToolbarGlyph.Camera, UiText.T("Снимок экрана"), () => _ = session.CaptureScreenshotAsync());
+        _body.Children.Add(camera); _shortcutTips[camera] = ShortcutAction.Screenshot;
         _menu = IconButton(ToolbarGlyph.Menu, UiText.T("Меню BlurMask"), ShowMenu);
         _body.Children.Add(_menu);
 
@@ -151,6 +159,7 @@ internal sealed class DrawingToolbarWindow : Window
         LayoutUpdated += (_, _) => PlaceFlyout();
         KeyDown += (_, e) =>
         {
+            if (session.HandleLocalShortcut(e)) return;
             if (e.Key == Key.Escape) { CloseFlyout(); session.SelectTool(InkTool.Cursor); e.Handled = true; }
         };
         Closed += (_, _) => session.StateChanged -= Refresh;
@@ -211,6 +220,12 @@ internal sealed class DrawingToolbarWindow : Window
 
     private void Refresh()
     {
+        foreach (var (button, action) in _shortcutTips)
+        {
+            var tip = AppSettings.Label(action) + " · " + _session.ShortcutText(action);
+            if (action == ShortcutAction.Undo) tip += " · " + UiText.T("ПКМ — повторить");
+            ToolTip.SetTip(button, tip); AutomationProperties.SetName(button, tip);
+        }
         _cursor.Background = _session.Tool is InkTool.Cursor or InkTool.Select ? Cyan : Brushes.Transparent;
         _cursor.Content = new ToolbarIcon(_session.Tool == InkTool.Select ? ToolbarGlyph.Select : ToolbarGlyph.Cursor) { Width = 23, Height = 23 };
         _eraser.Background = _session.Tool == InkTool.Eraser ? Cyan : Brushes.Transparent;
@@ -327,7 +342,7 @@ internal sealed class DrawingToolbarWindow : Window
             button.BorderThickness = new Thickness(2);
             row.Children.Add(button);
         }
-        row.Children.Add(IconButton(ToolbarGlyph.Pen, UiText.T("Отдельное полотно · Ctrl+Shift+5"), () => { _session.OpenCanvas(); CloseFlyout(); }));
+        row.Children.Add(IconButton(ToolbarGlyph.Pen, AppSettings.Label(ShortcutAction.Canvas) + " · " + _session.ShortcutText(ShortcutAction.Canvas), () => { _session.OpenCanvas(); CloseFlyout(); }));
         ShowFlyout("boards", row, _boards);
     }
     public void ShowPalette()
@@ -359,35 +374,36 @@ internal sealed class DrawingToolbarWindow : Window
     {
         var panel = new StackPanel { Width = 270, Spacing = 3, Margin = new Thickness(7) };
         panel.Children.Add(new TextBlock { Text = "BlurMask", FontSize = 18, FontWeight = FontWeight.SemiBold, Margin = new Thickness(5, 0, 0, 7) });
-        MenuItem(panel, UiText.T("Полотно                            Ctrl+Shift+5"), _session.OpenCanvas);
-        MenuItem(panel, UiText.T("Рисовать на экране          Ctrl+Shift+6"), _session.SelectScreen);
+        MenuItem(panel, AppSettings.Label(ShortcutAction.Canvas), _session.OpenCanvas, ShortcutAction.Canvas);
+        MenuItem(panel, AppSettings.Label(ShortcutAction.Screen), _session.SelectScreen, ShortcutAction.Screen);
         MenuItem(panel, UiText.T("Новая маска"), _session.NewMask);
-        MenuItem(panel, UiText.T("Отменить                         Ctrl+Shift+Z"), _session.Undo);
-        MenuItem(panel, UiText.T("Повторить                       Ctrl+Shift+Y"), _session.Redo);
-        MenuItem(panel, _session.InkVisible ? UiText.T("Скрыть рисунок                  Ctrl+Shift+H") : UiText.T("Показать рисунок                Ctrl+Shift+H"), _session.ToggleInk);
-        MenuItem(panel, _session.Target == DrawingTarget.Canvas ? UiText.T("Очистить полотно             Ctrl+Shift+F") : UiText.T("Очистить экран                  Ctrl+Shift+F"), _session.Clear);
+        MenuItem(panel, AppSettings.Label(ShortcutAction.Undo), _session.Undo, ShortcutAction.Undo);
+        MenuItem(panel, AppSettings.Label(ShortcutAction.Redo), _session.Redo, ShortcutAction.Redo);
+        MenuItem(panel, AppSettings.Label(ShortcutAction.ToggleInk), _session.ToggleInk, ShortcutAction.ToggleInk);
+        MenuItem(panel, AppSettings.Label(ShortcutAction.Clear), _session.Clear, ShortcutAction.Clear);
         panel.Children.Add(new Border { Height = 1, Background = Edge, Margin = new Thickness(0, 5) });
         panel.Children.Add(new TextBlock { Text = UiText.T("Размер текста"), FontSize = 12, Margin = new Thickness(5, 3) });
         var textSize = new Slider { Minimum = 14, Maximum = 72, Value = _session.TextSize, TickFrequency = 2, IsSnapToTickEnabled = true };
         textSize.ValueChanged += (_, _) => _session.TextSize = textSize.Value;
         panel.Children.Add(textSize);
         MenuItem(panel, UiText.T("Горячие клавиши"), ShowShortcuts);
-        MenuItem(panel, UiText.T("Снимок экрана                   Ctrl+Shift+S"), () => _ = _session.CaptureScreenshotAsync());
+        MenuItem(panel, UiText.T("Настройки"), _session.ShowSettings);
+        MenuItem(panel, AppSettings.Label(ShortcutAction.Screenshot), () => _ = _session.CaptureScreenshotAsync(), ShortcutAction.Screenshot);
         MenuItem(panel, UiText.T("Свернуть панель"), ToggleCollapsed);
         MenuItem(panel, UiText.T("Свернуть в трей"), _session.MinimizeToTray);
         MenuItem(panel, UiText.T("Выход"), _session.Exit);
         ShowFlyout("menu", panel, _menu);
     }
-    private Button MenuItem(StackPanel panel, string text, Action click)
+    private Button MenuItem(StackPanel panel, string text, Action click, ShortcutAction? action = null)
     {
         Control content = new TextBlock { Text = text, TextWrapping = TextWrapping.Wrap };
         var shortcutAt = text.IndexOf("Ctrl+", StringComparison.Ordinal);
-        if (shortcutAt > 0)
+        if (action is not null || shortcutAt > 0)
         {
             var row = new DockPanel { LastChildFill = true };
-            var shortcut = new TextBlock { Text = text[shortcutAt..], Foreground = Brushes.Gray, FontSize = 11, Margin = new Thickness(12, 0, 0, 0) };
+            var shortcut = new TextBlock { Text = action is { } a ? _session.ShortcutText(a) : text[shortcutAt..], Foreground = Brushes.Gray, FontSize = 11, Margin = new Thickness(12, 0, 0, 0) };
             DockPanel.SetDock(shortcut, Dock.Right); row.Children.Add(shortcut);
-            row.Children.Add(new TextBlock { Text = text[..shortcutAt].TrimEnd(), TextWrapping = TextWrapping.Wrap });
+            row.Children.Add(new TextBlock { Text = action is not null ? text : text[..shortcutAt].TrimEnd(), TextWrapping = TextWrapping.Wrap });
             content = row;
         }
         var button = new Button { Theme = FlatButton, Content = new Border { Padding = new Thickness(7, 6), Child = content }, FontSize = 12, MinHeight = 30, HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -397,7 +413,8 @@ internal sealed class DrawingToolbarWindow : Window
         return button;
     }
     private void ShowShortcuts() => ShowMessage(UiText.T("Горячие клавиши"),
-        UiText.T("shortcuts_help"));
+        string.Join("\n", Enum.GetValues<ShortcutAction>().Where(a => _session.Settings.Shortcuts[a].Enabled)
+            .Select(a => _session.ShortcutText(a) + "   " + AppSettings.Label(a))));
 
     public void ShowMessage(string title, string message)
     {

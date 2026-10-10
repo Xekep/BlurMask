@@ -74,7 +74,7 @@ internal sealed class CanvasWindow : Window
         {
             ("Вставить изображение · Ctrl+V", () => _ = PasteImageAsync()), ("Новое", NewLocal),
             ("Подключить", ShowConnection), ("Фон", ToggleBackground), ("Сохранить PNG", SavePng),
-            ("Экран", session.SelectScreen), ("Скрыть меню · Tab", ToggleChrome)
+            ("Экран", session.SelectScreen), ("Настройки", session.ShowSettings), ("Скрыть меню · Tab", ToggleChrome)
         })
         {
             var item = new MenuItem { Header = UiText.T(label) };
@@ -140,8 +140,9 @@ internal sealed class CanvasWindow : Window
     private void CanvasKeyDown(object? sender, KeyEventArgs e)
     {
         if (FocusManager?.GetFocusedElement() is TextBox) return;
+        if (_session.HandleLocalShortcut(e)) return;
         if (e.Key == Key.Tab && e.KeyModifiers == KeyModifiers.None) { ToggleChrome(); e.Handled = true; }
-        else if (e.KeyModifiers.HasFlag(KeyModifiers.Control) && e.Key is Key.Add or Key.OemPlus or Key.Subtract or Key.OemMinus or Key.D0 or Key.NumPad0)
+        else if (e.KeyModifiers == KeyModifiers.Control && e.Key is Key.Add or Key.OemPlus or Key.Subtract or Key.OemMinus or Key.D0 or Key.NumPad0)
         {
             if (e.Key is Key.D0 or Key.NumPad0) _surface.Fit();
             else _surface.ZoomAt(e.Key is Key.Subtract or Key.OemMinus ? 1 / 1.2 : 1.2);
