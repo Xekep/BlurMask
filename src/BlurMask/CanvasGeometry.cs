@@ -7,6 +7,7 @@ namespace BlurMask;
 internal static class CanvasGeometry
 {
     internal const double CoordinateLimit = 100000;
+    internal static double PenWidth(double screenWidth, double zoom) => Math.Clamp(screenWidth / zoom, .5, 200);
     internal static Rect Grow(Rect board, Rect ink)
     {
         const double gutter = 256, step = 1024;

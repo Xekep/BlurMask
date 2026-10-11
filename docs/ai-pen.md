@@ -12,7 +12,18 @@ standard CTC collapse. It has no recovered lexical dictionary. English examples
 and digits have been verified. Russian raw-stroke recognition is not ready.
 The separate **Formulas** mode uses the reusable native
 [InkRecognition.Math module](ink-math-engine.md) and a user-installed Math2 pack.
-It recognizes notation; it does not calculate the value of expressions.
+The default **Automatic** mode selects text or mathematical notation after the
+pause. Confident natural text avoids loading the formula engine; numeric/operator
+input and uncertain text can use the Math2 model. **Text** and **Formulas** remain
+explicit overrides. Auto uses a conservative confidence guard, not a universal
+classifier, and ambiguous input stays handwritten.
+
+Numeric arithmetic now appends an answer: `2+2` becomes `2+2=4`. Supported input
+includes explicit arithmetic, decimal comma, parentheses, fractions, roots and
+powers. It does not solve symbolic equations, evaluate integrals or execute code.
+Division by zero, unknown notation and inconsistent written equalities are kept
+without an answer. A result extends to the right while retaining the original
+height and can be undone together with recognition.
 Confidence is an acoustic score, not a calibrated probability of correct text.
 
 ## Model installation
@@ -24,7 +35,7 @@ Installation checks the model structure and checksum before replacing a working
 model. The pen menu shows the currently supported language.
 
 For formulas, install a `.ikrmath` pack with **Install formula model**, then choose
-**Formulas** in the AI pen menu. The official CPU runtime is packaged for Windows
+**Automatic** or **Formulas** in the AI pen menu. The official CPU runtime is packaged for Windows
 x64, Linux x64 and macOS; model weights are supplied separately.
 
 ```sh

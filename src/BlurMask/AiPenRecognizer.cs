@@ -3,7 +3,7 @@ using Avalonia.Threading;
 
 namespace BlurMask;
 
-internal sealed class AiPenRecognizer(InkDocument document, Func<bool> mathMode) : IDisposable
+internal sealed class AiPenRecognizer(InkDocument document, Func<string> recognitionMode) : IDisposable
 {
     private static readonly SemaphoreSlim Inference = new(1, 1);
     private readonly List<InkMark> _strokes = [];
@@ -38,15 +38,20 @@ internal sealed class AiPenRecognizer(InkDocument document, Func<bool> mathMode)
         if (_disposed || _strokes.Count == 0) return;
         var strokes = _strokes.ToArray(); _strokes.Clear(); _processing = strokes;
         _work?.Cancel(); _work?.Dispose(); _work = new();
-        _ = ConvertAsync(strokes, ++_generation, mathMode(), _work.Token);
+        _ = ConvertAsync(strokes, ++_generation, recognitionMode(), _work.Token);
     }
-    private async Task ConvertAsync(InkMark[] strokes, int generation, bool math, CancellationToken cancellationToken)
+    private async Task ConvertAsync(InkMark[] strokes, int generation, string mode, CancellationToken cancellationToken)
     {
         try
         {
             await Inference.WaitAsync(cancellationToken);
             IReadOnlyList<AiInkLayout.Result> results;
-            try { if (_disposed || generation != _generation) return; results = await Task.Run(() => math ? AiMathLayout.Recognize(strokes, cancellationToken: cancellationToken) : AiInkLayout.Recognize(strokes, cancellationToken: cancellationToken), cancellationToken); }
+            try { if (_disposed || generation != _generation) return; results = await Task.Run(() => mode switch
+                {
+                    "math" => AiMathLayout.Recognize(strokes, cancellationToken: cancellationToken),
+                    "text" => AiInkLayout.Recognize(strokes, cancellationToken: cancellationToken),
+                    _ => AiAutomaticLayout.Recognize(strokes, cancellationToken: cancellationToken)
+                }, cancellationToken); }
             finally { Inference.Release(); }
             await Dispatcher.UIThread.InvokeAsync(() =>
             {

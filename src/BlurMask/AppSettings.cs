@@ -54,7 +54,7 @@ internal sealed record AppSettings
 {
     public string LinuxDisplayBackend { get; init; } = "auto";
     public string Language { get; init; } = "system";
-    public string AiMode { get; init; } = "text";
+    public string AiMode { get; init; } = "auto";
     public bool HotkeysEnabled { get; init; } = true;
     public Dictionary<ShortcutAction, ShortcutBinding> Shortcuts { get; init; } = DefaultShortcuts();
     internal AppSettings CloneSettings() => this with { Shortcuts = new(Shortcuts) };
@@ -89,7 +89,7 @@ internal sealed record AppSettings
     }) + (action is >= ShortcutAction.QuickColor1 and <= ShortcutAction.QuickColor6 ? $" {(int)action - (int)ShortcutAction.QuickColor1 + 1}" : "");
     internal string? Validate()
     {
-        if (LinuxDisplayBackend is not ("auto" or "x11" or "wayland") || Language is not ("system" or "en" or "fr" or "de" or "ru") || AiMode is not ("text" or "math") || Shortcuts is null) return UiText.T("Некорректные настройки");
+        if (LinuxDisplayBackend is not ("auto" or "x11" or "wayland") || Language is not ("system" or "en" or "fr" or "de" or "ru") || AiMode is not ("auto" or "text" or "math") || Shortcuts is null) return UiText.T("Некорректные настройки");
         var used = new HashSet<ShortcutBinding>();
         foreach (var action in Enum.GetValues<ShortcutAction>())
         {

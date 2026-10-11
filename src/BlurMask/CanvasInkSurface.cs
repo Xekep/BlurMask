@@ -10,6 +10,9 @@ internal sealed class CanvasInkSurface : Grid
     private readonly DrawingSession _session;
     private readonly CanvasWindow _window;
     private readonly BoardSurface _surface;
+    private readonly LiveSurface _liveSurface;
+    private InkMark[] _retainedMarks = [];
+    private (double Zoom, Vector Offset, Rect Board, string Background, bool Visible, double Scale)? _retainedView;
     private readonly Canvas _editorLayer = new();
     private TextBox? _editor;
     private Point _textPoint;
@@ -25,8 +28,9 @@ internal sealed class CanvasInkSurface : Grid
     {
         _session = session; _window = window; ClipToBounds = true;
         ResetBounds();
-        _surface = new BoardSurface(this);
-        Children.Add(_surface); Children.Add(_editorLayer);
+        _surface = new BoardSurface(this) { CacheMode = new BitmapCache() };
+        _liveSurface = new LiveSurface(this) { IsHitTestVisible = false };
+        Children.Add(_surface); Children.Add(_liveSurface); Children.Add(_editorLayer);
         _surface.PointerPressed += Pressed;
         _surface.PointerMoved += Moved;
         _surface.PointerReleased += Released;
@@ -70,7 +74,25 @@ internal sealed class CanvasInkSurface : Grid
         FinishInput(); _autoFit = false; Zoom = Math.Clamp(zoom, .002, 8); Offset = offset;
         UpdateBounds(); InvalidateVisual(); ViewChanged?.Invoke();
     }
-    public new void InvalidateVisual() { base.InvalidateVisual(); _surface.InvalidateVisual(); }
+    public new void InvalidateVisual() { _retainedView = null; RefreshContent(); }
+    internal void RefreshContent()
+    {
+        var marks = _session.CanvasDocument.Marks;
+        var view = (Zoom, Offset, BoardBounds, _window.BoardBackground, _session.InkVisible,
+            TopLevel.GetTopLevel(this)?.RenderScaling ?? 1);
+        var changed = _retainedView != view || _retainedMarks.Length != marks.Count;
+        if (!changed)
+            for (var i = 0; i < marks.Count; i++)
+                if (!ReferenceEquals(_retainedMarks[i], marks[i])) { changed = true; break; }
+        if (changed)
+        {
+            _retainedView = view; _retainedMarks = marks.ToArray();
+            _surface.InvalidateVisual();
+        }
+        // Mouse moves and peer previews do not redraw the saved vector/raster
+        // layer. Its cache is viewport-sized, independent of the world extent.
+        _liveSurface.InvalidateVisual();
+    }
     private void Pressed(object? sender, PointerPressedEventArgs e)
     {
         if (_pointer is not null) return;
@@ -93,7 +115,7 @@ internal sealed class CanvasInkSurface : Grid
         _session.BeginAiStroke(_session.CanvasDocument);
         if (_session.Tool == InkTool.Eraser) { _lastErase = point; Erase(point); }
         else _session.CanvasDocument.Preview = new InkMark(_session.Tool == InkTool.AiPen ? InkTool.Pen : _session.Tool, _session.Color,
-            _session.PenSize * (_session.Tool == InkTool.Highlighter ? 4 : 1), point)
+            CanvasGeometry.PenWidth(_session.PenSize * (_session.Tool == InkTool.Highlighter ? 4 : 1), Zoom), point)
             { FadeSeconds = _session.FadeSeconds };
         _session.CanvasDocument.Notify(); e.Handled = true;
     }
@@ -137,7 +159,7 @@ internal sealed class CanvasInkSurface : Grid
         Math.Clamp(point.Y, -CanvasGeometry.CoordinateLimit, CanvasGeometry.CoordinateLimit));
     private void Erase(Point point)
     {
-        var radius = Math.Max(8, _session.PenSize * 2);
+        var radius = Math.Max(8, _session.PenSize * 2) / Zoom;
         var removed = _session.CanvasDocument.Marks.RemoveAll(mark => mark.Hit(point, radius));
         removed += _session.CanvasDocument.FadingMarks.RemoveAll(mark => mark.Hit(point, radius));
         if (removed > 0)
@@ -219,10 +241,22 @@ internal sealed class CanvasInkSurface : Grid
             using var clip = context.PushClip(rect);
             if (!owner._session.InkVisible) return;
             var visible = new Rect(owner.ToBoard(default), owner.ToBoard(new Point(Bounds.Width, Bounds.Height))).Normalize();
-            foreach (var mark in owner._session.CanvasDocument.Marks) if (mark.Bounds.Intersects(visible)) mark.Draw(context);
-            foreach (var mark in owner._session.CanvasDocument.FadingMarks) if (mark.Bounds.Intersects(visible)) mark.Draw(context);
-            foreach (var mark in owner._window.RemotePreviews) if (mark.Bounds.Intersects(visible)) mark.Draw(context);
-            owner._session.CanvasDocument.Preview?.Draw(context);
+            var scale = owner.Zoom * (TopLevel.GetTopLevel(owner)?.RenderScaling ?? 1);
+            foreach (var mark in owner._session.CanvasDocument.Marks) if (mark.Bounds.Intersects(visible)) mark.Draw(context, scale);
+        }
+    }
+    private sealed class LiveSurface(CanvasInkSurface owner) : Control
+    {
+        public override void Render(DrawingContext context)
+        {
+            if (!owner._session.InkVisible) return;
+            using var transform = context.PushTransform(Matrix.CreateScale(owner.Zoom, owner.Zoom) * Matrix.CreateTranslation(owner.Offset));
+            using var clip = context.PushClip(owner.BoardBounds);
+            var visible = new Rect(owner.ToBoard(default), owner.ToBoard(new Point(Bounds.Width, Bounds.Height))).Normalize();
+            var scale = owner.Zoom * (TopLevel.GetTopLevel(owner)?.RenderScaling ?? 1);
+            foreach (var mark in owner._session.CanvasDocument.FadingMarks) if (mark.Bounds.Intersects(visible)) mark.Draw(context, scale);
+            foreach (var mark in owner._window.RemotePreviews) if (mark.Bounds.Intersects(visible)) mark.Draw(context, scale);
+            owner._session.CanvasDocument.Preview?.Draw(context, scale);
             if (owner._session.Tool == InkTool.Select && !owner._window.ReadOnly) owner._session.CanvasSelection.Draw(context, owner.Zoom);
         }
     }

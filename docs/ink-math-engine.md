@@ -33,6 +33,15 @@ vendor beam search, grammar constraints and forced segmentation are not ported.
 Input is limited to 256 strokes, 20,000 points and 6,000 processed frames.
 Glyph objects, external normalization scale and custom allocation are unsupported.
 
+`NumericExpressionEvaluator.TryEvaluate(plainOrLatex, out result)` is a separate
+model-free numeric API. It accepts explicit `+ - * / ^`, Unicode operators,
+parentheses, decimal comma, LaTeX fractions and roots. It returns an invariant
+compact number; variables, implicit multiplication, undefined arithmetic and
+unsupported commands return false. Existing numeric equalities must agree.
+Limits are 2,048 characters, nesting depth 32, 256 operations, integral root
+indices 2–64 and absolute exponents at most 10,000. It uses no scripting engine
+or external dependency and is covered by 84 managed/Native AOT guards and goldens.
+
 ## User-installed model
 
 Models are not committed or included in application releases. Export a locally

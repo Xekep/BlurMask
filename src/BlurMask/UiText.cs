@@ -32,6 +32,8 @@ public static class UiText
         ["Модель AI-пера не установлена"] = ["AI pen model is not installed", "Le modèle du stylo IA n’est pas installé", "KI-Stift-Modell ist nicht installiert"],
         ["English · экспериментально"] = ["English · experimental", "English · expérimental", "English · experimentell"],
         ["Формулы"] = ["Formulas", "Formules", "Formeln"],
+        ["Автоматически"] = ["Automatic", "Automatique", "Automatisch"],
+        ["Текст и формулы · автоматически"] = ["Text and formulas · automatic", "Texte et formules · automatique", "Text und Formeln · automatisch"],
         ["Формулы · экспериментально"] = ["Formulas · experimental", "Formules · expérimental", "Formeln · experimentell"],
         ["Модель формул не установлена"] = ["Formula model is not installed", "Le modèle de formules n’est pas installé", "Formelmodell ist nicht installiert"],
         ["Установить модель формул"] = ["Install formula model", "Installer le modèle de formules", "Formelmodell installieren"],

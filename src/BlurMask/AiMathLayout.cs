@@ -24,10 +24,25 @@ internal static class AiMathLayout
             cancellationToken.ThrowIfCancellationRequested();
             if (result is not { Completed: true, LaTex: { Length: > 0 } latex } || !float.IsFinite(result.Confidence) ||
                 result.Confidence < .75f || !MathTypesetting.Supported(latex)) continue;
+            var calculated = WithNumericResult(latex);
             var mark = new InkMark(InkTool.Text, first.Color, first.Width, bounds.TopLeft)
-            { Id = first.Id, Text = latex, Font = "STIX Two Math", FontSize = Math.Clamp(bounds.Height, 8, 300), FadeSeconds = first.FadeSeconds };
-            mark.AddPoint(bounds.BottomRight); results.Add(new(sources, mark));
+            { Id = first.Id, Text = calculated, Font = "STIX Two Math", FontSize = Math.Clamp(bounds.Height, 8, 300), FadeSeconds = first.FadeSeconds };
+            mark.AddPoint(bounds.BottomRight + new Avalonia.Vector(Math.Min(100000 - bounds.Right, ResultWidth(latex, calculated, bounds.Height)), 0));
+            results.Add(new(sources, mark, result.Confidence));
         }
         return results;
     }
+
+    internal static string WithNumericResult(string expression)
+    {
+        if (!NumericExpressionEvaluator.TryEvaluate(expression, out var value)) return expression;
+        var equal = expression.IndexOf('=');
+        // Preserve already written equalities and stand-alone numbers.
+        if (equal >= 0 && expression[(equal + 1)..].Trim().Length > 0) return expression;
+        if (equal < 0 && expression.IndexOfAny(['+', '-', '−', '*', '/', '^', '×', '÷', '\\', '√']) < 0) return expression;
+        return (equal >= 0 ? expression[..equal].TrimEnd() : expression) + "=" + value;
+    }
+
+    internal static double ResultWidth(string original, string calculated, double height)
+        => original == calculated ? 0 : Math.Max(1, calculated.Length - original.Length) * height * .55;
 }

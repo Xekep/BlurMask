@@ -6,6 +6,7 @@ Console.OutputEncoding = new System.Text.UTF8Encoding(false);
 
 if (args.Length == 0)
 {
+    NumericEvaluatorChecks.Verify();
     void Equal(string? actual, string? expected) { if (actual != expected) throw new InvalidDataException($"Expected {expected}; got {actual}"); }
     Equal(MathLatexFormatter.Format(["y", "=", "3", "x", "+", "2"]), "y=3x+2");
     Equal(MathLatexFormatter.Format(["<frac>", "1", "<fracbar>", "x", "</frac>"]), "\\frac{1}{x}");

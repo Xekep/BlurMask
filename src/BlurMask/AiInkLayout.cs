@@ -7,7 +7,7 @@ namespace BlurMask;
 // Batch layout is separate from inference: pen lifts do not define character boundaries.
 internal static class AiInkLayout
 {
-    internal sealed record Result(InkMark[] Strokes, InkMark Text);
+    internal sealed record Result(InkMark[] Strokes, InkMark Text, float Confidence = 1);
     private sealed class Group(InkMark stroke)
     {
         internal readonly List<InkMark> Strokes = [stroke];
@@ -50,7 +50,7 @@ internal static class AiInkLayout
             row.Sort((a, b) => a.Bounds.X.CompareTo(b.Bounds.X));
             var bounds = row.Select(g => g.Bounds).Aggregate((a, b) => a.Union(b));
             if (bounds.Width < 2 || bounds.Height < 2 || bounds.Left < -100000 || bounds.Top < -100000 || bounds.Right > 100000 || bounds.Bottom > 100000) continue;
-            var value = new StringBuilder(); var uncertain = false;
+            var value = new StringBuilder(); var uncertain = false; var confidence = 1f;
             for (var i = 0; i < row.Count;)
             {
                 if (i > 0 && row[i].Bounds.Left - row[i - 1].Bounds.Right > bounds.Height * .65) value.Append(' ');
@@ -62,6 +62,7 @@ internal static class AiInkLayout
                 var line = recognizer.Recognize(part, cancellationToken);
                 if (!float.IsFinite(line.Confidence) || line.Confidence < .75f || string.IsNullOrWhiteSpace(line.Text) || value.Length + line.Text.Length > 4000)
                 { uncertain = true; break; }
+                confidence = Math.Min(confidence, line.Confidence);
                 value.Append(line.Text); i = end;
             }
             var sources = row.SelectMany(g => g.Strokes).ToArray(); var first = sources[0];
@@ -69,7 +70,7 @@ internal static class AiInkLayout
             if (uncertain) continue;
             var text = new InkMark(InkTool.Text, first.Color, first.Width, bounds.TopLeft)
                 { Id = first.Id, Text = value.ToString(), Font = "Inter", FontSize = Math.Clamp(bounds.Height, 8, 300), FadeSeconds = first.FadeSeconds };
-            text.AddPoint(bounds.BottomRight); results.Add(new(sources, text));
+            text.AddPoint(bounds.BottomRight); results.Add(new(sources, text, confidence));
         }
         return results;
     }

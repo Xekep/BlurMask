@@ -308,7 +308,11 @@ for kind in ['desktop', 'canvas']:
     report[kind] = {'changed_pixels': changed, 'bbox': diff.getbbox()}
     assert changed > 200, (kind, report[kind])
 state = json.loads((p / 'canvas-state.json').read_text())
-assert any(m['tool'] == 'Pen' and len(m['points']) >= 3 and m['width'] == 8 for m in state['board']['marks'])
+pens = [m for m in state['board']['marks'] if m['tool'] == 'Pen' and len(m['points']) >= 3]
+assert pens
+# The scripted stroke spans 230 screen pixels horizontally. Width is stored in
+# world units, so the selected 8px nib must remain 8px after the fitted camera.
+assert any(abs(m['width'] * 230 / (m['points'][-1]['x'] - m['points'][0]['x']) - 8) < .05 for m in pens)
 report['persisted_canvas_marks'] = len(state['board']['marks'])
 geometry = dict(line.split('=', 1) for line in (p / 'canvas-geometry.txt').read_text().splitlines())
 x, y = int(geometry['X']), int(geometry['Y'])

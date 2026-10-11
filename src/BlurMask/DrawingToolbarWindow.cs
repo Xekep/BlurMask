@@ -278,13 +278,14 @@ internal sealed class DrawingToolbarWindow : Window
         if (name == "tools" && _session.Tool == InkTool.AiPen)
         {
             row.Children.Add(IconButton(ToolbarGlyph.AiPen, UiText.T("Распознать сейчас"), () => { _session.RecognizeAiInk(); CloseFlyout(); }));
-            var mode = new ComboBox { ItemsSource = new[] { UiText.T("Текст"), UiText.T("Формулы") },
-                SelectedIndex = _session.Settings.AiMode == "math" ? 1 : 0, MinWidth = 110, FontSize = 12 };
+            var mode = new ComboBox { ItemsSource = new[] { UiText.T("Автоматически"), UiText.T("Текст"), UiText.T("Формулы") },
+                SelectedIndex = _session.Settings.AiMode switch { "text" => 1, "math" => 2, _ => 0 }, MinWidth = 120, FontSize = 12 };
             var status = new TextBlock { FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(6, 0) };
             void UpdateStatus() => status.Text = UiText.T(_session.Settings.AiMode == "math"
                 ? AiMathRecognitionModels.Installed ? "Формулы · экспериментально" : "Модель формул не установлена"
+                : _session.Settings.AiMode == "auto" && AiMathRecognitionModels.Installed ? "Текст и формулы · автоматически"
                 : File.Exists(AiRecognitionModels.PathName) ? "English · экспериментально" : "Модель AI-пера не установлена");
-            mode.SelectionChanged += (_, _) => { _session.SetAiMode(mode.SelectedIndex == 1); UpdateStatus(); };
+            mode.SelectionChanged += (_, _) => { _session.SetAiMode(mode.SelectedIndex switch { 1 => "text", 2 => "math", _ => "auto" }); UpdateStatus(); };
             UpdateStatus(); row.Children.Add(mode); row.Children.Add(status);
         }
         ShowFlyout(name, row, anchor);

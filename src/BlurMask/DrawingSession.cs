@@ -57,7 +57,7 @@ internal sealed class DrawingSession : IDisposable
     {
         DesktopSelection = new(DesktopDocument);
         CanvasSelection = new(CanvasDocument);
-        _desktopAi = new(DesktopDocument, () => Settings.AiMode == "math"); _canvasAi = new(CanvasDocument, () => Settings.AiMode == "math");
+        _desktopAi = new(DesktopDocument, () => Settings.AiMode); _canvasAi = new(CanvasDocument, () => Settings.AiMode);
         _newMask = newMask;
         _exit = exit;
         _selectMask = selectMask;
@@ -165,10 +165,10 @@ internal sealed class DrawingSession : IDisposable
     }
     public void SetBoard(BoardMode board) { Board = board; UpdateState(); }
     public void NotifySettings() => StateChanged?.Invoke();
-    internal void SetAiMode(bool math)
+    internal void SetAiMode(string mode)
     {
         RecognizeAiInk();
-        SaveSettings(Settings with { AiMode = math ? "math" : "text" });
+        SaveSettings(Settings with { AiMode = mode });
     }
     public void SetFading(double seconds)
     {

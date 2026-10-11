@@ -321,7 +321,7 @@ internal sealed class CanvasWindow : Window
         _baseline = new(); Apply(new() { Title = UiText.T("Новое полотно") }, true); SaveState(); _surface.Fit();
         _status.Text = UiText.T("Сохранено на устройстве");
     }
-    public void Refresh() { _surface.UpdateBounds(); _surface.InvalidateVisual(); _title.IsReadOnly = ReadOnly; }
+    public void Refresh() { _surface.UpdateBounds(); _surface.RefreshContent(); _title.IsReadOnly = ReadOnly; }
     public void FinishInput() => _surface.FinishInput();
     public void Shutdown() { _shutdown = true; FinishInput(); SaveState(); _timer.Stop(); Close(); }
     internal BoardSnapshot Snapshot() => _board with { Marks = _session.CanvasDocument.Export() };

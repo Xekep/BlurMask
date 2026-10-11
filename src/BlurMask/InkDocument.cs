@@ -27,6 +27,7 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
     public Matrix Transform { get; init; } = Matrix.Identity;
     public string Font { get; init; } = "";
     private Bitmap? _bitmap;
+    private RasterPreview? _rasterPreview;
     private bool _imageDecoded;
     public double FadeSeconds { get; init; }
     internal long FadeStartedAt { get; private set; }
@@ -70,7 +71,7 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
         _geometry = null;
     }
 
-    public void Draw(DrawingContext context)
+    public void Draw(DrawingContext context, double viewScale = 1)
     {
         using var quality = context.PushRenderOptions(new RenderOptions { EdgeMode = EdgeMode.Antialias, BitmapInterpolationMode = BitmapInterpolationMode.HighQuality });
         using var transformed = context.PushTransform(Transform);
@@ -79,7 +80,9 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
         var start = Points[0];
         var end = Points[^1];
         var rect = new Rect(start, end).Normalize();
-        using var opacity = context.PushOpacity(FadeOpacity(Stopwatch.GetTimestamp()) * (Tool == InkTool.Highlighter ? 0.35 : 1));
+        var alpha = FadeOpacity(Stopwatch.GetTimestamp()) * (Tool == InkTool.Highlighter ? 0.35 : 1);
+        // Opaque pen strokes do not need an intermediate opacity surface.
+        using var opacity = alpha < 1 ? context.PushOpacity(alpha) : (DrawingContext.PushedState?)null;
         switch (Tool)
         {
             case InkTool.Image:
@@ -89,7 +92,12 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
                     try { if (BoardValidation.ValidImage(Image)) _bitmap = new Bitmap(new MemoryStream(Convert.FromBase64String(Image!))); }
                     catch (Exception ex) when (ex is ArgumentException or InvalidDataException or NotSupportedException) { }
                 }
-                if (_bitmap is not null) context.DrawImage(_bitmap, rect);
+                if (_bitmap is not null)
+                {
+                    var display = rect.TransformToAABB(Transform);
+                    var image = (_rasterPreview ??= new(_bitmap)).ForSize(display.Width * viewScale, display.Height * viewScale);
+                    context.DrawImage(image, rect);
+                }
                 break;
             case InkTool.Text:
                 if (Points.Count == 2)
@@ -147,6 +155,27 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
                     context.DrawGeometry(null, pen, _geometry);
                 }
                 break;
+        }
+    }
+
+    // One bounded downsample per source image, shared by transform/undo copies.
+    // Original pixels remain available for zooming in and PNG export.
+    private sealed class RasterPreview(Bitmap original)
+    {
+        private Bitmap? _reduced;
+        private int _level;
+        internal Bitmap ForSize(double width, double height)
+        {
+            var ratio = Math.Max(width / original.PixelSize.Width, height / original.PixelSize.Height);
+            if (!double.IsFinite(ratio) || ratio >= .5 || ratio <= 0) return original;
+            var level = Math.Clamp((int)Math.Floor(Math.Log2(1 / ratio)), 1, 12);
+            if (_reduced is not null && _level == level) return _reduced;
+            var divisor = 1 << level;
+            var size = new PixelSize(Math.Max(1, original.PixelSize.Width / divisor), Math.Max(1, original.PixelSize.Height / divisor));
+            var reduced = original.CreateScaledBitmap(size, BitmapInterpolationMode.HighQuality);
+            // Recorded draw operations retain their bitmap implementation reference.
+            _reduced?.Dispose(); _reduced = reduced; _level = level;
+            return reduced;
         }
     }
 
@@ -230,7 +259,7 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
         if (Transform != Matrix.Identity) return WithTransform(Transform * Matrix.CreateTranslation(delta));
         var copy = new InkMark(Tool, Color, Width, Points[0] + delta)
             { Id = Id, Text = Text, FontSize = FontSize, Font = Font, Image = Image, FadeSeconds = FadeSeconds, FadeStartedAt = FadeStartedAt,
-                _bitmap = _bitmap, _imageDecoded = _imageDecoded };
+                _bitmap = _bitmap, _imageDecoded = _imageDecoded, _rasterPreview = _rasterPreview };
         copy.Points.Clear(); copy.Points.AddRange(Points.Select(p => p + delta));
         return copy;
     }
@@ -239,7 +268,7 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
         if (transform == Transform) return this;
         var copy = new InkMark(Tool, Color, Width, Points[0])
             { Id = Id, Text = Text, FontSize = FontSize, Font = Font, Image = Image, Transform = transform,
-                FadeSeconds = FadeSeconds, FadeStartedAt = FadeStartedAt, _bitmap = _bitmap, _imageDecoded = _imageDecoded,
+                FadeSeconds = FadeSeconds, FadeStartedAt = FadeStartedAt, _bitmap = _bitmap, _imageDecoded = _imageDecoded, _rasterPreview = _rasterPreview,
                 _geometry = _geometry, _brush = _brush, _pen = _pen, _formatted = _formatted, _textGeometry = _textGeometry,
                 _textCulture = _textCulture, _bounds = _bounds };
         copy.Points.Clear(); copy.Points.AddRange(Points); return copy;
@@ -364,12 +393,25 @@ internal sealed class InkDocument
         Marks = marks.Select(dto =>
         {
             var cssColor = dto.Color.Length == 9 ? "#" + dto.Color[7..9] + dto.Color[1..7] : dto.Color;
-            var mark = new InkMark(Enum.Parse<InkTool>(dto.Tool), Color.Parse(cssColor), dto.Width,
+            var tool = Enum.Parse<InkTool>(dto.Tool); var color = Color.Parse(cssColor);
+            var transform = dto.Transform is { } t ? new Matrix(t.M11, t.M12, t.M21, t.M22, t.OffsetX, t.OffsetY) : Matrix.Identity;
+            // Most server snapshots contain unchanged marks. Compare them before
+            // allocating a second point list or throwing away raster/path caches.
+            if (previous.TryGetValue(dto.Id, out var existing) && existing.Tool == tool && existing.Color == color &&
+                existing.Width == dto.Width && existing.Text == dto.Text && existing.FontSize == dto.FontSize &&
+                existing.Font == dto.Font && existing.Image == dto.Image && existing.Transform == transform &&
+                existing.Points.Count == dto.Points.Count)
+            {
+                var same = true;
+                for (var i = 0; i < dto.Points.Count; i++)
+                    if (existing.Points[i].X != dto.Points[i].X || existing.Points[i].Y != dto.Points[i].Y) { same = false; break; }
+                if (same) return existing;
+            }
+            var mark = new InkMark(tool, color, dto.Width,
                 new Point(dto.Points[0].X, dto.Points[0].Y))
             { Id = dto.Id, Text = dto.Text, FontSize = dto.FontSize, Font = dto.Font, Image = dto.Image,
-                Transform = dto.Transform is { } t ? new Matrix(t.M11, t.M12, t.M21, t.M22, t.OffsetX, t.OffsetY) : Matrix.Identity };
+                Transform = transform };
             foreach (var point in dto.Points.Skip(1)) mark.AddPoint(new Point(point.X, point.Y));
-            if (previous.TryGetValue(dto.Id, out var existing) && existing.Same(mark)) return existing;
             return mark;
         }).ToList();
         if (resetHistory) { _undo.Clear(); _redo.Clear(); FadingMarks.Clear(); }
