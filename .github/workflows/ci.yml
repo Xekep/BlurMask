@@ -112,6 +112,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native performance probe failed.' }
       - name: Startup and single-instance smoke test
         shell: pwsh
+        env:
+          BLURMASK_SMOKE_ARTIFACTS: ${{ github.workspace }}/.artifacts/ui-preview
         run: |
           $exe = Resolve-Path "bin\Release\net11.0\win-x64\publish\BlurMask.exe"
 
@@ -141,6 +143,13 @@ jobs:
           if ($first.ExitCode -ne 0) {
             throw "BlurMask exited with code $($first.ExitCode)"
           }
+      - name: Upload actual UI previews
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: BlurMask-UI-previews
+          path: .artifacts/ui-preview/*.png
+          if-no-files-found: warn
       - uses: actions/upload-artifact@v4
         with:
           name: BlurMask-win-x64

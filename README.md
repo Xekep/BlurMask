@@ -41,7 +41,7 @@ and [official tool guide](https://epicpen.com/userguide).
 - Shapes have a separate button. The mask button opens a horizontal strip: each icon creates a new independent mask, and the last button removes all masks.
 - **Follow window** below the mask icons automatically detects the window under each mask's centre. Masks move with the window and scale their position and dimensions as it resizes, hide while it is minimized, and close with it. Moving/resizing a mask by hand updates its attachment. Windows uses out-of-context geometry events; macOS and X11 check geometry every 16 ms. Wayland disables the switch because it does not expose foreign window geometry. Masks remain independent overlays; unrelated application rendering is not modified.
 - The analog timer opens a horizontal strip: off, quick (2 s), long (10 s), very long (30 s), with progressively filled timer icons. Temporary ink fades locally and is excluded from saved/shared boards.
-- The canvas uses a compact floating menu; **Tab** hides/restores it. **Ctrl+V** pastes a screenshot from the clipboard as a movable image that is saved, shared and included in PNG exports.
+- The canvas has a collapsible floating icon toolbar for new/connect/share/background/export/screen/fit actions. Click the chalk logo or press **Tab** to collapse/expand it. **Ctrl+V** pastes a screenshot from the clipboard as a movable image that is saved, shared and included in PNG exports.
 - Pasted images are normalized to PNG (up to 2048 px on the longest side); shared documents are limited to 4 MiB and 32 megapixels of raster content.
 - Interface language follows the system UI language: English, French, German or Russian; other languages fall back to English.
 - Screenshots include all monitors and visible annotations, exclude the toolbar, and save PNG files to `Pictures/BlurMask`.
@@ -74,7 +74,7 @@ The wheel zooms around the pointer; bottom-right controls and **Ctrl +/-** chang
 object coordinates, including negative coordinates and shared peer drawings. PNG export
 includes extended content and scales large boards to at most 4096 pixels on either side.
 
-The canvas menu's **Connect** button accepts an invitation code or link.
+The canvas toolbar's **Connect** icon accepts an invitation code or link.
 **Collaborate** creates a shared copy on the built-in `https://pen.kiiko.ru` service on first click and displays separate **Draw together** and view codes,
 with buttons to copy the code or invitation link. Links use one opaque fragment (`/#<code>`)
 without visible board/key parameters. The code retains the full 256-bit access key.

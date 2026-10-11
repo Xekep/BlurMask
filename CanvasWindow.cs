@@ -72,7 +72,7 @@ internal sealed class CanvasWindow : Window
         var workspace = new Grid();
         workspace.Children.Add(_surface);
         var top = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4 };
-        _title = new TextBox { Text = _board.Title, Width = 210, MaxLength = 120, IsReadOnly = ReadOnly,
+        _title = new TextBox { Text = _board.Title, Width = 180, MaxLength = 120, IsReadOnly = ReadOnly,
             FontSize = 13, BorderThickness = new Thickness(0), Background = Brushes.Transparent };
         _title.LostFocus += (_, _) =>
         {
@@ -83,29 +83,27 @@ internal sealed class CanvasWindow : Window
             SaveState();
         };
         top.Children.Add(_title);
-        top.Children.Add(CanvasButton("⊡", UiText.T("Вместить"), () => _surface.Fit()));
-        var share = CanvasButton("↗ " + UiText.T("Совместная работа"), UiText.T("Поделиться"), () => _ = ShareAsync());
-        share.FontSize = 13; top.Children.Add(share);
-        var menuButton = CanvasButton("···", UiText.T("Меню полотна"), () => { });
-        var menu = new ContextMenu();
-        foreach (var (label, action) in new (string, Action)[]
+        foreach (var (glyph, label, action) in new (ToolbarGlyph, string, Action)[]
         {
-            ("Вставить изображение · Ctrl+V", () => _ = PasteImageAsync()), ("Новое", NewLocal),
-            ("Подключить", ShowConnection), ("Фон", ToggleBackground), ("Сохранить PNG", SavePng),
-            ("Экран", session.SelectScreen), ("Настройки", session.ShowSettings), ("Скрыть меню · Tab", ToggleChrome)
+            (ToolbarGlyph.NewCanvas, "Новое", NewLocal),
+            (ToolbarGlyph.Connect, "Подключить", ShowConnection),
+            (ToolbarGlyph.Share, "Совместная работа", () => _ = ShareAsync()),
+            (ToolbarGlyph.Background, "Фон", ToggleBackground),
+            (ToolbarGlyph.Save, "Сохранить PNG", SavePng),
+            (ToolbarGlyph.Screen, "Экран", session.SelectScreen),
+            (ToolbarGlyph.Fit, "Вместить", _surface.Fit)
         })
         {
-            var item = new MenuItem { Header = UiText.T(label) };
-            item.Click += (_, _) => action(); menu.Items.Add(item);
+            var button = CanvasButton(new ToolbarIcon(glyph) { Width = 22, Height = 22 }, UiText.T(label), action);
+            button.Width = 36; button.Padding = new Thickness(6, 4);
+            top.Children.Add(button);
         }
-        menuButton.Click += (_, _) => menu.Open(menuButton);
-        top.Children.Add(menuButton);
         _chrome = new Border { Child = top, Background = Brushes.White, CornerRadius = new CornerRadius(12),
             Padding = new Thickness(8, 5), Margin = new Thickness(62, 12, 12, 0),
             HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top,
             BoxShadow = new BoxShadows(new BoxShadow { Blur = 18, OffsetY = 4, Color = Color.FromArgb(30, 0, 0, 0) }) };
         workspace.Children.Add(_chrome);
-        var reveal = CanvasButton(new ToolbarIcon(ToolbarGlyph.Nib, true) { Width = 28, Height = 28 }, UiText.T("Показать / скрыть меню · Tab"), ToggleChrome);
+        var reveal = CanvasButton(new ToolbarIcon(ToolbarGlyph.Nib, true) { Width = 28, Height = 28 }, UiText.T("Свернуть / развернуть панель · Tab"), ToggleChrome);
         reveal.Margin = new Thickness(12, 12, 0, 0); reveal.Width = 40; reveal.Height = 40;
         reveal.HorizontalAlignment = HorizontalAlignment.Left; reveal.VerticalAlignment = VerticalAlignment.Top;
         workspace.Children.Add(reveal);

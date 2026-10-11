@@ -28,6 +28,7 @@ public static class UiText
         ["BlurMask — показать / скрыть окно"] = ["BlurMask — show / hide window", "BlurMask — afficher / masquer la fenêtre", "BlurMask — Fenster anzeigen / ausblenden"],
         ["Показать окно"] = ["Show window", "Afficher la fenêtre", "Fenster anzeigen"],
         ["Скрыть окно"] = ["Hide window", "Masquer la fenêtre", "Fenster ausblenden"],
+        ["Свернуть / развернуть панель · Tab"] = ["Collapse / expand toolbar · Tab", "Replier / déplier la barre · Tab", "Leiste einklappen / ausklappen · Tab"],
         ["Настройки"] = ["Settings", "Paramètres", "Einstellungen"],
         ["Общие"] = ["General", "Général", "Allgemein"],
         ["Сохранить"] = ["Save", "Enregistrer", "Speichern"],

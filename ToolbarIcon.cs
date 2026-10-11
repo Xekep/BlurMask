@@ -4,7 +4,7 @@ using Avalonia.Media;
 
 namespace BlurMask;
 
-internal enum ToolbarGlyph { Nib, Eye, ClosedEye, Cursor, Select, Pen, Highlighter, Text, Line, Arrow, Rectangle, Ellipse, Eraser, Size, Undo, Redo, Trash, Board, Camera, Menu, Mask, Shapes, Fading, MaskBlur, MaskPixels, MaskScramble, MaskGlass, MaskBlackout }
+internal enum ToolbarGlyph { Nib, Eye, ClosedEye, Cursor, Select, Pen, Highlighter, Text, Line, Arrow, Rectangle, Ellipse, Eraser, Size, Undo, Redo, Trash, Board, Camera, Menu, Mask, Shapes, Fading, MaskBlur, MaskPixels, MaskScramble, MaskGlass, MaskBlackout, NewCanvas, Connect, Share, Background, Save, Screen, Fit }
 
 internal sealed class ToolbarIcon(ToolbarGlyph glyph, bool circle = false, double timerFraction = .5) : Control
 {
@@ -58,6 +58,36 @@ internal sealed class ToolbarIcon(ToolbarGlyph glyph, bool circle = false, doubl
         }
         switch (glyph)
         {
+            case ToolbarGlyph.NewCanvas:
+                context.DrawGeometry(Brushes.White, Outline, Geometry.Parse("M4,2 L15,2 L21,8 L21,22 L4,22 Z M15,2 L15,8 L21,8"));
+                context.DrawGeometry(null, new Pen(Ink, 1.8), Geometry.Parse("M8,15 L17,15 M12.5,10.5 L12.5,19.5"));
+                break;
+            case ToolbarGlyph.Connect:
+                context.DrawGeometry(null, new Pen(Ink, 2, lineCap: PenLineCap.Round),
+                    Geometry.Parse("M9,15 L6,18 C2,22 -1,17 3,13 L7,9 C9,7 12,7 14,9 M15,9 L18,6 C22,2 26,7 22,11 L18,15 C16,17 13,17 11,15 M8,16 L16,8"));
+                break;
+            case ToolbarGlyph.Share:
+                context.DrawGeometry(null, new Pen(Ink, 1.6), Geometry.Parse("M7,12 L18,5 M7,12 L18,20"));
+                foreach (var point in new[] { new Point(5, 12), new Point(19, 4), new Point(19, 21) })
+                    context.DrawEllipse(Brushes.White, new Pen(Ink, 1.5), point, 3, 3);
+                break;
+            case ToolbarGlyph.Background:
+                context.DrawEllipse(Brushes.White, Outline, new Point(12, 12), 10, 10);
+                context.DrawGeometry(Ink, null, Geometry.Parse("M12,2 A10,10 0 0 1 12,22 Z"));
+                break;
+            case ToolbarGlyph.Save:
+                context.DrawGeometry(Brushes.White, Outline, Geometry.Parse("M3,3 L18,3 L22,7 L22,22 L3,22 Z M7,3 L7,10 L17,10 L17,3 M7,22 L7,15 L18,15 L18,22"));
+                context.DrawLine(new Pen(Ink, 2), new Point(14, 5), new Point(14, 8));
+                break;
+            case ToolbarGlyph.Screen:
+                context.DrawRectangle(Brushes.White, Outline, new Rect(2, 3, 21, 15), 1, 1);
+                context.DrawGeometry(null, Outline, Geometry.Parse("M12,18 L12,23 M7,23 L17,23 M5,15 L20,15"));
+                break;
+            case ToolbarGlyph.Fit:
+                context.DrawGeometry(null, new Pen(Ink, 1.6, lineCap: PenLineCap.Round),
+                    Geometry.Parse("M8,2 L2,2 L2,8 M16,2 L22,2 L22,8 M22,16 L22,22 L16,22 M8,22 L2,22 L2,16"));
+                context.DrawRectangle(null, Outline, new Rect(7, 7, 10, 10));
+                break;
             case ToolbarGlyph.Highlighter:
                 // Broad chisel tip, collar and capped barrel stay distinct at toolbar size.
                 context.DrawLine(new Pen(MarkerYellow, 2.4, lineCap: PenLineCap.Round), new Point(2, 24), new Point(15, 24));
