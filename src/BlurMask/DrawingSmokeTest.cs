@@ -747,7 +747,11 @@ internal static class DrawingSmokeTest
         var window = session.OpenSettingsWindow!;
         try
         {
-            await Task.Delay(100); window.ShowKeyboardTab(); await Task.Delay(100);
+            await Task.Delay(100);
+            var artifacts = Environment.GetEnvironmentVariable("BLURMASK_SMOKE_ARTIFACTS");
+            if (!string.IsNullOrEmpty(artifacts) && OperatingSystem.IsWindows())
+            { Directory.CreateDirectory(artifacts); SaveWindow(window, Path.Combine(artifacts, "settings-general.png")); }
+            window.ShowKeyboardTab(); await Task.Delay(100);
             var button = window.GetVisualDescendants().OfType<Button>().Single(b => b.Name == "ShortcutPen");
             button.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
             window.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.F12, KeyModifiers = KeyModifiers.Control | KeyModifiers.Alt });
@@ -757,7 +761,6 @@ internal static class DrawingSmokeTest
             Check(window.Draft.Shortcuts[ShortcutAction.Pen].Key == Key.F12, "Conflicting shortcut overwrote the current binding.");
             window.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.Escape });
             await Task.Delay(100);
-            var artifacts = Environment.GetEnvironmentVariable("BLURMASK_SMOKE_ARTIFACTS");
             if (!string.IsNullOrEmpty(artifacts) && OperatingSystem.IsWindows())
             { Directory.CreateDirectory(artifacts); SaveWindow(window, Path.Combine(artifacts, "settings-keyboard.png")); }
             Check(window.Save(), "Settings window could not apply changes.");
