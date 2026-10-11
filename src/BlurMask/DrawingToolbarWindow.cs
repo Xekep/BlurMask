@@ -144,6 +144,12 @@ internal sealed class DrawingToolbarWindow : Window
         };
         column.Children.Add(_bodyContainer);
         Content = column;
+        AddHandler(PointerPressedEvent, (_, e) =>
+        {
+            if (!e.GetCurrentPoint(this).Properties.IsMiddleButtonPressed) return;
+            _session.MinimizeToTray();
+            e.Handled = true;
+        }, Avalonia.Interactivity.RoutingStrategies.Tunnel);
         BindHoverMenu(_cursor, "cursor", ShowCursorModes);
         BindHoverMenu(_drawing, "tools", ShowTools);
         BindHoverMenu(_shapes, "shapes", ShowShapes);
