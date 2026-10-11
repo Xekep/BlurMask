@@ -316,6 +316,11 @@ jobs:
           dotnet run --project tools/LegacySeedGraph.Probe -c Release -- .artifacts/legacy-seed-graph-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
           python tools/LegacyOrdinaryCutSource.Probe/reference_controls.py .artifacts/legacy-ordinary-cut-source-controls.json
           dotnet run --project tools/LegacyOrdinaryCutSource.Probe -c Release -- .artifacts/legacy-ordinary-cut-source-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyCandidateGraph.Probe/reference_controls.py .artifacts/legacy-candidate-graph-controls.json
+          dotnet run --project tools/LegacyCandidateGraph.Probe -c Release -- .artifacts/legacy-candidate-graph-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacySymbolMask.Probe/reference_controls.py .artifacts/legacy-symbol-mask-controls.json
+          dotnet run --project tools/LegacySymbolMask.Probe -c Release -- .artifacts/legacy-symbol-mask-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+          dotnet run --project tools/LegacyPreparedWordGroup.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
           python tools/handwriting/fetch_russian_track_corpus.py --self-test
           dotnet build tools/LegacyRussianCorpus.Probe -c Release
           python tools/LegacyVariableWord.Probe/reference_controls.py .artifacts/legacy-variable-word-controls.json
@@ -506,6 +511,9 @@ jobs:
             @{ Name = 'LegacyNativeSeed'; Args = @('.artifacts/legacy-native-seed-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacySeedGraph'; Args = @('.artifacts/legacy-seed-graph-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyOrdinaryCutSource'; Args = @('.artifacts/legacy-ordinary-cut-source-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyCandidateGraph'; Args = @('.artifacts/legacy-candidate-graph-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacySymbolMask'; Args = @('.artifacts/legacy-symbol-mask-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyPreparedWordGroup'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
             @{ Name = 'LegacyVariableWord'; Args = @('.artifacts/legacy-variable-word-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyHandwritingFontSize'; Args = @('.artifacts/font-size-controls.json') }
           )

@@ -35,14 +35,11 @@ public sealed record LegacyNativeSeedWordRecognitionResult(LegacyOrdinaryCursive
 public sealed class LegacyRussianCursiveWordRecognizer
 {
     private readonly LegacyRussianModelBundle model;
-    private readonly LegacyPreparedGlyphClassifier classifier;
-    private readonly LegacyContextWindowScorer contextScorer;
     private readonly LegacyAcousticLexicalMapping mapping;
 
     public LegacyRussianCursiveWordRecognizer(LegacyRussianModelBundle model, int? relatedFormMode = null)
     {
         ArgumentNullException.ThrowIfNull(model); this.model = model;
-        classifier = model.CreatePreparedGlyphClassifier(); contextScorer = model.CreateContextWindowScorer();
         mapping = new(model.AcousticAlphabet, model.LexicalAlphabet, model.CreateGlyphClassifier().OutputWidth, relatedFormMode);
     }
 
@@ -169,47 +166,16 @@ public sealed class LegacyRussianCursiveWordRecognizer
         var atoms = cuts.Atoms.ToArray(); var boundaryIds = Enumerable.Repeat(-1, atoms.Length).ToArray();
         var lattice = latticeFactory is null ? LegacyCursiveCandidateLattice.GenerateOrdinaryChain(atoms, boundaryIds,
             model.CursiveSpanProfile.MaximumAtoms, cancellationToken) : latticeFactory(cuts);
-        var rawPrepared = LegacyCursivePreparedInk.Create(source, cancellationToken);
-        float lineMinX = source.SelectMany(s => s.Points).Min(p => p.X);
-        var normalizedLine = new LegacyInkStroke[source.Count];
-        for (int stroke = 0; stroke < source.Count; stroke++)
-            normalizedLine[stroke] = LegacyPreparedGlyphNormalization.NormalizeOrderedRanges(rawPrepared,
-                [new LegacyInkRange(stroke, 0, rawCounts[stroke])], lineMinX, options.SourceBaseline,
-                options.SourceHeight, options.TargetHeight, 1, cancellationToken).Strokes[0];
-        var contextGroups = contextScorer.ScoreLine(normalizedLine, 0, options.TargetHeight, 0,
-            new int[source.Count], cancellationToken: cancellationToken);
+        var evaluator = new LegacyPreparedWordGroupEvaluator(model, source, cuts.PreparedInk, chronology,
+            options, cancellationToken);
         var wordScorer = new LegacyWordCandidateScorer(model.CreateResourceLanguageScorer(options.LanguageScale));
         var finalScores = new Dictionary<int, (int WordId, LegacyWordCandidateScore Score)>();
-        int classified = 0; byte[] enabled = options.IncludeBaselineFamilies ? [1,1,1,1,0,0,0] : [0,0,1,1,0,0,0];
+        int classified = 0;
         ReadOnlyMemory<LegacyIntegerLexicalCandidate> ScoreGroup(LegacyCursiveCandidateGroup group)
         {
             if (++classified > options.MaximumScoredGroups)
                 throw new InvalidOperationException("Cursive recognition exceeded its explicit neural-group budget.");
-            int[] order = chronology.OrderRangeIndicesForNormalization(group.Ranges.Span, cancellationToken);
-            var ranges = order.Select(i => group.Ranges.Span[i]).ToArray();
-            var counts = cuts.PreparedInk.StrokePointCounts.Span;
-            var starts = new int[counts.Length]; for (int i = 1; i < starts.Length; i++) starts[i] = starts[i-1] + counts[i-1];
-            float minimumX = float.MaxValue, sumX = 0; int count = 0;
-            foreach (var range in ranges)
-                for (int point = range.StartPoint; point < range.EndPointExclusive; point++)
-                {
-                    var p = cuts.PreparedInk.Points.Span[starts[range.StrokeIndex] + point];
-                    minimumX = Math.Min(minimumX, p.X); sumX += p.X; count++;
-                }
-            var physicalIds = ranges.Select(r => r.StrokeIndex).Distinct().ToArray();
-            var observations = LegacyPriorContextSelection.SelectNative(contextGroups, 0, physicalIds,
-                model.AcousticWeights.ContextSelectionMode, cancellationToken: cancellationToken);
-            // Context window centers and target must use the same line frame.
-            float centerX = ((sumX / count - lineMinX) * options.TargetHeight) / options.SourceHeight;
-            var context = LegacyFloatInputQuantization.Quantize(LegacyContextWeighting.Combine(observations,
-                centerX, options.TargetHeight, options.ContextLeftGapOffset, options.ContextLeftVariance,
-                options.ContextRightVariance, cancellationToken), cancellationToken: cancellationToken);
-            var signs = options.UsePreparedBoundarySigns ? LegacyCursiveGlyphBoundaryPolicy.Resolve(ranges,
-                cuts.PreparedInk.StrokePointCounts.Span, 0, options.SuppressStartBoundary, options.SuppressEndBoundary, cancellationToken) :
-                new LegacyCursiveGlyphBoundarySigns(options.StartBoundary, options.EndBoundary);
-            var classification = classifier.Classify(cuts.PreparedInk, ranges, minimumX, options.SourceBaseline,
-                options.SourceHeight, options.TargetHeight, 10, context, signs.Start, signs.End,
-                options.IncludeBaselineFamilies, enabled, options.CostMultiplier, cancellationToken: cancellationToken);
+            var classification = evaluator.Classify(group.Ranges.Span, cancellationToken);
             return costAdapter is null ? mapping.MapIntegerCosts(classification.IntegerCosts.Span, cancellationToken) :
                 costAdapter(group, classification);
         }
@@ -234,6 +200,6 @@ public sealed class LegacyRussianCursiveWordRecognizer
             var final = finalScores[match.TerminalState];
             return new LegacyCursiveRecognizedWord(text.ToString(), match, final.WordId, final.Score);
         }).ToArray();
-        return new(cuts, lattice, Array.AsReadOnly(words), contextGroups.Length, classified, search.ExpandedChoices);
+        return new(cuts, lattice, Array.AsReadOnly(words), evaluator.ContextWindowCount, classified, search.ExpandedChoices);
     }
 }
