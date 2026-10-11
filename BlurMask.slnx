@@ -21,6 +21,8 @@
     <Project Path="tools/LegacyDirectionalCoordinates.Probe/LegacyDirectionalCoordinates.Probe.csproj" />
     <Project Path="tools/LegacyIntersection.Probe/LegacyIntersection.Probe.csproj" />
     <Project Path="tools/LegacyDirectionalWindow.Probe/LegacyDirectionalWindow.Probe.csproj" />
+    <Project Path="tools/LegacyDirectionalBaseline.Probe/LegacyDirectionalBaseline.Probe.csproj" />
+    <Project Path="tools/LegacyDirectionalModel.Probe/LegacyDirectionalModel.Probe.csproj" />
     <Project Path="tools/InkMath.Solver.Probe/InkMath.Solver.Probe.csproj" />
   </Folder>
 </Solution>

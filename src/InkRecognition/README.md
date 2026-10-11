@@ -130,7 +130,7 @@ prepare power-of-two coordinates, constant-step physical strokes and native
 dimensions for the directional family. `LegacyArcLengthWindows` partitions
 prepared cumulative physical lengths. Independent own controls cover 655
 coordinate/resampling and 640 window cases; intersections, local channels,
-baseline/context assembly and joined-word decoding remain unfinished.
+automatic baseline/context estimation and joined-word decoding remain unfinished.
 
 `LegacyDirectionalIntersections` consumes prepared samples and restores ordered
 spatial-grid crossing flags and self-loop intervals; the underlying
@@ -143,3 +143,11 @@ restore the checked 3f temporal local channels and calibrated 313-column input
 layout. Caller-supplied geometry calibration, raw baseline and context are
 required. They pass 1,152 own arithmetic references; this does not supply the
 4f alternative layout or enable Russian cursive recognition in the app.
+
+`LegacyDirectionalBaselineStatistics` restores nine raw baseline channels from
+an explicit caller baseline, with 640 own numerical controls. The composed
+`LegacyTemporalDirectionalFeatures` connects these passes to the temporal313
+input. Its optional real-model diagnostic currently has weak class accuracy;
+automatic baseline/context inference and the full recognition profile remain
+unfinished. See [baseline mapping](../../docs/legacy-russian-directional-baseline.md)
+and [model diagnostic limits](../../docs/legacy-russian-directional-model.md).

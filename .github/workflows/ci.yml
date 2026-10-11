@@ -162,6 +162,12 @@ jobs:
         run: |
           python tools/LegacyDirectionalWindow.Probe/reference_controls.py .artifacts/legacy-temporal-controls.json
           dotnet run --project tools/LegacyDirectionalWindow.Probe -c Release -- .artifacts/legacy-temporal-controls.json
+      - name: Legacy explicit baseline mapping and independent arithmetic controls
+        run: |
+          python tools/LegacyDirectionalBaseline.Probe/reference_controls.py .artifacts/legacy-baseline-controls.json
+          dotnet run --project tools/LegacyDirectionalBaseline.Probe -c Release -- .artifacts/legacy-baseline-controls.json
+      - name: Legacy composed temporal features and vendor-free model guards
+        run: dotnet run --project tools/LegacyDirectionalModel.Probe -c Release
 
   symbolic-math:
     name: Native local CAS / ${{ matrix.os }}
