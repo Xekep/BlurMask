@@ -46,6 +46,21 @@ and choices per glyph to 512. Input segmentation, mapping acoustic labels to the
 lexical alphabet, confidence calibration and language-model costs belong to the
 caller. It does not restore cursive segmentation or native SDK decoding.
 
+`LegacyLexicalLatticeDecoder` accepts alternative caller-scored glyph boundaries
+instead of requiring one fixed segmentation. Forward arcs cover cut0 to the
+final ink cut; each arc supplies a lexical label and a nonpositive additive
+log cost. Dictionary prefix transitions constrain the search, duplicate words
+at a shared cut keep their best path, and returned matches include the selected
+cuts. The final cut rejects nonterminal prefixes before beam pruning. This is
+original approximate beam search, not the SDK's native segmentation or scoring.
+Cut generation, acoustic scoring and length/segmentation calibration still
+belong to the caller. Joined handwriting cannot be recognized by this API alone.
+Work is bounded to 128 final cut positions, 128 hypotheses per start cut,
+16,384 total arcs and beam width128. Waiting cuts retain at most two beams.
+Cancellation is checked while reading arcs and while expanding each cut/arc.
+Own tests verify alternate boundaries for the same word, rejected high-score
+nonwords, complete coverage, final terminals, malformed arcs and work bounds.
+
 `LegacyInkAlphabet` restores the embedded type2b version103/104 alphabet payload,
 including UTF-8 labels, lookup-table spans, reverse slots and optional triplet
 tails. The checked RU acoustic alphabet has 192 slots and 189 text mappings;

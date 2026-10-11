@@ -24,6 +24,18 @@ This proves a small complete raw-ink→network→alphabet mapping→dictionary p
 Grouping uses only whole strokes; this abbreviation is not a representative
 handwriting benchmark or proof of slanted/joined Russian recognition.
 
+`RecognizeAlternatives` also scores caller-proposed complete glyphs spanning
+different ordered cut positions, then invokes the original dictionary
+[cut-lattice beam search](legacy-russian-lexicon.md). It returns the selected
+cuts with each word. A request scores at most128 glyph alternatives, four per
+start cut, keeping each glyph's best32 acoustic classes. A caller-supplied
+nonpositive segmentation log penalty (bounded to −1000..0) adjusts competing
+cuts. Cut generation and cost calibration are separate missing components;
+the method does not establish general cursive segmentation or confidence.
+Own toy controls verify an alternative cut path with reversed label spaces.
+The real ИП controls verify the same acoustic scores through competing
+caller-provided cuts; their sample glyphs remain physically separate letters.
+
 The default probe uses an original zero-weight toy network, reversed acoustic
 and lexical label IDs, and a tiny own dictionary. Equal acoustic probabilities
 exercise label mapping and word-boundary enforcement without vendor assets.
@@ -40,6 +52,19 @@ legacy lite RU acoustic/lexical resources and activation JSON:
 ```powershell
 dotnet run --project tools/LegacySegmentedWord.Probe -c Release -- acoustic.res lexical.res activations.json
 ```
+
+Append `--benchmark` to measure100 repeated alternative-word requests with
+reused models (400 actual raster classifier evaluations). The probe reports
+elapsed time, current-thread allocations per request, packed dictionary
+storage and its own process private memory. This measures the small checked
+path; it is not a canvas/application memory benchmark or a large-word latency
+guarantee. No GUI is started.
+
+One local Windows x64 Native AOT run measured100 requests in52.6ms,
+190,856 allocated bytes/request, 2,910,612 packed dictionary bytes and31MiB
+private process memory (including the supplied resource buffers). Managed .NET
+measured226.3ms and41MiB for the same diagnostic. These are observed warm
+two-letter timings on one machine, not performance thresholds or full-app RAM.
 
 The probe's explicit offsets apply only to those checked assets. No model,
 dictionary or activation bytes are included in the repository. Managed .NET and

@@ -36,6 +36,7 @@ public static class LegacyLexicalDecoder
                 foreach (var path in beam)
                 {
                     if (!lexicon.TryAdvance(path.State, choice.Label, out int state)) continue;
+                    if (position == positions.Count - 1 && !lexicon.IsTerminal(state)) continue;
                     double score = path.Score + choice.LogScore;
                     if (!next.TryGetValue(state, out var previous) || score > previous.Score)
                         next[state] = new(state, choice.Label, path, score);

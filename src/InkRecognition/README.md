@@ -89,3 +89,10 @@ dots, geometry limits and cancellation. Four locally supplied classifier checks
 rank the original printed **ИП** sample first after automatic separated grouping.
 This remains an experimental headless path; general Russian words and joined
 handwriting are not enabled in the app. See [the checked pipeline and limits](../../docs/legacy-russian-segmented-word.md).
+
+`LegacyLexicalLatticeDecoder` performs original bounded dictionary beam search
+over alternative caller-scored glyph cuts. It returns both the word labels and
+the selected boundaries, so callers can compare possible segmentations without
+committing to a single split first. It does not generate the cuts or score raw
+ink. `LegacyLexicon.Probe` exercises ambiguity, complete coverage, duplicate-word
+merging, final terminals and resource/cancellation guards without vendor assets.

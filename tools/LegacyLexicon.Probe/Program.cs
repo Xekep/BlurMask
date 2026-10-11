@@ -96,6 +96,8 @@ ReadOnlyMemory<LegacyLexicalCandidate>[] lattice = [
 var decoded = LegacyLexicalDecoder.Decode(lexicon, lattice);
 Require(decoded.Count == 1 && decoded[0].Labels.Span.SequenceEqual(new ushort[] { 1, 2 }) && Math.Abs(decoded[0].LogScore + .6) < 1e-6,
     "Dictionary beam search failed to recover a valid ambiguous word.");
+Require(LegacyLexicalDecoder.Decode(lexicon, lattice, beamWidth: 1).Single().Labels.Span.SequenceEqual(new ushort[] { 1, 2 }),
+    "A final nonterminal consumed the narrow fixed-position terminal beam.");
 Require(LegacyLexicalDecoder.Decode(lexicon, [ReadOnlyMemory<LegacyLexicalCandidate>.Empty]).Count == 0,
     "Empty candidate lattice accepted.");
 using var canceled = new CancellationTokenSource(); canceled.Cancel();
@@ -103,6 +105,36 @@ try { LegacyLexicalDecoder.Decode(lexicon, lattice, cancellationToken: canceled.
 catch (OperationCanceledException) { }
 try { LegacyLexicalDecoder.Decode(lexicon, [new LegacyLexicalCandidate[] { new(1, float.NaN) }]); throw new InvalidOperationException("NaN score accepted."); }
 catch (ArgumentException) { }
+// Different glyph boundaries can spell the same word. Keep its highest-scoring
+// cut sequence; a stronger impossible prefix and a nonterminal ending must lose.
+LegacyLexicalArc[] arcs = [new(0, 1, 1, -.2f), new(1, 4, 2, -.4f),
+    new(0, 2, 1, -.1f), new(2, 4, 2, -.1f), new(0, 4, 3, -.3f),
+    new(0, 1, 2, 0), new(1, 4, 3, -.01f), new(0, 4, 1, -.4f)];
+var latticeWords = LegacyLexicalLatticeDecoder.Decode(lexicon, arcs, 4);
+Require(latticeWords.Count == 3 && latticeWords[0].Labels.Span.SequenceEqual(new ushort[] { 1, 2 }) &&
+    latticeWords[0].Cuts.Span.SequenceEqual(new[] { 0, 2, 4 }) && Math.Abs(latticeWords[0].LogScore + .2) < 1e-6,
+    "Alternative cut search did not recover the better dictionary word/boundaries.");
+Require(latticeWords[1].Labels.Span.SequenceEqual(new ushort[] { 3 }) && latticeWords[2].Labels.Span.SequenceEqual(new ushort[] { 1 }),
+    "Lattice ordering, duplicate-word merge or terminal filtering differs.");
+Require(LegacyLexicalLatticeDecoder.Decode(lexicon, [new(0, 1, 1, 0)], 2).Count == 0,
+    "Incomplete ink coverage accepted.");
+Require(LegacyLexicalLatticeDecoder.Decode(lexicon, [new(0, 1, 1, 0), new(1, 2, 3, 0)], 2).Count == 0,
+    "Nonterminal lattice word accepted.");
+Require(LegacyLexicalLatticeDecoder.Decode(lexicon, [new(0, 1, 1, 0), new(1, 2, 3, 0), new(1, 2, 2, -1)], 2, beamWidth: 1)
+    .Single().Labels.Span.SequenceEqual(new ushort[] { 1, 2 }), "A final nonterminal consumed the narrow terminal beam.");
+foreach (var bad in new[] { new LegacyLexicalArc(0, 0, 1, 0), new(1, 0, 1, 0), new(-1, 1, 1, 0),
+    new(0, 5, 1, 0), new(0, 1, 1, float.NaN), new(0, 1, 1, float.NegativeInfinity), new(0, 1, 1, .1f) })
+{
+    try { LegacyLexicalLatticeDecoder.Decode(lexicon, [bad], 4); throw new InvalidOperationException("Invalid lattice arc accepted."); }
+    catch (ArgumentException) { }
+}
+try { LegacyLexicalLatticeDecoder.Decode(lexicon, arcs, 4, cancellationToken: canceled.Token); throw new InvalidOperationException("Lattice cancellation ignored."); }
+catch (OperationCanceledException) { }
+try { LegacyLexicalLatticeDecoder.Decode(lexicon, Enumerable.Repeat(arcs[0], 129).ToArray(), 4); throw new InvalidOperationException("Per-cut hypothesis cap ignored."); }
+catch (ArgumentException) { }
+try { LegacyLexicalLatticeDecoder.Decode(lexicon, arcs, 129); throw new InvalidOperationException("Cut cap ignored."); }
+catch (ArgumentOutOfRangeException) { }
+Console.WriteLine("PASS alternative glyph cuts: dictionary prefixes, best boundaries, duplicate words, terminal/coverage guards, malformed arcs, limits and cancellation.");
 Console.WriteLine("PASS own packed-trie transitions, terminal words, crossing bits and malformed input. No ink recognition tested.");
 
 static byte[] Build(uint[] labels, uint[] counts, byte labelWidth, byte offsetWidth, byte countWidth, uint maxLength)

@@ -25,12 +25,28 @@ if (args.Length == 0)
     catch (OperationCanceledException) { }
     try { own.Recognize([[], []]); throw new InvalidOperationException("Empty glyph accepted."); }
     catch (ArgumentException) { }
+    var lattice = own.RecognizeAlternatives([
+        new(0, 1, ownGroups[0], -.5f), new(1, 3, ownGroups[1]),
+        new(0, 2, ownGroups[0]), new(2, 3, ownGroups[1])], 3);
+    Require(lattice.Count == 1 && lattice[0].Text == "ИП" && lattice[0].Cuts.Span.SequenceEqual(new[] { 0, 2, 3 }) &&
+        Math.Abs(lattice[0].LogScore - ownResult[0].LogScore) < 1e-6, "Scored alternative boundaries lost the better segmentation.");
+    Require(own.RecognizeAlternatives([new(0, 1, ownGroups[0])], 2).Count == 0, "Partial alternative ink coverage accepted.");
+    foreach (float badCost in new[] { float.NaN, float.PositiveInfinity, .1f, -1001 })
+    {
+        try { own.RecognizeAlternatives([new(0, 1, ownGroups[0], badCost)], 1); throw new InvalidOperationException("Invalid segmentation score accepted."); }
+        catch (ArgumentException) { }
+    }
+    try { own.RecognizeAlternatives(Enumerable.Repeat(new LegacyInkGlyphAlternative(0, 1, ownGroups[0]), 5).ToArray(), 1); throw new InvalidOperationException("Alternative scoring work cap ignored."); }
+    catch (ArgumentException) { }
+    try { own.RecognizeAlternatives([new(0, 1, ownGroups[0])], 1, cancellationToken: canceled.Token); throw new InvalidOperationException("Alternative scoring cancellation ignored."); }
+    catch (OperationCanceledException) { }
     try { own.Recognize([OwnGlyphs(1, 0, 0)[0], OwnGlyphs(1, 0, 0)[1], OwnGlyphs(1, 0, 0)[0]]); throw new InvalidOperationException("Overlong word accepted."); }
     catch (ArgumentException) { }
     Console.WriteLine("PASS own segmented-word pipeline, reversed label spaces, probabilities, terminal boundaries and cancellation. No vendor assets required.");
     return;
 }
-if (args.Length != 3) throw new ArgumentException("Usage: LegacySegmentedWord.Probe [acoustic.res lexical.res activations.json]");
+bool benchmark = args.Length == 4 && args[3] == "--benchmark";
+if (args.Length != 3 && !benchmark) throw new ArgumentException("Usage: LegacySegmentedWord.Probe [acoustic.res lexical.res activations.json [--benchmark]]");
 byte[] acoustic = File.ReadAllBytes(args[0]), lexical = File.ReadAllBytes(args[1]);
 using var tables = JsonDocument.Parse(File.ReadAllBytes(args[2]));
 int[] Values(JsonElement x) => x.EnumerateArray().Select(x => x.GetInt32()).ToArray();
@@ -55,6 +71,13 @@ foreach (var (scale, x, y) in new[] { (1, 0, 0), (1, -100, 300), (2, 0, 0), (3, 
         "Original separated-ink grouping failed for own printed abbreviation.");
     var results = recognizer.Recognize(groups);
     Require(results.Count != 0 && results[0].Text == "ИП", "Own segmented ИП example was not the best dictionary path.");
+    var alternativeResults = recognizer.RecognizeAlternatives([
+        new(0, 1, groups[0]), new(1, 3, groups[1]),
+        new(0, 2, groups[0], -.1f), new(2, 3, groups[1])], 3);
+    Require(alternativeResults.Count != 0 && alternativeResults[0].Text == "ИП" &&
+        alternativeResults[0].Cuts.Span.SequenceEqual(new[] { 0, 1, 3 }) &&
+        Math.Abs(alternativeResults[0].LogScore - results[0].LogScore) < 1e-6,
+        "Actual classifier → alternative cuts → dictionary scoring differs.");
     foreach (var result in results.Take(3))
     {
         using var buffer = new MemoryStream(); using (var writer = new Utf8JsonWriter(buffer))
@@ -66,6 +89,22 @@ foreach (var (scale, x, y) in new[] { (1, 0, 0), (1, -100, 300), (2, 0, 0), (3, 
     }
 }
 Console.WriteLine("PASS four own separated printed ИП variants through original whole-stroke grouping, actual raw-ink classifier, alphabet mapping and dictionary. Joined cursive is not tested.");
+if (benchmark)
+{
+    var sample = OwnGlyphs(1, 0, 0);
+    LegacyInkGlyphAlternative[] hypotheses = [new(0, 1, sample[0]), new(1, 3, sample[1]),
+        new(0, 2, sample[0], -.1f), new(2, 3, sample[1])];
+    _ = recognizer.RecognizeAlternatives(hypotheses, 3); // Warm up reusable models and runtime.
+    long allocated = GC.GetAllocatedBytesForCurrentThread();
+    var elapsed = System.Diagnostics.Stopwatch.StartNew();
+    for (int i = 0; i < 100; i++)
+        Require(recognizer.RecognizeAlternatives(hypotheses, 3)[0].Text == "ИП", "Repeated scoring changed the best word.");
+    elapsed.Stop(); allocated = GC.GetAllocatedBytesForCurrentThread() - allocated;
+    using var process = System.Diagnostics.Process.GetCurrentProcess();
+    Console.WriteLine($"BENCH 100 reused-model alternative word requests, 400 glyph evaluations: {elapsed.Elapsed.TotalMilliseconds:F1} ms; " +
+        $"{allocated / 100} allocated bytes/request; {graph.StorageBytes} packed dictionary bytes; " +
+        $"{process.PrivateMemorySize64 / (1024 * 1024)} MiB process private memory (includes source resources/runtime, not application memory).");
+}
 
 static LegacyInkStroke[][] OwnGlyphs(int scale, int x, int y)
 {
