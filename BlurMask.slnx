@@ -80,6 +80,7 @@
     <Project Path="tools/LegacySourceChronology.Probe/LegacySourceChronology.Probe.csproj" />
     <Project Path="tools/LegacyCursiveSeparation.Probe/LegacyCursiveSeparation.Probe.csproj" />
     <Project Path="tools/LegacyAcousticCandidate.Probe/LegacyAcousticCandidate.Probe.csproj" />
+    <Project Path="tools/LegacyHandwritingFontSize.Probe/LegacyHandwritingFontSize.Probe.csproj" />
     <Project Path="tools/InkMath.Solver.Probe/InkMath.Solver.Probe.csproj" />
   </Folder>
 </Solution>

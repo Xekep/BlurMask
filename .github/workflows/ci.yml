@@ -295,6 +295,8 @@ jobs:
           dotnet run --project tools/LegacyCursiveSeparation.Probe -c Release -- .artifacts/legacy-cursive-separation-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
           python tools/LegacyAcousticCandidate.Probe/reference_controls.py .artifacts/legacy-acoustic-candidate-controls.json
           dotnet run --project tools/LegacyAcousticCandidate.Probe -c Release -- .artifacts/legacy-acoustic-candidate-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/handwriting/create_font_size_controls.py .artifacts/font-size-controls.json
+          dotnet run --project tools/LegacyHandwritingFontSize.Probe -c Release -- .artifacts/font-size-controls.json
       - name: Legacy stored word and class language costs
         run: |
           python tools/LegacyWordLanguage.Probe/reference_controls.py models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-language-controls.json
@@ -467,7 +469,8 @@ jobs:
             @{ Name = 'LegacyGlyphPayload'; Args = @('.artifacts/glyph-payload-controls.json') },
             @{ Name = 'LegacySourceChronology'; Args = @('.artifacts/legacy-source-chronology-controls.json') },
             @{ Name = 'LegacyCursiveSeparation'; Args = @('.artifacts/legacy-cursive-separation-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
-            @{ Name = 'LegacyAcousticCandidate'; Args = @('.artifacts/legacy-acoustic-candidate-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') }
+            @{ Name = 'LegacyAcousticCandidate'; Args = @('.artifacts/legacy-acoustic-candidate-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyHandwritingFontSize'; Args = @('.artifacts/font-size-controls.json') }
           )
           foreach ($case in $cases) {
             $name = $case.Name

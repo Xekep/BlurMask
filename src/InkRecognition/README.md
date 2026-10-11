@@ -400,3 +400,8 @@ restores the checked scalar class/geometry/prior-path total, strict budget and
 special-symbol bypasses. `LegacyAcousticCandidateThresholds` reads its real Russian
 kind gates. Class-cache production, lexical mapping and search orchestration remain
 separate; this adapter does not enable automatic connected-word recognition.
+[`LegacyHandwritingFontSizePolicy`](../../docs/legacy-handwriting-font-size-policy.md)
+restores the checked `convert.match-text-size` value calculation from recognized
+range geometry and rendered `x` metrics, optional prepared math contributions,
+quantization and dirty tolerance. Its values use model units; recognition-range
+production, display conversion and final baseline placement remain separate.
