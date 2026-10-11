@@ -30,6 +30,7 @@ internal static class AiPenProbe
         catch (InvalidDataException) { }
         VerifyLocalModel();
         VerifyMath();
+        AiMathCorpusProbe.RunIfRequested();
         VerifyAutomatic();
         VerifyAcceptedMathCalculation();
         VerifyRawContentDispatch();

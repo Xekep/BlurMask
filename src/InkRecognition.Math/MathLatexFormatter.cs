@@ -40,6 +40,10 @@ public static class MathLatexFormatter
                     case "<sub>": text.Append("_{").Append(Read("</sub>")).Append('}'); break;
                     case "<subsup>":
                         text.Append("_{").Append(Read("<subsup2>")).Append("}^{").Append(Read("</subsup>")).Append('}'); break;
+                    case "<under>":
+                        text.Append(Read("<under2>")).Append("_{").Append(Read("</under>")).Append('}'); break;
+                    case "<underover>":
+                        text.Append(Read("<underover2>")).Append("_{").Append(Read("<underover3>")).Append("}^{").Append(Read("</underover>")).Append('}'); break;
                     case "<table>": text.Append("\\begin{matrix}").Append(Read("</table>")).Append("\\end{matrix}"); break;
                     case "<&>": text.Append('&'); break;
                     case "<\\>": text.Append("\\\\"); break;

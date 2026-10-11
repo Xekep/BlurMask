@@ -18,13 +18,18 @@ if (args.Length == 0)
     Equal(MathLatexFormatter.Format(["<frac>", "∂", "<sup>", "2", "</sup>", "<fracbar>", "∂", "x", "∂", "y", "</frac>", "x", "<sup>", "2", "</sup>", "y", "<sup>", "3", "</sup>"]), @"\frac{\partial ^{2}}{\partial x\partial y}x^{2}y^{3}");
     Equal(MathLatexFormatter.Format(["l", "o", "g", "<sub>", "2", "</sub>", "(", "8", ")"]), "log_{2}(8)");
     Equal(MathLatexFormatter.Format(["<table>", "1", "<&>", "2", "<\\>", "3", "<&>", "4", "</table>"]), @"\begin{matrix}1&2\\3&4\end{matrix}");
+    Equal(MathLatexFormatter.Format(["<under>", "l", "i", "m", "<under2>", "n", "→", "∞", "</under>", "x"]), @"lim_{n\to \infty }x");
+    Equal(MathLatexFormatter.Format(["<underover>", "∫", "<underover2>", "0", "<underover3>", "∞", "</underover>", "x", "d", "x"]), @"\int _{0}^{\infty }xdx");
+    Equal(MathLatexFormatter.Format(["<under>", "∫", "<under2>", "0"]), null);
+    Equal(MathLatexFormatter.Format(["<underover>", "∫", "<underover2>", "0", "</underover>"]), null);
+    Equal(MathLatexFormatter.Format(["<underover>", "∫", "<underover3>", "0", "<underover2>", "1", "</underover>"]), null);
     foreach (var invalid in new[] { Array.Empty<byte>(), new byte[64] })
     {
         bool rejected = false;
         try { MathModel.Read(new MemoryStream(invalid)); } catch (Exception e) when (e is InvalidDataException or EndOfStreamException) { rejected = true; }
         if (!rejected) throw new InvalidDataException("Malformed model was accepted.");
     }
-    Console.WriteLine("Math formatter/model guards PASS (12 checks, including calculus/log-base/matrix structural token streams)"); return;
+    Console.WriteLine("Math formatter/model guards PASS (17 checks, including calculus/log-base/matrix and under/underover token streams)"); return;
 }
 if (args is ["--features", var fixture])
 {
@@ -74,7 +79,11 @@ if (args is ["--runtime-checks", var pack, var runtime])
     catch (ObjectDisposedException) { }
     Console.WriteLine("Native runtime lifetime/empty/cancellation/hash guards PASS (5 checks)"); return;
 }
-if (args.Length != 3) throw new ArgumentException("Usage: InkRecognition.Math.Probe model.ikrmath strokes.json native-runtime-library");
+if (args is ["--corpus", var corpusPack, var corpusRuntime, var corpusManifest, var corpusReport])
+{
+    CorpusChecks.Run(corpusPack, corpusRuntime, corpusManifest, corpusReport); return;
+}
+if (args.Length != 3) throw new ArgumentException("Usage: InkRecognition.Math.Probe model.ikrmath strokes.json native-runtime-library; or --corpus model.ikrmath runtime manifest.json report.json");
 using var model = File.OpenRead(args[0]);
 using var recognizer = StrokeMathRecognizer.Load(model, Path.GetFullPath(args[2]));
 using var json = JsonDocument.Parse(File.ReadAllBytes(args[1]));
