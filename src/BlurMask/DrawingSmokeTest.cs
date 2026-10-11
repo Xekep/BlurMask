@@ -45,8 +45,19 @@ internal static class DrawingSmokeTest
         if (Environment.GetEnvironmentVariable("BLURMASK_SMOKE_ARTIFACTS") is { Length: > 0 } output)
         { Directory.CreateDirectory(output); bitmap.Save(Path.Combine(output, "wayland-native-canvas.png"), PngBitmapEncoderOptions.Default); }
         Console.WriteLine($"Native Wayland canvas: configured {size}, Inter/STIX, undo/redo, red stroke pixels={red}, no desktop overlay.");
-        // Allow the isolated compositor harness to capture the presented surface.
-        await Task.Delay(1800);
+        // Saving an offscreen bitmap does not mean Wayland has mapped/presented
+        // the canvas yet. Yield the dispatcher until the isolated harness has
+        // verified real compositor pixels; never synchronously block rendering.
+        if (Environment.GetEnvironmentVariable("BLURMASK_WAYLAND_CAPTURE_ACK") is { Length: > 0 } captureAck)
+        {
+            var presentationWait = Stopwatch.StartNew();
+            while (!File.Exists(captureAck))
+            {
+                Check(presentationWait.Elapsed < TimeSpan.FromSeconds(30), "Wayland compositor did not confirm presented canvas pixels.");
+                await Task.Delay(50);
+            }
+        }
+        else await Task.Delay(1800);
     }
     public static void VerifyDocument(InkDocument document)
     {

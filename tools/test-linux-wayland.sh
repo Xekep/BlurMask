@@ -11,11 +11,12 @@ for tool in weston weston-screenshooter timeout python3; do command -v "$tool" >
 python3 -c 'from PIL import Image'
 [[ -x "$exe" ]] || { echo "Executable is missing: $exe" >&2; exit 2; }
 mkdir -p "$out"
-[[ ! -e "$out/app.log" && ! -e "$out/app/wayland-native-canvas.png" ]] || {
+[[ ! -e "$out/app.log" && ! -e "$out/app/wayland-native-canvas.png" && ! -e "$out/app/wayland-compositor-verified.txt" ]] || {
   echo 'Use a fresh artifact directory to avoid accepting stale evidence.' >&2; exit 2;
 }
 export LANG=C.UTF-8 XDG_DATA_HOME="$out/data" XDG_CONFIG_HOME="$out/config" XDG_CACHE_HOME="$out/cache"
 export XDG_PICTURES_DIR="$out/captures" BLURMASK_SMOKE_ARTIFACTS="$out/app"
+export BLURMASK_WAYLAND_CAPTURE_ACK="$out/app/wayland-compositor-verified.txt"
 export LIBGL_ALWAYS_SOFTWARE=1
 # The EGL driver may use llvmpipe. This does not request Avalonia's X11 software backend.
 unset DISPLAY WAYLAND_DISPLAY WAYLAND_SOCKET
@@ -95,7 +96,41 @@ for attempt in {1..600}; do
   kill -0 "$app_pid" 2>/dev/null || break
   sleep .1
 done
-if [[ "$ready" == 1 ]]; then capture "$out/captures/canvas"; fi
+[[ "$ready" == 1 ]] || { echo 'Native canvas PNG was not produced.' >&2; exit 1; }
+# An offscreen PNG can precede the canvas's first Wayland buffer commit. Keep
+# the asynchronous smoke host alive until actual compositor pixels prove that
+# its window has been mapped and presented. Preserve early frames for diagnosis.
+presented=0
+presentation_deadline=$((SECONDS + 25))
+for attempt in {1..100}; do
+  [[ "$SECONDS" -lt "$presentation_deadline" ]] || break
+  kill -0 "$app_pid" 2>/dev/null || break
+  frame_directory="$out/captures/canvas/attempt-$(printf '%03d' "$attempt")"
+  capture "$frame_directory"
+  if python3 - "$frame_directory" >> "$out/frame-pixels.log" <<'PY'
+import sys
+from pathlib import Path
+from PIL import Image
+
+visible = False
+for path in sorted(Path(sys.argv[1]).glob('*.png')):
+    with Image.open(path) as image:
+        image.load()
+        pixels = list(image.convert('RGB').getdata())
+        red = sum(r > 180 and g < 100 and b < 100 for r, g, b in pixels)
+        white = sum(min(r, g, b) > 235 for r, g, b in pixels)
+        print(f'{path}: red={red} white={white}', flush=True)
+        visible |= image.width >= 600 and image.height >= 400 and red > 500 and white > 100_000
+sys.exit(0 if visible else 1)
+PY
+  then
+    presented=1
+    printf 'Real compositor red stroke and opaque canvas verified.\n' > "$BLURMASK_WAYLAND_CAPTURE_ACK"
+    break
+  fi
+  sleep .1
+done
+[[ "$presented" == 1 ]] || { echo 'Canvas was not visible in fresh compositor frames within the bounded presentation wait.' >&2; exit 1; }
 app_result=0
 wait "$app_pid" || app_result=$?
 app_pid=
@@ -125,7 +160,7 @@ def inspect(path):
 
 rendered = inspect(out / 'app/wayland-native-canvas.png')
 before = [inspect(p) for p in sorted((out / 'captures/before').glob('*.png'))]
-presented = [inspect(p) for p in sorted((out / 'captures/canvas').glob('*.png'))]
+presented = [inspect(p) for p in sorted((out / 'captures/canvas').rglob('*.png'))]
 report = dict(backend='native-wayland', compositor='Weston headless/Pixman',
               rendered=rendered, baseline=before, presented=presented,
               limitation='Programmatic canvas drawing; no physical input, GPU or Hyprland coverage.')
