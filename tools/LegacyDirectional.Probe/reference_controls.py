@@ -5,8 +5,12 @@ models the statically checked direction pass (0b6d20); Y's first comparison
 at point 2 deliberately retains point 0. This is not a character segmenter.
 """
 import json
+from pathlib import Path
 import random
 import sys
+
+if len(sys.argv) != 2:
+    raise SystemExit("Usage: reference_controls.py output.json")
 
 
 def axis_flags(values, minimum, maximum, first_previous):
@@ -58,6 +62,8 @@ for iteration in range(640):
         strokes.append(list(map(list, zip(xs, ys))))
     controls.append(reference(strokes))
 controls.append(reference([[[index - 2048, 0] for index in range(4096)]]))
-with open(sys.argv[1], "w", encoding="utf-8") as output:
+destination = Path(sys.argv[1])
+destination.parent.mkdir(parents=True, exist_ok=True)
+with destination.open("w", encoding="utf-8") as output:
     json.dump(controls, output, separators=(",", ":"))
 print(f"Generated {len(controls)} own reference cases")
