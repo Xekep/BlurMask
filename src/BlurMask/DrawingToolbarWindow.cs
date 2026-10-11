@@ -49,6 +49,8 @@ internal sealed class DrawingToolbarWindow : Window
     private readonly HashSet<Button> _hoverMenus = [];
     private readonly DispatcherTimer _hoverCloseTimer = new() { Interval = TimeSpan.FromMilliseconds(220) };
     private bool _flyoutPointerOver;
+    private string? _updateVersion;
+    private Avalonia.Controls.Shapes.Path? _updateTail;
 
     public DrawingToolbarWindow(DrawingSession session)
     {
@@ -149,6 +151,10 @@ internal sealed class DrawingToolbarWindow : Window
         BindHoverMenu(_selectedColor, "palette", ShowPalette);
         foreach (var button in column.GetVisualDescendants().OfType<Button>())
             if (!_hoverMenus.Contains(button)) button.PointerEntered += (_, _) => CloseFlyout();
+        _handle.PointerEntered += (_, _) =>
+        {
+            if (_updateVersion is not null && _dragPointer is null) ShowUpdateAvailable(_updateVersion);
+        };
         _hoverCloseTimer.Tick += (_, _) =>
         {
             _hoverCloseTimer.Stop();
@@ -515,6 +521,36 @@ internal sealed class DrawingToolbarWindow : Window
     }
 
     private Control? _flyoutAnchor;
+    internal void ShowUpdateAvailable(string version)
+    {
+        _updateVersion = version;
+        if (_flyoutName is not null) return;
+        var text = new StackPanel { Spacing = 7, Width = 220 };
+        text.Children.Add(new TextBlock { Text = UiText.F("Вышла новая версия {0}", version),
+            FontWeight = FontWeight.SemiBold, FontSize = 14, TextWrapping = TextWrapping.Wrap });
+        text.Children.Add(new TextBlock { Text = UiText.T("Обновимся?"), FontSize = 12 });
+        var actions = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 7 };
+        var download = new Button { Content = UiText.T("Скачать обновление"), FontSize = 12 };
+        download.Click += async (_, _) =>
+        {
+            CloseFlyout();
+            try { await Launcher.LaunchUriAsync(new Uri(AppUpdates.Website)); }
+            catch (Exception ex) when (ex is InvalidOperationException or System.ComponentModel.Win32Exception) { }
+        };
+        var later = new Button { Content = UiText.T("Позже"), FontSize = 12 };
+        later.Click += (_, _) => { _updateVersion = null; CloseFlyout(); };
+        actions.Children.Add(download); actions.Children.Add(later); text.Children.Add(actions);
+        var fill = new SolidColorBrush(Color.Parse("#FFF9E8"));
+        var bubble = new Grid { ColumnDefinitions = new ColumnDefinitions("10,*,10") };
+        var tail = new Avalonia.Controls.Shapes.Path { Data = Geometry.Parse("M10,0 L0,8 L10,16 Z"),
+            Fill = fill, Width = 10, Height = 16, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(0, 12, 0, 0) };
+        var body = new Border { Background = fill, CornerRadius = new CornerRadius(12), Padding = new Thickness(12), Child = text };
+        Grid.SetColumn(body, 1); bubble.Children.Add(tail); bubble.Children.Add(body);
+        ShowFlyout("update", bubble, _handle);
+        _updateTail = tail;
+        PlaceFlyout();
+    }
+
     private void ShowFlyout(string name, Control content, Control anchor)
     {
         if (_flyoutName == name) return;
@@ -523,6 +559,7 @@ internal sealed class DrawingToolbarWindow : Window
         _flyoutAnchor = anchor;
         var surface = new Border { Background = Brushes.White, BorderBrush = Edge,
             BorderThickness = new Thickness(1), Padding = new Thickness(3), Child = content };
+        if (name == "update") { surface.Background = Brushes.Transparent; surface.BorderThickness = new Thickness(0); surface.Padding = new Thickness(0); }
         surface.PointerEntered += (_, _) => { _flyoutPointerOver = true; _hoverCloseTimer.Stop(); };
         surface.PointerExited += (_, _) => { _flyoutPointerOver = false; QueueFlyoutClose(); };
         if (Program.UseNativeWayland)
@@ -547,6 +584,12 @@ internal sealed class DrawingToolbarWindow : Window
             Background = Brushes.White,
             Content = surface
         };
+        if (name == "update" && !OperatingSystem.IsLinux())
+        {
+            _flyout.Background = Brushes.Transparent;
+            _flyout.TransparencyLevelHint = [WindowTransparencyLevel.Transparent];
+            _flyout.TransparencyBackgroundFallback = Brushes.White;
+        }
         var openedFlyout = _flyout;
         openedFlyout.Closed += (_, _) =>
         {
@@ -579,6 +622,12 @@ internal sealed class DrawingToolbarWindow : Window
         var height = (int)Math.Ceiling(flyout.Bounds.Height * flyout.RenderScaling);
         var x = Position.X + (int)Math.Ceiling(Bounds.Width * scale);
         if (x + width > area.Right) x = Position.X - width;
+        if (_flyoutName == "update" && _updateTail is { } tail)
+        {
+            var left = x < Position.X;
+            Grid.SetColumn(tail, left ? 2 : 0);
+            tail.RenderTransform = left ? new ScaleTransform(-1, 1) : null;
+        }
         // Anchor to the actual button after layout, including borders, margins and DPI.
         var y = anchor.PointToScreen(default).Y - (int)Math.Round(4 * scale);
         var position = new PixelPoint(Math.Clamp(x, area.X, Math.Max(area.X, area.Right - width)),
@@ -590,6 +639,7 @@ internal sealed class DrawingToolbarWindow : Window
     {
         _hoverCloseTimer.Stop();
         _flyoutPointerOver = false;
+        _updateTail = null;
         var popup = _waylandPopup; _waylandPopup = null;
         if (popup is not null) { popup.IsOpen = false; ((StackPanel)Content!).Children.Remove(popup); }
         var flyout = _flyout;

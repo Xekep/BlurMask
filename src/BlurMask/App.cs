@@ -11,6 +11,9 @@ public sealed partial class App : Application
     private readonly List<BlurMaskWindow> _masks = [];
     private TrayIcon? _tray;
     private DrawingSession? _drawing;
+    private readonly CancellationTokenSource _updateCheck = new();
+    private string? _availableUpdate;
+    private bool _updatePresented;
 
     public override void Initialize()
     {
@@ -29,6 +32,8 @@ public sealed partial class App : Application
             UpdateTrayMenu();
             desktop.Exit += (_, _) =>
             {
+                _updateCheck.Cancel();
+                _updateCheck.Dispose();
                 _drawing?.Dispose();
                 DesktopInkNative.DisposePlatformResources();
             };
@@ -39,9 +44,24 @@ public sealed partial class App : Application
             {
                 _ = ShutdownAfterSmokeTestAsync(desktop);
             }
+            else _ = CheckForUpdatesAsync();
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private async Task CheckForUpdatesAsync()
+    {
+        var version = await AppUpdates.CheckAsync(_updateCheck.Token).ConfigureAwait(false);
+        if (version is null || _updateCheck.IsCancellationRequested) return;
+        Dispatcher.UIThread.Post(() => { _availableUpdate = version; ShowUpdateNotice(); });
+    }
+
+    private void ShowUpdateNotice()
+    {
+        if (_updatePresented || _availableUpdate is null || _drawing?.Toolbar is not { IsVisible: true } toolbar) return;
+        _updatePresented = true;
+        toolbar.ShowUpdateAvailable(_availableUpdate);
     }
 
     private async Task ShutdownAfterSmokeTestAsync(IClassicDesktopStyleApplicationLifetime desktop)
@@ -176,7 +196,11 @@ public sealed partial class App : Application
             _drawing = drawing;
             drawing.Toolbar.PropertyChanged += (_, e) =>
             {
-                if (e.Property == Visual.IsVisibleProperty) UpdateTrayMenu();
+                if (e.Property == Visual.IsVisibleProperty)
+                {
+                    UpdateTrayMenu();
+                    if (drawing.Toolbar.IsVisible) Dispatcher.UIThread.Post(ShowUpdateNotice, DispatcherPriority.Loaded);
+                }
             };
             drawing.Toolbar.Closed += (_, _) =>
             {
@@ -191,11 +215,11 @@ public sealed partial class App : Application
 
     private void ShowMask(PrivacyMode mode) => ShowMask(mode, null, null);
 
-    private void FillWindowRegion(PixelPoint point)
+    private void FillWindowRegion(TrackedWindow selected)
     {
         var catalog = NativeWindowCatalog.TryCreate();
         if (catalog is null) return;
-        var region = catalog.FindChildAt(point);
+        var region = catalog.ReadRegion(selected);
         if (region is not { Visible: true } || region.Bounds.Width <= 0 || region.Bounds.Height <= 0) { catalog.Dispose(); return; }
         ShowMask(PrivacyMode.Blackout, catalog, region);
     }

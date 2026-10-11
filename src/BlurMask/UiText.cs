@@ -25,6 +25,10 @@ public static class UiText
     public static string ExitApp => T("Закрыть программу");
     internal static IReadOnlyDictionary<string, string[]> Translations { get; } = new Dictionary<string, string[]>
     {
+        ["Вышла новая версия {0}"] = ["Version {0} is here", "La version {0} est disponible", "Version {0} ist da"],
+        ["Обновимся?"] = ["Ready for an update?", "On met à jour ?", "Zeit für ein Update?"],
+        ["Скачать обновление"] = ["Download update", "Télécharger la mise à jour", "Update herunterladen"],
+        ["Позже"] = ["Later", "Plus tard", "Später"],
         ["BlurMask — показать / скрыть окно"] = ["BlurMask — show / hide window", "BlurMask — afficher / masquer la fenêtre", "BlurMask — Fenster anzeigen / ausblenden"],
         ["Показать окно"] = ["Show window", "Afficher la fenêtre", "Fenster anzeigen"],
         ["Скрыть окно"] = ["Hide window", "Masquer la fenêtre", "Fenster ausblenden"],

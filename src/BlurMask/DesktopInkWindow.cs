@@ -45,6 +45,7 @@ internal sealed class DesktopInkWindow : Window
         Content = grid;
         _surface.PointerPressed += OnPressed;
         _surface.PointerMoved += OnMoved;
+        _surface.PointerExited += (_, _) => _session.ClearWindowFillPreview();
         _surface.PointerReleased += OnReleased;
         _surface.PointerCaptureLost += (_, _) => CancelGesture();
         AddHandler(KeyDownEvent, OnKeyDown, Avalonia.Interactivity.RoutingStrategies.Tunnel);
@@ -174,6 +175,13 @@ internal sealed class DesktopInkWindow : Window
 
     private void OnMoved(object? sender, PointerEventArgs e)
     {
+        if (_session.PickingMaskRegion)
+        {
+            var desktop = DesktopPoint(e.GetPosition(_surface));
+            _session.UpdateWindowFillPreview(new PixelPoint((int)Math.Round(desktop.X), (int)Math.Round(desktop.Y)));
+            e.Handled = true;
+            return;
+        }
         if (_session.Tool == InkTool.Eraser && e.GetCurrentPoint(_surface).Properties.IsLeftButtonPressed)
             _session.EraseMasks(DesktopPoint(e.GetPosition(_surface)), Math.Max(8, _session.PenSize * 2) * RenderScaling);
         if (_session.Tool == InkTool.Select)
@@ -302,7 +310,7 @@ internal sealed class DesktopInkWindow : Window
     {
         public override void Render(DrawingContext context)
         {
-            var active = session.Target == DrawingTarget.Screen && session.Tool != InkTool.Cursor && session.InkVisible;
+            var active = session.Target == DrawingTarget.Screen && (session.PickingMaskRegion || session.Tool != InkTool.Cursor) && session.InkVisible;
             // A non-zero alpha over the entire screen makes empty desktop areas accept ink.
             context.DrawRectangle(active ? new SolidColorBrush(Color.FromArgb(1, 0, 0, 0)) : Brushes.Transparent,
                 null, new Rect(Bounds.Size));
@@ -315,6 +323,8 @@ internal sealed class DesktopInkWindow : Window
             foreach (var mark in session.DesktopDocument.Marks) if (mark.Bounds.Intersects(visible)) mark.Draw(context);
             foreach (var mark in session.DesktopDocument.FadingMarks) if (mark.Bounds.Intersects(visible)) mark.Draw(context);
             session.DesktopDocument.Preview?.Draw(context);
+            if (session.PickingMaskRegion && session.WindowFillPreview is { } region)
+                context.DrawRectangle(Brushes.Black, null, new Rect(region.Bounds.X, region.Bounds.Y, region.Bounds.Width, region.Bounds.Height));
             if (session.Tool == InkTool.Select) session.DesktopSelection.Draw(context, 1 / window.RenderScaling);
         }
     }

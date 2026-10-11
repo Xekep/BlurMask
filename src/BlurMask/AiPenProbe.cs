@@ -10,6 +10,7 @@ internal static class AiPenProbe
 {
     internal static void Run()
     {
+        DesktopFeatureChecks.Run();
         SelectionProbe.Run();
         StrokeGeometryChecks.Run();
         BoardWriteReceiptChecks.Run();
