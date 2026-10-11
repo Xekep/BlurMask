@@ -55,7 +55,7 @@ internal sealed class AiPenRecognizer(InkDocument document, Func<string> recogni
             finally { Inference.Release(); }
             if (results.Count == 0) return;
             // Inference and the quiet period overlap. Only publishing waits;
-            // the manual "Recognize now" action bypasses the quiet period.
+            // explicit tool/mode transitions bypass the quiet period.
             if (deferConversion)
             {
                 var remaining = RemainingConversionDelay(System.Diagnostics.Stopwatch.GetElapsedTime(releasedAt));

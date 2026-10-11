@@ -290,7 +290,6 @@ internal sealed class DrawingToolbarWindow : Window
         }
         if (name == "tools" && _session.Tool == InkTool.AiPen)
         {
-            row.Children.Add(IconButton(ToolbarGlyph.AiPen, UiText.T("Распознать сейчас"), () => { _session.RecognizeAiInk(); CloseFlyout(); }));
             var mode = new ComboBox { ItemsSource = new[] { UiText.T("Автоматически"), UiText.T("Текст"), UiText.T("Формулы") },
                 SelectedIndex = _session.Settings.AiMode switch { "text" => 1, "math" => 2, _ => 0 }, MinWidth = 120, FontSize = 12 };
             var status = new TextBlock { FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(6, 0) };
@@ -337,13 +336,15 @@ internal sealed class DrawingToolbarWindow : Window
             (PrivacyMode.GlassBlocks, ToolbarGlyph.MaskGlass, "Преломление стекла"),
             (PrivacyMode.Blackout, ToolbarGlyph.MaskBlackout, "Чёрная маска")
         }) row.Children.Add(IconButton(glyph, UiText.T(label), () => { CloseFlyout(); _session.CreateMask(mode); }));
-        row.Children.Add(IconButton(ToolbarGlyph.Trash, UiText.T("Удалить все маски"), () => { CloseFlyout(); _session.CloseAllMasks(); }));
         var panel = new StackPanel { Spacing = 5 }; panel.Children.Add(row);
         using var catalog = NativeWindowCatalog.TryCreate();
+        if (_session.AttachMasksToWindows && catalog is not null)
+            row.Children.Add(IconButton(ToolbarGlyph.MaskFill, UiText.T("Залить область окна"), () => { CloseFlyout(); _session.BeginWindowFill(); }));
+        row.Children.Add(IconButton(ToolbarGlyph.Trash, UiText.T("Удалить все маски"), () => { CloseFlyout(); _session.CloseAllMasks(); }));
         var attach = new ToggleSwitch { Content = UiText.T("Привязать к окну"), IsChecked = _session.AttachMasksToWindows,
             IsEnabled = catalog is not null, FontSize = 12, Margin = new Thickness(4, 0), OnContent = UiText.T("Включено"), OffContent = UiText.T("Выключено") };
         ToolTip.SetTip(attach, UiText.T(catalog is null ? "Привязка недоступна в этой оконной системе" : "Определять окно под маской автоматически"));
-        attach.IsCheckedChanged += (_, _) => _session.SetMaskWindowAttachment(attach.IsChecked == true);
+        attach.IsCheckedChanged += (_, _) => { _session.SetMaskWindowAttachment(attach.IsChecked == true); CloseFlyout(); ShowMasks(); };
         panel.Children.Add(attach); ShowFlyout("masks", panel, _masks);
     }
     internal void ShowSizes()

@@ -471,20 +471,20 @@ internal static class DrawingSmokeTest
             Check(mask.Position == new PixelPoint(550, 300), "Mask did not follow its automatically detected window.");
             catalog.Target = catalog.Target with { Bounds = new PixelRect(500, 250, 800, 600) };
             attachment.Update(); await Task.Delay(100);
-            Check(mask.Position == new PixelPoint(600, 350) && Math.Abs(mask.Width - 200) < 1 && Math.Abs(mask.Height - 160) < 1,
-                "Mask did not scale its position and size with the target window.");
+            Check(mask.Position == new PixelPoint(500, 250) && Math.Abs(mask.Width - 800) < 1 && Math.Abs(mask.Height - 600) < 1 && mask.HasPrivacyCover && !mask.Topmost,
+                "Window reflow did not latch a full opaque cover at the target stack level.");
             await Task.Delay(350); attachment.Update();
             catalog.Target = catalog.Target with { Bounds = new PixelRect(500, 250, 400, 300) };
             attachment.Update(); await Task.Delay(100);
-            Check(mask.Position == new PixelPoint(550, 300) && Math.Abs(mask.Width - 100) < 1,
-                "Programmatic resizing incorrectly rebound the mask.");
+            Check(mask.Position == new PixelPoint(500, 250) && Math.Abs(mask.Width - 400) < 1 && mask.HasPrivacyCover,
+                "Restoring target dimensions incorrectly removed resize protection.");
             catalog.Target = catalog.Target with { Visible = false }; attachment.Update();
             Check(!mask.IsVisible, "Mask did not hide with minimized target.");
             catalog.Target = catalog.Target with { Visible = true }; attachment.Update(); await Task.Delay(100);
-            Check(mask.IsVisible && mask.Position == new PixelPoint(550, 300), "Mask did not return with restored target.");
-            mask.Position = new PixelPoint(650, 350); await Task.Delay(450); attachment.Update();
+            Check(mask.IsVisible && mask.Position == new PixelPoint(500, 250), "Mask did not return with restored target.");
+            mask.Width = 100; mask.Height = 80; mask.Position = new PixelPoint(650, 350); await Task.Delay(450); attachment.Update();
             catalog.Target = catalog.Target with { Bounds = new PixelRect(600, 300, 400, 300) }; attachment.Update(); await Task.Delay(100);
-            Check(mask.Position == new PixelPoint(750, 400), "Manual mask placement did not update its attachment offset.");
+            Check(mask.Position == new PixelPoint(750, 400) && !mask.HasPrivacyCover, "Manual mask placement did not reconfigure its protected region.");
             if (mask.NativeOptics is { } optics)
             {
                 foreach (var mode in new[] { PrivacyMode.Scramble, PrivacyMode.GlassBlocks })
@@ -551,6 +551,7 @@ internal static class DrawingSmokeTest
         internal TrackedWindow? Target;
         public TrackedWindow? FindAt(PixelPoint point) => Target is { Visible: true } && Target.Bounds.Contains(point) ? Target : null;
         public TrackedWindow? Read(nuint id) => Target?.Id == id ? Target : null;
+        public bool PlaceAbove(Window mask, TrackedWindow target) => true;
         public void Dispose() { }
     }
     private static async Task VerifyToolbarAsync(DrawingSession session)

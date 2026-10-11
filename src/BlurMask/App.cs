@@ -67,6 +67,7 @@ public sealed partial class App : Application
             VerifyTrayToggle();
             await DrawingSmokeTest.VerifyScrambleAsync();
             await DrawingSmokeTest.VerifyWindowAttachmentAsync();
+            await NativeMaskSmokeTest.RunAsync();
         }
         catch (Exception ex)
         {
@@ -171,7 +172,7 @@ public sealed partial class App : Application
         if (_drawing is null)
         {
             var drawing = new DrawingSession(ShowMask, () => ExitOnClicked(this, EventArgs.Empty),
-                mode => ShowMask(mode), CloseAllMasks, enabled => { foreach (var mask in _masks.ToArray()) mask.SetWindowAttachment(enabled); }, EraseMasks);
+                mode => ShowMask(mode), CloseAllMasks, enabled => { foreach (var mask in _masks.ToArray()) mask.SetWindowAttachment(enabled); }, EraseMasks, FillWindowRegion);
             _drawing = drawing;
             drawing.Toolbar.PropertyChanged += (_, e) =>
             {
@@ -188,15 +189,32 @@ public sealed partial class App : Application
 
     private void ShowMask() => ShowMask(PrivacyMode.Blur);
 
-    private void ShowMask(PrivacyMode mode)
+    private void ShowMask(PrivacyMode mode) => ShowMask(mode, null, null);
+
+    private void FillWindowRegion(PixelPoint point)
     {
-        if (Program.UseNativeWayland) return;
+        var catalog = NativeWindowCatalog.TryCreate();
+        if (catalog is null) return;
+        var region = catalog.FindChildAt(point);
+        if (region is not { Visible: true } || region.Bounds.Width <= 0 || region.Bounds.Height <= 0) { catalog.Dispose(); return; }
+        ShowMask(PrivacyMode.Blackout, catalog, region);
+    }
+    private void ShowMask(PrivacyMode mode, IWindowCatalog? catalog, TrackedWindow? region)
+    {
+        if (Program.UseNativeWayland) { catalog?.Dispose(); return; }
         _drawing?.SelectTool(InkTool.Cursor);
         var mask = new BlurMaskWindow();
         // A mask may be above the ink input layer; route its own input to the
         // eraser too, so clicking it cannot accidentally start a window drag.
         mask.TryErase = point => (_drawing?.EraseMasks(point, Math.Max(8, _drawing.PenSize * 2) * mask.RenderScaling) ?? 0) > 0;
         mask.SetMode(mode);
+        if (region is not null)
+        {
+            double scale = (_drawing?.Toolbar.Screens.ScreenFromPoint(region.Bounds.Position) ?? _drawing?.Toolbar.Screens.Primary)?.Scaling ?? 1;
+            mask.WindowStartupLocation = WindowStartupLocation.Manual; mask.Position = region.Bounds.Position;
+            mask.MinWidth = 1; mask.MinHeight = 1; mask.Width = region.Bounds.Width / scale; mask.Height = region.Bounds.Height / scale;
+            mask.Topmost = false; mask.ShowActivated = false;
+        }
         _masks.Add(mask);
         mask.ModeChanged += MaskOnModeChanged;
         mask.Closed += (_, _) =>
@@ -207,7 +225,8 @@ public sealed partial class App : Application
         };
 
         mask.Show();
-        mask.SetWindowAttachment(_drawing?.AttachMasksToWindows == true);
+        if (region is not null && catalog is not null) mask.AttachFilledRegion(catalog, region);
+        else mask.SetWindowAttachment(_drawing?.AttachMasksToWindows == true);
         UpdateTrayTooltip(mask.Mode);
     }
 

@@ -1,0 +1,214 @@
+using System.Runtime.InteropServices;
+using Avalonia;
+using Avalonia.Controls;
+
+namespace BlurMask;
+
+internal sealed partial class WindowsWindowCatalog
+{
+    public TrackedWindow? FindChildAt(PixelPoint point)
+    {
+        var root = FindAt(point);
+        if (root is null) return null;
+        return FindChildRegion(root, point);
+    }
+    internal TrackedWindow FindChildRegion(TrackedWindow root, PixelPoint point)
+    {
+        var region = root;
+        for (int depth = 0; depth < 32; depth++)
+        {
+            TrackedWindow? next = null;
+            var child = GetTopWindow((nint)region.Id);
+            for (int i = 0; child != 0 && i < 4096; i++, child = GetWindow(child, 2))
+            {
+                var candidate = ReadRegion(new((nuint)child, root.ProcessId, default, true, root.Id));
+                if (candidate is { Visible: true } && candidate.Bounds.Contains(point)) { next = candidate; break; }
+            }
+            if (next is null) break;
+            region = next;
+        }
+        return region;
+    }
+    public TrackedWindow? ReadRegion(TrackedWindow region)
+    {
+        if (region.ParentId == 0) return Read(region.Id);
+        var hwnd = (nint)region.Id;
+        var root = Read(region.ParentId);
+        var child = Read(region.Id);
+        if (root is null || child is null || GetAncestor(hwnd, 2) != (nint)root.Id || root.ProcessId != region.ProcessId) return null;
+        var bounds = child.Bounds; bool visible = root.Visible && child.Visible;
+        for (int i = 0; hwnd != (nint)root.Id && i < 32; i++)
+        {
+            hwnd = GetAncestor(hwnd, 1);
+            if (hwnd == 0 || GetClientRect(hwnd, out var rect) == 0 || ClientToScreen(hwnd, ref rect) == 0) return null;
+            // ClientToScreen maps the first POINT; preserve the client size.
+            int width = rect.Right, height = rect.Bottom;
+            bounds = bounds.Intersect(new PixelRect(rect.Left, rect.Top, width, height));
+            visible &= IsWindowVisible(hwnd) != 0;
+        }
+        if (hwnd != (nint)root.Id) return null;
+        return child with { ProcessId = root.ProcessId, Bounds = bounds, Visible = visible && bounds.Width > 0 && bounds.Height > 0, ParentId = root.Id };
+    }
+    public bool PlaceAbove(Window mask, TrackedWindow target)
+    {
+        if (mask.TryGetPlatformHandle() is not { HandleDescriptor: "HWND" } handle || handle.Handle == 0) return false;
+        nint hwnd = handle.Handle, root = (nint)target.StackingId;
+        if (IsWindow(root) == 0) return false;
+        const uint flags = 0x0010 | 0x0001 | 0x0002 | 0x0200; // no activation, geometry or owner changes
+        var style = GetMaskExStyle(hwnd, -20);
+        _ = SetMaskExStyle(hwnd, -20, style | (nint)0x08000000); // WS_EX_NOACTIVATE
+        bool targetTop = (GetMaskExStyle(root, -20) & 8) != 0;
+        if (((style & 8) != 0) != targetTop && SetMaskWindowPos(hwnd, targetTop ? -1 : -2, 0, 0, 0, 0, flags) == 0) return false;
+        nint previous = GetWindow(root, 3); // GW_HWNDPREV, immediately above target
+        if (previous == hwnd) return true;
+        for (nint current = previous; current != 0 && AttachedMaskWindows.SharesTarget((nuint)current, target.StackingId); current = GetWindow(current, 3))
+            if (current == hwnd) return true;
+        // Inserting below a topmost predecessor would promote a normal mask.
+        nint after = previous == 0 || !targetTop && (GetMaskExStyle(previous, -20) & 8) != 0 ? 0 : previous;
+        return SetMaskWindowPos(hwnd, after, 0, 0, 0, 0, flags) != 0;
+    }
+    internal nuint[] StackingWindows()
+    {
+        var result = new List<nuint>();
+        for (nint hwnd = GetTopWindow(0); hwnd != 0 && result.Count < 10000; hwnd = GetWindow(hwnd, 2)) result.Add((nuint)hwnd);
+        result.Reverse(); return result.ToArray();
+    }
+    [LibraryImport("user32.dll")] private static partial nint GetAncestor(nint window, uint flags);
+    [LibraryImport("user32.dll")] private static partial int GetClientRect(nint window, out NativeRect rectangle);
+    [LibraryImport("user32.dll")] private static partial int ClientToScreen(nint window, ref NativeRect point);
+    [LibraryImport("user32.dll", EntryPoint = "GetWindowLongPtrW")] private static partial nint GetMaskExStyle(nint window, int index);
+    [LibraryImport("user32.dll", EntryPoint = "SetWindowLongPtrW")] private static partial nint SetMaskExStyle(nint window, int index, nint value);
+    [LibraryImport("user32.dll", EntryPoint = "SetWindowPos")] private static partial int SetMaskWindowPos(nint window, nint after, int x, int y, int width, int height, uint flags);
+}
+
+internal sealed partial class MacWindowCatalog
+{
+    // Other applications' NSViews are not public WindowServer windows. Whole
+    // window fill remains available without Accessibility permission.
+    public TrackedWindow? FindChildAt(PixelPoint point) => FindAt(point);
+    public bool PlaceAbove(Window mask, TrackedWindow target)
+    {
+        if (mask.TryGetPlatformHandle() is not { HandleDescriptor: "NSWindow" } handle || handle.Handle == 0) return false;
+        var array = CGWindowListCopyWindowInfo(1 | 16, 0);
+        if (array == 0) return false;
+        var windows = new List<nuint>();
+        try
+        {
+            for (nint i = 0; i < CFArrayGetCount(array); i++)
+            {
+                var window = FromDictionary(CFArrayGetValueAtIndex(array, i));
+                if (window is null) continue;
+                windows.Add(window.Id);
+            }
+        }
+        finally { CFRelease(array); }
+        if (!windows.Contains(target.StackingId)) return false;
+        windows.Reverse();
+        if (!AttachedMaskWindows.IsAbove(windows, WindowNumber(handle.Handle), target.StackingId))
+            SendMaskOrder(handle.Handle, sel_registerName("orderWindow:relativeTo:"), 1, (nint)target.StackingId);
+        return true;
+    }
+    [LibraryImport("/usr/lib/libobjc.A.dylib", EntryPoint = "objc_msgSend")]
+    private static partial void SendMaskOrder(nint receiver, nint selector, nint order, nint relative);
+}
+
+internal sealed partial class XcbWindowCatalog
+{
+    private uint[] Children(uint window)
+    {
+        var reply = xcb_query_tree_reply(_connection, xcb_query_tree(_connection, window), out var error);
+        try
+        {
+            if (reply == 0) return [];
+            int count = Math.Min(4096, xcb_query_tree_children_length(reply)); var data = xcb_query_tree_children(reply);
+            var result = new uint[count]; for (int i = 0; i < count; i++) result[i] = unchecked((uint)Marshal.ReadInt32(data, i * 4));
+            return result;
+        }
+        finally { Free(reply, error); }
+    }
+    private uint Parent(uint window)
+    {
+        var reply = xcb_query_tree_reply(_connection, xcb_query_tree(_connection, window), out var error);
+        try { return reply == 0 ? 0 : unchecked((uint)Marshal.ReadInt32(reply, 12)); }
+        finally { Free(reply, error); }
+    }
+    public TrackedWindow? FindChildAt(PixelPoint point)
+    {
+        var root = FindAt(point); if (root is null) return null;
+        return FindChildRegion(root, point);
+    }
+    internal TrackedWindow FindChildRegion(TrackedWindow root, PixelPoint point)
+    {
+        var region = root;
+        for (int depth = 0; depth < 32; depth++)
+        {
+            var next = Children((uint)region.Id).Reverse().Select(id => ReadRegion(new(id, root.ProcessId, default, true, root.Id)))
+                .FirstOrDefault(child => child is { Visible: true } && child.Bounds.Contains(point));
+            if (next is null) break;
+            region = next;
+        }
+        return region;
+    }
+    internal nuint[] StackingWindows()
+    {
+        var windows = Property(_root, "_NET_CLIENT_LIST_STACKING");
+        if (windows.Length == 0) windows = Children(_root);
+        return windows.Select(id => (nuint)id).ToArray();
+    }
+    public TrackedWindow? ReadRegion(TrackedWindow region)
+    {
+        if (region.ParentId == 0) return Read(region.Id);
+        var root = Read(region.ParentId); var child = Read(region.Id);
+        if (root is null || child is null || root.ProcessId != region.ProcessId) return null;
+        uint current = (uint)region.Id; var bounds = child.Bounds; bool visible = child.Visible && root.Visible;
+        for (int depth = 0; current != (uint)root.Id && depth < 32; depth++)
+        {
+            current = Parent(current);
+            var parent = Read(current);
+            if (parent is null || current == _root) return null;
+            bounds = bounds.Intersect(parent.Bounds); visible &= parent.Visible;
+        }
+        if (current != (uint)root.Id) return null;
+        return child with { ProcessId = root.ProcessId, Bounds = bounds, Visible = visible && bounds.Width > 0 && bounds.Height > 0, ParentId = root.Id };
+    }
+    private uint Frame(uint window)
+    {
+        for (int depth = 0; depth < 32; depth++)
+        {
+            uint parent = Parent(window); if (parent == _root) return window;
+            if (parent == 0) return 0; window = parent;
+        }
+        return 0;
+    }
+    public unsafe bool PlaceAbove(Window mask, TrackedWindow target)
+    {
+        if (xcb_connection_has_error(_connection) != 0 || mask.TryGetPlatformHandle() is not { HandleDescriptor: "XID" } handle) return false;
+        uint id = (uint)handle.Handle, sibling = (uint)target.StackingId;
+        bool topmost = Property(sibling, "_NET_WM_STATE").Contains(Atom("_NET_WM_STATE_ABOVE"));
+        if (mask.Topmost != topmost) mask.Topmost = topmost;
+        var windows = Property(_root, "_NET_CLIENT_LIST_STACKING");
+        if (AttachedMaskWindows.IsAbove(windows.Select(window => (nuint)window).ToArray(), id, sibling)) return true;
+        if (Property(_root, "_NET_SUPPORTED").Contains(Atom("_NET_RESTACK_WINDOW")))
+        {
+            var message = new MaskClientMessage { Type = 33, Format = 32, Window = id, MessageType = Atom("_NET_RESTACK_WINDOW"), Source = 2, Sibling = sibling, StackMode = 0 };
+            var error = xcb_request_check(_connection, SendMaskEvent(_connection, 0, _root, 0x180000, &message));
+            if (error != 0) { free(error); return false; }
+        }
+        else
+        {
+            uint frame = Frame(id), siblingFrame = Frame(sibling);
+            if (frame == 0 || siblingFrame == 0) return false;
+            uint* values = stackalloc uint[2] { siblingFrame, 0 };
+            var error = xcb_request_check(_connection, ConfigureMaskStack(_connection, frame, 32 | 64, values));
+            if (error != 0) { free(error); return false; }
+        }
+        _ = xcb_flush(_connection); return true;
+    }
+    [StructLayout(LayoutKind.Sequential)] private struct MaskClientMessage
+    { public byte Type, Format; public ushort Sequence; public uint Window, MessageType, Source, Sibling, StackMode, Unused1, Unused2; }
+    [LibraryImport("libxcb.so.1", EntryPoint = "xcb_send_event_checked")]
+    private static unsafe partial Cookie SendMaskEvent(nint connection, byte propagate, uint destination, uint mask, MaskClientMessage* message);
+    [LibraryImport("libxcb.so.1", EntryPoint = "xcb_configure_window_checked")]
+    private static unsafe partial Cookie ConfigureMaskStack(nint connection, uint window, ushort mask, uint* values);
+    [LibraryImport("libxcb.so.1")] private static partial int xcb_flush(nint connection);
+}

@@ -9,6 +9,7 @@ internal static class OverlayPlatformProbe
     internal static void Run() => VerifyAsync().GetAwaiter().GetResult();
     private static async Task VerifyAsync()
     {
+        MaskAttachmentChecks.Run();
         if (LinuxDisplayPolicy.UseWayland("auto", ":0", "wayland-1") ||
             !LinuxDisplayPolicy.UseWayland("auto", null, "wayland-1") ||
             !LinuxDisplayPolicy.UseWayland("wayland", ":0", "wayland-1") ||

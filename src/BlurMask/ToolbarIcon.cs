@@ -4,7 +4,7 @@ using Avalonia.Media;
 
 namespace BlurMask;
 
-internal enum ToolbarGlyph { Nib, Eye, ClosedEye, Cursor, Select, Pen, Highlighter, Text, Line, Arrow, Rectangle, Ellipse, Eraser, Size, Undo, Redo, Trash, Board, Camera, Menu, Mask, Shapes, Fading, MaskBlur, MaskPixels, MaskScramble, MaskGlass, MaskBlackout, NewCanvas, Connect, Share, Background, Save, Screen, Fit, AiPen }
+internal enum ToolbarGlyph { Nib, Eye, ClosedEye, Cursor, Select, Pen, Highlighter, Text, Line, Arrow, Rectangle, Ellipse, Eraser, Size, Undo, Redo, Trash, Board, Camera, Menu, Mask, Shapes, Fading, MaskBlur, MaskPixels, MaskScramble, MaskGlass, MaskBlackout, NewCanvas, Connect, Share, Background, Save, Screen, Fit, AiPen, MaskFill }
 
 internal sealed class ToolbarIcon(ToolbarGlyph glyph, bool circle = false, double timerFraction = .5) : Control
 {
@@ -124,6 +124,11 @@ internal sealed class ToolbarIcon(ToolbarGlyph glyph, bool circle = false, doubl
                 break;
             case ToolbarGlyph.MaskBlackout:
                 context.DrawRectangle(Ink, Outline, new Rect(2, 3, 21, 19), 1, 1);
+                break;
+            case ToolbarGlyph.MaskFill:
+                context.DrawRectangle(Brushes.White, Outline, new Rect(2, 3, 21, 19), 1, 1);
+                context.DrawRectangle(Ink, null, new Rect(5, 9, 15, 10));
+                context.DrawGeometry(null, Outline, Geometry.Parse("M5,6 L7,6 M10,6 L12,6 M15,6 L19,6"));
                 break;
             case ToolbarGlyph.ClosedEye:
                 var lash = new Pen(Ink, 1.8, lineCap: PenLineCap.Round);

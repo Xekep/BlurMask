@@ -18,6 +18,8 @@ internal sealed class DrawingSession : IDisposable
     private readonly Action _closeMask;
     private readonly Action<bool>? _setMaskAttachment;
     private readonly Func<Point, double, int>? _eraseMasks;
+    private readonly Action<PixelPoint>? _fillWindowRegion;
+    internal bool PickingMaskRegion { get; private set; }
     private DesktopInkNative? _hotkeys;
     private SettingsWindow? _settingsWindow;
     private Color _color = Color.Parse("#FFF400"), _previousColor = Colors.Black;
@@ -96,7 +98,7 @@ internal sealed class DrawingSession : IDisposable
     }
 
     public DrawingSession(Action newMask, Action exit, Action<PrivacyMode> selectMask, Action closeMask,
-        Action<bool>? setMaskAttachment = null, Func<Point, double, int>? eraseMasks = null)
+        Action<bool>? setMaskAttachment = null, Func<Point, double, int>? eraseMasks = null, Action<PixelPoint>? fillWindowRegion = null)
     {
         DesktopSelection = new(DesktopDocument);
         CanvasSelection = new(CanvasDocument);
@@ -107,6 +109,7 @@ internal sealed class DrawingSession : IDisposable
         _closeMask = closeMask;
         _setMaskAttachment = setMaskAttachment;
         _eraseMasks = eraseMasks;
+        _fillWindowRegion = fillWindowRegion;
         _screenTimer.Tick += (_, _) => { _screenTimer.Stop(); RebuildOverlays(); };
         Toolbar = new DrawingToolbarWindow(this);
         DesktopDocument.Changed += RefreshDesktopDocument;
@@ -189,6 +192,7 @@ internal sealed class DrawingSession : IDisposable
 
     public void SelectTool(InkTool tool, bool remember = true)
     {
+        PickingMaskRegion = false;
         if (Tool == InkTool.AiPen && tool != InkTool.AiPen) { _desktopAi.Flush(); _canvasAi.Flush(); }
         Toolbar.CloseFlyout();
         foreach (var overlay in _overlays) { overlay.FinishText(); overlay.CancelGesture(); }
@@ -236,6 +240,18 @@ internal sealed class DrawingSession : IDisposable
     public void SetMaskWindowAttachment(bool enabled)
     {
         AttachMasksToWindows = enabled; _setMaskAttachment?.Invoke(enabled); NotifySettings();
+        if (!enabled && PickingMaskRegion) { PickingMaskRegion = false; UpdateState(); }
+    }
+    internal void BeginWindowFill()
+    {
+        if (!AttachMasksToWindows || Program.UseNativeWayland || _fillWindowRegion is null) return;
+        SelectScreen(); SelectTool(InkTool.Cursor, remember: false);
+        PickingMaskRegion = true; InkVisible = true; UpdateState();
+    }
+    internal void CompleteWindowFill(PixelPoint point)
+    {
+        if (!PickingMaskRegion) return;
+        PickingMaskRegion = false; UpdateState(); _fillWindowRegion?.Invoke(point);
     }
     public void OpenCanvas() => OpenCanvas(null);
     internal void OpenCanvas(string? isolatedStatePath)
@@ -271,6 +287,7 @@ internal sealed class DrawingSession : IDisposable
     public void Clear() { if (Target == DrawingTarget.Canvas && Canvas?.ReadOnly == true) return; FinishInput(); Document.Clear(); }
     private void FinishInput()
     {
+        PickingMaskRegion = false;
         _mathSolve?.Cancel();
         foreach (var overlay in _overlays) { overlay.FinishText(); overlay.CancelGesture(); }
         Canvas?.FinishInput();

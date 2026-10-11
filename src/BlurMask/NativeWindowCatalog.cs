@@ -1,14 +1,21 @@
 using System.Runtime.InteropServices;
 using Avalonia;
+using Avalonia.Controls;
 
 namespace BlurMask;
 
-internal sealed record TrackedWindow(nuint Id, int ProcessId, PixelRect Bounds, bool Visible);
+internal sealed record TrackedWindow(nuint Id, int ProcessId, PixelRect Bounds, bool Visible, nuint ParentId = 0)
+{
+    internal nuint StackingId => ParentId == 0 ? Id : ParentId;
+}
 
 internal interface IWindowCatalog : IDisposable
 {
     TrackedWindow? FindAt(PixelPoint point);
     TrackedWindow? Read(nuint id);
+    TrackedWindow? FindChildAt(PixelPoint point) => FindAt(point);
+    TrackedWindow? ReadRegion(TrackedWindow region) => Read(region.Id);
+    bool PlaceAbove(Window mask, TrackedWindow target);
 }
 
 internal static class NativeWindowCatalog
@@ -19,7 +26,7 @@ internal static class NativeWindowCatalog
         {
             if (OperatingSystem.IsWindows()) return new WindowsWindowCatalog();
             if (OperatingSystem.IsMacOS()) return new MacWindowCatalog();
-            if (OperatingSystem.IsLinux() && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WAYLAND_DISPLAY")))
+            if (OperatingSystem.IsLinux() && !Program.UseNativeWayland && !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DISPLAY")))
                 return XcbWindowCatalog.TryCreate();
         }
         catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException or InvalidOperationException) { }

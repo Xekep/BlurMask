@@ -33,6 +33,9 @@ public sealed class BlurMaskWindow : Window
     private readonly UniformGrid _glassBlocks;
     private WindowsGlassRefraction? _windowsGlass;
     private MaskWindowAttachment? _attachment;
+    private bool _privacyCover;
+    internal bool HasPrivacyCover => _privacyCover;
+    internal void RefreshAttachment() => _attachment?.Update();
 
     public PrivacyMode Mode { get; private set; } = PrivacyMode.Blur;
     internal bool HasNativeOptics => _windowsGlass is not null;
@@ -101,7 +104,6 @@ public sealed class BlurMaskWindow : Window
             PlatformBlur.TryApplyNativeEnhancements(this);
             // Opened fires again after Hide/Show (e.g. minimizing the attached target).
             // Reuse the four existing planes instead of leaking another native backend.
-            _windowsGlass ??= WindowsGlassRefraction.TryCreate(this);
             ApplyMode();
         };
         Closed += (_, _) =>
@@ -119,6 +121,21 @@ public sealed class BlurMaskWindow : Window
         if (enabled && NativeWindowCatalog.TryCreate() is { } catalog) _attachment = new(this, catalog);
     }
 
+    internal void AttachFilledRegion(IWindowCatalog catalog, TrackedWindow region)
+    {
+        _attachment?.Detach();
+        _attachment = new(this, catalog, region);
+        ToolTip.SetTip(_inputSurface, null);
+    }
+    internal void SetPrivacyCover(bool enabled)
+    {
+        if (_privacyCover == enabled) return;
+        _privacyCover = enabled;
+        MinWidth = enabled ? 1 : 60; MinHeight = enabled ? 1 : 40;
+        ToolTip.SetTip(_inputSurface, enabled && _attachment?.IsRegionFill != true ? UiText.T("Окно изменило размер. Настройте маску заново.") : null);
+        ApplyMode();
+    }
+
     private void InputSurfaceOnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
         var point = e.GetCurrentPoint(_inputSurface);
@@ -134,7 +151,7 @@ public sealed class BlurMaskWindow : Window
         if (properties.IsRightButtonPressed)
         {
             e.Handled = true;
-            CycleMode();
+            if (_attachment?.IsRegionFill != true) CycleMode();
             return;
         }
 
@@ -147,6 +164,7 @@ public sealed class BlurMaskWindow : Window
         e.Handled = true;
 
         var edge = GetResizeEdge(point.Position);
+        if (_attachment?.IsRegionFill == true) return;
         if (edge is { } resizeEdge)
             BeginResizeDrag(resizeEdge, e);
         else
@@ -352,6 +370,8 @@ public sealed class BlurMaskWindow : Window
 
     private void ApplyMode()
     {
+        if (_windowsGlass is null && IsVisible && !_privacyCover && Mode is PrivacyMode.GlassBlocks or PrivacyMode.Scramble)
+            _windowsGlass = WindowsGlassRefraction.TryCreate(this);
         Background = Brushes.Transparent;
         _root.Background = Brushes.Transparent;
         _bigPixels.IsVisible = false;
@@ -359,6 +379,13 @@ public sealed class BlurMaskWindow : Window
         _glassBlocks.IsVisible = false;
         _windowsGlass?.SetEnabled(false);
         _windowsGlass?.SetScramble(Mode == PrivacyMode.Scramble);
+
+        if (_privacyCover)
+        {
+            TransparencyLevelHint = [WindowTransparencyLevel.None];
+            Background = Brushes.Black; _root.Background = Brushes.Black;
+            return;
+        }
 
         // Software/RDP composition cannot blur the pixels behind the window.
         // Use an opaque cover so a rendering fallback never exposes private content.

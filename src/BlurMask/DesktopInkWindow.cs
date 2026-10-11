@@ -68,7 +68,7 @@ internal sealed class DesktopInkWindow : Window
 
     public void ApplyState()
     {
-        var drawing = _session.Target == DrawingTarget.Screen && _session.Tool != InkTool.Cursor && _session.InkVisible;
+        var drawing = _session.Target == DrawingTarget.Screen && (_session.PickingMaskRegion || _session.Tool != InkTool.Cursor) && _session.InkVisible;
         _surface.Cursor = new Cursor(_session.Tool == InkTool.Select ? StandardCursorType.SizeAll : drawing ? StandardCursorType.Cross : StandardCursorType.Arrow);
         _surface.InvalidateVisual();
         if (OperatingSystem.IsWindows())
@@ -130,6 +130,12 @@ internal sealed class DesktopInkWindow : Window
         {
             _session.SelectTool(InkTool.Cursor, remember: false);
             e.Handled = true;
+            return;
+        }
+        if (point.Properties.IsLeftButtonPressed && _session.PickingMaskRegion)
+        {
+            e.Handled = true;
+            _session.CompleteWindowFill(new PixelPoint((int)Math.Round(DesktopPoint(point.Position).X), (int)Math.Round(DesktopPoint(point.Position).Y)));
             return;
         }
         if (!point.Properties.IsLeftButtonPressed || _session.Tool == InkTool.Cursor || _session.Target != DrawingTarget.Screen) return;

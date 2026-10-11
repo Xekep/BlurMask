@@ -15,9 +15,10 @@ internal sealed unsafe partial class WindowsWindowEvents : IDisposable
     private WindowsWindowEvents(TrackedWindow target, Action changed)
     {
         _window = (nint)target.Id; _changed = changed;
-        foreach (var (first, last) in new[] { (0x16u, 0x17u), (0x8001u, 0x800Bu) })
+        foreach (var (first, last, process) in new[] { (0x16u, 0x17u, (uint)target.ProcessId),
+            (0x8001u, 0x800Bu, (uint)target.ProcessId), (3u, 3u, 0u), (0x8002u, 0x8004u, 0u) })
         {
-            var hook = SetWinEventHook(first, last, 0, &OnEvent, (uint)target.ProcessId, 0, 0);
+            var hook = SetWinEventHook(first, last, 0, &OnEvent, process, 0, 0);
             if (hook == 0) continue;
             _hooks.Add(hook); Instances[hook] = this;
         }
@@ -26,7 +27,7 @@ internal sealed unsafe partial class WindowsWindowEvents : IDisposable
     {
         if (!OperatingSystem.IsWindows()) return null;
         var watcher = new WindowsWindowEvents(target, changed);
-        if (watcher._hooks.Count == 2) return watcher;
+        if (watcher._hooks.Count == 4) return watcher;
         watcher.Dispose(); return null;
     }
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
@@ -35,7 +36,14 @@ internal sealed unsafe partial class WindowsWindowEvents : IDisposable
         try
         {
             if (objectId == 0 && childId == 0 && Instances.TryGetValue(hook, out var watcher) &&
-                !watcher._disposed && watcher._window == window) watcher._changed();
+                !watcher._disposed && window != 0)
+            {
+                bool targetEvent = watcher._window == window || EventRoot(window, 2) == watcher._window;
+                _ = EventProcess(window, out var process);
+                bool stackingEvent = kind is 3 or 0x8002 or 0x8003 or 0x8004 && process != Environment.ProcessId &&
+                    window != EventDesktop() && EventRoot(window, 2) == window;
+                if (targetEvent || stackingEvent) watcher._changed();
+            }
         }
         catch { /* Exceptions must never escape a native event callback. */ }
     }
@@ -50,4 +58,7 @@ internal sealed unsafe partial class WindowsWindowEvents : IDisposable
     private static partial nint SetWinEventHook(uint first, uint last, nint module,
         delegate* unmanaged[Stdcall]<nint, uint, nint, int, int, uint, uint, void> callback, uint process, uint thread, uint flags);
     [LibraryImport("user32.dll")] private static partial int UnhookWinEvent(nint hook);
+    [LibraryImport("user32.dll", EntryPoint = "GetAncestor")] private static partial nint EventRoot(nint window, uint flags);
+    [LibraryImport("user32.dll", EntryPoint = "GetWindowThreadProcessId")] private static partial uint EventProcess(nint window, out uint process);
+    [LibraryImport("user32.dll", EntryPoint = "GetDesktopWindow")] private static partial nint EventDesktop();
 }

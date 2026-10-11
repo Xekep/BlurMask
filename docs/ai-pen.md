@@ -40,7 +40,8 @@ Confidence is an acoustic score, not a calibrated probability of correct text.
 There is no artificial idle delay before inference. Automatic typesetting waits
 for a 500 ms quiet period measured from pen release; inference runs during that
 period, so a 300 ms computation leaves only 200 ms of waiting and a computation
-longer than 500 ms adds no wait. **Recognize now** bypasses this conversion gate.
+longer than 500 ms adds no wait. Recognition is automatic; there is no separate
+manual recognition button. Leaving AI-pen mode flushes the remaining fragment.
 This follows the separation used by the official MyScript
 [Write-to-Type example](https://github.com/MyScript/interactive-ink-additional-examples-android/blob/master/samples/write-to-type/src/main/java/com/myscript/iink/samples/writetotype/WriteToTypeManager.java):
 its adjustable 500 ms commit timer is separate from recognition. This is a
