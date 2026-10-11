@@ -11,6 +11,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 
 namespace BlurMask;
 
@@ -45,6 +46,9 @@ internal sealed class DrawingToolbarWindow : Window
     private IPointer? _dragPointer;
     private readonly Button _handle;
     private readonly Button _eye;
+    private readonly HashSet<Button> _hoverMenus = [];
+    private readonly DispatcherTimer _hoverCloseTimer = new() { Interval = TimeSpan.FromMilliseconds(220) };
+    private bool _flyoutPointerOver;
 
     public DrawingToolbarWindow(DrawingSession session)
     {
@@ -86,9 +90,9 @@ internal sealed class DrawingToolbarWindow : Window
         _body.Children.Add(_shapes);
         _eraser = AddTool(ToolbarGlyph.Eraser, UiText.T("Ластик · Ctrl+Shift+4"), () => session.SelectTool(InkTool.Eraser));
         _shortcutTips[_eraser] = ShortcutAction.Eraser;
-        _sizes = IconButton(ToolbarGlyph.Size, UiText.T("Толщина пера"), ShowSizes);
+        _sizes = IconButton(ToolbarGlyph.Size, UiText.T("Толщина пера"), () => { });
         _body.Children.Add(_sizes);
-        _fading = IconButton(ToolbarGlyph.Fading, UiText.T("Исчезающие чернила"), ShowFading);
+        _fading = IconButton(ToolbarGlyph.Fading, UiText.T("Исчезающие чернила"), () => { });
         _body.Children.Add(_fading);
         _shortcutTips[_fading] = ShortcutAction.ToggleFading;
         _undo = AddTool(ToolbarGlyph.Undo, UiText.T("Отменить · Ctrl+Shift+Z · ПКМ — повторить"), session.Undo);
@@ -99,15 +103,15 @@ internal sealed class DrawingToolbarWindow : Window
         };
         var clear = IconButton(ToolbarGlyph.Trash, UiText.T("Очистить"), session.Clear);
         _body.Children.Add(clear); _shortcutTips[clear] = ShortcutAction.Clear;
-        _boards = IconButton(ToolbarGlyph.Board, UiText.T("Рабочий стол / белая / чёрная доска"), ShowBoards);
+        _boards = IconButton(ToolbarGlyph.Board, UiText.T("Рабочий стол / белая / чёрная доска"), () => { if (Program.UseNativeWayland) session.OpenCanvas(); });
         _body.Children.Add(_boards);
-        _masks = IconButton(ToolbarGlyph.Mask, UiText.T("Маски приватности"), ShowMasks);
+        _masks = IconButton(ToolbarGlyph.Mask, UiText.T("Маски приватности"), () => { });
         _masks.IsEnabled = !Program.UseNativeWayland;
         _body.Children.Add(_masks);
         var camera = IconButton(ToolbarGlyph.Camera, UiText.T("Снимок экрана"), () => _ = session.CaptureScreenshotAsync());
         camera.IsEnabled = !Program.UseNativeWayland;
         _body.Children.Add(camera); _shortcutTips[camera] = ShortcutAction.Screenshot;
-        _menu = IconButton(ToolbarGlyph.Menu, UiText.T("Меню BlurMask"), ShowMenu);
+        _menu = IconButton(ToolbarGlyph.Menu, UiText.T("Меню BlurMask"), () => { });
         _body.Children.Add(_menu);
 
         var quick = new UniformGrid { Columns = 2, Rows = 2, Height = 30 };
@@ -123,7 +127,6 @@ internal sealed class DrawingToolbarWindow : Window
             Content = new TextBlock { Text = "◢", FontSize = 11, Foreground = Brushes.Black,
                 HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Bottom }
         };
-        _selectedColor.Click += (_, _) => ShowPalette();
         ToolTip.SetTip(_selectedColor, UiText.T("Палитра цветов"));
         AutomationProperties.SetName(_selectedColor, UiText.T("Палитра цветов"));
         _body.Children.Add(_selectedColor);
@@ -135,6 +138,23 @@ internal sealed class DrawingToolbarWindow : Window
         };
         column.Children.Add(_bodyContainer);
         Content = column;
+        BindHoverMenu(_cursor, "cursor", ShowCursorModes);
+        BindHoverMenu(_drawing, "tools", ShowTools);
+        BindHoverMenu(_shapes, "shapes", ShowShapes);
+        BindHoverMenu(_sizes, "sizes", ShowSizes);
+        BindHoverMenu(_fading, "fading", ShowFading);
+        if (!Program.UseNativeWayland) BindHoverMenu(_boards, "boards", ShowBoards);
+        BindHoverMenu(_masks, "masks", ShowMasks);
+        BindHoverMenu(_menu, "menu", ShowMenu);
+        BindHoverMenu(_selectedColor, "palette", ShowPalette);
+        foreach (var button in column.GetVisualDescendants().OfType<Button>())
+            if (!_hoverMenus.Contains(button)) button.PointerEntered += (_, _) => CloseFlyout();
+        _hoverCloseTimer.Tick += (_, _) =>
+        {
+            _hoverCloseTimer.Stop();
+            if (_flyoutAnchor?.IsPointerOver != true && !_flyoutPointerOver &&
+                !(_flyout?.GetVisualDescendants().OfType<ComboBox>().Any(c => c.IsDropDownOpen) ?? false)) CloseFlyout();
+        };
         session.StateChanged += Refresh;
         Opened += (_, _) =>
         {
@@ -161,7 +181,7 @@ internal sealed class DrawingToolbarWindow : Window
             if (session.HandleSelectionKey(e) || session.HandleLocalShortcut(e)) return;
             if (e.Key == Key.Escape) { CloseFlyout(); session.SelectTool(InkTool.Cursor, remember: false); e.Handled = true; }
         };
-        Closed += (_, _) => session.StateChanged -= Refresh;
+        Closed += (_, _) => { _hoverCloseTimer.Stop(); CloseFlyout(); session.StateChanged -= Refresh; };
         Refresh();
     }
 
@@ -175,17 +195,26 @@ internal sealed class DrawingToolbarWindow : Window
                 [!Border.BackgroundProperty] = button[!BackgroundProperty],
                 [!Border.BorderBrushProperty] = button[!BorderBrushProperty],
                 [!Border.BorderThicknessProperty] = button[!BorderThicknessProperty],
-                Child = new ContentPresenter
+                Child = new Grid
                 {
-                    [!ContentPresenter.ContentProperty] = button[!ContentProperty],
-                    [!ContentPresenter.HorizontalContentAlignmentProperty] = button[!HorizontalContentAlignmentProperty],
-                    [!ContentPresenter.VerticalContentAlignmentProperty] = button[!VerticalContentAlignmentProperty]
+                    Children =
+                    {
+                        new Border { Name = "HoverSurface", IsHitTestVisible = false },
+                        new ContentPresenter
+                        {
+                            [!ContentPresenter.ContentProperty] = button[!ContentProperty],
+                            [!ContentPresenter.HorizontalContentAlignmentProperty] = button[!HorizontalContentAlignmentProperty],
+                            [!ContentPresenter.VerticalContentAlignmentProperty] = button[!VerticalContentAlignmentProperty]
+                        }
+                    }
                 }
             })));
-        theme.Children.Add(new Style(x => x.Nesting().Class(":pointerover"))
-        { Setters = { new Setter(BackgroundProperty, new SolidColorBrush(Color.Parse("#D9F3F8"))) } });
-        theme.Children.Add(new Style(x => x.Nesting().Class(":pressed"))
-        { Setters = { new Setter(BackgroundProperty, Cyan) } });
+        // A separate template layer also highlights buttons with a locally set
+        // background (selected tools, thickness presets and colour swatches).
+        theme.Children.Add(new Style(x => x.Nesting().Class(":pointerover").Template().Name("HoverSurface"))
+        { Setters = { new Setter(Border.BackgroundProperty, new SolidColorBrush(Color.Parse("#D9F3F8"))) } });
+        theme.Children.Add(new Style(x => x.Nesting().Class(":pressed").Template().Name("HoverSurface"))
+        { Setters = { new Setter(Border.BackgroundProperty, Cyan) } });
         return theme;
     }
 
@@ -252,20 +281,38 @@ internal sealed class DrawingToolbarWindow : Window
 
     private void ActivateDrawing()
     {
-        if (_session.Tool is InkTool.Pen or InkTool.AiPen or InkTool.Highlighter or InkTool.Text) ShowTools();
-        else _session.SelectTool(_session.LastDrawingTool);
+        CloseFlyout();
+        _session.SelectTool(_session.LastDrawingTool);
     }
 
     private void ActivateShape()
     {
-        if (_session.Tool is InkTool.Line or InkTool.Arrow or InkTool.Rectangle or InkTool.Ellipse) ShowShapes();
-        else _session.SelectTool(_session.LastShapeTool);
+        CloseFlyout();
+        _session.SelectTool(_session.LastShapeTool);
     }
 
     private void ActivateCursor()
     {
-        if (_session.Tool == _session.LastCursorTool) ShowCursorModes();
-        else _session.SelectTool(_session.LastCursorTool);
+        CloseFlyout();
+        _session.SelectTool(_session.LastCursorTool);
+    }
+
+    private void BindHoverMenu(Button button, string name, Action open)
+    {
+        _hoverMenus.Add(button);
+        button.PointerEntered += (_, _) =>
+        {
+            if (!button.IsEnabled || _dragPointer is not null) return;
+            _hoverCloseTimer.Stop();
+            if (_flyoutName != name) open();
+        };
+        button.PointerExited += (_, _) => QueueFlyoutClose();
+    }
+
+    private void QueueFlyoutClose()
+    {
+        _hoverCloseTimer.Stop();
+        if (_flyoutName is not null) _hoverCloseTimer.Start();
     }
 
     public void ShowTools()
@@ -470,17 +517,21 @@ internal sealed class DrawingToolbarWindow : Window
     private Control? _flyoutAnchor;
     private void ShowFlyout(string name, Control content, Control anchor)
     {
-        if (_flyoutName == name) { CloseFlyout(); return; }
+        if (_flyoutName == name) return;
         CloseFlyout();
         _flyoutName = name;
         _flyoutAnchor = anchor;
+        var surface = new Border { Background = Brushes.White, BorderBrush = Edge,
+            BorderThickness = new Thickness(1), Padding = new Thickness(3), Child = content };
+        surface.PointerEntered += (_, _) => { _flyoutPointerOver = true; _hoverCloseTimer.Stop(); };
+        surface.PointerExited += (_, _) => { _flyoutPointerOver = false; QueueFlyoutClose(); };
         if (Program.UseNativeWayland)
         {
             // Native xdg_popup placement is relative to its parent; absolute window
             // coordinates and Topmost are unavailable on the Wayland backend.
             var popup = new Popup { PlacementTarget = anchor, Placement = PlacementMode.Right,
                 IsLightDismissEnabled = true,
-                Child = new Border { Background = Brushes.White, BorderBrush = Edge, BorderThickness = new Thickness(1), Padding = new Thickness(3), Child = content } };
+                Child = surface };
             _waylandPopup = popup;
             ((StackPanel)Content!).Children.Add(popup);
             popup.Closed += (_, _) => { if (ReferenceEquals(_waylandPopup, popup)) CloseFlyout(); };
@@ -494,7 +545,7 @@ internal sealed class DrawingToolbarWindow : Window
             CanResize = false, CanMinimize = false, CanMaximize = false,
             RequestedThemeVariant = ThemeVariant.Light,
             Background = Brushes.White,
-            Content = new Border { BorderBrush = Edge, BorderThickness = new Thickness(1), Padding = new Thickness(3), Child = content }
+            Content = surface
         };
         var openedFlyout = _flyout;
         openedFlyout.Closed += (_, _) =>
@@ -503,6 +554,8 @@ internal sealed class DrawingToolbarWindow : Window
             _flyout = null;
             _flyoutName = null;
             _flyoutAnchor = null;
+            _hoverCloseTimer.Stop();
+            _flyoutPointerOver = false;
             _toolButtons.Clear();
             _session.UpdateOverlayRegions();
         };
@@ -535,6 +588,8 @@ internal sealed class DrawingToolbarWindow : Window
     }
     public void CloseFlyout()
     {
+        _hoverCloseTimer.Stop();
+        _flyoutPointerOver = false;
         var popup = _waylandPopup; _waylandPopup = null;
         if (popup is not null) { popup.IsOpen = false; ((StackPanel)Content!).Children.Remove(popup); }
         var flyout = _flyout;

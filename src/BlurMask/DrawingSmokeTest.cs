@@ -648,7 +648,7 @@ internal static class DrawingSmokeTest
                 Click(button);
                 Check(session.Tool == tool && toolbar.OpenFlyout is null, $"First click did not restore {tool} without opening its menu.");
                 Click(button);
-                Check(toolbar.OpenFlyout is not null, $"Second click did not open the {tool} choices.");
+                Check(session.Tool == tool && toolbar.OpenFlyout is null, $"Repeated click did not retain {tool}; menus open on hover.");
                 toolbar.CloseFlyout();
                 session.SelectTool(InkTool.Eraser);
                 session.ToggleInk(); session.ToggleInk();
