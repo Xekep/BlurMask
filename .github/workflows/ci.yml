@@ -146,6 +146,8 @@ jobs:
             throw "BlurMask smoke test timed out"
           }
           if ($first.ExitCode -ne 0) {
+            $errorLog = Join-Path ([IO.Path]::GetTempPath()) 'BlurMask-smoke-error.txt'
+            if (Test-Path -LiteralPath $errorLog) { Get-Content -LiteralPath $errorLog }
             throw "BlurMask exited with code $($first.ExitCode)"
           }
       - name: Upload actual UI previews
@@ -153,7 +155,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: BlurMask-UI-previews
-          path: .artifacts/ui-preview/*.png
+          path: |
+            .artifacts/ui-preview/*.png
+            .artifacts/ui-preview/*.txt
           if-no-files-found: warn
       - uses: actions/upload-artifact@v4
         with:

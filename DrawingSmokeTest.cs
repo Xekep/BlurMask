@@ -385,12 +385,12 @@ internal static class DrawingSmokeTest
                         catalog.Target = catalog.Target with { Bounds = new PixelRect(600 + move, 300 + move / 2, 400, 300) };
                         attachment.Update();
                     }
-                    Check(optics.SourceUpdateCount == sources, "Optical capture blocked a synchronous attachment movement burst.");
+                    Check(optics.SourceUpdateCount == sources, $"Optical capture blocked a synchronous attachment movement burst: {mode}, {sources} -> {optics.SourceUpdateCount}.");
                     await Task.Delay(150);
                     Check(optics.SourceUpdateCount > sources && optics.SourceUpdateCount - sources <= 12,
-                        "Optical movement burst was lost or replayed instead of coalesced.");
+                        $"Optical movement burst was lost or replayed instead of coalesced: {mode}, {sources} -> {optics.SourceUpdateCount}.");
                     Check(optics.SourceBounds.Position == mask.PointToScreen(default) && optics.RegionBuildCount == regions,
-                        "Optical source lagged behind the final mask or rebuilt regions during a pure move.");
+                        $"Optical source lagged behind the final mask or rebuilt regions during a pure move: {mode}, {optics.SourceBounds.Position} != {mask.PointToScreen(default)}, regions {regions} -> {optics.RegionBuildCount}.");
                     catalog.Target = catalog.Target with { Visible = false }; attachment.Update();
                     sources = optics.SourceUpdateCount; await Task.Delay(150);
                     Check(optics.SourceUpdateCount == sources, "Hidden attached mask kept capturing the desktop.");

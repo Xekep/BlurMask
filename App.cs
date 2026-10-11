@@ -61,6 +61,8 @@ public sealed partial class App : Application
         {
             Console.Error.WriteLine(ex);
             File.WriteAllText(Path.Combine(Path.GetTempPath(), "BlurMask-smoke-error.txt"), ex.ToString());
+            if (Environment.GetEnvironmentVariable("BLURMASK_SMOKE_ARTIFACTS") is { Length: > 0 } artifacts)
+            { Directory.CreateDirectory(artifacts); File.WriteAllText(Path.Combine(artifacts, "smoke-error.txt"), ex.ToString()); }
             desktop.Shutdown(1);
             return;
         }
