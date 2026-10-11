@@ -175,17 +175,24 @@ internal sealed class MathExpressionParser
                         command = word; break;
                 }
                 if (!Functions.TryGetValue(command, out var function)) throw new FormatException("Unsupported mathematical function: " + command);
-                Expression? power = null;
-                if (Take("^")) power = Argument();
-                var value = Count(new Call(function, Argument()));
-                return power is null ? value : Count(new Binary("^", value, power));
+                return FunctionArgument(command, function);
             }
             foreach (var function in OrderedFunctions)
-                if (At(function.Key)) { _position += function.Key.Length; return Count(new Call(function.Value, Argument())); }
+                if (At(function.Key)) { _position += function.Key.Length; return FunctionArgument(function.Key, function.Value); }
             if (char.IsAsciiLetter(_source[_position])) return Count(new Variable(_source[_position++].ToString()));
             throw new FormatException("Unsupported mathematics operand.");
         }
         finally { _depth--; }
+    }
+    private Expression FunctionArgument(string command, string function)
+    {
+        Expression? logarithmBase = null;
+        if (command == "log" && Take("_")) logarithmBase = ScriptArgument();
+        Expression? power = null;
+        if (Take("^")) power = Argument();
+        Expression value = Count(new Call(logarithmBase is null ? function : "ln", Argument()));
+        if (logarithmBase is not null) value = Count(new Binary("/", value, Count(new Call("ln", logarithmBase))));
+        return power is null ? value : Count(new Binary("^", value, power));
     }
     private (Expression? Lower, Expression? Upper) Bounds()
     {
@@ -249,10 +256,23 @@ internal sealed class MathExpressionParser
         Expression order = new Number("1"); if (Take("^")) order = Argument();
         if (!Take("}") || !Take("{")) { _position = saved; return false; }
         if (!(partial ? Take("\\partial") : Take("d"))) { _position = saved; return false; }
-        var variable = Atom(); if (variable is not Variable) { _position = saved; return false; }
-        Expression denominatorOrder = new Number("1"); if (Take("^")) denominatorOrder = Argument();
-        if (!Take("}") || order != denominatorOrder || order is not Number { Value: var n } || !int.TryParse(n, out var integer) || integer is < 1 or > 16) { _position = saved; return false; }
-        derivative = Count(new Call("diff", Add(), variable, order)); return true;
+        if (order is not Number { Value: var n } || !int.TryParse(n, out var integer) || integer is < 1 or > 16)
+        { _position = saved; return false; }
+        var differentiations = new List<(Variable Variable, Number Order)>(); int totalOrder = 0;
+        do
+        {
+            var variable = Atom(); if (variable is not Variable symbol) { _position = saved; return false; }
+            Expression denominatorOrder = new Number("1"); if (Take("^")) denominatorOrder = Argument();
+            if (denominatorOrder is not Number number || !int.TryParse(number.Value, out var degree) || degree is < 1 or > 16)
+            { _position = saved; return false; }
+            totalOrder += degree;
+            if (totalOrder > 16) { _position = saved; return false; }
+            differentiations.Add((symbol, number));
+        } while (partial && Take("\\partial"));
+        if (!Take("}") || totalOrder != integer) { _position = saved; return false; }
+        derivative = Add();
+        foreach (var (variable, degree) in differentiations) derivative = Count(new Call("diff", derivative, variable, degree));
+        return true;
     }
     private Expression ReadMatrix()
     {

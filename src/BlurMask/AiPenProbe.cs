@@ -31,6 +31,7 @@ internal static class AiPenProbe
         VerifyLocalModel();
         VerifyMath();
         VerifyAutomatic();
+        VerifyAcceptedMathCalculation();
         VerifyRawContentDispatch();
         Console.WriteLine("AI row layout, uncertainty, model validation, history and peer ink: passed.");
     }
@@ -142,7 +143,7 @@ internal static class AiPenProbe
         {
             var engine = new InkMath.Solver.SymbolicMathSolver(System.IO.Path.GetFullPath(path));
             InkMath.Solver.MathSolution? Real(string text, CancellationToken token) => engine.SolveAsync(text, token).GetAwaiter().GetResult();
-            foreach (var source in new[] { @"\int_0^1 x^2 dx=", @"\frac{d}{dx}\sin(x)=", @"\lim_{x\to 0}\frac{\sin x}{x}=", @"\det\begin{matrix}1&2\\3&4\end{matrix}=", "x^2-1=0=", @"\begin{cases}x+y=3\\x-y=1\end{cases}=", @"\inv\begin{matrix}1&2\\3&4\end{matrix}=", @"\left\{\begin{matrix}x+y=3\\x-y=1\end{matrix}\right.=", @"\left[\begin{matrix}1&2\\3&4\end{matrix}\right]^{-1}=" })
+            foreach (var source in new[] { @"\int_0^1 x^2 dx=", @"\frac{d}{dx}\sin(x)=", @"\lim_{x\to 0}\frac{\sin x}{x}=", @"\det\begin{matrix}1&2\\3&4\end{matrix}=", "x^2-1=0=", @"\begin{cases}x+y=3\\x-y=1\end{cases}=", @"\inv\begin{matrix}1&2\\3&4\end{matrix}=", @"\left\{\begin{matrix}x+y=3\\x-y=1\end{matrix}\right.=", @"\left[\begin{matrix}1&2\\3&4\end{matrix}\right]^{-1}=", @"\log_{2}{8}=", "log_{2}(8)=", "sin^{2}(x)+cos^{2}(x)=", @"\frac{\partial^2}{\partial x \partial y}x^2y^3=", @"\int_0^\infty e^{-x} dx=" })
                 if (AiMathLayout.WithSolvedResult(source, solve: Real) == source) throw new InvalidOperationException("Real CAS → application result unchanged: " + source);
             Console.WriteLine("Native Giac → trailing equals policy/typesetting: passed.");
         }
@@ -259,6 +260,51 @@ internal static class AiPenProbe
         }
         Console.WriteLine("Automatic text/math dispatch, numeric answers, uncertainty, cancellation, history and persistence: passed.");
     }
+    private static void VerifyAcceptedMathCalculation()
+    {
+        var ink = new[] { Stroke(10, 10), Stroke(32, 10) };
+        var uncertainText = new DelegateRecognizer((_, _) => new("unclear", .2f, 6));
+        int calls = 0;
+        InkMath.Solver.MathSolution? Solve(string source, CancellationToken token)
+        { token.ThrowIfCancellationRequested(); calls++; return source == "x^2" ? new("x^{2}", false) : null; }
+        foreach (var (latex, confidence, expectedCount, expectedCalls) in new[]
+        {
+            ("x^2=", .84f, 0, 0), ("2+2=", .84f, 0, 0), ("abc", .95f, 0, 0),
+            ("x^2=3", .95f, 1, 0), ("x^2=", .95f, 1, 1), ("2+2=", .95f, 1, 0)
+        })
+        {
+            calls = 0;
+            var result = AiAutomaticLayout.Recognize(ink, uncertainText,
+                (_, _) => new(latex, latex, [], confidence, 10, true), mathSolver: Solve);
+            if (result.Count != expectedCount || calls != expectedCalls)
+                throw new InvalidOperationException("Unaccepted/unsolicited OCR started a calculation: " + latex);
+            if (expectedCount == 1 && latex == "x^2=" && result[0].Text.Text != "x^2=x^{2}")
+                throw new InvalidOperationException("Accepted symbolic OCR did not dispatch its trailing equals.");
+            if (expectedCount == 1 && latex == "x^2=3" && result[0].Text.Text != latex)
+                throw new InvalidOperationException("Written symbolic RHS was replaced.");
+        }
+        // One raw-content region can decode into separate color groups. A region
+        // rejected for incomplete coverage must not calculate its accepted subset.
+        var second = ink[1];
+        var differentlyColored = new InkMark(InkTool.Pen, Colors.Black, second.Width, second.Points[0]);
+        foreach (var point in second.Points.Skip(1)) differentlyColored.AddPoint(point);
+        ink[1] = differentlyColored;
+        calls = 0;
+        var classification = new RawContentResult([], [new(InkCategory.Math, new[] { 0, 1 }, .99f)]);
+        int decode = 0;
+        var partial = AiAutomaticLayout.Recognize(ink, uncertainText,
+            (_, _) => new("x^2=", "x^2=", [], ++decode == 1 ? .95f : .8f, 10, true),
+            rawAnalyzer: (_, _) => classification, mathSolver: Solve);
+        if (partial.Count != 0 || calls != 0) throw new InvalidOperationException("Incomplete raw-content region started CAS.");
+        ink[1] = second;
+        calls = 0;
+        var numeric = AiAutomaticLayout.Recognize(ink, new DelegateRecognizer((_, _) => new("2+2=", .99f, 6)),
+            (_, _) => null, rawAnalyzer: (_, _) => new([], [new(InkCategory.Text, new[] { 0, 1 }, .99f)]), mathSolver: Solve);
+        if (numeric.Count != 1 || numeric[0].Text.Text != "2+2=4" || calls != 0)
+            throw new InvalidOperationException("Accepted raw-text numeric request lost the fast calculation route.");
+        Console.WriteLine("CAS only after accepted OCR/complete region; uncertainty, written RHS, numeric shortcut: passed.");
+    }
+
     private static void VerifyRawContentDispatch()
     {
         var ink = new[] { Stroke(10, 10), Stroke(32, 10), Stroke(10, 160), Stroke(32, 160), Stroke(200, 200) };

@@ -12,7 +12,8 @@ internal static class AiAutomaticLayout
         IStrokeTextRecognizer? textRecognizer = null,
         Func<IReadOnlyList<InkStroke>, CancellationToken, MathRecognitionResult?>? mathRecognizer = null,
         CancellationToken cancellationToken = default,
-        Func<IReadOnlyList<InkStroke>, CancellationToken, RawContentResult?>? rawAnalyzer = null)
+        Func<IReadOnlyList<InkStroke>, CancellationToken, RawContentResult?>? rawAnalyzer = null,
+        Func<string, CancellationToken, InkMath.Solver.MathSolution?>? mathSolver = null)
     {
         if (strokes.Count == 0 || strokes.Count > 256 || strokes.Sum(s => (long)s.Points.Count) > 20000) return [];
         cancellationToken.ThrowIfCancellationRequested();
@@ -22,7 +23,7 @@ internal static class AiAutomaticLayout
         {
             var ink = strokes.Select(s => new InkStroke(s.Points.Select(p => new InkPoint((float)p.X, (float)p.Y)).ToArray())).ToArray();
             var classified = (rawAnalyzer ?? AiRawContentModels.Analyze)(ink, cancellationToken);
-            if (classified is not null) return RecognizeRegions(strokes, classified, textRecognizer, mathRecognizer, cancellationToken);
+            if (classified is not null) return RecognizeRegions(strokes, classified, textRecognizer, mathRecognizer, cancellationToken, mathSolver);
         }
         var text = AiInkLayout.Recognize(strokes, textRecognizer, cancellationToken);
         var complete = text.SelectMany(r => r.Strokes).Distinct().Count() == strokes.Count;
@@ -30,27 +31,23 @@ internal static class AiAutomaticLayout
         cancellationToken.ThrowIfCancellationRequested();
         if (mathRecognizer is not null || AiMathRecognitionModels.Installed)
         {
-            var formulas = AiMathLayout.Recognize(strokes, mathRecognizer, cancellationToken);
-            if (formulas.Count > 0 && formulas.All(r => r.Confidence >= .85f && Mathematical(r.Text.Text))) return formulas;
+            var formulas = AiMathLayout.Recognize(strokes, mathRecognizer, cancellationToken, calculate: false, minimumConfidence: .85f);
+            if (formulas.Count > 0 && formulas.All(r => r.Confidence >= .85f && Mathematical(r.Text.Text)))
+            {
+                foreach (var formula in formulas) AiMathLayout.ApplySolvedResult(formula, cancellationToken, mathSolver);
+                return formulas;
+            }
         }
         // Plain numeric input can still be computed with the text model alone.
         foreach (var result in text)
             if (result.Confidence >= .85f && Mathematical(result.Text.Text) && MathTypesetting.Supported(result.Text.Text))
-            {
-                var original = result.Text.Text;
-                var calculated = AiMathLayout.WithSolvedResult(original, cancellationToken);
-                if (calculated == original) continue;
-                result.SizingText = original;
-                var bounds = result.Text.Bounds;
-                result.Text.Text = calculated;
-                result.Text.AddPoint(bounds.BottomRight + new Avalonia.Vector(Math.Min(100000 - bounds.Right, AiMathLayout.ResultWidth(original, calculated, bounds.Height)), 0));
-            }
+                AiMathLayout.ApplySolvedResult(result, cancellationToken, mathSolver);
         return text.Where(r => r.Confidence >= .85f).ToArray();
     }
 
     private static IReadOnlyList<AiInkLayout.Result> RecognizeRegions(IReadOnlyList<InkMark> strokes, RawContentResult classification,
         IStrokeTextRecognizer? textRecognizer, Func<IReadOnlyList<InkStroke>, CancellationToken, MathRecognitionResult?>? mathRecognizer,
-        CancellationToken token)
+        CancellationToken token, Func<string, CancellationToken, InkMath.Solver.MathSolution?>? mathSolver)
     {
         var results = new List<AiInkLayout.Result>(); var used = new HashSet<int>();
         foreach (var region in classification.Regions)
@@ -63,9 +60,12 @@ internal static class AiAutomaticLayout
             // classifier boundary, and no drawing/uncertain stroke is substituted.
             var members = region.StrokeIndices.Order().Select(i => strokes[i]).ToArray();
             var decoded = region.Category == InkCategory.Text ? AiInkLayout.Recognize(members, textRecognizer, token) :
-                AiMathLayout.Recognize(members, mathRecognizer, token);
+                AiMathLayout.Recognize(members, mathRecognizer, token, calculate: false, minimumConfidence: .85f);
             if (decoded.Count == 0 || decoded.Any(r => !float.IsFinite(r.Confidence) || r.Confidence < .85f) ||
                 decoded.SelectMany(r => r.Strokes).Distinct().Count() != members.Length) continue;
+            foreach (var result in decoded)
+                if (Mathematical(result.Text.Text) && MathTypesetting.Supported(result.Text.Text))
+                    AiMathLayout.ApplySolvedResult(result, token, mathSolver);
             results.AddRange(decoded); foreach (var i in region.StrokeIndices) used.Add(i);
         }
         return results;

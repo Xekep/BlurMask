@@ -14,13 +14,17 @@ if (args.Length == 0)
     Equal(MathLatexFormatter.Format(["<fence>", "{", "<table>", "√", "3", "</sqrt>", "<\\>", "√", "6", "</sqrt>", "</table>", "</fence>"]), "\\left\\{\\begin{matrix}\\sqrt{3}\\\\\\sqrt{6}\\end{matrix}\\right.");
     Equal(MathLatexFormatter.Format(["√", "3"]), null);
     Equal(MathLatexFormatter.Format(["<over>", "x", "</over>"]), null);
+    Equal(MathLatexFormatter.Format(["∫", "<subsup>", "0", "<subsup2>", "1", "</subsup>", "x", "<sup>", "2", "</sup>", "d", "x"]), @"\int _{0}^{1}x^{2}dx");
+    Equal(MathLatexFormatter.Format(["<frac>", "∂", "<sup>", "2", "</sup>", "<fracbar>", "∂", "x", "∂", "y", "</frac>", "x", "<sup>", "2", "</sup>", "y", "<sup>", "3", "</sup>"]), @"\frac{\partial ^{2}}{\partial x\partial y}x^{2}y^{3}");
+    Equal(MathLatexFormatter.Format(["l", "o", "g", "<sub>", "2", "</sub>", "(", "8", ")"]), "log_{2}(8)");
+    Equal(MathLatexFormatter.Format(["<table>", "1", "<&>", "2", "<\\>", "3", "<&>", "4", "</table>"]), @"\begin{matrix}1&2\\3&4\end{matrix}");
     foreach (var invalid in new[] { Array.Empty<byte>(), new byte[64] })
     {
         bool rejected = false;
         try { MathModel.Read(new MemoryStream(invalid)); } catch (Exception e) when (e is InvalidDataException or EndOfStreamException) { rejected = true; }
         if (!rejected) throw new InvalidDataException("Malformed model was accepted.");
     }
-    Console.WriteLine("Math formatter/model guards PASS (8 checks)"); return;
+    Console.WriteLine("Math formatter/model guards PASS (12 checks, including calculus/log-base/matrix structural token streams)"); return;
 }
 if (args is ["--features", var fixture])
 {

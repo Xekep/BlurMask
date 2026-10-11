@@ -19,7 +19,13 @@ var fixtures = new (string Input, string Cas)[]
     (@"\left\{\begin{matrix}x+y=3\\x-y=1\end{matrix}\right.", "[[((x+y)=3)],[((x-y)=1)]]"),
     (@"\left|\begin{matrix}1&2\\3&4\end{matrix}\right|", "det([[1,2],[3,4]])"),
     (@"\left[\begin{matrix}1&2\\3&4\end{matrix}\right]^{-1}", "([[1,2],[3,4]]^(-1*1))"),
-    (@"\sin\left(x\right)", "sin(x)")
+    (@"\sin\left(x\right)", "sin(x)"),
+    (@"\log_{2}{8}", "(ln(8)/ln(2))"),
+    ("log_{2}(8)", "(ln(8)/ln(2))"),
+    ("sin^{2}(x)", "(sin(x)^2)"),
+    (@"\log_{x+1}{8}", "(ln(8)/ln((x+1)))"),
+    (@"\frac{\partial^2}{\partial x \partial y}x^2y^3", "diff(diff(((x^2)*(y^3)),x,1),y,1)"),
+    (@"\frac{\partial^3}{\partial x^2 \partial y}x^3y^2", "diff(diff(((x^3)*(y^2)),x,2),y,1)")
 };
 foreach (var (input, expected) in fixtures)
 {
@@ -56,7 +62,14 @@ var actualFixtures = new (string Input, string Expected)[]
     (@"\operatorname{expand}((x+1)^2)", "x^{2}+2 x+1"),
     (@"\left\{\begin{matrix}x+y=3\\x-y=1\end{matrix}\right.", @"(x,y)\in \left\{\left[2,1\right]\right\}"),
     (@"\left|\begin{matrix}1&2\\3&4\end{matrix}\right|", "-2"),
-    (@"\left[\begin{matrix}1&2\\3&4\end{matrix}\right]^{-1}", @"\left[\begin{array}{cc}-2&1\\\frac{3}{2}&-\frac{1}{2}\end{array}\right]")
+    (@"\left[\begin{matrix}1&2\\3&4\end{matrix}\right]^{-1}", @"\left[\begin{array}{cc}-2&1\\\frac{3}{2}&-\frac{1}{2}\end{array}\right]"),
+    (@"\log_{2}{8}", "3"),
+    ("log_{2}(8)", "3"),
+    ("sin^{2}(x)+cos^{2}(x)", "1"),
+    (@"\int_0^\infty e^{-x} dx", "1"),
+    (@"\frac{\partial^2}{\partial x \partial y}x^2y^3", "6 x y^{2}"),
+    (@"\frac{\partial^3}{\partial x^2 \partial y}x^3y^2", "12 x y"),
+    (@"\operatorname{rank}\begin{matrix}1&2\\2&4\end{matrix}", "1")
 };
 foreach (var (input, expected) in actualFixtures)
 {

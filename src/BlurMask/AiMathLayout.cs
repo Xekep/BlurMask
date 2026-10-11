@@ -6,8 +6,10 @@ namespace BlurMask;
 internal static class AiMathLayout
 {
     internal static IReadOnlyList<AiInkLayout.Result> Recognize(IReadOnlyList<InkMark> strokes,
-        Func<IReadOnlyList<InkStroke>, CancellationToken, MathRecognitionResult?>? recognize = null, CancellationToken cancellationToken = default)
+        Func<IReadOnlyList<InkStroke>, CancellationToken, MathRecognitionResult?>? recognize = null, CancellationToken cancellationToken = default,
+        bool calculate = true, float minimumConfidence = .75f)
     {
+        if (!float.IsFinite(minimumConfidence) || minimumConfidence is < 0 or > 1) throw new ArgumentOutOfRangeException(nameof(minimumConfidence));
         if (strokes.Count == 0 || strokes.Count > 256 || strokes.Sum(s => s.Points.Count) > 20000) return [];
         cancellationToken.ThrowIfCancellationRequested();
         recognize ??= AiMathRecognitionModels.Recognize;
@@ -23,8 +25,8 @@ internal static class AiMathLayout
             var result = recognize(input, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             if (result is not { Completed: true, LaTex: { Length: > 0 } latex } || !float.IsFinite(result.Confidence) ||
-                result.Confidence < .75f || !MathTypesetting.Supported(latex)) continue;
-            var calculated = WithSolvedResult(latex, cancellationToken);
+                result.Confidence < minimumConfidence || !MathTypesetting.Supported(latex)) continue;
+            var calculated = calculate ? WithSolvedResult(latex, cancellationToken) : latex;
             // Re-read geometry after numeric parsing. Undefined arithmetic is
             // handled inside the parser; avoid carrying the Rect's floating
             // locals across that exception path in the ARM64 AOT compiler.
@@ -49,6 +51,20 @@ internal static class AiMathLayout
 
     internal static double ResultWidth(string original, string calculated, double height)
         => original == calculated ? 0 : Math.Max(1, calculated.Length - original.Length) * height * .55;
+
+    // Call only after the routing layer accepts the complete candidate/region.
+    // Rejected OCR results must never start a CAS child or append numeric output.
+    internal static void ApplySolvedResult(AiInkLayout.Result result, CancellationToken token,
+        Func<string, CancellationToken, InkMath.Solver.MathSolution?>? solve = null)
+    {
+        var original = result.Text.Text;
+        var calculated = WithSolvedResult(original, token, solve);
+        if (calculated == original) return;
+        result.SizingText = original;
+        var bounds = result.Text.Bounds;
+        result.Text.Text = calculated;
+        result.Text.AddPoint(bounds.BottomRight + new Avalonia.Vector(Math.Min(100000 - bounds.Right, ResultWidth(original, calculated, bounds.Height)), 0));
+    }
 
     internal static string WithSolvedResult(string expression, CancellationToken token = default,
         Func<string, CancellationToken, InkMath.Solver.MathSolution?>? solve = null)

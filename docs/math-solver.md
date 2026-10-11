@@ -31,6 +31,9 @@ AI pen preserves notation until an explicit calculation request: append `=`.
 A simple numeric expression uses the existing fast numeric evaluator first.
 For a complete equation, append another `=` or select it and use **=** in the
 cursor's selection submenu. A written right-hand side is never auto-overwritten.
+Automatic routing calculates only after accepting the OCR candidate or a complete
+raw-content region. Uncertain or rejected Math candidates do not start Giac.
+Accepted numeric requests classified as text still use the fast numeric evaluator.
 The result participates in document undo/redo and ordinary canvas synchronization.
 
 | Input before the final `=` | Operation |
@@ -38,6 +41,8 @@ The result participates in document undo/redo and ordinary canvas synchronizatio
 | `\int x^2 dx` | Antiderivative, including `+C` |
 | `\int_0^1 x^2 dx` | Definite integral |
 | `\frac{d}{dx}\sin(x)` | Derivative; matched higher orders up to 16 |
+| `\frac{\partial^2}{\partial x \partial y}x^2y^3` | Mixed partial derivative; total order up to 16 |
+| `\log_{2}{8}`, `log_{2}(8)` | Logarithm with explicit base |
 | `\lim_{x\to 0}\frac{\sin x}{x}` | Limit |
 | `\sum_{k=1}^{10}k`, `\prod_{k=1}^{4}k` | Finite sums/products |
 | `x^2-1=0` | Roots, displayed as `x ∈ {−1,1}` |
@@ -81,3 +86,17 @@ the adapter and runs portable tests, but actual macOS Giac execution is not yet
 validated. The Windows test helper verifies the pinned upstream installer's hash,
 extracts only the CLI/dependencies/license with 7-Zip and never executes the
 installer or uploads the third-party runtime as an application artifact.
+
+The 2026-10-11 audit passed the managed and Windows NativeAOT probes with 24
+grammar translations and 25 actual Giac calculus/algebra cases, including improper
+integrals, mixed partial derivatives, explicit log bases and plain recognized
+`sin^{2}(x)+cos^{2}(x)`. The headless application probe additionally exercised
+result typesetting, trailing-equals policy, rejection before CAS, complete-region
+coverage and written-RHS preservation.
+
+This is solver verification, not proof that all those expressions are recognized
+accurately from handwriting. Real Math2/ORT 1.23.2 inference was separately tested
+on three public raw-stroke fixtures: `1`, `y=3x+2`, and a bracketed two-row root
+matrix. The equation also passed the application's automatic route, replacement,
+history and persistence checks. Complex handwritten calculus still needs a larger
+independent stroke corpus; synthetic structural-token tests verify formatting only.
