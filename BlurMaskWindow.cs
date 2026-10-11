@@ -98,7 +98,9 @@ public sealed class BlurMaskWindow : Window
         Opened += (_, _) =>
         {
             PlatformBlur.TryApplyNativeEnhancements(this);
-            _windowsGlass = WindowsGlassRefraction.TryCreate(this);
+            // Opened fires again after Hide/Show (e.g. minimizing the attached target).
+            // Reuse the four existing planes instead of leaking another native backend.
+            _windowsGlass ??= WindowsGlassRefraction.TryCreate(this);
             ApplyMode();
         };
         Closed += (_, _) =>
