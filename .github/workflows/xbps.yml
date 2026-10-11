@@ -91,10 +91,10 @@ jobs:
           docker image inspect "$image" > .artifacts/void-installers/container-image.json
           docker run --rm --platform linux/amd64 -v "$GITHUB_WORKSPACE:/workspace:ro" \
             -v "$GITHUB_WORKSPACE/.artifacts/void-installers:/output" -w /workspace \
-            -e BLURMASK_VERSION="$version" -e PAYLOAD -e SOURCE_DATE_EPOCH "$image" bash -euc '
+            -e BLURMASK_VERSION="$version" -e PAYLOAD -e SOURCE_DATE_EPOCH "$image" sh -euc '
               xbps-install -Suy xbps
               xbps-install -Suy
-              xbps-install -y shadow util-linux
+              xbps-install -y bash findutils shadow util-linux
               useradd --create-home builder
               chown builder /output
               runuser -u builder -- bash tools/build-xbps.sh "$BLURMASK_VERSION" "$PAYLOAD" /output
@@ -105,12 +105,15 @@ jobs:
           mkdir -p .artifacts/void-ui/results
           docker run --rm --platform linux/amd64 -v "$GITHUB_WORKSPACE:/workspace:ro" \
             -v "$GITHUB_WORKSPACE/.artifacts/void-ui/results:/tmp/void-ui-results" \
-            -w /workspace "$VOID_IMAGE" bash -euc '
+            -w /workspace "$VOID_IMAGE" sh -euc '
               xbps-install -Suy xbps
               xbps-install -Suy
-              xbps-install -y shadow util-linux desktop-file-utils xvfb-run dejavu-fonts-ttf \
+              xbps-install -y bash findutils shadow util-linux desktop-file-utils xvfb-run dejavu-fonts-ttf \
                 openbox picom xdotool wmctrl ImageMagick python3-Pillow glxinfo mesa-dri \
                 xwininfo xdpyinfo xsetroot
+              command -v python magick
+              python --version
+              magick -version
               result=0
               bash tools/test-xbps.sh .artifacts/void-installers/*.x86_64.xbps || result=$?
               chmod -R a+rX /tmp/void-ui-results
