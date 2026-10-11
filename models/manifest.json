@@ -62,6 +62,11 @@
       "sha256": "9bba7902c752fe937fc36f06573bd128c6b08d21a1b378dc460bc61608407739"
     },
     {
+      "path": "ru-RU/legacy-engine-profile.json",
+      "bytes": 53639,
+      "sha256": "c339047fecc25a3f8244f40a5b8389db86bf4020c489aa3ec0e6d79da9679abc"
+    },
+    {
       "path": "ru-RU/ru_RU-ak-cur.lite.res",
       "bytes": 572763,
       "sha256": "7a5f08809e81fb4a2d4c78b3efd251d0986503b0d30d21de3695dab1f8a89978"

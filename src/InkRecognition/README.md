@@ -229,3 +229,23 @@ normalization; its integer costs remain separate from confidence probabilities.
 Native profile selection,
 history state and total acoustic/lexical scoring are still unfinished; these
 components do not enable Russian cursive recognition in the GUI.
+
+[`LegacyRussianModelBundle`](../../docs/legacy-russian-model-bundle.md) now loads
+the complete checked resource/profile data from `models/ru-RU` with no vendor
+DLL or private activation/calibration files. It exposes the experimental word
+recognizer and stored language components with copied caller buffers and bounded
+profile validation. [`LegacyLineScale` and `LegacyLineGeometry`](../../docs/legacy-line-geometry.md)
+restore scale estimation from prepared height records and prepared-cluster line
+materialization; producing those records/clusters from raw ink is still separate.
+
+[`LegacyInkRangeExtraction`](../../docs/legacy-russian-point-ranges.md) restores
+point ownership and clipped glyph boundary flags for supplied interior stroke
+ranges. [`LegacyWordAuxiliaryProfile`](../../docs/legacy-russian-word-auxiliary.md)
+restores explicit boundary/category history costs and their checked resource
+factory. The bundle exposes all four auxiliary profiles. Automatic cut generation
+and total native search still need restoration.
+
+[`LegacyLineScaleSamples`](../../docs/legacy-line-scale-samples.md) extracts the
+checked extrema height samples from float32 ink, including plateau/endpoints and
+the explicit half-X profile. This supplies another upstream geometry component;
+automatic line clustering remains unfinished.

@@ -38,6 +38,11 @@
     <Project Path="tools/LegacyWordProfile.Probe/LegacyWordProfile.Probe.csproj" />
     <Project Path="tools/LegacyFixedLog.Probe/LegacyFixedLog.Probe.csproj" />
     <Project Path="tools/LegacyCostEnsemble.Probe/LegacyCostEnsemble.Probe.csproj" />
+    <Project Path="tools/LegacyRussianBundle.Probe/LegacyRussianBundle.Probe.csproj" />
+    <Project Path="tools/LegacyLineGeometry.Probe/LegacyLineGeometry.Probe.csproj" />
+    <Project Path="tools/LegacyLineSamples.Probe/LegacyLineSamples.Probe.csproj" />
+    <Project Path="tools/LegacyInkRanges.Probe/LegacyInkRanges.Probe.csproj" />
+    <Project Path="tools/LegacyWordAuxiliary.Probe/LegacyWordAuxiliary.Probe.csproj" />
     <Project Path="tools/InkMath.Solver.Probe/InkMath.Solver.Probe.csproj" />
   </Folder>
 </Solution>

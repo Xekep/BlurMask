@@ -204,6 +204,18 @@ jobs:
         run: dotnet run --project tools/LegacyDirectionalWord.Probe -c Release
       - name: Verify committed recognition resource fingerprints
         run: python tools/verify-model-resources.py
+      - name: Load portable Russian model data and verify restored line geometry
+        run: |
+          dotnet run --project tools/LegacyRussianBundle.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
+          python tools/LegacyLineGeometry.Probe/reference_controls.py .artifacts/legacy-line-geometry-controls.json
+          dotnet run --project tools/LegacyLineGeometry.Probe -c Release -- .artifacts/legacy-line-geometry-controls.json
+          python tools/LegacyLineSamples.Probe/reference_controls.py .artifacts/legacy-line-samples-controls.json
+          dotnet run --project tools/LegacyLineSamples.Probe -c Release -- .artifacts/legacy-line-samples-controls.json
+          python tools/LegacyInkRanges.Probe/reference_controls.py .artifacts/legacy-ink-range-controls.json
+          dotnet run --project tools/LegacyInkRanges.Probe -c Release -- .artifacts/legacy-ink-range-controls.json
+          python tools/LegacyWordAuxiliary.Probe/reference_controls.py .artifacts/legacy-word-auxiliary-controls.json
+          dotnet run --project tools/LegacyWordAuxiliary.Probe -c Release -- --controls .artifacts/legacy-word-auxiliary-controls.json
+          dotnet run --project tools/LegacyWordAuxiliary.Probe -c Release -- models/ru-RU/ru_RU-lk-text.lite.res
       - name: Legacy stored word and class language costs
         run: |
           python tools/LegacyWordLanguage.Probe/reference_controls.py models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-language-controls.json
@@ -234,6 +246,24 @@ jobs:
           $probe = if ($IsWindows) { './.artifacts/legacy-word-native/LegacyDirectionalWord.Probe.exe' } else { './.artifacts/legacy-word-native/LegacyDirectionalWord.Probe' }
           & $probe
           exit $LASTEXITCODE
+      - name: Publish and run portable Russian models and line geometry as Native AOT
+        shell: pwsh
+        run: |
+          dotnet publish tools/LegacyRussianBundle.Probe/LegacyRussianBundle.Probe.csproj -c Release -p:PublishAot=true -o .artifacts/legacy-russian-bundle-native
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $probe = if ($IsWindows) { './.artifacts/legacy-russian-bundle-native/LegacyRussianBundle.Probe.exe' } else { './.artifacts/legacy-russian-bundle-native/LegacyRussianBundle.Probe' }
+          & $probe models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet publish tools/LegacyLineGeometry.Probe/LegacyLineGeometry.Probe.csproj -c Release -p:PublishAot=true -o .artifacts/legacy-line-geometry-native
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $probe = if ($IsWindows) { './.artifacts/legacy-line-geometry-native/LegacyLineGeometry.Probe.exe' } else { './.artifacts/legacy-line-geometry-native/LegacyLineGeometry.Probe' }
+          & $probe .artifacts/legacy-line-geometry-controls.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet publish tools/LegacyLineSamples.Probe/LegacyLineSamples.Probe.csproj -c Release -p:PublishAot=true -o .artifacts/legacy-line-samples-native
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $probe = if ($IsWindows) { './.artifacts/legacy-line-samples-native/LegacyLineSamples.Probe.exe' } else { './.artifacts/legacy-line-samples-native/LegacyLineSamples.Probe' }
+          & $probe .artifacts/legacy-line-samples-controls.json
+          exit $LASTEXITCODE
       - name: Publish and verify stored Russian language tables as Native AOT
         shell: pwsh
         run: |
@@ -241,6 +271,21 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $probe = if ($IsWindows) { './.artifacts/legacy-language-native/LegacyWordLanguage.Probe.exe' } else { './.artifacts/legacy-language-native/LegacyWordLanguage.Probe' }
           & $probe models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-language-controls.json
+          exit $LASTEXITCODE
+      - name: Verify interior ink ranges and auxiliary language costs as Native AOT
+        shell: pwsh
+        run: |
+          dotnet publish tools/LegacyInkRanges.Probe/LegacyInkRanges.Probe.csproj -c Release -p:PublishAot=true -o .artifacts/legacy-ink-ranges-native
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $probe = if ($IsWindows) { './.artifacts/legacy-ink-ranges-native/LegacyInkRanges.Probe.exe' } else { './.artifacts/legacy-ink-ranges-native/LegacyInkRanges.Probe' }
+          & $probe .artifacts/legacy-ink-range-controls.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet publish tools/LegacyWordAuxiliary.Probe/LegacyWordAuxiliary.Probe.csproj -c Release -p:PublishAot=true -o .artifacts/legacy-word-auxiliary-native
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $probe = if ($IsWindows) { './.artifacts/legacy-word-auxiliary-native/LegacyWordAuxiliary.Probe.exe' } else { './.artifacts/legacy-word-auxiliary-native/LegacyWordAuxiliary.Probe' }
+          & $probe --controls .artifacts/legacy-word-auxiliary-controls.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & $probe models/ru-RU/ru_RU-lk-text.lite.res
           exit $LASTEXITCODE
       - name: Publish and verify Russian dictionary word identities as Native AOT
         shell: pwsh
