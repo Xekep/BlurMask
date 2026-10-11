@@ -28,7 +28,8 @@ $inputs = @(
     @{ Name='licenses/COPYING.RUNTIME'; Hash='9d6b43ce4d8de0c878bf16b54d8e7a10d9bd42b75178153e3af6a815bdc90f74'; Url='https://raw.githubusercontent.com/gcc-mirror/gcc/releases/gcc-16.2.0/COPYING.RUNTIME' },
     @{ Name='licenses/winpthreads-COPYING'; Hash='63263614cdd29f2f93cba85e992f041b31f9fc7b4033692f31269489a8a1b177'; Url='https://raw.githubusercontent.com/mingw-w64/mingw-w64/v14.0.0/mingw-w64-libraries/winpthreads/COPYING' }
 )
-$recipeFiles = @($PSCommandPath) + @(Get-ChildItem -LiteralPath $recipe -File | Sort-Object Name | ForEach-Object FullName)
+$windowsRecipeNames = @('Makefile', 'build.sh', 'icas.cpp', 'test-transport.ps1')
+$recipeFiles = @($PSCommandPath) + @($windowsRecipeNames | Sort-Object | ForEach-Object { Join-Path $recipe $_ })
 $recipeDescription = ($recipeFiles | ForEach-Object { (Split-Path $_ -Leaf) + ':' + (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash.ToLowerInvariant() }) -join "`n"
 $sha = [Security.Cryptography.SHA256]::Create()
 try { $recipeHash = [BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($recipeDescription))).Replace('-','').ToLowerInvariant() }
@@ -157,11 +158,13 @@ $manifest = [ordered]@{
     })
 }
 Set-Content -LiteralPath (Join-Path $output 'manifest.json') -Value ($manifest | ConvertTo-Json -Depth 6) -Encoding UTF8
-$sourcePackage = Join-Path $cache 'corresponding-sources'
+$sourcePackage = Join-Path $cache ('corresponding-sources-' + $recipeHash.Substring(0, 16))
 New-Item -ItemType Directory -Force -Path $sourcePackage, (Join-Path $sourcePackage 'archives'), (Join-Path $sourcePackage 'tools') | Out-Null
 foreach ($archive in @('giac-source.tar.gz','gmp-6.3.0.tar.xz','mpfr-4.2.2.tar.xz')) { Copy-Item (Join-Path $cache $archive) (Join-Path $sourcePackage 'archives') -Force }
 Copy-Item -LiteralPath $PSCommandPath -Destination (Join-Path $sourcePackage 'tools\prepare-giac-runtime.ps1') -Force
-Copy-Item -LiteralPath $recipe -Destination (Join-Path $sourcePackage 'tools') -Recurse -Force
+$sourceRecipe = Join-Path $sourcePackage 'tools\giac-native'
+New-Item -ItemType Directory -Force -Path $sourceRecipe | Out-Null
+foreach ($name in $windowsRecipeNames) { Copy-Item -LiteralPath (Join-Path $recipe $name) -Destination $sourceRecipe -Force }
 Copy-Item -LiteralPath (Join-Path $output 'COPYING'), (Join-Path $output 'THIRD-PARTY-NOTICES.txt'), (Join-Path $output 'manifest.json') -Destination $sourcePackage -Force
 Copy-Item -LiteralPath (Join-Path $output 'licenses') -Destination $sourcePackage -Recurse -Force
 Set-Content -LiteralPath (Join-Path $sourcePackage 'BUILD.txt') -Encoding UTF8 -Value 'Install Git for Windows and 7-Zip. Run tools/prepare-giac-runtime.ps1 with -OutputDirectory and -SourcesDirectory. Copy the three archives in archives/ into -CacheDirectory beforehand for offline source reuse. The pinned toolchain and m4 package are build tools only; their download URLs and SHA256 are recorded in manifest.json. Giac is compiled without GUI and optional external CAS libraries; GMP and MPFR are compiled from the enclosed sources. build.sh replaces upstream bundled gmp.h with the native Win64 header generated from GMP 6.3.0.'

@@ -26,8 +26,9 @@ Numeric arithmetic appends an answer only after a trailing equals sign:
 `2+2` stays `2+2`, while `2+2=` becomes `2+2=4`. A written right-hand side is
 preserved, including an incorrect answer. Supported input
 includes explicit arithmetic, decimal comma, parentheses, fractions, roots and
-powers. With **Settings > Use Giac** enabled, the [bundled local solver](math-solver.md) also
-evaluates integrals, derivatives, limits, sums, products and matrix operations.
+powers. With **Settings > Use Giac** enabled, a trailing `=` also evaluates
+integrals, derivatives, limits, sums, products and matrix operations through
+the [bundled local solver](math-solver.md).
 Append another `=` to an equation to request its roots (`x^2-1=0=`); a complete
 written equation without that request stays unchanged. Alternatively, select a
 recognized formula and press **=** in the cursor submenu. Unsupported requests
