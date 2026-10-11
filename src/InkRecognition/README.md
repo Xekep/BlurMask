@@ -67,3 +67,14 @@ original synthetic **П/И** controls against locally supplied assets. Supplied
 reference files can be checked with `--raw-controls` or `--score-controls`.
 These controls exercise narrow raw-ink paths, not handwriting accuracy.
 See [the evidence and current limits](../../docs/ink-math-engine.md#russian-text-preparation).
+
+`LegacyPackedLexicon` restores the checked packed RU dictionary graph and
+supports prefix transitions and terminal word lookup without expanding its
+labels/offsets. `LegacyLexicalDecoder` filters a caller-supplied segmented glyph
+lattice through that graph. Run `dotnet run --project tools/LegacyLexicon.Probe
+-c Release` for vendor-free malformed-format, transition and ambiguous-candidate
+tests. These APIs do not turn raw ink into Russian words; acoustic-to-lexical
+mapping, cursive segmentation and language costs remain unfinished.
+`LegacyInkAlphabet` reads caller-supplied acoustic and lexical alphabets so that
+their distinct numeric IDs can be mapped through Unicode text.
+See [lexical format evidence and checks](../../docs/legacy-russian-lexicon.md).

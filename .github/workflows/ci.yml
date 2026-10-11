@@ -128,6 +128,8 @@ jobs:
         run: dotnet run --project tools/InkRecognition.RawContent.Probe -c Release
       - name: Legacy integer network and Russian feature numerical controls
         run: dotnet run --project tools/LegacyInk.Probe -c Release
+      - name: Russian packed lexicon and bounded candidate decoding
+        run: dotnet run --project tools/LegacyLexicon.Probe -c Release
       - name: Bounded legacy resource parser controls
         run: python tools/test-legacy-ink.py
       - name: Overlay compositor IPC ownership, cancellation and transport

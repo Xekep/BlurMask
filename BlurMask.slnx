@@ -12,6 +12,7 @@
     <Project Path="tools/InkRecognition.Math.Probe/InkRecognition.Math.Probe.csproj" />
     <Project Path="tools/InkRecognition.RawContent.Probe/InkRecognition.RawContent.Probe.csproj" />
     <Project Path="tools/LegacyInk.Probe/LegacyInk.Probe.csproj" />
+    <Project Path="tools/LegacyLexicon.Probe/LegacyLexicon.Probe.csproj" />
     <Project Path="tools/InkMath.Solver.Probe/InkMath.Solver.Probe.csproj" />
   </Folder>
 </Solution>

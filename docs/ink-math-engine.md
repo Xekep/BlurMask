@@ -210,9 +210,15 @@ controls are
 ignored under `.artifacts/myscript-analysis/output/RussianAssetsSearch` and
 `RussianExtractorStage2` through `RussianExtractorStage5`.
 
+The [legacy lexical backend](legacy-russian-lexicon.md) now reads the actual
+type2b4 Russian word trie and performs bounded dictionary-constrained decoding
+of caller-supplied per-glyph candidates. Ten local string/label lookups pass;
+the main graph uses 2,910,612 owned packed bytes. This advances word decoding,
+but does not supply automatic glyph boundaries or recognize cursive ink.
+
 Remaining work: the two 313-input profiles, automatic baseline estimation,
 complete ensemble/candidate-mask handling, cursive segmentation, virtual-label
-and language/dictionary decoding, and validation on representative Russian ink.
+full language-model costs and acoustic/lexical integration, and validation on representative Russian ink.
 The English loader remains incompatible. Modern official RU assets still require
 signed URLs/cookies; no login or activation checks were bypassed. Russian word
 recognition is not enabled in the application or advertised as ready.
