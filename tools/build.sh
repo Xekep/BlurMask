@@ -4,12 +4,12 @@ cd "$(dirname "$0")/.."
 
 RID="${1:-linux-x64}"
 VERSION="${2:-}"
-version_args=()
+publish_args=(publish ./src/BlurMask/BlurMask.csproj -c Release -r "$RID" --self-contained true -p:PublishAot=true)
 if [[ -n "$VERSION" ]]; then
   if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$ ]]; then
     echo "Invalid application version: $VERSION" >&2; exit 2
   fi
-  version_args+=("-p:Version=$VERSION")
+  publish_args+=("-p:Version=$VERSION")
 fi
 case "$RID" in
   win-x64|win-arm64|linux-x64|linux-arm64|osx-x64|osx-arm64) ;;
@@ -29,11 +29,7 @@ if [[ "$RID" != "$PREFIX"* ]]; then
 fi
 
 echo "Publishing BlurMask (.NET 11 Native AOT) for $RID..."
-dotnet publish ./src/BlurMask/BlurMask.csproj \
-  -c Release \
-  -r "$RID" \
-  --self-contained true \
-  -p:PublishAot=true "${version_args[@]}"
+dotnet "${publish_args[@]}"
 
 case "$RID" in
   linux-x64|osx-x64|osx-arm64)
