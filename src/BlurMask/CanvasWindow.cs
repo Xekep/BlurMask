@@ -65,7 +65,7 @@ internal sealed class CanvasWindow : Window
         Background = new SolidColorBrush(Color.Parse("#F0F3F5"));
         var storage = Program.SmokeTest
             ? Path.Combine(Environment.GetEnvironmentVariable("BLURMASK_SMOKE_ARTIFACTS") ?? Path.GetTempPath(), "canvas-smoke")
-            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "BlurMask");
+            : Path.GetDirectoryName(SettingsStore.PathName)!;
         _statePath = Path.Combine(storage, "canvas.json");
         if (!Program.SmokeTest) LoadState();
         _surface = new CanvasInkSurface(session, this);

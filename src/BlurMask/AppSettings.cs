@@ -104,7 +104,7 @@ internal partial class SettingsJsonContext : JsonSerializerContext;
 
 internal static class SettingsStore
 {
-    internal static string PathName => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "BlurMask", "settings.json");
+    internal static string PathName => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData, Environment.SpecialFolderOption.DoNotVerify), "BlurMask", "settings.json");
     internal static AppSettings Load(string? path = null)
     {
         try
