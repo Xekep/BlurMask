@@ -331,6 +331,10 @@ jobs:
           dotnet run --project tools/LegacyLinguisticMask.Probe -c Release -- .artifacts/legacy-linguistic-mask-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res
           python tools/LegacyLinguisticBinding.Probe/reference_controls.py .artifacts/legacy-linguistic-binding-controls.json
           dotnet run --project tools/LegacyLinguisticBinding.Probe -c Release -- .artifacts/legacy-linguistic-binding-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res
+          python tools/LegacyLinguisticRefresh.Probe/reference_controls.py .artifacts/legacy-linguistic-refresh-controls.json
+          dotnet run --project tools/LegacyLinguisticRefresh.Probe -c Release -- .artifacts/legacy-linguistic-refresh-controls.json
+          python tools/LegacyWordPathBoundary.Probe/reference_controls.py .artifacts/legacy-word-path-boundary-controls.json
+          dotnet run --project tools/LegacyWordPathBoundary.Probe -c Release -- .artifacts/legacy-word-path-boundary-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
           python tools/LegacySourceEndpoint.Probe/reference_controls.py .artifacts/legacy-source-endpoint-controls.json
           dotnet run --project tools/LegacySourceEndpoint.Probe -c Release -- .artifacts/legacy-source-endpoint-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           python tools/handwriting/fetch_russian_track_corpus.py --self-test
@@ -529,6 +533,8 @@ jobs:
             @{ Name = 'LegacyDeferredGraph'; Args = @('.artifacts/legacy-deferred-graph-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyLinguisticMask'; Args = @('.artifacts/legacy-linguistic-mask-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res') },
             @{ Name = 'LegacyLinguisticBinding'; Args = @('.artifacts/legacy-linguistic-binding-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res') },
+            @{ Name = 'LegacyLinguisticRefresh'; Args = @('.artifacts/legacy-linguistic-refresh-controls.json') },
+            @{ Name = 'LegacyWordPathBoundary'; Args = @('.artifacts/legacy-word-path-boundary-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacySourceEndpoint'; Args = @('.artifacts/legacy-source-endpoint-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyVariableWord'; Args = @('.artifacts/legacy-variable-word-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyHandwritingFontSize'; Args = @('.artifacts/font-size-controls.json') }
