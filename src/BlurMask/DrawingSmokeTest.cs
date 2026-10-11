@@ -560,6 +560,7 @@ internal static class DrawingSmokeTest
         var area = (toolbar.Screens.ScreenFromWindow(toolbar) ?? toolbar.Screens.Primary)!.WorkingArea;
         try
         {
+            VerifyRememberedTools(session);
             foreach (var right in new[] { false, true })
             {
                 toolbar.Position = new PixelPoint(right ? area.Right - (int)Math.Ceiling(toolbar.Bounds.Width * toolbar.RenderScaling) - 8 : area.X + 8, area.Y + 16);
@@ -621,6 +622,46 @@ internal static class DrawingSmokeTest
         }
         finally { toolbar.CloseFlyout(); toolbar.Position = originalPosition; }
     }
+    private static void VerifyRememberedTools(DrawingSession session)
+    {
+        var toolbar = session.Toolbar;
+        var original = session.Tool;
+        Button Find(string name) => toolbar.GetVisualDescendants().OfType<Button>().Single(b =>
+            AutomationProperties.GetName(b) == name || AutomationProperties.GetName(b)?.StartsWith(name + " · ", StringComparison.Ordinal) == true);
+        var drawing = Find(AppSettings.Label(ShortcutAction.Pen));
+        var shapes = Find(UiText.T("Линии и фигуры"));
+        var cursor = Find(AppSettings.Label(ShortcutAction.Cursor));
+        void Click(Button button) => button.RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+        try
+        {
+            foreach (var (tool, button) in new[]
+            {
+                (InkTool.Pen, drawing), (InkTool.AiPen, drawing), (InkTool.Highlighter, drawing), (InkTool.Text, drawing),
+                (InkTool.Line, shapes), (InkTool.Arrow, shapes), (InkTool.Rectangle, shapes), (InkTool.Ellipse, shapes),
+                (InkTool.Select, cursor)
+            })
+            {
+                session.SelectTool(tool);
+                toolbar.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.Escape });
+                Check(session.Tool == InkTool.Cursor, "Escape did not return to the ordinary cursor.");
+                Click(button);
+                Check(session.Tool == tool && toolbar.OpenFlyout is null, $"First click did not restore {tool} without opening its menu.");
+                Click(button);
+                Check(toolbar.OpenFlyout is not null, $"Second click did not open the {tool} choices.");
+                toolbar.CloseFlyout();
+                session.SelectTool(InkTool.Eraser);
+                session.ToggleInk(); session.ToggleInk();
+                Click(button);
+                Check(session.Tool == tool && toolbar.OpenFlyout is null, $"Eraser/visibility toggle lost remembered {tool}.");
+            }
+            session.SelectTool(InkTool.Cursor);
+            session.SelectTool(InkTool.Pen);
+            Click(cursor);
+            Check(session.Tool == InkTool.Cursor && toolbar.OpenFlyout is null, "Explicit ordinary cursor choice was not remembered.");
+        }
+        finally { toolbar.CloseFlyout(); session.SelectTool(original); }
+    }
+
     private static void SaveChalkIcon(string directory)
     {
         foreach (var size in new[] { 16, 24, 32, 48, 64, 128, 256 })

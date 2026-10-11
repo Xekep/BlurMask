@@ -218,7 +218,7 @@ internal sealed class CanvasInkSurface : Grid
             return;
         }
         if (_session.HandleSelectionKey(e) || _session.HandleLocalShortcut(e)) return;
-        if (e.Key == Key.Escape) { CancelGesture(); _session.SelectTool(InkTool.Cursor); e.Handled = true; }
+        if (e.Key == Key.Escape) { CancelGesture(); _session.SelectTool(InkTool.Cursor, remember: false); e.Handled = true; }
         else if (!_window.ReadOnly && e.Key == Key.Z && e.KeyModifiers.HasFlag(KeyModifiers.Control))
         {
             CancelGesture();

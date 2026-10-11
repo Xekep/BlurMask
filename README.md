@@ -42,6 +42,9 @@ Icons are drawn as local vector geometry. Reference: [Epic Pen toolbar screensho
 and [official tool guide](https://epicpen.com/userguide).
 
 - The pen menu contains **pen, AI pen, highlighter and text**. Shapes have their own button.
+  Drawing, shape and cursor buttons remember their last mode for the current session.
+  Click an inactive button once to restore that mode; click again to open its choices.
+  Escape and right-click return to the ordinary cursor without forgetting the selected modes.
 - **AI pen** waits 0.8 seconds after the last stroke, then replaces a completed row with one typeset text object.
   Symbols share a font size and baseline; position, bounding size and color are preserved. The pen menu also offers **Recognize now**.
   Recognition processes stroke coordinates locally: English text uses native C#; **Formulas** uses the bundled native CPU runtime.
@@ -62,7 +65,7 @@ and [official tool guide](https://epicpen.com/userguide).
 - Choose five stroke widths, four quick colors, 24 palette colors, or enter a custom hex color.
 - Switch between the desktop, whiteboard, and blackboard without losing annotations.
 - The eye button collapses the toolbar with an animation and hides ink; the chalk logo remains above the closed eye. Click the eye to restore the toolbar. **Minimize to tray** hides it completely; click the tray icon to restore it.
-- The cursor button opens two modes: normal cursor and **Select and move**. Click a drawn object and drag it on the screen or canvas; Delete removes it. Moves support undo/redo.
+- The cursor menu offers two modes: normal cursor and **Select and move**. Click a drawn object and drag it on the screen or canvas; Delete removes it. Moves support undo/redo.
 - Shapes have a separate button. The mask button opens a horizontal strip: each icon creates a new independent mask, and the last button removes all masks.
 - **Follow window** below the mask icons automatically detects the window under each mask's centre. Masks move with the window and scale their position and dimensions as it resizes, hide while it is minimized, and close with it. Moving/resizing a mask by hand updates its attachment. Windows uses out-of-context geometry events; macOS and X11 check geometry every 16 ms. Wayland disables the switch because it does not expose foreign window geometry. Masks remain independent overlays; unrelated application rendering is not modified.
 - The analog timer opens a horizontal strip: off, quick (2 s), long (10 s), very long (30 s), with progressively filled timer icons. Temporary ink fades locally and is excluded from saved/shared boards.

@@ -40,6 +40,9 @@ internal sealed class DrawingSession : IDisposable
     public DrawingTarget Target { get; private set; }
     public CanvasWindow? Canvas { get; private set; }
     public InkTool Tool { get; private set; } = InkTool.Cursor;
+    internal InkTool LastDrawingTool { get; private set; } = InkTool.Pen;
+    internal InkTool LastShapeTool { get; private set; } = InkTool.Line;
+    internal InkTool LastCursorTool { get; private set; } = InkTool.Cursor;
     public Color Color { get => _color; set { if (_color != value) { _previousColor = _color; _color = value; } } }
     public double PenSize { get; set; } = 4;
     public double TextSize { get; set; } = 28;
@@ -146,13 +149,20 @@ internal sealed class DrawingSession : IDisposable
         Toolbar.ClampToScreen();
     }
 
-    public void SelectTool(InkTool tool)
+    public void SelectTool(InkTool tool, bool remember = true)
     {
         if (Tool == InkTool.AiPen && tool != InkTool.AiPen) { _desktopAi.Flush(); _canvasAi.Flush(); }
         Toolbar.CloseFlyout();
         foreach (var overlay in _overlays) { overlay.FinishText(); overlay.CancelGesture(); }
         Canvas?.FinishInput();
         Tool = tool;
+        if (remember)
+            switch (tool)
+            {
+                case InkTool.Pen or InkTool.AiPen or InkTool.Highlighter or InkTool.Text: LastDrawingTool = tool; break;
+                case InkTool.Line or InkTool.Arrow or InkTool.Rectangle or InkTool.Ellipse: LastShapeTool = tool; break;
+                case InkTool.Cursor or InkTool.Select: LastCursorTool = tool; break;
+            }
         if (tool != InkTool.Select) { DesktopSelection.Clear(); CanvasSelection.Clear(); }
         if (tool != InkTool.Cursor) InkVisible = true;
         UpdateState();
@@ -180,8 +190,8 @@ internal sealed class DrawingSession : IDisposable
         if (seconds > 0) _previousFadeSeconds = seconds;
         NotifySettings();
     }
-    public void NewMask() { if (Program.UseNativeWayland) return; SelectScreen(); SelectTool(InkTool.Cursor); _newMask(); }
-    public void CreateMask(PrivacyMode mode) { if (Program.UseNativeWayland) return; SelectScreen(); SelectTool(InkTool.Cursor); _selectMask(mode); }
+    public void NewMask() { if (Program.UseNativeWayland) return; SelectScreen(); SelectTool(InkTool.Cursor, remember: false); _newMask(); }
+    public void CreateMask(PrivacyMode mode) { if (Program.UseNativeWayland) return; SelectScreen(); SelectTool(InkTool.Cursor, remember: false); _selectMask(mode); }
     public void CloseAllMasks() => _closeMask();
     internal int EraseMasks(Point point, double radius) => Tool == InkTool.Eraser && Target == DrawingTarget.Screen && InkVisible
         ? _eraseMasks?.Invoke(point, radius) ?? 0 : 0;
@@ -197,7 +207,7 @@ internal sealed class DrawingSession : IDisposable
         if (Canvas is null) { Canvas = new CanvasWindow(this, isolatedStatePath); Color = Colors.Black; }
         Target = DrawingTarget.Canvas;
         InkVisible = true;
-        if (Tool == InkTool.Cursor) Tool = InkTool.Pen;
+        if (Tool == InkTool.Cursor) Tool = LastDrawingTool;
         Canvas.Show();
         Canvas.Activate();
         UpdateState();
@@ -330,7 +340,7 @@ internal sealed class DrawingSession : IDisposable
     internal void ShowSettings()
     {
         if (_settingsWindow is not null) { _settingsWindow.Activate(); return; }
-        FinishInput(); Toolbar.CloseFlyout(); SelectTool(InkTool.Cursor);
+        FinishInput(); Toolbar.CloseFlyout(); SelectTool(InkTool.Cursor, remember: false);
         var unavailable = UnavailableHotkeys.ToArray();
         _hotkeys?.Dispose(); _hotkeys = null;
         _settingsWindow = new SettingsWindow(this, unavailable);

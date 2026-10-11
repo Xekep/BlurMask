@@ -59,7 +59,7 @@ internal sealed class DesktopInkWindow : Window
             // A compositor's close shortcut should leave this reusable layer
             // available for the next stroke instead of destroying its handle.
             e.Cancel = true;
-            _session.SelectTool(InkTool.Cursor);
+            _session.SelectTool(InkTool.Cursor, remember: false);
         };
         Closed += (_, _) => { CancelGesture(); _hyprlandEffects?.Dispose(); };
         PositionChanged += (_, _) => UpdateControlExclusion();
@@ -128,7 +128,7 @@ internal sealed class DesktopInkWindow : Window
         var point = e.GetCurrentPoint(_surface);
         if (point.Properties.IsRightButtonPressed)
         {
-            _session.SelectTool(InkTool.Cursor);
+            _session.SelectTool(InkTool.Cursor, remember: false);
             e.Handled = true;
             return;
         }
@@ -282,7 +282,7 @@ internal sealed class DesktopInkWindow : Window
             return;
         }
         if (_session.HandleSelectionKey(e) || _session.HandleLocalShortcut(e)) return;
-        if (e.Key == Key.Escape) { _session.SelectTool(InkTool.Cursor); e.Handled = true; }
+        if (e.Key == Key.Escape) { _session.SelectTool(InkTool.Cursor, remember: false); e.Handled = true; }
         else if (e.Key == Key.Z && e.KeyModifiers.HasFlag(KeyModifiers.Control))
         {
             CancelGesture();

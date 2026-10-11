@@ -77,15 +77,11 @@ internal sealed class DrawingToolbarWindow : Window
 
         _eye = IconButton(ToolbarGlyph.Eye, UiText.T("Свернуть панель / скрыть рисунок"), ToggleCollapsed);
         _body.Children.Add(_eye);
-        _cursor = IconButton(ToolbarGlyph.Cursor, UiText.T("Курсор · Ctrl+Shift+1"), ShowCursorModes);
+        _cursor = IconButton(ToolbarGlyph.Cursor, UiText.T("Курсор · Ctrl+Shift+1"), ActivateCursor);
         _body.Children.Add(_cursor);
         _shortcutTips[_cursor] = ShortcutAction.Cursor;
-        _drawing = AddTool(ToolbarGlyph.Pen, UiText.T("Инструменты рисования · Ctrl+Shift+2"), () =>
-        {
-            if (session.Tool is InkTool.Cursor or InkTool.Select or InkTool.Eraser) session.SelectTool(InkTool.Pen);
-            ShowTools();
-        });
-        _shapes = IconButton(ToolbarGlyph.Shapes, UiText.T("Линии и фигуры"), ShowShapes);
+        _drawing = AddTool(ToolbarGlyph.Pen, UiText.T("Инструменты рисования · Ctrl+Shift+2"), ActivateDrawing);
+        _shapes = IconButton(ToolbarGlyph.Shapes, UiText.T("Линии и фигуры"), ActivateShape);
         _shortcutTips[_drawing] = ShortcutAction.Pen;
         _body.Children.Add(_shapes);
         _eraser = AddTool(ToolbarGlyph.Eraser, UiText.T("Ластик · Ctrl+Shift+4"), () => session.SelectTool(InkTool.Eraser));
@@ -163,7 +159,7 @@ internal sealed class DrawingToolbarWindow : Window
         KeyDown += (_, e) =>
         {
             if (session.HandleSelectionKey(e) || session.HandleLocalShortcut(e)) return;
-            if (e.Key == Key.Escape) { CloseFlyout(); session.SelectTool(InkTool.Cursor); e.Handled = true; }
+            if (e.Key == Key.Escape) { CloseFlyout(); session.SelectTool(InkTool.Cursor, remember: false); e.Handled = true; }
         };
         Closed += (_, _) => session.StateChanged -= Refresh;
         Refresh();
@@ -229,15 +225,14 @@ internal sealed class DrawingToolbarWindow : Window
             if (action == ShortcutAction.Undo) tip += " · " + UiText.T("ПКМ — повторить");
             ToolTip.SetTip(button, tip); AutomationProperties.SetName(button, tip);
         }
-        _cursor.Background = _session.Tool is InkTool.Cursor or InkTool.Select ? Cyan : Brushes.Transparent;
-        _cursor.Content = new ToolbarIcon(_session.Tool == InkTool.Select ? ToolbarGlyph.Select : ToolbarGlyph.Cursor) { Width = 23, Height = 23 };
+        _cursor.Background = _session.Tool == _session.LastCursorTool ? Cyan : Brushes.Transparent;
+        _cursor.Content = new ToolbarIcon(GlyphFor(_session.LastCursorTool)) { Width = 23, Height = 23 };
         _eraser.Background = _session.Tool == InkTool.Eraser ? Cyan : Brushes.Transparent;
         var isShape = _session.Tool is InkTool.Line or InkTool.Arrow or InkTool.Rectangle or InkTool.Ellipse;
         _drawing.Background = _session.Tool is InkTool.Pen or InkTool.Highlighter or InkTool.Text or InkTool.AiPen ? Cyan : Brushes.Transparent;
-        _drawing.Content = new ToolbarIcon(isShape || _session.Tool is InkTool.Cursor or InkTool.Select or InkTool.Eraser
-            ? ToolbarGlyph.Pen : GlyphFor(_session.Tool)) { Width = 23, Height = 23 };
+        _drawing.Content = new ToolbarIcon(GlyphFor(_session.LastDrawingTool)) { Width = 23, Height = 23 };
         _shapes.Background = isShape ? Cyan : Brushes.Transparent;
-        _shapes.Content = new ToolbarIcon(isShape ? GlyphFor(_session.Tool) : ToolbarGlyph.Shapes) { Width = 23, Height = 23 };
+        _shapes.Content = new ToolbarIcon(GlyphFor(_session.LastShapeTool)) { Width = 23, Height = 23 };
         _fading.Background = _session.FadeSeconds > 0 ? Cyan : Brushes.Transparent;
         _fading.Content = new ToolbarIcon(ToolbarGlyph.Fading, timerFraction: _session.FadeSeconds switch { 2 => .25, 10 => .5, 30 => .9, _ => 0 }) { Width = 23, Height = 23 };
         _selectedColor.Background = new SolidColorBrush(_session.Color);
@@ -254,6 +249,24 @@ internal sealed class DrawingToolbarWindow : Window
         InkTool.Rectangle => ToolbarGlyph.Rectangle, InkTool.Ellipse => ToolbarGlyph.Ellipse,
         _ => ToolbarGlyph.Pen
     };
+
+    private void ActivateDrawing()
+    {
+        if (_session.Tool is InkTool.Pen or InkTool.AiPen or InkTool.Highlighter or InkTool.Text) ShowTools();
+        else _session.SelectTool(_session.LastDrawingTool);
+    }
+
+    private void ActivateShape()
+    {
+        if (_session.Tool is InkTool.Line or InkTool.Arrow or InkTool.Rectangle or InkTool.Ellipse) ShowShapes();
+        else _session.SelectTool(_session.LastShapeTool);
+    }
+
+    private void ActivateCursor()
+    {
+        if (_session.Tool == _session.LastCursorTool) ShowCursorModes();
+        else _session.SelectTool(_session.LastCursorTool);
+    }
 
     public void ShowTools()
         => ShowToolChoices("tools", _drawing, [(InkTool.Pen, UiText.T("Перо")), (InkTool.AiPen, UiText.T("AI-перо")), (InkTool.Highlighter, UiText.T("Маркер")), (InkTool.Text, UiText.T("Текст"))]);
