@@ -68,6 +68,32 @@ public sealed class LegacyRussianCursiveWordRecognizer
     }
 
     /// <summary>
+    /// Ordinary resource-configured ingress, per-physical-stroke enclosure and
+    /// cuts, with raw chronology preserved through deduplication/insertion.
+    /// SourceStrokeProbability in options is unused on this endpoint: cut and
+    /// final-cache consumers receive the actual vector, never a scalar average.
+    /// Source-order seed/context frame and bounded beam remain original policy.
+    /// Scope flags remain explicit; whole scope is supported only for a single
+    /// complete physical range. This is not SDK-equivalent automatic recognition.
+    /// </summary>
+    public LegacyCursiveWordRecognitionResult RecognizeOrdinarySourceWithFinalCache(
+        IReadOnlyList<InkStroke> rawSource, LegacyOrdinarySourceProfile sourceProfile,
+        LegacyCursiveWordSearchOptions options, LegacyCursiveFinalCacheGroupScorer finalCacheScorer,
+        Func<LegacyCursiveCandidateGroup, LegacyPreparedGlyphClassification, LegacyOrdinaryAcousticCacheContext> sourceScope,
+        bool useEndCompositeMap, bool zeroFirstId, bool useNativeShortlist,
+        ReadOnlySpan<uint> history = default, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(options); ArgumentNullException.ThrowIfNull(finalCacheScorer);
+        ArgumentNullException.ThrowIfNull(sourceScope);
+        var prepared = LegacyOrdinaryCursiveCutSource.Generate(rawSource, sourceProfile,
+            options.SourceBaseline, options.SourceHeight, cancellationToken: cancellationToken);
+        return RecognizePreparedDiagnostic(prepared.Source.Strokes, options, history, (group, glyph) =>
+            finalCacheScorer.Score(glyph, prepared.BindCacheProbability(sourceScope(group, glyph), glyph.Geometry),
+                options.SourceHeight, 0, useEndCompositeMap, zeroFirstId, useNativeShortlist, cancellationToken).Choices,
+            null, cancellationToken, prepared);
+    }
+
+    /// <summary>
     /// The supplied source is one ordinary word in source stroke order. Original
     /// timestamps are not invented: the ordinary unsampled key writer uses
     /// (0,stroke,point). Inserted-cut points retain that raw identity. Optional
@@ -119,12 +145,12 @@ public sealed class LegacyRussianCursiveWordRecognizer
         Func<LegacyCursiveCandidateGroup, LegacyPreparedGlyphClassification,
             ReadOnlyMemory<LegacyIntegerLexicalCandidate>>? costAdapter,
         Func<LegacyCursiveCutResult, LegacyCursiveCandidateLattice>? latticeFactory,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, LegacyOrdinaryCursiveCutSource? ordinarySource = null)
     {
         ArgumentNullException.ThrowIfNull(source); ArgumentNullException.ThrowIfNull(options);
         cancellationToken.ThrowIfCancellationRequested();
         if (!float.IsFinite(options.SourceBaseline) || !float.IsFinite(options.SourceHeight) || options.SourceHeight <= 0 ||
-            !float.IsFinite(options.SourceStrokeProbability) || options.SourceStrokeProbability is < 0 or > 1 || !float.IsFinite(options.LanguageScale) || options.LanguageScale <= 0 ||
+            (ordinarySource is null && (!float.IsFinite(options.SourceStrokeProbability) || options.SourceStrokeProbability is < 0 or > 1)) || !float.IsFinite(options.LanguageScale) || options.LanguageScale <= 0 ||
             !float.IsFinite(options.CostMultiplier) || options.CostMultiplier <= 0 ||
             !float.IsFinite(options.ContextLeftGapOffset) || !float.IsFinite(options.ContextLeftVariance) || options.ContextLeftVariance <= 0 ||
             !float.IsFinite(options.ContextRightVariance) || options.ContextRightVariance <= 0 ||
@@ -133,10 +159,10 @@ public sealed class LegacyRussianCursiveWordRecognizer
             options.MaximumExpandedChoices is < 1 or > 100_000_000 || options.TotalCostLimit > LegacyWordCandidateScorer.ImpossibleCost)
             throw new ArgumentException("Invalid explicit cursive line/search policy.", nameof(options));
         var historySnapshot = history.ToArray();
-        var cuts = LegacyCursiveCutProducer.GenerateRussianVersion106(source, options.SourceBaseline,
+        var cuts = ordinarySource?.Cuts ?? LegacyCursiveCutProducer.GenerateRussianVersion106(source, options.SourceBaseline,
             options.SourceHeight, options.SourceStrokeProbability, cancellationToken: cancellationToken);
         int[] rawCounts = source.Select(s => s.Points.Count).ToArray();
-        var chronology = LegacySourcePointChronology.CreateOrdinary(rawCounts).WithInsertedPreparedInk(cuts.PreparedInk, cancellationToken);
+        var chronology = ordinarySource?.Chronology ?? LegacySourcePointChronology.CreateOrdinary(rawCounts).WithInsertedPreparedInk(cuts.PreparedInk, cancellationToken);
         // Ordinary physical boundary service records are initialized to -1.
         // Source-order atoms are an explicit original seed policy; the large
         // native line reorder/skip/special-token controller is not inferred.
