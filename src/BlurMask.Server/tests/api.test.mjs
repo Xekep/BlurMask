@@ -13,6 +13,9 @@ test('conditional reads validate credentials, role and current revision before r
   const read=(key,etag)=>fetch(base+path,{headers:{Authorization:'Bearer '+key,'If-None-Match':etag}});
   const unchanged=await read(access.editKey,tag);
   assert.equal(unchanged.status,304); assert.equal(await unchanged.text(),'');
+  const weakTag=tag.startsWith('W/')?tag:'W/'+tag;
+  assert.equal((await read(access.editKey,weakTag)).status,304);
+  assert.equal((await read('x'.repeat(43),weakTag)).status,404);
   const denied=await read('x'.repeat(43),tag);
   assert.equal(denied.status,404); assert.equal(denied.headers.get('etag'),null);
   const view=await read(access.viewKey,tag);

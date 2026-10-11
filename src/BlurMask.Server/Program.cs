@@ -86,6 +86,8 @@ api.MapPost("", async (CreateBoardRequest request, BoardStore store, Cancellatio
 api.MapGet("/{id:guid}", async (Guid id, HttpContext context, BoardStore store, CancellationToken ct) =>
 {
     var tag = context.Request.Headers.IfNoneMatch.ToString();
+    // GET uses weak comparison: compression proxies can prefix our revision tag with W/.
+    if (tag.StartsWith("W/", StringComparison.Ordinal)) tag = tag[2..];
     var prefix = $"\"{id:N}-";
     var readOnly = tag.EndsWith("-v\"", StringComparison.Ordinal);
     long? known = tag.StartsWith(prefix, StringComparison.Ordinal) && tag.Length > prefix.Length + 3 &&
