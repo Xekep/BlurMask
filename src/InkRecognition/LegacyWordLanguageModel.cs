@@ -16,6 +16,10 @@ public sealed class LegacyWordLanguageModel
     public int WordCount { get; }
     public int ClassCount { get; }
     public int DeclaredBigramCount { get; }
+    /// <summary>First stored codebook level, not a scan of actual word frequencies.</summary>
+    public int GetStoredInitialWordLevel() => _wordLevels[0];
+    /// <summary>First stored unigram/bigram codebook level; no runtime history is selected.</summary>
+    public int GetStoredInitialClassLevel(bool bigram) => (bigram ? _bigramLevels : _unigramLevels)[0];
     public int StorageBytes => _classes.Length + _wordCodes.Length + _unigramCodes.Length + _bigramCodes.Length +
         4 * (_wordLevels.Length + _unigramLevels.Length + _bigramLevels.Length);
 

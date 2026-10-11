@@ -55,6 +55,9 @@
     <Project Path="tools/LegacyWordCandidate.Probe/LegacyWordCandidate.Probe.csproj" />
     <Project Path="tools/LegacyIntegerWord.Probe/LegacyIntegerWord.Probe.csproj" />
     <Project Path="tools/LegacyCursiveHorizontal.Probe/LegacyCursiveHorizontal.Probe.csproj" />
+    <Project Path="tools/LegacyCursiveLoops.Probe/LegacyCursiveLoops.Probe.csproj" />
+    <Project Path="tools/LegacySparseLineEstimator.Probe/LegacySparseLineEstimator.Probe.csproj" />
+    <Project Path="tools/LegacyWordBound.Probe/LegacyWordBound.Probe.csproj" />
     <Project Path="tools/InkMath.Solver.Probe/InkMath.Solver.Probe.csproj" />
   </Folder>
 </Solution>

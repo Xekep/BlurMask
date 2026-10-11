@@ -247,6 +247,13 @@ jobs:
           dotnet run --project tools/LegacyIntegerWord.Probe -c Release -- models/ru-RU/ru_RU-lk-text.lite.res
           python tools/LegacyCursiveHorizontal.Probe/reference_controls.py .artifacts/cursive-horizontal-controls.json
           dotnet run --project tools/LegacyCursiveHorizontal.Probe -c Release -- .artifacts/cursive-horizontal-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/LegacyCursiveLoops.Probe/reference_controls.py .artifacts/cursive-loop-controls.json
+          dotnet run --project tools/LegacyCursiveLoops.Probe -c Release -- .artifacts/cursive-loop-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/LegacySparseLineEstimator.Probe/reference_controls.py .artifacts/sparse-line-controls.json
+          dotnet run --project tools/LegacySparseLineEstimator.Probe -c Release -- .artifacts/sparse-line-controls.json
+          python tools/LegacyWordBound.Probe/reference_controls.py .artifacts/word-bound-controls.json
+          dotnet run --project tools/LegacyWordBound.Probe -c Release -- --controls .artifacts/word-bound-controls.json
+          dotnet run --project tools/LegacyWordBound.Probe -c Release -- models/ru-RU/ru_RU-lk-text.lite.res
       - name: Legacy stored word and class language costs
         run: |
           python tools/LegacyWordLanguage.Probe/reference_controls.py models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-language-controls.json
@@ -394,7 +401,10 @@ jobs:
             @{ Name = 'LegacyWordCandidate'; Args = @('--controls', '.artifacts/word-candidate-controls.json') }
             @{ Name = 'LegacyLineGroupSearch'; Args = @('.artifacts/line-group-search-controls.json') },
             @{ Name = 'LegacyIntegerWord'; Args = @('--controls', '.artifacts/integer-word-controls.json') },
-            @{ Name = 'LegacyCursiveHorizontal'; Args = @('.artifacts/cursive-horizontal-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') }
+            @{ Name = 'LegacyCursiveHorizontal'; Args = @('.artifacts/cursive-horizontal-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyCursiveLoops'; Args = @('.artifacts/cursive-loop-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacySparseLineEstimator'; Args = @('.artifacts/sparse-line-controls.json') },
+            @{ Name = 'LegacyWordBound'; Args = @('--controls', '.artifacts/word-bound-controls.json') }
           )
           foreach ($case in $cases) {
             $name = $case.Name
@@ -408,6 +418,8 @@ jobs:
           }
           $suffix = if ($IsWindows) { '.exe' } else { '' }
           & "./.artifacts/LegacyIntegerWord-native/LegacyIntegerWord.Probe$suffix" models/ru-RU/ru_RU-lk-text.lite.res
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & "./.artifacts/LegacyWordBound-native/LegacyWordBound.Probe$suffix" models/ru-RU/ru_RU-lk-text.lite.res
           exit $LASTEXITCODE
 
   symbolic-math:

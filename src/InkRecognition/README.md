@@ -319,3 +319,11 @@ crossings and the final marker controller remain separate missing stages.
 connects supplied integer glyph choices to dictionary identity and ordinary
 lexical terminal scoring before final beam pruning. The bundle factory uses
 the verified stored source profile, with explicit runtime scale and flags.
+
+[`LegacyCursiveLoopCuts`](../../docs/legacy-russian-cursive-loop-cuts.md) restores
+finite-segment intersections, reversal spacing and inserted loop-tag ownership.
+[`LegacySparseLineEstimator`](../../docs/legacy-automatic-baseline.md) restores
+the automatic type24a branch for sparse input and explicitly declines geometry
+requiring the unfinished dense Gaussian fit. [`LegacyWordInitialLanguageBound`](../../docs/legacy-russian-word-initial-bound.md)
+exposes the native cache's first-codebook bound; it excludes boundary/category
+terms and is not used as a universal mathematical pruning bound.
