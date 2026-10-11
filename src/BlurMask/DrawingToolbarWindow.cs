@@ -531,6 +531,7 @@ internal sealed class DrawingToolbarWindow : Window
     }
 
     private Control? _flyoutAnchor;
+    internal Task ScreenshotActionTask { get; private set; } = Task.CompletedTask;
     internal void ShowScreenshotActions(byte[] png, PixelRect region)
     {
         var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 2 };
@@ -555,23 +556,28 @@ internal sealed class DrawingToolbarWindow : Window
         };
         var copy = IconButton(ToolbarGlyph.Copy, UiText.T("Копировать снимок"), () => { });
         copy.IsEnabled = Clipboard is not null;
-        copy.Click += async (_, _) =>
-        {
-            CloseFlyout();
-            try
-            {
-                if (Clipboard is null) return;
-                using var memory = new MemoryStream(png, writable: false);
-                using var bitmap = new Bitmap(memory);
-                await Clipboard.SetBitmapAsync(bitmap);
-            }
-            catch (Exception ex) { ShowMessage(UiText.T("Не удалось скопировать снимок"), ex.Message); }
-        };
+        copy.Click += (_, _) => ScreenshotActionTask = CopyScreenshotAsync(png);
         row.Children.Add(save); row.Children.Add(copy);
         row.Children.Add(IconButton(ToolbarGlyph.Close, UiText.T("Отмена"), CloseFlyout));
         ShowFlyout("screenshot", row, _handle);
         _flyoutRegionAnchor = region;
         PlaceFlyout();
+    }
+
+    private async Task CopyScreenshotAsync(byte[] png)
+    {
+        CloseFlyout();
+        try
+        {
+            if (Clipboard is not { } clipboard) return;
+            var transfer = new ClipboardBitmapTransfer(png);
+            try { await clipboard.SetDataAsync(transfer); }
+            catch { transfer.Dispose(); throw; }
+            // Windows materializes delayed formats, preserving the screenshot
+            // when the application exits. Other backends keep transfer ownership.
+            await clipboard.FlushAsync();
+        }
+        catch (Exception ex) { ShowMessage(UiText.T("Не удалось скопировать снимок"), ex.Message); }
     }
 
     internal void ShowUpdateAvailable(string version)

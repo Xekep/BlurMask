@@ -678,9 +678,9 @@ internal static class DrawingSmokeTest
         Check(buttons.Length == 3 && buttons.All(b => b.Content is ToolbarIcon), "Screenshot actions must be a horizontal icon strip.");
         buttons.Single(b => AutomationProperties.GetName(b) == UiText.T("Копировать снимок"))
             .RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
-        await Task.Delay(150);
+        await session.Toolbar.ScreenshotActionTask.WaitAsync(TimeSpan.FromSeconds(5));
         using var bitmap = await session.Toolbar.Clipboard!.TryGetBitmapAsync();
-        Check(bitmap?.PixelSize == new PixelSize(120, 90), "Screenshot clipboard did not contain the selected area.");
+        Check(bitmap?.PixelSize == new PixelSize(120, 90), $"Screenshot clipboard did not contain the selected area: {bitmap?.PixelSize.ToString() ?? "empty"}.");
         var cancel = session.CaptureScreenshotAsync(); await Task.Delay(60); session.CancelScreenshot();
         await cancel.WaitAsync(TimeSpan.FromSeconds(10));
         Check(!session.PickingScreenshot && session.Toolbar.IsVisible && session.Toolbar.OpenFlyout is null, "Screenshot cancel left an input layer or actions open.");

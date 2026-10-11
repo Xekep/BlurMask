@@ -481,12 +481,13 @@ internal sealed class DrawingSession : IDisposable
             byte[] png;
             try { await Task.Run(() => DesktopInkNative.SaveScreenshot(path, region)); png = await File.ReadAllBytesAsync(path); }
             finally { File.Delete(path); }
+            if (_disposed || _inTray) return;
             Toolbar.Show();
             Toolbar.ShowScreenshotActions(png, region.Value);
         }
         catch (Exception ex)
         {
-            if (!_disposed) { Toolbar.Show(); Toolbar.ShowMessage(UiText.T("Не удалось сохранить снимок"), ex.Message); }
+            if (!_disposed && !_inTray) { Toolbar.Show(); Toolbar.ShowMessage(UiText.T("Не удалось сохранить снимок"), ex.Message); }
         }
         finally
         {
