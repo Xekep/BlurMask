@@ -154,6 +154,8 @@ internal static class AiPenProbe
             ("\\sqrt{9}", "\\sqrt{9}", false), ("\\sqrt{9}=", "\\sqrt{9}=3", true),
             ("2^{3}", "2^{3}", false), ("2^{3}=", "2^{3}=8", true),
             ("42", "42", false), ("42=", "42=42", true), ("1/0=", "1/0=", false),
+            ("\\frac{1}{0}=", "\\frac{1}{0}=", false), ("\\sqrt{-1}=", "\\sqrt{-1}=", false),
+            ("0^{0}=", "0^{0}=", false), ("x=", "x=", false),
             ("y=3x+2", "y=3x+2", false), ("\\frac{1}{x}", "\\frac{1}{x}", false)
         })
         {
