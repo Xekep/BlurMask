@@ -1,17 +1,29 @@
 using InkRecognition;
 using InkRecognition.Math;
+using InkRecognition.RawContent;
 
 namespace BlurMask;
 
-// Text is cheap and gets first refusal. Load the formula engine only for
-// mathematical notation or uncertain text; never compare unrelated model scores.
+// An installed raw-content model partitions mixed ink before either decoder runs.
+// Without a model, retain the previous conservative text-first fallback.
 internal static class AiAutomaticLayout
 {
     internal static IReadOnlyList<AiInkLayout.Result> Recognize(IReadOnlyList<InkMark> strokes,
         IStrokeTextRecognizer? textRecognizer = null,
         Func<IReadOnlyList<InkStroke>, CancellationToken, MathRecognitionResult?>? mathRecognizer = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Func<IReadOnlyList<InkStroke>, CancellationToken, RawContentResult?>? rawAnalyzer = null)
     {
+        if (strokes.Count == 0 || strokes.Count > 256 || strokes.Sum(s => (long)s.Points.Count) > 20000) return [];
+        cancellationToken.ThrowIfCancellationRequested();
+        // Explicit injected decoders keep tests/reusers independent of the user's
+        // installed assets. Production uses the optional local analyzer automatically.
+        if (rawAnalyzer is not null || textRecognizer is null && mathRecognizer is null && AiRawContentModels.Installed)
+        {
+            var ink = strokes.Select(s => new InkStroke(s.Points.Select(p => new InkPoint((float)p.X, (float)p.Y)).ToArray())).ToArray();
+            var classified = (rawAnalyzer ?? AiRawContentModels.Analyze)(ink, cancellationToken);
+            if (classified is not null) return RecognizeRegions(strokes, classified, textRecognizer, mathRecognizer, cancellationToken);
+        }
         var text = AiInkLayout.Recognize(strokes, textRecognizer, cancellationToken);
         var complete = text.SelectMany(r => r.Strokes).Distinct().Count() == strokes.Count;
         if (complete && text.Count > 0 && text.All(r => r.Confidence >= .85f && NaturalText(r.Text.Text))) return text;
@@ -34,6 +46,29 @@ internal static class AiAutomaticLayout
                 result.Text.AddPoint(bounds.BottomRight + new Avalonia.Vector(Math.Min(100000 - bounds.Right, AiMathLayout.ResultWidth(original, calculated, bounds.Height)), 0));
             }
         return text.Where(r => r.Confidence >= .85f).ToArray();
+    }
+
+    private static IReadOnlyList<AiInkLayout.Result> RecognizeRegions(IReadOnlyList<InkMark> strokes, RawContentResult classification,
+        IStrokeTextRecognizer? textRecognizer, Func<IReadOnlyList<InkStroke>, CancellationToken, MathRecognitionResult?>? mathRecognizer,
+        CancellationToken token)
+    {
+        var results = new List<AiInkLayout.Result>(); var used = new HashSet<int>();
+        foreach (var region in classification.Regions)
+        {
+            token.ThrowIfCancellationRequested();
+            if (region.Category is not (InkCategory.Text or InkCategory.Math) || !float.IsFinite(region.Confidence) || region.Confidence < .85f ||
+                region.StrokeIndices.Count == 0 || region.StrokeIndices.Any(i => i < 0 || i >= strokes.Count || used.Contains(i)) ||
+                region.StrokeIndices.Distinct().Count() != region.StrokeIndices.Count) continue;
+            // Preserve chronology, colors and fading; neither decoder crosses a
+            // classifier boundary, and no drawing/uncertain stroke is substituted.
+            var members = region.StrokeIndices.Order().Select(i => strokes[i]).ToArray();
+            var decoded = region.Category == InkCategory.Text ? AiInkLayout.Recognize(members, textRecognizer, token) :
+                AiMathLayout.Recognize(members, mathRecognizer, token);
+            if (decoded.Count == 0 || decoded.Any(r => !float.IsFinite(r.Confidence) || r.Confidence < .85f) ||
+                decoded.SelectMany(r => r.Strokes).Distinct().Count() != members.Length) continue;
+            results.AddRange(decoded); foreach (var i in region.StrokeIndices) used.Add(i);
+        }
+        return results;
     }
 
     private static bool NaturalText(string value) => value.Any(char.IsLetter) &&

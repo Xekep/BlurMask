@@ -10,6 +10,8 @@ obj/
 *.pyc
 *.ikrpack
 *.ikrmath
+*.ikrraw
+!tools/InkRecognition.RawContent.Probe/runtime-fixture.ikrraw
 **/.env
 **/.data/
 **/node_modules/

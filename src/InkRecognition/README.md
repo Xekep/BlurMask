@@ -46,3 +46,18 @@ Current limits: whole-word geometry is heuristic; CTC has no lexical language
 model; Russian and Math2 are not implemented here. Confidence is an acoustic
 score. This is an experimental engine, not a reproduction of the complete
 MyScript SDK.
+
+The legacy RU investigation has a separate experimental API:
+`LegacyInkNetwork.Load` reads a complete FEA0/version106 classifier, while
+`LegacyStrokeFeatures.ExtractIsolatedInput` builds its 247 channels from one
+complete quantized stroke. The caller supplies weights and activation tables.
+This path has no NuGet or native dependencies and passes Native AOT checks.
+It does not implement `IStrokeTextRecognizer`: joined Russian handwriting still
+needs multi-stroke profiles, segmentation, ensemble and language decoding.
+
+Run `dotnet run --project tools/LegacyInk.Probe -c Release` from the repository
+root for vendor-free format, integer and geometry checks. The probe also supports
+`--glyph-cases resource.res tools/LegacyInk.Probe/isolated-ru-i.json activations.json`
+to verify four original synthetic **И** controls against locally supplied assets.
+Those controls test a narrow raw-ink path; they are not a handwriting accuracy
+benchmark. See [the evidence and current limits](../../docs/ink-math-engine.md#russian-text-preparation).

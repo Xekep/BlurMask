@@ -37,6 +37,7 @@
     <AvaloniaResource Include="Assets/**" />
     <ProjectReference Include="../InkRecognition/InkRecognition.csproj" />
     <ProjectReference Include="../InkRecognition.Math/InkRecognition.Math.csproj" />
+    <ProjectReference Include="../InkRecognition.RawContent/InkRecognition.RawContent.csproj" />
     <Compile Include="../BlurMask.Shared/*.cs" Link="Shared/%(Filename)%(Extension)" />
     <Compile Include="../../tools/InkRecognitionChecks.cs" Link="Diagnostics/InkRecognitionChecks.cs" />
     <None Include="../../docs/licenses/*.txt;../../docs/THIRD-PARTY-NOTICES.txt"

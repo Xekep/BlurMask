@@ -122,6 +122,12 @@ jobs:
         run: dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --ai-pen-test
       - name: Math token formatter and model guards
         run: dotnet run --project tools/InkRecognition.Math.Probe -c Release
+      - name: Raw-content geometry, mixed segmentation and model guards
+        run: dotnet run --project tools/InkRecognition.RawContent.Probe -c Release
+      - name: Legacy integer network and Russian feature numerical controls
+        run: dotnet run --project tools/LegacyInk.Probe -c Release
+      - name: Bounded legacy resource parser controls
+        run: python tools/test-legacy-ink.py
       - name: Overlay compositor IPC ownership, cancellation and transport
         run: dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --overlay-platform-test
 
@@ -413,3 +419,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Math formatter/model guards failed.' }
           & $exe --runtime-native ".artifacts/formula-app/runtimes/$rid/native/$lib"
           if ($LASTEXITCODE -ne 0) { throw 'Native formula ABI/inference/cancellation failed.' }
+          dotnet publish tools/InkRecognition.RawContent.Probe/InkRecognition.RawContent.Probe.csproj -c Release -r $rid -p:PublishAot=true -o .artifacts/raw-content-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Raw-content probe publish failed.' }
+          $raw = if ($IsWindows) { '.artifacts/raw-content-probe/InkRecognition.RawContent.Probe.exe' } else { '.artifacts/raw-content-probe/InkRecognition.RawContent.Probe' }
+          & $raw
+          if ($LASTEXITCODE -ne 0) { throw 'Raw-content feature/segmentation checks failed.' }
+          & $raw --runtime-native ".artifacts/formula-app/runtimes/$rid/native/$lib"
+          if ($LASTEXITCODE -ne 0) { throw 'Raw-content native CPU ABI checks failed.' }

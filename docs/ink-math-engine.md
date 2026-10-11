@@ -128,15 +128,61 @@ A legacy `ru_RU-ak-cur.lite.res` was found in an older
 The 572,763-byte acoustic resource has SHA256
 `7a5f08809e81fb4a2d4c78b3efd251d0986503b0d30d21de3695dab1f8a89978`.
 Its root type247/version10d/build07000000 contains eight feedforward networks,
-not the type5f/21e BLSTM adapters used by the current English engine. All eight
-networks and sixteen matrix/row-scale pairs were read with exact byte coverage;
-an independent integer/LUT prototype passed 32 supplied-vector controls.
-The Cyrillic alphabet, including Ё/ё, was extracted. This is model preparation,
-not working recognition from raw Russian handwriting.
+not the type5f/21e BLSTM adapters used by the current English engine. Both
+type21d/version110 configurations are now parsed to their exact ends, including
+seven submodel slots per profile and global tables. All eight networks and
+sixteen matrix/row-scale pairs have exact byte coverage. The Cyrillic alphabet,
+including Ё/ё, was extracted. No vendor weights or activation tables are included
+in the reusable implementation or release.
 
-The old 246/228/255/237/312-dimensional feature extractors, model selector,
-classifier-to-alphabet mapping, and segmentation/dictionary decoder remain
-unknown. Its 180 classifier outputs must not be assumed to be alphabet IDs or
-CTC outputs. The English loader is incompatible. Modern official RU assets still
-require signed URLs/cookies; no login or activation checks were bypassed.
-No Russian model is distributed or advertised as ready.
+`LegacyInkNetwork` loads the observed FEA0/version106, exponent-10, row-scaled
+int8 MLP format. It preserves scalar int32 wrap, signed-byte weights, hidden bias,
+and caller-supplied tanh/sigmoid lookup tables. The **full stored input widths**
+are 30, 247, 229, 256, 238 and 313; the old claim of 246/228/etc. omitted a channel
+incorrectly. These input vectors have no automatically inserted global bias.
+
+The backward-compatible extractor was found in the existing modern Text DLL.
+`LegacyStrokeFeatures` implements its first **single-stroke** trajectory profile:
+integer normalization into a 128×128 grid, 30-point integer arc-length resampling,
+210 pen-state/coordinate/tangent/curvature channels, and seven shape statistics.
+The native small-distance lookup equals `round(sqrt(n))` for every one of its
+16,384 entries, so the implementation derives it without distributing that table.
+An isolated complete glyph with no preceding candidates uses 28 context channels
+of -1024 and two boundary channels of +1024, producing the 247-input first model.
+This path does not segment a multi-stroke glyph, word, or joined handwriting.
+
+Static evidence for that layout is Text `18000ac70` (registration), `180007470`
+(normalization), `180007b20` (resampling), `180008290` (trajectory), `180008770`
+(statistics), `1801b75b0` (channel assembly), `1801ca5f0` (empty prior context),
+and `1800ebb20`/`1800ebb60` (int16 copy and float-to-fixed conversion). Text
+`1801bcbd0` maps canonical labels below the classifier width directly to network
+slots `label+1`; the extra slot is the output bias. Thus emitted rows 0..179 have
+the default canonical alphabet IDs 0..179. Virtual labels 180+ and contextual
+overrides still need their separate decoder rules. These are not CTC outputs.
+The second configuration's 192×4×2 global float table is model-major center/slope
+calibration: `18013e8e0` computes `sigmoid((score-center)*slope)`.
+
+Headless verification passed in managed .NET and Windows Native AOT: synthetic
+format/overflow/geometry/cancellation tests, 32 supplied-vector comparisons for
+all eight actual networks, and 60 raw-stroke/network comparisons on 30 synthetic
+strokes against an independent Python implementation. The checked-in
+`tools/LegacyInk.Probe/isolated-ru-i.json` supplies original four-point Cyrillic
+**И** controls: the actual RU trajectory model ranks canonical output 70 first
+for the original, translated, and two scaled variants. This is a concrete raw-ink
+result, **not a natural-handwriting accuracy benchmark**. Other geometric letters
+still confuse Latin/Russian lookalikes or symbols when ranked by one model alone.
+
+Reproduce the vendor-free tests with `python tools/test-legacy-ink.py` and
+`dotnet run --project tools/LegacyInk.Probe -c Release`. With locally supplied
+resource and activation JSON, use `--glyph-cases resource.res
+tools/LegacyInk.Probe/isolated-ru-i.json activations.json`, or `--raw-controls`
+with a local reference control file. Private static exports and controls are
+ignored under `.artifacts/myscript-analysis/output/RussianAssetsSearch` and
+`RussianExtractorStage2` through `RussianExtractorStage5`.
+
+Remaining work: multi-stroke/pen-up extraction, raster and baseline profiles,
+ensemble score conversion/calibration, cursive segmentation, virtual-label and
+language/dictionary decoding, and validation on representative Russian ink.
+The English loader remains incompatible. Modern official RU assets still require
+signed URLs/cookies; no login or activation checks were bypassed. Russian word
+recognition is not enabled in the application or advertised as ready.

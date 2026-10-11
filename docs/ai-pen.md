@@ -13,10 +13,13 @@ and digits have been verified. Russian raw-stroke recognition is not ready.
 The separate **Formulas** mode uses the reusable native
 [InkRecognition.Math module](ink-math-engine.md) and a user-installed Math2 pack.
 The default **Automatic** mode selects text or mathematical notation after the
-pause. Confident natural text avoids loading the formula engine; numeric/operator
-input and uncertain text can use the Math2 model. **Text** and **Formulas** remain
-explicit overrides. Auto uses a conservative confidence guard, not a universal
-classifier, and ambiguous input stays handwritten.
+pause. With an installed [Raw Content2 pack](raw-content-engine.md), a separate
+local neural analyzer first partitions text and formula regions in a mixed batch;
+drawings and uncertain regions stay handwritten. Each region uses its own decoder.
+Without this optional pack, confident natural text avoids loading the formula
+engine; numeric/operator input and uncertain text can use the Math2 model.
+**Text** and **Formulas** remain explicit overrides. The analyzer does not add
+Russian handwriting recognition, and the recovered pipeline is experimental.
 
 Numeric arithmetic appends an answer only after a trailing equals sign:
 `2+2` stays `2+2`, while `2+2=` becomes `2+2=4`. A written right-hand side is

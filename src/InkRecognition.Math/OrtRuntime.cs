@@ -40,13 +40,13 @@ internal sealed unsafe class OrtRuntime : IDisposable
         catch { Dispose(); throw; }
     }
 
-    public OrtSession CreateSession(ReadOnlyMemory<byte> model, string[] inputs, string[] outputs)
+    public OrtSession CreateSession(ReadOnlyMemory<byte> model, string[] inputs, string[] outputs, int threads = 2)
     {
         nint options = 0, session = 0;
         try
         {
             Check(((delegate* unmanaged<nint*, nint>)Slot(10))(&options));
-            Check(((delegate* unmanaged<nint, int, nint>)Slot(24))(options, 2));
+            Check(((delegate* unmanaged<nint, int, nint>)Slot(24))(options, threads));
             Check(((delegate* unmanaged<nint, int, nint>)Slot(25))(options, 1));
             Check(((delegate* unmanaged<nint, int, nint>)Slot(23))(options, 99));
             fixed (byte* bytes = model.Span)

@@ -17,6 +17,13 @@ internal static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        if (args.Length == 2 && args[0] == "--install-raw-content-model")
+        {
+            using var model = File.OpenRead(args[1]);
+            AiRawContentModels.Install(model);
+            Console.WriteLine($"Installed raw-content model: {AiRawContentModels.PathName}");
+            return;
+        }
         if (args.Length == 2 && args[0] == "--install-ink-math-model")
         {
             using var model = File.OpenRead(args[1]);

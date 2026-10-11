@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Media;
 using InkRecognition;
 using InkRecognition.Math;
+using InkRecognition.RawContent;
 
 namespace BlurMask;
 
@@ -28,6 +29,7 @@ internal static class AiPenProbe
         VerifyLocalModel();
         VerifyMath();
         VerifyAutomatic();
+        VerifyRawContentDispatch();
         Console.WriteLine("AI row layout, uncertainty, model validation, history and peer ink: passed.");
     }
 
@@ -219,6 +221,58 @@ internal static class AiPenProbe
         }
         Console.WriteLine("Automatic text/math dispatch, numeric answers, uncertainty, cancellation, history and persistence: passed.");
     }
+    private static void VerifyRawContentDispatch()
+    {
+        var ink = new[] { Stroke(10, 10), Stroke(32, 10), Stroke(10, 160), Stroke(32, 160), Stroke(200, 200) };
+        var original = ink.Select(InkDocument.ExportMark).ToArray();
+        var textCalls = 0; var mathCalls = 0;
+        var text = new DelegateRecognizer((strokes, _) =>
+        {
+            textCalls++;
+            if (strokes.Count != 2 || strokes.Any(s => s.Points[0].Y != 10)) throw new InvalidOperationException("Text decoder received formula/drawing ink.");
+            return new("hello", .99f, 6);
+        });
+        MathRecognitionResult? Math(IReadOnlyList<InkStroke> strokes, CancellationToken token)
+        {
+            mathCalls++; token.ThrowIfCancellationRequested();
+            if (strokes.Count != 2 || strokes.Any(s => s.Points[0].Y != 160)) throw new InvalidOperationException("Math decoder received text/drawing ink.");
+            return new("2+2=", "2+2=", [], .99f, 6, true);
+        }
+        var classification = new RawContentResult([], [new(InkCategory.Text, new[] { 0, 1 }, .99f), new(InkCategory.Math, new[] { 2, 3 }, .99f)]);
+        var results = AiAutomaticLayout.Recognize(ink, text, Math, rawAnalyzer: (input, token) =>
+        {
+            token.ThrowIfCancellationRequested();
+            if (input.Count != 5 || input.Any(s => s.Points.Count != 3)) throw new InvalidOperationException("Raw analyzer lost original strokes.");
+            return classification;
+        });
+        if (results.Count != 2 || results[0].Text.Text != "hello" || results[1].Text.Text != "2+2=4" || textCalls != 1 || mathCalls != 1 ||
+            results.SelectMany(r => r.Strokes).Contains(ink[4])) throw new InvalidOperationException("Mixed raw-content dispatch converted a drawing or merged text and math.");
+        foreach (var result in results) VerifyReplacement(result, result.Text.Font == "STIX Two Math");
+        if (!ink.Select(InkDocument.ExportMark).Zip(original).All(p => BlurMask.Shared.BoardValidation.Same(p.First, p.Second))) throw new InvalidOperationException("Raw dispatch mutated source ink.");
+        textCalls = mathCalls = 0;
+        var guarded = new RawContentResult([], [new(InkCategory.Shape, new[] { 4 }, .99f), new(InkCategory.Text, new[] { 0, 1 }, .8f),
+            new(InkCategory.Math, new[] { 2, 99 }, .99f), new(InkCategory.Text, new[] { 0, 0 }, .99f)]);
+        if (AiAutomaticLayout.Recognize(ink, text, Math, rawAnalyzer: (_, _) => guarded).Count != 0 || textCalls != 0 || mathCalls != 0)
+            throw new InvalidOperationException("Invalid or uncertain regions invoked a decoder.");
+        var uncertain = new DelegateRecognizer((_, _) => new("hello", .2f, 6));
+        if (AiAutomaticLayout.Recognize(ink[..2], uncertain, Math, rawAnalyzer: (_, _) => new RawContentResult([], [classification.Regions[0]])).Count != 0)
+            throw new InvalidOperationException("Classifier confidence bypassed decoder uncertainty.");
+        // Optional real model verifies the app boundary without installing assets or
+        // creating UI. Each category stays in its own decoder and undo transaction.
+        if (Environment.GetEnvironmentVariable("BLURMASK_RAW_TEST_PACK") is { Length: > 0 } pack &&
+            Environment.GetEnvironmentVariable("BLURMASK_RAW_TEST_INPUT") is { Length: > 0 } path)
+        {
+            using var stream = File.OpenRead(pack);
+            using var analyzer = RawContentAnalyzer.Load(stream, Environment.GetEnvironmentVariable("BLURMASK_RAW_TEST_RUNTIME"));
+            var actual = AiAutomaticLayout.Recognize(ReadStrokes(path), rawAnalyzer: analyzer.Analyze);
+            var expected = (Environment.GetEnvironmentVariable("BLURMASK_RAW_TEST_TEXT") ?? "hello|y=3x+2").Split('|');
+            if (!actual.Select(r => r.Text.Text).SequenceEqual(expected)) throw new InvalidOperationException($"Raw model → mixed app result differs: {string.Join('|', actual.Select(r => r.Text.Text))}");
+            foreach (var result in actual) VerifyReplacement(result);
+            Console.WriteLine("Actual Raw Content2 → mixed text/math decoders → replacement/history PASS");
+        }
+        Console.WriteLine("Mixed raw-content dispatch, drawing preservation, region guards, confidence and undo: passed.");
+    }
+
     private static InkMark Stroke(double x, double y)
     {
         var mark = new InkMark(InkTool.Pen, Colors.Red, 3, new(x, y));

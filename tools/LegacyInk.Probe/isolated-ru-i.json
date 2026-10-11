@@ -1,0 +1,11 @@
+{
+  "offset": 19195,
+  "end": 105190,
+  "description": "Original synthetic single-stroke Cyrillic capital I controls for the observed legacy RU trajectory classifier. No vendor ink samples or model data.",
+  "cases": [
+    { "name": "Cyrillic I", "points": [[10,10],[10,90],[60,10],[60,90]], "expectedOutput": 70 },
+    { "name": "Translated Cyrillic I", "points": [[-90,310],[-90,390],[-40,310],[-40,390]], "expectedOutput": 70 },
+    { "name": "Scaled Cyrillic I x2", "points": [[20,20],[20,180],[120,20],[120,180]], "expectedOutput": 70 },
+    { "name": "Scaled Cyrillic I x3", "points": [[30,30],[30,270],[180,30],[180,270]], "expectedOutput": 70 }
+  ]
+}
