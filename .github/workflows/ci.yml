@@ -184,6 +184,8 @@ jobs:
         run: |
           python tools/LegacyPriorContext.Probe/reference_controls.py .artifacts/legacy-prior-context-controls.json
           dotnet run --project tools/LegacyPriorContext.Probe -c Release -- .artifacts/legacy-prior-context-controls.json
+      - name: Legacy initial context window enumeration and complete prior chain
+        run: dotnet run --project tools/LegacyContextWindow.Probe -c Release
 
   symbolic-math:
     name: Native local CAS / ${{ matrix.os }}

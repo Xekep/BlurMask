@@ -158,5 +158,10 @@ The checked prior-context path now has separate components for
 [`LegacyContextWeighting`](../../docs/legacy-russian-context-weighting.md) (28 weighted channels) and
 [`LegacyFloatInputQuantization`](../../docs/legacy-russian-float-input.md) (model-scaled float input).
 They pass 2,304 own arithmetic/range references, including Windows Native AOT.
-Candidate-window generation and automatic line geometry are still required;
-these components do not enable full Russian handwriting in the app.
+[`LegacyContextWindowScorer`](../../docs/legacy-russian-context-windows.md)
+composes fresh candidate windows, the initial context network, selection,
+weighting and fixed conversion for one explicit caller-supplied line. The real
+RU diagnostic now sends changing prior context into the directional classifier.
+Automatic line geometry, the full model ensemble and joined cursive cuts are
+still required; these components do not enable full Russian handwriting in
+the app.
