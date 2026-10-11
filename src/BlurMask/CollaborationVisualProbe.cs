@@ -222,8 +222,14 @@ internal static class CollaborationVisualProbe
         var text = new InkMark(InkTool.Text, Colors.Black, 1, Start(6)) { Font = "Inter", Text = "Hello русский Ω", FontSize = 38 };
         var textCell = Cell(6);
         fixtures.Add(new("TypedTextInter", text, new Rect(textCell.X, textCell.Y, textCell.Width, 120)));
-        var fitted = new InkMark(InkTool.Text, Colors.DarkGreen, 1, Start(6) + new Vector(0, 150)) { Font = "Inter", Text = "AI fitted text", FontSize = 38 };
+        var fitted = new InkMark(InkTool.Text, Colors.DarkGreen, 1, Start(6) + new Vector(0, 150)) { Font = "Inter", Text = "AI text", FontSize = 38 };
         fitted.AddPoint(Start(6) + new Vector(430, 260));
+        AiTypesetLayout.Fit(fitted, new Rect(fitted.Points[0], fitted.Points[1]), null, []);
+        var fittedGlyph = new FormattedText(fitted.Text, System.Globalization.CultureInfo.InvariantCulture,
+            FlowDirection.LeftToRight, InkFonts.Face(fitted.Font), fitted.FontSize, Brushes.Black).BuildGeometry(default)!.Bounds;
+        var fittedRect = new Rect(fitted.Points[0], fitted.Points[1]);
+        Check(System.Math.Abs(fittedRect.Width / fittedGlyph.Width - fittedRect.Height / fittedGlyph.Height) < .00001,
+            "Native AI typeset distorted the embedded font proportions.");
         fixtures.Add(new("AiTextInter", fitted, new Rect(textCell.X, textCell.Y + 145, textCell.Width, 230)));
         using var raster = TransparentRaster(); using var bytes = new MemoryStream(); raster.Save(bytes, PngBitmapEncoderOptions.Default);
         var image = new InkMark(InkTool.Image, Colors.Black, 1, Start(7)) { Image = Convert.ToBase64String(bytes.ToArray()) };

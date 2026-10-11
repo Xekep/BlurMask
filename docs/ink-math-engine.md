@@ -41,6 +41,10 @@ unsupported commands return false. Existing numeric equalities must agree.
 Limits are 2,048 characters, nesting depth 32, 256 operations, integral root
 indices 2–64 and absolute exponents at most 10,000. It uses no scripting engine
 or external dependency and is covered by 84 managed/Native AOT guards and goldens.
+The application's AI pen calls this API only when the recognized expression ends
+with an equals sign and its right-hand side is empty. Recognition without `=` and
+already written answers are preserved; the reusable numeric API itself remains
+independent of that UI trigger.
 
 ## User-installed model
 

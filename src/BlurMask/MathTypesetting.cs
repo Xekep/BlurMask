@@ -106,8 +106,10 @@ internal static class MathTypesetting
         catch (FormatException) { return false; }
     }
     internal static Geometry? Build(string latex, double size)
+        => Typeset(latex, size)?.Geometry;
+    internal static (Geometry Geometry, double Baseline)? Typeset(string latex, double size)
     {
-        try { return Parse(latex).Layout(size).Geometry; }
+        try { var box = Parse(latex).Layout(size); return (box.Geometry, box.Baseline); }
         catch (FormatException) { return null; }
     }
     private static Node Parse(string latex)

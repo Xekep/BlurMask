@@ -7,7 +7,10 @@ namespace BlurMask;
 // Batch layout is separate from inference: pen lifts do not define character boundaries.
 internal static class AiInkLayout
 {
-    internal sealed record Result(InkMark[] Strokes, InkMark Text, float Confidence = 1);
+    internal sealed record Result(InkMark[] Strokes, InkMark Text, float Confidence = 1)
+    {
+        internal string? SizingText { get; set; }
+    }
     private sealed class Group(InkMark stroke)
     {
         internal readonly List<InkMark> Strokes = [stroke];

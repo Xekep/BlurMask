@@ -10,6 +10,7 @@ internal static class AiPenProbe
     internal static void Run()
     {
         SelectionProbe.Run();
+        StrokeGeometryChecks.Run();
         BoardWriteReceiptChecks.Run();
         InkRecognitionChecks.Run();
         var strokes = new[] { Stroke(10, 10), Stroke(32, 10), Stroke(10, 160), Stroke(32, 160) };
@@ -147,9 +148,13 @@ internal static class AiPenProbe
 
         foreach (var (latex, expected, grows) in new[]
         {
-            ("2+2", "2+2=4", true), ("2+2=", "2+2=4", true), ("2+2=4", "2+2=4", false),
-            ("\\frac{1}{2}", "\\frac{1}{2}=0.5", true), ("\\sqrt{9}", "\\sqrt{9}=3", true),
-            ("2^{3}", "2^{3}=8", true), ("y=3x+2", "y=3x+2", false), ("\\frac{1}{x}", "\\frac{1}{x}", false)
+            ("2+2", "2+2", false), ("2+2=", "2+2=4", true), ("2+2=4", "2+2=4", false),
+            ("2+2=5", "2+2=5", false), ("2+2= ", "2+2=4", true),
+            ("\\frac{1}{2}", "\\frac{1}{2}", false), ("\\frac{1}{2}=", "\\frac{1}{2}=0.5", true),
+            ("\\sqrt{9}", "\\sqrt{9}", false), ("\\sqrt{9}=", "\\sqrt{9}=3", true),
+            ("2^{3}", "2^{3}", false), ("2^{3}=", "2^{3}=8", true),
+            ("42", "42", false), ("42=", "42=42", true), ("1/0=", "1/0=", false),
+            ("y=3x+2", "y=3x+2", false), ("\\frac{1}{x}", "\\frac{1}{x}", false)
         })
         {
             textCalls = mathCalls = 0;
@@ -171,9 +176,12 @@ internal static class AiPenProbe
         var ambiguous = AiAutomaticLayout.Recognize(strokes, uncertain, (_, _) => new("2+2", "2+2", [], .8f, 10, true));
         if (ambiguous.Count != 0) throw new InvalidOperationException("Both uncertain auto candidates replaced handwriting.");
         Preserved();
-        var fallback = AiAutomaticLayout.Recognize(strokes, new DelegateRecognizer((_, _) => new("2+2", .99f, 6)), (_, _) => null);
-        if (fallback.Count != 1 || fallback[0].Text.Text != "2+2=4") throw new InvalidOperationException("Numeric text fallback required a Math model.");
+        var fallback = AiAutomaticLayout.Recognize(strokes, new DelegateRecognizer((_, _) => new("2+2=", .99f, 6)), (_, _) => null);
+        if (fallback.Count != 1 || fallback[0].Text.Text != "2+2=4") throw new InvalidOperationException("Explicit numeric text fallback required a Math model.");
         Preserved(); VerifyReplacement(fallback[0], true);
+        var unfinished = AiAutomaticLayout.Recognize(strokes, new DelegateRecognizer((_, _) => new("2+2", .99f, 6)), (_, _) => null);
+        if (unfinished.Count != 1 || unfinished[0].Text.Text != "2+2") throw new InvalidOperationException("Text fallback calculated without a requested answer.");
+        Preserved(); VerifyReplacement(unfinished[0]);
         using var canceled = new CancellationTokenSource(); canceled.Cancel();
         try
         {

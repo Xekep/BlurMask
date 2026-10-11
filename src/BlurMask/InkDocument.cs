@@ -143,22 +143,13 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
                         _geometry = new StreamGeometry();
                         using var path = _geometry.Open();
                         path.BeginFigure(start, false);
-                        // Round gentle changes of direction, retaining deliberate corners.
-                        // Original samples remain unchanged for the wire, AI and editing.
-                        for (var i = 1; i < Points.Count - 1; i++)
+                        // Full sample-spacing quadratic smoothing, rather than
+                        // small width-limited fillets at individual vertices.
+                        foreach (var segment in InkStrokeGeometry.Segments(Points))
                         {
-                            var before = (Vector)(Points[i] - Points[i - 1]);
-                            var after = (Vector)(Points[i + 1] - Points[i]);
-                            var a = before.Length; var b = after.Length;
-                            if (a > 0 && b > 0 && Vector.Dot(before, after) / (a * b) > .5)
-                            {
-                                var trim = Math.Min(Math.Min(a, b) / 2, Width * 2);
-                                path.LineTo(Points[i] - before * (trim / a));
-                                path.QuadraticBezierTo(Points[i], Points[i] + after * (trim / b));
-                            }
-                            else path.LineTo(Points[i]);
+                            if (segment.Curve) path.QuadraticBezierTo(segment.Control, segment.End);
+                            else path.LineTo(segment.End);
                         }
-                        path.LineTo(end);
                         path.EndFigure(false);
                     }
                     context.DrawGeometry(null, pen, _geometry);
@@ -241,6 +232,7 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
                 Distance(point, end, end - new Vector(Math.Cos(angle + 0.5), Math.Sin(angle + 0.5)) * length) <= radius) return true;
         }
         if (Points.Count == 1) return ((Vector)(point - start)).Length <= radius;
+        if (Tool is InkTool.Pen or InkTool.Highlighter) return InkStrokeGeometry.Hit(Points, point, radius);
         for (var i = 1; i < Points.Count; i++)
             if (Distance(point, Points[i - 1], Points[i]) <= radius) return true;
         return false;
@@ -297,6 +289,66 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
     }
     internal bool Same(InkMark other) => Tool == other.Tool && Color == other.Color && Width == other.Width &&
         Text == other.Text && FontSize == other.FontSize && Font == other.Font && Image == other.Image && Transform == other.Transform && Points.SequenceEqual(other.Points);
+}
+
+// Quadratic spans stay within their samples' convex hull: existing bounds remain
+// valid, no overshoot is introduced, and the original input/wire/AI points stay intact.
+internal static class InkStrokeGeometry
+{
+    internal readonly record struct Segment(Point Start, Point Control, Point End, bool Curve);
+
+    internal static IEnumerable<Segment> Segments(IReadOnlyList<Point> points)
+    {
+        if (points.Count < 2) yield break;
+        var current = points[0];
+        for (var i = 1; i < points.Count - 1; i++)
+        {
+            var before = (Vector)(points[i] - points[i - 1]);
+            var after = (Vector)(points[i + 1] - points[i]);
+            var a = before.Length; var b = after.Length;
+            // Preserve sharp turns. On smooth motion, adjoining lines/curves
+            // share tangent directions even with uneven pointer sample spacing.
+            if (a > 0 && b > 0 && Vector.Dot(before, after) / (a * b) > .5)
+            {
+                var trim = Math.Min(a, b) / 2;
+                var entry = points[i] - before * (trim / a);
+                var exit = points[i] + after * (trim / b);
+                if (current != entry) yield return new(current, default, entry, false);
+                yield return new(entry, points[i], exit, true);
+                current = exit;
+            }
+            else
+            {
+                if (current != points[i]) yield return new(current, default, points[i], false);
+                current = points[i];
+            }
+        }
+        if (current != points[^1]) yield return new(current, default, points[^1], false);
+    }
+
+    internal static bool Hit(IReadOnlyList<Point> points, Point point, double radius)
+    {
+        foreach (var segment in Segments(points))
+            if (segment.Curve ? HitCurve(point, segment.Start, segment.Control, segment.End, radius, 0)
+                             : InkMark.Distance(point, segment.Start, segment.End) <= radius) return true;
+        return false;
+    }
+
+    private static bool HitCurve(Point point, Point a, Point control, Point b, double radius, int depth)
+    {
+        var box = new Rect(new Point(Math.Min(a.X, Math.Min(control.X, b.X)), Math.Min(a.Y, Math.Min(control.Y, b.Y))),
+                           new Point(Math.Max(a.X, Math.Max(control.X, b.X)), Math.Max(a.Y, Math.Max(control.Y, b.Y))));
+        if (!box.Inflate(radius).Contains(point)) return false;
+        var deviation = InkMark.Distance(control, a, b);
+        if (deviation <= Math.Max(.001, radius * .1) || depth >= 18)
+            return InkMark.Distance(point, a, b) <= radius + deviation;
+        // Adaptive de Casteljau subdivision; distant spans are rejected above.
+        var left = a + (control - a) * .5;
+        var right = control + (b - control) * .5;
+        var middle = left + (right - left) * .5;
+        return HitCurve(point, a, left, middle, radius, depth + 1) ||
+               HitCurve(point, middle, right, b, radius, depth + 1);
+    }
 }
 
 internal sealed class InkDocument

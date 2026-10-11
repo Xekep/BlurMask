@@ -56,7 +56,12 @@ internal sealed class AiPenRecognizer(InkDocument document, Func<string> recogni
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 if (_disposed || generation != _generation || document.HasActiveEdit) return;
-                foreach (var result in results) document.ReplaceRecognized(result.Strokes, result.Text);
+                foreach (var result in results)
+                {
+                    var bounds = result.Strokes.Select(s => s.Bounds).Aggregate((a, b) => a.Union(b));
+                    AiTypesetLayout.Fit(result.Text, bounds, result.SizingText, document.Marks);
+                    document.ReplaceRecognized(result.Strokes, result.Text);
+                }
             });
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }

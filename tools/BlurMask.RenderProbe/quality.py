@@ -35,6 +35,13 @@ def main():
         if ink < 100 or covered < 100:
             failures.append(f"{zoom}%: thin stroke missing or not antialiased")
         results.append({"penZoom": zoom / 100, "inkPixels": ink, "coveragePixels": covered})
+        smooth = Image.open(args.output / f"synthetic-smooth-pen-{zoom}.png").convert("RGB")
+        # Independent quadratic t=1/2: (.25*(110,70)+.5*(200,120)+.25*(290,70))=(200,95).
+        x, y = round(200 * zoom / 100), round(95 * zoom / 100)
+        curve = smooth.crop((x - 1, y - 1, x + 2, y + 2))
+        vertex = smooth.getpixel((round(200 * zoom / 100), round(120 * zoom / 100)))
+        if min(min(p) for p in curve.getdata()) >= 245 or min(vertex) < 245:
+            failures.append(f"{zoom}%: smooth stroke follows the old polygon instead of the quadratic span")
     report = {"syntheticOnly": True, "comparisons": results, "failures": failures}
     (args.output / "quality.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(json.dumps(report, indent=2))

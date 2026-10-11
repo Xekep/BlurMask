@@ -28,6 +28,7 @@ internal static class AiAutomaticLayout
                 var original = result.Text.Text;
                 var calculated = AiMathLayout.WithNumericResult(original);
                 if (calculated == original) continue;
+                result.SizingText = original;
                 var bounds = result.Text.Bounds;
                 result.Text.Text = calculated;
                 result.Text.AddPoint(bounds.BottomRight + new Avalonia.Vector(Math.Min(100000 - bounds.Right, AiMathLayout.ResultWidth(original, calculated, bounds.Height)), 0));

@@ -35,6 +35,11 @@ detail against an independent area reference with fixed error limits, rejected
 blurred controls, and nonzero intermediate coverage of thin strokes at each zoom.
 It needs no historical source or private board. Pointer/compositor behavior is
 checked separately by the installed-app Arch/Void tests.
+The probe also measures embedded font geometry to check AI text aspect ratio,
+neighboring words' baselines, the scale of appended math answers, large lettering
+and shared-document round trips. A synthetic three-point stroke independently
+checks that the displayed curve passes its quadratic midpoint instead of following
+the former width-limited polygon at 100%, 25% and 10%.
 
 Each zoom starts with a fresh document so the first image decode/LOD request occurs
 at that zoom. The benchmark reports cold draw, repeated draws, unchanged import,

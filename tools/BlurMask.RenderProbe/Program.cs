@@ -36,6 +36,7 @@ internal static class Program
         AppBuilder.Configure<Application>().UseSkia()
             .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false })
             .SetupWithoutStarting();
+        TypesetChecks.Run();
         if (options.TryGetValue("--board", out var boardPath))
         {
             var board = JsonSerializer.Deserialize(File.ReadAllText(boardPath), BoardJsonContext.Default.BoardSnapshot)
@@ -54,6 +55,11 @@ internal static class Program
         {
             Width = 3840, Height = 2160,
             Marks = [new InkMarkDto { Width = 1, Points = [new(200, 400), new(3300, 1600)] }]
+        }, savePixels: true);
+        Profile("synthetic-smooth-pen", new BoardSnapshot
+        {
+            Width = 400, Height = 160,
+            Marks = [new InkMarkDto { Width = 4, Points = [new(20, 20), new(200, 120), new(380, 20)] }]
         }, savePixels: true);
         var report = new
         {

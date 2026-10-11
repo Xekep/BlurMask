@@ -14,6 +14,7 @@
     <PackageReference Include="Avalonia.Skia" Version="12.1.2" />
     <Compile Include="$(InkDocumentSource)" Link="Production/InkDocument.cs" />
     <Compile Include="../../src/BlurMask/InkFonts.cs;../../src/BlurMask/MathTypesetting.cs" Link="Production/%(Filename)%(Extension)" />
+    <Compile Include="../../src/BlurMask/AiTypesetLayout.cs;../../src/BlurMask/CanvasGeometry.cs" Link="Production/%(Filename)%(Extension)" />
     <Compile Include="../../src/BlurMask.Shared/*.cs" Link="Shared/%(Filename)%(Extension)" />
     <AvaloniaResource Include="../../src/BlurMask/Assets/Fonts/*" Link="Assets/Fonts/%(Filename)%(Extension)" />
   </ItemGroup>

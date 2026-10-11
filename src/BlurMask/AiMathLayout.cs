@@ -28,19 +28,19 @@ internal static class AiMathLayout
             var mark = new InkMark(InkTool.Text, first.Color, first.Width, bounds.TopLeft)
             { Id = first.Id, Text = calculated, Font = "STIX Two Math", FontSize = Math.Clamp(bounds.Height, 8, 300), FadeSeconds = first.FadeSeconds };
             mark.AddPoint(bounds.BottomRight + new Avalonia.Vector(Math.Min(100000 - bounds.Right, ResultWidth(latex, calculated, bounds.Height)), 0));
-            results.Add(new(sources, mark, result.Confidence));
+            results.Add(new(sources, mark, result.Confidence) { SizingText = latex });
         }
         return results;
     }
 
     internal static string WithNumericResult(string expression)
     {
-        if (!NumericExpressionEvaluator.TryEvaluate(expression, out var value)) return expression;
         var equal = expression.IndexOf('=');
-        // Preserve already written equalities and stand-alone numbers.
-        if (equal >= 0 && expression[(equal + 1)..].Trim().Length > 0) return expression;
-        if (equal < 0 && expression.IndexOfAny(['+', '-', '−', '*', '/', '^', '×', '÷', '\\', '√']) < 0) return expression;
-        return (equal >= 0 ? expression[..equal].TrimEnd() : expression) + "=" + value;
+        // An empty right-hand side explicitly requests a result. Recognition
+        // alone must not evaluate expressions or replace a written answer.
+        if (equal < 0 || expression[(equal + 1)..].Trim().Length > 0 ||
+            !NumericExpressionEvaluator.TryEvaluate(expression, out var value)) return expression;
+        return expression[..equal].TrimEnd() + "=" + value;
     }
 
     internal static double ResultWidth(string original, string calculated, double height)

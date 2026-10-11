@@ -18,7 +18,9 @@ input and uncertain text can use the Math2 model. **Text** and **Formulas** rema
 explicit overrides. Auto uses a conservative confidence guard, not a universal
 classifier, and ambiguous input stays handwritten.
 
-Numeric arithmetic now appends an answer: `2+2` becomes `2+2=4`. Supported input
+Numeric arithmetic appends an answer only after a trailing equals sign:
+`2+2` stays `2+2`, while `2+2=` becomes `2+2=4`. A written right-hand side is
+preserved, including an incorrect answer. Supported input
 includes explicit arithmetic, decimal comma, parentheses, fractions, roots and
 powers. It does not solve symbolic equations, evaluate integrals or execute code.
 Division by zero, unknown notation and inconsistent written equalities are kept
@@ -61,11 +63,21 @@ files are ignored by Git. See its help for the input file and output arguments.
 
 ## Layout and editing
 
-Completed words in a row share one font size and bounding rectangle. Spatial gaps
+Completed words in a row share one font size and baseline. Spatial gaps
 between words become spaces; original pen chronology is preserved when passing
 each word to inference. Printed text uses Inter. Color, position, disappearing-ink
 duration and shared-document identity are retained. Undo restores the original
 strokes. Starting another stroke invalidates a pending result.
+
+After inference, the UI measures the embedded font's actual glyph geometry and
+matches the handwriting height using uniform scaling. Close sizes are grouped in
+1.25 steps, and nearby converted words can supply the row size and baseline.
+Natural glyph widths replace the old independent horizontal/vertical stretching.
+Computed math answers use the original expression for size estimation and extend
+to the right at the same scale. This follows the documented MyScript diagram
+size-matching principle, not its proprietary internal layout algorithm.
+See [MyScript whiteboard sizing](https://developer.myscript.com/doc/interactive-ink/3.0/android/advanced/interactive-white-board/index.html)
+and [font/style reference](https://developer.myscript.com/doc/interactive-ink/4.1/reference/styling/).
 
 Formula mode keeps each expression together, including fractions, radicals,
 superscripts and matrices. Its bounded native geometry renderer uses STIX Two
