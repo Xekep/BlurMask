@@ -6,5 +6,9 @@
     <IsAotCompatible>true</IsAotCompatible>
     <Description>Local stroke classification and segmentation using native CPU ONNX Runtime.</Description>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType><DebugSymbols>false</DebugSymbols>
+    <CopyOutputSymbolsToPublishDirectory>false</CopyOutputSymbolsToPublishDirectory>
+  </PropertyGroup>
   <ItemGroup><ProjectReference Include="../InkRecognition.Math/InkRecognition.Math.csproj" /></ItemGroup>
 </Project>
