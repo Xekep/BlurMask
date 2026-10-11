@@ -18,12 +18,17 @@ main { flex: 1; padding: clamp(40px, 6vh, 72px) 0 64px; display: grid; grid-temp
 .eyebrow span { width: 6px; height: 6px; border-radius: 50%; background: #799675; }
 h1 { margin: 26px 0; font-size: clamp(42px, 4.4vw, 64px); line-height: 1.08; font-weight: 650; letter-spacing: -.055em; max-width: 880px; }
 .description { max-width: 570px; font-size: 19px; line-height: 1.6; color: #72756c; margin: 0; }
-.downloads { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 38px; }
-.download { display: inline-flex; align-items: center; justify-content: center; gap: 12px; padding: 15px 22px; border: 1px solid #dadcd4; border-radius: 12px; font-size: 14px; font-weight: 550; transition: background .18s, transform .18s; }
+.download-heading { margin: 30px 0 12px; font-size: 13px; font-weight: 550; color: #6b6e66; }
+.downloads { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; max-width: 500px; }
+.download { min-width: 0; min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; border: 1px solid #dadcd4; background: #ffffff60; border-radius: 12px; font-size: 14px; transition: background .18s, border-color .18s, transform .18s; }
+.download-copy { display: grid; gap: 5px; min-width: 0; }
+.download-copy strong { font-size: 14px; font-weight: 600; line-height: 1.25; }
+.download-copy small { font-size: 12px; line-height: 1.2; color: #777c70; }
+.download-icon { flex-shrink: 0; color: #777c70; }
 .download:hover { background: #ebece4; transform: translateY(-2px); }
 .download.primary { background: #262923; color: white; border-color: #262923; }
 .download.primary:hover { background: #424a3c; }
-.download.primary > span[aria-hidden] { font-size: 20px; line-height: 1; }
+.download.primary small, .download.primary .download-icon { color: #cbd2c5; }
 .details { font-size: 12px; color: #91958a; margin-top: 17px; }
 .invitation { max-width: 570px; margin-top: 32px; padding: 18px 20px; border: 1px solid #d6ddcf; border-radius: 12px; color: #616958; }
 .invitation p { font-size: 14px; line-height: 1.6; margin: 0 0 12px; }
@@ -40,8 +45,9 @@ footer { padding-top: 20px; border-top: 1px solid #e1e3db; font-size: 12px; colo
   main { padding-top: 36px; padding-bottom: 48px; }
   .description { font-size: 17px; }
   .downloads { gap: 8px; }
-  .download { padding: 14px 18px; }
-  .download.primary { width: 100%; }
+  .download { padding: 14px; gap: 8px; }
+  .download-copy small { font-size: 11px; }
   footer { gap: 16px; font-size: 11px; }
 }
+@media (max-width: 380px) { .downloads { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { .download { transition: none; } }

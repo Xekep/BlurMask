@@ -72,7 +72,12 @@ app.Use(async (context, next) =>
     await next(context);
 });
 app.UseDefaultFiles();
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    // Revalidate mutable page assets instead of keeping an old download list.
+    // ETag/Last-Modified still allow lightweight 304 responses.
+    OnPrepareResponse = context => context.Context.Response.Headers.CacheControl = "no-cache"
+});
 app.MapGet("/healthz", async (BoardStore store, CancellationToken ct) =>
     await store.PingAsync(ct) ? Results.Ok(new { status = "ok" }) : Results.StatusCode(503));
 var api = app.MapGroup("/api/boards").RequireRateLimiting("api");

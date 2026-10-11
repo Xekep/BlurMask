@@ -19,31 +19,32 @@ async function downloadPage(language,assets) {
     href:'https://github.com/Xekep/BlurMask/releases/latest',
     dataset:{text:id},classList:{toggle(){}},parentElement:{prepend(){}}
   }]));
+  const heading={dataset:{text:'download'}};
   runInNewContext(source.replace(/^import .*;\r?\n/,''),{
     navigator:{language,platform:'Linux'},location:{hash:''},
-    document:{documentElement:{},getElementById:id=>links[id],querySelectorAll:selector=>selector==='[data-text]'?[links.arch]:Object.values(links)},
+    document:{documentElement:{},getElementById:id=>links[id],querySelectorAll:selector=>selector==='[data-text]'?[heading]:Object.values(links)},
     fetch:async()=>({ok:true,json:async()=>({assets})}),
     AbortSignal:{timeout:()=>null},addEventListener(){}
   });
   await new Promise(resolve=>setImmediate(resolve));
-  return links;
+  return {links,heading};
 }
 
 test('Arch download resolves the current x86_64 package in every page language',async()=>{
   const url='https://github.com/Xekep/BlurMask/releases/download/v1.2.3/blurmask-1.2.3-1-x86_64.pkg.tar.zst';
   for(const language of ['en','ru','fr','de']) {
-    const links=await downloadPage(language,[
+    const {links,heading}=await downloadPage(language,[
       {name:'blurmask-1.2.3-1-x86_64.pkg.tar.zst.sha256',browser_download_url:`${url}.sha256`},
       {name:'blurmask-1.2.3-1-x86_64.pkg.tar.zst',browser_download_url:url}
     ]);
     assert.equal(links.arch.href,url);
-    assert.equal(links.arch.textContent,'Arch Linux');
+    assert.ok(heading.textContent.includes('BlurMask'));
   }
 });
 
 test('Arch download keeps the release fallback if metadata has no package or an unrelated URL',async()=>{
   for(const assets of [[],[{name:'blurmask-1.2.3-1-x86_64.pkg.tar.zst',browser_download_url:'https://example.com/download'}]]) {
-    const links=await downloadPage('en',assets);
+    const {links}=await downloadPage('en',assets);
     assert.equal(links.arch.href,'https://github.com/Xekep/BlurMask/releases/latest');
   }
 });
