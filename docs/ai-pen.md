@@ -60,12 +60,13 @@ distant writing starts a new fragment. Undo/redo retain previous live associatio
 Source resources for English, Russian, mathematics and Raw Content are stored in
 [`models`](../models/README.md). Application model packs are installed separately
 from the executable.
-An absent, invalid or uncertain model leaves the original ink untouched. Settings
-shows the model status and offers **Install AI pen model** for a `.ikrpack` file.
-Installation checks the model structure and checksum before replacing a working
-model. The pen menu shows the currently supported language.
+An absent, invalid or uncertain model leaves the original ink untouched. The
+application discovers installed local packs automatically; Settings has no model
+selectors or file pickers. Developer installation commands below check model
+structure and checksum before replacing a working model. The pen menu shows the
+currently supported language.
 
-For formulas, install a `.ikrmath` pack with **Install formula model**, then choose
+For formulas, a local `.ikrmath` pack is loaded automatically; choose
 **Automatic** or **Formulas** in the AI pen menu. The official CPU runtime is packaged for Windows
 x64, Linux x64 and macOS; model weights are supplied separately.
 

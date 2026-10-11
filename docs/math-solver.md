@@ -17,9 +17,9 @@ license and dependencies are handled by the upstream installer/package manager.
 Install [Giac/Xcas from upstream](https://xcas.univ-grenoble-alpes.fr/backup/install_en).
 Windows normally installs `C:\xcaswin\icas.exe`; macOS upstream documents
 `/Applications/usr/bin/icas`. Standard installed CLI paths are discovered
-automatically. For another location, open **Settings → Connect Giac solver** and
-select `icas.exe` / `icas` / `giac`, not the graphical `xcas` executable. The
-connection is tested with `1+1` before being saved. A headless equivalent is:
+automatically. Settings has no solver configuration or download buttons. For a
+custom developer installation, the following command selects `icas.exe` /
+`icas` / `giac`, rather than the graphical `xcas` executable, and verifies `1+1`:
 
 ```text
 BlurMask --set-math-solver /absolute/path/to/icas
@@ -82,7 +82,7 @@ is monitoring, not an OS sandbox or a strict instantaneous allocation cap.
 
 Input limits: 4 KiB, 512 expression nodes, depth 32, eight free variables and
 12×12 matrices. Supplied local engines must be trusted software. The installation
-picker verifies a calculation, not authenticity; use upstream or OS packages.
+command verifies a calculation, not authenticity; use upstream or OS packages.
 
 ## Verification
 
