@@ -289,6 +289,10 @@ jobs:
           dotnet run --project tools/LegacyCursiveSpanProfile.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res
           python tools/LegacyGlyphPayload.Probe/reference_controls.py .artifacts/glyph-payload-controls.json
           dotnet run --project tools/LegacyGlyphPayload.Probe -c Release -- .artifacts/glyph-payload-controls.json
+          python tools/LegacySourceChronology.Probe/reference_controls.py .artifacts/legacy-source-chronology-controls.json
+          dotnet run --project tools/LegacySourceChronology.Probe -c Release -- .artifacts/legacy-source-chronology-controls.json
+          python tools/LegacyCursiveSeparation.Probe/reference_controls.py .artifacts/legacy-cursive-separation-controls.json
+          dotnet run --project tools/LegacyCursiveSeparation.Probe -c Release -- .artifacts/legacy-cursive-separation-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
       - name: Legacy stored word and class language costs
         run: |
           python tools/LegacyWordLanguage.Probe/reference_controls.py models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-language-controls.json
@@ -458,7 +462,9 @@ jobs:
             @{ Name = 'LegacyWordCategory'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyGlyphTypesetGeometry'; Args = @('.artifacts/glyph-typeset-controls.json') },
             @{ Name = 'LegacyCursiveSpanProfile'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res') },
-            @{ Name = 'LegacyGlyphPayload'; Args = @('.artifacts/glyph-payload-controls.json') }
+            @{ Name = 'LegacyGlyphPayload'; Args = @('.artifacts/glyph-payload-controls.json') },
+            @{ Name = 'LegacySourceChronology'; Args = @('.artifacts/legacy-source-chronology-controls.json') },
+            @{ Name = 'LegacyCursiveSeparation'; Args = @('.artifacts/legacy-cursive-separation-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') }
           )
           foreach ($case in $cases) {
             $name = $case.Name

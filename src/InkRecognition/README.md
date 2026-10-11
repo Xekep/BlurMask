@@ -386,3 +386,12 @@ it does not claim a completed handwriting-to-font-size policy.
 [`LegacyGlyphGeometryPayload`](../../docs/legacy-glyph-payload.md) reproduces the
 checked affine quad setter and normalized baseline/x-height presence fields.
 The type24a wrapper, final adjustments and raw-line candidate selection are separate.
+
+[`LegacySourcePointChronology`](../../docs/legacy-russian-source-point-chronology.md)
+preserves source point keys through inserted points and resampling and restores
+the checked signed range sort used by glyph normalization. It does not determine
+the initial line-DAG order.
+[`LegacyCursiveGroupSeparationCost`](../../docs/legacy-russian-cursive-group-separation.md)
+restores the ordinary pen-up grouping penalty, with resource profile coefficients
+and an explicit native lookup table and resolved line height. Special-symbol
+bypass and the full acoustic/path scorer remain separate caller responsibilities.
