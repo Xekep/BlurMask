@@ -10,6 +10,7 @@ namespace BlurMask;
 
 internal sealed partial class DesktopInkNative : IDisposable
 {
+    private static XcbWindowCatalog? _x11Stacking;
     private const int ExStyle = -20;
     private const long Transparent = 0x20;
     private const long Layered = 0x80000;
@@ -69,6 +70,17 @@ internal sealed partial class DesktopInkNative : IDisposable
     {
         if (OperatingSystem.IsWindows() && window.IsVisible)
             SetWindowPos(Handle(window), -1, 0, 0, 0, 0, 0x1 | 0x2 | 0x10);
+        else if (OperatingSystem.IsLinux() && window.IsVisible &&
+                 window.TryGetPlatformHandle() is { HandleDescriptor: "XID" } handle)
+        {
+            _x11Stacking ??= XcbWindowCatalog.TryCreate();
+            _x11Stacking?.Raise((nuint)handle.Handle);
+        }
+    }
+    internal static void DisposePlatformResources()
+    {
+        _x11Stacking?.Dispose();
+        _x11Stacking = null;
     }
     internal static void VerifyClickThrough(Window window)
     {

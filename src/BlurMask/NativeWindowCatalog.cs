@@ -198,6 +198,16 @@ internal sealed partial class XcbWindowCatalog(nint connection, uint root) : IWi
         }
         finally { Free(attributes, attributeError); Free(geometry, geometryError); Free(coordinates, coordinateError); }
     }
+    internal void Raise(nuint id)
+    {
+        if (xcb_connection_has_error(_connection) != 0) return;
+        // XCB_CONFIG_WINDOW_STACK_MODE / XCB_STACK_MODE_ABOVE. A checked
+        // request keeps a window closing between events from becoming fatal.
+        uint above = 0;
+        var error = xcb_request_check(_connection,
+            xcb_configure_window_checked(_connection, (uint)id, 64, in above));
+        if (error != 0) free(error);
+    }
     private static void Free(nint reply, nint error) { if (reply != 0) free(reply); if (error != 0) free(error); }
     public void Dispose() => xcb_disconnect(_connection);
     [StructLayout(LayoutKind.Sequential)] private struct Cookie { public uint Sequence; }
@@ -225,4 +235,6 @@ internal sealed partial class XcbWindowCatalog(nint connection, uint root) : IWi
     [LibraryImport("libxcb.so.1")] private static partial nint xcb_get_geometry_reply(nint connection, Cookie cookie, out nint error);
     [LibraryImport("libxcb.so.1")] private static partial Cookie xcb_translate_coordinates(nint connection, uint source, uint destination, short x, short y);
     [LibraryImport("libxcb.so.1")] private static partial nint xcb_translate_coordinates_reply(nint connection, Cookie cookie, out nint error);
+    [LibraryImport("libxcb.so.1")] private static partial Cookie xcb_configure_window_checked(nint connection, uint window, ushort mask, in uint values);
+    [LibraryImport("libxcb.so.1")] private static partial nint xcb_request_check(nint connection, Cookie cookie);
 }

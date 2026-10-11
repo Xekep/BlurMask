@@ -27,7 +27,11 @@ public sealed partial class App : Application
             _tray = TrayIcon.GetIcons(this)?.FirstOrDefault();
             if (!Program.StartMinimized) ShowDrawing();
             UpdateTrayMenu();
-            desktop.Exit += (_, _) => _drawing?.Dispose();
+            desktop.Exit += (_, _) =>
+            {
+                _drawing?.Dispose();
+                DesktopInkNative.DisposePlatformResources();
+            };
 
             if (Program.WebsitePreview)
                 _ = SaveWebsitePreviewAsync(desktop);
