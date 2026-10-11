@@ -14,6 +14,7 @@ public sealed class LegacyWordLanguageScorer
     private readonly LegacyWordLanguageCostProfile _profile;
     private readonly LegacyWordAuxiliaryProfile _auxiliary;
     public float RuntimeScale { get; }
+    public int WordCount => _model.WordCount;
 
     public LegacyWordLanguageScorer(LegacyWordLanguageModel model,
         LegacyWordLanguageCostProfile profile, LegacyWordAuxiliaryProfile auxiliary,

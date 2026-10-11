@@ -117,6 +117,11 @@ public sealed class LegacyRussianModelBundle
     public LegacyWordLanguageScorer CreateResourceLanguageScorer(float runtimeScale) =>
         CreateLanguageScorer(ResourceLanguageProfileIndex, runtimeScale);
 
+    /// <summary>Original prepared-choice integer beam with the checked ordinary terminal scorer.
+    /// Cut candidates, history/category flags and heap policy remain caller supplied.</summary>
+    public LegacyIntegerWordDecoder CreateIntegerWordDecoder(float runtimeScale) =>
+        new(Lexicon, WordIndex, new(CreateResourceLanguageScorer(runtimeScale)));
+
     private static void Verify(ReadOnlySpan<byte> data, int length, string hash)
     {
         if (data.Length != length || !SHA256.HashData(data).AsSpan().SequenceEqual(Convert.FromHexString(hash)))

@@ -310,3 +310,12 @@ add arc-weighted raw stroke moments, projected native group costs and free
 row-count dynamic programming over explicit prepared candidates. Independent
 exhaustive partition checks verify the search minima. Candidate merging,
 the supplied row-lattice branch and full cluster fitting remain unfinished.
+
+[`LegacyCursiveHorizontalCuts`](../../docs/legacy-russian-cursive-horizontal-cuts.md)
+restores the complete prepared horizontal-stage state machine and inserted-point
+ownership, including the stored Russian settings. Upstream loop tags, baseline
+crossings and the final marker controller remain separate missing stages.
+[`LegacyIntegerWordDecoder`](../../docs/legacy-russian-integer-word-pipeline.md)
+connects supplied integer glyph choices to dictionary identity and ordinary
+lexical terminal scoring before final beam pruning. The bundle factory uses
+the verified stored source profile, with explicit runtime scale and flags.

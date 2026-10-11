@@ -9,6 +9,12 @@ returns a 40-byte line record whose first fields are float32 baseline and
 height. Its scale getter `180169050` converts the stored double primary scale
 to float32. The materializer `1801629c0` reads a prepared 24-byte cluster:
 
+Further tracing identifies this record at secondary `+0x68` as **user
+guidelines**, set by `1801670b0`. Its error string explicitly rejects user
+guidelines for Hindi. This materializer is not the automatic baseline estimator;
+the `LegacyLineCluster` API name is retained for compatibility with the prepared
+record. Automatic geometry is routed through separate class219 callbacks.
+
 * For a positive-height cluster, baseline is `row * pitch + baseline`, and
   height is the cluster height. A one-row cluster uses row zero.
 * Without a positive-height cluster, a prepared 16-byte fallback record gives

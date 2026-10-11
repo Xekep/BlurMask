@@ -24,6 +24,9 @@ var glyphClassifier = bundle.CreateGlyphClassifier();
 // Supply prepared glyph ink, baseline and explicit context/boundary flags.
 // Language profile and runtime scale remain explicit caller parameters.
 var language = bundle.CreateResourceLanguageScorer(runtimeScale: 1);
+var words = bundle.CreateIntegerWordDecoder(runtimeScale: 1);
+// words.Decode accepts caller-prepared integer glyph choices plus explicit
+// history/category flags, additional path costs, heap budget and beam width.
 ```
 
 Russian connected handwriting is still experimental. Automatic continuous cuts,

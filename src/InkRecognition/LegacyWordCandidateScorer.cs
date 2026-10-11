@@ -15,6 +15,7 @@ public sealed class LegacyWordCandidateScorer
 {
     public const int ImpossibleCost = 0x4000000;
     private readonly LegacyWordLanguageScorer _language;
+    public int WordCount => _language.WordCount;
 
     public LegacyWordCandidateScorer(LegacyWordLanguageScorer language)
     {

@@ -242,6 +242,11 @@ jobs:
           dotnet run --project tools/LegacyWordCandidate.Probe -c Release -- --controls .artifacts/word-candidate-controls.json
           python tools/LegacyLineGroupSearch.Probe/reference_controls.py .artifacts/line-group-search-controls.json
           dotnet run --project tools/LegacyLineGroupSearch.Probe -c Release -- .artifacts/line-group-search-controls.json
+          python tools/LegacyIntegerWord.Probe/reference_controls.py .artifacts/integer-word-controls.json
+          dotnet run --project tools/LegacyIntegerWord.Probe -c Release -- --controls .artifacts/integer-word-controls.json
+          dotnet run --project tools/LegacyIntegerWord.Probe -c Release -- models/ru-RU/ru_RU-lk-text.lite.res
+          python tools/LegacyCursiveHorizontal.Probe/reference_controls.py .artifacts/cursive-horizontal-controls.json
+          dotnet run --project tools/LegacyCursiveHorizontal.Probe -c Release -- .artifacts/cursive-horizontal-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
       - name: Legacy stored word and class language costs
         run: |
           python tools/LegacyWordLanguage.Probe/reference_controls.py models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-language-controls.json
@@ -387,7 +392,9 @@ jobs:
             @{ Name = 'LegacyCursivePreparedInk'; Args = @('.artifacts/cursive-prepared-controls.json') },
             @{ Name = 'LegacyCursiveCategory'; Args = @('.artifacts/cursive-category-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyWordCandidate'; Args = @('--controls', '.artifacts/word-candidate-controls.json') }
-            @{ Name = 'LegacyLineGroupSearch'; Args = @('.artifacts/line-group-search-controls.json') }
+            @{ Name = 'LegacyLineGroupSearch'; Args = @('.artifacts/line-group-search-controls.json') },
+            @{ Name = 'LegacyIntegerWord'; Args = @('--controls', '.artifacts/integer-word-controls.json') },
+            @{ Name = 'LegacyCursiveHorizontal'; Args = @('.artifacts/cursive-horizontal-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') }
           )
           foreach ($case in $cases) {
             $name = $case.Name
@@ -399,6 +406,9 @@ jobs:
             & $probe @probeArgs
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
+          $suffix = if ($IsWindows) { '.exe' } else { '' }
+          & "./.artifacts/LegacyIntegerWord-native/LegacyIntegerWord.Probe$suffix" models/ru-RU/ru_RU-lk-text.lite.res
+          exit $LASTEXITCODE
 
   symbolic-math:
     name: Native local CAS / ${{ matrix.os }}

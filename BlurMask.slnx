@@ -53,6 +53,8 @@
     <Project Path="tools/LegacyCursivePreparedInk.Probe/LegacyCursivePreparedInk.Probe.csproj" />
     <Project Path="tools/LegacyCursiveCategory.Probe/LegacyCursiveCategory.Probe.csproj" />
     <Project Path="tools/LegacyWordCandidate.Probe/LegacyWordCandidate.Probe.csproj" />
+    <Project Path="tools/LegacyIntegerWord.Probe/LegacyIntegerWord.Probe.csproj" />
+    <Project Path="tools/LegacyCursiveHorizontal.Probe/LegacyCursiveHorizontal.Probe.csproj" />
     <Project Path="tools/InkMath.Solver.Probe/InkMath.Solver.Probe.csproj" />
   </Folder>
 </Solution>

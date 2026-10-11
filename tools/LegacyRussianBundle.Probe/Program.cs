@@ -30,6 +30,10 @@ var ordinary=model.CreateResourceLanguageScorer(runtimeScale:1).Score(wordId,[],
 var explicitProfile=model.CreateLanguageScorer(2,1).Score(wordId,[],0,false,true,false);
 if (ordinary != explicitProfile || ordinary.WordCost != -9096)
     throw new InvalidOperationException("Stored source kind did not select the verified lexical profile.");
+var integerPositions=mir.Select(label=>(ReadOnlyMemory<LegacyIntegerLexicalCandidate>)new LegacyIntegerLexicalCandidate[]{new(label,1)}).ToArray();
+var integerWord=model.CreateIntegerWordDecoder(1).Decode(integerPositions,[],0,false,true,false,7,100000,false,64).Single();
+if (integerWord.WordId!=198893 || integerWord.AcousticCost!=3 || integerWord.Score.Language.LexicalSubtotal!=4537 || integerWord.Score.TotalCost!=4547)
+    throw new InvalidOperationException("Portable bundle integer terminal pipeline differs from independent stored costs.");
 
 // Each malformed profile is validated against the same unchanged real resource pair.
 Reject(() => LegacyRussianModelBundle.Load(acoustic, lexical, "{"u8));

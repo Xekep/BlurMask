@@ -1,6 +1,6 @@
 namespace InkRecognition;
 
-/// <summary>Prepared native line-cluster fields; constructing a cluster is a separate operation.</summary>
+/// <summary>Prepared native user-guideline fields; these are not automatic cluster-fitting results.</summary>
 public readonly record struct LegacyLineCluster(int RowCount, float Baseline, float Pitch, float Height);
 
 public readonly record struct LegacyLineBounds(float X, float Y, float Width, float Height);
