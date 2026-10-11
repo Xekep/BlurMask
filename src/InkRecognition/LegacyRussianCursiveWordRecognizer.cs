@@ -21,6 +21,9 @@ public sealed record LegacyCursiveWordRecognitionResult(LegacyCursiveCutResult C
     LegacyCursiveCandidateLattice Lattice, IReadOnlyList<LegacyCursiveRecognizedWord> Words,
     int ContextWindowCount, int ClassifiedGroups, long ExpandedChoices);
 
+public sealed record LegacyNativeSeedWordRecognitionResult(LegacyOrdinaryCursiveSeedResult Seeds,
+    LegacyCursiveWordRecognitionResult Recognition);
+
 /// <summary>
 /// End-to-end diagnostic word recognition with actual Russian resources: cuts,
 /// prepared ownership, variable groups, chronological glyph ranges, four neural
@@ -77,6 +80,46 @@ public sealed class LegacyRussianCursiveWordRecognizer
         Func<LegacyCursiveCandidateGroup, LegacyPreparedGlyphClassification,
             ReadOnlyMemory<LegacyIntegerLexicalCandidate>>? costAdapter = null,
         CancellationToken cancellationToken = default)
+        => RecognizePreparedDiagnostic(source, options, history, costAdapter, null, cancellationToken);
+
+    /// <summary>
+    /// Connect exact native19f850 ordinary LTR seeds to the restored ordinary
+    /// lattice, neural/context, native final-cache and lexical stages. Explicit
+    /// source70/F0 metadata is checked; deferred skip arcs are refused. Whole-line
+    /// context frame and bounded dictionary beam remain original orchestration.
+    /// This diagnostic endpoint does not produce acceptance confidence.
+    /// </summary>
+    public LegacyNativeSeedWordRecognitionResult RecognizeNondeferredNativeSeedsWithFinalCache(
+        IReadOnlyList<InkStroke> source, LegacyCursiveWordSearchOptions options,
+        LegacyOrdinaryCursiveSeedProfile seedProfile, ReadOnlySpan<byte> sourceDirectionFlags,
+        ReadOnlySpan<int> physicalBoundaryIds, LegacyCursiveFinalCacheGroupScorer finalCacheScorer,
+        Func<LegacyCursiveCandidateGroup, LegacyPreparedGlyphClassification, LegacyOrdinaryAcousticCacheContext> sourceScope,
+        bool useEndCompositeMap, bool zeroFirstId, bool useNativeShortlist,
+        ReadOnlySpan<uint> history = default, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(options); ArgumentNullException.ThrowIfNull(finalCacheScorer);
+        ArgumentNullException.ThrowIfNull(sourceScope);
+        var directions = sourceDirectionFlags.ToArray(); var boundaries = physicalBoundaryIds.ToArray();
+        LegacyOrdinaryCursiveSeedResult? seeds = null;
+        LegacyCursiveCandidateLattice MakeLattice(LegacyCursiveCutResult cuts)
+        {
+            seeds = LegacyOrdinaryCursiveSeedProducer.GenerateLeftToRight(cuts, options.SourceHeight,
+                seedProfile, directions, boundaries, cancellationToken);
+            return seeds.CreateNondeferredOrdinaryChain(model.CursiveSpanProfile.MaximumAtoms, cancellationToken);
+        }
+        var result = RecognizePreparedDiagnostic(source, options, history, (group, glyph) =>
+            finalCacheScorer.Score(glyph, sourceScope(group, glyph), options.SourceHeight, 0,
+                useEndCompositeMap, zeroFirstId, useNativeShortlist, cancellationToken).Choices,
+            MakeLattice, cancellationToken);
+        return new(seeds ?? throw new InvalidOperationException("Native source seeds were not produced."), result);
+    }
+
+    private LegacyCursiveWordRecognitionResult RecognizePreparedDiagnostic(IReadOnlyList<InkStroke> source,
+        LegacyCursiveWordSearchOptions options, ReadOnlySpan<uint> history,
+        Func<LegacyCursiveCandidateGroup, LegacyPreparedGlyphClassification,
+            ReadOnlyMemory<LegacyIntegerLexicalCandidate>>? costAdapter,
+        Func<LegacyCursiveCutResult, LegacyCursiveCandidateLattice>? latticeFactory,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(source); ArgumentNullException.ThrowIfNull(options);
         cancellationToken.ThrowIfCancellationRequested();
@@ -98,8 +141,8 @@ public sealed class LegacyRussianCursiveWordRecognizer
         // Source-order atoms are an explicit original seed policy; the large
         // native line reorder/skip/special-token controller is not inferred.
         var atoms = cuts.Atoms.ToArray(); var boundaryIds = Enumerable.Repeat(-1, atoms.Length).ToArray();
-        var lattice = LegacyCursiveCandidateLattice.GenerateOrdinaryChain(atoms, boundaryIds,
-            model.CursiveSpanProfile.MaximumAtoms, cancellationToken);
+        var lattice = latticeFactory is null ? LegacyCursiveCandidateLattice.GenerateOrdinaryChain(atoms, boundaryIds,
+            model.CursiveSpanProfile.MaximumAtoms, cancellationToken) : latticeFactory(cuts);
         var rawPrepared = LegacyCursivePreparedInk.Create(source, cancellationToken);
         float lineMinX = source.SelectMany(s => s.Points).Min(p => p.X);
         var normalizedLine = new LegacyInkStroke[source.Count];

@@ -106,6 +106,13 @@ producer, then adds one for each synthetic prefix-template stroke it appends.
 The resulting byte reaches Text1801be930 argument 10 and then Text1801b95a0.
 It must not be guessed from character identity or replaced by a language enum.
 
+`LegacyPreparedSourceStrokeCount.Count` exposes this bounded integer producer
+with caller-supplied source IDs and prefix-template count. Its probe compares
+497 own-data cases against an independent set-cardinality reference in managed
+Release and Windows NativeAOT, including non-adjacent repeated fragments,
+permutation invariance, uint8 overflow neighbors and downstream inclusive
+bounds. It does not discover ranges or manufacture missing physical pen-up IDs.
+
 The resource producer is Text1801c2940. For versions at most 0x110 it writes
 NULL to both resource+148/+150. For a newer version it reads one presence byte;
 zero again writes both NULL, while nonzero calls global-context+98 service

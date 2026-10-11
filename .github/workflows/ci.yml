@@ -303,6 +303,17 @@ jobs:
           dotnet run --project tools/LegacySymbolRange.Probe -c Release -- .artifacts/legacy-symbol-range-controls.json
           python tools/LegacyResultScore.Probe/reference_controls.py .artifacts/legacy-result-score-controls.json
           dotnet run --project tools/LegacyResultScore.Probe -c Release -- .artifacts/legacy-result-score-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
+          python tools/LegacyResultReference.Probe/reference_controls.py .artifacts/legacy-result-reference-controls.json
+          dotnet run --project tools/LegacyResultReference.Probe -c Release -- .artifacts/legacy-result-reference-controls.json
+          python tools/LegacySourceEnclosure.Probe/reference_controls.py .artifacts/legacy-source-enclosure-controls.json
+          dotnet run --project tools/LegacySourceEnclosure.Probe -c Release -- .artifacts/legacy-source-enclosure-controls.json
+          python tools/LegacyOrdinarySource.Probe/reference_controls.py .artifacts/legacy-ordinary-source-controls.json
+          dotnet run --project tools/LegacyOrdinarySource.Probe -c Release -- .artifacts/legacy-ordinary-source-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+          dotnet run --project tools/LegacyPreparedSourceCount.Probe -c Release
+          python tools/LegacyNativeSeed.Probe/reference_controls.py .artifacts/legacy-native-seed-controls.json
+          dotnet run --project tools/LegacyNativeSeed.Probe -c Release -- .artifacts/legacy-native-seed-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/handwriting/fetch_russian_track_corpus.py --self-test
+          dotnet build tools/LegacyRussianCorpus.Probe -c Release
           python tools/LegacyVariableWord.Probe/reference_controls.py .artifacts/legacy-variable-word-controls.json
           dotnet run --project tools/LegacyVariableWord.Probe -c Release -- .artifacts/legacy-variable-word-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           python tools/handwriting/create_font_size_controls.py .artifacts/font-size-controls.json
@@ -484,6 +495,11 @@ jobs:
             @{ Name = 'LegacyWideSymbolPairs'; Args = @('.artifacts/legacy-wide-symbol-pairs-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacySymbolRange'; Args = @('.artifacts/legacy-symbol-range-controls.json') },
             @{ Name = 'LegacyResultScore'; Args = @('.artifacts/legacy-result-score-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
+            @{ Name = 'LegacyResultReference'; Args = @('.artifacts/legacy-result-reference-controls.json') },
+            @{ Name = 'LegacySourceEnclosure'; Args = @('.artifacts/legacy-source-enclosure-controls.json') },
+            @{ Name = 'LegacyOrdinarySource'; Args = @('.artifacts/legacy-ordinary-source-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyPreparedSourceCount'; Args = @() },
+            @{ Name = 'LegacyNativeSeed'; Args = @('.artifacts/legacy-native-seed-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyVariableWord'; Args = @('.artifacts/legacy-variable-word-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyHandwritingFontSize'; Args = @('.artifacts/font-size-controls.json') }
           )
