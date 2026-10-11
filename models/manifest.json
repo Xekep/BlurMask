@@ -77,6 +77,11 @@
       "sha256": "c339047fecc25a3f8244f40a5b8389db86bf4020c489aa3ec0e6d79da9679abc"
     },
     {
+      "path": "ru-RU/legacy-separation-profile.json",
+      "bytes": 7080,
+      "sha256": "97bf0ef2d14e7563e8a24ef9ad4c09373d7702819f73e43c1e6bba3a8da76978"
+    },
+    {
       "path": "ru-RU/ru_RU-ak-cur.lite.res",
       "bytes": 572763,
       "sha256": "7a5f08809e81fb4a2d4c78b3efd251d0986503b0d30d21de3695dab1f8a89978"

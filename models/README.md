@@ -7,7 +7,7 @@ repository's MIT-licensed implementation code.
 
 The catalog contains 16 source `.res` files, including the two line classifiers
 extracted from the inspected engine (67,689,808 bytes in total), plus the separate Russian engine data
-profile. Keeping a resource here does not
+profile and a separate exact separation-cost table. Keeping a resource here does not
 automatically enable its profile in the application or include it in installers.
 
 | File | Role |
@@ -27,6 +27,7 @@ automatically enable its profile in the application or include it in installers.
 | [ru-RU/ru_RU-ak-cur.lite.res](ru-RU/ru_RU-ak-cur.lite.res) | Russian neural classifiers and acoustic alphabet |
 | [ru-RU/ru_RU-lk-text.lite.res](ru-RU/ru_RU-lk-text.lite.res) | Russian packed word dictionary and language model |
 | [ru-RU/legacy-engine-profile.json](ru-RU/legacy-engine-profile.json) | Matching static activations, geometry ranges and acoustic confidence calibration |
+| [ru-RU/legacy-separation-profile.json](ru-RU/legacy-separation-profile.json) | Matching 256-value table for costs between grouped handwriting components |
 | [raw-content/raw-content.res](raw-content/raw-content.res) | Earlier Raw Content classification resource |
 | [raw-content/raw-content2.res](raw-content/raw-content2.res) | Raw Content2 text/math/drawing classification graph |
 
