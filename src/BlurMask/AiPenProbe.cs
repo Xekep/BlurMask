@@ -228,10 +228,14 @@ internal static class AiPenProbe
         var bounds = strokes.Select(m => m.Bounds).Aggregate((a, b) => a.Union(b));
         var document = new InkDocument(); foreach (var stroke in strokes) document.Add(stroke);
         var peer = new InkMark(InkTool.Pen, Colors.Blue, 3, new(200, 200)); document.Add(peer);
-        var correctBounds = grows ? text.Bounds.TopLeft == bounds.TopLeft && text.Bounds.Height == bounds.Height && text.Bounds.Width > bounds.Width : text.Bounds == bounds;
+        static bool Close(double a, double b) => Math.Abs(a - b) <= 1e-9;
+        // Native ARM64 may fuse the identity AABB arithmetic. Compare geometric
+        // coordinates with a sub-pixel tolerance, not bitwise floating equality.
+        var correctBounds = Close(text.Bounds.X, bounds.X) && Close(text.Bounds.Y, bounds.Y) &&
+            Close(text.Bounds.Height, bounds.Height) && (grows ? text.Bounds.Width > bounds.Width : Close(text.Bounds.Width, bounds.Width));
         if (!document.ReplaceRecognized(strokes, text) || document.Marks.Count != 2 || document.Marks[0] != text ||
             document.Marks[1] != peer || !correctBounds || text.Id != strokes[0].Id || text.Color != strokes[0].Color)
-            throw new InvalidOperationException("AI conversion lost bounds, color, layers or peer ink.");
+            throw new InvalidOperationException($"AI conversion lost bounds, color, layers or peer ink: text={text.Text}, grows={grows}, source={bounds}, replacement={text.Bounds}, marks={document.Marks.Count}, identity={text.Id == strokes[0].Id}, color={text.Color == strokes[0].Color}.");
         document.Undo();
         if (!document.Marks.SequenceEqual(strokes.Append(peer))) throw new InvalidOperationException("AI undo did not restore handwriting.");
         document.Redo();
