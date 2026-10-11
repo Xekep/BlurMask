@@ -56,7 +56,7 @@ original approximate beam search, not the SDK's native segmentation or scoring.
 Cut generation, acoustic scoring and length/segmentation calibration still
 belong to the caller. Joined handwriting cannot be recognized by this API alone.
 Work is bounded to 128 final cut positions, 128 hypotheses per start cut,
-16,384 total arcs and beam width128. Waiting cuts retain at most two beams.
+16,384 total arcs and beam width 128. Waiting cuts retain at most two beams.
 Cancellation is checked while reading arcs and while expanding each cut/arc.
 Own tests verify alternate boundaries for the same word, rejected high-score
 nonwords, complete coverage, final terminals, malformed arcs and work bounds.

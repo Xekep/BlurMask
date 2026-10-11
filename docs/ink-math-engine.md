@@ -224,6 +224,18 @@ translation/scale changes and reversed physical stroke acquisition order, rank
 small raw-ink-to-word path, rather than natural-handwriting accuracy. Connected
 cursive strokes remain intact; their internal cuts are not implemented.
 
+The remaining legacy 313-input family has a checked 283-channel geometric vector:
+one leading bias, 17 global channels (mask 0x1e1fff), 16 windows of 16 channels
+(mask 0xe1fff), and 9 baseline channels (mask 0x1ff). Context 28 and boundaries 2
+complete 313. `LegacyDirectionalLandmarks` restores one prerequisite pass
+(`1800b6d20`) over caller-prepared physical sample points: axis reversals and
+stroke ends, preserving the assembly-confirmed first-Y carry. It does not
+substitute the other profile's 30-point resampling or generate character cuts.
+641 own independently generated controls plus analytic/limits/cancellation
+checks pass in managed .NET and Windows Native AOT. Full native coordinate
+preparation, intersections, window aggregates and complete 313 vectors remain
+unfinished; the comparison did not execute an activated vendor engine.
+
 Remaining work: the two 313-input profiles, automatic baseline estimation,
 complete ensemble/candidate-mask handling, cursive segmentation, virtual-label
 rules, full language-model costs and representative Russian ink validation.

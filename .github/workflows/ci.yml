@@ -134,6 +134,10 @@ jobs:
         run: dotnet run --project tools/LegacySegmentedWord.Probe -c Release
       - name: Separated physical ink grouping and geometry limits
         run: dotnet run --project tools/LegacySeparatedInk.Probe -c Release
+      - name: Legacy directional landmarks and independent sample controls
+        run: |
+          python tools/LegacyDirectional.Probe/reference_controls.py .artifacts/legacy-directional-controls.json
+          dotnet run --project tools/LegacyDirectional.Probe -c Release -- .artifacts/legacy-directional-controls.json
       - name: Bounded legacy resource parser controls
         run: python tools/test-legacy-ink.py
       - name: Overlay compositor IPC ownership, cancellation and transport

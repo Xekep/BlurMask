@@ -96,3 +96,12 @@ the selected boundaries, so callers can compare possible segmentations without
 committing to a single split first. It does not generate the cuts or score raw
 ink. `LegacyLexicon.Probe` exercises ambiguity, complete coverage, duplicate-word
 merging, final terminals and resource/cancellation guards without vendor assets.
+
+`LegacyDirectionalLandmarks` restores the checked directional reversal and
+physical stroke-boundary flag pass for caller-prepared samples in the 313-input
+feature family. It does not create character cuts, prepare native coordinates,
+mark intersections or supply the full network vector. Analytic and 641 original
+reference cases cover plateaus, short-coordinate extremes, multiple strokes,
+the statically confirmed first-Y carry and sample bounds. Regenerate the
+vendor-free controls with `tools/LegacyDirectional.Probe/reference_controls.py`
+and pass their JSON path to `LegacyDirectional.Probe`.
