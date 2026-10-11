@@ -137,3 +137,9 @@ spatial-grid crossing flags and self-loop intervals; the underlying
 `LegacyQuantizedSegmentIntersection` preserves the checked fixed-point
 arithmetic. Together they pass 4,736 own pair/classification references plus a
 complete prepared-ink smoke path. See [the intersection checks and limits](../../docs/legacy-russian-intersections.md).
+
+`LegacyDirectionalWindowStatistics` and `LegacyDirectionalFeatureAssembly`
+restore the checked 3f temporal local channels and calibrated 313-column input
+layout. Caller-supplied geometry calibration, raw baseline and context are
+required. They pass 1,152 own arithmetic references; this does not supply the
+4f alternative layout or enable Russian cursive recognition in the app.

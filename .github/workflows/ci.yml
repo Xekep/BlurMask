@@ -158,6 +158,10 @@ jobs:
         run: |
           python tools/LegacyIntersection.Probe/reference_controls.py .artifacts/legacy-intersection-controls.json
           dotnet run --project tools/LegacyIntersection.Probe -c Release -- .artifacts/legacy-intersection-controls.json
+      - name: Legacy temporal window statistics and calibrated channel assembly
+        run: |
+          python tools/LegacyDirectionalWindow.Probe/reference_controls.py .artifacts/legacy-temporal-controls.json
+          dotnet run --project tools/LegacyDirectionalWindow.Probe -c Release -- .artifacts/legacy-temporal-controls.json
 
   symbolic-math:
     name: Native local CAS / ${{ matrix.os }}
