@@ -358,4 +358,31 @@ Russian v110 prefix: four dynamic mode2 families and three inactive slots.
 connects supplied atom groups and scored normalized glyphs to integer costs and
 word language totals. Its caller-supplied fixed sequence and bounded prefix beam
 do not implement the native variable-cut search or enable Russian GUI recognition.
+
+[`LegacyCursiveCutProducer`](../../docs/legacy-russian-cursive-cut-producer.md)
+composes the checked whole-input Russian106 cut controller with explicit per-stroke
+service confidences. [`LegacyCursiveCandidateLattice`](../../docs/legacy-russian-cursive-candidate-lattice.md)
+constructs the ordinary single-source variable-group DAG with explicit atom order,
+physical-boundary metadata and span cap. Full cross-source search remains separate.
+[`LegacyCursiveLatticeSpanProfile`](../../docs/legacy-russian-cursive-source-metadata.md)
+reads the Russian resource span cap of eight atoms; the bundle exposes it through
+`CursiveSpanProfile`. Other fields in that resource node remain uninterpreted.
+
+[`LegacyPreparedGlyphNormalization`](../../docs/legacy-russian-prepared-normalization.md)
+restores the checked FF/FF short-coordinate branch, and
+[`LegacyPreparedGlyphClassifier`](../../docs/legacy-russian-prepared-glyph-classifier.md)
+connects that normalization to real acoustic families, resource weights and integer
+costs. The bundle provides `CreatePreparedGlyphClassifier()`; line frame, context,
+range order, family/class flags and multiplier remain explicit caller inputs.
+[`LegacyNormalizedPenUpMerge`](../../docs/legacy-russian-normalized-penup-merge.md)
+preserves native boundary tie order. It is an explicit separate post-normalization
+operation, not automatically applied by the checked glyph factory.
+
+[`LegacyOrdinaryWordCategoryPolicy`](../../docs/legacy-russian-ordinary-word-category.md)
+restores the checked symbol/beam category choice with explicit special-label metadata.
+[`LegacyGlyphTypesetGeometry`](../../docs/legacy-rendered-glyph-typeset.md)
+restores baseline and x-height fractions from externally measured rendered glyphs;
+it does not claim a completed handwriting-to-font-size policy.
+[`LegacyGlyphGeometryPayload`](../../docs/legacy-glyph-payload.md) reproduces the
+checked affine quad setter and normalized baseline/x-height presence fields.
 The type24a wrapper, final adjustments and raw-line candidate selection are separate.

@@ -273,6 +273,22 @@ jobs:
           python tools/LegacyDynamicWeights.Probe/reference_controls.py .artifacts/dynamic-weights-controls.json
           dotnet run --project tools/LegacyDynamicWeights.Probe -c Release -- --controls .artifacts/dynamic-weights-controls.json
           dotnet run --project tools/LegacyDynamicWeights.Probe -c Release -- --resource models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/LegacyCursiveProducer.Probe/reference_controls.py .artifacts/cursive-producer-controls.json
+          dotnet run --project tools/LegacyCursiveProducer.Probe -c Release -- .artifacts/cursive-producer-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/LegacyCursiveLattice.Probe/reference_controls.py .artifacts/legacy-cursive-lattice-controls.json
+          dotnet run --project tools/LegacyCursiveLattice.Probe -c Release -- .artifacts/legacy-cursive-lattice-controls.json
+          python tools/LegacyPreparedNormalization.Probe/reference_controls.py .artifacts/prepared-normalization-controls.json
+          dotnet run --project tools/LegacyPreparedNormalization.Probe -c Release -- --controls .artifacts/prepared-normalization-controls.json
+          dotnet run --project tools/LegacyPreparedNormalization.Probe -c Release -- --resource models/ru-RU/ru_RU-ak-cur.lite.res
+          dotnet run --project tools/LegacyPreparedGlyph.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
+          python tools/LegacyPenUpMerge.Probe/reference_controls.py .artifacts/penup-merge-controls.json
+          dotnet run --project tools/LegacyPenUpMerge.Probe -c Release -- --controls .artifacts/penup-merge-controls.json
+          dotnet run --project tools/LegacyWordCategory.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/LegacyGlyphTypesetGeometry.Probe/reference_controls.py .artifacts/glyph-typeset-controls.json
+          dotnet run --project tools/LegacyGlyphTypesetGeometry.Probe -c Release -- .artifacts/glyph-typeset-controls.json
+          dotnet run --project tools/LegacyCursiveSpanProfile.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/LegacyGlyphPayload.Probe/reference_controls.py .artifacts/glyph-payload-controls.json
+          dotnet run --project tools/LegacyGlyphPayload.Probe -c Release -- .artifacts/glyph-payload-controls.json
       - name: Legacy stored word and class language costs
         run: |
           python tools/LegacyWordLanguage.Probe/reference_controls.py models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-language-controls.json
@@ -433,7 +449,16 @@ jobs:
             @{ Name = 'LegacyCursiveOverride'; Args = @('.artifacts/cursive-override-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyCursiveFilters'; Args = @('.artifacts/cursive-filters-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyPreparedSequence'; Args = @() },
-            @{ Name = 'LegacyDynamicWeights'; Args = @('--controls', '.artifacts/dynamic-weights-controls.json') }
+            @{ Name = 'LegacyDynamicWeights'; Args = @('--controls', '.artifacts/dynamic-weights-controls.json') },
+            @{ Name = 'LegacyCursiveProducer'; Args = @('.artifacts/cursive-producer-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyCursiveLattice'; Args = @('.artifacts/legacy-cursive-lattice-controls.json') },
+            @{ Name = 'LegacyPreparedNormalization'; Args = @('--controls', '.artifacts/prepared-normalization-controls.json') },
+            @{ Name = 'LegacyPreparedGlyph'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
+            @{ Name = 'LegacyPenUpMerge'; Args = @('--controls', '.artifacts/penup-merge-controls.json') },
+            @{ Name = 'LegacyWordCategory'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyGlyphTypesetGeometry'; Args = @('.artifacts/glyph-typeset-controls.json') },
+            @{ Name = 'LegacyCursiveSpanProfile'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyGlyphPayload'; Args = @('.artifacts/glyph-payload-controls.json') }
           )
           foreach ($case in $cases) {
             $name = $case.Name
@@ -451,6 +476,8 @@ jobs:
           & "./.artifacts/LegacyWordBound-native/LegacyWordBound.Probe$suffix" models/ru-RU/ru_RU-lk-text.lite.res
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           & "./.artifacts/LegacyDynamicWeights-native/LegacyDynamicWeights.Probe$suffix" --resource models/ru-RU/ru_RU-ak-cur.lite.res
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & "./.artifacts/LegacyPreparedNormalization-native/LegacyPreparedNormalization.Probe$suffix" --resource models/ru-RU/ru_RU-ak-cur.lite.res
           exit $LASTEXITCODE
 
   symbolic-math:

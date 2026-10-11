@@ -68,6 +68,15 @@
     <Project Path="tools/LegacyCursiveFilters.Probe/LegacyCursiveFilters.Probe.csproj" />
     <Project Path="tools/LegacyPreparedSequence.Probe/LegacyPreparedSequence.Probe.csproj" />
     <Project Path="tools/LegacyDynamicWeights.Probe/LegacyDynamicWeights.Probe.csproj" />
+    <Project Path="tools/LegacyCursiveProducer.Probe/LegacyCursiveProducer.Probe.csproj" />
+    <Project Path="tools/LegacyCursiveLattice.Probe/LegacyCursiveLattice.Probe.csproj" />
+    <Project Path="tools/LegacyPreparedNormalization.Probe/LegacyPreparedNormalization.Probe.csproj" />
+    <Project Path="tools/LegacyPreparedGlyph.Probe/LegacyPreparedGlyph.Probe.csproj" />
+    <Project Path="tools/LegacyPenUpMerge.Probe/LegacyPenUpMerge.Probe.csproj" />
+    <Project Path="tools/LegacyWordCategory.Probe/LegacyWordCategory.Probe.csproj" />
+    <Project Path="tools/LegacyGlyphTypesetGeometry.Probe/LegacyGlyphTypesetGeometry.Probe.csproj" />
+    <Project Path="tools/LegacyCursiveSpanProfile.Probe/LegacyCursiveSpanProfile.Probe.csproj" />
+    <Project Path="tools/LegacyGlyphPayload.Probe/LegacyGlyphPayload.Probe.csproj" />
     <Project Path="tools/InkMath.Solver.Probe/InkMath.Solver.Probe.csproj" />
   </Folder>
 </Solution>

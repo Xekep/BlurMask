@@ -16,9 +16,13 @@ public sealed class LegacyDirectionalAcousticWeightConfiguration
     public LegacyDynamicAcousticWeightProfile DynamicProfile {get;}
     public float ResourceCostMultiplier {get;}
     public ReadOnlyMemory<LegacyAcousticWeightSlot> Slots {get;}
+    /// <summary>Reader raw+60, forwarded to type227 runtime+28.</summary>
+    public byte StoredContextSelector {get;}
+    public LegacyNativePriorContextMode ContextSelectionMode=>StoredContextSelector switch
+        {0=>LegacyNativePriorContextMode.AllContained,1=>LegacyNativePriorContextMode.Disjoint,_=>LegacyNativePriorContextMode.SameLineAll};
     private LegacyDirectionalAcousticWeightConfiguration(LegacyDynamicAcousticWeightProfile profile,
-        float multiplier,LegacyAcousticWeightSlot[] slots)
-    {DynamicProfile=profile;ResourceCostMultiplier=multiplier;Slots=slots;}
+        float multiplier,LegacyAcousticWeightSlot[] slots,byte contextSelector)
+    {DynamicProfile=profile;ResourceCostMultiplier=multiplier;Slots=slots;StoredContextSelector=contextSelector;}
 
     public static LegacyDirectionalAcousticWeightConfiguration LoadV110Prefix(ReadOnlySpan<byte> serialized,
         out int consumedBytes,CancellationToken cancellationToken=default)
@@ -34,7 +38,9 @@ public sealed class LegacyDirectionalAcousticWeightConfiguration
         r.Skip(4); // flags8/9, point target10; v110 implicit cost multiplier1.
         if(!r.Flag())throw new InvalidDataException("Checked profile requires an initial network.");
         r.Network();
-        r.Skip(3*4+2+2+4+4); // initial-network context parameters48..65.
+        r.Skip(3*4+2+2+4+1); // initial-network context parameters48..5c.
+        byte contextSelector=r.Byte(); // native raw+60, zero-extended from serializedbyte.
+        r.Skip(2); // raw64/65.
         if(!r.Flag())throw new InvalidDataException("Checked profile requires dynamic type257 weights.");
         int count=r.UInt16();
         var profile=new LegacyDynamicAcousticWeightProfile(count,r.Float(),r.Float(),r.Float(),r.Float(),
@@ -62,7 +68,7 @@ public sealed class LegacyDirectionalAcousticWeightConfiguration
         // Reuse evaluator validation without inventing a second config policy.
         _=LegacyDynamicAcousticWeights.Evaluate(new InkStroke[]{new(new InkPoint[]{new(0,0)})},profile,cancellationToken);
         consumedBytes=r.Position;
-        return new(profile,1f,slots);
+        return new(profile,1f,slots,contextSelector);
     }
 
     /// <summary>Native mode0/1/2 resolution from explicit runtime geometry results.

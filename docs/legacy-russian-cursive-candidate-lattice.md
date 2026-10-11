@@ -1,0 +1,27 @@
+# Ordinary cursive candidate lattice
+
+`LegacyCursiveCandidateLattice.GenerateOrdinaryChain` restores the **single-source, ordinary, linear seed graph** branch of the native variable-group producer. It returns every permitted consecutive glyph group, prepared ink ranges, native group identities, local arc ordinals and reciprocal predecessor/successor links. A decoder can choose different glyph lengths rather than a fixed partition.
+
+The caller supplies native line order, source-service physical-boundary IDs and the positive span cap. These values are not inferred from stroke indices, marker kinds or letter categories. The checked endpoint bounds the cap to15 and input to4096 atoms;15 is the existing checked range-composer limit, not a recovered resource default. It accepts single-range prepared atoms that overlap at most at their shared cut endpoint. Source IDs are assumed identical, kinds ordinary0 and the seed graph a linear chain. The caller must supply a valid prepared atom order; this endpoint does not restore source extraction, horizontal reordering or arbitrary initial graph pruning.
+
+## Native evidence
+
+Addresses refer to the locally inspected x64 `MyScriptText.dll`; private exports are deliberately untracked.
+
+* `150d00` puts its cloned type21b into config+28. `1a6980` forwards that instance through the sampler initialization descriptor; `18d920` stores it at sampler297 runtime+1c8. The ordered-lattice provider is therefore type21b itself. It is not an unidentified external graph service.
+* `1a61c0` prepares each source graph using `19f850`, `1a1ef0`, `1a4f10`, then `1a5700` and **`1a5920`**. Later `19e8b0` joins source graphs. The candidate construction happens before sampler scoring `1941b0`.
+* `1a5920` visits left nodes in increasing order and calls `1a3b30(left, unrestricted span, left+1, merge-search hints, crossSource=false)`.
+* `1a3b30` scans left arcs in their stored order and their reachable right arcs. It requires `left.span + rightNode - leftNode < spanCap`, rejects right flag8 and special kind1. Within the same source ID, the cross-source box/layout tests are bypassed. On an ordinary linear seed graph, this yields all consecutive atom groups up to the explicit cap and physical-boundary barrier. It retains atomic arcs at index0, then appends length2, length3, etc. in encounter order.
+* `1a5700` gets the current and predecessor physical-boundary IDs using source-service virtualf0. For a known current ID it sets flag8 when IDs differ and flag16 when `previous+1 < current`. Unknown current -1 leaves these flags untouched. The group producer rejects **right** flag8; it does not reject the left group's flag8.
+* `1a35a0` concatenates selected atom handles, sorts by the first range's `(physical stroke, start point)` using `1a3450`, then calls sampler297 virtual58/60, corresponding to the restored193690/193720 composer. The output ranges address the prepared ink including synthetic points. Arbitrary overlapping ranges are rejected here because they would require extra native deduplication cases.
+* `1a3b30` interns exact composed range arrays. The `1a5920` per-stroke search hints begin at the group count on the first merge, so initial atom groups are excluded from merge interning. A terminal singleton can therefore reuse an earlier **merged** group identity without reusing an initial atom identity.
+* `1a37b0` sets new span to `left.span - leftNode + rightNode`, copies left predecessor links and right successor links, and retains ordinary flags from the left group. In this checked branch initial flag0 is clear, so the native conjunction of left/right flag0 remains clear.
+* Type21b method table is1802e1ff0. Its virtual70=`1a7850` returns arc byte+4: the span. The predecessor node is **`currentNode - span - 1`**, not the getter's raw value. Arc records are0x20 bytes; nodes have0x10 pointer/count/capacity vectors. `1a7610`/`1a7640` expose predecessor ordinals and `1a76a0`/`1a7700` expose successor ordinals grouped by future-node offset.
+
+`LegacyCursiveCandidateSuccessor.NodeOffset` is the positive destination offset, and `ArcIndex` is the destination node's local ordinal. `PredecessorArcIndices` addresses the single predecessor node implied by the span; -1 is the start sentinel. `GroupId` identifies composed geometry and may repeat across arcs after native merge interning.
+
+## Controls and limits
+
+The independent Python control interpreter uses mutable native-shaped node/arc records, explicit boundary flags, ordered merges and merged-only geometry interning. Managed and Windows NativeAOT probes compare **768 graphs,83019 candidates and64951 variable spans**, including shuffled line order, physical pen-separated ranges, shared cut endpoints, terminal singleton interning, exact flags and reciprocal adjacency. Own checks demonstrate selecting a whole three-atom glyph over three single glyphs, boundary barriers, input ownership, malformed inputs and cancellation. They establish the restored branch's behavior; they are not an end-to-end recognition accuracy measurement.
+
+Not restored here: non-linear initial seed arcs, skip/reorder alternatives, token kinds1/2, cross-source geometry joins, native resource default span cap, source-order decisions or final acoustic/lexical beam search. Prepared group ranges can be passed to `LegacyPreparedGlyphClassifier`; its baseline, context, clipping and weighting inputs remain explicit. The endpoint does not claim that a complete application recognizer is finished.

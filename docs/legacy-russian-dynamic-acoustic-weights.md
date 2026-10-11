@@ -96,3 +96,12 @@ parameters, seven modes/flags/network masks and prefix endpoint. These controls
 are arithmetic/resource validation, not Russian handwriting accuracy or GUI
 integration. Float prepared-point to normalized-short geometry conversion and
 native variable-cut word search remain separate unresolved upstream stages.
+
+## Native context selector
+
+The same checked type21d prefix also exposes its stored context selector.
+Russian raw `+60`, serialized byte195767, is2. Initializer1b0760 forwards this
+field into type227 runtime `+28`; the exact prior-context policy is
+[documented separately](legacy-russian-prior-context.md). It retains all
+same-line/scope observations, including target overlap. Dynamic weight modes
+and this context selector are separate fields.

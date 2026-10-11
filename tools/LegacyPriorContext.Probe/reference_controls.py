@@ -15,7 +15,17 @@ for i in range(640):
         excluded = a in target if first else bool(set(target).intersection(range(a,b+1)))
         if not excluded:
             expected.append(center)
-    cases.append(dict(target=target,line=line,scope=scope,scoped=scoped,firstOnly=first,boundary=boundary,groups=groups,expectedCenters=expected))
+    native=[]
+    for mode in range(3):
+        chosen=[]
+        for gl,gs,a,b,center in groups:
+            if boundary or gl!=line or (scoped and gs!=scope):continue
+            covered=set(range(a,b+1)); ink=set(target)
+            if mode==0 and not covered.issubset(ink):continue
+            if mode==1 and covered.intersection(ink):continue
+            chosen.append(center)
+        native.append(chosen)
+    cases.append(dict(target=target,line=line,scope=scope,scoped=scoped,firstOnly=first,boundary=boundary,groups=groups,expectedCenters=expected,expectedNativeCenters=native))
 path=pathlib.Path(sys.argv[1]);path.parent.mkdir(parents=True,exist_ok=True)
 path.write_text(json.dumps(cases,separators=(',',':')),encoding='utf8')
 print(f'Wrote{len(cases)} own prior context selection cases.')

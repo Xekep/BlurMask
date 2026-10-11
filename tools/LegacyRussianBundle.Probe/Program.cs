@@ -25,6 +25,10 @@ if (model.LineProfiles.Count!=3 || model.LineProfiles.Any(p=>p.SparseThreshold!=
     throw new InvalidOperationException("Stored line and cursive category profile components differ.");
 _ = model.CreateContextWindowScorer();
 _ = model.CreatePreparedSequenceWordSearch(1,0);
+_ = model.CreatePreparedGlyphClassifier();
+if (model.CursiveSpanProfile.MaximumAtoms != 8 || model.CursiveSpanProfile.NativeSecondByte != 1 ||
+    model.AcousticWeights.ContextSelectionMode != LegacyNativePriorContextMode.SameLineAll)
+    throw new InvalidOperationException("Stored cursive span/context selector differs.");
 try { model.CreateCursiveCategoryMapper(2); throw new InvalidOperationException("Invalid stored cursive profile selected."); } catch(ArgumentOutOfRangeException){}
 ushort[] mir = "\u043c\u0438\u0440".Select(letter =>
     model.LexicalAlphabet.TryGetLabel(letter.ToString(), out ushort id) ? id : throw new InvalidOperationException("Missing label.")).ToArray();

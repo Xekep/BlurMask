@@ -33,8 +33,10 @@ Static path evidence for the inspected native generation:
 This API restores only the aggregation arithmetic. It does not generate the30
 geometry inputs or their neural probabilities, select matching line/group
 observations, infer source baselines or recognize cursive words. Caller-selected
-observations must already exclude incompatible lines and overlapping current
-ink as required by the full selection pass. The float channels also require the
+observations must already satisfy the selected native line/scope and interval
+policy. Overlapping current ink is excluded in mode1, required to fully contain
+an observation in mode0, and retained in the inspected Russian mode2. See the
+corrected [prior selection policy](legacy-russian-prior-context.md). The float channels also require the
 verified native float-to-fixed conversion before being appended to an integer
 classifier; this API does not guess that conversion. Use the separate checked
 [`LegacyFloatInputQuantization`](legacy-russian-float-input.md) component for it,

@@ -21,6 +21,15 @@ try{LegacyDynamicAcousticWeights.Evaluate(parallel,profile,new CancellationToken
 Console.WriteLine($"PASS type257 own geometry: close parallel overlap={near.Overlap:R}, complementary weights={near.Mode1Weight:R}/{near.Mode2Weight:R}; logistic/endpoint reset, translation, zero arc, bounds and cancellation. Explicit config, no baseline/default/resource selection claim.");
 // Own v110 prefix gives nontrivial mode0/1/2 resolution without resources.
 var ownPrefix=OwnPrefix();var stored=LegacyDirectionalAcousticWeightConfiguration.LoadV110Prefix(ownPrefix,out int used);
+Require(stored.StoredContextSelector==0 && stored.ContextSelectionMode==LegacyNativePriorContextMode.AllContained,"Own context selector forwarding differs.");
+// Own network payload starts after byte20, its11-byte header/payload ends32;
+// serialized context selector is21 bytes into the24-byte initial parameters.
+foreach(byte mode in new byte[]{0,1,2,255})
+{
+ var variant=ownPrefix.ToArray();variant[32+21]=mode;
+ var config=LegacyDirectionalAcousticWeightConfiguration.LoadV110Prefix(variant,out _);
+ Require(config.StoredContextSelector==mode && config.ContextSelectionMode==(mode<2 ? (LegacyNativePriorContextMode)mode:LegacyNativePriorContextMode.SameLineAll),"Stored context selector normalization differs.");
+}
 Require(used==ownPrefix.Length&&stored.DynamicProfile.SampleCount==30&&stored.ResourceCostMultiplier==1&&stored.Slots.Span[0].StoredWeight==.3f,"Own serialized prefix consumed/mapped incorrectly.");
 var weights=stored.ResolveWeights(new(.25f,.7f,.3f,10));
 Require(weights.AsSpan().SequenceEqual(new float[]{.3f,.7f,.3f,0,0,0,0}),"Stored mode0/1/2 resolution differs.");
@@ -33,6 +42,7 @@ if(args.Length==2&&args[0]=="--resource")
 {
  byte[] resource=File.ReadAllBytes(args[1]);
  var actual=LegacyDirectionalAcousticWeightConfiguration.LoadV110Prefix(resource.AsSpan(189734),out int consumed);
+ Require(actual.StoredContextSelector==2 && actual.ContextSelectionMode==LegacyNativePriorContextMode.SameLineAll && resource[195767]==2,"Actual RU native context selector must be2, same-line-all.");
  var expectedProfile=new LegacyDynamicAcousticWeightProfile(30,.15f,.30f,.40f,.50f,.95f,25,.20f,1);
  Require(consumed==566330-189734&&actual.DynamicProfile==expectedProfile&&actual.ResourceCostMultiplier==1,"Actual type21d native prefix profile/consumption differs.");
  for(int i=0;i<7;i++){var slot=actual.Slots.Span[i];Require(i<4?slot.Mode==2&&slot.NetworkMask==2&&slot.FirstFlag&&slot.SecondFlag:slot.Mode==0&&slot.StoredWeight==0&&slot.NetworkMask==0&&!slot.FirstFlag&&!slot.SecondFlag,"Actual seven-family modes/flags/network mask differs.");}

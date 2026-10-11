@@ -7,6 +7,13 @@ nonblank-mass acceptance. Accepted records can then pass through
 `LegacyPriorContextSelection` and `LegacyContextWeighting` into the28 appended
 directional input channels. No vendor weights or activation tables are included.
 
+The older diagnostics below use the explicit disjoint prior-window selection
+(native mode1). This is not the inspected Russian resource's stored default:
+its context selector is2, retaining all same-line/scope observations. See
+[native prior selection](legacy-russian-prior-context.md) for the corrected
+mode0/mode1/mode2 policy and resource forwarding evidence. No accuracy claim
+depends on the older diagnostic selection.
+
 The caller supplies integer-coordinate strokes for one line, line height,
 vertical reference, per-stroke scope IDs and the matching model/activations.
 Windows begin at physical stroke1; stroke0 contributes the earlier X reference.
