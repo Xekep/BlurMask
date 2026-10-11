@@ -14,6 +14,9 @@ public sealed class LegacyPackedLexicon
     public int NodeCount { get; }
     public int MaximumWordLength { get; }
     public uint StoredTerminalCount { get; }
+    /// <summary>Native packed label masks used by the prepared source query materializer.</summary>
+    public uint PackedLabelMask => _labelMask;
+    public uint PackedTerminalBit => _terminalBit;
     public int StorageBytes => _labels.Data.Length + _offsets.Data.Length;
 
     private LegacyPackedLexicon(int nodes, int maximumWordLength, uint terminalCount,
@@ -80,6 +83,16 @@ public sealed class LegacyPackedLexicon
     public ushort GetLabel(int state)
     {
         ValidateState(state); return (ushort)(_labels.Get(state) & _labelMask);
+    }
+
+    public uint GetPackedLabel(int state)
+    {
+        ValidateState(state); return _labels.Get(state);
+    }
+
+    public (int Start, int End) GetChildRange(int state)
+    {
+        ValidateState(state); return (ChildStart(state), ChildStart(state + 1));
     }
 
     public bool IsTerminal(int state)

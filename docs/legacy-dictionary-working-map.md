@@ -27,9 +27,11 @@ edge order and exact next-node identity.
 
 The port uses immutable owned map snapshots instead of native mutable pointers.
 It bounds alphabets to 65,535 labels and immediate dictionary fanout to 512,
-rejects absent auxiliary data, and propagates cancellation. This does not port
-the eight-slot native query ring, pagination, context-pointer/tag storage,
-dictionary parent-context callback, or native word decoder.
+rejects absent auxiliary data, and propagates cancellation. The separate
+[prepared dictionary query source](legacy-prepared-dictionary-query.md) now
+restores the eight-slot ring, single-packed pagination and32-byte records,
+including the additional root-child skip. This lower-level map API does not
+implement those query operations, native context allocation or word decoding.
 
 `MapAcousticCosts` is an **original diagnostic adapter**: it uses the selected
 map to route explicit integer acoustic costs to lexical IDs. It adds no case,
@@ -74,7 +76,9 @@ these leading candidates. Expected words are not used during inference and
 these results do **not** establish Russian handwriting accuracy.
 
 Source descriptor category `0xc00`, baseline `90`, height `80`, source
-probability `0`, and language scale `1` are explicit diagnostic inputs. The
-actual descriptor producer `092990`, controller permission-byte producer,
-automatic frame inference, final native beam/winner/confidence and complete
-ordinary application orchestration remain separate unfinished boundaries.
+probability `0`, and language scale `1` are explicit diagnostic inputs. The actual
+descriptor and permission producer are now separate
+[checked components](legacy-acoustic-dictionary-permissions.md). Automatic frames
+and the [ordinary neural line sweep](legacy-ordinary-neural-line-sweep.md) are also
+separate components. Final native beam/winner/confidence and complete ordinary
+application orchestration remain unfinished.
