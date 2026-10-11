@@ -8,15 +8,36 @@ namespace BlurMask;
 // Replace marks during dragging so undo snapshots stay immutable.
 internal sealed class InkSelection(InkDocument document)
 {
-    internal Guid? Selected { get; private set; }
+    private readonly HashSet<Guid> _selected = [];
+    internal IReadOnlyCollection<Guid> SelectedIds => _selected;
+    internal Guid? Selected => _selected.Count == 1 ? _selected.First() : null;
     private InkMark? _original;
+    private InkMark[] _originals = [];
+    private int[] _indices = [];
+    private bool _marquee;
+    private Point _end;
+    private double _marqueeThreshold;
+    private HashSet<Guid> _marqueeBefore = [], _marqueeBase = [];
     private Point _start;
     private int _handle = -1;
     private static readonly Dictionary<StandardCursorType, Cursor> Cursors = new();
     internal static Cursor NativeCursor(StandardCursorType type)
     { if (!Cursors.TryGetValue(type, out var cursor)) Cursors[type] = cursor = new(type); return cursor; }
     private static readonly (double X, double Y)[] Positions = [(0,0),(.5,0),(1,0),(1,.5),(1,1),(.5,1),(0,1),(0,.5)];
-    private InkMark? Current => Selected is { } id ? document.Marks.Find(m => m.Id == id) : null;
+    private InkMark? Current
+    {
+        get
+        {
+            if (_selected.Count == 0) return null;
+            if (_selected.Count == 1) return document.Marks.Find(m => m.Id == _selected.First());
+            var marks = document.Marks.Where(m => _selected.Contains(m.Id)).ToArray();
+            if (marks.Length == 0) return null;
+            if (marks.Length == 1) return marks[0];
+            var bounds = marks.Select(m => m.Bounds).Aggregate((a, b) => a.Union(b));
+            var frame = new InkMark(InkTool.Rectangle, Colors.Transparent, 0, bounds.TopLeft);
+            frame.AddPoint(bounds.BottomRight); return frame;
+        }
+    }
     internal static Point HandlePoint(InkMark mark, int index, double scale)
     {
         var box = mark.BaseBounds; var p = Positions[index < 8 ? index : (index - 8) * 2];
@@ -37,27 +58,60 @@ internal sealed class InkSelection(InkDocument document)
         if (Current is not { } mark) return StandardCursorType.Arrow;
         var handle = _original is not null ? _handle : HitHandle(mark, point, scale);
         if (handle >= 8) return StandardCursorType.Hand;
-        if (handle < 0) return mark.Hit(point, 6 / scale) ? StandardCursorType.SizeAll : StandardCursorType.Arrow;
+        if (handle < 0) return (_selected.Count > 1 ? mark.Bounds.Contains(point) : mark.Hit(point, 6 / scale))
+            ? StandardCursorType.SizeAll : StandardCursorType.Arrow;
         var p = Positions[handle]; var x = p.X - .5; var y = p.Y - .5;
         var angle = Math.Atan2(x * mark.Transform.M12 + y * mark.Transform.M22, x * mark.Transform.M11 + y * mark.Transform.M21);
         var axis = ((int)Math.Round(angle / (Math.PI / 4)) % 4 + 4) % 4;
         return axis switch { 0 => StandardCursorType.SizeWestEast, 1 => StandardCursorType.TopLeftCorner,
             2 => StandardCursorType.SizeNorthSouth, _ => StandardCursorType.TopRightCorner };
     }
-    internal void Begin(Point point, double tolerance)
+    internal void Begin(Point point, double tolerance, bool toggle = false)
     {
-        _handle = Current is { } selected ? HitHandle(selected, point, 6 / tolerance) : -1;
-        _original = _handle >= 0 ? Current : document.Marks.LastOrDefault(m => m.Hit(point, tolerance));
-        Selected = _original?.Id;
+        Cancel();
+        var existing = document.Marks.Select(m => m.Id).ToHashSet();
+        _selected.IntersectWith(existing);
+        var frame = Current;
+        _handle = !toggle && tolerance > 0 && frame is not null ? HitHandle(frame, point, 6 / tolerance) : -1;
+        var hit = _handle < 0 ? document.Marks.LastOrDefault(m => m.Hit(point, tolerance)) : null;
         _start = point;
-        if (_original is not null) document.BeginEdit();
+        if (toggle && hit is not null)
+        {
+            if (!_selected.Add(hit.Id)) _selected.Remove(hit.Id);
+            document.Notify(); return;
+        }
+        if (_handle < 0 && hit is not null)
+        {
+            if (!_selected.Contains(hit.Id)) { _selected.Clear(); _selected.Add(hit.Id); }
+        }
+        else if (_handle < 0 && (toggle || frame is null || _selected.Count < 2 || !frame.Bounds.Contains(point)))
+        {
+            _marqueeBefore = [.. _selected];
+            if (!toggle) _selected.Clear();
+            _marqueeBase = [.. _selected];
+            _marquee = true; _end = point; _marqueeThreshold = Math.Max(.001, tolerance / 2);
+            document.Notify(); return;
+        }
+        _original = Current;
+        _originals = document.Marks.Where(m => _selected.Contains(m.Id)).ToArray();
+        var indices = document.Marks.Select((m, i) => (m.Id, i)).ToDictionary(p => p.Id, p => p.i);
+        _indices = _originals.Select(m => indices[m.Id]).ToArray();
+        if (_originals.Length > 0) document.BeginEdit();
         document.Notify();
     }
     internal void Move(Point point, bool limitToCanvas = false, bool constrain = false)
     {
-        if (_original is null) return;
-        var index = document.Marks.FindIndex(m => m.Id == _original.Id);
-        if (index < 0) return;
+        if (_marquee)
+        {
+            _end = point; _selected.Clear(); _selected.UnionWith(_marqueeBase);
+            if (((Vector)(_end - _start)).Length >= _marqueeThreshold)
+            {
+                var area = new Rect(_start, _end).Normalize();
+                foreach (var mark in document.Marks) if (area.Intersects(mark.Bounds)) _selected.Add(mark.Id);
+            }
+            document.Notify(); return;
+        }
+        if (_original is null || _originals.Length == 0) return;
         InkMark replacement;
         if (_handle >= 8)
         {
@@ -90,28 +144,56 @@ internal sealed class InkSelection(InkDocument document)
             }
             replacement = _original.Translate(delta);
         }
-        var bounds = replacement.Bounds;
-        var t = replacement.Transform;
-        if (!double.IsFinite(bounds.Width) || !double.IsFinite(bounds.Height) ||
-            Math.Max(Math.Max(Math.Abs(t.M11), Math.Abs(t.M12)), Math.Max(Math.Abs(t.M21), Math.Abs(t.M22))) > 1000 ||
-            Math.Abs(t.M11 * t.M22 - t.M12 * t.M21) < 1e-8 || bounds.Left < -100000 || bounds.Top < -100000 ||
-            bounds.Right > 100000 || bounds.Bottom > 100000) return;
-        document.Marks[index] = replacement;
+        var replacements = new InkMark[_originals.Length];
+        for (var i = 0; i < _originals.Length; i++)
+        {
+            replacements[i] = _originals.Length == 1 ? replacement : _handle < 0
+                ? _originals[i].Translate(replacement.Points[0] - _original.Points[0])
+                : _originals[i].WithTransform(_originals[i].Transform * replacement.Transform);
+            var bounds = replacements[i].Bounds; var t = replacements[i].Transform;
+            if (!double.IsFinite(bounds.Width) || !double.IsFinite(bounds.Height) ||
+                Math.Max(Math.Max(Math.Abs(t.M11), Math.Abs(t.M12)), Math.Max(Math.Abs(t.M21), Math.Abs(t.M22))) > 1000 ||
+                Math.Abs(t.M11 * t.M22 - t.M12 * t.M21) < 1e-8 || bounds.Left < -100000 || bounds.Top < -100000 ||
+                bounds.Right > 100000 || bounds.Bottom > 100000) return;
+            var index = _indices[i];
+            if (index < 0 || index >= document.Marks.Count || document.Marks[index].Id != _originals[i].Id)
+                _indices[i] = document.Marks.FindIndex(m => m.Id == _originals[i].Id);
+            if (_indices[i] < 0) return;
+        }
+        // Validate the whole group before modifying any mark; one drag is one edit.
+        for (var i = 0; i < replacements.Length; i++) document.Marks[_indices[i]] = replacements[i];
         document.Notify();
     }
-    internal void Complete() { if (_original is not null) document.Commit(); _original = null; }
-    internal void Cancel() { if (_original is not null) document.Cancel(); _original = null; }
-    internal void Clear() { Cancel(); Selected = null; document.Notify(); }
+    internal void Complete()
+    {
+        var editing = _originals.Length > 0;
+        _original = null; _originals = []; _indices = []; _marquee = false;
+        if (editing) document.Commit(); else document.Notify();
+    }
+    internal void Cancel()
+    {
+        var editing = _originals.Length > 0; var marquee = _marquee;
+        _original = null; _originals = []; _indices = []; _marquee = false;
+        if (marquee) { _selected.Clear(); _selected.UnionWith(_marqueeBefore); }
+        if (editing) document.Cancel(); else if (marquee) document.Notify();
+    }
+    internal void Clear() { Cancel(); _selected.Clear(); document.Notify(); }
+    internal void SelectAll() { Cancel(); _selected.Clear(); _selected.UnionWith(document.Marks.Select(m => m.Id)); document.Notify(); }
     internal void Delete()
     {
         Cancel();
-        if (Selected is not { } id) return;
-        document.BeginEdit(); document.Marks.RemoveAll(m => m.Id == id); document.Commit(); Selected = null;
+        if (_selected.Count == 0) return;
+        document.BeginEdit(); document.Marks.RemoveAll(m => _selected.Contains(m.Id)); _selected.Clear(); document.Commit();
     }
     internal void Draw(DrawingContext context, double scale)
     {
-        if (Selected is not { } id || document.Marks.Find(m => m.Id == id) is not { } mark) return;
         var brush = new SolidColorBrush(Color.Parse("#00A7CC"));
+        if (_marquee)
+        {
+            context.DrawRectangle(new SolidColorBrush(Color.FromArgb(25, 0, 167, 204)),
+                new Pen(brush, 1 / scale), new Rect(_start, _end).Normalize());
+        }
+        if (Current is not { } mark) return;
         var pen = new Pen(brush, 1 / scale);
         var corners = new[] { 0, 2, 4, 6 }.Select(i => HandlePoint(mark, i, scale)).ToArray();
         var frame = new Pen(brush, 1.5 / scale, new DashStyle([4, 3], 0));

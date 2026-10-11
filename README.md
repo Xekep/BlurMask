@@ -50,7 +50,12 @@ and [official tool guide](https://epicpen.com/userguide).
   Uncertain results stay handwritten, and Undo restores the original strokes. See [model details and limits](docs/ai-pen.md).
 - Draw directly over the desktop and applications. On Windows, cursor mode leaves the ink visible
   and passes clicks to applications underneath. Right-click the drawing surface or press Esc to return to cursor mode.
-- The eraser removes entire strokes. Each eraser gesture, drawing operation, and clear can be undone.
+- In selection mode, Shift-click adds/removes an object; drag an empty area to select a group.
+  Shift-drag adds an area to the selection. Ctrl+A (Cmd+A on macOS) selects all objects.
+  Move, resize or rotate a group together; Delete removes the selection in one undoable operation.
+  These operations work on the desktop and editable shared canvases.
+- The eraser removes entire strokes and closes privacy masks touched on the desktop.
+  Each ink eraser gesture, drawing operation, and clear can be undone.
   Right-click Undo or use the menu for Redo.
 - Hold Shift while drawing shapes for a square/circle or 45° line/arrow angles.
 - Click to place text; Enter commits, Shift+Enter adds a line, and Esc cancels.

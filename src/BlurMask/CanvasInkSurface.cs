@@ -110,7 +110,7 @@ internal sealed class CanvasInkSurface : Grid
         point = ClampPoint(point); _autoFit = false;
         if (_session.Tool == InkTool.Text) { StartText(local, point); e.Handled = true; return; }
         _pointer = e.Pointer; e.Pointer.Capture(_surface); Focus();
-        if (_session.Tool == InkTool.Select) { _session.CanvasSelection.Begin(point, 6 / Zoom); e.Handled = true; return; }
+        if (_session.Tool == InkTool.Select) { _session.CanvasSelection.Begin(point, 6 / Zoom, e.KeyModifiers.HasFlag(KeyModifiers.Shift)); e.Handled = true; return; }
         _session.CanvasDocument.BeginEdit();
         _session.BeginAiStroke(_session.CanvasDocument);
         if (_session.Tool == InkTool.Eraser) { _lastErase = point; Erase(point); }
@@ -217,10 +217,8 @@ internal sealed class CanvasInkSurface : Grid
             else if (e.Key == Key.Enter && !e.KeyModifiers.HasFlag(KeyModifiers.Shift)) { FinishText(); e.Handled = true; }
             return;
         }
-        if (_session.HandleLocalShortcut(e)) return;
+        if (_session.HandleSelectionKey(e) || _session.HandleLocalShortcut(e)) return;
         if (e.Key == Key.Escape) { CancelGesture(); _session.SelectTool(InkTool.Cursor); e.Handled = true; }
-        else if (!_window.ReadOnly && e.Key is Key.Delete or Key.Back && _session.Tool == InkTool.Select)
-        { _session.CanvasSelection.Delete(); e.Handled = true; }
         else if (!_window.ReadOnly && e.Key == Key.Z && e.KeyModifiers.HasFlag(KeyModifiers.Control))
         {
             CancelGesture();

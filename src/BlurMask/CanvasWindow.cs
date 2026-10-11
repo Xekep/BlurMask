@@ -167,7 +167,7 @@ internal sealed class CanvasWindow : Window
     private void CanvasKeyDown(object? sender, KeyEventArgs e)
     {
         if (FocusManager?.GetFocusedElement() is TextBox) return;
-        if (_session.HandleLocalShortcut(e)) return;
+        if (_session.HandleSelectionKey(e) || _session.HandleLocalShortcut(e)) return;
         if (e.Key == Key.Tab && e.KeyModifiers == KeyModifiers.None) { ToggleChrome(); e.Handled = true; }
         else if (e.KeyModifiers == KeyModifiers.Control && e.Key is Key.Add or Key.OemPlus or Key.Subtract or Key.OemMinus or Key.D0 or Key.NumPad0)
         {

@@ -17,6 +17,7 @@ internal sealed class DrawingSession : IDisposable
     private readonly Action<PrivacyMode> _selectMask;
     private readonly Action _closeMask;
     private readonly Action<bool>? _setMaskAttachment;
+    private readonly Func<Point, double, int>? _eraseMasks;
     private DesktopInkNative? _hotkeys;
     private SettingsWindow? _settingsWindow;
     private Color _color = Color.Parse("#FFF400"), _previousColor = Colors.Black;
@@ -53,7 +54,8 @@ internal sealed class DrawingSession : IDisposable
     private readonly AiPenRecognizer _desktopAi, _canvasAi;
     internal void RecognizeAiInk() { FinishInput(); _desktopAi.Flush(); _canvasAi.Flush(); }
 
-    public DrawingSession(Action newMask, Action exit, Action<PrivacyMode> selectMask, Action closeMask, Action<bool>? setMaskAttachment = null)
+    public DrawingSession(Action newMask, Action exit, Action<PrivacyMode> selectMask, Action closeMask,
+        Action<bool>? setMaskAttachment = null, Func<Point, double, int>? eraseMasks = null)
     {
         DesktopSelection = new(DesktopDocument);
         CanvasSelection = new(CanvasDocument);
@@ -63,6 +65,7 @@ internal sealed class DrawingSession : IDisposable
         _selectMask = selectMask;
         _closeMask = closeMask;
         _setMaskAttachment = setMaskAttachment;
+        _eraseMasks = eraseMasks;
         _screenTimer.Tick += (_, _) => { _screenTimer.Stop(); RebuildOverlays(); };
         Toolbar = new DrawingToolbarWindow(this);
         DesktopDocument.Changed += RefreshDesktopDocument;
@@ -180,6 +183,8 @@ internal sealed class DrawingSession : IDisposable
     public void NewMask() { if (Program.UseNativeWayland) return; SelectScreen(); SelectTool(InkTool.Cursor); _newMask(); }
     public void CreateMask(PrivacyMode mode) { if (Program.UseNativeWayland) return; SelectScreen(); SelectTool(InkTool.Cursor); _selectMask(mode); }
     public void CloseAllMasks() => _closeMask();
+    internal int EraseMasks(Point point, double radius) => Tool == InkTool.Eraser && Target == DrawingTarget.Screen && InkVisible
+        ? _eraseMasks?.Invoke(point, radius) ?? 0 : 0;
     public void SetMaskWindowAttachment(bool enabled)
     {
         AttachMasksToWindows = enabled; _setMaskAttachment?.Invoke(enabled); NotifySettings();
@@ -264,6 +269,19 @@ internal sealed class DrawingSession : IDisposable
     }
 
     internal string ShortcutText(ShortcutAction action) => Settings.Shortcuts[action].ToString();
+    internal bool HandleSelectionKey(KeyEventArgs e)
+    {
+        if (e.Handled || Tool != InkTool.Select || _settingsWindow is not null ||
+            Target == DrawingTarget.Canvas && Canvas?.ReadOnly == true) return false;
+        var delete = e.Key is Key.Delete or Key.Back && e.KeyModifiers is KeyModifiers.None or KeyModifiers.Shift;
+        var all = e.Key == Key.A && (e.KeyModifiers == KeyModifiers.Control ||
+            OperatingSystem.IsMacOS() && e.KeyModifiers == KeyModifiers.Meta);
+        if (!delete && !all) return false;
+        FinishInput();
+        var selection = Target == DrawingTarget.Screen ? DesktopSelection : CanvasSelection;
+        if (delete) selection.Delete(); else selection.SelectAll();
+        e.Handled = true; return true;
+    }
     internal bool HandleLocalShortcut(KeyEventArgs e)
     {
         if (e.Handled || _settingsWindow is not null || !Settings.HotkeysEnabled) return false;

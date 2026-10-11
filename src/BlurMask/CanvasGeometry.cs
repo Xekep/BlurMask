@@ -8,6 +8,12 @@ internal static class CanvasGeometry
 {
     internal const double CoordinateLimit = 100000;
     internal static double PenWidth(double screenWidth, double zoom) => Math.Clamp(screenWidth / zoom, .5, 200);
+    internal static bool IntersectsEraser(Rect bounds, Point point, double radius)
+    {
+        if (bounds.Width <= 0 || bounds.Height <= 0 || !double.IsFinite(radius) || radius < 0) return false;
+        var nearest = new Point(Math.Clamp(point.X, bounds.Left, bounds.Right), Math.Clamp(point.Y, bounds.Top, bounds.Bottom));
+        return ((Vector)(point - nearest)).SquaredLength <= radius * radius;
+    }
     internal static Rect Grow(Rect board, Rect ink)
     {
         const double gutter = 256, step = 1024;

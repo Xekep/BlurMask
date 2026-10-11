@@ -38,7 +38,7 @@ internal sealed class DesktopInkWindow : Window
         Position = screen.Bounds.Position;
         Width = screen.Bounds.Width / screen.Scaling;
         Height = screen.Bounds.Height / screen.Scaling;
-        _surface = new InkSurface(session, this);
+        _surface = new InkSurface(session, this) { Focusable = true };
         var grid = new Grid();
         grid.Children.Add(_surface);
         grid.Children.Add(_editLayer);
@@ -145,7 +145,11 @@ internal sealed class DesktopInkWindow : Window
         if (_pointer is not null) return;
         _pointer = e.Pointer;
         e.Pointer.Capture(_surface);
-        if (_session.Tool == InkTool.Select) { _session.DesktopSelection.Begin(origin, 6 * RenderScaling); return; }
+        if (_session.Tool == InkTool.Select)
+        {
+            Activate(); _surface.Focus();
+            _session.DesktopSelection.Begin(origin, 6 * RenderScaling, e.KeyModifiers.HasFlag(KeyModifiers.Shift)); return;
+        }
         _session.DesktopDocument.BeginEdit();
         _session.BeginAiStroke(_session.DesktopDocument);
         if (_session.Tool == InkTool.Eraser)
@@ -164,6 +168,8 @@ internal sealed class DesktopInkWindow : Window
 
     private void OnMoved(object? sender, PointerEventArgs e)
     {
+        if (_session.Tool == InkTool.Eraser && e.GetCurrentPoint(_surface).Properties.IsLeftButtonPressed)
+            _session.EraseMasks(DesktopPoint(e.GetPosition(_surface)), Math.Max(8, _session.PenSize * 2) * RenderScaling);
         if (_session.Tool == InkTool.Select)
             _surface.Cursor = InkSelection.NativeCursor(_session.DesktopSelection.CursorAt(DesktopPoint(e.GetPosition(_surface)), 1 / RenderScaling));
         if (_pointer != e.Pointer) return;
@@ -202,6 +208,7 @@ internal sealed class DesktopInkWindow : Window
     private void Erase(Point point)
     {
         var radius = Math.Max(8, _session.PenSize * 2) * RenderScaling;
+        _session.EraseMasks(point, radius);
         var removed = _session.DesktopDocument.Marks.RemoveAll(mark => mark.Hit(point, radius));
         removed += _session.DesktopDocument.FadingMarks.RemoveAll(mark => mark.Hit(point, radius));
         if (removed > 0)
@@ -274,10 +281,8 @@ internal sealed class DesktopInkWindow : Window
             else if (e.Key == Key.Enter && !e.KeyModifiers.HasFlag(KeyModifiers.Shift)) { FinishText(); e.Handled = true; }
             return;
         }
-        if (_session.HandleLocalShortcut(e)) return;
+        if (_session.HandleSelectionKey(e) || _session.HandleLocalShortcut(e)) return;
         if (e.Key == Key.Escape) { _session.SelectTool(InkTool.Cursor); e.Handled = true; }
-        else if (e.Key is Key.Delete or Key.Back && _session.Tool == InkTool.Select)
-        { _session.DesktopSelection.Delete(); e.Handled = true; }
         else if (e.Key == Key.Z && e.KeyModifiers.HasFlag(KeyModifiers.Control))
         {
             CancelGesture();

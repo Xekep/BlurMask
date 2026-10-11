@@ -293,6 +293,9 @@ internal static class DrawingSmokeTest
             await Task.Delay(80);
             Check(session.Document.Marks[^1].Transform != Matrix.Identity, "Desktop pointer resize handle did not transform the stroke.");
             session.Undo(); Check(session.Document.Marks[^1].Same(originalStroke), "Desktop resize undo failed.");
+            DesktopInkNative.TestKey(overlay, 0x2E); await Task.Delay(80);
+            Check(session.Document.Marks.Count == count, "Desktop Delete did not remove the selected object.");
+            session.Undo(); Check(session.Document.Marks[^1].Same(originalStroke), "Desktop Delete undo failed.");
             session.SelectTool(InkTool.Eraser);
             DesktopInkNative.TestMouseGesture(overlay, 180, 120, 260, 180);
             await Task.Delay(120);
@@ -791,6 +794,11 @@ internal static class DrawingSmokeTest
         session.CanvasSelection.Begin(raster.Bounds.Center, 0); session.CanvasSelection.Move(raster.Bounds.Center + new Vector(120, 60)); session.CanvasSelection.Complete();
         Check(session.CanvasDocument.Marks[^1].Points[0] == raster.Points[0] + new Vector(120, 60), "Raster move failed.");
         session.Undo(); Check(session.CanvasDocument.Marks[^1].Same(raster), "Raster move undo failed.");
+        window.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.A, KeyModifiers = KeyModifiers.Control });
+        Check(session.CanvasSelection.SelectedIds.Count == 2, "Canvas Ctrl+A did not select all objects.");
+        window.RaiseEvent(new KeyEventArgs { RoutedEvent = InputElement.KeyDownEvent, Key = Key.Delete });
+        Check(session.CanvasDocument.Marks.Count == 0, "Canvas Delete did not remove the whole selection.");
+        session.Undo(); Check(session.CanvasDocument.Marks.Count == 2 && session.CanvasDocument.Marks[^1].Same(raster), "Canvas group Delete undo failed.");
         if (!string.IsNullOrEmpty(artifacts))
         {
             await Task.Delay(100);

@@ -162,7 +162,7 @@ internal sealed class DrawingToolbarWindow : Window
         LayoutUpdated += (_, _) => { PlaceFlyout(); session.UpdateOverlayRegions(); };
         KeyDown += (_, e) =>
         {
-            if (session.HandleLocalShortcut(e)) return;
+            if (session.HandleSelectionKey(e) || session.HandleLocalShortcut(e)) return;
             if (e.Key == Key.Escape) { CloseFlyout(); session.SelectTool(InkTool.Cursor); e.Handled = true; }
         };
         Closed += (_, _) => session.StateChanged -= Refresh;

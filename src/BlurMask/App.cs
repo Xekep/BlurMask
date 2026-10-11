@@ -61,6 +61,7 @@ public sealed partial class App : Application
             ShowMask();
             _drawing?.SmokeTest();
             await DrawingSmokeTest.VerifyRenderingAsync(_drawing!);
+            VerifyMaskEraser();
             foreach (var mask in _masks) mask.Hide();
             await DrawingSmokeTest.VerifyCanvasAsync(_drawing!);
             VerifyTrayToggle();
@@ -124,6 +125,29 @@ public sealed partial class App : Application
     {
         foreach (var mask in _masks.ToArray()) mask.Close();
     }
+    private int EraseMasks(Point point, double radius)
+    {
+        var removed = 0;
+        foreach (var mask in _masks.ToArray())
+            if (mask.IsVisible && CanvasGeometry.IntersectsEraser(new Rect(mask.Position.X, mask.Position.Y,
+                mask.Bounds.Width * mask.RenderScaling, mask.Bounds.Height * mask.RenderScaling), point, radius))
+            { mask.Close(); removed++; }
+        return removed;
+    }
+    private void VerifyMaskEraser()
+    {
+        var mask = _masks.First();
+        var center = new Point(mask.Position.X + mask.Bounds.Width * mask.RenderScaling / 2,
+            mask.Position.Y + mask.Bounds.Height * mask.RenderScaling / 2);
+        _drawing!.SelectScreen(); _drawing.SelectTool(InkTool.Pen);
+        if (mask.TryErase?.Invoke(center) != false || !_masks.Contains(mask))
+            throw new InvalidOperationException("A drawing pen deleted a privacy mask.");
+        _drawing.SelectTool(InkTool.Eraser);
+        if (mask.TryErase?.Invoke(center) != true || _masks.Contains(mask) || mask.NativeOptics is not null)
+            throw new InvalidOperationException("Mask eraser did not close the window and release its native optics.");
+        _drawing.SelectTool(InkTool.Cursor);
+        Console.WriteLine("Privacy mask eraser: own mask input closes the window and disposes native optics; pen leaves masks intact.");
+    }
 
     private async Task SaveWebsitePreviewAsync(IClassicDesktopStyleApplicationLifetime desktop)
     {
@@ -147,7 +171,7 @@ public sealed partial class App : Application
         if (_drawing is null)
         {
             var drawing = new DrawingSession(ShowMask, () => ExitOnClicked(this, EventArgs.Empty),
-                mode => ShowMask(mode), CloseAllMasks, enabled => { foreach (var mask in _masks.ToArray()) mask.SetWindowAttachment(enabled); });
+                mode => ShowMask(mode), CloseAllMasks, enabled => { foreach (var mask in _masks.ToArray()) mask.SetWindowAttachment(enabled); }, EraseMasks);
             _drawing = drawing;
             drawing.Toolbar.PropertyChanged += (_, e) =>
             {
@@ -169,6 +193,9 @@ public sealed partial class App : Application
         if (Program.UseNativeWayland) return;
         _drawing?.SelectTool(InkTool.Cursor);
         var mask = new BlurMaskWindow();
+        // A mask may be above the ink input layer; route its own input to the
+        // eraser too, so clicking it cannot accidentally start a window drag.
+        mask.TryErase = point => (_drawing?.EraseMasks(point, Math.Max(8, _drawing.PenSize * 2) * mask.RenderScaling) ?? 0) > 0;
         mask.SetMode(mode);
         _masks.Add(mask);
         mask.ModeChanged += MaskOnModeChanged;

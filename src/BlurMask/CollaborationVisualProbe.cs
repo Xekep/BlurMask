@@ -139,6 +139,43 @@ internal static class CollaborationVisualProbe
             SetViews(owner, viewer);
             await CapturePair(owner, viewer, directory, "reconnect", "all-fixtures", MatrixRoi(), log);
 
+            // Select ink plus a raster as a group; verify real native key routing
+            // and saved changes in an independently connected viewer.
+            var groupPen = fixtures.Single(f => f.Name == "Pen").Mark;
+            void SelectPair()
+            {
+                root.SelectTool(InkTool.Select);
+                root.CanvasSelection.Begin(groupPen.Points[0], 1); root.CanvasSelection.Complete();
+                root.CanvasSelection.Begin(image.Bounds.Center, 1, true); root.CanvasSelection.Complete();
+                Check(root.CanvasSelection.SelectedIds.Count == 2, "Native Shift selection did not group ink and raster.");
+            }
+            SelectPair();
+            var moveBy = new Vector(20, 10);
+            root.CanvasSelection.Begin(groupPen.Points[0], 1); root.CanvasSelection.Move(groupPen.Points[0] + moveBy, true); root.CanvasSelection.Complete();
+            await owner.SyncAsync();
+            await Wait(() => viewer.Snapshot().Marks.Any(m => m.Id == image.Id && m.Points[0].X == image.Points[0].X + moveBy.X) &&
+                viewer.Snapshot().Marks.Any(m => m.Id == groupPen.Id && m.Points[0].X == groupPen.Points[0].X + moveBy.X), "Group move did not reach the viewer.");
+            root.SelectTool(InkTool.Pen); SetViews(owner, viewer);
+            await CapturePair(owner, viewer, directory, "group-moved", "ink-and-raster", MatrixRoi(), log);
+            root.Undo(); await owner.SyncAsync();
+            await Wait(() => fixtures.All(f => viewer.Snapshot().Marks.Any(m => m.Id == f.Mark.Id && BoardValidation.Same(m, InkDocument.ExportMark(f.Mark)))), "Group move undo did not restore peer objects.");
+            SelectPair();
+            Check(root.HandleSelectionKey(new Avalonia.Input.KeyEventArgs { Key = Avalonia.Input.Key.Delete }), "Delete key route ignored native group selection.");
+            await owner.SyncAsync();
+            await Wait(() => !viewer.Snapshot().Marks.Any(m => m.Id == image.Id || m.Id == groupPen.Id), "Group Delete did not reach the viewer.");
+            Check(fixtures.Where(f => f.Mark.Id != image.Id && f.Mark.Id != groupPen.Id).All(f =>
+                viewer.Snapshot().Marks.Any(m => m.Id == f.Mark.Id && BoardValidation.Same(m, InkDocument.ExportMark(f.Mark)))), "Group Delete changed unselected shared marks.");
+            root.SelectTool(InkTool.Pen); SetViews(owner, viewer);
+            await CapturePair(owner, viewer, directory, "group-deleted", "ink-and-raster", MatrixRoi(), log);
+            root.Undo(); await owner.SyncAsync();
+            await Wait(() => fixtures.All(f => viewer.Snapshot().Marks.Any(m => m.Id == f.Mark.Id && BoardValidation.Same(m, InkDocument.ExportMark(f.Mark)))), "Group Delete undo did not restore all peer objects.");
+            SetViews(owner, viewer);
+            await CapturePair(owner, viewer, directory, "group-delete-undone", "ink-and-raster", MatrixRoi(), log);
+            viewerSession.SelectTool(InkTool.Select); viewerSession.CanvasSelection.SelectAll();
+            Check(!viewerSession.HandleSelectionKey(new Avalonia.Input.KeyEventArgs { Key = Avalonia.Input.Key.Delete }) && SameMarks(beforeView, viewer.Snapshot()),
+                "Readonly viewer accepted Delete on a selected group.");
+            viewerSession.SelectTool(InkTool.Cursor);
+
             var fadingStart = Start(0) + new Vector(0, 320);
             var fading = new InkMark(InkTool.Pen, Colors.Magenta, 10, fadingStart) { FadeSeconds = 120 };
             fading.AddPoint(fadingStart + new Vector(180, 0)); ownedIds.Add(fading.Id);
@@ -151,7 +188,7 @@ internal static class CollaborationVisualProbe
             var viewerInk = InkPixels(fadingViewer, ToPixels(fadingRoi, fadingViewer));
             Check(authorInk >= 40 && viewerInk == 0 && !viewer.Snapshot().Marks.Any(m => m.Id == fading.Id), "Fading ink was not isolated to its author.");
             log.AppendLine($"local-fading,expected-author-only,{authorInk},0,0,0");
-            Console.WriteLine("Two native Canvas clients: live preview, saved visual parity, PNG/Math/transforms/readonly/reconnect PASS.");
+            Console.WriteLine("Two native Canvas clients: live preview, saved visual parity, PNG/Math/transforms/readonly/reconnect/group move/Delete/undo PASS.");
         }
         finally
         {

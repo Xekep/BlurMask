@@ -37,6 +37,7 @@ public sealed class BlurMaskWindow : Window
     public PrivacyMode Mode { get; private set; } = PrivacyMode.Blur;
     internal bool HasNativeOptics => _windowsGlass is not null;
     internal WindowsGlassRefraction? NativeOptics => _windowsGlass;
+    internal Func<Point, bool>? TryErase { get; set; }
 
     public event Action<PrivacyMode>? ModeChanged;
 
@@ -140,6 +141,9 @@ public sealed class BlurMaskWindow : Window
         if (!properties.IsLeftButtonPressed)
             return;
 
+        if (TryErase?.Invoke(new Point(Position.X + point.Position.X * RenderScaling,
+            Position.Y + point.Position.Y * RenderScaling)) == true) { e.Handled = true; return; }
+
         e.Handled = true;
 
         var edge = GetResizeEdge(point.Position);
@@ -151,6 +155,9 @@ public sealed class BlurMaskWindow : Window
 
     private void InputSurfaceOnPointerMoved(object? sender, PointerEventArgs e)
     {
+        var point = e.GetCurrentPoint(_inputSurface);
+        if (point.Properties.IsLeftButtonPressed && TryErase?.Invoke(new Point(Position.X + point.Position.X * RenderScaling,
+            Position.Y + point.Position.Y * RenderScaling)) == true) { e.Handled = true; return; }
         var edge = GetResizeEdge(e.GetPosition(_inputSurface));
         _inputSurface.Cursor = CursorForEdge(edge);
     }
