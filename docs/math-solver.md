@@ -18,7 +18,7 @@ are published with the release. [Build details and provenance](giac-runtime-buil
 
 ## Enable it
 
-Enable **Settings ? Use Giac**; no separate installation or path selection is
+Enable **Settings > Use Giac**; no separate installation or path selection is
 required for the bundled platforms. The switch is off by default. Built-in
 numeric calculations and exact polynomial definite integrals work with it off.
 Settings has no path selectors or download buttons. On other platforms, standard
@@ -57,7 +57,7 @@ write `x^2 dx` when integrating the square of x.
 | `\log_{2}{8}`, `log_{2}(8)` | Logarithm with explicit base |
 | `\lim_{x\to 0}\frac{\sin x}{x}` | Limit |
 | `\sum_{k=1}^{10}k`, `\prod_{k=1}^{4}k` | Finite sums/products |
-| `x^2-1=0` | Roots, displayed as `x в€€ {в€’1,1}` |
+| `x^2-1=0` | Roots, displayed as `x ∈ {−1,1}` |
 | A `cases` matrix of equations | Simultaneous equations |
 | Matrix, determinant, inverse, trace, rank, eigenvalues | Linear algebra |
 | Trigonometry, fractions, roots, powers, `factor`/`expand` | Exact simplification |
@@ -83,7 +83,7 @@ output stream, and cancellation which kills the process tree. The memory check
 is monitoring, not an OS sandbox or a strict instantaneous allocation cap.
 
 Input limits: 4 KiB, 512 expression nodes, depth 32, eight free variables and
-12Г—12 matrices. Supplied local engines must be trusted software. The installation
+12×12 matrices. Supplied local engines must be trusted software. The installation
 command verifies a calculation, not authenticity; use upstream or OS packages.
 
 ## Verification
@@ -91,7 +91,7 @@ command verifies a calculation, not authenticity; use upstream or OS packages.
 `tools/InkMath.Solver.Probe` checks parsing, forbidden commands, bounded
 complexity, actual calculus/algebra results and cancellation of a live native
 process. Pass the absolute CLI path to exercise Giac. Without it, only grammar
-tests run. `BLURMASK_TEST_GIAC` enables real CAS в†’ application equals policy and
+tests run. `BLURMASK_TEST_GIAC` enables real CAS → application equals policy and
 typesetting tests under `BlurMask --ai-pen-test`, without starting any GUI.
 Native application CI builds the bundled CLI from pinned sources on Windows,
 Linux and macOS, then checks automatic discovery, the default-off toggle and
