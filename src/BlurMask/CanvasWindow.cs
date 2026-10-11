@@ -387,7 +387,7 @@ internal sealed class CanvasWindow : Window
             if (!ReadOnly && CanvasMerge.HasChanges(patch))
             {
                 _pending = patch; _pendingBefore = before; SaveState();
-                remote = await _cloud.ApplyAsync(_connection, patch);
+                remote = await _cloud.ApplyAsync(_connection, patch, _baseline);
                 if (generation != _generation || _shutdown) return;
                 _pending = null; _pendingBefore = null;
             }

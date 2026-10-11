@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net11.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Isolated renderer only; this assembly name preserves production font resource URIs. -->
+    <AssemblyName>BlurMask</AssemblyName>
+    <InkDocumentSource Condition="'$(InkDocumentSource)' == ''">../../src/BlurMask/InkDocument.cs</InkDocumentSource>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Headless" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Skia" Version="12.1.2" />
+    <Compile Include="$(InkDocumentSource)" Link="Production/InkDocument.cs" />
+    <Compile Include="../../src/BlurMask/InkFonts.cs;../../src/BlurMask/MathTypesetting.cs" Link="Production/%(Filename)%(Extension)" />
+    <Compile Include="../../src/BlurMask.Shared/*.cs" Link="Shared/%(Filename)%(Extension)" />
+    <AvaloniaResource Include="../../src/BlurMask/Assets/Fonts/*" Link="Assets/Fonts/%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

@@ -28,7 +28,7 @@ internal sealed class CanvasInkSurface : Grid
     {
         _session = session; _window = window; ClipToBounds = true;
         ResetBounds();
-        _surface = new BoardSurface(this) { CacheMode = new BitmapCache() };
+        _surface = new BoardSurface(this);
         _liveSurface = new LiveSurface(this) { IsHitTestVisible = false };
         Children.Add(_surface); Children.Add(_liveSurface); Children.Add(_editorLayer);
         _surface.PointerPressed += Pressed;
@@ -89,8 +89,8 @@ internal sealed class CanvasInkSurface : Grid
             _retainedView = view; _retainedMarks = marks.ToArray();
             _surface.InvalidateVisual();
         }
-        // Mouse moves and peer previews do not redraw the saved vector/raster
-        // layer. Its cache is viewport-sized, independent of the world extent.
+        // Mouse moves and peer previews only invalidate the live layer; saved
+        // drawing commands are retained until the document or camera changes.
         _liveSurface.InvalidateVisual();
     }
     private void Pressed(object? sender, PointerPressedEventArgs e)

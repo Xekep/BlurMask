@@ -17,6 +17,7 @@ builder.Services.AddSingleton<BoardStore>();
 builder.Services.AddSingleton<BoardLiveHub>();
 builder.Services.AddHostedService(provider => provider.GetRequiredService<BoardLiveHub>());
 builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.TypeInfoResolverChain.Insert(0, BoardJsonContext.Default));
+builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.TypeInfoResolverChain.Insert(0, BoardWriteReceiptJsonContext.Default));
 builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = BoardValidation.MaxDocumentBytes);
 builder.Services.AddRateLimiter(options =>
 {
@@ -123,6 +124,20 @@ api.MapPost("/{id:guid}/changes", async (Guid id, BoardPatch patch, HttpRequest 
     var result = await store.UpdateAsync(id, Key(request), patch, ct);
     if (result.ReadOnly) return Results.StatusCode(403);
     if (result.Board is not null && result.Change is not null) live.Changed(result.Board, result.Change);
+    if (result.Board is { } board && request.Headers[BoardWriteReceipt.BaseRevisionHeader].Count == 1 &&
+        long.TryParse(request.Headers[BoardWriteReceipt.BaseRevisionHeader].ToString(), System.Globalization.NumberStyles.None,
+            System.Globalization.CultureInfo.InvariantCulture, out var baseline) && baseline >= 0 &&
+        ((result.Change is not null && baseline < long.MaxValue && board.Revision == baseline + 1) ||
+         (result.Change is null && board.Revision == baseline)))
+    {
+        var canonical = result.Change is { } change ? change with
+        { Title = change.Title is null ? null : board.Title, Background = change.Background is null ? null : board.Background } : null;
+        return Results.Json(new BoardWriteReceipt
+        {
+            BoardId = board.Id, OperationId = patch.OperationId, BaseRevision = baseline, Revision = board.Revision,
+            Title = board.Title, Background = board.Background, Width = board.Width, Height = board.Height, Patch = canonical
+        }, BoardWriteReceiptJsonContext.Default.BoardWriteReceipt, contentType: BoardWriteReceipt.MediaType);
+    }
     return result.Board is null ? Results.NotFound() : Results.Ok(result.Board);
 }).WithMetadata(new BoardKeyRequired());
 await app.Services.GetRequiredService<BoardStore>().InitializeAsync();

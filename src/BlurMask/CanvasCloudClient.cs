@@ -37,13 +37,28 @@ internal sealed class CanvasCloudClient : IDisposable
         await using var stream = await response.Content.ReadAsStreamAsync();
         return (await JsonSerializer.DeserializeAsync(stream, BoardJsonContext.Default.BoardSnapshot))!;
     }
-    public async Task<BoardSnapshot> ApplyAsync(BoardConnection connection, BoardPatch patch)
+    public async Task<BoardSnapshot> ApplyAsync(BoardConnection connection, BoardPatch patch, BoardSnapshot? baseSnapshot = null)
     {
         using var request = Request(connection, HttpMethod.Post, "/changes");
+        if (baseSnapshot is { ReadOnly: false, Revision: >= 0 } && baseSnapshot.Id == connection.Id)
+            request.Headers.Add(BoardWriteReceipt.BaseRevisionHeader, baseSnapshot.Revision.ToString(System.Globalization.CultureInfo.InvariantCulture));
         request.Content = new StringContent(JsonSerializer.Serialize(patch, BoardJsonContext.Default.BoardPatch), Encoding.UTF8, "application/json");
         using var response = await _http.SendAsync(request);
         Ensure(response);
         await using var stream = await response.Content.ReadAsStreamAsync();
+        if (response.Content.Headers.ContentType?.MediaType == BoardWriteReceipt.MediaType)
+        {
+            try
+            {
+                var receipt = await JsonSerializer.DeserializeAsync(stream, BoardWriteReceiptJsonContext.Default.BoardWriteReceipt);
+                if (baseSnapshot is not null && receipt is not null && receipt.TryApply(baseSnapshot, patch.OperationId, out var acknowledged))
+                    return acknowledged!;
+            }
+            catch (JsonException) { }
+            // Do not re-post a committed write when an acknowledgement cannot be
+            // reconstructed. Read the current authorized snapshot instead.
+            return await ReadAsync(connection);
+        }
         return (await JsonSerializer.DeserializeAsync(stream, BoardJsonContext.Default.BoardSnapshot))!;
     }
     private static HttpRequestMessage Request(BoardConnection connection, HttpMethod method, string suffix)

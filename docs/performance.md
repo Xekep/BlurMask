@@ -153,7 +153,38 @@ The production host has three vCPUs and about 3.3 GiB RAM; the application servi
 
 No unexpected disconnects, cross-board ink, point-order errors, OOMs or application restarts occurred in these successful runs. The 2,000-connection run targeted 20 frames/s per writer but took 117.07 seconds for 600 frames per writer: **only 5.13 frames/s were actually generated**. It demonstrates connection admission and delivery integrity under this workload; it does not demonstrate 200 writers at 20 Hz or smooth drawing at that scale. Its generator shared the production host's three CPUs, so the result mixes generator/proxy/application costs. Health latency remained below 457 ms. The service cgroup's kernel-recorded memory peak was 242.82 MiB; this includes its charged file/socket memory, not just managed allocations.
 
-The expected aggregate traffic and active-writer count must accompany any capacity claim. Thousands of idle connections, hundreds of active writers, and thousands of users drawing on one board are separate cases. A sustained high-write workload additionally needs stronger CPU resources and, for multiple server processes, an event broker and board routing. The PostgreSQL row/JSONB snapshot write and full HTTP snapshot acknowledgement remain candidates for the next storage/protocol redesign.
+The expected aggregate traffic and active-writer count must accompany any capacity claim. Thousands of idle connections, hundreds of active writers, and thousands of users drawing on one board are separate cases. A sustained high-write workload additionally needs stronger CPU resources and, for multiple server processes, an event broker and board routing. The PostgreSQL row/JSONB snapshot write remains a candidate for a storage redesign. Clients now request a compact write receipt when their exact base revision is known; a concurrent edit or lost-response retry falls back to a full snapshot.
+
+## Screenshot rendering at reduced zoom
+
+`tools/BlurMask.RenderProbe` creates no windows and uses the production ink document
+with Avalonia Headless and CPU Skia. A 200-frame Windows run compared `ccc6f91` with
+the corrected reduced-image cache. The synthetic input is a 3840×2160 PNG with fine
+detail. Values below are milliseconds per offscreen render, not compositor FPS.
+
+| Zoom | Repeated render before / after | Changed snapshot + render before / after |
+|---|---:|---:|
+| 100% | 10.47 / 9.21 | 30.70 / 8.90 |
+| 25% | 17.70 / 0.26 | 42.83 / 0.30 |
+| 10% | 2.76 / 1.58 | 30.67 / 1.53 |
+
+The original raster remains available for export and zooming in. One reduced bitmap
+is retained per image; transforms and synchronization of unchanged PNGs preserve
+the decoded raster. The first 25% draw increased from 41.8 to 53.4 ms because it also
+creates the reduced bitmap. These results do not establish physical pointer latency,
+GPU speed or lower laptop temperature. A standalone pen render showed no speedup.
+
+Full-resolution pixels and 25% image pixels matched the earlier renderer. At 10%,
+mean RGB difference was 2.66/255; the independent area-reference detail gate passed
+and deliberately blurred images failed. CI checks image detail and thin-stroke
+coverage; actual pointer input and compositor output are tested separately on Arch
+and Void. `BoardSurface.BitmapCache` was removed after those installed-app tests
+caught saved strokes failing to appear despite successful input/persistence.
+
+An unchanged 187-mark, 20,072-point snapshot imported in 0.85 ms instead of 3.52 ms,
+allocating 8,930 managed bytes instead of 1,016,117. Unchanged mark instances are
+reused. The private snapshot was read only; neither its contents nor rendered pixels
+are included in the probe's public artifacts.
 
 The v2 external repeat kept all 512 connections (128 per board), delivered every expected preview and saved every completed stroke at 20 frames/s. Received bytes fell from 352,249,054 in the failed JSON test to 162,438,773 (about 155 MiB), including HTTP bodies and WebSocket framing but excluding HTTP/TLS headers. Its p99 was 713 ms, maximum 2.26 s; this is a short 15-second drawing phase, not a latency guarantee or long-duration soak. The v2 2,000-connection repeat reduced received bytes from 863,401,600 to 434,656,275 but still achieved only 4.84 Hz with its generator on the same host. No errors/restarts/OOMs occurred; the service's cgroup kernel peak after that repeat was 250.64 MiB. Reducing traffic alone did not establish the requested 20 Hz capacity for 200 simultaneous authors.
 

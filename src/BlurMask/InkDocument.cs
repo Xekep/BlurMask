@@ -96,7 +96,16 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
                 {
                     var display = rect.TransformToAABB(Transform);
                     var image = (_rasterPreview ??= new(_bitmap)).ForSize(display.Width * viewScale, display.Height * viewScale);
-                    context.DrawImage(image, rect);
+                    if (ReferenceEquals(image, _bitmap)) context.DrawImage(image, rect);
+                    else
+                    {
+                        // The renderer selects its sampler before applying the
+                        // camera transform. Equal source/destination pixel sizes
+                        // keep reduced previews on the downsampling path.
+                        using var imageTransform = context.PushTransform(Matrix.CreateScale(rect.Width / image.PixelSize.Width,
+                            rect.Height / image.PixelSize.Height) * Matrix.CreateTranslation(rect.X, rect.Y));
+                        context.DrawImage(image, new Rect(0, 0, image.PixelSize.Width, image.PixelSize.Height));
+                    }
                 }
                 break;
             case InkTool.Text:
@@ -172,11 +181,24 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
             if (_reduced is not null && _level == level) return _reduced;
             var divisor = 1 << level;
             var size = new PixelSize(Math.Max(1, original.PixelSize.Width / divisor), Math.Max(1, original.PixelSize.Height / divisor));
-            var reduced = original.CreateScaledBitmap(size, BitmapInterpolationMode.HighQuality);
+            // Use the same area/mipmap sampling as displayed screenshots.
+            // Bitmap.CreateScaledBitmap's cubic resize can wash out fine detail.
+            var reduced = new RenderTargetBitmap(size, new Vector(96, 96));
+            using (var drawing = reduced.CreateDrawingContext())
+            {
+                using var quality = drawing.PushRenderOptions(new RenderOptions { BitmapInterpolationMode = BitmapInterpolationMode.HighQuality, EdgeMode = EdgeMode.Antialias });
+                drawing.DrawImage(original, new Rect(0, 0, size.Width, size.Height));
+            }
             // Recorded draw operations retain their bitmap implementation reference.
             _reduced?.Dispose(); _reduced = reduced; _level = level;
             return reduced;
         }
+    }
+
+    internal void ShareRaster(InkMark previous)
+    {
+        if (Tool != InkTool.Image || previous.Tool != InkTool.Image || Image != previous.Image) return;
+        _bitmap = previous._bitmap; _imageDecoded = previous._imageDecoded; _rasterPreview = previous._rasterPreview;
     }
 
     public bool Hit(Point point, double radius)
@@ -412,6 +434,7 @@ internal sealed class InkDocument
             { Id = dto.Id, Text = dto.Text, FontSize = dto.FontSize, Font = dto.Font, Image = dto.Image,
                 Transform = transform };
             foreach (var point in dto.Points.Skip(1)) mark.AddPoint(new Point(point.X, point.Y));
+            if (previous.TryGetValue(dto.Id, out var old)) mark.ShareRaster(old);
             return mark;
         }).ToList();
         if (resetHistory) { _undo.Clear(); _redo.Clear(); FadingMarks.Clear(); }
