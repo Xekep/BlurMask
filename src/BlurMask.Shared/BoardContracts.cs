@@ -16,7 +16,8 @@ public sealed record InkMarkDto
     public double FontSize { get; init; } = 28;
     public string? Image { get; init; }
     public InkTransformDto? Transform { get; init; }
-    public string Font { get; init; } = "";
+    // Setter retains the default when this optional field is omitted in .NET 10 generated JSON.
+    public string Font { get; set; } = "";
 }
 public sealed record BoardSnapshot
 {

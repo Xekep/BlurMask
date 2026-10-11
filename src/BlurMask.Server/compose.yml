@@ -1,3 +1,5 @@
+# Preserve volume names used before the source-directory move.
+name: server
 services:
   postgres:
     image: postgres:17
