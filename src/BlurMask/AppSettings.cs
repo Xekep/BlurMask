@@ -53,8 +53,6 @@ internal sealed record ShortcutBinding(Key Key, KeyModifiers Modifiers)
 internal sealed record AppSettings
 {
     public string Language { get; init; } = "system";
-    public string AiLanguage { get; init; } = "auto";
-    public string AiFont { get; init; } = "Inter";
     public bool HotkeysEnabled { get; init; } = true;
     public Dictionary<ShortcutAction, ShortcutBinding> Shortcuts { get; init; } = DefaultShortcuts();
     internal AppSettings CloneSettings() => this with { Shortcuts = new(Shortcuts) };
@@ -89,8 +87,7 @@ internal sealed record AppSettings
     }) + (action is >= ShortcutAction.QuickColor1 and <= ShortcutAction.QuickColor6 ? $" {(int)action - (int)ShortcutAction.QuickColor1 + 1}" : "");
     internal string? Validate()
     {
-        if (Language is not ("system" or "en" or "fr" or "de" or "ru") || AiLanguage is not ("auto" or "en" or "ru") ||
-            !InkFonts.Names.Contains(AiFont) || Shortcuts is null) return UiText.T("Некорректные настройки");
+        if (Language is not ("system" or "en" or "fr" or "de" or "ru") || Shortcuts is null) return UiText.T("Некорректные настройки");
         var used = new HashSet<ShortcutBinding>();
         foreach (var action in Enum.GetValues<ShortcutAction>())
         {

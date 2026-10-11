@@ -275,19 +275,8 @@ internal sealed class DrawingToolbarWindow : Window
         if (name == "tools" && _session.Tool == InkTool.AiPen)
         {
             row.Children.Add(IconButton(ToolbarGlyph.AiPen, UiText.T("Распознать сейчас"), () => { _session.RecognizeAiInk(); CloseFlyout(); }));
-            var modes = new[] { "auto", "en", "ru" };
-            var language = new ComboBox { ItemsSource = new[] { UiText.T("Авто"), "English", "Русский" },
-                SelectedIndex = Array.IndexOf(modes, _session.Settings.AiLanguage), MinWidth = 98, VerticalAlignment = VerticalAlignment.Center };
-            ToolTip.SetTip(language, UiText.T("Язык распознавания"));
-            language.SelectionChanged += (_, _) =>
-            {
-                if (language.SelectedIndex < 0) return;
-                var settings = _session.Settings with { AiLanguage = modes[language.SelectedIndex] };
-                try { _session.SaveSettings(settings); _session.RecognizeAiInk(); }
-                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-                { ShowMessage(UiText.T("Не удалось сохранить настройки"), ex.Message); }
-            };
-            row.Children.Add(language);
+            row.Children.Add(new TextBlock { Text = UiText.T(AiRecognitionModels.Current is null ? "Модель AI-пера не установлена" : "English · экспериментально"),
+                FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(6, 0) });
         }
         ShowFlyout(name, row, anchor);
         if (_flyoutName == name)

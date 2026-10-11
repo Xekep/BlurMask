@@ -241,11 +241,8 @@ internal static class DrawingSmokeTest
             await Task.Delay(100);
             DesktopInkNative.TestMouseGesture(overlay, 550, 310, 550, 390);
             await Task.Delay(2200);
-            Check(session.Document.Marks.Count == beforeAi + 1 && session.Document.Marks[^1].Tool == InkTool.Text &&
-                session.Document.Marks[^1].Text == "+", "AI pen pointer input did not combine pen lifts into one symbol.");
-            session.Undo();
             Check(session.Document.Marks.Count == beforeAi + 2 && session.Document.Marks.TakeLast(2).All(m => m.Tool == InkTool.Pen),
-                "AI pen undo did not restore both original strokes.");
+                "AI pen without a model did not retain both original strokes.");
             foreach (var tool in new[] { InkTool.Highlighter, InkTool.Line, InkTool.Arrow, InkTool.Rectangle, InkTool.Ellipse })
             {
                 var previousCount = session.Document.Marks.Count;

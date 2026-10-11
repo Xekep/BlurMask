@@ -57,7 +57,7 @@ internal sealed class DrawingSession : IDisposable
     {
         DesktopSelection = new(DesktopDocument);
         CanvasSelection = new(CanvasDocument);
-        _desktopAi = new(DesktopDocument, () => Settings); _canvasAi = new(CanvasDocument, () => Settings);
+        _desktopAi = new(DesktopDocument); _canvasAi = new(CanvasDocument);
         _newMask = newMask;
         _exit = exit;
         _selectMask = selectMask;

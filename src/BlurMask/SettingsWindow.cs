@@ -13,7 +13,6 @@ internal sealed class SettingsWindow : Window
     private readonly DrawingSession _session;
     private readonly Dictionary<ShortcutAction, Button> _buttons = [];
     private readonly ComboBox _language;
-    private readonly ComboBox _aiFont;
     private readonly CheckBox _enabled;
     private readonly TextBlock _message = new() { TextWrapping = TextWrapping.Wrap, FontSize = 12, Foreground = Brushes.Firebrick };
     private readonly TabControl _tabs;
@@ -49,10 +48,26 @@ internal sealed class SettingsWindow : Window
             SelectedIndex = Math.Max(0, Array.IndexOf(Languages, _draft.Language)), HorizontalAlignment = HorizontalAlignment.Stretch };
         general.Children.Add(_language);
         general.Children.Add(new TextBlock { Text = UiText.T("Изменение языка вступит в силу после перезапуска."), FontSize = 12, Foreground = Brushes.Gray, TextWrapping = TextWrapping.Wrap });
-        general.Children.Add(new TextBlock { Text = UiText.T("Шрифт AI-пера"), FontWeight = FontWeight.SemiBold });
-        _aiFont = new ComboBox { ItemsSource = InkFonts.Names.Select(name => new TextBlock { Text = name + " · Aa Бб 123", FontFamily = InkFonts.Face(name).FontFamily, FontSize = 17 }).ToArray(),
-            SelectedIndex = Math.Max(0, Array.IndexOf(InkFonts.Names, _draft.AiFont)), HorizontalAlignment = HorizontalAlignment.Stretch };
-        general.Children.Add(_aiFont);
+        var aiStatus = new TextBlock { Text = UiText.T(AiRecognitionModels.Current is null ? "Модель AI-пера не установлена" : "English · экспериментально"), FontSize = 12, TextWrapping = TextWrapping.Wrap };
+        var importModel = new Button { Content = UiText.T("Установить модель AI-пера"), HorizontalAlignment = HorizontalAlignment.Left };
+        importModel.Click += async (_, _) =>
+        {
+            try
+            {
+                var files = await StorageProvider.OpenFilePickerAsync(new Avalonia.Platform.Storage.FilePickerOpenOptions
+                {
+                    Title = UiText.T("Установить модель AI-пера"), AllowMultiple = false,
+                    FileTypeFilter = [new Avalonia.Platform.Storage.FilePickerFileType("Ink recognition model") { Patterns = ["*.ikrpack"] }]
+                });
+                if (files.Count != 1) return;
+                await using var stream = await files[0].OpenReadAsync();
+                await Task.Run(() => AiRecognitionModels.Install(stream));
+                aiStatus.Text = UiText.T("English · экспериментально"); _message.Text = "";
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException)
+            { _message.Text = UiText.T("Не удалось установить модель") + ": " + ex.Message; }
+        };
+        general.Children.Add(aiStatus); general.Children.Add(importModel);
         _enabled = new CheckBox { Content = UiText.T("Включить горячие клавиши"), IsChecked = _draft.HotkeysEnabled, Margin = new Thickness(0, 10, 0, 0) };
         general.Children.Add(_enabled);
         general.Children.Add(new TextBlock { Text = UiText.T(OperatingSystem.IsWindows() ? "На Windows клавиши работают поверх других приложений." : "На этой платформе клавиши работают, когда окно BlurMask активно."),
@@ -108,8 +123,7 @@ internal sealed class SettingsWindow : Window
     internal bool Save()
     {
         EndCapture();
-        _draft = _draft with { Language = Languages[Math.Clamp(_language.SelectedIndex, 0, Languages.Length - 1)], HotkeysEnabled = _enabled.IsChecked == true,
-            AiFont = InkFonts.Names[Math.Clamp(_aiFont.SelectedIndex, 0, InkFonts.Names.Length - 1)] };
+        _draft = _draft with { Language = Languages[Math.Clamp(_language.SelectedIndex, 0, Languages.Length - 1)], HotkeysEnabled = _enabled.IsChecked == true };
         if (_draft.Validate() is { } error) { _message.Text = error; return false; }
         try { _session.SaveSettings(_draft); Close(); return true; }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)

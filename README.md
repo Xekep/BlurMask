@@ -5,13 +5,15 @@ Create a rectangle from the toolbar, move/resize it over sensitive content, and
 switch privacy effects without doing post-production blur work.
 
 Sources are organized under `src/BlurMask` (desktop app), `src/BlurMask.Server` (API/download page)
-and `src/BlurMask.Shared` (wire contracts). Build/package scripts live in `tools`, installer
+and `src/BlurMask.Shared` (wire contracts). `src/InkRecognition` is a reusable CPU recognition library.
+Build/package scripts live in `tools`, installer
 definitions in `packaging`, and documentation in `docs`.
 
-AI pen recognizes English/Russian words, digits and mathematical signs locally. Write a row
-and pause briefly; its printed replacement keeps the original size and color. Choose Auto,
-English or Russian in the pen menu, and a replacement font in Settings. Recognition can be
-undone. Model scope, licenses and measured limits are in [AI pen documentation](docs/ai-pen.md).
+AI pen uses an experimental local stroke recognizer in a separate library. Install an
+English `.ikrpack` model in Settings, write a row and pause briefly; its printed replacement
+keeps the original size and color. Recognition can be undone. Models are separate from
+installers; without a model, ink stays handwritten. Russian and formula integration remain
+in progress. See [AI pen documentation](docs/ai-pen.md).
 Selection supports eight resize handles and rotation outside each corner, on the desktop
 and canvas. Shift preserves proportions or snaps rotation to 15° steps; shared boards retain
 object transforms and font choices.
@@ -42,8 +44,8 @@ and [official tool guide](https://epicpen.com/userguide).
 - The pen menu contains **pen, AI pen, highlighter and text**. Shapes have their own button.
 - **AI pen** waits 0.8 seconds after the last stroke, then replaces a completed row with one typeset text object.
   Symbols share a font size and baseline; position, bounding size and color are preserved. The pen menu also offers **Recognize now**.
-  Recognition runs locally in native C#, without a cloud service or extra ML libraries. Connected cursive handwriting uses an open
-  Cyrillic handwriting model and an English text model; confident digits and basic mathematical signs use a small symbol model.
+  Recognition processes stroke coordinates locally in native C#, without a cloud service or extra ML libraries.
+  The previous raster recognizers and their models have been removed; the initial portable engine supports experimental English recognition.
   Uncertain results stay handwritten, and Undo restores the original strokes. See [model details and limits](docs/ai-pen.md).
 - Draw directly over the desktop and applications. On Windows, cursor mode leaves the ink visible
   and passes clicks to applications underneath. Right-click the drawing surface or press Esc to return to cursor mode.

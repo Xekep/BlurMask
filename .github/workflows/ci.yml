@@ -91,7 +91,7 @@ jobs:
           dotnet-version: 11.0.100-preview.7.26381.103
       - run: dotnet restore src/BlurMask/BlurMask.csproj
       - run: dotnet build src/BlurMask/BlurMask.csproj -c Release --no-restore -p:PublishAot=false -p:SelfContained=false
-      - name: Offline AI pen recognition, numerical equivalence and history
+      - name: Portable stroke engine numerical goldens, model validation and ink history
         run: dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --ai-pen-test
 
   native-aot-windows:

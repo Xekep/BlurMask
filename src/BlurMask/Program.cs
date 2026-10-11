@@ -15,6 +15,13 @@ internal static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        if (args.Length == 2 && args[0] == "--install-ink-model")
+        {
+            using var model = File.OpenRead(args[1]);
+            AiRecognitionModels.Install(model);
+            Console.WriteLine($"Installed ink recognition model: {AiRecognitionModels.PathName}");
+            return;
+        }
         if (args.Contains("--performance-test", StringComparer.OrdinalIgnoreCase)) { PerformanceProbe.Run(); return; }
         if (args.Contains("--mask-performance-test", StringComparer.OrdinalIgnoreCase)) { MaskPerformanceProbe.Run(); return; }
         if (args.Contains("--ai-pen-test", StringComparer.OrdinalIgnoreCase)) { AiPenProbe.Run(); return; }

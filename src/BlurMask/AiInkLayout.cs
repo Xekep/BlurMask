@@ -1,5 +1,6 @@
 using Avalonia;
 using System.Text;
+using InkRecognition;
 
 namespace BlurMask;
 
@@ -13,9 +14,11 @@ internal static class AiInkLayout
         internal Rect Bounds = stroke.Bounds;
         internal void Merge(Group other) { Strokes.AddRange(other.Strokes); Bounds = Bounds.Union(other.Bounds); }
     }
-    internal static IReadOnlyList<Result> Recognize(IReadOnlyList<InkMark> strokes, string language, string font = "Inter")
+    internal static IReadOnlyList<Result> Recognize(IReadOnlyList<InkMark> strokes, IStrokeTextRecognizer? recognizer = null, CancellationToken cancellationToken = default)
     {
         if (strokes.Count == 0 || strokes.Count > 256 || strokes.Sum(m => m.Points.Count) > 20000) return [];
+        recognizer ??= AiRecognitionModels.Current;
+        if (recognizer is null) return [];
         var groups = strokes.Select(s => new Group(s)).ToList();
         // Join components sharing a horizontal interval (crossbars, dots, =, +, etc.).
         // Keep separate rows apart, even when their X positions are identical.
@@ -43,45 +46,31 @@ internal static class AiInkLayout
         var results = new List<Result>();
         foreach (var row in rows)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             row.Sort((a, b) => a.Bounds.X.CompareTo(b.Bounds.X));
             var bounds = row.Select(g => g.Bounds).Aggregate((a, b) => a.Union(b));
             if (bounds.Width < 2 || bounds.Height < 2 || bounds.Left < -100000 || bounds.Top < -100000 || bounds.Right > 100000 || bounds.Bottom > 100000) continue;
             var value = new StringBuilder(); var uncertain = false;
-            // Keep confident digits/operators separate from handwritten words so a text
-            // recognizer cannot silently substitute a mathematical sign.
-            var predictions = row.Select(g => AiSymbolNetwork.Instance.Value.Recognize(AiPenRecognizer.Rasterize(g.Strokes, g.Bounds))).ToArray();
-            bool Connected(int index) => row[index].Bounds.Width > row[index].Bounds.Height * 1.5 && row[index].Strokes.Any(s => s.Points.Count > 8);
-            bool Symbol(int index) => !Connected(index) && predictions[index].Confidence >= .75f && !char.IsLetter(predictions[index].Symbol);
             for (var i = 0; i < row.Count;)
             {
                 if (i > 0 && row[i].Bounds.Left - row[i - 1].Bounds.Right > bounds.Height * .65) value.Append(' ');
-                if (Symbol(i)) { value.Append(predictions[i].Symbol); i++; continue; }
                 var end = i + 1;
-                while (end < row.Count && !Symbol(end) && row[end].Bounds.Left - row[end - 1].Bounds.Right <= bounds.Height * .65) end++;
-                var part = row.Skip(i).Take(end - i).SelectMany(g => g.Strokes).ToArray();
-                var area = part.Select(s => s.Bounds).Aggregate((a, b) => a.Union(b));
-                var line = RecognizeWord(part, area, language);
-                if (line.Confidence < .75f || string.IsNullOrWhiteSpace(line.Text)) { uncertain = true; break; }
+                while (end < row.Count && row[end].Bounds.Left - row[end - 1].Bounds.Right <= bounds.Height * .65) end++;
+                var members = row.Skip(i).Take(end - i).SelectMany(g => g.Strokes).ToHashSet();
+                // Preserve pen chronology for delayed dots/crossbars and connected words.
+                var part = strokes.Where(members.Contains).Select(s => new InkStroke(s.Points.Select(p => new InkPoint((float)p.X, (float)p.Y)).ToArray())).ToArray();
+                var line = recognizer.Recognize(part, cancellationToken);
+                if (!float.IsFinite(line.Confidence) || line.Confidence < .75f || string.IsNullOrWhiteSpace(line.Text) || value.Length + line.Text.Length > 4000)
+                { uncertain = true; break; }
                 value.Append(line.Text); i = end;
             }
             var sources = row.SelectMany(g => g.Strokes).ToArray(); var first = sources[0];
             // Retain the entire handwritten row when any component is uncertain.
             if (uncertain) continue;
             var text = new InkMark(InkTool.Text, first.Color, first.Width, bounds.TopLeft)
-                { Id = first.Id, Text = value.ToString(), Font = font, FontSize = Math.Clamp(bounds.Height, 8, 300), FadeSeconds = first.FadeSeconds };
+                { Id = first.Id, Text = value.ToString(), Font = "Inter", FontSize = Math.Clamp(bounds.Height, 8, 300), FadeSeconds = first.FadeSeconds };
             text.AddPoint(bounds.BottomRight); results.Add(new(sources, text));
         }
         return results;
-    }
-    internal static (string Text, float Confidence) RecognizeWord(IReadOnlyList<InkMark> strokes, Rect bounds, string language)
-    {
-        if (language == "ru") return AiHandwritingNetwork.Instance.Value.Recognize(AiPenRecognizer.RasterizeLine(strokes, bounds));
-        var english = AiHandwritingNetwork.English.Value.Recognize(AiPenRecognizer.RasterizeLine(strokes, bounds, 32, 128));
-        if (language == "en" || (english.Confidence >= .97f && english.Text.Length >= 3)) return english;
-        var russian = AiHandwritingNetwork.Instance.Value.Recognize(AiPenRecognizer.RasterizeLine(strokes, bounds));
-        // Very short lookalikes have no unique script. Use the interface only as a tie-break.
-        if (Math.Abs(russian.Confidence - english.Confidence) < .08f)
-            return UiText.Language == "ru" ? russian : english;
-        return russian.Confidence > english.Confidence ? russian : english;
     }
 }

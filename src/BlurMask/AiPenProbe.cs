@@ -1,7 +1,6 @@
-using System.Diagnostics;
-using System.Text.Json;
 using Avalonia;
 using Avalonia.Media;
+using InkRecognition;
 
 namespace BlurMask;
 
@@ -9,122 +8,71 @@ internal static class AiPenProbe
 {
     internal static void Run()
     {
-        var model = AiSymbolNetwork.Instance.Value;
         SelectionProbe.Run();
-        VerifyHandwritingNetwork();
-        VerifyEnglishNetwork();
-        VerifyExpression();
-        using var stream = File.OpenRead(Path.Combine("tools", "ai-pen-fixtures.bin"));
-        using var reader = new BinaryReader(stream);
-        var examples = reader.ReadInt32(); var largestError = 0f; var pixels = new float[1024];
-        for (var example = 0; example < examples; example++)
-        {
-            var expected = (char)reader.ReadInt32();
-            for (var i = 0; i < pixels.Length; i++) pixels[i] = reader.ReadByte() / 255f;
-            var logits = model.Predict(pixels);
-            if (reader.ReadInt32() != logits.Length) throw new InvalidDataException("Fixture vocabulary differs from the model.");
-            for (var i = 0; i < logits.Length; i++) largestError = Math.Max(largestError, Math.Abs(logits[i] - reader.ReadSingle()));
-            var result = model.Recognize(pixels);
-            if (result.Symbol != expected || result.Confidence < .75f)
-                throw new InvalidOperationException($"AI fixture mismatch: {expected} -> {result.Symbol}, {result.Confidence}.");
-        }
-        if (largestError > .002f) throw new InvalidOperationException($"C# and training inference disagree: {largestError}.");
-        // Rasterize real multi-stroke pen input instead of feeding only pre-normalized images.
-        foreach (var (symbol, paths) in new (char, Point[][])[]
-        {
-            ('+', [[new(10, 50), new(90, 50)], [new(50, 10), new(50, 90)]]),
-            ('=', [[new(10, 30), new(90, 30)], [new(10, 70), new(90, 70)]]),
-            ('×', [[new(10, 10), new(90, 90)], [new(90, 10), new(10, 90)]])
-        })
-        {
-            var strokes = paths.Select(points =>
-            { var mark = new InkMark(InkTool.Pen, Colors.Red, 5, points[0]); foreach (var point in points.Skip(1)) mark.AddPoint(point); return mark; }).ToArray();
-            var bounds = strokes.Select(m => m.Bounds).Aggregate((a, b) => a.Union(b));
-            var result = model.Recognize(AiPenRecognizer.Rasterize(strokes, bounds));
-            if (result.Symbol != symbol || result.Confidence < .75f)
-                throw new InvalidOperationException($"Drawn symbol mismatch: {symbol} -> {result.Symbol}, {result.Confidence}.");
-            VerifyReplacement(strokes, bounds, symbol);
-        }
-        var start = Stopwatch.GetTimestamp(); var allocated = GC.GetAllocatedBytesForCurrentThread();
-        for (var i = 0; i < 100; i++) model.Recognize(pixels);
-        var report = new Dictionary<string, PerformanceMetric>
-        {
-            ["ai_symbol_100_cpu_inferences"] = new(Stopwatch.GetElapsedTime(start).TotalMilliseconds,
-                GC.GetAllocatedBytesForCurrentThread() - allocated, 100),
-            ["ai_training_logit_max_error"] = new(largestError, 0, examples)
-        };
-        Console.WriteLine(JsonSerializer.Serialize(report, PerformanceJsonContext.Default.DictionaryStringPerformanceMetric));
+        InkRecognitionChecks.Run();
+        var strokes = new[] { Stroke(10, 10), Stroke(32, 10), Stroke(10, 160), Stroke(32, 160) };
+        var results = AiInkLayout.Recognize(strokes, new TestRecognizer());
+        if (results.Count != 2 || results.Any(r => r.Text.Text != "hello" || r.Strokes.Length != 2))
+            throw new InvalidOperationException("AI row layout split pen lifts or merged separate rows.");
+        foreach (var result in results) VerifyReplacement(result);
+        if (AiInkLayout.Recognize(strokes, new TestRecognizer(.2f)).Count != 0)
+            throw new InvalidOperationException("Uncertain AI recognition replaced handwriting.");
+        if (AiRecognitionModels.Current is null && AiInkLayout.Recognize(strokes).Count != 0)
+            throw new InvalidOperationException("Missing model replaced handwriting.");
+        using var invalid = new MemoryStream("not a model"u8.ToArray());
+        try { AiRecognitionModels.Install(invalid); throw new InvalidOperationException("Invalid model installation succeeded."); }
+        catch (InvalidDataException) { }
+        VerifyLocalModel();
+        Console.WriteLine("AI row layout, uncertainty, model validation, history and peer ink: passed.");
     }
-    private static void VerifyExpression()
+
+    private static void VerifyLocalModel()
     {
-        var paths = new Point[][]
+        if (Environment.GetEnvironmentVariable("BLURMASK_AI_TEST_INPUT") is not { Length: > 0 } path) return;
+        if (AiRecognitionModels.Current is null) throw new InvalidOperationException("The local model verification requires an installed model.");
+        using var json = System.Text.Json.JsonDocument.Parse(File.ReadAllBytes(path));
+        var marks = new List<InkMark>();
+        foreach (var stroke in json.RootElement.EnumerateArray())
         {
-            [new(10, 50), new(90, 50)], [new(50, 10), new(50, 90)],
-            [new(130, 28), new(210, 28)], [new(130, 66), new(210, 66)],
-            [new(250, 12), new(330, 92)], [new(330, 12), new(250, 92)]
-        };
-        var strokes = paths.Select(path => { var mark = new InkMark(InkTool.Pen, Colors.Red, 5, path[0]); mark.AddPoint(path[1]); return mark; }).ToArray();
-        var expression = AiInkLayout.Recognize(strokes, "en").Single();
+            if (stroke.ValueKind == System.Text.Json.JsonValueKind.Object && stroke.GetProperty("type").GetString() != "stroke") continue;
+            InkMark? mark = null;
+            foreach (var point in (stroke.ValueKind == System.Text.Json.JsonValueKind.Array ? stroke : stroke.GetProperty("pointers")).EnumerateArray())
+            {
+                var position = point.ValueKind == System.Text.Json.JsonValueKind.Array ? new Point(point[0].GetDouble(), point[1].GetDouble()) :
+                    new Point(point.GetProperty("x").GetDouble(), point.GetProperty("y").GetDouble());
+                if (mark is null) mark = new(InkTool.Pen, Colors.Black, 2, position); else mark.AddPoint(position);
+            }
+            if (mark is not null) marks.Add(mark);
+        }
+        var result = AiInkLayout.Recognize(marks);
+        var expected = Environment.GetEnvironmentVariable("BLURMASK_AI_TEST_TEXT") ?? "hello";
+        if (result.Count != 1 || result[0].Text.Text != expected || result[0].Strokes.Length != marks.Count)
+            throw new InvalidOperationException($"Local AI integration mismatch: expected {expected}, actual {string.Join(" / ", result.Select(r => r.Text.Text))}.");
+        VerifyReplacement(result[0]);
+        Console.WriteLine($"Local raw-stroke model → application layout/history: {result[0].Text.Text}; {marks.Count} original strokes preserved.");
+    }
+
+    private sealed class TestRecognizer(float confidence = .99f) : IStrokeTextRecognizer
+    {
+        public string Language => "en";
+        public TextRecognition Recognize(IReadOnlyList<InkStroke> strokes, CancellationToken cancellationToken = default)
+        {
+            if (strokes.Count != 2 || strokes.Any(s => s.Points.Count != 3))
+                throw new InvalidOperationException("Original stroke points were lost before inference.");
+            return new("hello", confidence, 6);
+        }
+    }
+    private static InkMark Stroke(double x, double y)
+    {
+        var mark = new InkMark(InkTool.Pen, Colors.Red, 3, new(x, y));
+        mark.AddPoint(new(x + 10, y + 30)); mark.AddPoint(new(x + 20, y + 5)); return mark;
+    }
+    private static void VerifyReplacement(AiInkLayout.Result result)
+    {
+        var strokes = result.Strokes; var text = result.Text;
         var bounds = strokes.Select(m => m.Bounds).Aggregate((a, b) => a.Union(b));
-        if (expression.Text.Text != "+=×" || expression.Text.Bounds != bounds || expression.Strokes.Length != 6)
-            throw new InvalidOperationException($"Expression was split, reordered or resized: {expression.Text.Text}.");
-        var rows = AiInkLayout.Recognize(strokes.Concat(strokes.Select(s => s.Translate(new(0, 150)))).ToArray(), "en");
-        if (rows.Count != 2 || rows.Any(r => r.Text.Text != "+=×")) throw new InvalidOperationException("Separate handwriting rows were merged.");
-    }
-    private static void VerifyEnglishNetwork()
-    {
-        var network = AiHandwritingNetwork.English.Value;
-        using var reader = new BinaryReader(File.OpenRead(Path.Combine("tools", "ai-english-fixture.bin")));
-        var pixels = new float[32 * 128]; for (var i = 0; i < pixels.Length; i++) pixels[i] = reader.ReadSingle();
-        var start = Stopwatch.GetTimestamp(); var memory = network.Encode(pixels); var error = 0f;
-        for (var i = 0; i < memory.Length; i++) error = Math.Max(error, Math.Abs(memory[i] - reader.ReadSingle()));
-        var logits = network.Decode(memory, [95,18,15], [0,1,2]);
-        for (var i = 0; i < logits.Length; i++) error = Math.Max(error, Math.Abs(logits[i] - reader.ReadSingle()));
-        if (error > .005f) throw new InvalidOperationException($"English inference differs from PyTorch: {error}.");
-        Console.WriteLine($"English encoder/decoder: {Stopwatch.GetElapsedTime(start).TotalMilliseconds:F1} ms, max error {error:G4}.");
-        using var samples = new BinaryReader(File.OpenRead(Path.Combine("tools", "ai-english-words.bin")));
-        var count = samples.ReadInt32(); start = Stopwatch.GetTimestamp();
-        for (var sample = 0; sample < count; sample++)
-        {
-            var expected = System.Text.Encoding.UTF8.GetString(samples.ReadBytes(samples.ReadInt32()));
-            for (var i = 0; i < pixels.Length; i++) pixels[i] = samples.ReadSingle();
-            var result = network.Recognize(pixels);
-            if (result.Text != expected || result.Confidence < .75f) throw new InvalidOperationException($"English word mismatch: {expected} -> {result.Text}.");
-        }
-        Console.WriteLine($"English synthetic cursive/numbers/expression: {count} samples, {Stopwatch.GetElapsedTime(start).TotalMilliseconds:F1} ms total.");
-    }
-    private static void VerifyHandwritingNetwork()
-    {
-        var network = AiHandwritingNetwork.Instance.Value;
-        using var reader = new BinaryReader(File.OpenRead(Path.Combine("tools", "ai-handwriting-fixture.bin")));
-        var pixels = new float[48 * 512]; for (var i = 0; i < pixels.Length; i++) pixels[i] = reader.ReadSingle();
-        var start = Stopwatch.GetTimestamp(); var memory = network.Encode(pixels); var error = 0f;
-        for (var i = 0; i < memory.Length; i++) error = Math.Max(error, Math.Abs(memory[i] - reader.ReadSingle()));
-        Console.WriteLine($"Native handwriting encoder: {Stopwatch.GetElapsedTime(start).TotalMilliseconds:F1} ms; max error {error:G4}.");
-        if (error > .005f) throw new InvalidOperationException($"Native handwriting encoder differs from PyTorch: {error}.");
-        var logits = network.Decode(memory, [233, 129, 140], [0, 1, 2]); error = 0;
-        for (var i = 0; i < logits.Length; i++) error = Math.Max(error, Math.Abs(logits[i] - reader.ReadSingle()));
-        Console.WriteLine($"Native handwriting decoder max error {error:G4}.");
-        if (error > .005f) throw new InvalidOperationException($"Native handwriting decoder differs from PyTorch: {error}.");
-        using var cursive = new BinaryReader(File.OpenRead(Path.Combine("tools", "ai-cursive-fixtures.bin")));
-        var samples = cursive.ReadInt32(); start = Stopwatch.GetTimestamp();
-        for (var sample = 0; sample < samples; sample++)
-        {
-            var expected = System.Text.Encoding.UTF8.GetString(cursive.ReadBytes(cursive.ReadInt32()));
-            for (var i = 0; i < pixels.Length; i++) pixels[i] = cursive.ReadSingle();
-            var result = network.Recognize(pixels);
-            if (result.Text != expected || result.Confidence < .75f)
-                throw new InvalidOperationException($"Real cursive mismatch: {expected} -> {result.Text}, {result.Confidence}.");
-        }
-        Console.WriteLine($"Native real cursive: {samples} examples, {Stopwatch.GetElapsedTime(start).TotalMilliseconds:F1} ms total.");
-    }
-    private static void VerifyReplacement(InkMark[] strokes, Rect bounds, char symbol)
-    {
         var document = new InkDocument(); foreach (var stroke in strokes) document.Add(stroke);
         var peer = new InkMark(InkTool.Pen, Colors.Blue, 3, new(200, 200)); document.Add(peer);
-        var text = new InkMark(InkTool.Text, strokes[0].Color, strokes[0].Width, bounds.TopLeft)
-            { Id = strokes[0].Id, Text = symbol.ToString() };
-        text.AddPoint(bounds.BottomRight);
         if (!document.ReplaceRecognized(strokes, text) || document.Marks.Count != 2 || document.Marks[0] != text ||
             document.Marks[1] != peer || text.Bounds != bounds || text.Color != strokes[0].Color)
             throw new InvalidOperationException("AI conversion lost bounds, color, layers or peer ink.");

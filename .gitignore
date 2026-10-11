@@ -8,6 +8,7 @@ obj/
 .artifacts/
 **/__pycache__/
 *.pyc
+*.ikrpack
 **/.env
 **/.data/
 **/node_modules/

@@ -3,7 +3,7 @@ using Avalonia.Threading;
 
 namespace BlurMask;
 
-internal sealed class AiPenRecognizer(InkDocument document, Func<AppSettings> settings) : IDisposable
+internal sealed class AiPenRecognizer(InkDocument document) : IDisposable
 {
     private static readonly SemaphoreSlim Inference = new(1, 1);
     private readonly List<InkMark> _strokes = [];
@@ -12,9 +12,10 @@ internal sealed class AiPenRecognizer(InkDocument document, Func<AppSettings> se
     private bool _started;
     private int _generation;
     private InkMark[]? _processing;
+    private CancellationTokenSource? _work;
     internal void Pause()
     {
-        _timer.Stop(); _generation++;
+        _timer.Stop(); _generation++; _work?.Cancel();
         if (_processing is not { } previous) return;
         _processing = null;
         _strokes.InsertRange(0, previous.Where(m => document.Marks.Contains(m) || document.FadingMarks.Contains(m)));
@@ -36,15 +37,16 @@ internal sealed class AiPenRecognizer(InkDocument document, Func<AppSettings> se
         _strokes.RemoveAll(m => !document.Marks.Contains(m) && !document.FadingMarks.Contains(m));
         if (_disposed || _strokes.Count == 0) return;
         var strokes = _strokes.ToArray(); _strokes.Clear(); _processing = strokes;
-        _ = ConvertAsync(strokes, ++_generation);
+        _work?.Cancel(); _work?.Dispose(); _work = new();
+        _ = ConvertAsync(strokes, ++_generation, _work.Token);
     }
-    private async Task ConvertAsync(InkMark[] strokes, int generation)
+    private async Task ConvertAsync(InkMark[] strokes, int generation, CancellationToken cancellationToken)
     {
         try
         {
-            await Inference.WaitAsync();
+            await Inference.WaitAsync(cancellationToken);
             IReadOnlyList<AiInkLayout.Result> results;
-            try { if (_disposed || generation != _generation) return; var options = settings(); results = await Task.Run(() => AiInkLayout.Recognize(strokes, options.AiLanguage, options.AiFont)); }
+            try { if (_disposed || generation != _generation) return; results = await Task.Run(() => AiInkLayout.Recognize(strokes, cancellationToken: cancellationToken), cancellationToken); }
             finally { Inference.Release(); }
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
@@ -52,54 +54,10 @@ internal sealed class AiPenRecognizer(InkDocument document, Func<AppSettings> se
                 foreach (var result in results) document.ReplaceRecognized(result.Strokes, result.Text);
             });
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
         catch (Exception ex) when (ex is IOException or InvalidDataException or ArgumentException or InvalidOperationException)
         { System.Diagnostics.Trace.WriteLine($"AI pen: {ex.Message}"); }
         finally { if (generation == _generation) _processing = null; }
     }
-    internal static float[] Rasterize(IReadOnlyList<InkMark> strokes, Rect bounds)
-    {
-        var pixels = new float[1024]; var scale = 24 / Math.Max(bounds.Width, bounds.Height);
-        var origin = new Point((32 - bounds.Width * scale) / 2, (32 - bounds.Height * scale) / 2);
-        foreach (var mark in strokes)
-        {
-            var radius = Math.Clamp(mark.Width * scale / 2, .5, 5);
-            for (var i = 0; i < mark.Points.Count; i++)
-            {
-                var a = origin + (mark.Points[Math.Max(0, i - 1)] - bounds.TopLeft) * scale;
-                var b = origin + (mark.Points[i] - bounds.TopLeft) * scale;
-                var minX = Math.Max(0, (int)Math.Floor(Math.Min(a.X, b.X) - radius - 1));
-                var maxX = Math.Min(31, (int)Math.Ceiling(Math.Max(a.X, b.X) + radius + 1));
-                var minY = Math.Max(0, (int)Math.Floor(Math.Min(a.Y, b.Y) - radius - 1));
-                var maxY = Math.Min(31, (int)Math.Ceiling(Math.Max(a.Y, b.Y) + radius + 1));
-                for (var y = minY; y <= maxY; y++) for (var x = minX; x <= maxX; x++)
-                    pixels[y * 32 + x] = Math.Max(pixels[y * 32 + x], (float)Math.Clamp(radius + .5 - InkMark.Distance(new Point(x + .5, y + .5), a, b), 0, 1));
-            }
-        }
-        return pixels;
-    }
-    internal static float[] RasterizeLine(IReadOnlyList<InkMark> strokes, Rect bounds, int height = 48, int width = 512)
-    {
-        var pixels = new float[height * width]; Array.Fill(pixels, 1);
-        var sx = (width - 4) / bounds.Width; var sy = (height - 4) / bounds.Height;
-        foreach (var stroke in strokes)
-        {
-            var radius = stroke.Width / 2; var antialias = .5 / Math.Max(sx, sy);
-            for (var i = 0; i < stroke.Points.Count; i++)
-            {
-                var a = stroke.Points[Math.Max(0, i - 1)]; var b = stroke.Points[i];
-                var left = Math.Max(0, (int)((Math.Min(a.X, b.X) - radius - bounds.X) * sx));
-                var right = Math.Min(width - 1, (int)Math.Ceiling((Math.Max(a.X, b.X) + radius - bounds.X) * sx + 4));
-                var top = Math.Max(0, (int)((Math.Min(a.Y, b.Y) - radius - bounds.Y) * sy));
-                var bottom = Math.Min(height - 1, (int)Math.Ceiling((Math.Max(a.Y, b.Y) + radius - bounds.Y) * sy + 4));
-                for (var y = top; y <= bottom; y++) for (var x = left; x <= right; x++)
-                {
-                    var point = new Point((x + .5 - 2) / sx + bounds.X, (y + .5 - 2) / sy + bounds.Y);
-                    var coverage = Math.Clamp((radius + antialias - InkMark.Distance(point, a, b)) / (2 * antialias), 0, 1);
-                    pixels[y * width + x] = Math.Min(pixels[y * width + x], (float)(1 - 2 * coverage));
-                }
-            }
-        }
-        return pixels;
-    }
-    public void Dispose() { _disposed = true; _timer.Stop(); _strokes.Clear(); _processing = null; }
+    public void Dispose() { _disposed = true; _timer.Stop(); _work?.Cancel(); _work?.Dispose(); _strokes.Clear(); _processing = null; }
 }

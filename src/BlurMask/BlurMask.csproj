@@ -31,11 +31,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AvaloniaResource Include="Assets/**" Exclude="Assets/AiPen.bin;Assets/AiHandwriting.bin;Assets/AiEnglish.bin" />
-    <EmbeddedResource Include="Assets/AiEnglish.bin" LogicalName="BlurMask.AiEnglish.bin" />
-    <EmbeddedResource Include="Assets/AiHandwriting.bin" LogicalName="BlurMask.AiHandwriting.bin" />
-    <EmbeddedResource Include="Assets/AiPen.bin" LogicalName="BlurMask.AiPen.bin" />
+    <AvaloniaResource Include="Assets/**" />
+    <ProjectReference Include="../InkRecognition/InkRecognition.csproj" />
     <Compile Include="../BlurMask.Shared/*.cs" Link="Shared/%(Filename)%(Extension)" />
+    <Compile Include="../../tools/InkRecognitionChecks.cs" Link="Diagnostics/InkRecognitionChecks.cs" />
     <None Include="../../docs/licenses/*.txt;../../docs/THIRD-PARTY-NOTICES.txt"
           Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
