@@ -86,21 +86,56 @@ assert_unmapped 'BlurMask.*menu'
 xdotool windowactivate --sync "$toolbar"
 xdotool key --clearmodifiers ctrl+shift+c
 canvas="$(wait_visible 'BlurMask.*Canvas')"
-sleep .8
 assert_unmapped 'BlurMask.*ink overlay'
-capture "$canvas" canvas-before
-capture root canvas-desktop
-xdotool getwindowgeometry --shell "$canvas" > "$out/canvas-geometry.txt"
+# Native mapping does not mean that picom has presented the first frame yet.
+# Wait for the real screen to paint without activating, raising or moving the window.
+paint_start=$SECONDS
+paint_deadline=$((SECONDS + 5))
+paint_attempt=0
+paint_ready=0
+while (( SECONDS < paint_deadline )); do
+  kill -0 "$app"
+  paint_attempt=$((paint_attempt + 1))
+  xdotool getwindowgeometry --shell "$canvas" > "$out/canvas-geometry.txt"
+  capture "$canvas" canvas-before
+  capture root canvas-desktop
+  if (( paint_attempt == 1 )); then
+    cp "$out/canvas-desktop.png" "$out/canvas-desktop-first-map.png"
+  fi
+  if python - "$out" "$paint_attempt" "$((SECONDS - paint_start))" >> "$out/canvas-paint-readiness.jsonl" <<'PY'
+from pathlib import Path
+from PIL import Image
+import json, sys
+p = Path(sys.argv[1])
+geometry = dict(line.split('=', 1) for line in (p / 'canvas-geometry.txt').read_text().splitlines())
+x, y = int(geometry['X']), int(geometry['Y'])
+native = Image.open(p / 'canvas-before.png').convert('RGB').crop((250, 180, 900, 650))
+screen = Image.open(p / 'canvas-desktop.png').convert('RGB').crop((x + 250, y + 180, x + 900, y + 650))
+native_white = sum(min(pixel) >= 245 for pixel in native.getdata())
+screen_white = sum(min(pixel) >= 245 for pixel in screen.getdata())
+print(json.dumps({'attempt': int(sys.argv[2]), 'elapsed_seconds': int(sys.argv[3]),
+                  'native_white_pixels': native_white, 'screen_white_pixels': screen_white}))
+sys.exit(0 if native_white > 200000 and screen_white > 200000 else 1)
+PY
+  then
+    paint_ready=1
+    break
+  fi
+  sleep .2
+done
+[[ "$paint_ready" == 1 ]] || { echo 'Canvas did not paint an opaque board on screen within five seconds.' >&2; exit 1; }
 xdotool windowactivate --sync "$canvas"
 xdotool key --clearmodifiers ctrl+shift+3
 stroke "$canvas" 360 310 430 360 510 330 590 410
 capture "$canvas" canvas-after
 capture root canvas-after-desktop
-find "$XDG_DATA_HOME" -name canvas.json -exec cp {} "$out/canvas-state.json" \;
 # Ask the WM to close, rather than destroying the native window directly.
 wmctrl -ic "$(printf '0x%x' "$canvas")"
 sleep .8
 assert_unmapped 'BlurMask.*Canvas'
+# Closing flushes the document; the periodic autosave has a 1300 ms cadence.
+find "$XDG_DATA_HOME" -name canvas.json -exec cp {} "$out/canvas-state.json" \;
+test -s "$out/canvas-state.json"
 [[ "$(wait_visible 'BlurMask.*ink overlay')" == "$overlay" ]]
 wmctrl -ic "$(printf '0x%x' "$overlay")"
 sleep .8
