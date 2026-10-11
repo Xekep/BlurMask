@@ -50,7 +50,7 @@ test('live collaboration: incremental ink, late join, cancel, commit, permission
   assert.equal((await viewer.next('clear')).revision, board.revision);
   const change = await viewer.next('changed');
   assert.equal(change.revision, board.revision); assert.equal(change.baseRevision || 0, 0);
-  assert.deepEqual(change.patch.add, [{ ...resized, image: null }]);
+  assert.deepEqual(change.patch.add, [{ ...resized, image: null, transform: null, font: '' }]);
   const large = { ...mark(), points: Array.from({length:1100}, (_,i)=>({x:i,y:i})) };
   const largeSaved = await request(path + '/changes', access.editKey, {operationId:crypto.randomUUID(),add:[large],remove:[]});
   assert.equal(largeSaved.status,200);
