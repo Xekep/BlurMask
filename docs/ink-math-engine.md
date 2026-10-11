@@ -48,11 +48,12 @@ independent of that UI trigger.
 
 ## User-installed model
 
-Models are not committed or included in application releases. Export a locally
-obtained Math2 `math-sr.res` of the observed v103 ordinary-pen profile:
+Source Math resources are stored in [`models`](../models/README.md). Model packs
+are installed separately from application releases. Export the repository's
+Math2 `math-sr.res` of the observed v103 ordinary-pen profile:
 
 ```powershell
-python tools/export-ink-math-model.py path/to/math-sr.res --output path/to/math2.ikrmath
+python tools/export-ink-math-model.py models/math2/math-sr.res --output .artifacts/math2.ikrmath
 ```
 
 The exporter uses Python's standard library only. It accepts the observed

@@ -57,7 +57,7 @@ distant writing starts a new fragment. Undo/redo retain previous live associatio
 
 ## Model installation
 
-Source resources for Russian recognition and Raw Content2 are stored in
+Source resources for English, Russian, mathematics and Raw Content are stored in
 [`models`](../models/README.md). Application model packs are installed separately
 from the executable.
 An absent, invalid or uncertain model leaves the original ink untouched. Settings
@@ -70,8 +70,8 @@ For formulas, install a `.ikrmath` pack with **Install formula model**, then cho
 x64, Linux x64 and macOS; model weights are supplied separately.
 
 ```sh
-python tools/export-ink-math-model.py /private/path/math-sr.res --output /private/path/math2.ikrmath
-BlurMask --install-ink-math-model /private/path/math2.ikrmath
+python tools/export-ink-math-model.py models/math2/math-sr.res --output .artifacts/math2.ikrmath
+BlurMask --install-ink-math-model .artifacts/math2.ikrmath
 ```
 
 The current application stores its model at:
@@ -80,11 +80,11 @@ The current application stores its model at:
 <LocalApplicationData>/BlurMask/models/en-US.ikrpack
 ```
 
-For local research, convert an existing supported English resource with:
+Convert the supported English resource from the repository with:
 
 ```sh
-python tools/export-ink-model.py --resource /path/to/en_US-ak-cur.res --output /private/path/en-US.ikrpack
-BlurMask --install-ink-model /private/path/en-US.ikrpack
+python tools/export-ink-model.py --resource models/en-US/en_US-ak-cur.res --output .artifacts/en-US.ikrpack
+BlurMask --install-ink-model .artifacts/en-US.ikrpack
 ```
 
 The exporter does not download, activate or distribute vendor assets. Exported

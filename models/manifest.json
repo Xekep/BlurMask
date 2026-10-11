@@ -2,6 +2,66 @@
   "schemaVersion": 1,
   "resources": [
     {
+      "path": "en-US/en_US-ak-cur.lite.res",
+      "bytes": 545871,
+      "sha256": "ca46297ada4a80de0d4bbd40650a8ace5c3809af9edbd493fb8f4eb692a18657"
+    },
+    {
+      "path": "en-US/en_US-ak-cur.res",
+      "bytes": 3783049,
+      "sha256": "355f15d581dee2baeb092937cef69ae8db321ce3f60e28497c13e628a3b72927"
+    },
+    {
+      "path": "en-US/en_US-ak-superimposed.lite.res",
+      "bytes": 571332,
+      "sha256": "7766f8d89a1c7c1bc2b00fdc77aa381544b72f902c2970dd18a0214f3bad1028"
+    },
+    {
+      "path": "en-US/en_US-ak-superimposed.res",
+      "bytes": 1082985,
+      "sha256": "46ced881e2ba272701953a3f1388ee3750a46e5490a3ee5d2cd060513e0d1bd0"
+    },
+    {
+      "path": "en-US/en_US-lk-text.lite.res",
+      "bytes": 3300812,
+      "sha256": "9f4ef50bca4a1e3cc42189c279b72bf8fdf03f62e638673079d57075e168f7c9"
+    },
+    {
+      "path": "en-US/en_US-lk-text.res",
+      "bytes": 9579232,
+      "sha256": "0a59f9ff16d52c696b59191f89681bb94c7083f9a242f88eb2f7cd9821648472"
+    },
+    {
+      "path": "math/math-ak.res",
+      "bytes": 3685881,
+      "sha256": "8c8d9c8ce93aa74820f30a592d77ec3fe382c930a72063d5ced48629f3c167c1"
+    },
+    {
+      "path": "math/math-grm-standard.res",
+      "bytes": 6637,
+      "sha256": "adc9b7adce2d3af1a20a6262467afc0b1c6365bf27c120596d80c86ec54893f8"
+    },
+    {
+      "path": "math2/math-sr.res",
+      "bytes": 13880316,
+      "sha256": "22b9e7839f7d27c6bfbbf14c555f1d52cd15934336896fa13bef643ebc5ce3d4"
+    },
+    {
+      "path": "math2/math2-unwrapped.res",
+      "bytes": 18704269,
+      "sha256": "2dc179aadb1bce347bb1ebd57aa765d4c822d6ea12eca7593a8b9f1b89d53e8a"
+    },
+    {
+      "path": "raw-content/raw-content.res",
+      "bytes": 182722,
+      "sha256": "4bf00672faf92dcd829c566980f833cc5a40e3ad2c26e9ebe4874e6b1373cd0c"
+    },
+    {
+      "path": "raw-content/raw-content2.res",
+      "bytes": 5345803,
+      "sha256": "9bba7902c752fe937fc36f06573bd128c6b08d21a1b378dc460bc61608407739"
+    },
+    {
       "path": "ru-RU/ru_RU-ak-cur.lite.res",
       "bytes": 572763,
       "sha256": "7a5f08809e81fb4a2d4c78b3efd251d0986503b0d30d21de3695dab1f8a89978"
@@ -10,11 +70,6 @@
       "path": "ru-RU/ru_RU-lk-text.lite.res",
       "bytes": 6200992,
       "sha256": "d26ed08baf419361484958b3a04a5f740a228f4664f7e2643f43459223ef3e4e"
-    },
-    {
-      "path": "raw-content/raw-content2.res",
-      "bytes": 5345803,
-      "sha256": "9bba7902c752fe937fc36f06573bd128c6b08d21a1b378dc460bc61608407739"
     }
   ]
 }
