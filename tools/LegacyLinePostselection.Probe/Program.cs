@@ -64,5 +64,3 @@ Console.WriteLine("PASS actual ordinary source/profile→2e3 NN/group/frame→Ru
 }
 static void Require(bool value,string message){if(!value)throw new InvalidDataException(message);}
 static void Throws<T>(Action action)where T:Exception{try{action();}catch(T){return;}throw new InvalidDataException($"Expected {typeof(T).Name}.");}
-
-
