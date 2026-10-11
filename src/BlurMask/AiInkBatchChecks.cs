@@ -50,6 +50,7 @@ internal static class AiInkBatchChecks
         var oversized = Stroke(0, 0); oversized.Points.AddRange(new Point[20000]); capped.Add(oversized); cappedBatch.Add(oversized);
         Require(cappedBatch.Snapshot().Length == 0 && capped.Marks.Contains(oversized), "Oversized ink was retained for unbounded inference or deleted.");
         VerifyReleaseScheduling();
+        VerifyConversionGate();
         Console.WriteLine("Live AI ink context: pen-release availability, refinements, multi-stroke equals, undo/redo, edited/moved/deleted text, peer ink and work caps passed.");
     }
 
@@ -78,6 +79,25 @@ internal static class AiInkBatchChecks
         recognizer.Pending.WaitAsync(TimeSpan.FromSeconds(5)).GetAwaiter().GetResult();
         Require(calls == 2 && refined is not null && refined.SequenceEqual(new[] { first, next }),
             "The next release lost canceled ink or queued obsolete recognition work.");
+    }
+
+    private static void VerifyConversionGate()
+    {
+        Require(AiPenRecognizer.RemainingConversionDelay(TimeSpan.FromMilliseconds(300)) == TimeSpan.FromMilliseconds(200) &&
+            AiPenRecognizer.RemainingConversionDelay(TimeSpan.FromMilliseconds(800)) == TimeSpan.Zero,
+            "Model computation and the quiet period were added instead of overlapped.");
+        var document = new InkDocument(); var first = Stroke(10, 10); document.Add(first);
+        using var reached = new ManualResetEventSlim();
+        var publish = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        TimeSpan? remaining = null;
+        using var recognizer = new AiPenRecognizer(document, () => "text", (ink, _, _) => [Text(ink, "l")], (delay, token) =>
+        { remaining = delay; reached.Set(); return publish.Task.WaitAsync(token); });
+        recognizer.Add(first);
+        Require(reached.Wait(TimeSpan.FromSeconds(5)) && remaining is { } wait && wait >= TimeSpan.Zero && wait <= TimeSpan.FromMilliseconds(500),
+            "Immediate inference did not reach the independent conversion gate.");
+        Require(document.Marks.SequenceEqual(new[] { first }), "An intermediate result replaced ink before its conversion gate.");
+        recognizer.Pause(); recognizer.Pending.WaitAsync(TimeSpan.FromSeconds(5)).GetAwaiter().GetResult();
+        Require(document.Marks.SequenceEqual(new[] { first }), "A canceled conversion gate changed document ink.");
     }
 
     private static InkMark Stroke(double x, double y)

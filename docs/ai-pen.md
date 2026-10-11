@@ -37,8 +37,17 @@ without an answer. A result extends to the right while retaining the original
 height and can be undone together with recognition.
 Confidence is an acoustic score, not a calibrated probability of correct text.
 
-There is no artificial idle delay before inference. Model loading and computation
-still take time. A new pen press cancels obsolete work; the next release uses the
+There is no artificial idle delay before inference. Automatic typesetting waits
+for a 500 ms quiet period measured from pen release; inference runs during that
+period, so a 300 ms computation leaves only 200 ms of waiting and a computation
+longer than 500 ms adds no wait. **Recognize now** bypasses this conversion gate.
+This follows the separation used by the official MyScript
+[Write-to-Type example](https://github.com/MyScript/interactive-ink-additional-examples-android/blob/master/samples/write-to-type/src/main/java/com/myscript/iink/samples/writetotype/WriteToTypeManager.java):
+its adjustable 500 ms commit timer is separate from recognition. This is a
+sample's UX policy, not a universal engine timeout; our current inference still
+re-evaluates a bounded fragment rather than restoring the SDK's incremental graph.
+Model loading and computation still take time. A new pen press cancels obsolete
+work and pending conversion; the next release uses the
 retained original ink, including ink behind an already converted nearby word.
 This lets later crossbars, dots and equals signs refine the complete fragment.
 Only visible, unchanged text is eligible: manual edits, movement or deletion do

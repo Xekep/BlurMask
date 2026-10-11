@@ -4,8 +4,10 @@ using Avalonia.Threading;
 namespace BlurMask;
 
 internal sealed class AiPenRecognizer(InkDocument document, Func<string> recognitionMode,
-    Func<InkMark[], string, CancellationToken, IReadOnlyList<AiInkLayout.Result>>? infer = null) : IDisposable
+    Func<InkMark[], string, CancellationToken, IReadOnlyList<AiInkLayout.Result>>? infer = null,
+    Func<TimeSpan, CancellationToken, Task>? settle = null) : IDisposable
 {
+    internal static readonly TimeSpan ConversionQuietPeriod = TimeSpan.FromMilliseconds(500);
     private static readonly SemaphoreSlim Inference = new(1, 1);
     private readonly AiInkBatch _batch = new(document);
     private bool _disposed;
@@ -17,25 +19,29 @@ internal sealed class AiPenRecognizer(InkDocument document, Func<string> recogni
         if (_disposed) return;
         _generation++; _work?.Cancel();
     }
-    internal void Resume() => Flush();
+    internal void Resume() => Flush(deferConversion: true);
     internal void Add(InkMark mark)
     {
         if (_disposed) return;
         _batch.Add(mark);
         // Add is called by CompleteStroke on pointer release. Start inference
         // now; a subsequent pen press cancels this generation, not its ink.
-        Flush();
+        Flush(deferConversion: true);
     }
-    internal void Flush()
+    internal void Flush(bool deferConversion = false)
     {
         if (_disposed) return;
         var strokes = _batch.Snapshot();
         if (strokes.Length == 0) return;
         _work?.Cancel(); _work?.Dispose(); _work = new();
-        Pending = ConvertAsync(strokes, ++_generation, recognitionMode(), _work.Token);
+        Pending = ConvertAsync(strokes, ++_generation, recognitionMode(), deferConversion, _work.Token);
     }
-    private async Task ConvertAsync(InkMark[] strokes, int generation, string mode, CancellationToken cancellationToken)
+    internal static TimeSpan RemainingConversionDelay(TimeSpan elapsed)
+        => elapsed >= ConversionQuietPeriod ? TimeSpan.Zero : ConversionQuietPeriod - elapsed;
+
+    private async Task ConvertAsync(InkMark[] strokes, int generation, string mode, bool deferConversion, CancellationToken cancellationToken)
     {
+        long releasedAt = System.Diagnostics.Stopwatch.GetTimestamp();
         try
         {
             await Inference.WaitAsync(cancellationToken);
@@ -48,6 +54,13 @@ internal sealed class AiPenRecognizer(InkDocument document, Func<string> recogni
                 }, cancellationToken); }
             finally { Inference.Release(); }
             if (results.Count == 0) return;
+            // Inference and the quiet period overlap. Only publishing waits;
+            // the manual "Recognize now" action bypasses the quiet period.
+            if (deferConversion)
+            {
+                var remaining = RemainingConversionDelay(System.Diagnostics.Stopwatch.GetElapsedTime(releasedAt));
+                await (settle is null ? Task.Delay(remaining, cancellationToken) : settle(remaining, cancellationToken));
+            }
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 if (_disposed || generation != _generation || document.HasActiveEdit) return;
