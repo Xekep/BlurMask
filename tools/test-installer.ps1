@@ -61,6 +61,15 @@ try {
     if (-not (Test-Path -LiteralPath $uninstallKey) -or -not (Test-Path -LiteralPath $menuLink) -or -not (Test-Path -LiteralPath $desktopLink)) {
         throw 'Uninstall registration or shortcuts were not created.'
     }
+    $shortcutShell = New-Object -ComObject WScript.Shell
+    try {
+        $shortcut = $shortcutShell.CreateShortcut($menuLink)
+        if ($shortcut.TargetPath -ne (Join-Path $installDir 'BlurMask.exe') -or $shortcut.WorkingDirectory -ne $installDir -or
+            $shortcut.Arguments -ne '' -or $shortcut.IconLocation -ne ((Join-Path $installDir 'BlurMask.exe') + ',0')) {
+            throw 'Start Menu shortcut must open BlurMask with the application icon, without minimized startup arguments.'
+        }
+    }
+    finally { if ($shortcut) { [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($shortcut) }; [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($shortcutShell) }
     $startup = (Get-ItemProperty -LiteralPath $runKey -Name BlurMask).BlurMask
     if ($startup -ne ('"' + (Join-Path $installDir 'BlurMask.exe') + '" --minimized')) { throw 'Startup command must quote the executable and launch minimized.' }
     if (-not $SkipLaunch) { Invoke-TestProcess (Join-Path $installDir 'BlurMask.exe') @('--smoke-test', '--minimized') }

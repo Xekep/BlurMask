@@ -73,7 +73,7 @@ Type: files; Name: "{app}\libSkiaSharp.pdb"
 Type: files; Name: "{app}\libHarfBuzzSharp.pdb"
 
 [Icons]
-Name: "{autoprograms}\BlurMask"; Filename: "{app}\BlurMask.exe"; WorkingDir: "{app}"
+Name: "{autoprograms}\BlurMask"; Filename: "{app}\BlurMask.exe"; WorkingDir: "{app}"; IconFilename: "{app}\BlurMask.exe"; AppUserModelID: "Xekep.BlurMask"
 Name: "{autodesktop}\BlurMask"; Filename: "{app}\BlurMask.exe"; WorkingDir: "{app}"; Tasks: desktopicon
 
 [Registry]
