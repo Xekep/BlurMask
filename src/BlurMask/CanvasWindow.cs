@@ -136,7 +136,7 @@ internal sealed class CanvasWindow : Window
             if (NeedsSync || !_liveReady || DateTime.UtcNow > _nextPoll) RequestSync(true);
         };
         _timer.Start();
-        _liveTimer.Tick += (_, _) => PublishPreview();
+        _liveTimer.Tick += (_, _) => { PublishPreview(); _liveTimer.Stop(); };
         ResetLive();
         Activated += (_, _) => { if (!_shutdown) session.ActivateCanvas(); };
         Closing += (_, e) =>
@@ -231,6 +231,9 @@ internal sealed class CanvasWindow : Window
     {
         if (_loading) return;
         _dirty = true; _previewDirty = true; _localChanges = true; _localVersion++;
+        // Wake the 20 Hz preview throttle only while ink changes. Idle boards
+        // receive pushes without scheduling twenty UI-thread wakeups per second.
+        if (_live is not null && !ReadOnly && _session.CanvasDocument.HasActiveEdit) _liveTimer.Start();
         if (!_session.CanvasDocument.HasActiveEdit)
         {
             PublishPreview();

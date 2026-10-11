@@ -40,6 +40,24 @@ These are warmed CPU/GDI measurements of region rebuilding during resize, not en
 
 ## Collaboration changes
 
+Pen/highlighter rendering uses bounded quadratic rounding of gentle turns;
+intentional sharp corners and all original samples stay intact. The same cached
+vector geometry is used for local and remote ink, without an enlarged framebuffer.
+Raster marks explicitly use high-quality downsampling. Manual text now uses the
+embedded Inter face, including legacy empty-font marks, so peers do not select
+different OS default fonts. Idle live canvases no longer wake a 20 Hz preview timer;
+the timer runs only when local ink changes.
+
+The isolated native collaboration probe opens two separate CanvasWindow/session
+clients with independent caches against the real loopback PostgreSQL API. It checks
+live previews before commit, alpha, cancellation, committed preview deduplication,
+all saved mark types, raster HTTP fallback, rotation/nonuniform scaling, text/math,
+read-only controls/server rejection, reconnect, and pixel parity at 50%, 25% and
+10% zoom. PNG pairs/diff images and per-region metrics are archived by CI. This
+does not cover physical mixed-OS/GPU rendering. Fading ink is currently deliberately
+local and is tested as such; typing and selection transforms appear to peers on
+commit. Privacy masks and desktop ink are not part of a shared canvas.
+
 - Sender/receiver append only new points; packet lists and accumulator lists have separate ownership.
 - Clients must negotiate `blurmask.live.v2`; no v1 or JSON point-delta fallback remains. A six-point delta is 138 bytes rather than 314 bytes of JSON. Saved patches also use binary double coordinates, with JSON metadata sent once. Coordinate precision is unchanged. Socket admission checks credentials/revision and retrieves only committed mark IDs when needed, rather than decoding the complete JSONB document per participant.
 - Network work runs off the UI thread. An idle sender waits for input rather than waking at 20 Hz.

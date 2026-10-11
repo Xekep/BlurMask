@@ -45,6 +45,8 @@ internal static class DrawingSmokeTest
         if (Environment.GetEnvironmentVariable("BLURMASK_SMOKE_ARTIFACTS") is { Length: > 0 } output)
         { Directory.CreateDirectory(output); bitmap.Save(Path.Combine(output, "wayland-native-canvas.png"), PngBitmapEncoderOptions.Default); }
         Console.WriteLine($"Native Wayland canvas: configured {size}, Inter/STIX, undo/redo, red stroke pixels={red}, no desktop overlay.");
+        // Allow the isolated compositor harness to capture the presented surface.
+        await Task.Delay(1800);
     }
     public static void VerifyDocument(InkDocument document)
     {
@@ -619,6 +621,7 @@ internal static class DrawingSmokeTest
     {
         var settings = new AppSettings();
         Check(settings.Validate() is null, "Epic Pen default shortcuts conflict.");
+        Check((settings with { LinuxDisplayBackend = "wayland" }).Validate() is null && (settings with { LinuxDisplayBackend = "invalid" }).Validate() is not null, "Linux backend settings validation failed.");
         Check((settings with { AiMode = "math" }).Validate() is null && (settings with { AiMode = "unknown" }).Validate() is not null, "AI mode settings validation failed.");
         Check(settings.Shortcuts[ShortcutAction.Cursor].Key == Key.D2 && settings.Shortcuts[ShortcutAction.Pen].Key == Key.D3 &&
             settings.Shortcuts[ShortcutAction.Undo].Key == Key.D6 && settings.Shortcuts[ShortcutAction.Screenshot].VirtualKey == 44,
@@ -829,6 +832,7 @@ internal static class DrawingSmokeTest
                 "Undo removed peer stroke.");
             await window.SyncAsync();
             Check((await client.ReadAsync(state.Connection!)).Marks.Count == 1, "Native erasure did not synchronize.");
+            await CollaborationVisualProbe.VerifyAsync(session);
             var viewLink = CanvasCloudClient.Link(state.Connection! with { Key = state.ViewKey! });
             await window.ConnectAsync(viewLink);
             Check(window.ReadOnly, "Native viewer is editable.");
@@ -915,6 +919,12 @@ internal static class DrawingSmokeTest
     }
     private static void SaveWindow(Avalonia.Controls.Window window, string path)
     {
+        if (!OperatingSystem.IsWindows())
+        {
+            using var rendered = new RenderTargetBitmap(new PixelSize((int)Math.Ceiling(window.Bounds.Width), (int)Math.Ceiling(window.Bounds.Height)), new Vector(96, 96));
+            rendered.Render(window); rendered.Save(path, PngBitmapEncoderOptions.Default);
+            return;
+        }
         using var catalog = new WindowsWindowCatalog();
         var bounds = catalog.Read((nuint)window.TryGetPlatformHandle()!.Handle)?.Bounds ?? new PixelRect(window.Position, new PixelSize(
             (int)Math.Ceiling(window.Bounds.Width * window.RenderScaling), (int)Math.Ceiling(window.Bounds.Height * window.RenderScaling)));

@@ -267,7 +267,63 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: BlurMask-collaboration-visual
-          path: .artifacts/collaboration-visual/
+          path: |
+            .artifacts/collaboration-visual/**/*.png
+            .artifacts/collaboration-visual/**/*.csv
+            .artifacts/collaboration-visual/smoke-error.txt
+
+  native-wayland:
+    name: Native AOT / native Wayland canvas
+    needs: native-aot-linux
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: BlurMask-linux-x64
+          path: .artifacts/native-wayland-payload
+      - run: sudo apt-get update && sudo apt-get install -y weston libwayland-client0 libwayland-cursor0 libwayland-egl1 libxkbcommon0 libegl1 libgles2 libgl1-mesa-dri python3-pil
+      - name: Verify native protocol, rendered canvas and compositor pixels
+        run: |
+          chmod +x .artifacts/native-wayland-payload/BlurMask
+          bash tools/test-linux-wayland.sh .artifacts/native-wayland-payload/BlurMask "$GITHUB_WORKSPACE/.artifacts/native-wayland"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BlurMask-native-wayland
+          path: .artifacts/native-wayland/
+
+  native-linux-cpu:
+    name: Native AOT / Linux CPU / ${{ matrix.renderer }}
+    needs: native-aot-linux
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        renderer: [default, software]
+    env:
+      BLURMASK_MEMORY_CPU_ONLY: '1'
+      BLURMASK_MEMORY_SCREEN: 1600x1000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: BlurMask-linux-x64
+          path: .artifacts/linux-cpu-payload
+      - run: sudo apt-get update && sudo apt-get install -y xvfb xauth openbox picom xdotool wmctrl x11-utils mesa-utils python3
+      - name: Measure idle and active own-process CPU
+        env:
+          RENDERER: ${{ matrix.renderer }}
+        run: |
+          chmod +x .artifacts/linux-cpu-payload/BlurMask
+          args=()
+          if [[ "$RENDERER" == software ]]; then args+=(--software-rendering); fi
+          bash tools/test-linux-memory.sh .artifacts/linux-cpu-payload/BlurMask "$GITHUB_WORKSPACE/.artifacts/linux-cpu-$RENDERER" "${args[@]}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BlurMask-Linux-CPU-${{ matrix.renderer }}
+          path: .artifacts/linux-cpu-${{ matrix.renderer }}/
 
   native-aot-macos:
     name: Native AOT / macOS host architecture

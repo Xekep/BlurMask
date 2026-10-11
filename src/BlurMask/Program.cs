@@ -72,6 +72,7 @@ internal static class Program
         SoftwareRendering = LinuxDisplayPolicy.UseSoftware(args.Contains("--software-rendering", StringComparer.OrdinalIgnoreCase),
             RemoteDesktopSupport.IsRemoteSession, OperatingSystem.IsLinux(), UseNativeWayland,
             Environment.GetEnvironmentVariable("XDG_RUNTIME_DIR"), Environment.GetEnvironmentVariable("HYPRLAND_INSTANCE_SIGNATURE"));
+        if (OperatingSystem.IsLinux()) Console.WriteLine($"Linux window backend: {(UseNativeWayland ? "Wayland" : "X11/XWayland")}; renderer: {(UseNativeWayland ? "Wayland EGL/framebuffer" : SoftwareRendering ? "CPU" : "default")}.");
 
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(
             args,
