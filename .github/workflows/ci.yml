@@ -254,6 +254,10 @@ jobs:
           python tools/LegacyWordBound.Probe/reference_controls.py .artifacts/word-bound-controls.json
           dotnet run --project tools/LegacyWordBound.Probe -c Release -- --controls .artifacts/word-bound-controls.json
           dotnet run --project tools/LegacyWordBound.Probe -c Release -- models/ru-RU/ru_RU-lk-text.lite.res
+          python tools/LegacyCursiveBaseline.Probe/reference_controls.py .artifacts/cursive-baseline-controls.json
+          dotnet run --project tools/LegacyCursiveBaseline.Probe -c Release -- .artifacts/cursive-baseline-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/LegacyGaussianLineFit.Probe/reference_controls.py .artifacts/gaussian-line-controls.json
+          dotnet run --project tools/LegacyGaussianLineFit.Probe -c Release -- .artifacts/gaussian-line-controls.json
       - name: Legacy stored word and class language costs
         run: |
           python tools/LegacyWordLanguage.Probe/reference_controls.py models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-language-controls.json
@@ -404,7 +408,9 @@ jobs:
             @{ Name = 'LegacyCursiveHorizontal'; Args = @('.artifacts/cursive-horizontal-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyCursiveLoops'; Args = @('.artifacts/cursive-loop-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacySparseLineEstimator'; Args = @('.artifacts/sparse-line-controls.json') },
-            @{ Name = 'LegacyWordBound'; Args = @('--controls', '.artifacts/word-bound-controls.json') }
+            @{ Name = 'LegacyWordBound'; Args = @('--controls', '.artifacts/word-bound-controls.json') },
+            @{ Name = 'LegacyCursiveBaseline'; Args = @('.artifacts/cursive-baseline-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyGaussianLineFit'; Args = @('.artifacts/gaussian-line-controls.json') }
           )
           foreach ($case in $cases) {
             $name = $case.Name

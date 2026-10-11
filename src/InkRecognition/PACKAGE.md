@@ -7,6 +7,8 @@ The package includes the portable BLSTM executor and experimental recovered
 legacy model readers, glyph feature composers, integer acoustic costs,
 dictionary/language scoring, prepared cursive atoms and line geometry.
 Math and Raw Content adapters are separate packages in the same release.
+Those adapters require compatible CPU ONNX Runtime libraries and exported
+model packs, supplied separately from the NuGet packages.
 
 Model data is supplied separately. The release's `InkRecognition-models.zip`
 contains the repository model catalog, its SHA-256 manifest and engine profile.

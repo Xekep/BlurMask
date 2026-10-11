@@ -327,3 +327,10 @@ the automatic type24a branch for sparse input and explicitly declines geometry
 requiring the unfinished dense Gaussian fit. [`LegacyWordInitialLanguageBound`](../../docs/legacy-russian-word-initial-bound.md)
 exposes the native cache's first-codebook bound; it excludes boundary/category
 terms and is not used as a universal mathematical pruning bound.
+
+[`LegacyCursiveBaselineCuts`](../../docs/legacy-russian-cursive-baseline-cuts.md)
+restores the prepared baseline/loop-exit stage with explicit line metrics,
+including the native unknown-baseline branch. [`LegacyLineExtrema` and
+`LegacyGaussianLineFit`](../../docs/legacy-dense-line-fit.md) restore raw extrema
+and the default four-component Gaussian/shared-slope fit, bounded to20 iterations.
+The type24a wrapper, final adjustments and raw-line candidate selection are separate.
