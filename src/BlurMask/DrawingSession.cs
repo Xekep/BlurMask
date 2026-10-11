@@ -49,6 +49,7 @@ internal sealed class DrawingSession : IDisposable
     public DrawingTarget Target { get; private set; }
     public CanvasWindow? Canvas { get; private set; }
     public InkTool Tool { get; private set; } = InkTool.Cursor;
+    internal bool MiddleButtonErases => Tool is InkTool.Pen or InkTool.AiPen or InkTool.Highlighter or InkTool.Eraser;
     internal InkTool LastDrawingTool { get; private set; } = InkTool.Pen;
     internal InkTool LastShapeTool { get; private set; } = InkTool.Line;
     internal InkTool LastCursorTool { get; private set; } = InkTool.Cursor;
@@ -261,7 +262,8 @@ internal sealed class DrawingSession : IDisposable
     public void NewMask() { if (Program.UseNativeWayland) return; SelectScreen(); SelectTool(InkTool.Cursor, remember: false); _newMask(); }
     public void CreateMask(PrivacyMode mode) { if (Program.UseNativeWayland) return; SelectScreen(); SelectTool(InkTool.Cursor, remember: false); _selectMask(mode); }
     public void CloseAllMasks() => _closeMask();
-    internal int EraseMasks(Point point, double radius) => Tool == InkTool.Eraser && Target == DrawingTarget.Screen && InkVisible
+    internal int EraseMasks(Point point, double radius, bool temporaryEraser = false) =>
+        (Tool == InkTool.Eraser || temporaryEraser && MiddleButtonErases) && Target == DrawingTarget.Screen && InkVisible
         ? _eraseMasks?.Invoke(point, radius) ?? 0 : 0;
     public void SetMaskWindowAttachment(bool enabled)
     {

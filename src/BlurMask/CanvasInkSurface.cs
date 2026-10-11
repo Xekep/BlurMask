@@ -17,7 +17,7 @@ internal sealed class CanvasInkSurface : Grid
     private TextBox? _editor;
     private Point _textPoint;
     private IPointer? _pointer;
-    private bool _panning, _autoFit = true;
+    private bool _panning, _middleErasing, _autoFit = true;
     private Point _panStart, _offsetStart, _lastErase;
     internal double Zoom { get; private set; } = 1;
     internal Vector Offset { get; private set; } = new(20, 20);
@@ -101,7 +101,8 @@ internal sealed class CanvasInkSurface : Grid
         _session.ActivateCanvas(); _session.Toolbar.CloseFlyout();
         FinishText();
         var local = current.Position; var point = ToBoard(local);
-        if (_session.Tool == InkTool.Cursor || current.Properties.IsMiddleButtonPressed || _window.ReadOnly)
+        _middleErasing = current.Properties.IsMiddleButtonPressed && _session.MiddleButtonErases && !_window.ReadOnly;
+        if (_session.Tool == InkTool.Cursor || current.Properties.IsMiddleButtonPressed && !_middleErasing || _window.ReadOnly)
         {
             _autoFit = false;
             _panning = true; _panStart = local; _offsetStart = (Point)Offset;
@@ -113,7 +114,7 @@ internal sealed class CanvasInkSurface : Grid
         if (_session.Tool == InkTool.Select) { _session.CanvasSelection.Begin(point, 6 / Zoom, e.KeyModifiers.HasFlag(KeyModifiers.Shift)); e.Handled = true; return; }
         _session.CanvasDocument.BeginEdit();
         _session.BeginAiStroke(_session.CanvasDocument);
-        if (_session.Tool == InkTool.Eraser) { _lastErase = point; Erase(point); }
+        if (_session.Tool == InkTool.Eraser || _middleErasing) { _lastErase = point; Erase(point); }
         else _session.CanvasDocument.Preview = new InkMark(_session.Tool == InkTool.AiPen ? InkTool.Pen : _session.Tool, _session.Color,
             CanvasGeometry.PenWidth(_session.PenSize * (_session.Tool == InkTool.Highlighter ? 4 : 1), Zoom), point)
             { FadeSeconds = _session.FadeSeconds };
@@ -128,7 +129,7 @@ internal sealed class CanvasInkSurface : Grid
         if (_panning) { Offset = (Vector)_offsetStart + (Vector)(local - _panStart); InvalidateVisual(); return; }
         var point = ClampPoint(ToBoard(local));
         if (_session.Tool == InkTool.Select && !_window.ReadOnly) { _session.CanvasSelection.Move(point, true, e.KeyModifiers.HasFlag(KeyModifiers.Shift)); e.Handled = true; return; }
-        if (_session.Tool == InkTool.Eraser)
+        if (_session.Tool == InkTool.Eraser || _middleErasing)
         {
             var steps = Math.Max(1, (int)Math.Ceiling(((Vector)(point - _lastErase)).Length / Math.Max(2, _session.PenSize)));
             for (var i = 1; i <= steps; i++) Erase(_lastErase + (point - _lastErase) * ((double)i / steps));
@@ -168,14 +169,19 @@ internal sealed class CanvasInkSurface : Grid
     private void Released(object? sender, PointerReleasedEventArgs e)
     {
         if (_pointer != e.Pointer) return;
+        if (_middleErasing && e.GetCurrentPoint(_surface).Properties.IsMiddleButtonPressed) return;
         var pointer = _pointer; _pointer = null;
+        var middleErasing = _middleErasing;
         if (!_panning)
         {
             if (_session.Tool == InkTool.Select) _session.CanvasSelection.Complete();
-            else if (_session.CanvasDocument.Marks.Count < 5000) _session.CompleteStroke(_session.CanvasDocument);
+            else if (_session.Tool == InkTool.Eraser || middleErasing || _session.CanvasDocument.Marks.Count < 5000)
+                _session.CompleteStroke(_session.CanvasDocument);
             else _session.CanvasDocument.Cancel();
         }
-        _panning = false; pointer.Capture(null); e.Handled = true;
+        _panning = false; _middleErasing = false; pointer.Capture(null);
+        if (middleErasing) _session.ResumeAiStroke(_session.CanvasDocument);
+        e.Handled = true;
     }
     private void CancelGesture()
     {
@@ -186,6 +192,7 @@ internal sealed class CanvasInkSurface : Grid
             if (!_panning) { _session.CanvasSelection.Cancel(); _session.CanvasDocument.Cancel(); _session.ResumeAiStroke(_session.CanvasDocument); }
         }
         _panning = false;
+        _middleErasing = false;
     }
     private void StartText(Point local, Point point)
     {

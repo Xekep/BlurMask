@@ -14,6 +14,7 @@ internal sealed class DesktopInkWindow : Window
     private TextBox? _textBox;
     private Point _textOrigin;
     private IPointer? _pointer;
+    private bool _middleErasing;
     private Point _lastErase;
     private readonly PixelRect _screenBounds;
     private PixelRect[]? _controlRegion;
@@ -147,7 +148,9 @@ internal sealed class DesktopInkWindow : Window
             _session.MoveScreenshot(new PixelPoint((int)Math.Round(desktop.X), (int)Math.Round(desktop.Y)));
             e.Handled = true; return;
         }
-        if (!point.Properties.IsLeftButtonPressed || _session.Tool == InkTool.Cursor || _session.Target != DrawingTarget.Screen) return;
+        var middleErasing = point.Properties.IsMiddleButtonPressed && _session.MiddleButtonErases &&
+            !_session.PickingScreenshot && !_session.PickingMaskRegion;
+        if ((!point.Properties.IsLeftButtonPressed && !middleErasing) || _session.Tool == InkTool.Cursor || _session.Target != DrawingTarget.Screen) return;
         _session.Toolbar.CloseFlyout();
         e.Handled = true;
         FinishText();
@@ -159,6 +162,7 @@ internal sealed class DesktopInkWindow : Window
         }
         if (_pointer is not null) return;
         _pointer = e.Pointer;
+        _middleErasing = middleErasing;
         e.Pointer.Capture(_surface);
         if (_session.Tool == InkTool.Select)
         {
@@ -167,7 +171,7 @@ internal sealed class DesktopInkWindow : Window
         }
         _session.DesktopDocument.BeginEdit();
         _session.BeginAiStroke(_session.DesktopDocument);
-        if (_session.Tool == InkTool.Eraser)
+        if (_session.Tool == InkTool.Eraser || _middleErasing)
         {
             _lastErase = origin;
             Erase(origin);
@@ -213,7 +217,7 @@ internal sealed class DesktopInkWindow : Window
         }
         var point = DesktopPoint(e.GetPosition(_surface));
         if (_session.Tool == InkTool.Select) { _session.DesktopSelection.Move(point, constrain: e.KeyModifiers.HasFlag(KeyModifiers.Shift)); e.Handled = true; return; }
-        if (_session.Tool == InkTool.Eraser)
+        if (_session.Tool == InkTool.Eraser || _middleErasing)
         {
             var distance = ((Vector)(point - _lastErase)).Length;
             var steps = Math.Max(1, (int)Math.Ceiling(distance / Math.Max(2, _session.PenSize * RenderScaling)));
@@ -246,7 +250,7 @@ internal sealed class DesktopInkWindow : Window
     private void Erase(Point point)
     {
         var radius = Math.Max(8, _session.PenSize * 2) * RenderScaling;
-        _session.EraseMasks(point, radius);
+        _session.EraseMasks(point, radius, _middleErasing);
         var removed = _session.DesktopDocument.Marks.RemoveAll(mark => mark.Hit(point, radius));
         removed += _session.DesktopDocument.FadingMarks.RemoveAll(mark => mark.Hit(point, radius));
         if (removed > 0)
@@ -256,10 +260,15 @@ internal sealed class DesktopInkWindow : Window
     private void OnReleased(object? sender, PointerReleasedEventArgs e)
     {
         if (_pointer != e.Pointer) return;
+        var properties = e.GetCurrentPoint(_surface).Properties;
+        if (_middleErasing ? properties.IsMiddleButtonPressed : properties.IsLeftButtonPressed) return;
+        var middleErasing = _middleErasing;
         if (_session.Tool == InkTool.Select) _session.DesktopSelection.Complete();
         else _session.CompleteStroke(_session.DesktopDocument);
         _pointer = null;
+        _middleErasing = false;
         e.Pointer.Capture(null);
+        if (middleErasing) _session.ResumeAiStroke(_session.DesktopDocument);
         e.Handled = true;
     }
 
@@ -267,6 +276,7 @@ internal sealed class DesktopInkWindow : Window
     {
         var pointer = _pointer;
         _pointer = null;
+        _middleErasing = false;
         if (pointer is not null)
         {
             if (_session.PickingScreenshot) _session.CancelScreenshot();

@@ -281,6 +281,17 @@ internal static class DrawingSmokeTest
             Check(session.Document.Marks.Count == count + 1, "Mouse input did not create a desktop stroke.");
             Check(session.Document.Marks[^1].Points.Count > 1, "Mouse motion did not extend the stroke.");
             var originalStroke = session.Document.Marks[^1];
+            foreach (var tool in new[] { InkTool.Pen, InkTool.AiPen, InkTool.Highlighter, InkTool.Eraser })
+            {
+                session.SelectTool(tool);
+                var remembered = session.LastDrawingTool;
+                DesktopInkNative.TestMouseGesture(overlay, 180, 120, 260, 180, middleButton: true);
+                await Task.Delay(60);
+                Check(session.Document.Marks.Count == count && !session.Document.HasActiveEdit && session.Tool == tool &&
+                    session.LastDrawingTool == remembered, "Middle-button desktop eraser changed the selected tool or failed to finish.");
+                session.Undo();
+                Check(session.Document.Marks[^1].Same(originalStroke), "Middle-button desktop erasure was not one undoable edit.");
+            }
             session.SelectTool(InkTool.Select);
             DesktopInkNative.TestMouseGesture(overlay, 180, 120, 210, 145);
             await Task.Delay(80);
@@ -827,6 +838,21 @@ internal static class DrawingSmokeTest
             await Task.Delay(100);
             Check(session.CanvasDocument.Marks.Count == 1, "Canvas pointer gesture did not create a stroke.");
             Check(session.CanvasDocument.Marks[0].Points.Count > 1, "Canvas motion did not extend stroke.");
+            var originalStroke = session.CanvasDocument.Marks[0];
+            var view = (window.Surface.Zoom, window.Surface.Offset);
+            foreach (var tool in new[] { InkTool.Pen, InkTool.AiPen, InkTool.Highlighter, InkTool.Eraser })
+            {
+                session.SelectTool(tool);
+                var remembered = session.LastDrawingTool;
+                DesktopInkNative.TestMouseGesture(window, (int)a.X, (int)a.Y, (int)b.X, (int)b.Y, middleButton: true);
+                await Task.Delay(60);
+                Check(session.CanvasDocument.Marks.Count == 0 && !session.CanvasDocument.HasActiveEdit && session.Tool == tool &&
+                    session.LastDrawingTool == remembered && (window.Surface.Zoom, window.Surface.Offset) == view,
+                    "Middle-button canvas gesture panned or changed the selected tool instead of erasing.");
+                session.Undo();
+                Check(session.CanvasDocument.Marks[0].Same(originalStroke), "Middle-button canvas erasure was not one undoable edit.");
+            }
+            session.SelectTool(InkTool.Pen);
         }
         else session.CanvasDocument.Add(new InkMark(InkTool.Pen, Colors.Black, 4, new Point(100, 100)));
         Check(session.DesktopDocument.Marks.SequenceEqual(new[] { desktopMark }), "Canvas changed desktop ink.");

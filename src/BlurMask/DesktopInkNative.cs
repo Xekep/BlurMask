@@ -102,16 +102,16 @@ internal sealed partial class DesktopInkNative : IDisposable
         if ((root == Handle(window)) != drawing)
             throw new InvalidOperationException(drawing ? "Drawing overlay does not receive desktop input." : "Cursor-mode overlay still intercepts desktop input.");
     }
-    internal static void TestMouseGesture(Window window, int x, int y, int endX, int endY)
+    internal static void TestMouseGesture(Window window, int x, int y, int endX, int endY, bool middleButton = false)
     {
         var hwnd = Handle(window);
         static nint Position(int px, int py) => (nint)((py << 16) | (px & 0xffff));
         // Send only to this app's HWND; do not move the user's system cursor or
         // inject clicks into unrelated applications during CI/development checks.
         SendMessageW(hwnd, 0x200, 0, Position(x, y));
-        SendMessageW(hwnd, 0x201, 1, Position(x, y));
-        SendMessageW(hwnd, 0x200, 1, Position(endX, endY));
-        SendMessageW(hwnd, 0x202, 0, Position(endX, endY));
+        SendMessageW(hwnd, middleButton ? 0x207u : 0x201u, middleButton ? 0x10 : 1, Position(x, y));
+        SendMessageW(hwnd, 0x200, middleButton ? 0x10 : 1, Position(endX, endY));
+        SendMessageW(hwnd, middleButton ? 0x208u : 0x202u, 0, Position(endX, endY));
     }
     internal static void TestKey(Window window, int key)
     {
