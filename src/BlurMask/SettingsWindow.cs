@@ -5,7 +5,6 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Styling;
-using Avalonia.Platform.Storage;
 
 namespace BlurMask;
 
@@ -59,95 +58,6 @@ internal sealed class SettingsWindow : Window
             general.Children.Add(new TextBlock { Text = UiText.T("После перезапуска. X11 поддерживает рисование на рабочем столе. Нативный Wayland пока поддерживает только отдельное полотно."),
                 FontSize = 12, Foreground = Brushes.Gray, TextWrapping = TextWrapping.Wrap });
         }
-        var aiStatus = new TextBlock { Text = UiText.T(AiRecognitionModels.Current is null ? "Модель AI-пера не установлена" : "English · экспериментально"), FontSize = 12, TextWrapping = TextWrapping.Wrap };
-        var importModel = new Button { Content = UiText.T("Установить модель AI-пера"), HorizontalAlignment = HorizontalAlignment.Left };
-        importModel.Click += async (_, _) =>
-        {
-            try
-            {
-                var files = await StorageProvider.OpenFilePickerAsync(new Avalonia.Platform.Storage.FilePickerOpenOptions
-                {
-                    Title = UiText.T("Установить модель AI-пера"), AllowMultiple = false,
-                    FileTypeFilter = [new Avalonia.Platform.Storage.FilePickerFileType("Ink recognition model") { Patterns = ["*.ikrpack"] }]
-                });
-                if (files.Count != 1) return;
-                await using var stream = await files[0].OpenReadAsync();
-                await Task.Run(() => AiRecognitionModels.Install(stream));
-                aiStatus.Text = UiText.T("English · экспериментально"); _message.Text = "";
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException)
-            { _message.Text = UiText.T("Не удалось установить модель") + ": " + ex.Message; }
-        };
-        general.Children.Add(aiStatus); general.Children.Add(importModel);
-        var mathStatus = new TextBlock { Text = UiText.T(AiMathRecognitionModels.Installed ? "Формулы · экспериментально" : "Модель формул не установлена"), FontSize = 12, TextWrapping = TextWrapping.Wrap };
-        var importMath = new Button { Content = UiText.T("Установить модель формул"), HorizontalAlignment = HorizontalAlignment.Left };
-        importMath.Click += async (_, _) =>
-        {
-            try
-            {
-                var files = await StorageProvider.OpenFilePickerAsync(new Avalonia.Platform.Storage.FilePickerOpenOptions
-                {
-                    Title = UiText.T("Установить модель формул"), AllowMultiple = false,
-                    FileTypeFilter = [new Avalonia.Platform.Storage.FilePickerFileType("Ink math model") { Patterns = ["*.ikrmath"] }]
-                });
-                if (files.Count != 1) return;
-                await using var stream = await files[0].OpenReadAsync();
-                await Task.Run(() => AiMathRecognitionModels.Install(stream));
-                mathStatus.Text = UiText.T("Формулы · экспериментально"); _message.Text = "";
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException or DllNotFoundException or BadImageFormatException or EntryPointNotFoundException or NotSupportedException)
-            { _message.Text = UiText.T("Не удалось установить модель") + ": " + ex.Message; }
-        };
-        general.Children.Add(mathStatus); general.Children.Add(importMath);
-        var rawStatus = new TextBlock { Text = UiText.T(AiRawContentModels.Installed ? "Определение текста и формул · экспериментально" : "Модель определения текста и формул не установлена"), FontSize = 12, TextWrapping = TextWrapping.Wrap };
-        var importRaw = new Button { Content = UiText.T("Установить модель определения текста и формул"), HorizontalAlignment = HorizontalAlignment.Left };
-        importRaw.Click += async (_, _) =>
-        {
-            try
-            {
-                var files = await StorageProvider.OpenFilePickerAsync(new Avalonia.Platform.Storage.FilePickerOpenOptions
-                {
-                    Title = UiText.T("Установить модель определения текста и формул"), AllowMultiple = false,
-                    FileTypeFilter = [new Avalonia.Platform.Storage.FilePickerFileType("Ink content model") { Patterns = ["*.ikrraw"] }]
-                });
-                if (files.Count != 1) return;
-                await using var stream = await files[0].OpenReadAsync();
-                await Task.Run(() => AiRawContentModels.Install(stream));
-                rawStatus.Text = UiText.T("Определение текста и формул · экспериментально"); _message.Text = "";
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException or DllNotFoundException or BadImageFormatException or EntryPointNotFoundException or NotSupportedException)
-            { _message.Text = UiText.T("Не удалось установить модель") + ": " + ex.Message; }
-        };
-        general.Children.Add(rawStatus); general.Children.Add(importRaw);
-        var solverStatus = new TextBlock { Text = UiText.T(AiMathSolver.Executable is null ? "Решатель Giac не подключён" : "Локальный решатель Giac подключён"), FontSize = 12, TextWrapping = TextWrapping.Wrap };
-        var chooseSolver = new Button { Content = UiText.T("Подключить решатель Giac"), HorizontalAlignment = HorizontalAlignment.Left };
-        chooseSolver.Click += async (_, _) =>
-        {
-            try
-            {
-                var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
-                {
-                    Title = UiText.T("Выберите icas или giac"), AllowMultiple = false,
-                    FileTypeFilter = [new FilePickerFileType("Giac command-line engine") { Patterns = OperatingSystem.IsWindows() ? ["icas.exe", "giac.exe"] : ["icas", "giac"] }]
-                });
-                if (files.Count != 1 || files[0].TryGetLocalPath() is not { } path) return;
-                chooseSolver.IsEnabled = false;
-                await AiMathSolver.ConfigureAsync(path);
-                solverStatus.Text = UiText.T("Локальный решатель Giac подключён"); _message.Text = "";
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException)
-            { _message.Text = UiText.T("Не удалось запустить решатель Giac") + ": " + ex.Message; }
-            finally { chooseSolver.IsEnabled = true; }
-        };
-        var getSolver = new Button { Content = UiText.T("Скачать Giac / Xcas"), HorizontalAlignment = HorizontalAlignment.Left };
-        getSolver.Click += (_, _) =>
-        {
-            try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://xcas.univ-grenoble-alpes.fr/backup/install_en") { UseShellExecute = true }); }
-            catch (Exception ex) when (ex is InvalidOperationException or System.ComponentModel.Win32Exception) { _message.Text = ex.Message; }
-        };
-        general.Children.Add(solverStatus); general.Children.Add(chooseSolver); general.Children.Add(getSolver);
-        general.Children.Add(new TextBlock { Text = UiText.T("Определённые интегралы полиномов вычисляются без Giac."), FontSize = 12, Foreground = Brushes.Gray, TextWrapping = TextWrapping.Wrap });
-        general.Children.Add(new TextBlock { Text = UiText.T("Giac устанавливается отдельно. Допишите = для вычисления; готовое уравнение можно выделить и решить кнопкой = в меню курсора."), FontSize = 12, Foreground = Brushes.Gray, TextWrapping = TextWrapping.Wrap });
         _enabled = new CheckBox { Content = UiText.T("Включить горячие клавиши"), IsChecked = _draft.HotkeysEnabled, Margin = new Thickness(0, 10, 0, 0) };
         general.Children.Add(_enabled);
         general.Children.Add(new TextBlock { Text = UiText.T(OperatingSystem.IsWindows() ? "На Windows клавиши работают поверх других приложений." : "На этой платформе клавиши работают, когда окно BlurMask активно."),
