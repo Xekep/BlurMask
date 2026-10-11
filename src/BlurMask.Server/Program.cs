@@ -72,6 +72,16 @@ app.Use(async (context, next) =>
     await next(context);
 });
 app.UseDefaultFiles();
+app.Use(async (context, next) =>
+{
+    // nginx prefixes compressed static ETags with W/. Conditional GET/HEAD uses
+    // weak comparison, while the static file middleware compares strong tags.
+    if (!context.Request.Path.StartsWithSegments("/api") &&
+        (HttpMethods.IsGet(context.Request.Method) || HttpMethods.IsHead(context.Request.Method)))
+        context.Request.Headers.IfNoneMatch = context.Request.Headers.IfNoneMatch.ToString()
+            .Replace("W/\"", "\"", StringComparison.Ordinal);
+    await next(context);
+});
 app.UseStaticFiles(new StaticFileOptions
 {
     // Revalidate mutable page assets instead of keeping an old download list.
