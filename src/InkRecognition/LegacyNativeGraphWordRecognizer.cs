@@ -14,6 +14,8 @@ public sealed record LegacyNativeGraphRecognitionResult(LegacyOrdinaryCursiveCut
 /// Native single-deferred topology is retained. Dictionary beam, whole-line
 /// frame/context and terminal selection are original bounded orchestration;
 /// native winner, path corrections and acceptance confidence are not claimed.
+/// Explicit opt-in source-primitive scope restores only the three checked
+/// boundary/endpoint/probability cache fields; every other scope flag is retained.
 /// </summary>
 public sealed class LegacyNativeGraphWordRecognizer(LegacyRussianModelBundle model)
 {
@@ -27,10 +29,11 @@ public sealed class LegacyNativeGraphWordRecognizer(LegacyRussianModelBundle mod
             LegacyPreparedGlyphClassification, LegacyOrdinaryAcousticCacheContext> sourceScope,
         bool useEndCompositeMap, bool zeroFirstId, bool useNativeShortlist,
         ReadOnlySpan<uint> history = default, int maximumCandidates = 131072,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default, bool useNativeSourcePrimitiveScope = false)
         => RecognizeCore(rawSource, sourceProfile, seedProfile, sourceDirectionFlags, physicalBoundaryIds,
             options, finalCacheScorer, sourceScope, useEndCompositeMap, zeroFirstId, useNativeShortlist,
-            history, maximumCandidates, LegacyOrdinaryCursiveSeedGraph.CreateSingleDeferred, cancellationToken);
+            history, maximumCandidates, LegacyOrdinaryCursiveSeedGraph.CreateSingleDeferred, cancellationToken,
+            useNativeSourcePrimitiveScope);
 
     /// <summary>
     /// Ordinary noNN/shift1 graph bridge including multiple deferred placements.
@@ -45,10 +48,11 @@ public sealed class LegacyNativeGraphWordRecognizer(LegacyRussianModelBundle mod
             LegacyPreparedGlyphClassification, LegacyOrdinaryAcousticCacheContext> sourceScope,
         bool useEndCompositeMap, bool zeroFirstId, bool useNativeShortlist,
         ReadOnlySpan<uint> history = default, int maximumCandidates = 131072,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default, bool useNativeSourcePrimitiveScope = false)
         => RecognizeCore(rawSource, sourceProfile, seedProfile, sourceDirectionFlags, physicalBoundaryIds,
             options, finalCacheScorer, sourceScope, useEndCompositeMap, zeroFirstId, useNativeShortlist,
-            history, maximumCandidates, LegacyOrdinaryCursiveSeedGraph.CreateOrdinaryDeferred, cancellationToken);
+            history, maximumCandidates, LegacyOrdinaryCursiveSeedGraph.CreateOrdinaryDeferred, cancellationToken,
+            useNativeSourcePrimitiveScope);
 
     private LegacyNativeGraphRecognitionResult RecognizeCore(IReadOnlyList<InkStroke> rawSource,
         LegacyOrdinarySourceProfile sourceProfile, LegacyOrdinaryCursiveSeedProfile seedProfile,
@@ -59,7 +63,7 @@ public sealed class LegacyNativeGraphWordRecognizer(LegacyRussianModelBundle mod
         bool useEndCompositeMap, bool zeroFirstId, bool useNativeShortlist,
         ReadOnlySpan<uint> history, int maximumCandidates,
         Func<LegacyOrdinaryCursiveSeedResult, CancellationToken, LegacyOrdinaryCursiveSeedGraph> graphFactory,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, bool useNativeSourcePrimitiveScope)
     {
         ArgumentNullException.ThrowIfNull(options); ArgumentNullException.ThrowIfNull(finalCacheScorer);
         ArgumentNullException.ThrowIfNull(sourceScope); cancellationToken.ThrowIfCancellationRequested();
@@ -70,6 +74,9 @@ public sealed class LegacyNativeGraphWordRecognizer(LegacyRussianModelBundle mod
             throw new ArgumentException("Invalid explicit graph word policy.", nameof(options));
         var source = LegacyOrdinaryCursiveCutSource.Generate(rawSource, sourceProfile,
             options.SourceBaseline, options.SourceHeight, cancellationToken: cancellationToken);
+        var sourcePrimitiveScope = useNativeSourcePrimitiveScope
+            ? new LegacyOrdinarySourceEndpointMetadata(source, rawSource.Select(s => s.Points.Count).ToArray(), cancellationToken)
+            : null;
         var seeds = LegacyOrdinaryCursiveSeedProducer.GenerateLeftToRight(source.Cuts, options.SourceHeight,
             seedProfile, sourceDirectionFlags, physicalBoundaryIds, cancellationToken);
         var seedGraph = graphFactory(seeds, cancellationToken);
@@ -89,7 +96,9 @@ public sealed class LegacyNativeGraphWordRecognizer(LegacyRussianModelBundle mod
                 glyph = evaluator.Classify(group.Ranges.Span, cancellationToken);
                 classifications.Add(arc.GroupId, glyph);
             }
-            var context = source.BindCacheProbability(sourceScope(position, arc, glyph), glyph.Geometry);
+            var template = sourceScope(position, arc, glyph);
+            var context = sourcePrimitiveScope is null ? source.BindCacheProbability(template, glyph.Geometry)
+                : sourcePrimitiveScope.BindContext(glyph.Geometry, template, cancellationToken);
             return finalCacheScorer.Score(glyph, context, options.SourceHeight, 0,
                 useEndCompositeMap, zeroFirstId, useNativeShortlist, cancellationToken).Choices;
         }
