@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Native Wayland canvas test in our own headless compositor; never use a desktop session.
-# Ubuntu: weston libwayland-client0 libwayland-cursor0 libwayland-egl1 libxkbcommon0
+# Ubuntu 24.04+ (Weston 13+): weston libwayland-client0 libwayland-cursor0 libwayland-egl1 libxkbcommon0
 #         libegl1 libgles2 libgl1-mesa-dri python3-pil
 set -euo pipefail
 [[ "$EUID" != 0 ]] || { echo 'Run as an unprivileged test user.' >&2; exit 2; }
@@ -41,6 +41,11 @@ cleanup() {
 }
 trap cleanup EXIT
 weston --version > "$out/weston-version.txt"
+weston_major="$(sed -nE 's/^weston ([0-9]+)\..*/\1/p' "$out/weston-version.txt")"
+[[ "$weston_major" =~ ^[0-9]+$ && "$weston_major" -ge 13 ]] || {
+  echo 'This native Wayland probe requires Weston 13+ (Ubuntu 24.04+); Weston 9 advertises xdg_wm_base v1, but Avalonia requires v3.' >&2
+  exit 2
+}
 weston --help > "$out/weston-help.txt" 2>&1
 cat > "$out/weston.ini" <<'INI'
 [core]
@@ -51,8 +56,7 @@ background-image=
 panel-position=none
 locking=false
 INI
-options=(--backend=headless-backend.so --use-pixman)
-if grep -q -- '--renderer' "$out/weston-help.txt"; then options=(--backend=headless --renderer=pixman); fi
+options=(--backend=headless --renderer=pixman)
 # --debug exposes capture on this private, newly created compositor only.
 weston "${options[@]}" --width=1440 --height=1000 --socket="$WAYLAND_DISPLAY" \
   --idle-time=0 --debug --config="$out/weston.ini" --log="$out/weston.log" \
@@ -69,8 +73,16 @@ cd "$out"
 capture() {
   local directory="$1"
   mkdir -p "$directory"
+  # Weston 13 uses weston_capture_v1; its client still takes no arguments and
+  # writes XDG_PICTURES_DIR/wayland-screenshot-*.png. --debug above authorizes it
+  # only on our private compositor. A protocol failure can return zero without
+  # writing a PNG, so require actual capture output as well as a successful exit.
   (cd "$directory"; XDG_PICTURES_DIR="$directory" timeout --kill-after=1s 3s weston-screenshooter) \
     >> "$out/screenshooter.log" 2>&1
+  compgen -G "$directory/wayland-screenshot-*.png" > /dev/null || {
+    echo "Weston did not write a compositor screenshot in $directory." >&2
+    return 1
+  }
 }
 # A clean baseline lets the compositor assertion reject colors from its own shell.
 capture "$out/captures/before"

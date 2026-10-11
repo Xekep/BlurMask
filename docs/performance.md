@@ -97,6 +97,15 @@ graphs now borrow validated slices instead of duplicating the pack during loadin
 managed diagnostic peak fell from 145.2 to 127.7 MiB on the same input. Diagnostic
 GC is confined to probes and is not a production memory policy.
 
+In the 1600×1000 CPU probe of bb78e1c, ten-second idle intervals measured
+0–0.10% of one core in both default and CPU modes (timer ticks have finite
+resolution). A bounded short stroke plus settling over about two seconds measured
+1.97% / 4.35%; Picom measured 0% in that interval. This short, model-free Xvfb
+workload is not a sustained drawing benchmark, a physical Hyprland/GPU measurement
+or a temperature test. CPU and full-frame blur on the user's laptop still require
+measurement on that hardware. Run [38130801420](https://github.com/Xekep/BlurMask/actions/runs/38130801420)
+contains the raw per-process stat timestamps/ticks and CPU interval summaries.
+
 Reproduce installed-app measurements with `tools/test-linux-memory.sh` in an
 isolated unprivileged container. The headless app command is:
 
