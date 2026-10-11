@@ -183,6 +183,28 @@ internal static class DrawingSmokeTest
         Check(session.Overlays.SequenceEqual(originalOverlays), "Showing the toolbar recreated the ink overlay.");
         // Rebuilt native windows need their first layout before synthetic pointer input.
         await Task.Delay(150);
+        if (OperatingSystem.IsLinux())
+        {
+            using var catalog = XcbWindowCatalog.TryCreate()
+                ?? throw new InvalidOperationException("X11 diagnostic connection unavailable.");
+            foreach (var overlay in session.Overlays)
+                Check(catalog.Read((nuint)overlay.TryGetPlatformHandle()!.Handle) is { Visible: false },
+                    "Cursor-mode desktop overlay is still mapped on X11.");
+            var layer = session.Overlays.First();
+            session.SelectTool(InkTool.Pen);
+            await Task.Delay(150);
+            Check(catalog.Read((nuint)layer.TryGetPlatformHandle()!.Handle) is { Visible: true },
+                "Desktop drawing layer did not map on X11.");
+            session.SelectTool(InkTool.Cursor);
+            await Task.Delay(150);
+            Check(catalog.Read((nuint)layer.TryGetPlatformHandle()!.Handle) is { Visible: false },
+                "Desktop layer still intercepts X11 input after selecting cursor.");
+            session.SelectTool(InkTool.Pen);
+            await Task.Delay(150);
+            Check(catalog.Read((nuint)layer.TryGetPlatformHandle()!.Handle) is { Visible: true },
+                "Desktop drawing layer could not reopen after selecting cursor.");
+            session.SelectTool(InkTool.Cursor);
+        }
         if (OperatingSystem.IsWindows())
         {
             var overlay = session.Overlays.First();

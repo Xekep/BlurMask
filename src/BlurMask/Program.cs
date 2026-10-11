@@ -54,6 +54,11 @@ internal static class Program
                 RenderingMode = [Win32RenderingMode.Software],
                 CompositionMode = [Win32CompositionMode.RedirectionSurface]
             });
+        if (OperatingSystem.IsLinux() && SoftwareRendering)
+            builder.With(new X11PlatformOptions
+            {
+                RenderingMode = [X11RenderingMode.Software]
+            });
         return builder;
     }
 }

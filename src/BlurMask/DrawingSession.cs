@@ -134,7 +134,9 @@ internal sealed class DrawingSession : IDisposable
         {
             var overlay = new DesktopInkWindow(this, screen);
             _overlays.Add(overlay);
-            overlay.Show();
+            // Apply visibility before mapping: cursor/canvas mode must never
+            // briefly create a transparent, input-blocking Linux window.
+            overlay.ApplyState();
         }
         // The controls must always sit above the ink input layer.
         Toolbar.RaiseAboveInk();

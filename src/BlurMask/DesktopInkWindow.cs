@@ -50,6 +50,14 @@ internal sealed class DesktopInkWindow : Window
             Position = _screenBounds.Position;
             ApplyState();
         };
+        Closing += (_, e) =>
+        {
+            if (e.IsProgrammatic || e.CloseReason != WindowCloseReason.WindowClosing) return;
+            // A compositor's close shortcut should leave this reusable layer
+            // available for the next stroke instead of destroying its handle.
+            e.Cancel = true;
+            _session.SelectTool(InkTool.Cursor);
+        };
         Closed += (_, _) => CancelGesture();
     }
 

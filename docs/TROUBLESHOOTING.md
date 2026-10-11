@@ -54,6 +54,38 @@ and driver and needs an actual disconnect/reconnect test.
 
 Blur-behind is compositor-specific. Scramble and Blackout are compositor-independent. Pixel Blur uses compositor blur. Glass Refraction uses the Windows Magnification API on Windows and a compositor-based fallback elsewhere. The fallback privacy modes still hide the underlying content.
 
+## Linux / Hyprland: empty or transparent window
+
+The desktop ink layer is transparent by design; it receives input while a drawing
+tool is selected. The separate **Canvas** window should have an opaque board and
+a toolbar. If that window is transparent, it is a rendering problem.
+
+Close BlurMask using **Quit** in its tray menu before trying another renderer:
+the application only permits one running instance. Run:
+
+```sh
+blurmask --software-rendering
+```
+
+This selects the CPU renderer on Linux as well as Windows in builds containing
+the Linux renderer fix. Earlier builds ignored this option on Linux.
+For those builds, `LIBGL_ALWAYS_SOFTWARE=1 blurmask` can help isolate the GPU path.
+
+On Hyprland, capture the window information while the issue is visible:
+
+```sh
+hyprctl version
+hyprctl activewindow
+hyprctl clients -j
+pacman -Q blurmask hyprland xorg-xwayland mesa
+```
+
+Window titles distinguish the desktop ink layer from Canvas. The client data
+also shows whether the compositor tiled the window, its actual size, and whether
+it uses XWayland. Missing cursor files during theme fallback in `strace` are
+normal if a later cursor lookup succeeds; `killed by SIGINT` indicates an
+interrupt signal and does not establish that the application crashed.
+
 ## Right-click seems to do nothing
 
 The mode changes immediately. The tray tooltip shows the current mode. Pixel Blur, Scramble, Glass Refraction and Blackout are visually obvious; Blur depends on the OS compositor.
