@@ -258,6 +258,21 @@ jobs:
           dotnet run --project tools/LegacyCursiveBaseline.Probe -c Release -- .artifacts/cursive-baseline-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
           python tools/LegacyGaussianLineFit.Probe/reference_controls.py .artifacts/gaussian-line-controls.json
           dotnet run --project tools/LegacyGaussianLineFit.Probe -c Release -- .artifacts/gaussian-line-controls.json
+          python tools/LegacyAutomaticLineEstimator.Probe/reference_controls.py .artifacts/automatic-line-controls.json
+          dotnet run --project tools/LegacyAutomaticLineEstimator.Probe -c Release -- .artifacts/automatic-line-controls.json
+          python tools/LegacyLinePostprocessing.Probe/reference_controls.py .artifacts/line-postprocessing-controls.json
+          dotnet run --project tools/LegacyLinePostprocessing.Probe -c Release -- .artifacts/line-postprocessing-controls.json
+          python tools/LegacyCursiveLimit.Probe/reference_controls.py .artifacts/cursive-limit-controls.json
+          dotnet run --project tools/LegacyCursiveLimit.Probe -c Release -- .artifacts/cursive-limit-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+          dotnet run --project tools/LegacyCursiveCategoryMap.Probe -c Release -- .artifacts/cursive-category-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/LegacyCursiveOverride.Probe/reference_controls.py .artifacts/cursive-override-controls.json
+          dotnet run --project tools/LegacyCursiveOverride.Probe -c Release -- .artifacts/cursive-override-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/LegacyCursiveFilters.Probe/reference_controls.py .artifacts/cursive-filters-controls.json
+          dotnet run --project tools/LegacyCursiveFilters.Probe -c Release -- .artifacts/cursive-filters-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+          dotnet run --project tools/LegacyPreparedSequence.Probe -c Release
+          python tools/LegacyDynamicWeights.Probe/reference_controls.py .artifacts/dynamic-weights-controls.json
+          dotnet run --project tools/LegacyDynamicWeights.Probe -c Release -- --controls .artifacts/dynamic-weights-controls.json
+          dotnet run --project tools/LegacyDynamicWeights.Probe -c Release -- --resource models/ru-RU/ru_RU-ak-cur.lite.res
       - name: Legacy stored word and class language costs
         run: |
           python tools/LegacyWordLanguage.Probe/reference_controls.py models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-language-controls.json
@@ -410,7 +425,15 @@ jobs:
             @{ Name = 'LegacySparseLineEstimator'; Args = @('.artifacts/sparse-line-controls.json') },
             @{ Name = 'LegacyWordBound'; Args = @('--controls', '.artifacts/word-bound-controls.json') },
             @{ Name = 'LegacyCursiveBaseline'; Args = @('.artifacts/cursive-baseline-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
-            @{ Name = 'LegacyGaussianLineFit'; Args = @('.artifacts/gaussian-line-controls.json') }
+            @{ Name = 'LegacyGaussianLineFit'; Args = @('.artifacts/gaussian-line-controls.json') },
+            @{ Name = 'LegacyAutomaticLineEstimator'; Args = @('.artifacts/automatic-line-controls.json') },
+            @{ Name = 'LegacyLinePostprocessing'; Args = @('.artifacts/line-postprocessing-controls.json') },
+            @{ Name = 'LegacyCursiveLimit'; Args = @('.artifacts/cursive-limit-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyCursiveCategoryMap'; Args = @('.artifacts/cursive-category-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyCursiveOverride'; Args = @('.artifacts/cursive-override-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyCursiveFilters'; Args = @('.artifacts/cursive-filters-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyPreparedSequence'; Args = @() },
+            @{ Name = 'LegacyDynamicWeights'; Args = @('--controls', '.artifacts/dynamic-weights-controls.json') }
           )
           foreach ($case in $cases) {
             $name = $case.Name
@@ -426,6 +449,8 @@ jobs:
           & "./.artifacts/LegacyIntegerWord-native/LegacyIntegerWord.Probe$suffix" models/ru-RU/ru_RU-lk-text.lite.res
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           & "./.artifacts/LegacyWordBound-native/LegacyWordBound.Probe$suffix" models/ru-RU/ru_RU-lk-text.lite.res
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & "./.artifacts/LegacyDynamicWeights-native/LegacyDynamicWeights.Probe$suffix" --resource models/ru-RU/ru_RU-ak-cur.lite.res
           exit $LASTEXITCODE
 
   symbolic-math:

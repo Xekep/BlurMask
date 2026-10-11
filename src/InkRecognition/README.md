@@ -333,4 +333,29 @@ restores the prepared baseline/loop-exit stage with explicit line metrics,
 including the native unknown-baseline branch. [`LegacyLineExtrema` and
 `LegacyGaussianLineFit`](../../docs/legacy-dense-line-fit.md) restore raw extrema
 and the default four-component Gaussian/shared-slope fit, bounded to20 iterations.
+
+[`LegacyAutomaticLineEstimator`](../../docs/legacy-class24a-prepared-line.md)
+restores the stored class24a sparse/dense selection for a supplied line group.
+[`LegacyLineDeskew` and `LegacyLineGuidelineAdjustment`](../../docs/legacy-line-postcallback.md)
+restore postcallback metadata and rotation; automatic page grouping and final
+font metrics remain separate. The checked Russian bundle exposes three stored
+line profiles and both cursive category profiles.
+
+[`LegacyCursiveMarkerLimit`](../../docs/legacy-russian-cursive-marker-limit.md),
+[`LegacyCursiveStrokeOverride`](../../docs/legacy-russian-cursive-stroke-override.md)
+and [`LegacyCursiveControllerFilters`](../../docs/legacy-russian-cursive-controller-filters.md)
+restore further Russian106 marker stages, with owned prepared ink and explicit
+source geometry. [`LegacyCursiveCategoryMapper`](../../docs/legacy-russian-cursive-category-mapper.md)
+preserves absent category mappings instead of guessing neural family IDs.
+
+[`LegacyDynamicAcousticWeights`](../../docs/legacy-russian-dynamic-acoustic-weights.md)
+restores physical resampling, parallel-stroke overlap and configured weight
+resolution. `LegacyDirectionalAcousticWeightConfiguration` reads the actual
+Russian v110 prefix: four dynamic mode2 families and three inactive slots.
+`LegacyRussianModelBundle.AcousticWeights` exposes those resource settings.
+
+[`LegacyPreparedSequenceWordSearch`](../../docs/legacy-russian-prepared-sequence.md)
+connects supplied atom groups and scored normalized glyphs to integer costs and
+word language totals. Its caller-supplied fixed sequence and bounded prefix beam
+do not implement the native variable-cut search or enable Russian GUI recognition.
 The type24a wrapper, final adjustments and raw-line candidate selection are separate.

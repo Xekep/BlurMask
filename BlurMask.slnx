@@ -60,6 +60,14 @@
     <Project Path="tools/LegacyWordBound.Probe/LegacyWordBound.Probe.csproj" />
     <Project Path="tools/LegacyCursiveBaseline.Probe/LegacyCursiveBaseline.Probe.csproj" />
     <Project Path="tools/LegacyGaussianLineFit.Probe/LegacyGaussianLineFit.Probe.csproj" />
+    <Project Path="tools/LegacyAutomaticLineEstimator.Probe/LegacyAutomaticLineEstimator.Probe.csproj" />
+    <Project Path="tools/LegacyLinePostprocessing.Probe/LegacyLinePostprocessing.Probe.csproj" />
+    <Project Path="tools/LegacyCursiveLimit.Probe/LegacyCursiveLimit.Probe.csproj" />
+    <Project Path="tools/LegacyCursiveCategoryMap.Probe/LegacyCursiveCategoryMap.Probe.csproj" />
+    <Project Path="tools/LegacyCursiveOverride.Probe/LegacyCursiveOverride.Probe.csproj" />
+    <Project Path="tools/LegacyCursiveFilters.Probe/LegacyCursiveFilters.Probe.csproj" />
+    <Project Path="tools/LegacyPreparedSequence.Probe/LegacyPreparedSequence.Probe.csproj" />
+    <Project Path="tools/LegacyDynamicWeights.Probe/LegacyDynamicWeights.Probe.csproj" />
     <Project Path="tools/InkMath.Solver.Probe/InkMath.Solver.Probe.csproj" />
   </Folder>
 </Solution>

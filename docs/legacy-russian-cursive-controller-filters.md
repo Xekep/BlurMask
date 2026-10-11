@@ -1,0 +1,13 @@
+# Native191950 surrounding tag filters
+
+`LegacyCursiveControllerFilters` restores the two tag passes before190350 and the two tag passes after it. It accepts owned prepared ink and an explicit physical stroke, preserves all point coordinates/deltas/lengths/counts/provenance and returns an owned tag replacement.
+
+Before baseline processing, native192200 retains the latest tag4/7 anchor while ignoring0/13/14. A later tag11 above that anchor can become tag2 when an intervening point lies strictly outside the chord slope. Vertical chords use the native negative-X test, and zero intermediate X uses the chord direction comparison. Other ordinary markers reset the pending state; the physical final point is excluded. The next pass scans the whole physical stroke, pairs tag11 markers when the immediately preceding segment has positiveDX, clears the preceding pending11 except at global index0, and changes the latter marker to2. Tags1/12 reset pairing; other types retain it.
+
+After baseline processing, native192410 examines markers except0/1/13/14. The surprising condition is currentY strictly below zero, not below baseline; assembly192447-19244d confirms it. A high previous tag4/5/7 anchor, rightward current marker, and known baseline permit a scan for the first strictly below-baseline point. Native writes tag2 to the PREVIOUS point and clears the old anchor. These assignments can target the same point, in which case clearing wins. Native19244f-192461 confirms float `baseline + height*margin` operation order. Russian106 margin at object+2c is0.5 (resource node+51).
+
+The final pass excludes the physical endpoint, ignores0/1/13/14, and replaces tag11 followed immediately by13 when its downwardY difference from the preceding ordinary anchor strictly exceeds height times0.2. Object+20 supplies this value, serialized at node+39. The baseline estimator and190350 itself remain separate stages.
+
+The independent generator supplies1024 own-ink cases for both operations, variable tags, known/unknown baselines and multiple physical strokes. All tag outputs agree;87 pre-baseline and53 post-baseline cases change. Every other record field remains unchanged. Additional controls prove previous-point relocation, exact zero guard, source immutability, bounded stroke index, invalid metrics and cancellation. Both real Russian resource nodes are checked for0.5/0.2. Managed and Windows NativeAOT headless probes pass.
+
+Full191950 preparation and runtime branch selection, mandatory post-normal override1908c0 and final pipeline composition remain separate. No neural-wrapper policy or baseline heuristic is invented.

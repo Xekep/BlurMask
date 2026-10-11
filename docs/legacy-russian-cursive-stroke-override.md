@@ -1,0 +1,15 @@
+# Native1908c0 Russian geometry override
+
+`LegacyCursiveStrokeOverride.ApplyRussianVersion106` restores the confirmed old Russian branch of1801908c0, where runtime optional-neural flag242 is zero. Raw ink supplies the target stroke bounding box; prepared ink supplies intersections, segment lengths, tags and original-point provenance. The inclusive first/last selected physical-stroke range and baseline are explicit. The modern optional-neural neighbor expansion through virtualF0 is not guessed.
+
+A known baseline permits processing only when raw width exceeds line height, raw height is strictly below half line height, and the raw maximumY lies strictly above baseline minus half line height. Unknown baseline and envelope equality leave ink unchanged. Native1908c0 returns success even outside this envelope; callers must retain the controller's explicit decision to use this override rather than treating unchanged output as failure.
+
+Other selected strokes are scanned in physical order, then their segments, then target segments. Native18db40 provides inclusive-box float intersections. At most10 intersections are admitted. After every admission the native ordered-pair scan updates the farthest squared distance using strict comparison. Its Y-square/X-square sum is float arithmetic. A qualifying pair exceeds one quarter of the squared line height.
+
+The two chosen intersections are ordered by intersection encounter index, not target segment position. Their stored target segment positions can therefore be reversed, in which case no cut is inserted. The midpoint arc includes both endpoint segment lengths, but interpolation tests only segments strictly before the upper endpoint. The first strict midpoint crossing inserts tag2 with native18dde0 ownership; equality can insert a duplicate coordinate at fraction zero. A qualifying farthest pair that has no usable crossing leaves existing tags unchanged. When the envelope is valid but no qualifying pair exists, all target tags after its first point are cleared, including protected marker types from other stages.
+
+Assembly190f87 through191098 confirms encounter-index ordering, inclusive summation, exclusive interpolation, strict comparison and the global insertion point passed inR9 to18dde0. Native insertion updates following physical-stroke offsets; owned prepared-ink insertion supplies the equivalent updated counts.
+
+Independent controls contain768 own-ink cases, with varying physical order, subset ranges, baselines, stroke direction and intersections. All coordinate/delta/length float bits, tags, provenance and updated counts agree;37 cases insert a point. Additional controls prove strict duplicate midpoint, reversed encounter order, envelope equality, unknown-baseline sentinel, clearing without intersections, immutability, malformed arguments and cancellation. Managed and Windows NativeAOT headless runs pass.
+
+Full191950 still requires its runtime override selection and post-horizontal/post-baseline controller filters. This explicitly named Russian106 operation does not claim the optional modern neural branch or complete end-to-end cursive recognition.

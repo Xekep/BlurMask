@@ -24,6 +24,9 @@ public sealed class LegacyRussianModelBundle
     public LegacyWordLanguageModel LanguageModel { get; }
     public IReadOnlyList<LegacyWordLanguageCostProfile> LanguageProfiles { get; }
     public IReadOnlyList<LegacyWordAuxiliaryProfile> AuxiliaryProfiles { get; }
+    public IReadOnlyList<LegacyAutomaticLineProfile> LineProfiles { get; }
+    public IReadOnlyList<LegacyCursiveCategoryProfile> CursiveCategoryProfiles { get; }
+    public LegacyDirectionalAcousticWeightConfiguration AcousticWeights { get; }
     /// <summary>Stored source kind forwarded by the checked ordinary type2b7 path.</summary>
     public int SourceKind { get; }
     public int ResourceLanguageProfileIndex => 0x137 - SourceKind;
@@ -32,13 +35,18 @@ public sealed class LegacyRussianModelBundle
         LegacyInkActivations activations, LegacyDirectionalCalibration temporal, LegacyDirectionalCalibration spatial,
         LegacyInkAlphabet acousticAlphabet, LegacyInkAlphabet lexicalAlphabet, LegacyPackedLexicon lexicon,
         LegacyLexiconWordIndex wordIndex, LegacyWordLanguageModel languageModel, LegacyWordLanguageCostProfile[] profiles,
-        LegacyWordAuxiliaryProfile[] auxiliaryProfiles, int sourceKind)
+        LegacyWordAuxiliaryProfile[] auxiliaryProfiles, int sourceKind,
+        LegacyAutomaticLineProfile[] lineProfiles, LegacyCursiveCategoryProfile[] cursiveProfiles,
+        LegacyDirectionalAcousticWeightConfiguration acousticWeights)
     {
         _families = families; _initial = initial; _activations = activations; _temporal = temporal; _spatial = spatial;
         AcousticAlphabet = acousticAlphabet; LexicalAlphabet = lexicalAlphabet; Lexicon = lexicon;
         WordIndex = wordIndex; LanguageModel = languageModel; LanguageProfiles = Array.AsReadOnly(profiles);
         AuxiliaryProfiles = Array.AsReadOnly(auxiliaryProfiles);
         SourceKind = sourceKind;
+        LineProfiles = Array.AsReadOnly(lineProfiles);
+        CursiveCategoryProfiles = Array.AsReadOnly(cursiveProfiles);
+        AcousticWeights = acousticWeights;
     }
 
     /// <summary>Load exactly the observed pair, copying retained parameters from caller buffers.</summary>
@@ -87,10 +95,20 @@ public sealed class LegacyRussianModelBundle
             var language = LegacyWordLanguageModel.Load(lexicalResource[2513123..4565174], cancellationToken);
             var profiles = LegacyWordLanguageCostProfile.LoadProfiles(lexicalResource[2513123..4565174], cancellationToken);
             var auxiliary = LegacyWordAuxiliaryProfile.LoadProfiles(lexicalResource[2513123..4565174], cancellationToken);
+            LegacyAutomaticLineProfile[] lineProfiles = [
+                LegacyAutomaticLineProfile.ReadResourceNode(acousticResource, 5789),
+                LegacyAutomaticLineProfile.ReadResourceNode(acousticResource, 11421),
+                LegacyAutomaticLineProfile.ReadResourceNode(acousticResource, 187976)];
+            LegacyCursiveCategoryProfile[] cursiveProfiles = [
+                LegacyCursiveCategoryProfile.Load(acousticResource[11571..], 11571, out _, cancellationToken),
+                LegacyCursiveCategoryProfile.Load(acousticResource[188222..], 188222, out _, cancellationToken)];
+            var acousticWeights = LegacyDirectionalAcousticWeightConfiguration.LoadV110Prefix(
+                acousticResource[189734..], out int weightBytes, cancellationToken);
+            if (weightBytes != 566330 - 189734) throw Invalid("Russian acoustic weight prefix length differs.");
             if (language.WordCount != wordIndex.WordCount) throw Invalid("Dictionary and language word counts differ.");
             cancellationToken.ThrowIfCancellationRequested();
             return new(families, initial, activations, temporal, spatial, acousticAlphabet, lexicalAlphabet,
-                lexicon, wordIndex, language, profiles, auxiliary, sourceKind);
+                lexicon, wordIndex, language, profiles, auxiliary, sourceKind, lineProfiles, cursiveProfiles, acousticWeights);
         }
         catch (Exception ex) when (ex is JsonException or KeyNotFoundException or InvalidOperationException or
             ArgumentException or FormatException or OverflowException)
@@ -105,6 +123,13 @@ public sealed class LegacyRussianModelBundle
         new(_families, _initial, _activations, AcousticAlphabet, LexicalAlphabet, Lexicon, _temporal, _spatial, relatedFormMode);
 
     public LegacyDirectionalGlyphClassifier CreateGlyphClassifier() => new(_families, _activations, _temporal, _spatial);
+    public LegacyContextWindowScorer CreateContextWindowScorer() => new(_initial, _activations);
+
+    public LegacyCursiveCategoryMapper CreateCursiveCategoryMapper(int profileIndex)
+    {
+        if ((uint)profileIndex >= CursiveCategoryProfiles.Count) throw new ArgumentOutOfRangeException(nameof(profileIndex));
+        return new(CursiveCategoryProfiles[profileIndex]);
+    }
 
     public LegacyWordLanguageScorer CreateLanguageScorer(int profileIndex, float runtimeScale)
     {
@@ -121,6 +146,11 @@ public sealed class LegacyRussianModelBundle
     /// Cut candidates, history/category flags and heap policy remain caller supplied.</summary>
     public LegacyIntegerWordDecoder CreateIntegerWordDecoder(float runtimeScale) =>
         new(Lexicon, WordIndex, new(CreateResourceLanguageScorer(runtimeScale)));
+
+    public LegacyPreparedSequenceWordSearch CreatePreparedSequenceWordSearch(float runtimeScale,
+        int? relatedFormMode = null) => new(
+            new LegacyAcousticLexicalMapping(AcousticAlphabet, LexicalAlphabet, _families[0].Network.OutputWidth, relatedFormMode),
+            CreateIntegerWordDecoder(runtimeScale));
 
     private static void Verify(ReadOnlySpan<byte> data, int length, string hash)
     {

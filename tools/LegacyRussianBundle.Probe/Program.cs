@@ -19,6 +19,13 @@ var model = LegacyRussianModelBundle.Load(acoustic, lexical, profile);
 var recognizer = model.CreateWordRecognizer(relatedFormMode: 0);
 if (model.Lexicon.StoredTerminalCount != 439826 || model.WordIndex.WordCount != model.LanguageModel.WordCount ||
     model.LanguageProfiles.Count != 4) throw new InvalidOperationException("Stored model components differ.");
+if (model.LineProfiles.Count!=3 || model.LineProfiles.Any(p=>p.SparseThreshold!=10 || p.DenseThreshold!=10) ||
+    model.CursiveCategoryProfiles.Count!=2 || model.CreateCursiveCategoryMapper(0).CompositeCategoryCount!=35 ||
+    !model.CreateCursiveCategoryMapper(0).CompositeFirstIds.Span.SequenceEqual(model.CreateCursiveCategoryMapper(1).CompositeFirstIds.Span))
+    throw new InvalidOperationException("Stored line and cursive category profile components differ.");
+_ = model.CreateContextWindowScorer();
+_ = model.CreatePreparedSequenceWordSearch(1,0);
+try { model.CreateCursiveCategoryMapper(2); throw new InvalidOperationException("Invalid stored cursive profile selected."); } catch(ArgumentOutOfRangeException){}
 ushort[] mir = "\u043c\u0438\u0440".Select(letter =>
     model.LexicalAlphabet.TryGetLabel(letter.ToString(), out ushort id) ? id : throw new InvalidOperationException("Missing label.")).ToArray();
 if (!model.WordIndex.TryGetWordId(mir, out int wordId) || wordId != 198893 ||
