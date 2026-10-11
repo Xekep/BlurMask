@@ -79,6 +79,13 @@ mapping, cursive segmentation and language costs remain unfinished.
 their distinct numeric IDs can be mapped through Unicode text.
 See [lexical format evidence and checks](../../docs/legacy-russian-lexicon.md).
 
+The alphabet loader also exposes stored virtual-label markers, per-symbol bits
+and the checked three-form accessor with narrow/wide signed lookup maps and
+mode fallback. Relations may include both case and accented forms. Reading
+these fields does not implement the engine's word-case policy or preserve case
+through dictionary decoding. `LegacyLexicon.Probe` covers absent relations,
+sentinel insertion, malformed references and version103/104 payloads.
+
 `LegacySegmentedWordRecognizer` connects the isolated raster classifier to the
 dictionary through Unicode acoustic/lexical label mapping. The original
 `LegacySeparatedInkSegmenter` proposes left-to-right groups of overlapping
@@ -105,3 +112,16 @@ reference cases cover plateaus, short-coordinate extremes, multiple strokes,
 the statically confirmed first-Y carry and sample bounds. Regenerate the
 vendor-free controls with `tools/LegacyDirectional.Probe/reference_controls.py`
 and pass their JSON path to `LegacyDirectional.Probe`.
+
+`LegacyDirectionalStatistics` adds the 17 checked global integer channels for
+caller-prepared geometry and intersection classifications. Independent own
+controls cover signed covariance, dynamic scaling and integer arc reduction;
+unprepared coordinates, guessed intersections and the full 313-vector are not
+supplied by this API. See [the restored passes and remaining work](../../docs/legacy-russian-directional-profile.md).
+
+`LegacyDirectionalCoordinatePreparation` and `LegacyDirectionalResampling`
+prepare power-of-two coordinates, constant-step physical strokes and native
+dimensions for the directional family. `LegacyArcLengthWindows` partitions
+prepared cumulative physical lengths. Independent own controls cover 655
+coordinate/resampling and 640 window cases; intersections, local channels,
+baseline/context assembly and joined-word decoding remain unfinished.

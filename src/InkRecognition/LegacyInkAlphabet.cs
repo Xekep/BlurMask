@@ -3,6 +3,9 @@ using System.Text;
 
 namespace InkRecognition;
 
+/// <summary>Three related symbol IDs in native stored order; 65535 means absent.</summary>
+public readonly record struct LegacyInkRelatedForms(ushort First, ushort Second, ushort Third);
+
 /// <summary>
 /// Caller-supplied legacy alphabet payload. Acoustic and lexical resources use
 /// different label IDs; map through text rather than assuming their IDs match.
@@ -11,12 +14,18 @@ public sealed class LegacyInkAlphabet
 {
     private readonly Dictionary<ushort, string> _text;
     private readonly Dictionary<string, ushort> _labels;
+    private readonly ushort[] _reverse;
+    private readonly byte[] _symbolFlags;
+    private readonly LegacyInkRelatedForms[] _forms;
+    private readonly short[]?[] _relationMaps;
     public int LabelCount { get; }
     public int BytesConsumed { get; }
 
-    private LegacyInkAlphabet(int count, int consumed, Dictionary<ushort, string> text)
+    private LegacyInkAlphabet(int count, int consumed, Dictionary<ushort, string> text,
+        ushort[] reverse, byte[] symbolFlags, LegacyInkRelatedForms[] forms, short[]?[] relationMaps)
     {
         LabelCount = count; BytesConsumed = consumed; _text = text;
+        _reverse = reverse; _symbolFlags = symbolFlags; _forms = forms; _relationMaps = relationMaps;
         _labels = new(StringComparer.Ordinal);
         foreach (var item in text)
             if (!_labels.TryAdd(item.Value, item.Key) && _labels[item.Value] != item.Key)
@@ -64,24 +73,80 @@ public sealed class LegacyInkAlphabet
             catch (DecoderFallbackException) { throw Invalid("Invalid UTF-8 alphabet entry."); }
             if (!text.TryAdd(labels[i], value) && text[labels[i]] != value) throw Invalid("Conflicting alphabet label mapping.");
         }
-        reader.Bytes(count * 2); // Reverse lookup slots, retained by the native reader.
+        var reverse = new ushort[count];
+        for (int i = 0; i < count; i++)
+        {
+            reverse[i] = reader.U16();
+            if (reverse[i] != ushort.MaxValue && reverse[i] >= lastSpan) throw Invalid("Invalid reverse alphabet slot.");
+        }
         byte haveBits = reader.U8();
         if (haveBits > 1) throw Invalid("Invalid alphabet bitset flag.");
-        if (haveBits != 0) reader.Bytes((count + 7) / 8);
-        int triplets = reader.U16(); reader.Bytes(triplets * 6);
+        byte[] symbolFlags = haveBits == 0 ? [] : reader.Bytes((count + 7) / 8).ToArray();
+        int triplets = reader.U16();
+        var forms = new LegacyInkRelatedForms[triplets];
+        for (int i = 0; i < triplets; i++)
+        {
+            forms[i] = new(reader.U16(), reader.U16(), reader.U16());
+            foreach (ushort label in new[] { forms[i].First, forms[i].Second, forms[i].Third })
+                if (label != ushort.MaxValue && label >= count) throw Invalid("Related form exceeds alphabet.");
+        }
+        var relationMaps = new short[]?[3];
         if (triplets != 0)
         {
             uint flags = reader.U32();
             if ((flags & ~7u) != 0) throw Invalid("Unsupported alphabet triplet flags.");
-            int width = triplets < 128 ? 1 : 2;
-            for (int bit = 1; bit <= 4; bit *= 2) if ((flags & bit) != 0) reader.Bytes(count * width);
+            for (int mode = 0; mode < 3; mode++)
+                if ((flags & (1u << mode)) != 0)
+                {
+                    var map = new short[count]; relationMaps[mode] = map;
+                    for (int i = 0; i < count; i++)
+                    {
+                        int index = triplets < 128 ? unchecked((sbyte)reader.U8()) : unchecked((short)reader.U16());
+                        if (index < -1 || index >= triplets) throw Invalid("Invalid related-form lookup index.");
+                        map[i] = (short)index;
+                    }
+                }
         }
         if (version == 0x104) reader.U8();
-        return new(count, reader.Position, text);
+        return new(count, reader.Position, text, reverse, symbolFlags, forms, relationMaps);
     }
 
     public bool TryGetText(ushort label, out string text) => _text.TryGetValue(label, out text!);
     public bool TryGetLabel(string text, out ushort label) => _labels.TryGetValue(text, out label);
+
+    /// <summary>Native reverse slot65535 marks a virtual symbol, independent of Unicode text.</summary>
+    public bool IsVirtual(ushort label) { ValidateLabel(label); return _reverse[label] == ushort.MaxValue; }
+
+    /// <summary>Read the stored per-symbol bit; its higher-level recognition role is not inferred.</summary>
+    public bool IsSymbolFlagged(ushort label)
+    {
+        ValidateLabel(label); return _symbolFlags.Length != 0 && (_symbolFlags[label >> 3] & (1 << (label & 7))) != 0;
+    }
+
+    /// <summary>
+    /// Restore the checked native three-form accessor. Mode1/2 use their own
+    /// lookup if present, otherwise mode0. This exposes supplied relationships;
+    /// it does not infer case conversion or score/correct a word.
+    /// </summary>
+    public bool TryGetRelatedForms(ushort label, int mode, out LegacyInkRelatedForms forms)
+    {
+        ValidateLabel(label);
+        if (mode is < 0 or > 2) throw new ArgumentOutOfRangeException(nameof(mode));
+        var map = _relationMaps[mode] ?? _relationMaps[0];
+        if (map is null || map[label] == -1) { forms = new(ushort.MaxValue, ushort.MaxValue, ushort.MaxValue); return false; }
+        forms = _forms[map[label]];
+        if (label != forms.First && label != forms.Second && label != forms.Third)
+        {
+            if (forms.First == ushort.MaxValue) forms = forms with { First = label };
+            else if (forms.Second == ushort.MaxValue) forms = forms with { Second = label };
+        }
+        return true;
+    }
+
+    private void ValidateLabel(ushort label)
+    {
+        if (label >= LabelCount) throw new ArgumentOutOfRangeException(nameof(label));
+    }
 
     private static InvalidDataException Invalid(string message) => new(message);
     private ref struct Reader

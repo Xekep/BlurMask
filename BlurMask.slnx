@@ -16,6 +16,9 @@
     <Project Path="tools/LegacySegmentedWord.Probe/LegacySegmentedWord.Probe.csproj" />
     <Project Path="tools/LegacySeparatedInk.Probe/LegacySeparatedInk.Probe.csproj" />
     <Project Path="tools/LegacyDirectional.Probe/LegacyDirectional.Probe.csproj" />
+    <Project Path="tools/LegacyDirectionalStatistics.Probe/LegacyDirectionalStatistics.Probe.csproj" />
+    <Project Path="tools/LegacyArcLengthWindows.Probe/LegacyArcLengthWindows.Probe.csproj" />
+    <Project Path="tools/LegacyDirectionalCoordinates.Probe/LegacyDirectionalCoordinates.Probe.csproj" />
     <Project Path="tools/InkMath.Solver.Probe/InkMath.Solver.Probe.csproj" />
   </Folder>
 </Solution>

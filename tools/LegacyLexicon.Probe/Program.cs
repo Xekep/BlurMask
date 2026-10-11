@@ -2,6 +2,51 @@ using System.Buffers.Binary;
 using System.Text.Json;
 using InkRecognition;
 
+if (args.Length >= 6 && args[0] == "--lookup")
+{
+    byte[] resource = File.ReadAllBytes(args[1]);
+    var alphabet = LegacyInkAlphabet.Load(resource.AsSpan(int.Parse(args[2])), Convert.ToUInt16(args[3], 16));
+    int offset = int.Parse(args[4]);
+    int length = checked((int)BinaryPrimitives.ReadUInt32LittleEndian(resource.AsSpan(offset + 4, 4)) + 8);
+    var graph = LegacyPackedLexicon.Load(resource.AsSpan(offset, length));
+    foreach (string word in args.Skip(5))
+    {
+        var labels = new List<ushort>(); bool mapped = true;
+        foreach (var rune in word.EnumerateRunes())
+        {
+            if (!alphabet.TryGetLabel(rune.ToString(), out ushort label)) { mapped = false; break; }
+            labels.Add(label);
+        }
+        using var buffer = new MemoryStream(); using (var writer = new Utf8JsonWriter(buffer))
+        {
+            writer.WriteStartObject(); writer.WriteString("text", word); writer.WriteBoolean("mapped", mapped);
+            writer.WriteBoolean("terminal", mapped && graph.Contains(labels.ToArray()));
+            writer.WriteStartArray("labels"); foreach (ushort label in labels) writer.WriteNumberValue(label);
+            writer.WriteEndArray(); writer.WriteEndObject();
+        }
+        Console.WriteLine(System.Text.Encoding.UTF8.GetString(buffer.ToArray()));
+    }
+    return;
+}
+
+if (args.Length == 5 && args[0] == "--form-controls")
+{
+    byte[] resource = File.ReadAllBytes(args[1]);
+    var alphabet = LegacyInkAlphabet.Load(resource.AsSpan(int.Parse(args[2])), Convert.ToUInt16(args[3], 16));
+    using var controls = JsonDocument.Parse(File.ReadAllBytes(args[4])); int tested = 0;
+    foreach (var item in controls.RootElement.EnumerateArray())
+    {
+        bool actual = alphabet.TryGetRelatedForms(item.GetProperty("label").GetUInt16(), item.GetProperty("mode").GetInt32(), out var forms);
+        Require(actual == item.GetProperty("found").GetBoolean(), "Related-form availability differs.");
+        var expected = item.GetProperty("forms").EnumerateArray().Select(value => value.GetUInt16()).ToArray();
+        Require(new ushort[] { forms.First, forms.Second, forms.Third }.SequenceEqual(expected), "Related-form labels differ.");
+        tested++;
+    }
+    Require(tested > 0, "Empty form controls.");
+    Console.WriteLine($"PASS {tested} supplied related-form controls. Native engine was not executed.");
+    return;
+}
+
 if (args.Length == 5 && args[0] == "--alphabet-controls")
 {
     byte[] resource = File.ReadAllBytes(args[1]); int offset = int.Parse(args[2]);
@@ -38,7 +83,25 @@ if (args.Length == 4 && args[0] == "--controls")
     Console.WriteLine($"PASS {tested} dictionary controls; {graph.NodeCount} nodes, {graph.StorageBytes} owned bytes. No ink recognition tested.");
     return;
 }
-if (args.Length != 0) throw new ArgumentException("Usage: LegacyLexicon.Probe [--controls resource.res graph-offset own-controls.json | --alphabet-controls resource.res offset version-hex controls.json]");
+if (args.Length != 0) throw new ArgumentException("Usage: LegacyLexicon.Probe [--controls resource.res graph-offset own-controls.json | --alphabet-controls resource.res offset version-hex controls.json | --form-controls resource.res offset version-hex controls.json | --lookup resource.res alphabet-offset version-hex graph-offset words...]");
+
+var related = LegacyInkAlphabet.Load(BuildAlphabet(false, relations: 2), 0x103);
+Require(related.IsVirtual(0) && !related.IsVirtual(1) && !related.IsSymbolFlagged(0) && related.IsSymbolFlagged(1),
+    "Native virtual slot or stored per-symbol flag differs.");
+Require(related.TryGetRelatedForms(1, 0, out var injectedFirst) && injectedFirst == new LegacyInkRelatedForms(1, 0, 0),
+    "Missing first relation slot was not filled with the requested label.");
+Require(related.TryGetRelatedForms(0, 1, out var fallback) && fallback == new LegacyInkRelatedForms(65535, 0, 0),
+    "Absent mode1 did not fall back to mode0.");
+Require(related.TryGetRelatedForms(0, 2, out var injectedSecond) && injectedSecond == new LegacyInkRelatedForms(1, 0, 1) &&
+    !related.TryGetRelatedForms(1, 2, out _), "Independent mode2 lookup or missing relation differs.");
+var wideRelations = LegacyInkAlphabet.Load(BuildAlphabet(false, relations: 128), 0x103);
+Require(wideRelations.TryGetRelatedForms(0, 2, out var wideForm) && wideForm == injectedSecond, "Signed-short relation lookup differs.");
+byte[] relatedFixture = BuildAlphabet(false, relations: 2);
+for (int n = 0; n < relatedFixture.Length; n++) RejectAlphabet(relatedFixture.AsSpan(0, n), 0x103);
+var badRelation = relatedFixture.ToArray(); badRelation[^4] = 127; RejectAlphabet(badRelation, 0x103);
+badRelation = relatedFixture.ToArray(); BinaryPrimitives.WriteUInt16LittleEndian(badRelation.AsSpan(badRelation.Length - 20), 2); RejectAlphabet(badRelation, 0x103);
+try { related.TryGetRelatedForms(0, 3, out _); throw new Exception("Unknown relation mode accepted."); } catch (ArgumentOutOfRangeException) { }
+Console.WriteLine("PASS stored related forms: mode fallback, virtual slots, symbol bits, sentinel injection, narrow/wide maps and malformed data.");
 
 // An original two-label Cyrillic fixture tests both serialized alphabet versions.
 byte[] ownAlphabet = BuildAlphabet(false);
@@ -146,7 +209,7 @@ static byte[] Build(uint[] labels, uint[] counts, byte labelWidth, byte offsetWi
     writer.Write((uint)labels.Skip(1).Count(x => (x & (1u << (labelWidth - 1))) != 0));
     byte[] data = stream.ToArray(); BinaryPrimitives.WriteUInt32LittleEndian(data.AsSpan(4), (uint)data.Length - 8); return data;
 }
-static byte[] BuildAlphabet(bool version104)
+static byte[] BuildAlphabet(bool version104, int relations = 0)
 {
     using var stream = new MemoryStream(); using var writer = new BinaryWriter(stream);
     for (int i = 0; i < 7; i++) writer.Write((ushort)65535); writer.Write((ushort)2);
@@ -156,8 +219,22 @@ static byte[] BuildAlphabet(bool version104)
     writer.Write((ushort)0); writer.Write((ushort)2);
     writer.Write(0u); writer.Write(0u); writer.Write(2u); writer.Write(1u); writer.Write(4u); writer.Write(65535u);
     writer.Write(System.Text.Encoding.UTF8.GetBytes("ИП"));
-    writer.Write((ushort)0); writer.Write((ushort)1); // Reverse label table.
-    writer.Write((byte)0); writer.Write((ushort)0); // No bitset or triplets.
+    writer.Write(relations == 0 ? (ushort)0 : ushort.MaxValue); writer.Write((ushort)1); // Reverse label table.
+    writer.Write((byte)(relations == 0 ? 0 : 1));
+    if (relations != 0) writer.Write((byte)2);
+    writer.Write((ushort)relations);
+    if (relations != 0)
+    {
+        for (int i = 0; i < relations; i++)
+        {
+            writer.Write(i == 0 ? ushort.MaxValue : (ushort)1);
+            writer.Write(i == 0 ? (ushort)0 : ushort.MaxValue);
+            writer.Write(i == 0 ? (ushort)0 : (ushort)1);
+        }
+        writer.Write(5u); // Modes0/2 present; mode1 must fall back to mode0.
+        if (relations < 128) writer.Write(new byte[] { 0, 0, (byte)(relations - 1), 255 });
+        else { writer.Write((ushort)0); writer.Write((ushort)0); writer.Write((ushort)(relations - 1)); writer.Write(ushort.MaxValue); }
+    }
     if (version104) writer.Write((byte)1);
     return stream.ToArray();
 }

@@ -138,8 +138,20 @@ jobs:
         run: |
           python tools/LegacyDirectional.Probe/reference_controls.py .artifacts/legacy-directional-controls.json
           dotnet run --project tools/LegacyDirectional.Probe -c Release -- .artifacts/legacy-directional-controls.json
+      - name: Legacy global shape statistics and independent arithmetic controls
+        run: |
+          python tools/LegacyDirectionalStatistics.Probe/reference_controls.py .artifacts/legacy-statistics-controls.json
+          dotnet run --project tools/LegacyDirectionalStatistics.Probe -c Release -- .artifacts/legacy-statistics-controls.json
       - name: Bounded legacy resource parser controls
         run: python tools/test-legacy-ink.py
+      - name: Legacy physical arc length window membership
+        run: |
+          python tools/LegacyArcLengthWindows.Probe/reference_controls.py .artifacts/legacy-window-controls.json
+          dotnet run --project tools/LegacyArcLengthWindows.Probe -c Release -- .artifacts/legacy-window-controls.json
+      - name: Legacy coordinate preparation and physical resampling
+        run: |
+          python tools/LegacyDirectionalCoordinates.Probe/reference_controls.py .artifacts/legacy-coordinate-controls.json
+          dotnet run --project tools/LegacyDirectionalCoordinates.Probe -c Release -- .artifacts/legacy-coordinate-controls.json
       - name: Overlay compositor IPC ownership, cancellation and transport
         run: dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --overlay-platform-test
 
