@@ -26,6 +26,10 @@ preserves missing labels as65535, matching the lookup sentinel. It does not
 assume their numeric IDs across resource versions. The actual Russian alphabet
 contains four of the five strings. The component preserves signed prior-path
 values; it does not clamp previously applied negative language costs to zero.
+Special class costs may also be negative: native direction primitives use
+`-ln(directionFraction/profileDivisor)*8192`, and the actual divisor0.9 can
+produce a negative correction when the fraction exceeds it. These signed class
+costs are preserved; geometry grouping costs remain nonnegative.
 Bounds and rejection of signed addition overflow are deliberate checked-port
 limits, not a claim that the native engine checks wraparound.
 

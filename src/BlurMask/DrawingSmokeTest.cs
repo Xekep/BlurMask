@@ -675,7 +675,15 @@ internal static class DrawingSmokeTest
         var capture = session.CaptureScreenshotAsync();
         await Task.Delay(100);
         Check(session.PickingScreenshot && !session.Toolbar.IsVisible, "Screenshot tool did not enter region selection.");
-        session.BeginScreenshot(start); session.MoveScreenshot(start + new PixelPoint(120, 90)); session.CompleteScreenshot();
+        session.BeginScreenshot(start); session.MoveScreenshot(start + new PixelPoint(120, 90));
+        Check(session.ScreenshotPreview is { Width: 120, Height: 90 }, "Selection dimensions were not physical screen pixels.");
+        await Task.Delay(80);
+        if (Environment.GetEnvironmentVariable("BLURMASK_SMOKE_ARTIFACTS") is { Length: > 0 } directory)
+        {
+            Directory.CreateDirectory(directory);
+            DesktopInkNative.SaveScreenshot(Path.Combine(directory, "screenshot-region-selection.png"), screen.Bounds);
+        }
+        session.CompleteScreenshot();
         await capture.WaitAsync(TimeSpan.FromSeconds(10));
         var actions = session.Toolbar.OpenFlyout ?? throw new InvalidOperationException("Screenshot actions did not open.");
         var buttons = actions.GetVisualDescendants().OfType<Button>().ToArray();

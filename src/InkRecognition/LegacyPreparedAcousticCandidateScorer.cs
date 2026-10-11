@@ -38,7 +38,9 @@ public sealed class LegacyPreparedAcousticCandidateScorer
         if(classCosts.Length is <1 or >65535 || acousticSymbol>=classCosts.Length)
             throw new ArgumentException("Acoustic symbol is outside supplied class-cost cache.",nameof(acousticSymbol));
         int classCost=classCosts[acousticSymbol];
-        if(classCost is <0 or >0x4000000)throw new ArgumentException("Class cost is outside the checked native domain.",nameof(classCosts));
+        // Special native primitives can be negative, e.g. -ln(1/.9)*8192.
+        // Preserve signed class costs; the positive sentinel still rejects.
+        if(classCost>0x4000000)throw new ArgumentException("Class cost exceeds the native impossible-cost domain.",nameof(classCosts));
         if(candidateKind<0||totalCostLimit is <0 or >0x4000000)
             throw new ArgumentOutOfRangeException(nameof(candidateKind));
         if(classCost==0x4000000)return Rejected(LegacyAcousticCandidateRejection.ImpossibleClass);

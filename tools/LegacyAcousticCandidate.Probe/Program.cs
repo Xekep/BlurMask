@@ -12,6 +12,8 @@ foreach(ushort special in bypass)
 classes[0]=0x4000000;Require(scorer.Evaluate(classes,0,[],999,0,0,1).Rejection==LegacyAcousticCandidateRejection.ImpossibleClass,"Impossible class must reject before geometry lookup.");
 classes[0]=11;Require(scorer.Evaluate(classes,0,[],999,1,0,1).Rejection==LegacyAcousticCandidateRejection.KindThreshold,"Kind threshold must reject before geometry lookup.");
 classes[0]=10;Reject<ArgumentException>(()=>scorer.Evaluate(classes,0,[],0,0,0,100));
+classes[0]=-863;Require(scorer.Evaluate(classes,0,geometry,0,1,0,1).TotalCost==-843,"Native direction primitive can have negative class cost and must retain its signed total.");
+classes[0]=10;
 Reject<OverflowException>(()=>scorer.Evaluate(classes,0,geometry,0,0,int.MaxValue,100));
 using var cts=new CancellationTokenSource();cts.Cancel();Reject<OperationCanceledException>(()=>scorer.Evaluate(classes,0,geometry,0,0,0,100,cts.Token));
 int count=0,profileCount=0;

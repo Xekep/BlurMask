@@ -4,7 +4,7 @@ from pathlib import Path
 r=random.Random(0x1c0fd0);cases=[];profiles=[]
 for i in range(1024):
  thresholds=[r.randrange(0x4000001) for _ in range(3)];symbol=r.randrange(8);category=r.randrange(35);kind=r.randrange(8)
- cls=r.choice([0,0x4000000,*thresholds,r.randrange(0x4000001)]);geometry=r.randrange(0x4000001);previous=r.randrange(-100000,100001);limit=r.randrange(0x4000001)
+ cls=r.choice([0,-863,0x4000000,*thresholds,r.randrange(-100000,0x4000001)]);geometry=r.randrange(0x4000001);previous=r.randrange(-100000,100001);limit=r.randrange(0x4000001)
  reason=1 if cls==0x4000000 else 2 if 1<=kind<=3 and cls>thresholds[kind-1] else 0
  applied=0 if reason or symbol in [1,2,3,4,5] else geometry
  total=0x4000000 if reason else cls+applied+previous
