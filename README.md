@@ -1,15 +1,15 @@
 # BlurMask
 
 A small desktop annotation toolbar and always-on-top privacy mask for screen recording and streaming.
-Create a rectangle from the system tray, move/resize it over sensitive content, and
+Create a rectangle from the toolbar, move/resize it over sensitive content, and
 switch privacy effects without doing post-production blur work.
 
 ## Features
 
 - system tray application;
-- Epic Pen-style floating drawing toolbar, shown on startup;
-- click the tray icon to show the drawing toolbar;
-- tray context menu: drawing tools, create mask, close mask, exit application;
+- Epic Pen-style floating drawing toolbar, shown on manual launch; login startup stays in the tray without creating windows;
+- left-click the tray icon to show/hide the toolbar and restore any open canvas;
+- right-click tray menu contains only **Show/Hide window** and **Exit**;
 - always-on-top frameless rectangle;
 - drag the center with the left mouse button to move it;
 - drag edges/corners to resize it;
@@ -167,7 +167,7 @@ bash ./build.sh osx-arm64
 Native AOT is OS-specific: publish Windows on Windows, Linux on Linux, and macOS on macOS.
 Linux payloads include their native `.so` libraries. Debian packaging requires `dpkg-dev`;
 the package installs into `/opt/blurmask`, adds an application launcher, and enables
-login startup through `/etc/xdg/autostart/blurmask.desktop`. Disable startup in the
+login startup with `--minimized` through `/etc/xdg/autostart/blurmask.desktop`. The application launcher still opens the toolbar normally. Disable startup in the
 desktop's Startup Applications settings. Builds use Ubuntu 22.04 for the glibc baseline.
 The reusable/manual **Debian Installer** workflow verifies installation, startup,
 reinstallation and removal. CI uploads `.deb` and SHA-256 as **BlurMask-Debian-Installer**;
@@ -192,7 +192,7 @@ excludes debug symbols, and does not require an installed .NET runtime.
 It supports English/French/German/Russian, installs into `%LOCALAPPDATA%/Programs/BlurMask`
 without elevation, creates a Start Menu shortcut, and offers optional desktop
 shortcut and Windows startup tasks. Startup is selected by default on first install;
-the user's choice is retained during upgrades. Close BlurMask before updating or uninstalling.
+the user's choice is retained during upgrades. The startup entry uses `--minimized` to keep the app in the tray; manual launch opens the toolbar. Close BlurMask before updating or uninstalling.
 Uninstall removes the program, shortcuts and its startup entry while preserving local canvases.
 
 To package an existing Windows publish directory:

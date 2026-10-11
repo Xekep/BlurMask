@@ -7,6 +7,7 @@ internal static class Program
 {
     internal static bool SmokeTest { get; private set; }
     internal static bool WebsitePreview { get; private set; }
+    internal static bool StartMinimized { get; private set; }
     public static bool ShowTray => !SmokeTest;
     internal static bool SoftwareRendering { get; private set; }
     internal static AppSettings Settings { get; set; } = new();
@@ -16,6 +17,7 @@ internal static class Program
     {
         if (args.Contains("--performance-test", StringComparer.OrdinalIgnoreCase)) { PerformanceProbe.Run(); return; }
         WebsitePreview = args.Contains("--website-preview", StringComparer.OrdinalIgnoreCase);
+        StartMinimized = !WebsitePreview && args.Contains("--minimized", StringComparer.OrdinalIgnoreCase);
         var isolatedSmoke = WebsitePreview || args.Contains("--isolated-smoke-test", StringComparer.OrdinalIgnoreCase);
         // Acquire the single-instance guard before Avalonia or any native UI code starts.
         // A second launch exits silently with success and never creates a tray icon/window.

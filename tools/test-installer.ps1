@@ -54,8 +54,8 @@ try {
         throw 'Uninstall registration or shortcuts were not created.'
     }
     $startup = (Get-ItemProperty -LiteralPath $runKey -Name BlurMask).BlurMask
-    if ($startup -ne ('"' + (Join-Path $installDir 'BlurMask.exe') + '"')) { throw 'Startup command does not quote the executable path.' }
-    if (-not $SkipLaunch) { Invoke-TestProcess (Join-Path $installDir 'BlurMask.exe') @('--smoke-test') }
+    if ($startup -ne ('"' + (Join-Path $installDir 'BlurMask.exe') + '" --minimized')) { throw 'Startup command must quote the executable and launch minimized.' }
+    if (-not $SkipLaunch) { Invoke-TestProcess (Join-Path $installDir 'BlurMask.exe') @('--smoke-test', '--minimized') }
 
     # Reinstall must replace the executable and remove the old dynamic graphics DLLs.
     $marker = Join-Path $installDir 'user-file.txt'

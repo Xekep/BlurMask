@@ -117,7 +117,7 @@ jobs:
 
           # First process owns the single-instance mutex and remains alive long enough
           # for a duplicate launch to be tested.
-          $first = Start-Process -FilePath $exe -ArgumentList "--smoke-test" -PassThru
+          $first = Start-Process -FilePath $exe -ArgumentList '--smoke-test', '--minimized' -WindowStyle Hidden -PassThru
           Start-Sleep -Milliseconds 500
 
           if ($first.HasExited) {
@@ -125,7 +125,7 @@ jobs:
           }
 
           # A duplicate launch must terminate silently and successfully.
-          $second = Start-Process -FilePath $exe -PassThru
+          $second = Start-Process -FilePath $exe -WindowStyle Hidden -PassThru
           if (-not $second.WaitForExit(3000)) {
             $second.Kill()
             throw "Second BlurMask instance did not exit promptly"
@@ -168,7 +168,7 @@ jobs:
       - run: dotnet restore
       - run: bash ./build.sh linux-x64
       - name: Startup smoke test
-        run: xvfb-run -a ./bin/Release/net11.0/linux-x64/publish/BlurMask --smoke-test
+        run: xvfb-run -a ./bin/Release/net11.0/linux-x64/publish/BlurMask --smoke-test --minimized
       - uses: actions/upload-artifact@v4
         with:
           name: BlurMask-linux-x64

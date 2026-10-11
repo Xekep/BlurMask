@@ -16,13 +16,18 @@ public static class UiText
         return language switch { "ru" => values.Length == 4 ? values[3] : text, "fr" => values[1], "de" => values[2], _ => values[0] };
     }
     public static string F(string text, params object?[] args) => string.Format(CultureInfo.CurrentCulture, T(text), args);
-    public static string TrayTooltip => T("BlurMask — клик: инструменты рисования");
+    public static string TrayTooltip => T("BlurMask — показать / скрыть окно");
+    public static string ShowWindow => T("Показать окно");
+    public static string HideWindow => T("Скрыть окно");
     public static string DrawOnDesktop => T("Рисовать на рабочем столе");
     public static string NewMask => T("Новая маска");
     public static string CloseMask => T("Закрыть маску");
     public static string ExitApp => T("Закрыть программу");
     internal static IReadOnlyDictionary<string, string[]> Translations { get; } = new Dictionary<string, string[]>
     {
+        ["BlurMask — показать / скрыть окно"] = ["BlurMask — show / hide window", "BlurMask — afficher / masquer la fenêtre", "BlurMask — Fenster anzeigen / ausblenden"],
+        ["Показать окно"] = ["Show window", "Afficher la fenêtre", "Fenster anzeigen"],
+        ["Скрыть окно"] = ["Hide window", "Masquer la fenêtre", "Fenster ausblenden"],
         ["Настройки"] = ["Settings", "Paramètres", "Einstellungen"],
         ["Общие"] = ["General", "Général", "Allgemein"],
         ["Сохранить"] = ["Save", "Enregistrer", "Speichern"],

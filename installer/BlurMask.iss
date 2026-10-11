@@ -77,7 +77,7 @@ Name: "{autoprograms}\BlurMask"; Filename: "{app}\BlurMask.exe"; WorkingDir: "{a
 Name: "{autodesktop}\BlurMask"; Filename: "{app}\BlurMask.exe"; WorkingDir: "{app}"; Tasks: desktopicon
 
 [Registry]
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "BlurMask"; ValueData: """{app}\BlurMask.exe"""; Tasks: startup; Flags: uninsdeletevalue
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "BlurMask"; ValueData: """{app}\BlurMask.exe"" --minimized"; Tasks: startup; Flags: uninsdeletevalue
 
 [Run]
 Filename: "{app}\BlurMask.exe"; Description: "{cm:LaunchProgram,BlurMask}"; Flags: nowait postinstall skipifsilent

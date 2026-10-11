@@ -25,14 +25,14 @@ public sealed partial class App : Application
         {
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             _tray = TrayIcon.GetIcons(this)?.FirstOrDefault();
-            ShowDrawing();
+            if (!Program.StartMinimized) ShowDrawing();
+            UpdateTrayMenu();
             desktop.Exit += (_, _) => _drawing?.Dispose();
 
             if (Program.WebsitePreview)
                 _ = SaveWebsitePreviewAsync(desktop);
             else if (Program.SmokeTest)
             {
-                ShowMask();
                 _ = ShutdownAfterSmokeTestAsync(desktop);
             }
         }
@@ -45,10 +45,15 @@ public sealed partial class App : Application
         await Task.Delay(200);
         try
         {
+            if (Program.StartMinimized && (_drawing is not null || desktop.Windows.Count != 0))
+                throw new InvalidOperationException("Minimized startup created an application window.");
+            VerifyTrayToggle();
+            ShowMask();
             _drawing?.SmokeTest();
             await DrawingSmokeTest.VerifyRenderingAsync(_drawing!);
             foreach (var mask in _masks) mask.Hide();
             await DrawingSmokeTest.VerifyCanvasAsync(_drawing!);
+            VerifyTrayToggle();
             await DrawingSmokeTest.VerifyScrambleAsync();
             await DrawingSmokeTest.VerifyWindowAttachmentAsync();
         }
@@ -73,13 +78,35 @@ public sealed partial class App : Application
 
     // XAML event handlers -----------------------------------------------------
 
-    private void TrayOnClicked(object? sender, EventArgs e) => ShowDrawing();
+    private void TrayOnClicked(object? sender, EventArgs e)
+    {
+        if (_drawing?.Toolbar.IsVisible == true) _drawing.MinimizeToTray();
+        else ShowDrawing();
+    }
 
-    private void DrawingOnClicked(object? sender, EventArgs e) => ShowDrawing();
+    private void UpdateTrayMenu()
+    {
+        if (_tray?.Menu?.Items.FirstOrDefault() is NativeMenuItem toggle)
+            toggle.Header = _drawing?.Toolbar.IsVisible == true ? UiText.HideWindow : UiText.ShowWindow;
+    }
 
-    private void NewMaskOnClicked(object? sender, EventArgs e) => ShowMask();
-
-    private void CloseMaskOnClicked(object? sender, EventArgs e) => _masks.LastOrDefault()?.Close();
+    private void VerifyTrayToggle()
+    {
+        if (_tray?.Menu is not { Items.Count: 2 } menu || menu.Items[0] is not NativeMenuItem toggle ||
+            menu.Items[1] is not NativeMenuItem exit || exit.Header != UiText.ExitApp)
+            throw new InvalidOperationException("Tray menu must contain exactly visibility and exit actions.");
+        if (_drawing?.Toolbar.IsVisible != true) TrayOnClicked(this, EventArgs.Empty);
+        var session = _drawing!;
+        var canvasVisible = session.Canvas?.IsVisible == true;
+        var inkVisible = session.InkVisible;
+        TrayOnClicked(this, EventArgs.Empty);
+        if (session.Toolbar.IsVisible || session.Canvas?.IsVisible == true || session.InkVisible || toggle.Header != UiText.ShowWindow)
+            throw new InvalidOperationException("Tray click did not hide the app or update its menu.");
+        TrayOnClicked(this, EventArgs.Empty);
+        if (!session.Toolbar.IsVisible || (session.Canvas?.IsVisible == true) != canvasVisible ||
+            session.InkVisible != inkVisible || toggle.Header != UiText.HideWindow || !ReferenceEquals(session, _drawing))
+            throw new InvalidOperationException("Tray click did not restore the existing drawing session.");
+    }
 
     private void CloseAllMasks()
     {
@@ -110,9 +137,13 @@ public sealed partial class App : Application
             var drawing = new DrawingSession(ShowMask, () => ExitOnClicked(this, EventArgs.Empty),
                 mode => ShowMask(mode), CloseAllMasks, enabled => { foreach (var mask in _masks.ToArray()) mask.SetWindowAttachment(enabled); });
             _drawing = drawing;
+            drawing.Toolbar.PropertyChanged += (_, e) =>
+            {
+                if (e.Property == Visual.IsVisibleProperty) UpdateTrayMenu();
+            };
             drawing.Toolbar.Closed += (_, _) =>
             {
-                if (ReferenceEquals(_drawing, drawing)) _drawing = null;
+                if (ReferenceEquals(_drawing, drawing)) { _drawing = null; UpdateTrayMenu(); }
             };
         }
         _drawing.Show();
@@ -148,7 +179,7 @@ public sealed partial class App : Application
             return;
 
         _tray.ToolTipText = mode is null
-            ? UiText.T("BlurMask — клик: инструменты рисования")
+            ? UiText.TrayTooltip
             : UiText.F("BlurMask — {0}; ПКМ по маске: следующий режим", ModeName(mode.Value));
     }
 

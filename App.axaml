@@ -15,10 +15,7 @@
                 Clicked="TrayOnClicked">
         <TrayIcon.Menu>
           <NativeMenu>
-            <NativeMenuItem Header="{x:Static local:UiText.DrawOnDesktop}" Click="DrawingOnClicked" />
-            <NativeMenuItem Header="{x:Static local:UiText.NewMask}" Click="NewMaskOnClicked" />
-            <NativeMenuItem Header="{x:Static local:UiText.CloseMask}" Click="CloseMaskOnClicked" />
-            <NativeMenuItemSeparator />
+            <NativeMenuItem Header="{x:Static local:UiText.ShowWindow}" Click="TrayOnClicked" />
             <NativeMenuItem Header="{x:Static local:UiText.ExitApp}" Click="ExitOnClicked" />
           </NativeMenu>
         </TrayIcon.Menu>

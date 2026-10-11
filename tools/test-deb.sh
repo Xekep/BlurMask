@@ -9,8 +9,10 @@ sudo apt-get install -y "$package"
 test -x /opt/blurmask/BlurMask
 test -L /usr/bin/blurmask
 desktop-file-validate /usr/share/applications/blurmask.desktop
-cmp /usr/share/applications/blurmask.desktop /etc/xdg/autostart/blurmask.desktop
-xvfb-run -a /usr/bin/blurmask --smoke-test
+desktop-file-validate /etc/xdg/autostart/blurmask.desktop
+grep -Fx 'Exec=/opt/blurmask/BlurMask' /usr/share/applications/blurmask.desktop
+grep -Fx 'Exec=/opt/blurmask/BlurMask --minimized' /etc/xdg/autostart/blurmask.desktop
+xvfb-run -a /usr/bin/blurmask --smoke-test --minimized
 sudo apt-get install --reinstall -y "$package"
 test -x /opt/blurmask/BlurMask
 cleanup

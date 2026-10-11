@@ -15,7 +15,6 @@ internal sealed class ToolbarIcon(ToolbarGlyph glyph, bool circle = false, doubl
         [ToolbarGlyph.Cursor] = Geometry.Parse("M3,2 L20,12 L12,14 L16,21 L12,23 L8,16 L3,21 Z"),
         [ToolbarGlyph.Select] = Geometry.Parse("M2,8 L2,2 L8,2 M16,2 L22,2 L22,8 M22,16 L22,22 L16,22 M8,22 L2,22 L2,16 M8,7 L18,14 L13,15 L11,20 Z"),
         [ToolbarGlyph.Pen] = Geometry.Parse("M3,17 L16,4 L20,8 L7,21 L2,22 Z M13,7 L17,11 M3,17 L7,21"),
-        [ToolbarGlyph.Highlighter] = Geometry.Parse("M3,12 L10,5 L21,16 L14,23 Z M4,13 L1,17 L7,23 L11,20 M10,5 L12,3 L23,14 L21,16"),
         [ToolbarGlyph.Trash] = Geometry.Parse("M5,7 L19,7 L18,23 L6,23 Z M3,4 L21,4 M9,4 L9,1 L15,1 L15,4 M9,10 L9,20 M12,10 L12,20 M15,10 L15,20"),
         [ToolbarGlyph.Board] = Geometry.Parse("M3,3 L21,3 L21,17 L3,17 Z M1,1 L23,1 M12,17 L12,23 M7,23 L10,17 M17,23 L14,17"),
         [ToolbarGlyph.Camera] = Geometry.Parse("M2,7 L7,7 L9,3 L16,3 L18,7 L23,7 L23,21 L2,21 Z"),
@@ -23,6 +22,12 @@ internal sealed class ToolbarIcon(ToolbarGlyph glyph, bool circle = false, doubl
         [ToolbarGlyph.Nib] = Geometry.Parse("M4,17 L16,3 C18,1 24,5 22,8 L10,23 C7,25 1,21 4,17 Z"),
         [ToolbarGlyph.Arrow] = Geometry.Parse("M3,22 L22,3 M12,3 L22,3 L22,13")
     };
+    private static readonly Geometry MarkerBody = Geometry.Parse("M7,12 L15,4 Q16,3 17,4 L21,8 Q22,9 21,10 L13,18 Z");
+    private static readonly Geometry MarkerCap = Geometry.Parse("M14,5 L15,4 Q16,3 17,4 L21,8 Q22,9 21,10 L20,11 Z");
+    private static readonly Geometry MarkerNeck = Geometry.Parse("M7,12 L13,18 L10,21 L4,15 Z");
+    private static readonly Geometry MarkerTip = Geometry.Parse("M4,15 L10,21 L4,23 L1,20 Z");
+    private static readonly Geometry MarkerGrip = Geometry.Parse("M10,12 L15,7 M12,14 L17,9");
+    private static readonly IBrush MarkerYellow = new SolidColorBrush(Color.Parse("#F4D936"));
 
     public override void Render(DrawingContext context)
     {
@@ -53,6 +58,15 @@ internal sealed class ToolbarIcon(ToolbarGlyph glyph, bool circle = false, doubl
         }
         switch (glyph)
         {
+            case ToolbarGlyph.Highlighter:
+                // Broad chisel tip, collar and capped barrel stay distinct at toolbar size.
+                context.DrawLine(new Pen(MarkerYellow, 2.4, lineCap: PenLineCap.Round), new Point(2, 24), new Point(15, 24));
+                context.DrawGeometry(Brushes.White, Outline, MarkerBody);
+                context.DrawGeometry(Ink, Outline, MarkerCap);
+                context.DrawGeometry(MarkerYellow, Outline, MarkerNeck);
+                context.DrawGeometry(Ink, Outline, MarkerTip);
+                context.DrawGeometry(null, Outline, MarkerGrip);
+                break;
             case ToolbarGlyph.MaskBlur:
                 context.DrawRectangle(new SolidColorBrush(Color.Parse("#C4D3DC")), Outline, new Rect(2, 3, 21, 19), 2, 2);
                 foreach (var radius in new[] { 7d, 5d, 3d })

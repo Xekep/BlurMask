@@ -27,7 +27,7 @@ internal sealed class DrawingSession : IDisposable
     private InkTool _toolBeforeHide = InkTool.Cursor;
     private bool _disposed;
     private bool _capturing;
-    private bool _inTray, _trayInkVisible;
+    private bool _inTray, _trayInkVisible, _trayCanvasVisible, _traySettingsVisible;
     private readonly DispatcherTimer _fadeTimer = new() { Interval = TimeSpan.FromMilliseconds(33) };
     private readonly DispatcherTimer _screenTimer = new() { Interval = TimeSpan.FromMilliseconds(300) };
     private (bool Undo, bool Redo) _historyState;
@@ -93,6 +93,8 @@ internal sealed class DrawingSession : IDisposable
         {
             _inTray = false;
             if (_trayInkVisible && !InkVisible) ToggleInk();
+            if (_trayCanvasVisible) Canvas?.Show();
+            if (_traySettingsVisible) _settingsWindow?.Show();
         }
         if (!Toolbar.IsVisible) Toolbar.Show();
         else Toolbar.Activate();
@@ -103,8 +105,10 @@ internal sealed class DrawingSession : IDisposable
         if (_inTray) return;
         FinishInput(); Toolbar.CloseFlyout();
         _trayInkVisible = InkVisible; _inTray = true;
+        _trayCanvasVisible = Canvas?.IsVisible == true;
+        _traySettingsVisible = _settingsWindow?.IsVisible == true;
         if (InkVisible) ToggleInk();
-        Canvas?.Hide(); Toolbar.Hide();
+        _settingsWindow?.Hide(); Canvas?.Hide(); Toolbar.Hide();
     }
     internal void ToggleToolbarVisibility()
     {
