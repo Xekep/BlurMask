@@ -38,9 +38,10 @@ install -Dm644 LICENSE "$root/usr/share/licenses/blurmask/LICENSE"
 epoch="${SOURCE_DATE_EPOCH:-$(git log -1 --format=%ct)}"
 [[ "$epoch" =~ ^[0-9]+$ ]]
 find "$root" -exec touch -h -d "@$epoch" {} +
-dependencies='glibc>=2.35 libgcc libstdc++ zlib libssl3 libcrypto3 icu ca-certificates'
-dependencies+=' libX11 libxcb libICE libSM fontconfig libXcursor libXrandr libXi libXrender dbus'
-dependencies+=' wayland libxkbcommon libglvnd'
+# xbps-create takes complete package patterns, unlike xbps-src template shorthand.
+dependencies='glibc>=2.35 libgcc>=0 libstdc++>=0 zlib>=0 libssl3>=0 libcrypto3>=0 icu>=0 ca-certificates>=0'
+dependencies+=' libX11>=0 libxcb>=0 libICE>=0 libSM>=0 fontconfig>=0 libXcursor>=0 libXrandr>=0 libXi>=0 libXrender>=0 dbus>=0'
+dependencies+=' wayland>=0 libxkbcommon>=0 libglvnd>=0'
 cd "$output"
 xbps-create -A x86_64 -n "blurmask-${version}_1" \
   -s 'Native desktop annotation, privacy masks and shared canvas' \
