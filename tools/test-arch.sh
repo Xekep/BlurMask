@@ -25,6 +25,11 @@ done < <(find /opt/blurmask -type f \( -name BlurMask -o -name '*.so' \) -print0
 useradd --create-home blurmask-test
 runuser -u blurmask-test -- /usr/bin/blurmask --ai-pen-test
 runuser -u blurmask-test -- xvfb-run -a /usr/bin/blurmask --smoke-test --minimized
+ui_results="${BLURMASK_UI_RESULTS:-/tmp/arch-ui-results}"
+install -d -o blurmask-test -g blurmask-test "$ui_results"
+ui_script="$(dirname "$(realpath "$0")")/test-linux-ui.sh"
+runuser -u blurmask-test -- bash "$ui_script" /usr/bin/blurmask "$ui_results/default"
+runuser -u blurmask-test -- bash "$ui_script" /usr/bin/blurmask "$ui_results/software" --software-rendering
 original_hash="$(sha256sum /opt/blurmask/BlurMask)"
 printf 'outdated payload\n' > /opt/blurmask/BlurMask
 pacman -U --noconfirm "$package"
@@ -35,4 +40,4 @@ trap - EXIT
 for path in /opt/blurmask /usr/bin/blurmask /etc/xdg/autostart/blurmask.desktop /usr/share/applications/blurmask.desktop /usr/share/icons/hicolor/scalable/apps/blurmask.svg /usr/share/licenses/blurmask; do
   test ! -e "$path"
 done
-echo 'Arch install, native dependencies, launch, reinstall and removal checks passed.'
+echo 'Arch install, dependencies, real UI input/pixels, reinstall and removal checks passed.'

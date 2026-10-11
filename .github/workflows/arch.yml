@@ -84,10 +84,24 @@ jobs:
       - name: Install, launch, reinstall and remove in a fresh Arch container
         shell: bash
         run: |
-          docker run --rm -v "$GITHUB_WORKSPACE:/workspace:ro" -w /workspace "$ARCH_IMAGE" bash -euc '
-            pacman -Syu --noconfirm desktop-file-utils xorg-server-xvfb xorg-xauth ttf-dejavu
-            bash tools/test-arch.sh .artifacts/installers/*.pkg.tar.zst
+          mkdir -p .artifacts/arch-ui/results
+          docker run --rm -v "$GITHUB_WORKSPACE:/workspace:ro" \
+            -v "$GITHUB_WORKSPACE/.artifacts/arch-ui/results:/tmp/arch-ui-results" \
+            -w /workspace "$ARCH_IMAGE" bash -euc '
+            pacman -Syu --noconfirm desktop-file-utils xorg-server-xvfb xorg-xauth ttf-dejavu \
+              openbox picom xdotool wmctrl imagemagick python-pillow mesa-utils \
+              xorg-xwininfo xorg-xdpyinfo xorg-xsetroot
+            result=0
+            bash tools/test-arch.sh .artifacts/installers/*.pkg.tar.zst || result=$?
+            chmod -R a+rX /tmp/arch-ui-results
+            exit "$result"
           '
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: BlurMask-Arch-UI
+          path: .artifacts/arch-ui/results/
+          if-no-files-found: warn
       - uses: actions/upload-artifact@v4
         with:
           name: BlurMask-Arch-Installer
