@@ -7,7 +7,8 @@ switch privacy effects without doing post-production blur work.
 Sources are organized under `src/BlurMask` (desktop app), `src/BlurMask.Server` (API/download page)
 and `src/BlurMask.Shared` (wire contracts). `src/InkRecognition` and `src/InkRecognition.Math` are reusable stroke recognition libraries.
 Build/package scripts live in `tools`, installer
-definitions in `packaging`, and documentation in `docs`.
+definitions in `packaging`, documentation in `docs`, and recognition resources in
+[`models`](models/README.md).
 
 AI pen uses an experimental local stroke recognizer in a separate library. Install an
 English `.ikrpack` model in Settings; recognition starts on pen release and its printed replacement

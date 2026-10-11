@@ -57,7 +57,9 @@ distant writing starts a new fragment. Undo/redo retain previous live associatio
 
 ## Model installation
 
-Model weights are separate from the source and are not bundled with installers.
+Source resources for Russian recognition and Raw Content2 are stored in
+[`models`](../models/README.md). Application model packs are installed separately
+from the executable.
 An absent, invalid or uncertain model leaves the original ink untouched. Settings
 shows the model status and offers **Install AI pen model** for a `.ikrpack` file.
 Installation checks the model structure and checksum before replacing a working

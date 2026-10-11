@@ -43,14 +43,16 @@ validated against the complete vendor pipeline. Recognition starts on pen
 release and considers the bounded current ink fragment, including retained
 original ink behind its unchanged live text, rather than the whole document.
 
-## Private model installation
+## Model installation
 
-Weights are not committed or bundled with installers. The exporter accepts only
-the inspected 4.5 resource fingerprint, rejecting unverified future profiles.
+The inspected resource is stored at
+[`models/raw-content/raw-content2.res`](../models/raw-content/raw-content2.res).
+The exporter accepts its 4.5 fingerprint, rejecting unverified future profiles.
+Installers use a separately installed `.ikrraw` pack.
 
 ```sh
-python tools/export-raw-content-model.py /private/dl-raw-content.res /private/raw-content.ikrraw
-BlurMask --install-raw-content-model /private/raw-content.ikrraw
+python tools/export-raw-content-model.py models/raw-content/raw-content2.res .artifacts/raw-content.ikrraw
+BlurMask --install-raw-content-model .artifacts/raw-content.ikrraw
 ```
 
 The same pack can be installed in Settings. Automatic AI mode then partitions

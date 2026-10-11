@@ -1,7 +1,7 @@
-"""Export the observed caller-supplied Raw Content2 resource to private IKRRAW01.
+"""Export the checked Raw Content2 resource to an IKRRAW01 application pack.
 
 No downloads or vendor DLL execution. Version1 accepts only the observed profile;
-vendor weights are not part of this repository or distributable app packages.
+the source resource is available under models/raw-content.
 """
 import argparse
 import hashlib

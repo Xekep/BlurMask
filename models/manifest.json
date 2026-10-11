@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "resources": [
+    {
+      "path": "ru-RU/ru_RU-ak-cur.lite.res",
+      "bytes": 572763,
+      "sha256": "7a5f08809e81fb4a2d4c78b3efd251d0986503b0d30d21de3695dab1f8a89978"
+    },
+    {
+      "path": "ru-RU/ru_RU-lk-text.lite.res",
+      "bytes": 6200992,
+      "sha256": "d26ed08baf419361484958b3a04a5f740a228f4664f7e2643f43459223ef3e4e"
+    },
+    {
+      "path": "raw-content/raw-content2.res",
+      "bytes": 5345803,
+      "sha256": "9bba7902c752fe937fc36f06573bd128c6b08d21a1b378dc460bc61608407739"
+    }
+  ]
+}
