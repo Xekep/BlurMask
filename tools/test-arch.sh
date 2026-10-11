@@ -24,6 +24,7 @@ while IFS= read -r -d '' elf; do
 done < <(find /opt/blurmask -type f \( -name BlurMask -o -name '*.so' \) -print0)
 useradd --create-home blurmask-test
 runuser -u blurmask-test -- /usr/bin/blurmask --ai-pen-test
+runuser -u blurmask-test -- /usr/bin/blurmask --overlay-platform-test
 runuser -u blurmask-test -- xvfb-run -a /usr/bin/blurmask --smoke-test --minimized
 ui_results="${BLURMASK_UI_RESULTS:-/tmp/arch-ui-results}"
 install -d -o blurmask-test -g blurmask-test "$ui_results"

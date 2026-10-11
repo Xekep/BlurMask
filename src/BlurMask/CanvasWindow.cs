@@ -459,7 +459,7 @@ internal sealed class CanvasWindow : Window
     {
         var panel = new StackPanel { Margin = new Thickness(18), Spacing = 10 };
         panel.Children.Add(new TextBlock { Text = UiText.T("Открыть общее полотно"), FontSize = 18 });
-        var link = new TextBox { PlaceholderText = UiText.T("Код приглашения или ссылка") };
+        var link = new TextBox { PlaceholderText = UiText.T("Код приглашения") };
         panel.Children.Add(link);
         var error = new TextBlock { TextWrapping = TextWrapping.Wrap, Foreground = Brushes.DarkRed };
         var open = new Button { Content = UiText.T("Подключиться") }; panel.Children.Add(open);
@@ -478,25 +478,21 @@ internal sealed class CanvasWindow : Window
             await SyncAsync();
             var panel = new StackPanel { Margin = new Thickness(18), Spacing = 9 };
             panel.Children.Add(new TextBlock { Text = UiText.T("Поделиться полотном"), FontSize = 18 });
-            panel.Children.Add(new TextBlock { Text = UiText.T("Отправьте приглашение. Получатель откроет в BlurMask «Полотно → Меню → Подключить» и вставит код или ссылку."), TextWrapping = TextWrapping.Wrap });
-            AddLink(panel, ReadOnly ? UiText.T("Только просмотр") : UiText.T("Рисовать вместе"), CanvasCloudClient.Link(_connection));
-            if (!ReadOnly && _viewKey is not null) AddLink(panel, UiText.T("Только просмотр"), CanvasCloudClient.Link(_connection with { Key = _viewKey }));
-            Dialog(UiText.T("Ссылка на полотно"), panel);
+            panel.Children.Add(new TextBlock { Text = UiText.T("Отправьте код приглашения. Получатель откроет полотно в BlurMask, нажмёт «Подключить» и вставит код."), TextWrapping = TextWrapping.Wrap });
+            AddInvitation(panel, ReadOnly ? UiText.T("Только просмотр") : UiText.T("Рисовать вместе"), BoardInvite.Code(_connection.Id, _connection.Key));
+            if (!ReadOnly && _viewKey is not null) AddInvitation(panel, UiText.T("Только просмотр"), BoardInvite.Code(_connection.Id, _viewKey));
+            Dialog(UiText.T("Поделиться полотном"), panel);
         }
         catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidOperationException or TaskCanceledException or JsonException)
         { _status.Text = ex.Message; _session.Toolbar.ShowMessage(UiText.T("Совместная работа"), ex.Message); }
     }
-    private void AddLink(StackPanel panel, string label, string link)
+    private void AddInvitation(StackPanel panel, string label, string code)
     {
         panel.Children.Add(new TextBlock { Text = label, FontSize = 12 });
-        var code = link[(link.IndexOf('#') + 1)..];
         panel.Children.Add(new TextBox { Text = code, IsReadOnly = true });
         var copy = new Button { Content = UiText.T("Копировать код") };
         copy.Click += async (_, _) => { if (Clipboard is not null) { await Clipboard.SetTextAsync(code); copy.Content = UiText.T("Скопировано"); } };
         panel.Children.Add(copy);
-        var copyLink = new Button { Content = UiText.T("Копировать ссылку") };
-        copyLink.Click += async (_, _) => { if (Clipboard is not null) { await Clipboard.SetTextAsync(link); copyLink.Content = UiText.T("Скопировано"); } };
-        panel.Children.Add(copyLink);
     }
     private void SavePng()
     {

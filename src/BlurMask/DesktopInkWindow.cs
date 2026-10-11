@@ -17,12 +17,14 @@ internal sealed class DesktopInkWindow : Window
     private Point _lastErase;
     private readonly PixelRect _screenBounds;
     private PixelRect[]? _controlRegion;
+    private readonly HyprlandInkOverlay? _hyprlandEffects;
 
     public DesktopInkWindow(DrawingSession session, Screen screen)
     {
         _session = session;
         _screenBounds = screen.Bounds;
         Title = UiText.T("BlurMask — слой рисования");
+        _hyprlandEffects = HyprlandInkOverlay.TryCreate(Title);
         WindowDecorations = WindowDecorations.None;
         ShowInTaskbar = false;
         ShowActivated = false;
@@ -59,7 +61,7 @@ internal sealed class DesktopInkWindow : Window
             e.Cancel = true;
             _session.SelectTool(InkTool.Cursor);
         };
-        Closed += (_, _) => CancelGesture();
+        Closed += (_, _) => { CancelGesture(); _hyprlandEffects?.Dispose(); };
         PositionChanged += (_, _) => UpdateControlExclusion();
         SizeChanged += (_, _) => UpdateControlExclusion();
     }
@@ -83,8 +85,8 @@ internal sealed class DesktopInkWindow : Window
         else
         {
             // Never leave an invisible input-blocking window on unsupported backends.
-            if (drawing && !IsVisible) Show();
-            else if (!drawing && IsVisible) Hide();
+            if (drawing && !IsVisible) { Show(); _hyprlandEffects?.Apply(); }
+            else if (!drawing && IsVisible) { _hyprlandEffects?.Suspend(); Hide(); }
             UpdateControlExclusion();
         }
     }

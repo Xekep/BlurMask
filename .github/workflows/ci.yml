@@ -93,6 +93,8 @@ jobs:
       - run: dotnet build src/BlurMask/BlurMask.csproj -c Release --no-restore -p:PublishAot=false -p:SelfContained=false
       - name: Portable stroke engine numerical goldens, model validation and ink history
         run: dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --ai-pen-test
+      - name: Overlay compositor IPC ownership, cancellation and transport
+        run: dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --overlay-platform-test
 
   native-aot-windows:
     name: Native AOT / Windows x64
@@ -128,6 +130,8 @@ jobs:
         run: |
           & ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe --ai-pen-test | Out-Default
           if ($LASTEXITCODE -ne 0) { throw 'AI pen probe failed.' }
+          & ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe --overlay-platform-test | Out-Default
+          if ($LASTEXITCODE -ne 0) { throw 'Overlay IPC probe failed.' }
       - name: Startup and single-instance smoke test
         shell: pwsh
         env:
@@ -200,6 +204,8 @@ jobs:
       - run: bash ./tools/build.sh linux-x64
       - name: Native offline AI pen probe
         run: ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --ai-pen-test
+      - name: Native overlay IPC probe
+        run: ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --overlay-platform-test
       - name: Startup smoke test
         run: xvfb-run -a ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --smoke-test --minimized
       - uses: actions/upload-artifact@v4
@@ -266,6 +272,8 @@ jobs:
           bash ./tools/build.sh "$RID"
       - name: Native offline AI pen probe
         run: ./src/BlurMask/bin/Release/net11.0/${{ env.RID }}/publish/BlurMask --ai-pen-test
+      - name: Native overlay IPC probe
+        run: ./src/BlurMask/bin/Release/net11.0/${{ env.RID }}/publish/BlurMask --overlay-platform-test
       - uses: actions/upload-artifact@v4
         with:
           name: BlurMask-macos

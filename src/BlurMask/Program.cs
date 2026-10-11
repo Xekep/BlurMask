@@ -25,6 +25,7 @@ internal static class Program
         if (args.Contains("--performance-test", StringComparer.OrdinalIgnoreCase)) { PerformanceProbe.Run(); return; }
         if (args.Contains("--mask-performance-test", StringComparer.OrdinalIgnoreCase)) { MaskPerformanceProbe.Run(); return; }
         if (args.Contains("--ai-pen-test", StringComparer.OrdinalIgnoreCase)) { AiPenProbe.Run(); return; }
+        if (args.Contains("--overlay-platform-test", StringComparer.OrdinalIgnoreCase)) { OverlayPlatformProbe.Run(); return; }
         WebsitePreview = args.Contains("--website-preview", StringComparer.OrdinalIgnoreCase);
         StartMinimized = !WebsitePreview && args.Contains("--minimized", StringComparer.OrdinalIgnoreCase);
         var isolatedSmoke = WebsitePreview || args.Contains("--isolated-smoke-test", StringComparer.OrdinalIgnoreCase);

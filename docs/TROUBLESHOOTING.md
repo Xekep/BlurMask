@@ -92,6 +92,25 @@ when a compositor ignores requests to raise a window. This requires the X11
 Shape library (`libxcb` on Arch, `libxcb-shape0` on Debian/Ubuntu), included in
 the installer dependencies.
 
+### Drawing blurs the whole desktop
+
+The ink layer requests plain transparency, not blur. Hyprland can nevertheless
+apply its global blur, shadow and dimming effects to transparent normal windows.
+The app now uses Hyprland's session IPC to disable those effects only on mapped
+desktop-ink windows owned by its own PID. It does not edit configuration files
+or global window rules. Requests are asynchronous, cancellable and bounded;
+missing or unavailable IPC does not stop drawing. Canvas and privacy masks keep
+their separate effects. See the official [window effects](https://wiki.hypr.land/0.54.0/Configuring/Window-Rules/)
+and [IPC](https://wiki.hypr.land/IPC/) documentation.
+
+Other compositors need their own per-window configuration. For example, picom
+with global background blur needs an exclusion for the desktop ink window's
+title; inspect its title with `xprop _NET_WM_NAME`. Do not exclude all `BlurMask`
+windows, because that would also disable blur privacy masks. The regression
+checks compare a detailed real desktop before and after mapping/drawing, and
+include a blur-enabled negative control. Tests under Xvfb/Openbox/picom do not
+establish behavior on a physical Hyprland/GPU session.
+
 ## Right-click seems to do nothing
 
 The mode changes immediately. The tray tooltip shows the current mode. Pixel Blur, Scramble, Glass Refraction and Blackout are visually obvious; Blur depends on the OS compositor.
