@@ -32,8 +32,14 @@ jobs:
       PUBLISH_ARTIFACT: ${{ inputs.publish-artifact }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .artifacts/giac-runtime/win-x64
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz.sha256
+          key: giac-win-x64-${{ hashFiles('tools/prepare-giac-runtime.ps1', 'tools/giac-native/**') }}
       - uses: actions/setup-dotnet@v4
-        if: inputs.publish-artifact == ''
         with:
           dotnet-version: 11.0.100-preview.7.26381.103
       - uses: actions/download-artifact@v4
@@ -46,6 +52,9 @@ jobs:
         run: |
           $reusePublish = -not [string]::IsNullOrEmpty($env:PUBLISH_ARTIFACT)
           .\tools\build-installer.ps1 -Version $env:INSTALLER_VERSION -SkipPublish:$reusePublish
+      - name: Verify bundled Giac calculus, algebra, cancellation and input guards
+        shell: pwsh
+        run: dotnet run --project tools/InkMath.Solver.Probe -c Release -- .artifacts/giac-runtime/win-x64/icas.exe
       - name: Verify installation, upgrade, startup and uninstall
         shell: pwsh
         run: |
@@ -62,4 +71,7 @@ jobs:
         if: failure()
         with:
           name: BlurMask-Installer-Test-Logs
-          path: .artifacts/installer-test/**/*.log
+          path: |
+            .artifacts/installer-test/**/*.log
+            ${{ runner.temp }}/BlurMask-Giac-source-build/build-*/**/*.log
+            .artifacts/giac-runtime/win-x64/manifest.json

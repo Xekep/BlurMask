@@ -11,6 +11,9 @@
 #ifndef InstallerOutputDir
   #define InstallerOutputDir "..\.artifacts\installers"
 #endif
+#ifndef SolverDir
+  #error SolverDir must contain the verified Giac CLI, dependencies and licenses.
+#endif
 #define InstallerName "BlurMask-" + AppVersion + "-win-x64-Setup"
 
 [Setup]
@@ -62,6 +65,7 @@ russian.StartupTask=Запускать BlurMask при входе в Windows
 
 [Files]
 Source: "{#PublishDir}\*"; DestDir: "{app}"; Excludes: "*.pdb"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#SolverDir}\*"; DestDir: "{app}\runtimes\win-x64\solver"; Excludes: "*.pdb"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 
 [InstallDelete]

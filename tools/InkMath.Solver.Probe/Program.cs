@@ -119,7 +119,7 @@ var actualFixtures = new (string Input, string Expected)[]
 foreach (var (input, expected) in actualFixtures)
 {
     var value = await solver.SolveAsync(input);
-    if (value?.LaTex != expected) throw new Exception($"Native CAS differs: {input} → {value?.LaTex ?? "null"}; expected {expected}");
+    if (!SameResult(value?.LaTex, expected, value?.IsEquation == false)) throw new Exception($"Native CAS differs: {input} → {value?.LaTex ?? "null"}; expected {expected}");
 }
 foreach (var (input, expected) in polynomialFixtures)
 {
@@ -148,3 +148,14 @@ if (child is null || !child.HasExited) throw new Exception("Canceled CAS child w
 child.Dispose();
 if (cancellationWatch.Elapsed > TimeSpan.FromSeconds(2)) throw new Exception("Native child cancellation was slow.");
 Console.WriteLine($"PASS native Giac: {actualFixtures.Length} calculus/algebra fixtures, cancellation and undefined/injection guards; {watch.ElapsedMilliseconds} ms");
+
+static bool SameResult(string? actual, string expected, bool allowStructural)
+{
+    if (actual == expected) return true;
+    if (actual is null || !allowStructural) return false;
+    // Keep numerical/variable/operator goldens unchanged. Different Giac builds
+    // add function parentheses or explicit multiplication in otherwise identical
+    // expressions. Root sets and matrices still require their exact notation.
+    try { return new MathExpressionParser(actual).Parse().Cas == new MathExpressionParser(expected).Parse().Cas; }
+    catch (FormatException) { return false; }
+}

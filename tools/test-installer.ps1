@@ -1,12 +1,14 @@
 param(
     [Parameter(Mandatory = $true)][string]$InstallerPath,
     [Parameter(Mandatory = $true)][string]$PublishDirectory,
+    [string]$SolverDirectory = (Join-Path (Split-Path $PSScriptRoot -Parent) '.artifacts\giac-runtime\win-x64'),
     [switch]$SkipLaunch
 )
 
 $ErrorActionPreference = 'Stop'
 $installer = (Resolve-Path -LiteralPath $InstallerPath).Path
 $payload = (Resolve-Path -LiteralPath $PublishDirectory).Path
+$solverPayload = (Resolve-Path -LiteralPath $SolverDirectory).Path
 $uninstallKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{A78C0733-F377-4CC3-91D0-D2621D4532CC}_is1'
 $runKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
 $menuLink = Join-Path ([Environment]::GetFolderPath('Programs')) 'BlurMask.lnk'
@@ -48,6 +50,14 @@ function Assert-Payload {
             throw "Installed formula runtime is missing or differs: $name"
         }
     }
+    foreach ($source in (Get-ChildItem -LiteralPath $solverPayload -File -Recurse)) {
+        $relative = $source.FullName.Substring($solverPayload.Length).TrimStart('\', '/')
+        $installed = Join-Path (Join-Path $installDir 'runtimes/win-x64/solver') $relative
+        if (-not (Test-Path -LiteralPath $installed) -or (Get-FileHash -LiteralPath $installed).Hash -ne (Get-FileHash -LiteralPath $source.FullName).Hash) {
+            throw "Installed Giac payload is missing or differs: $relative"
+        }
+    }
+    Invoke-TestProcess (Join-Path $installDir 'BlurMask.exe') @('--math-solver-test')
 }
 
 $installedSuccessfully = $false
@@ -93,6 +103,7 @@ finally {
     }
 }
 if ((Test-Path -LiteralPath (Join-Path $installDir 'BlurMask.exe')) -or (Test-Path -LiteralPath $uninstallKey) -or
+    (Test-Path -LiteralPath (Join-Path $installDir 'runtimes/win-x64/solver/icas.exe')) -or
     (Test-Path -LiteralPath $menuLink) -or (Test-Path -LiteralPath $desktopLink) -or
     (Get-ItemProperty -LiteralPath $runKey -Name BlurMask -ErrorAction SilentlyContinue)) {
     throw 'Uninstall left application files, registration, shortcuts or startup entry.'

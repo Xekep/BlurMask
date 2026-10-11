@@ -19,7 +19,10 @@ internal static class Program
     {
         if (args.Length == 1 && args[0] == "--math-solver-test")
         {
-            AiMathSolver.VerifyBundledAsync().GetAwaiter().GetResult(); return;
+            try { AiMathSolver.VerifyBundledAsync().GetAwaiter().GetResult(); }
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException)
+            { Console.Error.WriteLine(error.Message); Environment.ExitCode = 1; }
+            return;
         }
         if (args.Length == 2 && args[0] == "--set-math-solver")
         {

@@ -8,13 +8,18 @@ for example, `\int_{1}^{10} x^2 dx=` produces `333` without an installed CAS.
 This path supports rational/decimal numeric bounds, polynomial degree at most32,
 and sums/products/powers/division by nonzero rational constants. Trigonometric
 functions, symbolic bounds and singular rational integrands still require Giac.
-Giac is an optional, separately installed engine; no Giac binary is redistributed
-inside BlurMask. This keeps ordinary drawing installations small. Giac's GPL
-license and dependencies are handled by the upstream installer/package manager.
+The Windows installer includes a separately executed, statically built Giac CLI
+(about 19 MiB), without Xcas's graphical interface or additional solver DLLs.
+Its licenses and source-archive hash are installed beside the executable. The
+matching source archive and build recipe are published with the installer.
+Portable Windows archives and other platforms discover a separately installed
+Giac CLI. [Build details and provenance](giac-runtime-build.md).
 
 ## Enable it
 
-Install [Giac/Xcas from upstream](https://xcas.univ-grenoble-alpes.fr/backup/install_en).
+With the Windows installer, enable **Settings → Use Giac**; no separate download
+or path selection is required. With other distributions, install
+[Giac/Xcas from upstream](https://xcas.univ-grenoble-alpes.fr/backup/install_en).
 Windows normally installs `C:\xcaswin\icas.exe`; macOS upstream documents
 `/Applications/usr/bin/icas`. Standard installed CLI paths are discovered
 automatically. **Settings → Use Giac** enables advanced CAS calculations and is
@@ -95,9 +100,13 @@ tests run. `BLURMASK_TEST_GIAC` enables real CAS → application equals policy a
 typesetting tests under `BlurMask --ai-pen-test`, without starting any GUI.
 CI exercises actual Windows and Ubuntu CLIs with a Native AOT probe; macOS builds
 the adapter and runs portable tests, but actual macOS Giac execution is not yet
-validated. The Windows test helper verifies the pinned upstream installer's hash,
-extracts only the CLI/dependencies/license with 7-Zip and never executes the
-installer or uploads the third-party runtime as an application artifact.
+validated. The legacy Windows regression helper verifies the pinned upstream
+installer's hash and extracts its CLI without executing that installer. The
+bundled runtime has a separate source-build pipeline with pinned source hashes,
+transport tests and the full calculus/algebra probe. Installer tests verify the
+installed payload hashes, automatic discovery and the default-off toggle before
+testing upgrade and uninstall. `BlurMask --math-solver-test` runs these solver
+checks without opening any application windows.
 
 The 2026-10-12 integral update passed 31 grammar translations and 20 built-in
 exact integral cases, including rational/decimal bounds, reversed bounds,

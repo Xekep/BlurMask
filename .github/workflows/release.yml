@@ -20,6 +20,13 @@ jobs:
       RELEASE_VERSION: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .artifacts/giac-runtime/win-x64
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz.sha256
+          key: giac-win-x64-${{ hashFiles('tools/prepare-giac-runtime.ps1', 'tools/giac-native/**') }}
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 11.0.100-preview.7.26381.103
@@ -30,6 +37,9 @@ jobs:
           .\tools\build.ps1 win-x64 -Version $version
           Compress-Archive -Path "src\BlurMask\bin\Release\net11.0\win-x64\publish\*" -DestinationPath BlurMask-win-x64.zip
           .\tools\build-installer.ps1 -Version $version -SkipPublish -PublishDirectory src/BlurMask/bin/Release/net11.0/win-x64/publish
+          if ($LASTEXITCODE -ne 0) { throw 'Windows installer build failed.' }
+          dotnet run --project tools/InkMath.Solver.Probe -c Release -- .artifacts/giac-runtime/win-x64/icas.exe
+          if ($LASTEXITCODE -ne 0) { throw 'Bundled Giac verification failed.' }
           $installers = @(Get-ChildItem .artifacts/installers/*-Setup.exe)
           if ($installers.Count -ne 1) { throw 'Expected exactly one installer.' }
           $installer = $installers[0]

@@ -43,7 +43,7 @@ internal static class AiMathSolver
                 Calculate(@"\int_1^{10} x^2 dx", default)?.LaTex != "333")
                 throw new InvalidOperationException("Disabled Giac must preserve built-in integrals without running advanced CAS.");
             Program.Settings = originalSettings with { GiacEnabled = true };
-            if (Calculate(@"\frac{d}{dx}\sin(x)", default)?.LaTex != @"\cos x")
+            if (!Equivalent(Calculate(@"\frac{d}{dx}\sin(x)", default)?.LaTex, @"\cos x"))
                 throw new InvalidOperationException("The Giac toggle did not enable the automatically discovered engine.");
         }
         finally { Program.Settings = originalSettings; }
@@ -56,10 +56,18 @@ internal static class AiMathSolver
             (@"\lim_{x\to 0}\frac{\sin x}{x}", "1")
         })
         {
-            if ((await solver.SolveAsync(formula))?.LaTex != expected)
+            if (!Equivalent((await solver.SolveAsync(formula))?.LaTex, expected))
                 throw new InvalidOperationException("Installed Giac calculation failed: " + formula);
         }
         Console.WriteLine("PASS bundled Giac: default-off toggle, built-in fallback, automatic discovery, definite/improper integrals, derivative and limit.");
+        static bool Equivalent(string? actual, string expected)
+        {
+            if (actual == expected) return true;
+            if (actual is null) return false;
+            // Giac releases print this same derivative with either implicit or
+            // parenthesized arguments; all numerical results remain exact.
+            return expected == @"\cos x" && actual == @"\cos\left(x\right)";
+        }
     }
     internal static MathSolution? Calculate(string latex, CancellationToken token)
     {
