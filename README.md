@@ -40,10 +40,10 @@ Icons are drawn as local vector geometry. Reference: [Epic Pen toolbar screensho
 and [official tool guide](https://epicpen.com/userguide).
 
 - The pen menu contains **pen, AI pen, highlighter and text**. Shapes have their own button.
-- **AI pen** waits 1.8 seconds after the last stroke, then replaces a completed row with one typeset text object.
+- **AI pen** waits 0.8 seconds after the last stroke, then replaces a completed row with one typeset text object.
   Symbols share a font size and baseline; position, bounding size and color are preserved. The pen menu also offers **Recognize now**.
   Recognition runs locally in native C#, without a cloud service or extra ML libraries. Connected cursive handwriting uses an open
-  Cyrillic line model; separated Latin/Cyrillic letters, digits and basic mathematical signs use a small symbol model.
+  Cyrillic handwriting model and an English text model; confident digits and basic mathematical signs use a small symbol model.
   Uncertain results stay handwritten, and Undo restores the original strokes. See [model details and limits](docs/ai-pen.md).
 - Draw directly over the desktop and applications. On Windows, cursor mode leaves the ink visible
   and passes clicks to applications underneath. Right-click the drawing surface or press Esc to return to cursor mode.

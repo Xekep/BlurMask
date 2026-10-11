@@ -55,8 +55,10 @@ ties. An explicit language avoids script ambiguity and unnecessary second-model 
 
 On the development computer, warmed-up symbol inference takes about 0.54 ms per character;
 the optimized managed probe reads five Cyrillic examples in about 5.3 seconds and seven
-English examples in about 1 second. These are local CPU measurements,
-not a guaranteed latency on every computer. Inference runs in the background and is serialized
+English examples in about 1 second.
+The native Windows build takes about 2.1 seconds per Cyrillic example and 0.23 seconds per
+English example, in addition to the 0.8-second pause; first use also loads the selected model.
+These timings are not guaranteed on every computer. Inference runs in the background and is serialized
 across canvases. SIMD, at most three CPU workers, pooled tensors and cached cross-attention
 keys/values bound resource use. No matrix projection of the encoded image is repeated per
 decoded character. Four-channel SIMD projection reuses input loads; decoder refinement
