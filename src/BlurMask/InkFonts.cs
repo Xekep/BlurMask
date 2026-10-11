@@ -4,7 +4,8 @@ namespace BlurMask;
 
 internal static class InkFonts
 {
-    internal static readonly string[] Names = ["Inter", "Manrope", "Source Serif 4"];
+    internal static readonly string[] Names = ["Inter", "Manrope", "Source Serif 4", "STIX Two Math"];
+    internal static readonly Typeface MathVariable = new(new FontFamily("avares://BlurMask/Assets/Fonts#STIX Two Text"), FontStyle.Italic);
     private static readonly Dictionary<string, Typeface> Faces = new(StringComparer.Ordinal);
     internal static Typeface Face(string name)
     {

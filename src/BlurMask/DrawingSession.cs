@@ -57,7 +57,7 @@ internal sealed class DrawingSession : IDisposable
     {
         DesktopSelection = new(DesktopDocument);
         CanvasSelection = new(CanvasDocument);
-        _desktopAi = new(DesktopDocument); _canvasAi = new(CanvasDocument);
+        _desktopAi = new(DesktopDocument, () => Settings.AiMode == "math"); _canvasAi = new(CanvasDocument, () => Settings.AiMode == "math");
         _newMask = newMask;
         _exit = exit;
         _selectMask = selectMask;
@@ -165,6 +165,11 @@ internal sealed class DrawingSession : IDisposable
     }
     public void SetBoard(BoardMode board) { Board = board; UpdateState(); }
     public void NotifySettings() => StateChanged?.Invoke();
+    internal void SetAiMode(bool math)
+    {
+        RecognizeAiInk();
+        SaveSettings(Settings with { AiMode = math ? "math" : "text" });
+    }
     public void SetFading(double seconds)
     {
         FinishInput();
@@ -318,6 +323,7 @@ internal sealed class DrawingSession : IDisposable
     }
     internal void SaveSettings(AppSettings settings)
     {
+        if (Settings.AiMode != settings.AiMode) RecognizeAiInk();
         if (!Program.SmokeTest) SettingsStore.Save(settings);
         Settings = settings.CloneSettings();
         if (!Program.SmokeTest) Program.Settings = settings.CloneSettings();

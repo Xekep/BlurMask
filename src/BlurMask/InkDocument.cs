@@ -21,8 +21,8 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
     public List<Point> Points { get; } = [start];
     private string _text = "";
     private double _fontSize = 28;
-    public string Text { get => _text; set { if (_text != value) { _text = value; _bounds = null; _formatted = null; } } }
-    public double FontSize { get => _fontSize; set { if (_fontSize != value) { _fontSize = value; _bounds = null; _formatted = null; } } }
+    public string Text { get => _text; set { if (_text != value) { _text = value; _bounds = null; _formatted = null; _textGeometry = null; } } }
+    public double FontSize { get => _fontSize; set { if (_fontSize != value) { _fontSize = value; _bounds = null; _formatted = null; _textGeometry = null; } } }
     public string? Image { get; init; }
     public Matrix Transform { get; init; } = Matrix.Identity;
     public string Font { get; init; } = "";
@@ -93,7 +93,7 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
             case InkTool.Text:
                 if (Points.Count == 2)
                 {
-                    var text = Formatted(); var glyph = _textGeometry ??= text.BuildGeometry(default);
+                    var glyph = _textGeometry ??= (Font == "STIX Two Math" ? MathTypesetting.Build(Text, FontSize) : null) ?? Formatted().BuildGeometry(default);
                     var source = glyph?.Bounds ?? default;
                     if (glyph is not null && source.Width > 0 && source.Height > 0 && rect.Width > 0 && rect.Height > 0)
                     {

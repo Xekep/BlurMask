@@ -58,9 +58,31 @@ if ($Runtime.StartsWith('win-')) {
 
     if (-not $DynamicNativeLibraries) {
         if (Get-ChildItem -LiteralPath $publishDir -Filter '*.dll') { throw 'Static Native AOT publish unexpectedly contains DLLs.' }
-        Write-Host 'Verified single-executable Native AOT payload. Rendering libraries are statically linked.'
+        Write-Host 'Verified Native AOT application executable. Rendering libraries are statically linked.'
     }
     else { Write-Host 'Verified dynamic native dependencies. Keep the entire publish directory together.' }
 }
+
+if ($Runtime -eq 'win-x64') {
+    $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
+    if (-not (Test-Path -LiteralPath $vswhere)) { throw 'Visual Studio locator is required to package the licensed VC runtime.' }
+    $installations = @(& $vswhere -all -prerelease -products '*' -property installationPath)
+    $redists = foreach ($installation in $installations) {
+        $redistRoot = Join-Path $installation 'VC/Redist/MSVC'
+        if (Test-Path -LiteralPath $redistRoot) {
+            Get-ChildItem -Path (Join-Path $redistRoot '*/x64/Microsoft.VC*.CRT') -Directory
+        }
+    }
+    $redist = $redists | Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName 'vcruntime140_1.dll') } |
+        Sort-Object FullName -Descending | Select-Object -First 1
+    if (-not $redist) { throw 'The Visual Studio x64 redistributable runtime directory was not found.' }
+    python (Join-Path $repoRoot 'tools/fetch-ink-math-runtime.py') $Runtime --output $publishDir --vc-redist-dir $redist.FullName
+    if ($LASTEXITCODE -ne 0) { throw 'Formula runtime packaging failed.' }
+}
+elseif ($Runtime -in @('linux-x64', 'osx-x64', 'osx-arm64')) {
+    python3 (Join-Path $repoRoot 'tools/fetch-ink-math-runtime.py') $Runtime --output $publishDir
+    if ($LASTEXITCODE -ne 0) { throw 'Formula runtime packaging failed.' }
+}
+else { Write-Warning "Formula runtime is not packaged for $Runtime; handwritten ink and text recognition remain available." }
 
 Write-Host "Published to: $publishDir"

@@ -1,10 +1,17 @@
-Embedded text fonts: Inter, Manrope, Source Serif 4 and STIX Two Math.
+Embedded text fonts: Inter, Manrope, Source Serif 4, STIX Two Math and STIX Two Text
+(regular and italic).
 SIL Open Font License 1.1; copyright notices and complete terms are preserved in
 LICENSE-FONT-Inter.txt, LICENSE-FONT-Manrope.txt, LICENSE-FONT-SourceSerif4.txt,
-and LICENSE-FONT-STIXTwoMath.txt. Source revisions/hashes: docs/ai-fonts.json.
+LICENSE-FONT-STIXTwoMath.txt, LICENSE-FONT-STIXTwoText.txt and
+LICENSE-FONT-STIXTwoTextItalic.txt. Source revisions/hashes: docs/ai-fonts.json.
 Fonts come from https://github.com/google/fonts; no font source was modified.
 
 
 InkRecognition engine source is distributed under the repository MIT license.
 Recognition model parameters are supplied separately and are not bundled with the app.
 No MyScript DLL or Python runtime is shipped.
+
+Formula inference uses the official native CPU ONNX Runtime 1.23.2 (MIT).
+Its license, third-party notices and pinned archive hashes are included under
+runtimes/<platform>/native/. Windows builds include the four app-local Microsoft
+Visual C++ runtime dependencies from the builder's licensed Visual Studio REDIST.

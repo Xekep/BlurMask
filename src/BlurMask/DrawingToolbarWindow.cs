@@ -275,8 +275,14 @@ internal sealed class DrawingToolbarWindow : Window
         if (name == "tools" && _session.Tool == InkTool.AiPen)
         {
             row.Children.Add(IconButton(ToolbarGlyph.AiPen, UiText.T("Распознать сейчас"), () => { _session.RecognizeAiInk(); CloseFlyout(); }));
-            row.Children.Add(new TextBlock { Text = UiText.T(AiRecognitionModels.Current is null ? "Модель AI-пера не установлена" : "English · экспериментально"),
-                FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(6, 0) });
+            var mode = new ComboBox { ItemsSource = new[] { UiText.T("Текст"), UiText.T("Формулы") },
+                SelectedIndex = _session.Settings.AiMode == "math" ? 1 : 0, MinWidth = 110, FontSize = 12 };
+            var status = new TextBlock { FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(6, 0) };
+            void UpdateStatus() => status.Text = UiText.T(_session.Settings.AiMode == "math"
+                ? AiMathRecognitionModels.Installed ? "Формулы · экспериментально" : "Модель формул не установлена"
+                : File.Exists(AiRecognitionModels.PathName) ? "English · экспериментально" : "Модель AI-пера не установлена");
+            mode.SelectionChanged += (_, _) => { _session.SetAiMode(mode.SelectedIndex == 1); UpdateStatus(); };
+            UpdateStatus(); row.Children.Add(mode); row.Children.Add(status);
         }
         ShowFlyout(name, row, anchor);
         if (_flyoutName == name)

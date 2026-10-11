@@ -68,6 +68,26 @@ internal sealed class SettingsWindow : Window
             { _message.Text = UiText.T("Не удалось установить модель") + ": " + ex.Message; }
         };
         general.Children.Add(aiStatus); general.Children.Add(importModel);
+        var mathStatus = new TextBlock { Text = UiText.T(AiMathRecognitionModels.Installed ? "Формулы · экспериментально" : "Модель формул не установлена"), FontSize = 12, TextWrapping = TextWrapping.Wrap };
+        var importMath = new Button { Content = UiText.T("Установить модель формул"), HorizontalAlignment = HorizontalAlignment.Left };
+        importMath.Click += async (_, _) =>
+        {
+            try
+            {
+                var files = await StorageProvider.OpenFilePickerAsync(new Avalonia.Platform.Storage.FilePickerOpenOptions
+                {
+                    Title = UiText.T("Установить модель формул"), AllowMultiple = false,
+                    FileTypeFilter = [new Avalonia.Platform.Storage.FilePickerFileType("Ink math model") { Patterns = ["*.ikrmath"] }]
+                });
+                if (files.Count != 1) return;
+                await using var stream = await files[0].OpenReadAsync();
+                await Task.Run(() => AiMathRecognitionModels.Install(stream));
+                mathStatus.Text = UiText.T("Формулы · экспериментально"); _message.Text = "";
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException or DllNotFoundException or BadImageFormatException or EntryPointNotFoundException or NotSupportedException)
+            { _message.Text = UiText.T("Не удалось установить модель") + ": " + ex.Message; }
+        };
+        general.Children.Add(mathStatus); general.Children.Add(importMath);
         _enabled = new CheckBox { Content = UiText.T("Включить горячие клавиши"), IsChecked = _draft.HotkeysEnabled, Margin = new Thickness(0, 10, 0, 0) };
         general.Children.Add(_enabled);
         general.Children.Add(new TextBlock { Text = UiText.T(OperatingSystem.IsWindows() ? "На Windows клавиши работают поверх других приложений." : "На этой платформе клавиши работают, когда окно BlurMask активно."),

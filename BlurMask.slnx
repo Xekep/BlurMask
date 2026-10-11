@@ -2,9 +2,11 @@
   <Folder Name="/src/">
     <Project Path="src/BlurMask/BlurMask.csproj" />
     <Project Path="src/InkRecognition/InkRecognition.csproj" />
+    <Project Path="src/InkRecognition.Math/InkRecognition.Math.csproj" />
     <Project Path="src/BlurMask.Server/BlurMask.Server.csproj" />
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/InkRecognition.Probe/InkRecognition.Probe.csproj" />
+    <Project Path="tools/InkRecognition.Math.Probe/InkRecognition.Math.Probe.csproj" />
   </Folder>
 </Solution>

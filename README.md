@@ -5,7 +5,7 @@ Create a rectangle from the toolbar, move/resize it over sensitive content, and
 switch privacy effects without doing post-production blur work.
 
 Sources are organized under `src/BlurMask` (desktop app), `src/BlurMask.Server` (API/download page)
-and `src/BlurMask.Shared` (wire contracts). `src/InkRecognition` is a reusable CPU recognition library.
+and `src/BlurMask.Shared` (wire contracts). `src/InkRecognition` and `src/InkRecognition.Math` are reusable stroke recognition libraries.
 Build/package scripts live in `tools`, installer
 definitions in `packaging`, and documentation in `docs`.
 
@@ -44,8 +44,9 @@ and [official tool guide](https://epicpen.com/userguide).
 - The pen menu contains **pen, AI pen, highlighter and text**. Shapes have their own button.
 - **AI pen** waits 0.8 seconds after the last stroke, then replaces a completed row with one typeset text object.
   Symbols share a font size and baseline; position, bounding size and color are preserved. The pen menu also offers **Recognize now**.
-  Recognition processes stroke coordinates locally in native C#, without a cloud service or extra ML libraries.
-  The previous raster recognizers and their models have been removed; the initial portable engine supports experimental English recognition.
+  Recognition processes stroke coordinates locally: English text uses native C#; **Formulas** uses the bundled native CPU runtime.
+  Models are installed separately. The previous raster recognizers have been removed. Russian handwriting is not ready.
+  Fonts are automatic: Inter for text, STIX Two Math for formulas and STIX Two Text Italic for variables; settings has no font selector.
   Uncertain results stay handwritten, and Undo restores the original strokes. See [model details and limits](docs/ai-pen.md).
 - Draw directly over the desktop and applications. On Windows, cursor mode leaves the ink visible
   and passes clicks to applications underneath. Right-click the drawing surface or press Esc to return to cursor mode.
@@ -166,6 +167,8 @@ src\BlurMask\bin\Release\net11.0\win-x64\publish\
 The default Windows build is one native `BlurMask.exe`: Skia, HarfBuzz and ANGLE
 are statically linked using StaticLink.Avalonia. No external rendering DLLs or
 installed .NET runtime are required. Windows system libraries are still used.
+Keep the complete publish folder: formulas additionally use the CPU ONNX Runtime
+and four app-local VC CRT dependencies under `runtimes/win-x64/native/`.
 For renderer diagnostics, `./tools/build.ps1 win-x64 -DynamicNativeLibraries` produces
 the traditional build with three adjacent native DLLs; distribute that entire folder.
 
@@ -243,7 +246,7 @@ Version 7.1.0 was the latest stable release on 2026-10-10; see the
 [official downloads](https://jrsoftware.org/isdl.php).
 
 Output: `.artifacts/installers/BlurMask-1.2.3-win-x64-Setup.exe`, accompanied by
-SHA-256 and JSON build metadata. The installer contains the single native executable,
+SHA-256 and JSON build metadata. The installer contains the native executable and formula runtime,
 excludes debug symbols, and does not require an installed .NET runtime.
 It supports English/French/German/Russian, installs into `%LOCALAPPDATA%/Programs/BlurMask`
 without elevation, creates a Start Menu shortcut, and offers optional desktop

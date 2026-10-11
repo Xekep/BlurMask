@@ -3,7 +3,8 @@
 ## Windows: "stack-based buffer overrun" / immediate native crash
 
 The default Windows Native AOT build links rendering libraries into `BlurMask.exe`.
-It runs as a single executable. Older builds and the diagnostic
+Formula recognition also needs the bundled `runtimes/win-x64/native` folder.
+Older builds and the diagnostic
 `-DynamicNativeLibraries` build require these libraries alongside the executable:
 
 - `av_libglesv2.dll`
@@ -11,7 +12,8 @@ It runs as a single executable. Older builds and the diagnostic
 - `libHarfBuzzSharp.dll`
 
 `build.ps1` verifies the selected payload type. For a dynamic build distribute its
-complete publish folder; for the default static build the executable is sufficient.
+complete publish folder. Distribute the complete static publish folder as well
+to retain formula recognition and its license notices.
 
 A missing native DLL usually causes a loader/DLL error rather than a true managed stack
 overflow, so if the complete publish directory is present and the program still terminates,

@@ -15,6 +15,13 @@ internal static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        if (args.Length == 2 && args[0] == "--install-ink-math-model")
+        {
+            using var model = File.OpenRead(args[1]);
+            AiMathRecognitionModels.Install(model);
+            Console.WriteLine($"Installed math recognition model: {AiMathRecognitionModels.PathName}");
+            return;
+        }
         if (args.Length == 2 && args[0] == "--install-ink-model")
         {
             using var model = File.OpenRead(args[1]);

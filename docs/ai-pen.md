@@ -9,8 +9,10 @@ been removed. There is no fallback to them.
 This first integration supports an experimental English acoustic model. It uses
 a bounding-box normalization heuristic, a three-layer bidirectional LSTM and
 standard CTC collapse. It has no recovered lexical dictionary. English examples
-and digits have been verified, but Russian and formula recognition are not yet
-implemented in the application. Math2 research is separate from this release.
+and digits have been verified. Russian raw-stroke recognition is not ready.
+The separate **Formulas** mode uses the reusable native
+[InkRecognition.Math module](ink-math-engine.md) and a user-installed Math2 pack.
+It recognizes notation; it does not calculate the value of expressions.
 Confidence is an acoustic score, not a calibrated probability of correct text.
 
 ## Model installation
@@ -20,6 +22,15 @@ An absent, invalid or uncertain model leaves the original ink untouched. Setting
 shows the model status and offers **Install AI pen model** for a `.ikrpack` file.
 Installation checks the model structure and checksum before replacing a working
 model. The pen menu shows the currently supported language.
+
+For formulas, install a `.ikrmath` pack with **Install formula model**, then choose
+**Formulas** in the AI pen menu. The official CPU runtime is packaged for Windows
+x64, Linux x64 and macOS; model weights are supplied separately.
+
+```sh
+python tools/export-ink-math-model.py /private/path/math-sr.res --output /private/path/math2.ikrmath
+BlurMask --install-ink-math-model /private/path/math2.ikrmath
+```
 
 The current application stores its model at:
 
@@ -44,6 +55,13 @@ between words become spaces; original pen chronology is preserved when passing
 each word to inference. Printed text uses Inter. Color, position, disappearing-ink
 duration and shared-document identity are retained. Undo restores the original
 strokes. Starting another stroke invalidates a pending result.
+
+Formula mode keeps each expression together, including fractions, radicals,
+superscripts and matrices. Its bounded native geometry renderer uses STIX Two
+Math and STIX Two Text Italic for variables. Regular text uses Inter. The fonts
+are embedded and automatic; settings contains no font selector. Unsupported
+structures, incomplete decoding and low-confidence results remain handwritten.
+The font defaults follow the [MyScript styling reference](https://developer.myscript.com/doc/interactive-ink/3.2/reference/styling/).
 
 The application keeps the entire handwritten row if any word is uncertain.
 Unsupported writing may remain ink or be misrecognized; the first-stage engine

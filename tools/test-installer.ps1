@@ -40,6 +40,14 @@ function Assert-Payload {
     }
     if (Get-ChildItem -LiteralPath $installDir -Filter '*.pdb') { throw 'Installer contains debug symbols.' }
     if (Get-ChildItem -LiteralPath $installDir -Filter '*.dll') { throw 'Single-executable installer left native DLLs.' }
+    foreach ($name in @('onnxruntime.dll','msvcp140.dll','msvcp140_1.dll','vcruntime140.dll','vcruntime140_1.dll','LICENSE')) {
+        $relative = Join-Path 'runtimes/win-x64/native' $name
+        $installed = Join-Path $installDir $relative
+        if (-not (Test-Path -LiteralPath $installed) -or
+            (Get-FileHash -LiteralPath $installed).Hash -ne (Get-FileHash -LiteralPath (Join-Path $PublishDirectory $relative)).Hash) {
+            throw "Installed formula runtime is missing or differs: $name"
+        }
+    }
 }
 
 $installedSuccessfully = $false

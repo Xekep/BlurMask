@@ -176,6 +176,25 @@ internal static class DrawingSmokeTest
         }
         var math = new Typeface(new FontFamily("avares://BlurMask/Assets/Fonts#STIX Two Math")).GlyphTypeface;
         Check(math.CharacterToGlyphMap.TryGetGlyph('∑', out _) && math.CharacterToGlyphMap.TryGetGlyph('∫', out _), "Embedded math font did not load.");
+        var variable = InkFonts.MathVariable.GlyphTypeface;
+        Check(variable.FamilyName == "STIX Two Text" && variable.Style == FontStyle.Italic && variable.CharacterToGlyphMap.TryGetGlyph('x', out _), "Embedded italic math variable font did not load.");
+        var formulaPreview = new StackPanel { Spacing = 16 };
+        formulaPreview.Children.Add(new TextBlock { Text = "English · русский · 123", FontFamily = InkFonts.Face("Inter").FontFamily, FontSize = 28 });
+        foreach (var formula in new[] { "y=3x+2", "\\frac{1}{x^{2}}", "\\left\\{\\begin{matrix}\\sqrt{3}\\\\\\sqrt{6}\\end{matrix}\\right." })
+        {
+            var geometry = MathTypesetting.Build(formula, 32);
+            Check(geometry is not null && double.IsFinite(geometry.Bounds.Width) && double.IsFinite(geometry.Bounds.Height) && geometry.Bounds.Width > 0 && geometry.Bounds.Height > 0,
+                "Formula geometry is empty or nonfinite.");
+            formulaPreview.Children.Add(new Avalonia.Controls.Shapes.Path { Data = geometry, Fill = Brushes.Black, Width = geometry!.Bounds.Width, Height = geometry.Bounds.Height, Stretch = Stretch.Uniform, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left });
+        }
+        var preview = new Border { Width = 640, Height = 400, Padding = new Thickness(24), Background = Brushes.White, Child = formulaPreview };
+        preview.Measure(new Size(640, 400)); preview.Arrange(new Rect(0, 0, 640, 400));
+        using (var bitmap = new RenderTargetBitmap(new PixelSize(640, 400), new Vector(96, 96)))
+        {
+            bitmap.Render(preview);
+            if (Environment.GetEnvironmentVariable("BLURMASK_SMOKE_ARTIFACTS") is { Length: > 0 } output)
+            { Directory.CreateDirectory(output); bitmap.Save(Path.Combine(output, "ai-fonts-formulas.png"), PngBitmapEncoderOptions.Default); }
+        }
         await VerifySettingsWindowAsync(session);
         var originalOverlays = session.Overlays.ToArray();
         session.Toolbar.Hide();
@@ -568,6 +587,7 @@ internal static class DrawingSmokeTest
     {
         var settings = new AppSettings();
         Check(settings.Validate() is null, "Epic Pen default shortcuts conflict.");
+        Check((settings with { AiMode = "math" }).Validate() is null && (settings with { AiMode = "unknown" }).Validate() is not null, "AI mode settings validation failed.");
         Check(settings.Shortcuts[ShortcutAction.Cursor].Key == Key.D2 && settings.Shortcuts[ShortcutAction.Pen].Key == Key.D3 &&
             settings.Shortcuts[ShortcutAction.Undo].Key == Key.D6 && settings.Shortcuts[ShortcutAction.Screenshot].VirtualKey == 44,
             "Epic Pen shortcut layout was not retained.");
@@ -738,9 +758,11 @@ internal static class DrawingSmokeTest
             await window.ShareAsync(server);
             if (Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime sharingDesktop)
             {
-                var invitation = sharingDesktop.Windows.Single(w => w.Title == UiText.T("Ссылка на полотно"));
+                var invitation = sharingDesktop.Windows.Single(w => w.Title == UiText.T("Поделиться полотном"));
                 Check(invitation.GetVisualDescendants().OfType<TextBox>().Count(b => b.IsReadOnly) == 2,
                     "Collaboration did not show separate edit and view invitations.");
+                Check(invitation.GetVisualDescendants().OfType<TextBox>().Where(b => b.IsReadOnly).All(b => b.Text is { } code && !code.Contains("://") && CanvasCloudClient.ParseLink(code).Id != Guid.Empty),
+                    "Sharing form exposes links instead of invitation codes.");
                 invitation.Close();
             }
             var storage = Path.Combine(artifacts ?? Path.GetTempPath(), "canvas-smoke", "canvas.json");

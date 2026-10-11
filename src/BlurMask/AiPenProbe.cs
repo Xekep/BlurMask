@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Media;
 using InkRecognition;
+using InkRecognition.Math;
 
 namespace BlurMask;
 
@@ -23,6 +24,7 @@ internal static class AiPenProbe
         try { AiRecognitionModels.Install(invalid); throw new InvalidOperationException("Invalid model installation succeeded."); }
         catch (InvalidDataException) { }
         VerifyLocalModel();
+        VerifyMath();
         Console.WriteLine("AI row layout, uncertainty, model validation, history and peer ink: passed.");
     }
 
@@ -30,6 +32,17 @@ internal static class AiPenProbe
     {
         if (Environment.GetEnvironmentVariable("BLURMASK_AI_TEST_INPUT") is not { Length: > 0 } path) return;
         if (AiRecognitionModels.Current is null) throw new InvalidOperationException("The local model verification requires an installed model.");
+        var marks = ReadStrokes(path);
+        var result = AiInkLayout.Recognize(marks);
+        var expected = Environment.GetEnvironmentVariable("BLURMASK_AI_TEST_TEXT") ?? "hello";
+        if (result.Count != 1 || result[0].Text.Text != expected || result[0].Strokes.Length != marks.Count)
+            throw new InvalidOperationException($"Local AI integration mismatch: expected {expected}, actual {string.Join(" / ", result.Select(r => r.Text.Text))}.");
+        VerifyReplacement(result[0]);
+        Console.WriteLine($"Local raw-stroke model → application layout/history: {result[0].Text.Text}; {marks.Count} original strokes preserved.");
+    }
+
+    private static List<InkMark> ReadStrokes(string path)
+    {
         using var json = System.Text.Json.JsonDocument.Parse(File.ReadAllBytes(path));
         var marks = new List<InkMark>();
         foreach (var stroke in json.RootElement.EnumerateArray())
@@ -44,12 +57,53 @@ internal static class AiPenProbe
             }
             if (mark is not null) marks.Add(mark);
         }
-        var result = AiInkLayout.Recognize(marks);
-        var expected = Environment.GetEnvironmentVariable("BLURMASK_AI_TEST_TEXT") ?? "hello";
-        if (result.Count != 1 || result[0].Text.Text != expected || result[0].Strokes.Length != marks.Count)
-            throw new InvalidOperationException($"Local AI integration mismatch: expected {expected}, actual {string.Join(" / ", result.Select(r => r.Text.Text))}.");
+        return marks;
+    }
+
+    private static void VerifyMath()
+    {
+        var latex = "\\left\\{\\begin{matrix}\\sqrt{3}\\\\\\sqrt{6}\\end{matrix}\\right.";
+        var strokes = new[] { Stroke(10, 10), Stroke(32, 160) };
+        var calls = 0;
+        MathRecognitionResult Recognize(IReadOnlyList<InkStroke> ink, CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested(); calls++;
+            if (ink.Count != 2 || ink[1].Points[0].Y != 160) throw new InvalidOperationException("Formula was split into text rows.");
+            return new("structural tokens", latex, [], .95f, 10, true);
+        }
+        var result = AiMathLayout.Recognize(strokes, Recognize);
+        if (calls != 1 || result.Count != 1 || result[0].Text.Text != latex || result[0].Text.Font != "STIX Two Math")
+            throw new InvalidOperationException("Formula layout lost structure or fonts.");
         VerifyReplacement(result[0]);
-        Console.WriteLine($"Local raw-stroke model → application layout/history: {result[0].Text.Text}; {marks.Count} original strokes preserved.");
+        foreach (var rejected in new[]
+        {
+            new MathRecognitionResult("", latex, [], .2f, 10, true),
+            new MathRecognitionResult("", latex, [], .95f, 10, false),
+            new MathRecognitionResult("", "\\unsupported{x}", [], .95f, 10, true),
+            new MathRecognitionResult("", "\\frac{1}", [], .95f, 10, true),
+            new MathRecognitionResult("", " ", [], .95f, 10, true)
+        })
+            if (AiMathLayout.Recognize(strokes, (_, _) => rejected).Count != 0) throw new InvalidOperationException("Uncertain/unsupported math replaced strokes.");
+        foreach (var accepted in new[] { "y=3x+2", "x_{1}^{2}", "\\frac{1}{x}", latex, "\\int x\\,dx".Replace("\\,", " ") })
+            if (!MathTypesetting.Supported(accepted)) throw new InvalidOperationException("Supported math cannot be typeset.");
+        if (MathTypesetting.Supported(new string('{', 33) + "x" + new string('}', 33))) throw new InvalidOperationException("Unbounded formula nesting.");
+        using var canceled = new CancellationTokenSource(); canceled.Cancel();
+        try { AiMathLayout.Recognize(strokes, Recognize, canceled.Token); throw new InvalidOperationException("Math cancellation ignored."); }
+        catch (OperationCanceledException) { }
+        var previous = File.Exists(AiMathRecognitionModels.PathName) ? File.ReadAllBytes(AiMathRecognitionModels.PathName) : null;
+        using var invalid = new MemoryStream("not a math model"u8.ToArray());
+        try { AiMathRecognitionModels.Install(invalid); throw new InvalidOperationException("Invalid math model installation succeeded."); }
+        catch (InvalidDataException) { }
+        if (previous is not null && !previous.AsSpan().SequenceEqual(File.ReadAllBytes(AiMathRecognitionModels.PathName))) throw new InvalidOperationException("Invalid math import replaced the installed model.");
+        if (Environment.GetEnvironmentVariable("BLURMASK_MATH_TEST_INPUT") is { Length: > 0 } path)
+        {
+            var actual = AiMathLayout.Recognize(ReadStrokes(path));
+            var expected = Environment.GetEnvironmentVariable("BLURMASK_MATH_TEST_LATEX") ?? "y=3x+2";
+            if (actual.Count != 1 || actual[0].Text.Text != expected) throw new InvalidOperationException($"Raw math application mismatch: expected {expected}; actual {string.Join(" / ", actual.Select(r => r.Text.Text))}");
+            VerifyReplacement(actual[0]);
+            Console.WriteLine($"Local raw math → application/history/persistence: {expected}");
+        }
+        Console.WriteLine("Math expression structure, typesetting syntax, confidence, cancellation and atomic installation: passed.");
     }
 
     private sealed class TestRecognizer(float confidence = .99f) : IStrokeTextRecognizer
@@ -83,7 +137,7 @@ internal static class AiPenProbe
         document.Undo(); document.Undo(); document.Undo();
         if (document.ReplaceRecognized(strokes, text)) throw new InvalidOperationException("Stale AI result resurrected deleted handwriting.");
         var imported = new InkDocument(); imported.Import(new() { InkDocument.ExportMark(text) });
-        if (imported.Marks.Single().Bounds != bounds || imported.Marks.Single().Text != text.Text)
+        if (imported.Marks.Single().Bounds != bounds || imported.Marks.Single().Text != text.Text || imported.Marks.Single().Font != text.Font || !BlurMask.Shared.BoardValidation.Valid(InkDocument.ExportMark(text)))
             throw new InvalidOperationException("Saved/shared AI text lost its size.");
     }
 }

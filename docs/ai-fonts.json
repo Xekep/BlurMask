@@ -26,5 +26,19 @@
     "sha256": "562551b15b836e6e01d1b7350909baf3c8c8d83260c1190fbf4544333e6936de",
     "bytes": 1517976,
     "license": "SIL-OFL-1.1"
+  },
+  {
+    "font": "STIXTwoText",
+    "source": "https://raw.githubusercontent.com/google/fonts/bd8f81ddb5c74d5c8897b36ad88b440266245103/ofl/stixtwotext/STIXTwoText%5Bwght%5D.ttf",
+    "sha256": "7962b8b7811e6a896c9a91a0bccbb5241047770eb24d4997c5cb5fe21d5c0df2",
+    "bytes": 418956,
+    "license": "SIL-OFL-1.1"
+  },
+  {
+    "font": "STIXTwoTextItalic",
+    "source": "https://raw.githubusercontent.com/google/fonts/bd8f81ddb5c74d5c8897b36ad88b440266245103/ofl/stixtwotext/STIXTwoText-Italic%5Bwght%5D.ttf",
+    "sha256": "88c0e2e316eaff56eddc9e51e4850317e2a1e490bbf758b2dec4793aedba9c74",
+    "bytes": 454368,
+    "license": "SIL-OFL-1.1"
   }
 ]

@@ -98,7 +98,7 @@ public static class BoardValidation
         double.IsFinite(mark.Width) && mark.Width is >= 0.5 and <= 200 &&
         double.IsFinite(mark.FontSize) && mark.FontSize is >= 8 and <= 300 &&
         mark.Text is { Length: <= 4000 } && mark.Points is { Count: > 0 and <= 20000 } &&
-        mark.Font is "" or "Inter" or "Manrope" or "Source Serif 4" &&
+        mark.Font is "" or "Inter" or "Manrope" or "Source Serif 4" or "STIX Two Math" &&
         mark.Points.All(p => p is not null && double.IsFinite(p.X) && double.IsFinite(p.Y) && Math.Abs(p.X) <= 100000 && Math.Abs(p.Y) <= 100000) &&
         ValidTransform(mark) &&
         (mark.Tool == "Image" ? mark.Points.Count == 2 && ValidImage(mark.Image) : mark.Image is null);

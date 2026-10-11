@@ -25,8 +25,69 @@ cleanup() {
 trap cleanup EXIT
 openbox > "$out/openbox.log" 2>&1 & pids+=("$!")
 sleep 1
-picom --backend xrender > "$out/picom.log" 2>&1 & pids+=("$!")
-xsetroot -solid '#315070'
+# Keep the root pixmap alive: picom uses _XROOTPMAP_ID rather than xsetroot's solid fill.
+python - "$out" > "$out/background.log" 2>&1 <<'PY' &
+import ctypes as c, sys, time
+from pathlib import Path
+x = c.CDLL('libX11.so.6')
+def bind(name, result, args):
+    f = getattr(x, name); f.restype = result; f.argtypes = args; return f
+ptr, ul, ui, si = c.c_void_p, c.c_ulong, c.c_uint, c.c_int
+bind('XOpenDisplay', ptr, [c.c_char_p]); bind('XDefaultScreen', si, [ptr])
+bind('XRootWindow', ul, [ptr, si]); bind('XDefaultDepth', si, [ptr, si])
+bind('XCreatePixmap', ul, [ptr, ul, ui, ui, ui]); bind('XCreateGC', ptr, [ptr, ul, ul, ptr])
+bind('XSetForeground', si, [ptr, ptr, ul]); bind('XFillRectangle', si, [ptr, ul, ptr, si, si, ui, ui])
+bind('XInternAtom', ul, [ptr, c.c_char_p, si])
+bind('XChangeProperty', si, [ptr, ul, ul, ul, si, si, ptr, si])
+bind('XSetWindowBackgroundPixmap', si, [ptr, ul, ul]); bind('XClearWindow', si, [ptr, ul])
+bind('XSync', si, [ptr, si]); bind('XCloseDisplay', si, [ptr])
+d = x.XOpenDisplay(None)
+assert d, 'Cannot open isolated X display'
+screen = x.XDefaultScreen(d); root = x.XRootWindow(d, screen)
+pixmap = x.XCreatePixmap(d, root, 1440, 1000, x.XDefaultDepth(d, screen))
+gc = x.XCreateGC(d, pixmap, 0, None)
+for y in range(0, 1000, 8):
+    for xx in range(0, 1440, 8):
+        # Sharp alternating edges, with slow RGB variation to expose whole-screen blur.
+        rgb = (0xE8DDA8 if (xx // 8 + y // 8) % 2 else 0x234D83) ^ ((xx // 160) << 8)
+        x.XSetForeground(d, gc, rgb)
+        x.XFillRectangle(d, pixmap, gc, xx, y, 8, 8)
+value = ul(pixmap)
+for name in (b'_XROOTPMAP_ID', b'ESETROOT_PMAP_ID'):
+    x.XChangeProperty(d, root, x.XInternAtom(d, name, 0), x.XInternAtom(d, b'PIXMAP', 0),
+                      32, 0, c.byref(value), 1)
+x.XSetWindowBackgroundPixmap(d, root, pixmap); x.XClearWindow(d, root); x.XSync(d, 0)
+Path(sys.argv[1], 'background-ready').touch()
+try:
+    while True: time.sleep(1)
+finally: x.XCloseDisplay(d)
+PY
+pids+=("$!")
+for i in {1..40}; do [[ ! -f "$out/background-ready" ]] || break; sleep .1; done
+test -f "$out/background-ready"
+start_picom() {
+  local mode="$1"
+  if [[ -n "${compositor:-}" ]]; then
+    kill "$compositor"; wait "$compositor" || true
+    for index in "${!pids[@]}"; do
+      [[ "${pids[$index]}" != "$compositor" ]] || unset "pids[$index]"
+    done
+  fi
+  local config="$out/picom-$mode.conf"
+  printf 'backend = "xrender"; fading = false; shadow = false;\n' > "$config"
+  if [[ "$mode" != normal ]]; then
+    printf 'blur-method = "kernel"; blur-kern = "3x3box"; blur-background = true; blur-background-fixed = true;\n' >> "$config"
+  fi
+  if [[ "$mode" == excluded ]]; then
+    cat >> "$config" <<'CONF'
+blur-background-exclude = ["name *= 'ink overlay'"];
+CONF
+  fi
+  picom --config "$config" > "$out/picom-$mode.log" 2>&1 & compositor="$!"; pids+=("$compositor")
+  sleep .4
+  kill -0 "$compositor"
+}
+start_picom normal
 xdpyinfo > "$out/xdpyinfo.txt"
 glxinfo -B > "$out/glxinfo.txt" 2>&1 || true
 cd "$out"
@@ -48,6 +109,43 @@ assert_unmapped() {
   id="$(visible "$1" || true)"
   [[ -z "$id" ]] || { echo "Unexpected mapped window: $1 ($id)" >&2; return 1; }
 }
+# Compare actual composited pixels, allowing only the layer's 1/255 input alpha.
+# UI, known strokes and their antialiasing margins have explicitly bounded exclusions.
+cat > "$out/check-background.py" <<'PY'
+from pathlib import Path
+from PIL import Image, ImageChops, ImageDraw
+import json, sys
+p = Path(sys.argv[1]); before, after, mode = sys.argv[2:]
+a = Image.open(p / f'{before}.png').convert('RGB')
+b = Image.open(p / f'{after}.png').convert('RGB')
+assert a.size == b.size == (1440, 1000)
+mask = Image.new('L', a.size)
+draw = ImageDraw.Draw(mask)
+draw.rectangle((400, 0, 1439, 999), fill=255)
+for box in ((580, 505, 830, 620), (875, 675, 1225, 735)): draw.rectangle(box, fill=0)
+channels = ImageChops.difference(a, b).split()
+error = ImageChops.lighter(ImageChops.lighter(channels[0], channels[1]), channels[2])
+error = ImageChops.multiply(error, mask)
+count = mask.histogram()[255]; changed = sum(error.histogram()[2:]); maximum = error.getextrema()[1]
+report = {'before': before, 'after': after, 'mode': mode,
+          'checked_pixels': count, 'changed_over_one_level': changed, 'max_channel_error': maximum}
+if mode == 'negative':
+    # The 3x3 blur changes checker edges, while each 8x8 tile's center stays intact.
+    # A missing/black/stale compositor frame must not count as a successful blur control.
+    centers = [(x, y) for y in range(4, 1000, 8) for x in range(404, 1440, 8)
+               if mask.getpixel((x, y))]
+    centers_changed = sum(error.getpixel(point) > 1 for point in centers)
+    report['negative_control_tile_centers'] = len(centers)
+    report['negative_control_centers_changed'] = centers_changed
+with (p / 'background-proof.jsonl').open('a') as f: f.write(json.dumps(report) + '\n')
+if mode == 'negative':
+    assert centers_changed == 0, ('Negative control lost the background instead of blurring edges', report)
+    # Exercise the same detector: enabling compositor blur must make its normal invariant fail.
+    assert changed > 50000 and maximum > 20, ('Blur negative control was not detected', report)
+else:
+    assert changed == 0, ('Desktop background was altered outside ink/UI', report)
+PY
+background_check() { python "$out/check-background.py" "$out" "$1" "$2" "$3"; }
 capture() { magick import -window "$1" "$out/$2.png"; }
 click_toolbar() { xdotool mousemove --window "$toolbar" 26 "$1" click 1; sleep .4; }
 stroke() {
@@ -73,8 +171,49 @@ capture "$toolbar" toolbar-startup
 click_toolbar 124
 overlay="$(wait_visible 'BlurMask.*ink overlay')"
 capture "$overlay" desktop-before
+capture root desktop-pen-mapped
+background_check startup-desktop desktop-pen-mapped normal
+# A compositor with global blur reproduces the regression. This is a negative control,
+# not automatic protection: picom needs its own narrowly scoped overlay exclusion.
+start_picom negative
+sleep .8
+capture root desktop-blur-negative
+background_check desktop-pen-mapped desktop-blur-negative negative
+start_picom excluded
+sleep .8
+capture root desktop-blur-excluded
+background_check desktop-pen-mapped desktop-blur-excluded excluded
 stroke "$overlay" 600 550 670 580 740 530 800 590
 capture "$overlay" desktop-after
+capture root desktop-stroke-screen
+background_check desktop-pen-mapped desktop-stroke-screen stroke
+# A real highlighter stroke must blend with the patterned desktop rather than erase it.
+xdotool windowactivate --sync "$toolbar"
+xdotool key --clearmodifiers ctrl+shift+4
+stroke "$overlay" 900 705 1000 705 1100 705 1200 705
+capture root desktop-highlighter-screen
+background_check desktop-stroke-screen desktop-highlighter-screen highlighter
+python - "$out" <<'PY'
+from pathlib import Path
+from PIL import Image
+import json, sys
+p = Path(sys.argv[1])
+a = Image.open(p / 'desktop-stroke-screen.png').convert('RGB')
+b = Image.open(p / 'desktop-highlighter-screen.png').convert('RGB')
+# Interior samples across many checker edges must have one shared alpha/color blend.
+samples = [(a.getpixel((x, y)), b.getpixel((x, y))) for y in range(700, 710) for x in range(930, 1170)]
+changed = sum(max(abs(u-v) for u,v in zip(old,new)) > 5 for old,new in samples)
+assert changed > 1500, ('Highlighter stroke did not reach the screen', changed)
+# Within each checker pair, contrast must survive at ~65% of the original value.
+ratios = []
+for x in range(936, 1160, 16):
+    old1, old2 = a.getpixel((x,705)), a.getpixel((x+8,705))
+    new1, new2 = b.getpixel((x,705)), b.getpixel((x+8,705))
+    for i in range(3):
+        if abs(old1[i]-old2[i]) > 60: ratios.append(abs(new1[i]-new2[i])/abs(old1[i]-old2[i]))
+assert ratios and all(.60 <= r <= .70 for r in ratios), ('Highlighter must preserve background through 35% alpha', ratios)
+(p / 'highlighter-proof.json').write_text(json.dumps({'changed_pixels': changed, 'contrast_ratio_min': min(ratios), 'contrast_ratio_max': max(ratios)}, indent=2))
+PY
 # A pointer click through the ink layer must reach the toolbar and open a menu.
 click_toolbar 212
 xwininfo -root -tree > "$out/toolbar-click-windows.txt"
@@ -140,8 +279,12 @@ test -s "$out/canvas-state.json"
 wmctrl -ic "$(printf '0x%x' "$overlay")"
 sleep .8
 assert_unmapped 'BlurMask.*ink overlay'
+capture root desktop-wm-hidden
+background_check startup-desktop desktop-wm-hidden hidden
 click_toolbar 124
 [[ "$(wait_visible 'BlurMask.*ink overlay')" == "$overlay" ]]
+capture root desktop-wm-reopened
+background_check desktop-highlighter-screen desktop-wm-reopened reopened
 click_toolbar 212
 flyout="$(wait_visible 'BlurMask.*menu')"
 capture "$flyout" reopened-sizes-flyout
@@ -182,6 +325,10 @@ report['startup_overlay_unmapped'] = True
 report['toolbar_pointer_flyout'] = True
 report['flyout_pointer_sets_pen_width'] = 8
 report['wm_close_reuses_overlay'] = True
+report['root_background_preserved'] = True
+report['picom_blur_negative_control_detected'] = True
+report['picom_scoped_blur_exclusion_preserves_background'] = True
+report['highlighter_preserves_background_contrast'] = True
 (p / 'pixel-proof.json').write_text(json.dumps(report, indent=2))
 print(json.dumps(report, indent=2))
 PY

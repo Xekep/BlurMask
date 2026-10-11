@@ -42,6 +42,10 @@ test('object transforms and embedded font choices persist through shared updates
   const resized={...item,font:'Manrope',transform:{...item.transform,m12:2}};
   assert.equal((await request(path+'/changes',access.editKey,{operationId:crypto.randomUUID(),add:[],update:[resized],remove:[]})).status,200);
   const read=await (await request(path,access.editKey)).json(); assert.deepEqual(read.marks[0].transform,resized.transform);
+  const formula={...item,text:'\\frac{1}{x^{2}}',font:'STIX Two Math'};
+  assert.equal((await request(path+'/changes',access.editKey,{operationId:crypto.randomUUID(),add:[],update:[formula],remove:[]})).status,200);
+  const mathRead=await (await request(path,access.viewKey)).json();
+  assert.equal(mathRead.marks[0].font,'STIX Two Math'); assert.equal(mathRead.marks[0].text,formula.text);
   for(const bad of [
     {...item,font:'untrusted-font'},
     {...item,transform:{m11:0,m12:0,m21:0,m22:0,offsetX:0,offsetY:0}},

@@ -93,6 +93,8 @@ jobs:
       - run: dotnet build src/BlurMask/BlurMask.csproj -c Release --no-restore -p:PublishAot=false -p:SelfContained=false
       - name: Portable stroke engine numerical goldens, model validation and ink history
         run: dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --ai-pen-test
+      - name: Math token formatter and model guards
+        run: dotnet run --project tools/InkRecognition.Math.Probe -c Release
       - name: Overlay compositor IPC ownership, cancellation and transport
         run: dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --overlay-platform-test
 
@@ -108,13 +110,17 @@ jobs:
       - name: Publish
         shell: pwsh
         run: .\tools\build.ps1 win-x64 -Version "1.0.0-dev.$env:GITHUB_RUN_NUMBER"
-      - name: Verify single-executable native payload
+      - name: Verify static graphics and bundled formula runtime
         shell: pwsh
         run: |
           $dir = "src\BlurMask\bin\Release\net11.0\win-x64\publish"
           if (-not (Test-Path (Join-Path $dir 'BlurMask.exe'))) { throw 'Native executable is missing.' }
           if (Get-ChildItem $dir -Filter '*.dll') { throw 'Static native build contains external DLLs.' }
           if (Get-ChildItem $dir -Filter '*.pdb') { throw 'Native payload contains debug symbols.' }
+          $math = Join-Path $dir 'runtimes/win-x64/native'
+          foreach ($name in @('onnxruntime.dll', 'msvcp140.dll', 'msvcp140_1.dll', 'vcruntime140.dll', 'vcruntime140_1.dll', 'LICENSE')) {
+            if (-not (Test-Path (Join-Path $math $name))) { throw "Formula dependency is missing: $name" }
+          }
       - name: Native hot-path performance probe
         shell: pwsh
         run: |
@@ -278,3 +284,41 @@ jobs:
         with:
           name: BlurMask-macos
           path: src/BlurMask/bin/Release/net11.0/${{ env.RID }}/publish/
+
+  math-native-runtime:
+    name: Formula runtime ABI / ${{ matrix.os }}
+    needs: [native-aot-windows, native-aot-linux, native-aot-macos]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact: BlurMask-win-x64
+          - os: ubuntu-22.04
+            artifact: BlurMask-linux-x64
+          - os: macos-latest
+            artifact: BlurMask-macos
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 11.0.100-preview.7.26381.103
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: .artifacts/formula-app
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
+      - name: Verify published CPU runtime through an independent Native AOT process
+        shell: pwsh
+        run: |
+          $rid = [System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier
+          dotnet publish tools/InkRecognition.Math.Probe/InkRecognition.Math.Probe.csproj -c Release -r $rid -p:PublishAot=true -o .artifacts/math-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Math probe publish failed.' }
+          $exe = if ($IsWindows) { '.artifacts/math-probe/InkRecognition.Math.Probe.exe' } else { '.artifacts/math-probe/InkRecognition.Math.Probe' }
+          $lib = if ($IsWindows) { 'onnxruntime.dll' } elseif ($IsMacOS) { 'libonnxruntime.dylib' } else { 'libonnxruntime.so' }
+          & $exe
+          if ($LASTEXITCODE -ne 0) { throw 'Math formatter/model guards failed.' }
+          & $exe --runtime-native ".artifacts/formula-app/runtimes/$rid/native/$lib"
+          if ($LASTEXITCODE -ne 0) { throw 'Native formula ABI/inference/cancellation failed.' }

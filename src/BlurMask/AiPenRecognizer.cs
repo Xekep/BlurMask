@@ -3,7 +3,7 @@ using Avalonia.Threading;
 
 namespace BlurMask;
 
-internal sealed class AiPenRecognizer(InkDocument document) : IDisposable
+internal sealed class AiPenRecognizer(InkDocument document, Func<bool> mathMode) : IDisposable
 {
     private static readonly SemaphoreSlim Inference = new(1, 1);
     private readonly List<InkMark> _strokes = [];
@@ -38,15 +38,15 @@ internal sealed class AiPenRecognizer(InkDocument document) : IDisposable
         if (_disposed || _strokes.Count == 0) return;
         var strokes = _strokes.ToArray(); _strokes.Clear(); _processing = strokes;
         _work?.Cancel(); _work?.Dispose(); _work = new();
-        _ = ConvertAsync(strokes, ++_generation, _work.Token);
+        _ = ConvertAsync(strokes, ++_generation, mathMode(), _work.Token);
     }
-    private async Task ConvertAsync(InkMark[] strokes, int generation, CancellationToken cancellationToken)
+    private async Task ConvertAsync(InkMark[] strokes, int generation, bool math, CancellationToken cancellationToken)
     {
         try
         {
             await Inference.WaitAsync(cancellationToken);
             IReadOnlyList<AiInkLayout.Result> results;
-            try { if (_disposed || generation != _generation) return; results = await Task.Run(() => AiInkLayout.Recognize(strokes, cancellationToken: cancellationToken), cancellationToken); }
+            try { if (_disposed || generation != _generation) return; results = await Task.Run(() => math ? AiMathLayout.Recognize(strokes, cancellationToken: cancellationToken) : AiInkLayout.Recognize(strokes, cancellationToken: cancellationToken), cancellationToken); }
             finally { Inference.Release(); }
             await Dispatcher.UIThread.InvokeAsync(() =>
             {

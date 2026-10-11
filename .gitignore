@@ -9,6 +9,7 @@ obj/
 **/__pycache__/
 *.pyc
 *.ikrpack
+*.ikrmath
 **/.env
 **/.data/
 **/node_modules/

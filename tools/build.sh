@@ -27,4 +27,10 @@ dotnet publish ./src/BlurMask/BlurMask.csproj \
   --self-contained true \
   -p:PublishAot=true
 
+case "$RID" in
+  linux-x64|osx-x64|osx-arm64)
+    python3 tools/fetch-ink-math-runtime.py "$RID" --output "src/BlurMask/bin/Release/net11.0/$RID/publish" ;;
+  *) echo "Formula runtime is not packaged for $RID; handwritten ink and text recognition remain available." ;;
+esac
+
 echo "Published to: src/BlurMask/bin/Release/net11.0/$RID/publish/"
