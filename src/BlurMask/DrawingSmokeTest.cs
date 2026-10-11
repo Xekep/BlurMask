@@ -688,6 +688,11 @@ internal static class DrawingSmokeTest
         var actions = session.Toolbar.OpenFlyout ?? throw new InvalidOperationException("Screenshot actions did not open.");
         var buttons = actions.GetVisualDescendants().OfType<Button>().ToArray();
         Check(buttons.Length == 3 && buttons.All(b => b.Content is ToolbarIcon), "Screenshot actions must be a horizontal icon strip.");
+        if (Environment.GetEnvironmentVariable("BLURMASK_SMOKE_ARTIFACTS") is { Length: > 0 } actionsDirectory)
+        {
+            await Task.Delay(80);
+            DesktopInkNative.SaveScreenshot(Path.Combine(actionsDirectory, "screenshot-region-actions.png"), screen.Bounds);
+        }
         buttons.Single(b => AutomationProperties.GetName(b) == UiText.T("Копировать снимок"))
             .RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
         await session.Toolbar.ScreenshotActionTask.WaitAsync(TimeSpan.FromSeconds(5));
