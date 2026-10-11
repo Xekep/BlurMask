@@ -24,7 +24,7 @@ internal static class AiMathLayout
             cancellationToken.ThrowIfCancellationRequested();
             if (result is not { Completed: true, LaTex: { Length: > 0 } latex } || !float.IsFinite(result.Confidence) ||
                 result.Confidence < .75f || !MathTypesetting.Supported(latex)) continue;
-            var calculated = WithNumericResult(latex);
+            var calculated = WithSolvedResult(latex, cancellationToken);
             // Re-read geometry after numeric parsing. Undefined arithmetic is
             // handled inside the parser; avoid carrying the Rect's floating
             // locals across that exception path in the ARM64 AOT compiler.
@@ -49,4 +49,21 @@ internal static class AiMathLayout
 
     internal static double ResultWidth(string original, string calculated, double height)
         => original == calculated ? 0 : Math.Max(1, calculated.Length - original.Length) * height * .55;
+
+    internal static string WithSolvedResult(string expression, CancellationToken token = default,
+        Func<string, CancellationToken, InkMath.Solver.MathSolution?>? solve = null)
+    {
+        token.ThrowIfCancellationRequested();
+        var numeric = WithNumericResult(expression);
+        if (numeric != expression) return numeric;
+        var equal = expression.LastIndexOf('=');
+        if (equal < 0 || expression[(equal + 1)..].Trim().Length != 0) return expression;
+        var source = expression[..equal].TrimEnd();
+        if (source.Length == 0) return expression;
+        var solution = (solve ?? AiMathSolver.Calculate)(source, token);
+        token.ThrowIfCancellationRequested();
+        if (solution is null) return expression;
+        var calculated = source + (solution.IsEquation ? "\\Rightarrow " : "=") + solution.LaTex;
+        return MathTypesetting.Supported(calculated) ? calculated : expression;
+    }
 }

@@ -38,7 +38,7 @@ internal static class AiAutomaticLayout
             if (result.Confidence >= .85f && Mathematical(result.Text.Text) && MathTypesetting.Supported(result.Text.Text))
             {
                 var original = result.Text.Text;
-                var calculated = AiMathLayout.WithNumericResult(original);
+                var calculated = AiMathLayout.WithSolvedResult(original, cancellationToken);
                 if (calculated == original) continue;
                 result.SizingText = original;
                 var bounds = result.Text.Bounds;

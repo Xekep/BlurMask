@@ -9,7 +9,8 @@ license=('MIT')
 depends=('glibc>=2.35' 'gcc-libs' 'zlib' 'openssl' 'icu' 'ca-certificates'
          'libx11' 'libxcb' 'libice' 'libsm' 'fontconfig' 'libxcursor'
          'libxrandr' 'libxi' 'libxrender' 'dbus' 'wayland' 'libxkbcommon' 'libglvnd')
-optdepends=('xorg-xwayland: run in a Wayland desktop session')
+optdepends=('xorg-xwayland: run in a Wayland desktop session'
+            'giac: local symbolic solver for AI pen calculus, equations and matrices')
 backup=('etc/xdg/autostart/blurmask.desktop')
 # The payload is already stripped; never alter the tested native binaries.
 options=('!strip' '!debug')

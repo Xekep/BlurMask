@@ -50,6 +50,18 @@ internal static class TypesetChecks
             throw new InvalidOperationException("Computed answer changed the expression's font size or did not extend naturally.");
         var fraction = Create("\\frac{1}{2}=0.5", "STIX Two Math");
         AiTypesetLayout.Fit(fraction, ink, "\\frac{1}{2}=", []); Natural(fraction);
+        foreach (var (source, result) in new[]
+        {
+            (@"\int x^2\mathrm{d}x=", @"\frac{x^{3}}{3}+C"),
+            (@"\frac{d}{dx}\sin(x)=", @"\cos x"),
+            (@"x^2-1=0\Rightarrow ", @"x\in \left\{-1,1\right\}"),
+            (@"\inv\begin{matrix}1&2\\3&4\end{matrix}=", @"\left[\begin{array}{cc}-2&1\\\frac{3}{2}&-\frac{1}{2}\end{array}\right]")
+        })
+        {
+            var solved = Create(source + result, "STIX Two Math");
+            AiTypesetLayout.Fit(solved, ink, source, []); Natural(solved);
+            if (Metrics(solved).Bounds.Width <= 0) throw new InvalidOperationException("CAS result has no visible typeset geometry.");
+        }
         var large = Create("Hello"); AiTypesetLayout.Fit(large, new Rect(0, 0, 3000, 1200), null, []); Natural(large);
         if (large.FontSize != 300 || Math.Abs(large.Bounds.Height / 1200 - 1) > .13)
             throw new InvalidOperationException("Large world-space lettering lost its visual size at the font-size limit.");

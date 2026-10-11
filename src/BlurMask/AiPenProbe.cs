@@ -92,6 +92,7 @@ internal static class AiPenProbe
         foreach (var accepted in new[] { "y=3x+2", "x_{1}^{2}", "\\frac{1}{x}", latex, "\\int x\\,dx".Replace("\\,", " ") })
             if (!MathTypesetting.Supported(accepted)) throw new InvalidOperationException("Supported math cannot be typeset.");
         if (MathTypesetting.Supported(new string('{', 33) + "x" + new string('}', 33))) throw new InvalidOperationException("Unbounded formula nesting.");
+        VerifySymbolicMath();
         using var canceled = new CancellationTokenSource(); canceled.Cancel();
         try { AiMathLayout.Recognize(strokes, Recognize, canceled.Token); throw new InvalidOperationException("Math cancellation ignored."); }
         catch (OperationCanceledException) { }
@@ -109,6 +110,41 @@ internal static class AiPenProbe
             Console.WriteLine($"Local raw math → application/history/persistence: {expected}");
         }
         Console.WriteLine("Math expression structure, typesetting syntax, confidence, cancellation and atomic installation: passed.");
+    }
+
+    private static void VerifySymbolicMath()
+    {
+        int calls = 0;
+        InkMath.Solver.MathSolution? Calculate(string source, CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested(); calls++;
+            if (source == @"\int x^2 dx") return new(@"\frac{x^{3}}{3}+C", false);
+            if (source == "x^2-1=0") return new(@"x\in \left\{-1,1\right\}", true);
+            return null;
+        }
+        foreach (var original in new[] { @"\int x^2 dx", @"\int x^2 dx=123", "x^2-1=0", "2+2=", "2+2=5" })
+        {
+            var result = AiMathLayout.WithSolvedResult(original, solve: Calculate);
+            if (result != (original == "2+2=" ? "2+2=4" : original)) throw new InvalidOperationException("CAS evaluated unsolicited input/written RHS.");
+        }
+        if (calls != 0) throw new InvalidOperationException("CAS started without a symbolic calculation request.");
+        foreach (var original in new[] { @"\int x^2 dx=", "x^2-1=0=" })
+        {
+            var result = AiMathLayout.WithSolvedResult(original, solve: Calculate);
+            if (result == original || !MathTypesetting.Supported(result)) throw new InvalidOperationException("Explicit symbolic result lost/typesetting unsupported: " + original + " → " + result);
+        }
+        if (calls != 2) throw new InvalidOperationException("Symbolic requests were not dispatched exactly once.");
+        if (AiMathLayout.WithSolvedResult("x^2=", solve: (_, _) => new(@"\unsupported{x}", false)) != "x^2=")
+            throw new InvalidOperationException("Unsupported CAS result replaced the source.");
+        if (Environment.GetEnvironmentVariable("BLURMASK_TEST_GIAC") is { Length: > 0 } path)
+        {
+            var engine = new InkMath.Solver.SymbolicMathSolver(System.IO.Path.GetFullPath(path));
+            InkMath.Solver.MathSolution? Real(string text, CancellationToken token) => engine.SolveAsync(text, token).GetAwaiter().GetResult();
+            foreach (var source in new[] { @"\int_0^1 x^2 dx=", @"\frac{d}{dx}\sin(x)=", @"\lim_{x\to 0}\frac{\sin x}{x}=", @"\det\begin{matrix}1&2\\3&4\end{matrix}=", "x^2-1=0=", @"\begin{cases}x+y=3\\x-y=1\end{cases}=", @"\inv\begin{matrix}1&2\\3&4\end{matrix}=" })
+                if (AiMathLayout.WithSolvedResult(source, solve: Real) == source) throw new InvalidOperationException("Real CAS → application result unchanged: " + source);
+            Console.WriteLine("Native Giac → trailing equals policy/typesetting: passed.");
+        }
+        Console.WriteLine("Symbolic math dispatch, equations vs answers, unsupported output and written RHS preservation: passed.");
     }
 
     private sealed class TestRecognizer(float confidence = .99f) : IStrokeTextRecognizer

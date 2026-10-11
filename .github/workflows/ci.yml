@@ -122,6 +122,8 @@ jobs:
         run: dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --ai-pen-test
       - name: Math token formatter and model guards
         run: dotnet run --project tools/InkRecognition.Math.Probe -c Release
+      - name: Symbolic mathematics grammar and command isolation
+        run: dotnet run --project tools/InkMath.Solver.Probe -c Release
       - name: Raw-content geometry, mixed segmentation and model guards
         run: dotnet run --project tools/InkRecognition.RawContent.Probe -c Release
       - name: Legacy integer network and Russian feature numerical controls
@@ -130,6 +132,44 @@ jobs:
         run: python tools/test-legacy-ink.py
       - name: Overlay compositor IPC ownership, cancellation and transport
         run: dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --overlay-platform-test
+
+  symbolic-math:
+    name: Native local CAS / ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-22.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 11.0.100-preview.7.26381.103
+      - name: Install Linux CAS CLI and Native AOT build dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends xcas clang zlib1g-dev
+      - name: Extract verified official Windows CLI without running its installer
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $exe = ./tools/fetch-giac-test-runtime.ps1
+          "BLURMASK_TEST_GIAC=$exe" >> $env:GITHUB_ENV
+      - name: Locate Linux CLI
+        if: runner.os == 'Linux'
+        run: echo "BLURMASK_TEST_GIAC=$(command -v icas)" >> "$GITHUB_ENV"
+      - name: Actual calculus, equations, matrices and process cancellation under Native AOT
+        shell: pwsh
+        run: |
+          $rid = [System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier
+          dotnet publish tools/InkMath.Solver.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/solver-probe
+          if ($LASTEXITCODE -ne 0) { throw 'CAS probe publish failed.' }
+          $exe = if ($IsWindows) { '.artifacts/solver-probe/InkMath.Solver.Probe.exe' } else { '.artifacts/solver-probe/InkMath.Solver.Probe' }
+          & $exe $env:BLURMASK_TEST_GIAC
+          if ($LASTEXITCODE -ne 0) { throw 'Actual native CAS numerical/resource checks failed.' }
+          dotnet build src/BlurMask -c Release -p:PublishAot=false -p:SelfContained=false
+          if ($LASTEXITCODE -ne 0) { throw 'Application build failed.' }
+          dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --ai-pen-test
+          if ($LASTEXITCODE -ne 0) { throw 'CAS application typesetting/equals policy integration failed.' }
 
   native-aot-windows:
     name: Native AOT / Windows x64

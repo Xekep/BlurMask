@@ -301,6 +301,12 @@ internal sealed class DrawingToolbarWindow : Window
             mode.SelectionChanged += (_, _) => { _session.SetAiMode(mode.SelectedIndex switch { 1 => "text", 2 => "math", _ => "auto" }); UpdateStatus(); };
             UpdateStatus(); row.Children.Add(mode); row.Children.Add(status);
         }
+        if (name == "cursor" && _session.Tool == InkTool.Select && _session.CanSolveSelectedMath)
+        {
+            var solve = IconButton(ToolbarGlyph.Text, UiText.T("Решить выделенную формулу"), () => { CloseFlyout(); _ = _session.SolveSelectedMathAsync(); });
+            solve.Content = new TextBlock { Text = "=", FontSize = 23, FontWeight = FontWeight.SemiBold };
+            row.Children.Add(solve);
+        }
         ShowFlyout(name, row, anchor);
         if (_flyoutName == name)
             foreach (var (tool, button) in buttons) _toolButtons[tool] = button;

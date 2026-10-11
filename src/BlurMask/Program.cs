@@ -17,6 +17,11 @@ internal static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        if (args.Length == 2 && args[0] == "--set-math-solver")
+        {
+            AiMathSolver.ConfigureAsync(args[1]).GetAwaiter().GetResult();
+            Console.WriteLine("Configured local Giac solver."); return;
+        }
         if (args.Length == 2 && args[0] == "--install-raw-content-model")
         {
             using var model = File.OpenRead(args[1]);

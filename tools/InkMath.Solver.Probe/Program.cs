@@ -1,0 +1,69 @@
+using InkMath.Solver;
+using System.Diagnostics;
+
+var fixtures = new (string Input, string Cas)[]
+{
+    (@"\int x^2 dx", "integrate((x^2),x)"),
+    (@"\int_0^1 x^2 dx", "integrate((x^2),x,0,1)"),
+    (@"\frac{d}{dx}\sin(x)", "diff(sin(x),x,1)"),
+    (@"\frac{d^2}{dx^2}x^3", "diff((x^3),x,2)"),
+    (@"\lim_{x\to 0}\frac{\sin x}{x}", "limit((sin(x)/x),x,0)"),
+    (@"\sum_{k=1}^{10}k", "sum(k,k,1,10)"),
+    (@"\prod_{k=1}^{4}k", "product(k,k,1,4)"),
+    (@"x^2-1=0", "(((x^2)-1)=0)"),
+    (@"\det\begin{matrix}1&2\\3&4\end{matrix}", "det([[1,2],[3,4]])"),
+    (@"\frac{1}{2}+\sqrt{4}", "((1/2)+sqrt(4))"),
+    ("-x^2", "(-1*(x^2))"), ("2x(x+1)", "((2*x)*(x+1))"),
+    (@"\sqrt[3]{8}", "(8^(1/3))"),
+    (@"\begin{cases}x+y=3\\x-y=1\end{cases}", "[[((x+y)=3)],[((x-y)=1)]]")
+};
+foreach (var (input, expected) in fixtures)
+{
+    var actual = new MathExpressionParser(input).Parse().Cas;
+    if (actual != expected) throw new Exception($"Math grammar differs for {input}: {actual}");
+}
+foreach (var forbidden in new[] { @"\system{whoami}", "read(\"secret\")", "x;system(1)", "x:=1", "__import__('os')", "x\0", new string('-', 4096) + "x", new string('-', 200) + "x", string.Join('^', Enumerable.Repeat("x", 200)), new string('(', 100) + "x" + new string(')', 100), "2+", @"\begin{matrix}1&2\\3\end{matrix}" })
+{
+    try { new MathExpressionParser(forbidden).Parse(); throw new Exception("Unsafe/invalid input accepted: " + forbidden); }
+    catch (FormatException) { }
+}
+Console.WriteLine($"PASS math grammar: {fixtures.Length} translations, command injection and complexity guards");
+if (new MathExpressionParser("plot(x)").Parse().Cas.Contains("plot(", StringComparison.Ordinal)) throw new Exception("Arbitrary function name passed to CAS.");
+if (args.Length == 0) return;
+var solver = new SymbolicMathSolver(Path.GetFullPath(args[0]));
+if (args.Length > 1) { Console.WriteLine((await solver.SolveAsync(args[1]))?.LaTex ?? "unsolved"); return; }
+var watch = Stopwatch.StartNew();
+var actualFixtures = new (string Input, string Expected)[]
+{
+    (@"\int x^2 dx", @"\frac{x^{3}}{3}+C"),
+    (@"\int_0^1 x^2 dx", @"\frac{1}{3}"),
+    (@"\frac{d}{dx}\sin(x)", @"\cos x"),
+    (@"\frac{d^2}{dx^2}x^3", "6 x"),
+    (@"\lim_{x\to 0}\frac{\sin x}{x}", "1"),
+    (@"\sum_{k=1}^{10}k", "55"),
+    (@"\prod_{k=1}^{4}k", "24"),
+    (@"\det\begin{matrix}1&2\\3&4\end{matrix}", "-2"),
+    (@"x^2-1=0", @"x\in \left\{-1,1\right\}"),
+    (@"\frac{1}{2}+\sqrt{4}", @"\frac{5}{2}"),
+    (@"\begin{cases}x+y=3\\x-y=1\end{cases}", @"(x,y)\in \left\{\left[2,1\right]\right\}"),
+    (@"\inv\begin{matrix}1&2\\3&4\end{matrix}", @"\left[\begin{array}{cc}-2&1\\\frac{3}{2}&-\frac{1}{2}\end{array}\right]"),
+    (@"\sin^2 x+\cos^2 x", "1"),
+    (@"\operatorname{factor}(x^2+2x+1)", @"\left(x+1\right)^{2}"),
+    (@"\operatorname{expand}((x+1)^2)", "x^{2}+2 x+1")
+};
+foreach (var (input, expected) in actualFixtures)
+{
+    var value = await solver.SolveAsync(input);
+    if (value?.LaTex != expected) throw new Exception($"Native CAS differs: {input} → {value?.LaTex ?? "null"}; expected {expected}");
+}
+using var cancel = new CancellationTokenSource(); cancel.Cancel();
+try { await solver.SolveAsync("1+1", cancel.Token); throw new Exception("Cancellation lost."); } catch (OperationCanceledException) { }
+if (await solver.SolveAsync(@"\system{whoami}") is not null) throw new Exception("Unsafe input executed.");
+if (await solver.SolveAsync("1/0") is not null) throw new Exception("Undefined arithmetic replaced the input.");
+if (await solver.SolveAsync("x=x") is not null) throw new Exception("Unresolved/identity root echoed as its own solution.");
+if (await solver.SolveAsync("x") is not null) throw new Exception("Unchanged variable treated as an answer.");
+using var activeCancellation = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+var cancellationWatch = Stopwatch.StartNew();
+try { await solver.SolveAsync("(10^8)!", activeCancellation.Token); throw new Exception("Running calculation did not cancel."); } catch (OperationCanceledException) { }
+if (cancellationWatch.Elapsed > TimeSpan.FromSeconds(2)) throw new Exception("Native child cancellation was slow.");
+Console.WriteLine($"PASS native Giac: {actualFixtures.Length} calculus/algebra fixtures, cancellation and undefined/injection guards; {watch.ElapsedMilliseconds} ms");

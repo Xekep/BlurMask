@@ -15,3 +15,8 @@ Formula inference uses the official native CPU ONNX Runtime 1.23.2 (MIT).
 Its license, third-party notices and pinned archive hashes are included under
 runtimes/<platform>/native/. Windows builds include the four app-local Microsoft
 Visual C++ runtime dependencies from the builder's licensed Visual Studio REDIST.
+
+Optional local symbolic mathematics uses a separately installed Giac/Xcas CLI
+(GPL-3.0); it runs as an independent process. No Giac binary/library is bundled
+or linked into BlurMask. Install it from upstream or your OS package manager:
+https://xcas.univ-grenoble-alpes.fr/backup/install_en

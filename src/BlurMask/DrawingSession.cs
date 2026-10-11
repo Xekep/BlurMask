@@ -27,6 +27,7 @@ internal sealed class DrawingSession : IDisposable
     internal SettingsWindow? OpenSettingsWindow => _settingsWindow;
     private InkTool _toolBeforeHide = InkTool.Cursor;
     private bool _disposed;
+    private CancellationTokenSource? _mathSolve;
     private bool _capturing;
     private bool _inTray, _trayInkVisible, _trayCanvasVisible, _traySettingsVisible;
     private readonly DispatcherTimer _fadeTimer = new() { Interval = TimeSpan.FromMilliseconds(33) };
@@ -56,6 +57,43 @@ internal sealed class DrawingSession : IDisposable
     public event Action? StateChanged;
     private readonly AiPenRecognizer _desktopAi, _canvasAi;
     internal void RecognizeAiInk() { FinishInput(); _desktopAi.Flush(); _canvasAi.Flush(); }
+
+    internal bool CanSolveSelectedMath => AiMathSolver.Executable is not null &&
+        !(Target == DrawingTarget.Canvas && Canvas?.ReadOnly == true) &&
+        Document.Marks.Any(m => (Target == DrawingTarget.Canvas ? CanvasSelection : DesktopSelection).SelectedIds.Contains(m.Id) &&
+            m.Tool == InkTool.Text && (m.Font == "STIX Two Math" || AiAutomaticLayout.Mathematical(m.Text)));
+
+    internal async Task SolveSelectedMathAsync()
+    {
+        FinishInput();
+        if (!CanSolveSelectedMath) return;
+        var document = Document;
+        var ids = (Target == DrawingTarget.Canvas ? CanvasSelection : DesktopSelection).SelectedIds.ToHashSet();
+        var sources = document.Marks.Where(m => ids.Contains(m.Id) && m.Tool == InkTool.Text &&
+            (m.Font == "STIX Two Math" || AiAutomaticLayout.Mathematical(m.Text))).Take(16).ToArray();
+        _mathSolve?.Cancel();
+        using var cancellation = new CancellationTokenSource(); _mathSolve = cancellation;
+        try
+        {
+            foreach (var original in sources)
+            {
+                var text = original.Text; var request = text.TrimEnd().TrimEnd('=').TrimEnd();
+                var solution = await Task.Run(() => AiMathSolver.Calculate(request, cancellation.Token), cancellation.Token);
+                if (_disposed || cancellation.IsCancellationRequested || original.Text != text || solution is null ||
+                    !document.Marks.Contains(original) || document.HasActiveEdit || ReferenceEquals(document, CanvasDocument) && Canvas?.ReadOnly == true) continue;
+                var calculated = request + (solution.IsEquation ? "\\Rightarrow " : "=") + solution.LaTex;
+                if (!MathTypesetting.Supported(calculated)) continue;
+                var bounds = original.BaseBounds;
+                var mark = new InkMark(InkTool.Text, original.Color, original.Width, bounds.TopLeft)
+                { Id = original.Id, Text = calculated, Font = "STIX Two Math", FontSize = original.FontSize, Transform = original.Transform, FadeSeconds = original.FadeSeconds };
+                mark.AddPoint(bounds.BottomRight);
+                AiTypesetLayout.Fit(mark, bounds, request, document.Marks);
+                document.ReplaceRecognized([original], mark);
+            }
+        }
+        catch (OperationCanceledException) { }
+        finally { if (ReferenceEquals(_mathSolve, cancellation)) _mathSolve = null; }
+    }
 
     public DrawingSession(Action newMask, Action exit, Action<PrivacyMode> selectMask, Action closeMask,
         Action<bool>? setMaskAttachment = null, Func<Point, double, int>? eraseMasks = null)
@@ -233,6 +271,7 @@ internal sealed class DrawingSession : IDisposable
     public void Clear() { if (Target == DrawingTarget.Canvas && Canvas?.ReadOnly == true) return; FinishInput(); Document.Clear(); }
     private void FinishInput()
     {
+        _mathSolve?.Cancel();
         foreach (var overlay in _overlays) { overlay.FinishText(); overlay.CancelGesture(); }
         Canvas?.FinishInput();
     }
@@ -420,6 +459,7 @@ internal sealed class DrawingSession : IDisposable
     {
         if (_disposed) return;
         _disposed = true;
+        _mathSolve?.Cancel();
         _fadeTimer.Stop();
         _screenTimer.Stop();
         _desktopAi.Dispose(); _canvasAi.Dispose();

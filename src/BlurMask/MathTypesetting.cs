@@ -10,11 +10,11 @@ internal static class MathTypesetting
 {
     private sealed record Box(Geometry Geometry, double Width, double Height, double Baseline);
     private abstract record Node { internal abstract Box Layout(double size); }
-    private sealed record Run(string Text) : Node
+    private sealed record Run(string Text, bool Upright = false) : Node
     {
         internal override Box Layout(double size)
         {
-            var variable = Text.Any(char.IsLetter) && Text is not ("sin" or "cos" or "tan" or "log" or "ln" or "exp" or "lim" or "max" or "min" or "sinh" or "cosh" or "tanh" or "arcsin" or "arccos" or "arctan" or "det" or "gcd");
+            var variable = !Upright && Text.Any(char.IsLetter) && Text is not ("sin" or "cos" or "tan" or "cot" or "sec" or "csc" or "log" or "ln" or "exp" or "lim" or "max" or "min" or "sinh" or "cosh" or "tanh" or "arcsin" or "arccos" or "arctan" or "det" or "gcd");
             var text = new FormattedText(Text, CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
                 variable ? InkFonts.MathVariable : InkFonts.Face("STIX Two Math"), size, Brushes.Black);
             return new(text.BuildGeometry(default) ?? new GeometryGroup(), text.WidthIncludingTrailingWhitespace, text.Height, text.Baseline);
@@ -135,7 +135,7 @@ internal static class MathTypesetting
                 if (c is '^' or '_')
                 {
                     Position++; if (nodes.Count == 0) throw new FormatException("Missing script base.");
-                    var argument = Argument(); var previous = nodes[^1];
+                    var argument = ScriptArgument(); var previous = nodes[^1];
                     nodes[^1] = previous is Script s ? c == '^' ? s with { Sup = argument } : s with { Sub = argument } : new Script(previous, c == '_' ? argument : null, c == '^' ? argument : null);
                     continue;
                 }
@@ -150,21 +150,39 @@ internal static class MathTypesetting
                 var command = Command();
                 switch (command)
                 {
-                    case "frac": nodes.Add(new Fraction(Argument(), Argument())); break;
-                    case "sqrt": nodes.Add(new Radical(Argument())); break;
+                    case "mathrm": case "operatorname": case "text":
+                        Require("{"); var wordStart = Position;
+                        while (Position < source.Length && (char.IsAsciiLetter(source[Position]) || source[Position] == ' ')) Position++;
+                        if (Position - wordStart is 0 or > 32) throw new FormatException("Invalid formula label.");
+                        var word = source[wordStart..Position]; Require("}"); nodes.Add(new Run(word, Upright: true)); break;
+                    case "frac": case "dfrac": case "tfrac": nodes.Add(new Fraction(Argument(), Argument())); break;
+                    case "sqrt": nodes.Add(new Radical(ScriptArgument())); break;
                     case "left":
                         var left = Delimiter(); var body = Read("\\right"); Require("\\right"); nodes.Add(new Fence(left, body, Delimiter())); break;
                     case "begin":
-                        Require("{matrix}"); var rows = new List<IReadOnlyList<Node>>(); var row = new List<Node>();
+                        Require("{"); var start = Position;
+                        while (Position < source.Length && char.IsAsciiLetter(source[Position])) Position++;
+                        var environment = source[start..Position]; Require("}");
+                        if (environment is not ("matrix" or "pmatrix" or "bmatrix" or "vmatrix" or "array" or "cases")) throw new FormatException("Unknown matrix environment.");
+                        if (environment == "array")
+                        {
+                            Require("{"); var columns = 0;
+                            while (Position < source.Length && source[Position] is 'l' or 'c' or 'r' or '|') { Position++; if (++columns > 24) throw new FormatException("Matrix column limit."); }
+                            Require("}");
+                        }
+                        var end = "\\end{" + environment + "}";
+                        var rows = new List<IReadOnlyList<Node>>(); var row = new List<Node>();
                         while (true)
                         {
-                            row.Add(Read("&", "\\\\", "\\end{matrix}"));
+                            row.Add(Read("&", "\\\\", end));
+                            if (row.Count > 12 || rows.Count >= 12) throw new FormatException("Matrix dimension limit.");
                             if (At("&")) { Position++; continue; }
                             rows.Add(row); row = [];
                             if (At("\\\\")) { Position += 2; continue; }
-                            Require("\\end{matrix}"); break;
+                            Require(end); break;
                         }
-                        nodes.Add(new Table(rows)); break;
+                        Node table = new Table(rows);
+                        nodes.Add(environment switch { "pmatrix" => new Fence("(", table, ")"), "bmatrix" => new Fence("[", table, "]"), "vmatrix" => new Fence("|", table, "|"), "cases" => new Fence("{", table, "."), _ => table }); break;
                     default:
                         if (!Symbols.TryGetValue(command, out var symbol)) throw new FormatException("Unsupported formula command.");
                         nodes.Add(new Run(symbol)); break;
@@ -173,6 +191,22 @@ internal static class MathTypesetting
             _depth--; return new Row(nodes);
         }
         private Node Argument() { Require("{"); var node = Read("}"); Require("}"); return node; }
+        private Node ScriptArgument()
+        {
+            if (At("{")) return Argument();
+            if (Position == source.Length) throw new FormatException("Missing formula script.");
+            if (At("\\"))
+            {
+                var command = Command();
+                if (!Symbols.TryGetValue(command, out var symbol)) throw new FormatException("Unknown script symbol.");
+                return new Run(symbol);
+            }
+            var start = Position;
+            if (char.IsAsciiDigit(source[Position])) while (Position < source.Length && char.IsAsciiDigit(source[Position])) Position++;
+            else if (char.IsLetter(source[Position])) Position++;
+            else throw new FormatException("Invalid formula script.");
+            return new Run(source[start..Position]);
+        }
         private void Require(string value) { if (!At(value)) throw new FormatException("Incomplete formula."); Position += value.Length; }
         private string Command()
         {
@@ -196,6 +230,8 @@ internal static class MathTypesetting
         ["alpha"]="α", ["beta"]="β", ["gamma"]="γ", ["delta"]="δ", ["epsilon"]="ε", ["theta"]="θ", ["lambda"]="λ", ["mu"]="μ", ["pi"]="π", ["sigma"]="σ", ["phi"]="φ", ["omega"]="ω",
         ["Gamma"]="Γ", ["Delta"]="Δ", ["Sigma"]="Σ", ["Omega"]="Ω", ["infty"]="∞", ["int"]="∫", ["sum"]="∑", ["prod"]="∏", ["partial"]="∂", ["nabla"]="∇",
         ["pm"]="±", ["times"]="×", ["div"]="÷", ["cdot"]="⋅", ["leq"]="≤", ["geq"]="≥", ["neq"]="≠", ["approx"]="≈", ["in"]="∈", ["notin"]="∉", ["to"]="→", ["Rightarrow"]="⇒",
-        ["{"]="{", ["}"]="}", ["Vert"]="‖", ["langle"]="⟨", ["rangle"]="⟩", ["%"]="%", ["$"]="$", ["#"]="#", ["&"]="&", ["_"]="_", ["backslash"]="\\", ["sim"]="~"
+        ["{"]="{", ["}"]="}", ["Vert"]="‖", ["langle"]="⟨", ["rangle"]="⟩", ["%"]="%", ["$"]="$", ["#"]="#", ["&"]="&", ["_"]="_", ["backslash"]="\\", ["sim"]="~",
+        ["sin"]="sin", ["cos"]="cos", ["tan"]="tan", ["cot"]="cot", ["sec"]="sec", ["csc"]="csc", ["ln"]="ln", ["log"]="log", ["exp"]="exp", ["lim"]="lim",
+        ["sinh"]="sinh", ["cosh"]="cosh", ["tanh"]="tanh", ["arcsin"]="arcsin", ["arccos"]="arccos", ["arctan"]="arctan", ["det"]="det", ["inv"]="inv", ["rank"]="rank", ["trace"]="trace", ["varnothing"]="∅", [","]=" ", [";"]=" ", ["!"]=""
     };
 }
