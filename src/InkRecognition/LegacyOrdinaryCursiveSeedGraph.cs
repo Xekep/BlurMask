@@ -7,8 +7,8 @@ public sealed record LegacyOrdinaryCursiveSeedArc(int SeedGroupIndex, sbyte Plac
 /// <summary>
 /// Native1a1ef0/1a1850 seed-arc topology and1a4f10 physical-overlap flags, before
 /// merged glyph candidates. One ordinary LTR source, noNN reorder, shift1,
-/// unknown physical boundaries. Multiple deferred seed interactions are refused
-/// in this first checked producer. This graph is not a linear atom lattice.
+/// unknown physical boundaries. Checked ordinary deferred interactions retain
+/// their linked placement alternatives. This graph is not a linear atom lattice.
 /// </summary>
 public sealed class LegacyOrdinaryCursiveSeedGraph
 {
@@ -27,12 +27,25 @@ public sealed class LegacyOrdinaryCursiveSeedGraph
 
     public static LegacyOrdinaryCursiveSeedGraph CreateSingleDeferred(LegacyOrdinaryCursiveSeedResult source,
         CancellationToken cancellationToken = default)
+        => Create(source, true, cancellationToken);
+
+    /// <summary>
+    /// Checked noNN/shift1 ordinary expansion, including adjacent and multiple
+    /// deferred seeds. Relative ordinary/deferred orders and linked placement
+    /// alternatives are retained; this does not select a winning source path.
+    /// </summary>
+    public static LegacyOrdinaryCursiveSeedGraph CreateOrdinaryDeferred(LegacyOrdinaryCursiveSeedResult source,
+        CancellationToken cancellationToken = default)
+        => Create(source, false, cancellationToken);
+
+    private static LegacyOrdinaryCursiveSeedGraph Create(LegacyOrdinaryCursiveSeedResult source,
+        bool singleDeferredOnly, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(source);
         cancellationToken.ThrowIfCancellationRequested();
         var seeds = source.Seeds.ToArray();
         if (seeds.Length is < 1 or > 4096) throw new ArgumentException("Expected1..4096 native source seeds.");
-        if (source.DeferredCount > 1)
+        if (singleDeferredOnly && source.DeferredCount > 1)
             throw new NotSupportedException("Multiple interacting deferred seed expansions have not been independently checked.");
         if (seeds[0].Deferred || seeds.Any(s => s.Deferred && s.InsertionDisplacement is not (-1 or 0)))
             throw new ArgumentException("Invalid checked ordinary seed placement.");
