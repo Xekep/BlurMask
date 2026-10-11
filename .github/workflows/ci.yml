@@ -110,6 +110,11 @@ jobs:
         run: |
           & ./bin/Release/net11.0/win-x64/publish/BlurMask.exe --performance-test | Out-Default
           if ($LASTEXITCODE -ne 0) { throw 'Native performance probe failed.' }
+      - name: Native mask region equivalence and performance
+        shell: pwsh
+        run: |
+          & ./bin/Release/net11.0/win-x64/publish/BlurMask.exe --mask-performance-test | Out-Default
+          if ($LASTEXITCODE -ne 0) { throw 'Mask region probe failed.' }
       - name: Startup and single-instance smoke test
         shell: pwsh
         env:

@@ -374,6 +374,29 @@ internal static class DrawingSmokeTest
             mask.Position = new PixelPoint(650, 350); await Task.Delay(450); attachment.Update();
             catalog.Target = catalog.Target with { Bounds = new PixelRect(600, 300, 400, 300) }; attachment.Update(); await Task.Delay(100);
             Check(mask.Position == new PixelPoint(750, 400), "Manual mask placement did not update its attachment offset.");
+            if (mask.NativeOptics is { } optics)
+            {
+                foreach (var mode in new[] { PrivacyMode.Scramble, PrivacyMode.GlassBlocks })
+                {
+                    mask.SetMode(mode); await Task.Delay(40);
+                    var sources = optics.SourceUpdateCount; var regions = optics.RegionBuildCount;
+                    for (var move = 0; move < 120; move++)
+                    {
+                        catalog.Target = catalog.Target with { Bounds = new PixelRect(600 + move, 300 + move / 2, 400, 300) };
+                        attachment.Update();
+                    }
+                    Check(optics.SourceUpdateCount == sources, "Optical capture blocked a synchronous attachment movement burst.");
+                    await Task.Delay(150);
+                    Check(optics.SourceUpdateCount > sources && optics.SourceUpdateCount - sources <= 12,
+                        "Optical movement burst was lost or replayed instead of coalesced.");
+                    Check(optics.SourceBounds.Position == mask.PointToScreen(default) && optics.RegionBuildCount == regions,
+                        "Optical source lagged behind the final mask or rebuilt regions during a pure move.");
+                    catalog.Target = catalog.Target with { Visible = false }; attachment.Update();
+                    sources = optics.SourceUpdateCount; await Task.Delay(150);
+                    Check(optics.SourceUpdateCount == sources, "Hidden attached mask kept capturing the desktop.");
+                    catalog.Target = catalog.Target with { Visible = true }; attachment.Update(); await Task.Delay(40);
+                }
+            }
             var closed = false; mask.Closed += (_, _) => closed = true;
             catalog.Target = null; attachment.Update(); Check(closed, "Mask outlived its closed target.");
         }

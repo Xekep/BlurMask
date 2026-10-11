@@ -36,6 +36,7 @@ public sealed class BlurMaskWindow : Window
 
     public PrivacyMode Mode { get; private set; } = PrivacyMode.Blur;
     internal bool HasNativeOptics => _windowsGlass is not null;
+    internal WindowsGlassRefraction? NativeOptics => _windowsGlass;
 
     public event Action<PrivacyMode>? ModeChanged;
 
@@ -401,7 +402,7 @@ public sealed class BlurMaskWindow : Window
                 {
                     // Windows: four fixed Magnifier planes cover all glass cells through disjoint
                     // Win32 regions. Native window count stays constant as the mask grows.
-                    // There is no polling/render timer; source geometry changes only on move/resize.
+                    // Move/resize bursts share one source update; stationary content refreshes slowly.
                     TransparencyLevelHint =
                     [
                         WindowTransparencyLevel.Transparent,

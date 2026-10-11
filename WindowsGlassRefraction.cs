@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Threading;
 
@@ -14,15 +15,13 @@ namespace BlurMask;
 /// different source offset/scale/color transform. Neighboring cells therefore sample different
 /// desktop pixels while the native window count stays constant as the mask grows.
 ///
-/// A small timer refreshes the four sources while visible; window movement also
-/// updates geometry immediately. The native window count is independent of mask size.
+/// Source updates are coalesced to one current geometry per 16 ms during movement;
+/// stationary content refreshes at 100 ms. Native window count is independent of mask size.
 /// </summary>
 internal sealed partial class WindowsGlassRefraction : IDisposable
 {
     private const int PlaneCount = 4;
     private const int TilePitch = 32;
-    private const int Seam = 1;
-    private const int TileSide = TilePitch - Seam * 2; // 30 px, always square.
 
     private const uint WsChild = 0x40000000;
     private const uint WsVisible = 0x10000000;
@@ -38,7 +37,6 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
     private const int SwShowNa = 8;
 
     private const uint MwFilterModeExclude = 0;
-    private const int RgnOr = 2;
 
     private readonly Window _window;
     private readonly nint _host;
@@ -48,12 +46,16 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
     private bool _scramble;
     private bool _disposed;
     private readonly DispatcherTimer _refresh = new() { Interval = TimeSpan.FromMilliseconds(100) };
+    private readonly DispatcherTimer _geometryRefresh = new() { Interval = TimeSpan.FromMilliseconds(16) };
     private int _lastWidth = -1;
     private int _lastHeight = -1;
     private int _lastOriginX = int.MinValue;
     private int _lastOriginY = int.MinValue;
     private int _lastColumns = -1;
     private int _lastRows = -1;
+    internal long SourceUpdateCount { get; private set; }
+    internal long RegionBuildCount { get; private set; }
+    internal PixelRect SourceBounds => new(_lastOriginX, _lastOriginY, Math.Max(0, _lastWidth), Math.Max(0, _lastHeight));
 
     private WindowsGlassRefraction(Window window, nint host)
     {
@@ -61,18 +63,23 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
         _host = host;
 
         CreatePlanes();
+        _geometryRefresh.Tick += (_, _) =>
+        {
+            _geometryRefresh.Stop();
+            if (CanRefresh()) UpdateGeometry(force: false);
+        };
         _refresh.Tick += (_, _) =>
         {
-            if (!_enabled || _disposed || !_window.IsVisible || _lastWidth <= 0 || _lastHeight <= 0) return;
-            // Session changes can invalidate native magnification. Stop the effect
-            // rather than touching stale geometry after all monitors disappear.
-            if (RemoteDesktopSupport.IsRemoteSession || _window.Screens.All.Count == 0) { SetEnabled(false); return; }
+            // Pending geometry will sample the latest desktop once, never an old rectangle.
+            if (_geometryRefresh.IsEnabled || !CanRefresh() || UpdateGeometry(force: false)) return;
+            if (_lastWidth <= 0 || _lastHeight <= 0) return;
             for (var i = 0; i < PlaneCount; i++)
                 UpdatePlaneSource(_planes[i], _lastOriginX, _lastOriginY, _lastWidth, _lastHeight);
         };
 
         _window.PositionChanged += OnWindowPositionChanged;
         _window.Resized += OnWindowResized;
+        _window.PropertyChanged += OnWindowVisibilityChanged;
     }
 
     public static WindowsGlassRefraction? TryCreate(Window window)
@@ -164,8 +171,7 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
 
         if (enabled)
         {
-            // Force exactly one complete sync when entering the mode. Afterwards only actual
-            // native move/resize notifications touch source geometry.
+            // Force a complete sync when entering the mode; bursts afterwards share one frame.
             _lastWidth = -1;
             _lastHeight = -1;
             _lastOriginX = int.MinValue;
@@ -179,11 +185,12 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
                 if (plane is not null)
                     _ = ShowWindow(plane.Hwnd, SwShowNa);
             }
-            _refresh.Start();
+            if (_window.IsVisible) _refresh.Start();
         }
         else
         {
             _refresh.Stop();
+            _geometryRefresh.Stop();
             foreach (var plane in _planes)
             {
                 if (plane is not null)
@@ -214,33 +221,54 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
 
     private void OnWindowPositionChanged(object? sender, PixelPointEventArgs e)
     {
-        if (_enabled && !_disposed)
-            UpdateGeometry(force: false);
+        QueueGeometry();
     }
 
     private void OnWindowResized(object? sender, WindowResizedEventArgs e)
     {
-        if (_enabled && !_disposed)
-            UpdateGeometry(force: false);
+        QueueGeometry();
     }
 
-    private void UpdateGeometry(bool force)
+    private void QueueGeometry()
+    {
+        // Native child planes already move with the mask. Keep capture/region work out
+        // of its synchronous PositionChanged callback and always read the newest HWND rect.
+        if (_enabled && !_disposed && _window.IsVisible && !_geometryRefresh.IsEnabled)
+            _geometryRefresh.Start();
+    }
+
+    private void OnWindowVisibilityChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+    {
+        if (e.Property != Visual.IsVisibleProperty || !_enabled || _disposed) return;
+        if (_window.IsVisible) { QueueGeometry(); _refresh.Start(); }
+        else { _geometryRefresh.Stop(); _refresh.Stop(); }
+    }
+
+    private bool CanRefresh()
+    {
+        if (!_enabled || _disposed || !_window.IsVisible) return false;
+        if (RemoteDesktopSupport.IsRemoteSession || _window.Screens.All.Count == 0)
+        { SetEnabled(false); return false; }
+        return true;
+    }
+
+    private bool UpdateGeometry(bool force)
     {
         if (GetClientRect(_host, out var client) == 0)
-            return;
+            return false;
 
         var width = Math.Max(1, client.Right - client.Left);
         var height = Math.Max(1, client.Bottom - client.Top);
 
         var origin = new NativePoint(0, 0);
         if (ClientToScreen(_host, ref origin) == 0)
-            return;
+            return false;
 
         var sizeChanged = width != _lastWidth || height != _lastHeight;
         var positionChanged = origin.X != _lastOriginX || origin.Y != _lastOriginY;
 
         if (!force && !sizeChanged && !positionChanged)
-            return;
+            return false;
 
         _lastWidth = width;
         _lastHeight = height;
@@ -286,44 +314,19 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
             var plane = _planes[i];
             UpdatePlaneSource(plane, origin.X, origin.Y, width, height);
         }
+        return true;
     }
 
     private void RebuildPlaneRegion(nint hwnd, int planeIndex, int columns, int rows)
     {
-        var combined = CreateRectRgn(0, 0, 0, 0);
+        RegionBuildCount++;
+        var combined = WindowsMaskRegion.Create(planeIndex, columns, rows, _scramble);
         if (combined == IntPtr.Zero)
             return;
 
         var handedToWindow = false;
         try
         {
-            for (var row = 0; row < rows; row++)
-            {
-                for (var column = 0; column < columns; column++)
-                {
-                    if ((_scramble ? (column & 1) + (row & 1) * 2 : PlaneForCell(column, row)) != planeIndex)
-                        continue;
-
-                    var left = _scramble ? column * 8 : column * TilePitch + Seam;
-                    var top = _scramble ? row * 8 : row * TilePitch + Seam;
-                    var right = left + (_scramble ? 8 : TileSide);
-                    var bottom = top + (_scramble ? 8 : TileSide);
-
-                    var cell = CreateRectRgn(left, top, right, bottom);
-                    if (cell == IntPtr.Zero)
-                        continue;
-
-                    try
-                    {
-                        _ = CombineRgn(combined, combined, cell, RgnOr);
-                    }
-                    finally
-                    {
-                        _ = DeleteObject(cell);
-                    }
-                }
-            }
-
             // On success Windows owns the HRGN and deletes it when it is replaced/destroyed.
             if (SetWindowRgn(hwnd, combined, 1) != 0)
                 handedToWindow = true;
@@ -335,15 +338,9 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
         }
     }
 
-    private static int PlaneForCell(int column, int row)
+    private void UpdatePlaneSource(Plane plane, int originX, int originY, int width, int height)
     {
-        // Hash instead of a plain checkerboard. Straight edges crossing the grid therefore
-        // encounter irregular refraction directions, much closer to cast/textured glass.
-        return (int)(Hash(column, row) % PlaneCount);
-    }
-
-    private static void UpdatePlaneSource(Plane plane, int originX, int originY, int width, int height)
-    {
+        SourceUpdateCount++;
         var sourceWidth = Math.Max(1, (int)Math.Round(width / plane.Scale));
         var sourceHeight = Math.Max(1, (int)Math.Round(height / plane.Scale));
 
@@ -371,20 +368,6 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
         _ => (1.018f,  4,  3)
     };
 
-    private static uint Hash(int x, int y)
-    {
-        unchecked
-        {
-            uint h = 2166136261;
-            h = (h ^ (uint)(x + 17)) * 16777619;
-            h = (h ^ (uint)(y + 31)) * 16777619;
-            h ^= h >> 13;
-            h *= 0x5bd1e995;
-            h ^= h >> 15;
-            return h;
-        }
-    }
-
     public void Dispose()
     {
         if (_disposed)
@@ -392,10 +375,12 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
 
         _disposed = true;
         _refresh.Stop();
+        _geometryRefresh.Stop();
         _enabled = false;
 
         _window.PositionChanged -= OnWindowPositionChanged;
         _window.Resized -= OnWindowResized;
+        _window.PropertyChanged -= OnWindowVisibilityChanged;
 
         foreach (var plane in _planes)
         {
@@ -572,12 +557,6 @@ internal sealed partial class WindowsGlassRefraction : IDisposable
 
     [LibraryImport("user32.dll")]
     private static partial int InvalidateRect(nint hwnd, nint rect, int erase);
-
-    [LibraryImport("gdi32.dll")]
-    private static partial nint CreateRectRgn(int left, int top, int right, int bottom);
-
-    [LibraryImport("gdi32.dll")]
-    private static partial int CombineRgn(nint dest, nint source1, nint source2, int mode);
 
     [LibraryImport("gdi32.dll")]
     private static partial int DeleteObject(nint obj);

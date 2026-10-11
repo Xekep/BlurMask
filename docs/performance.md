@@ -23,6 +23,21 @@ A 20,000-point stroke is received in 400 packets of 50 points. Before/after meas
 
 The capture probe measures redundant capture calls with no additional points; it does not model 400 different full-sized strokes. CPU timings vary between runs. Bounds caching invalidates on geometry/text/font changes; clipping skips offscreen committed/remote marks. Active ink remains visible at the viewport boundary. Undo, movement, fading, raster and collaboration tests exercise the optimized code.
 
+## Attached optical masks
+
+Glass/scramble source refresh no longer runs synchronously for every window position notification. Movement bursts share a 16 ms timer that samples the latest HWND rectangle; native child planes follow the parent immediately. Stationary sources refresh every 100 ms, and hidden masks stop both timers. Pure movement does not rebuild tile regions. This bounds requested work; it does not guarantee 60 rendered frames/s from Windows Magnification or DWM.
+
+Tile regions are now submitted with one `ExtCreateRegion` call per plane using pooled RGNDATA instead of creating/combining/deleting a GDI region for each tile. `--mask-performance-test` verifies exact equivalence with `EqualRgn`, including empty regions, without creating any windows or desktop captures. Local managed Release timings for all four planes (2026-10-11):
+
+| Mask size / effect | Previous region construction | Batched construction |
+|---|---:|---:|
+| 1280×720 glass | 5.12 ms | 0.89 ms |
+| 1920×1080 glass | 14.63 ms | 1.78 ms |
+| 1280×720 scramble | 246.93 ms | 12.53 ms |
+| 1920×1080 scramble | 910.79 ms | 28.03 ms |
+
+These are warmed CPU/GDI measurements of region rebuilding during resize, not end-to-end drag latency or GPU frame time. CI separately verifies that 120 attached-window moves do not synchronously capture desktop pixels, that the final source follows the final mask coordinates without rebuilding regions, and that hidden masks stop capture.
+
 ## Collaboration changes
 
 - Sender/receiver append only new points; packet lists and accumulator lists have separate ownership.

@@ -10,7 +10,7 @@ header, footer { display: flex; align-items: center; justify-content: space-betw
 .logo { width: 42px; height: 42px; background: #22231f; border-radius: 50%; display: grid; place-items: center; }
 .source { color: #6b6e66; font-size: 14px; }
 .source:hover { color: #232421; }
-main { flex: 1; padding: clamp(64px, 12vh, 140px) 0 88px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); align-items: center; gap: 32px; }
+main { flex: 1; padding: clamp(40px, 6vh, 72px) 0 64px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); align-items: center; align-content: start; gap: 32px; }
 .hero-copy { min-width: 0; }
 .app-preview { min-width: 0; filter: drop-shadow(0 24px 26px #39403218); }
 .app-preview img { display: block; width: 100%; height: auto; border-radius: 8px; }
@@ -37,7 +37,7 @@ footer { padding-top: 20px; border-top: 1px solid #e1e3db; font-size: 12px; colo
 }
 @media (max-width: 600px) {
   .page { padding: 24px; }
-  main { padding-top: 64px; padding-bottom: 64px; }
+  main { padding-top: 36px; padding-bottom: 48px; }
   .description { font-size: 17px; }
   .downloads { gap: 8px; }
   .download { padding: 14px 18px; }
