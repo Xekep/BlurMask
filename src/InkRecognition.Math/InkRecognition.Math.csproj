@@ -6,12 +6,18 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsAotCompatible>true</IsAotCompatible>
     <Description>Independent pen-stroke mathematics recognition with native CPU ONNX Runtime.</Description>
+    <PackageId>BlurMask.InkRecognition.Math</PackageId>
+    <Authors>Xekep</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>PACKAGE.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/Xekep/BlurMask</RepositoryUrl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <DebugType>none</DebugType><DebugSymbols>false</DebugSymbols>
     <CopyOutputSymbolsToPublishDirectory>false</CopyOutputSymbolsToPublishDirectory>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="../InkRecognition/PACKAGE.md" Pack="true" PackagePath="/" />
     <ProjectReference Include="../InkRecognition/InkRecognition.csproj" />
   </ItemGroup>
 </Project>

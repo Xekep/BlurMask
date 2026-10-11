@@ -24,6 +24,12 @@ ushort[] mir = "\u043c\u0438\u0440".Select(letter =>
 if (!model.WordIndex.TryGetWordId(mir, out int wordId) || wordId != 198893 ||
     model.LanguageModel.GetStoredWordCost(wordId) != 9851 || model.LanguageModel.GetWordClass(wordId) != 435)
     throw new InvalidOperationException("Independent stored dictionary/language correspondence failed.");
+if (model.SourceKind != 0x135 || model.ResourceLanguageProfileIndex != 2)
+    throw new InvalidOperationException("Stored acoustic source profile forwarding differs.");
+var ordinary=model.CreateResourceLanguageScorer(runtimeScale:1).Score(wordId,[],0,false,true,false);
+var explicitProfile=model.CreateLanguageScorer(2,1).Score(wordId,[],0,false,true,false);
+if (ordinary != explicitProfile || ordinary.WordCost != -9096)
+    throw new InvalidOperationException("Stored source kind did not select the verified lexical profile.");
 
 // Each malformed profile is validated against the same unchanged real resource pair.
 Reject(() => LegacyRussianModelBundle.Load(acoustic, lexical, "{"u8));

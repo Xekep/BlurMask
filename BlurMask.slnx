@@ -43,6 +43,15 @@
     <Project Path="tools/LegacyLineSamples.Probe/LegacyLineSamples.Probe.csproj" />
     <Project Path="tools/LegacyInkRanges.Probe/LegacyInkRanges.Probe.csproj" />
     <Project Path="tools/LegacyWordAuxiliary.Probe/LegacyWordAuxiliary.Probe.csproj" />
+    <Project Path="tools/LegacyWordScorer.Probe/LegacyWordScorer.Probe.csproj" />
+    <Project Path="tools/LegacyCutBoundary.Probe/LegacyCutBoundary.Probe.csproj" />
+    <Project Path="tools/LegacyCursiveAtoms.Probe/LegacyCursiveAtoms.Probe.csproj" />
+    <Project Path="tools/PreparedLineClassifier.Probe/PreparedLineClassifier.Probe.csproj" />
+    <Project Path="tools/LegacyLinePairFeatures.Probe/LegacyLinePairFeatures.Probe.csproj" />
+    <Project Path="tools/LegacyCursiveGeometry.Probe/LegacyCursiveGeometry.Probe.csproj" />
+    <Project Path="tools/LegacyCursivePreparedInk.Probe/LegacyCursivePreparedInk.Probe.csproj" />
+    <Project Path="tools/LegacyCursiveCategory.Probe/LegacyCursiveCategory.Probe.csproj" />
+    <Project Path="tools/LegacyWordCandidate.Probe/LegacyWordCandidate.Probe.csproj" />
     <Project Path="tools/InkMath.Solver.Probe/InkMath.Solver.Probe.csproj" />
   </Folder>
 </Solution>

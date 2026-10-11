@@ -226,8 +226,8 @@ probability values without embedding a vendor table.
 [`LegacyAcousticCostEnsemble`](../../docs/legacy-russian-acoustic-cost-ensemble.md)
 combines seven explicit weighted family slots with checked native scalar
 normalization; its integer costs remain separate from confidence probabilities.
-Native profile selection,
-history state and total acoustic/lexical scoring are still unfinished; these
+Automatic native profile selection,
+history generation and full acoustic/lexical search are still unfinished; these
 components do not enable Russian cursive recognition in the GUI.
 
 [`LegacyRussianModelBundle`](../../docs/legacy-russian-model-bundle.md) now loads
@@ -249,3 +249,58 @@ and total native search still need restoration.
 checked extrema height samples from float32 ink, including plateau/endpoints and
 the explicit half-X profile. This supplies another upstream geometry component;
 automatic line clustering remains unfinished.
+
+`LegacyDirectionalGlyphClassifier` joins supplied interior point ranges and
+clipped boundary flags with all four directional neural families. It preserves
+calibrated confidence and raw family probabilities separately; integer acoustic
+costs use the raw channel with explicit weights/multiplier. The existing word
+path now calls this same classifier. Sixteen model diagnostic results remain
+identical after the refactor. `LegacyRussianModelBundle.CreateGlyphClassifier`
+exposes it independently of word cuts or dictionary decoding.
+
+[`LegacyWordLanguageScorer`](../../docs/legacy-russian-word-scorer.md) combines
+the checked known-word lexical terms, including category/boundary flags and
+zero/one class history, with an explicit profile and runtime scale. The bundle
+exposes it through `CreateLanguageScorer`. [`LegacyCutBoundaryPolicy`](../../docs/legacy-russian-cut-policy.md)
+restores one sampler's threshold/geometry promotion and cut/join cost decisions;
+its prepared-ink positions are not automatically original-stroke point indices.
+
+[`LegacyCursiveInkAtoms`](../../docs/legacy-russian-cursive-atoms.md) restores the
+actual Russian sampler297 ownership/composition rules. Interior adjacent atoms
+share one endpoint; recombining them preserves a continuous physical stroke.
+Producing cut markers from raw ink remains a separate geometry pass.
+
+[`PreparedLineBoundaryClassifier`](../../docs/legacy-line-neural-classifier.md)
+loads the two embedded42-input affine/BLSTM networks from `models/line-geometry`
+directly, sharing the generic CPU executor with the ink recognizer. It consumes
+prepared pair features and does not infer font size or baseline. Existing
+float/int16/int8 golden controls still pass; independent NumPy controls verify
+both real and synthetic networks, repeated/concurrent runs and malformed data.
+
+[`LegacyLineStrokeStatistics` and `LegacyLinePairFeatures`](../../docs/legacy-line-pair-features.md)
+now connect raw float32 strokes to the checked 17 statistics and 42 neural inputs.
+Full group construction and automatic baseline selection remain separate.
+[`LegacyCursiveMarkerGeometry`](../../docs/legacy-russian-cursive-marker-geometry.md)
+and [`LegacyCursiveCategoryProfile`](../../docs/legacy-russian-cursive-category-profile.md)
+restore selected prepared-marker passes and the stored category graph. Cut indices
+address prepared ink, which may include interpolated points.
+[`LegacyCursivePreparedInk`](../../docs/legacy-russian-cursive-prepared-ink.md)
+provides that owned buffer, exact forward deltas/lengths, explicit point insertion
+and source-index mapping. Candidate insertion locations remain caller supplied.
+
+[`LegacyWordCandidateScorer`](../../docs/legacy-russian-word-candidate.md) restores
+the ordinary known-word path's lexical budget and total-cost acceptance, including
+negative offsets and strict full-heap ties. `LegacyIntegerLexicalDecoder` provides
+an original bounded dictionary beam with a terminal scoring callback before final
+pruning. `MapIntegerCosts` preserves integer acoustic costs; no confidence-to-cost
+conversion is substituted. This decoder is not the complete native SDK search.
+
+Releases also attach three independent `.nupkg` libraries and the separate
+`InkRecognition-models.zip` catalog. Add the packages to a local NuGet source;
+the model archive retains the same `models/` paths used by the repository.
+See [the package readme](PACKAGE.md) for loading the Russian model bundle.
+
+The checked [ordinary source-profile forwarding](../../docs/legacy-russian-word-source-profile.md)
+reads source kind `0x135` from the acoustic resource and selects stored language
+profile2. `CreateResourceLanguageScorer` reproduces that branch while keeping
+runtime scale explicit. It does not infer global recognition modes or history.

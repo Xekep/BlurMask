@@ -21,9 +21,7 @@ public sealed record LegacyDirectionalWordResult(IReadOnlyList<LegacySegmentedWo
 /// </summary>
 public sealed class LegacyDirectionalWordRecognizer
 {
-    private readonly LegacyDirectionalAcousticFamily[] _families;
-    private readonly LegacyDirectionalCalibration _temporal, _spatial;
-    private readonly LegacyInkActivations _activations;
+    private readonly LegacyDirectionalGlyphClassifier _classifier;
     private readonly LegacyContextWindowScorer _context;
     private readonly LegacyAcousticLexicalMapping _mapping;
     private readonly LegacyInkAlphabet _alphabet;
@@ -38,28 +36,10 @@ public sealed class LegacyDirectionalWordRecognizer
     {
         ArgumentNullException.ThrowIfNull(families); ArgumentNullException.ThrowIfNull(activations);
         ArgumentNullException.ThrowIfNull(lexicalAlphabet); ArgumentNullException.ThrowIfNull(lexicon);
-        if (families.Count != 4) throw new ArgumentException("Exactly four matching acoustic families are required.", nameof(families));
-        int[] widths = [256, 238, 313, 313]; ushort[] kinds = [0x1f, 0x2f, 0x3f, 0x4f];
-        _families = new LegacyDirectionalAcousticFamily[4];
-        int outputs = 0;
-        var validation = new LegacyAcousticFamilyScores?[7];
-        for (int i = 0; i < 4; i++)
-        {
-            var family = families[i]; ArgumentNullException.ThrowIfNull(family);
-            ArgumentNullException.ThrowIfNull(family.Network);
-            if (family.Network.InputWidth != widths[i] || family.Network.Kind != kinds[i] ||
-                family.Network.OutputWidth is < 1 or > 512 ||
-                (outputs != 0 && family.Network.OutputWidth != outputs))
-                throw new ArgumentException("Acoustic family profile, ordering or output widths differ.", nameof(families));
-            outputs = family.Network.OutputWidth;
-            _families[i] = new(family.Network, family.Centers.ToArray(), family.Slopes.ToArray());
-            validation[i] = new(new int[outputs], _families[i].Centers, _families[i].Slopes);
-        }
-        _ = LegacyAcousticEnsemble.Combine(validation);
-        _temporal = Snapshot(temporal); _spatial = Snapshot(spatial);
-        _activations = activations; _alphabet = lexicalAlphabet; _lexicon = lexicon;
+        _classifier = new(families, activations, temporal, spatial);
+        _alphabet = lexicalAlphabet; _lexicon = lexicon;
         _context = new(initialContext, activations);
-        _mapping = new(acousticAlphabet, lexicalAlphabet, outputs, relatedFormMode);
+        _mapping = new(acousticAlphabet, lexicalAlphabet, _classifier.OutputWidth, relatedFormMode);
     }
 
     /// <summary>
@@ -102,27 +82,12 @@ public sealed class LegacyDirectionalWordRecognizer
             var context = LegacyFloatInputQuantization.Quantize(
                 LegacyContextWeighting.Combine(selected, sumX / pointCount, baseline.Height, 0, 1, 1),
                 cancellationToken: cancellationToken);
-            short[][] inputs = new short[4][];
-            if (includeBaselineFamilies)
-            {
-                inputs[0] = LegacyStrokeFeatures.ExtractInputWithBaseline(glyph, baseline, context, 1024, 1024, cancellationToken);
-                inputs[1] = LegacyRasterFeatures.ExtractInputWithBaseline(glyph, baseline, context, 1024, 1024, cancellationToken);
-            }
-            inputs[2] = LegacyTemporalDirectionalFeatures.Extract(glyph, baseline, _temporal.Minima.Span,
-                _temporal.Maxima.Span, context, 1024, 1024, cancellationToken);
-            inputs[3] = LegacySpatialDirectionalFeatures.Extract(glyph, baseline, _spatial.Minima.Span,
-                _spatial.Maxima.Span, context, 1024, 1024, cancellationToken);
-            var slots = new LegacyAcousticFamilyScores?[7];
-            for (int i = includeBaselineFamilies ? 0 : 2; i < 4; i++)
-            {
-                var family = _families[i];
-                slots[i] = new(LegacyClassScores.Convert(family.Network.Evaluate(inputs[i], _activations,
-                    cancellationToken: cancellationToken), cancellationToken).Probability32768,
-                    family.Centers, family.Slopes);
-            }
-            var confidence = LegacyAcousticEnsemble.Combine(slots, cancellationToken);
+            var confidence = _classifier.Classify(glyph, baseline, context, 1024, 1024,
+                includeBaselineFamilies, cancellationToken).Confidence.Span;
             // Explicit original cost adapter; not the native pre-confidence cost channel.
-            choices[target] = _mapping.Map(confidence.Select(value => (int)(value * 32768)).ToArray(), cancellationToken);
+            var quantized = new int[confidence.Length];
+            for (int i = 0; i < quantized.Length; i++) quantized[i] = (int)(confidence[i] * 32768);
+            choices[target] = _mapping.Map(quantized, cancellationToken);
         }
         var decoded = LegacyLexicalDecoder.Decode(_lexicon, choices, beamWidth, cancellationToken);
         var words = decoded.Select(match => new LegacySegmentedWord(Text(match.Labels.Span), match.LogScore)).ToArray();
@@ -140,15 +105,4 @@ public sealed class LegacyDirectionalWordRecognizer
         return text.ToString();
     }
 
-    private static LegacyDirectionalCalibration Snapshot(LegacyDirectionalCalibration calibration)
-    {
-        ArgumentNullException.ThrowIfNull(calibration);
-        if (calibration.Minima.Length != 274 || calibration.Maxima.Length != 274)
-            throw new ArgumentException("Matching 274-column geometry calibration is required.");
-        var minima = calibration.Minima.ToArray(); var maxima = calibration.Maxima.ToArray();
-        for (int i = 0; i < 274; i++)
-            if (minima[i] > maxima[i])
-                throw new ArgumentException("Geometry calibration ranges must be nondecreasing.");
-        return new(minima, maxima);
-    }
 }

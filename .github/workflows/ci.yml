@@ -216,6 +216,25 @@ jobs:
           python tools/LegacyWordAuxiliary.Probe/reference_controls.py .artifacts/legacy-word-auxiliary-controls.json
           dotnet run --project tools/LegacyWordAuxiliary.Probe -c Release -- --controls .artifacts/legacy-word-auxiliary-controls.json
           dotnet run --project tools/LegacyWordAuxiliary.Probe -c Release -- models/ru-RU/ru_RU-lk-text.lite.res
+          python tools/LegacyWordScorer.Probe/reference_controls.py .artifacts/legacy-word-scorer-controls.json
+          dotnet run --project tools/LegacyWordScorer.Probe -c Release -- --controls .artifacts/legacy-word-scorer-controls.json
+          dotnet run --project tools/LegacyWordScorer.Probe -c Release -- models/ru-RU/ru_RU-lk-text.lite.res
+          python tools/LegacyCutBoundary.Probe/reference_controls.py .artifacts/legacy-cut-boundary-controls.json
+          dotnet run --project tools/LegacyCutBoundary.Probe -c Release -- .artifacts/legacy-cut-boundary-controls.json
+          python tools/LegacyCursiveAtoms.Probe/reference_controls.py .artifacts/legacy-cursive-atoms-controls.json
+          dotnet run --project tools/LegacyCursiveAtoms.Probe -c Release -- .artifacts/legacy-cursive-atoms-controls.json
+          python tools/PreparedLineClassifier.Probe/reference_controls.py .artifacts/line-classifier-controls.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res
+          dotnet run --project tools/PreparedLineClassifier.Probe -c Release -- .artifacts/line-classifier-controls.json
+          python tools/LegacyLinePairFeatures.Probe/reference_controls.py .artifacts/line-pair-controls.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res
+          dotnet run --project tools/LegacyLinePairFeatures.Probe -c Release -- .artifacts/line-pair-controls.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res
+          python tools/LegacyCursiveGeometry.Probe/reference_controls.py .artifacts/cursive-geometry-controls.json
+          dotnet run --project tools/LegacyCursiveGeometry.Probe -c Release -- .artifacts/cursive-geometry-controls.json
+          python tools/LegacyCursivePreparedInk.Probe/reference_controls.py .artifacts/cursive-prepared-controls.json
+          dotnet run --project tools/LegacyCursivePreparedInk.Probe -c Release -- .artifacts/cursive-prepared-controls.json
+          python tools/LegacyCursiveCategory.Probe/reference_controls.py .artifacts/cursive-category-controls.json
+          dotnet run --project tools/LegacyCursiveCategory.Probe -c Release -- .artifacts/cursive-category-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/LegacyWordCandidate.Probe/reference_controls.py .artifacts/word-candidate-controls.json
+          dotnet run --project tools/LegacyWordCandidate.Probe -c Release -- --controls .artifacts/word-candidate-controls.json
       - name: Legacy stored word and class language costs
         run: |
           python tools/LegacyWordLanguage.Probe/reference_controls.py models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-language-controls.json
@@ -233,6 +252,14 @@ jobs:
           dotnet run --project tools/LegacyFixedLog.Probe -c Release -- .artifacts/legacy-fixed-log-controls.json
           python tools/LegacyCostEnsemble.Probe/reference_controls.py .artifacts/legacy-cost-ensemble-controls.json
           dotnet run --project tools/LegacyCostEnsemble.Probe -c Release -- .artifacts/legacy-cost-ensemble-controls.json
+      - name: Verify independent recognition release packages
+        if: runner.os == 'Linux'
+        run: |
+          for project in InkRecognition InkRecognition.Math InkRecognition.RawContent; do
+            dotnet pack "src/$project/$project.csproj" -c Release -p:Version=0.0.0-ci -o .artifacts/recognition-packages
+          done
+          python tools/package-model-resources.py .artifacts/recognition-packages/InkRecognition-models.zip
+          python tools/test-recognition-packages.py .artifacts/recognition-packages 0.0.0-ci
       - name: Install standalone recognition Native AOT prerequisites
         if: runner.os == 'Linux'
         run: |
@@ -295,6 +322,21 @@ jobs:
           $probe = if ($IsWindows) { './.artifacts/legacy-word-index-native/LegacyWordIndex.Probe.exe' } else { './.artifacts/legacy-word-index-native/LegacyWordIndex.Probe' }
           & $probe models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-word-index-controls.json
           exit $LASTEXITCODE
+      - name: Verify complete lexical subtotal and cut decisions as Native AOT
+        shell: pwsh
+        run: |
+          dotnet publish tools/LegacyWordScorer.Probe/LegacyWordScorer.Probe.csproj -c Release -p:PublishAot=true -o .artifacts/legacy-word-scorer-native
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $probe = if ($IsWindows) { './.artifacts/legacy-word-scorer-native/LegacyWordScorer.Probe.exe' } else { './.artifacts/legacy-word-scorer-native/LegacyWordScorer.Probe' }
+          & $probe --controls .artifacts/legacy-word-scorer-controls.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & $probe models/ru-RU/ru_RU-lk-text.lite.res
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet publish tools/LegacyCutBoundary.Probe/LegacyCutBoundary.Probe.csproj -c Release -p:PublishAot=true -o .artifacts/legacy-cut-boundary-native
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $probe = if ($IsWindows) { './.artifacts/legacy-cut-boundary-native/LegacyCutBoundary.Probe.exe' } else { './.artifacts/legacy-cut-boundary-native/LegacyCutBoundary.Probe' }
+          & $probe .artifacts/legacy-cut-boundary-controls.json
+          exit $LASTEXITCODE
       - name: Publish and verify Russian cost arithmetic as Native AOT
         shell: pwsh
         run: |
@@ -315,6 +357,40 @@ jobs:
           $probe = if ($IsWindows) { './.artifacts/legacy-cost-ensemble-native/LegacyCostEnsemble.Probe.exe' } else { './.artifacts/legacy-cost-ensemble-native/LegacyCostEnsemble.Probe' }
           & $probe .artifacts/legacy-cost-ensemble-controls.json
           exit $LASTEXITCODE
+      - name: Verify continuous stroke atoms and embedded line classifiers as Native AOT
+        shell: pwsh
+        run: |
+          dotnet publish tools/LegacyCursiveAtoms.Probe/LegacyCursiveAtoms.Probe.csproj -c Release -p:PublishAot=true -o .artifacts/legacy-cursive-atoms-native
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $probe = if ($IsWindows) { './.artifacts/legacy-cursive-atoms-native/LegacyCursiveAtoms.Probe.exe' } else { './.artifacts/legacy-cursive-atoms-native/LegacyCursiveAtoms.Probe' }
+          & $probe .artifacts/legacy-cursive-atoms-controls.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet publish tools/PreparedLineClassifier.Probe/PreparedLineClassifier.Probe.csproj -c Release -p:PublishAot=true -o .artifacts/line-classifier-native
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $probe = if ($IsWindows) { './.artifacts/line-classifier-native/PreparedLineClassifier.Probe.exe' } else { './.artifacts/line-classifier-native/PreparedLineClassifier.Probe' }
+          & $probe .artifacts/line-classifier-controls.json
+          exit $LASTEXITCODE
+
+      - name: Verify raw line features, cursive geometry and word totals as Native AOT
+        shell: pwsh
+        run: |
+          $cases = @(
+            @{ Name = 'LegacyLinePairFeatures'; Args = @('.artifacts/line-pair-controls.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res') },
+            @{ Name = 'LegacyCursiveGeometry'; Args = @('.artifacts/cursive-geometry-controls.json') },
+            @{ Name = 'LegacyCursivePreparedInk'; Args = @('.artifacts/cursive-prepared-controls.json') },
+            @{ Name = 'LegacyCursiveCategory'; Args = @('.artifacts/cursive-category-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyWordCandidate'; Args = @('--controls', '.artifacts/word-candidate-controls.json') }
+          )
+          foreach ($case in $cases) {
+            $name = $case.Name
+            dotnet publish "tools/$name.Probe/$name.Probe.csproj" -c Release -p:PublishAot=true -o ".artifacts/$name-native"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $suffix = if ($IsWindows) { '.exe' } else { '' }
+            $probe = "./.artifacts/$name-native/$name.Probe$suffix"
+            $probeArgs = $case.Args
+            & $probe @probeArgs
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
 
   symbolic-math:
     name: Native local CAS / ${{ matrix.os }}

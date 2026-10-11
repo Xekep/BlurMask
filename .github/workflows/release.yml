@@ -54,7 +54,7 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev dpkg-dev desktop-file-utils xvfb libx11-6 libxcb-shape0 libice6 libsm6 libfontconfig1
       - run: dotnet restore src/BlurMask/BlurMask.csproj
       - run: |
-          bash ./tools/build.sh linux-x64
+          bash ./tools/build.sh linux-x64 "${RELEASE_VERSION#v}"
           tar -C src/BlurMask/bin/Release/net11.0/linux-x64/publish -czf BlurMask-linux-x64.tar.gz .
           bash ./tools/build-deb.sh linux-x64 "${RELEASE_VERSION#v}"
           bash ./tools/test-deb.sh .artifacts/installers/*.deb
@@ -94,17 +94,43 @@ jobs:
       - shell: bash
         run: |
           if [[ "$(uname -m)" == "arm64" ]]; then RID=osx-arm64; else RID=osx-x64; fi
-          bash ./tools/build.sh "$RID"
+          bash ./tools/build.sh "$RID" "${GITHUB_REF_NAME#v}"
           tar -C "src/BlurMask/bin/Release/net11.0/$RID/publish" -czf "BlurMask-$RID.tar.gz" .
       - uses: actions/upload-artifact@v4
         with:
           name: release-macos
           path: BlurMask-osx-*.tar.gz
 
+  recognition-library:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 11.0.100-preview.7.26381.103
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Package independent recognition libraries and separate model assets
+        env:
+          RELEASE_VERSION: ${{ github.ref_name }}
+        run: |
+          version="${RELEASE_VERSION#v}"
+          for project in InkRecognition InkRecognition.Math InkRecognition.RawContent; do
+            dotnet pack "src/$project/$project.csproj" -c Release -p:Version="$version" -o .artifacts/recognition-release
+          done
+          python tools/package-model-resources.py .artifacts/recognition-release/InkRecognition-models.zip
+          python tools/test-recognition-packages.py .artifacts/recognition-release "$version"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-recognition-library
+          path: .artifacts/recognition-release/*
+          if-no-files-found: error
+
   publish-release:
     permissions:
       contents: write
-    needs: [windows, linux, macos, arch, void]
+    needs: [windows, linux, macos, arch, void, recognition-library]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4

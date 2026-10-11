@@ -1,5 +1,7 @@
 namespace InkRecognition;
 
+public readonly record struct LegacyIntegerLexicalCandidate(ushort Label, int Cost);
+
 /// <summary>
 /// Reusable acoustic-class to dictionary-label mapping for bounded classifier
 /// output. Optional stored forms keep the strongest source score per label.
@@ -65,5 +67,29 @@ public sealed class LegacyAcousticLexicalMapping
         }
         return choices.OrderBy(choice => choice.Key)
             .Select(choice => new LegacyLexicalCandidate(choice.Key, choice.Value)).ToArray();
+    }
+
+    /// <summary>
+    /// Preserve the native integer-cost channel, retaining the lowest source
+    /// cost for each supplied alias. This alias policy is original and does
+    /// not infer native case penalties. Impossible classes produce no label.
+    /// </summary>
+    public LegacyIntegerLexicalCandidate[] MapIntegerCosts(ReadOnlySpan<int> costs,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (costs.Length != OutputWidth) throw new ArgumentException("Acoustic cost width differs from mapping.", nameof(costs));
+        foreach (int cost in costs)
+            if (cost is < 0 or > LegacyAcousticFixedLog.ImpossibleCost)
+                throw new ArgumentException("Expected bounded nonnegative integer costs.", nameof(costs));
+        var choices = new Dictionary<ushort, int>();
+        for (int source = 0; source < OutputWidth; source++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (costs[source] == LegacyAcousticFixedLog.ImpossibleCost) continue;
+            foreach (ushort label in _labels[source])
+                if (!choices.TryGetValue(label, out int previous) || costs[source] < previous) choices[label] = costs[source];
+        }
+        return choices.OrderBy(choice => choice.Key).Select(choice => new LegacyIntegerLexicalCandidate(choice.Key, choice.Value)).ToArray();
     }
 }

@@ -1,3 +1,4 @@
+using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text.Json;
 
@@ -23,17 +24,21 @@ public sealed class LegacyRussianModelBundle
     public LegacyWordLanguageModel LanguageModel { get; }
     public IReadOnlyList<LegacyWordLanguageCostProfile> LanguageProfiles { get; }
     public IReadOnlyList<LegacyWordAuxiliaryProfile> AuxiliaryProfiles { get; }
+    /// <summary>Stored source kind forwarded by the checked ordinary type2b7 path.</summary>
+    public int SourceKind { get; }
+    public int ResourceLanguageProfileIndex => 0x137 - SourceKind;
 
     private LegacyRussianModelBundle(LegacyDirectionalAcousticFamily[] families, LegacyInkNetwork initial,
         LegacyInkActivations activations, LegacyDirectionalCalibration temporal, LegacyDirectionalCalibration spatial,
         LegacyInkAlphabet acousticAlphabet, LegacyInkAlphabet lexicalAlphabet, LegacyPackedLexicon lexicon,
         LegacyLexiconWordIndex wordIndex, LegacyWordLanguageModel languageModel, LegacyWordLanguageCostProfile[] profiles,
-        LegacyWordAuxiliaryProfile[] auxiliaryProfiles)
+        LegacyWordAuxiliaryProfile[] auxiliaryProfiles, int sourceKind)
     {
         _families = families; _initial = initial; _activations = activations; _temporal = temporal; _spatial = spatial;
         AcousticAlphabet = acousticAlphabet; LexicalAlphabet = lexicalAlphabet; Lexicon = lexicon;
         WordIndex = wordIndex; LanguageModel = languageModel; LanguageProfiles = Array.AsReadOnly(profiles);
         AuxiliaryProfiles = Array.AsReadOnly(auxiliaryProfiles);
+        SourceKind = sourceKind;
     }
 
     /// <summary>Load exactly the observed pair, copying retained parameters from caller buffers.</summary>
@@ -44,6 +49,8 @@ public sealed class LegacyRussianModelBundle
         cancellationToken.ThrowIfCancellationRequested();
         Verify(acousticResource, 572763, AcousticHash);
         Verify(lexicalResource, 6200992, LexicalHash);
+        int sourceKind = checked((int)BinaryPrimitives.ReadUInt32LittleEndian(acousticResource[5233..]));
+        if (sourceKind != 0x135) throw Invalid("Unsupported Russian acoustic source kind.");
         cancellationToken.ThrowIfCancellationRequested();
         if (engineProfile.Length is < 2 or > 128 * 1024) throw Invalid("Engine profile size outside bounds.");
         try
@@ -83,7 +90,7 @@ public sealed class LegacyRussianModelBundle
             if (language.WordCount != wordIndex.WordCount) throw Invalid("Dictionary and language word counts differ.");
             cancellationToken.ThrowIfCancellationRequested();
             return new(families, initial, activations, temporal, spatial, acousticAlphabet, lexicalAlphabet,
-                lexicon, wordIndex, language, profiles, auxiliary);
+                lexicon, wordIndex, language, profiles, auxiliary, sourceKind);
         }
         catch (Exception ex) when (ex is JsonException or KeyNotFoundException or InvalidOperationException or
             ArgumentException or FormatException or OverflowException)
@@ -96,6 +103,19 @@ public sealed class LegacyRussianModelBundle
     /// </summary>
     public LegacyDirectionalWordRecognizer CreateWordRecognizer(int? relatedFormMode = null) =>
         new(_families, _initial, _activations, AcousticAlphabet, LexicalAlphabet, Lexicon, _temporal, _spatial, relatedFormMode);
+
+    public LegacyDirectionalGlyphClassifier CreateGlyphClassifier() => new(_families, _activations, _temporal, _spatial);
+
+    public LegacyWordLanguageScorer CreateLanguageScorer(int profileIndex, float runtimeScale)
+    {
+        if ((uint)profileIndex >= LanguageProfiles.Count) throw new ArgumentOutOfRangeException(nameof(profileIndex));
+        return new(LanguageModel, LanguageProfiles[profileIndex], AuxiliaryProfiles[profileIndex], runtimeScale);
+    }
+
+    /// <summary>Use the stored acoustic kind's language profile, with an explicit runtime scale.
+    /// This reproduces ordinary type2b7 forwarding, not global SDK mode selection.</summary>
+    public LegacyWordLanguageScorer CreateResourceLanguageScorer(float runtimeScale) =>
+        CreateLanguageScorer(ResourceLanguageProfileIndex, runtimeScale);
 
     private static void Verify(ReadOnlySpan<byte> data, int length, string hash)
     {

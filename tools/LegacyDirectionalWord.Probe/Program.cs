@@ -41,6 +41,28 @@ using(var canceled=new CancellationTokenSource())
     try { ownMapping.Map([16384,16384],canceled.Token);throw new InvalidOperationException("Mapping cancellation ignored."); } catch(OperationCanceledException){}
 }
 Console.WriteLine("PASS own score -> mode1 ensemble calibration -> original bounded quantization -> reversed acoustic/lexical mapping -> terminal dictionary beam roundtrip, incomplete path and cancellation.");
+var integerChoices=ownMapping.MapIntegerCosts([16_777_217,16_777_216]);
+Require(integerChoices.SequenceEqual(new LegacyIntegerLexicalCandidate[]{new(0,16_777_216),new(1,16_777_217)}),"Integer mapping lost a one-unit difference beyond float precision.");
+Require(ownMapping.MapIntegerCosts([LegacyAcousticFixedLog.ImpossibleCost,0]).SequenceEqual(new LegacyIntegerLexicalCandidate[]{new(0,0)}),"Impossible acoustic class or zero cost mapped incorrectly.");
+var singleGraph=LegacyPackedLexicon.Load(BuildSingleGraph());
+var integerPositions=new ReadOnlyMemory<LegacyIntegerLexicalCandidate>[] {new LegacyIntegerLexicalCandidate[]{new(0,16_777_217),new(1,16_777_216)}};
+var integers=LegacyIntegerLexicalDecoder.Decode(singleGraph,integerPositions,beamWidth:1);
+Require(integers.Count==1&&integers[0].Labels.Span[0]==1&&integers[0].AcousticCost==16_777_216,"Integer dictionary beam lost exact ordering.");
+integers=LegacyIntegerLexicalDecoder.Decode(singleGraph,integerPositions,beamWidth:1,scoreTerminal:(state,cost)=>state==1?cost-2:cost);
+Require(integers.Count==1&&integers[0].Labels.Span[0]==0&&integers[0].Cost==16_777_215&&integers[0].AcousticCost==16_777_217,"Terminal rescoring happened after pruning or overwrote acoustic cost.");
+integers=LegacyIntegerLexicalDecoder.Decode(singleGraph,integerPositions,beamWidth:1,scoreTerminal:(state,cost)=>state==2?null:cost);
+Require(integers.Count==1&&integers[0].Labels.Span[0]==0,"Rejected terminal survived or was pruned before callback.");
+integers=LegacyIntegerLexicalDecoder.Decode(singleGraph,new ReadOnlyMemory<LegacyIntegerLexicalCandidate>[] {new LegacyIntegerLexicalCandidate[]{new(0,100),new(0,2),new(0,20)}});
+Require(integers.Count==1&&integers[0].Cost==2,"Repeated label did not retain cheapest source.");
+Require(LegacyIntegerLexicalDecoder.Decode(ownGraph,new ReadOnlyMemory<LegacyIntegerLexicalCandidate>[] {new LegacyIntegerLexicalCandidate[]{new(1,1)}}).Count==0,"Incomplete integer path accepted.");
+foreach(Action invalid in new Action[]{()=>ownMapping.MapIntegerCosts([-1,0]),()=>ownMapping.MapIntegerCosts([0]),
+    ()=>LegacyIntegerLexicalDecoder.Decode(singleGraph,integerPositions,0),
+    ()=>LegacyIntegerLexicalDecoder.Decode(singleGraph,new ReadOnlyMemory<LegacyIntegerLexicalCandidate>[] {new LegacyIntegerLexicalCandidate[]{new(0,-1)}})})
+{
+    try{invalid();throw new InvalidOperationException("Invalid integer decoder input accepted.");}catch(ArgumentException){}
+}
+try{LegacyIntegerLexicalDecoder.Decode(singleGraph,integerPositions,cancellationToken:new CancellationToken(true));throw new InvalidOperationException("Integer beam cancellation ignored.");}catch(OperationCanceledException){}
+Console.WriteLine("PASS integer mapping and dictionary search: exact large costs, terminal rescoring before final pruning, rejection, aliases, impossible classes, incomplete paths and cancellation.");
 // Exercise the reusable model/context/dictionary module with own zero-weight
 // networks. The reversed alphabets and sole terminal word constrain the result;
 // this validates transport and ownership rather than recognition accuracy.
@@ -54,6 +76,29 @@ var reusable=new LegacyDirectionalWordRecognizer(ownModels,ownInitial,ownActivat
     ownAcoustic,ownLexical,ownGraph,new(neutralMin,neutralMax),new(neutralMin,neutralMax));
 LegacyInkStroke[] ownInk=[new([new LegacyInkPoint(0,0),new(0,40),new(24,0),new(24,40)]),
     new([new LegacyInkPoint(40,0),new(40,40),new(64,0),new(64,40)])];
+var glyphClassifier=new LegacyDirectionalGlyphClassifier(ownModels.Select(family=>family with {
+    Centers=new float[]{.25f,.75f},Slopes=new float[]{4,4}}).ToArray(),ownActivations,new(neutralMin,neutralMax),new(neutralMin,neutralMax));
+var rangeSelection=LegacyInkRangeExtraction.Extract(ownInk,[new LegacyInkRange(0,1,4)]);
+var glyphScores=glyphClassifier.Classify(rangeSelection.Strokes,new(40,40),new short[28],rangeSelection.StartBoundary,rangeSelection.EndBoundary);
+Require(glyphScores.Confidence.Span[0]>.7f&&glyphScores.Confidence.Span[1]<.3f&&
+    glyphScores.FamilyProbabilities.Take(4).All(slot=>slot is{} values&&values.Span.SequenceEqual(new int[]{16384,16384})),
+    "Raw class probability channel was replaced by calibrated confidence.");
+Require(glyphScores.GetIntegerCosts([1,1,1,1,0,0,0],1).AsSpan().SequenceEqual(new int[]{5678,5678}),
+    "Native integer costs were computed from calibrated confidence instead of raw neural probabilities.");
+Require(glyphScores.GetIntegerCosts([1,1,1,1,0,0,0],1,[0,1])[0]==LegacyAcousticFixedLog.ImpossibleCost,
+    "Disabled class mask lost the impossible-cost sentinel.");
+var subsetScores=glyphClassifier.Classify(rangeSelection.Strokes,new(40,40),[],rangeSelection.StartBoundary,rangeSelection.EndBoundary,includeBaselineFamilies:false);
+Require(subsetScores.FamilyProbabilities[0] is null&&subsetScores.FamilyProbabilities[1] is null&&
+    subsetScores.GetIntegerCosts([0,0,1,1,0,0,0],1).AsSpan().SequenceEqual(new int[]{5678,5678}),"Explicit active-family subset changed.");
+foreach(Action invalid in new Action[]{()=>glyphScores.GetIntegerCosts([1,1,1,1,1,0,0],1),
+    ()=>glyphScores.GetIntegerCosts([1,1,float.NaN,1,0,0,0],1),
+    ()=>glyphClassifier.Classify(rangeSelection.Strokes,new(40,40),new short[27],-1024,1024),
+    ()=>glyphClassifier.Classify(rangeSelection.Strokes,new(40,40),[],0,1024)})
+{
+    try{invalid();throw new InvalidOperationException("Invalid glyph scoring profile accepted.");}catch(ArgumentException){}
+}
+try{glyphScores.GetIntegerCosts([1,1,1,1,0,0,0],1,cancellationToken:new CancellationToken(true));throw new InvalidOperationException("Glyph cost cancellation ignored.");}catch(OperationCanceledException){}
+Console.WriteLine("PASS interior point ranges -> explicit clipped flags -> four-family prepared glyph classifier; raw probability/cost separation from calibrated confidence, masks, active subsets, bounds and cancellation.");
 ownCenters[0]=float.NaN;ownSlopes[0]=0; // The module must retain its own immutable coefficient snapshots.
 var reusableResult=reusable.Recognize(ownInk,new(40,40));
 Require(reusableResult.Words.Count==1&&reusableResult.Words[0].Text=="\u0418\u041f"&&
@@ -161,6 +206,15 @@ static byte[] BuildGraph(uint lastLabel = 0)
     writer.Write((byte)2);
     writer.Write(0x01000000u); writer.Write(3u); writer.Write((byte)1); writer.Write(0b011u); // Child counts1,1,0.
     writer.Write(1u); var data = stream.ToArray(); BinaryPrimitives.WriteUInt32LittleEndian(data.AsSpan(4), (uint)data.Length - 8); return data;
+}
+static byte[] BuildSingleGraph()
+{
+    using var stream=new MemoryStream();using var writer=new BinaryWriter(stream);
+    writer.Write(0x0101fe90u);writer.Write(0u);writer.Write(0x2b4u);writer.Write(0x01000000u);
+    writer.Write(0u);writer.Write(3u);writer.Write(1u);
+    writer.Write(0x01000000u);writer.Write(3u);writer.Write((byte)2);writer.Write(0b111000u);
+    writer.Write((byte)2);writer.Write(0x01000000u);writer.Write(3u);writer.Write((byte)2);writer.Write(2u);
+    writer.Write(2u);var data=stream.ToArray();BinaryPrimitives.WriteUInt32LittleEndian(data.AsSpan(4),(uint)data.Length-8);return data;
 }
 static void Require(bool value,string message){if(!value)throw new InvalidOperationException(message);}
 sealed record Sample(string Name,string Expected,int GlyphCount,int Scale,int X,int Y,int Bottom,int Height,LegacyInkStroke[] Strokes);

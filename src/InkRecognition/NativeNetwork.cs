@@ -2,7 +2,8 @@ namespace InkRecognition;
 
 // Pure managed scalar execution of the recovered quantized BLSTM layout.
 // Every call owns its scratch arrays; loaded weights are never modified.
-internal sealed class NativeNetwork(int inputWidth, LstmLayer[] layers, AffineWeights output)
+internal sealed class NativeNetwork(int inputWidth, LstmLayer[] layers, AffineWeights output,
+    AffineWeights? inputAffine = null)
 {
     internal int InputWidth { get; } = inputWidth;
     internal int OutputWidth => output.Rows;
@@ -18,6 +19,20 @@ internal sealed class NativeNetwork(int inputWidth, LstmLayer[] layers, AffineWe
         cancellationToken.ThrowIfCancellationRequested();
         float[] current = features;
         int width = InputWidth;
+        if (inputAffine is not null)
+        {
+            var prepared = AllocateFrames(frames, inputAffine.Rows);
+            var preparationScratch = new AffineScratch(inputAffine.Columns);
+            for (int t = 0; t < frames; t++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var values = prepared.AsSpan(t * inputAffine.Rows, inputAffine.Rows);
+                Affine(inputAffine, features.AsSpan(t * width, width), 1f, values, preparationScratch, cancellationToken);
+                for (int i = 0; i < values.Length; i++) values[i] = MathF.Tanh(values[i]);
+            }
+            current = prepared;
+            width = inputAffine.Rows;
+        }
         foreach (var layer in layers)
         {
             int nextWidth = layer.OutputWidth;
