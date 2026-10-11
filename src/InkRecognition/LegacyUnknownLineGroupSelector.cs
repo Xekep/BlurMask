@@ -6,7 +6,7 @@ public sealed record LegacyUnknownLineGroups(IReadOnlyList<ReadOnlyMemory<int>> 
 /// <summary>
 /// The empty-prior, ordinary unknown-row branch of Text07c160. All source known
 /// and locked flags are false and no supplied guideline rows exist. Native
-/// post-selection singleton/attachment pass07a850 is deliberately separate.
+/// post-selection mean-Y ordering/adjacent-merge pass07a850 is separate.
 /// </summary>
 public static class LegacyUnknownLineGroupSelector
 {
