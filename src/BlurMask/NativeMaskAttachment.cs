@@ -56,7 +56,11 @@ internal sealed partial class WindowsWindowCatalog
         if (IsWindow(root) == 0) return false;
         const uint flags = 0x0010 | 0x0001 | 0x0002 | 0x0200; // no activation, geometry or owner changes
         var style = GetMaskExStyle(hwnd, -20);
-        _ = SetMaskExStyle(hwnd, -20, style | (nint)0x08000000); // WS_EX_NOACTIVATE
+        if ((style & 0x08000000) == 0) // WS_EX_NOACTIVATE: apply once, not every tracking tick.
+        {
+            _ = SetMaskExStyle(hwnd, -20, style | (nint)0x08000000);
+            if (SetMaskWindowPos(hwnd, 0, 0, 0, 0, 0, flags | 0x0004 | 0x0020) == 0) return false;
+        }
         bool targetTop = (GetMaskExStyle(root, -20) & 8) != 0;
         if (((style & 8) != 0) != targetTop && SetMaskWindowPos(hwnd, targetTop ? -1 : -2, 0, 0, 0, 0, flags) == 0) return false;
         nint previous = GetWindow(root, 3); // GW_HWNDPREV, immediately above target

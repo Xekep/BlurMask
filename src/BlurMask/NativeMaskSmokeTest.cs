@@ -48,8 +48,14 @@ internal static partial class NativeMaskSmokeTest
                 Require(mask.Position == resized.Bounds.Position && Math.Abs(mask.Height * mask.RenderScaling - resized.Bounds.Height) <= 1,
                     "Black child fill did not track nonuniform child resize.");
                 _ = DestroyWindow(child); child = 0; mask.RefreshAttachment();
+                await Task.Delay(100); mask.RefreshAttachment();
                 Require(mask.HasPrivacyCover && mask.Position == target.Bounds.Position && Math.Abs(mask.Width * mask.RenderScaling - target.Bounds.Width) <= 1,
                     "Removing the child exposed replacement content instead of protecting its parent.");
+                var nativeMask = catalog.Read(maskId)!;
+                Require(nativeMask.Bounds.Size == target.Bounds.Size &&
+                    DesktopInkNative.ReadScreenPixel(target.Bounds.Position + new PixelPoint(10, 10)) == 0 &&
+                    DesktopInkNative.ReadScreenPixel(target.Bounds.BottomRight - new PixelPoint(10, 10)) == 0,
+                    "The rendered parent cover still exposed content after layout/paint settled.");
             }
             else
             {
