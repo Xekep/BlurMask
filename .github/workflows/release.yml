@@ -135,6 +135,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: release-macos
+          include-hidden-files: true
+          if-no-files-found: error
           path: |
             BlurMask-osx-*.tar.gz
             .artifacts/installers/BlurMask-Giac-corresponding-sources-*-osx-*.tar.gz
@@ -198,6 +200,7 @@ jobs:
             if [[ -e "$target" ]]; then echo "Duplicate release asset: $target" >&2; exit 1; fi
             cp "$file" "$target"
           done < <(find dist -type f -print0)
+          python3 tools/verify-release-giac-sources.py release-assets
           options=()
           notes="docs/releases/${GITHUB_REF_NAME#v}.md"
           if [[ -f "$notes" ]]; then options+=(--notes-file "$notes"); else options+=(--generate-notes); fi
