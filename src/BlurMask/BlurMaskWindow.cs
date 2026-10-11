@@ -133,11 +133,14 @@ public sealed class BlurMaskWindow : Window
     }
     internal void SetPrivacyCover(bool enabled)
     {
+        // Zero leaves Win32's default minimum in place in Avalonia. Explicitly
+        // allow the smallest physical pixel, including on HiDPI monitors.
+        MinWidth = enabled ? 1 / RenderScaling : MinimumMaskWidth;
+        MinHeight = enabled ? 1 / RenderScaling : MinimumMaskHeight;
         if (_privacyCover == enabled) return;
         _privacyCover = enabled;
         // Region fills follow physical child bounds, even below a normal mask's
         // user-resize limit (including sub-DIP bounds on a scaled monitor).
-        MinWidth = enabled ? 0 : MinimumMaskWidth; MinHeight = enabled ? 0 : MinimumMaskHeight;
         ToolTip.SetTip(_inputSurface, enabled && _attachment?.IsRegionFill != true ? UiText.T("Окно изменило размер. Настройте маску заново.") : null);
         ApplyMode();
     }

@@ -56,10 +56,11 @@ internal static partial class NativeMaskSmokeTest
                 secondMask.Show(); secondMask.AttachFilledRegion(new WindowsWindowCatalog(), tinyRegion); secondMask.RefreshAttachment();
                 await Task.Delay(60);
                 var secondId = (nuint)secondMask.TryGetPlatformHandle()!.Handle;
-                Require(secondMask.MinWidth == 0 && secondMask.MinHeight == 0 &&
+                Require(Math.Abs(secondMask.MinWidth * secondMask.RenderScaling - 1) <= .01 &&
+                    Math.Abs(secondMask.MinHeight * secondMask.RenderScaling - 1) <= .01 &&
                     Math.Abs(secondMask.Width * secondMask.RenderScaling - 8) <= .01 &&
                     Math.Abs(secondMask.Height * secondMask.RenderScaling - 6) <= .01,
-                    "Tiny child fill was enlarged by mask minimum dimensions.");
+                    $"Tiny child fill was enlarged: {secondMask.Width}×{secondMask.Height} DIP, scale {secondMask.RenderScaling}, minimum {secondMask.MinWidth}×{secondMask.MinHeight}.");
                 Require(GetOwner((nint)maskId, 4) == (nint)target.Id && GetOwner((nint)secondId, 4) == (nint)target.Id,
                     "Attached masks have no native owner, leaving foreground changes dependent on callbacks.");
                 blocker.Show();

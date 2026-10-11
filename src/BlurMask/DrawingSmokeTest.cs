@@ -415,7 +415,7 @@ internal static class DrawingSmokeTest
         var minimum = new BlurMaskWindow();
         Check(minimum.MinWidth == 30 && minimum.MinHeight == 20, "Mask minimum dimensions were not halved.");
         minimum.SetPrivacyCover(true);
-        Check(minimum.MinWidth == 0 && minimum.MinHeight == 0, "Filled region retained user-resize limits.");
+        Check(minimum.MinWidth * minimum.RenderScaling == 1 && minimum.MinHeight * minimum.RenderScaling == 1, "Filled region retained user-resize limits above one physical pixel.");
         minimum.SetPrivacyCover(false);
         Check(minimum.MinWidth == 30 && minimum.MinHeight == 20, "Ordinary mask resize limits were not restored.");
         minimum.Close();
