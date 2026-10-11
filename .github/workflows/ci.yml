@@ -337,6 +337,24 @@ jobs:
           dotnet run --project tools/LegacyWordPathBoundary.Probe -c Release -- .artifacts/legacy-word-path-boundary-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
           python tools/LegacySourceEndpoint.Probe/reference_controls.py .artifacts/legacy-source-endpoint-controls.json
           dotnet run --project tools/LegacySourceEndpoint.Probe -c Release -- .artifacts/legacy-source-endpoint-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyDictionaryWorkingMap.Probe/reference_controls.py .artifacts/legacy-dictionary-working-map-controls.json
+          dotnet run --project tools/LegacyDictionaryWorkingMap.Probe -c Release -- .artifacts/legacy-dictionary-working-map-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
+          python tools/LegacyInitialWordRecord.Probe/reference_controls.py .artifacts/legacy-initial-word-record-controls.json
+          dotnet run --project tools/LegacyInitialWordRecord.Probe -c Release -- .artifacts/legacy-initial-word-record-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/LegacyWordHeap.Probe/reference_controls.py .artifacts/legacy-word-heap-controls.json
+          dotnet run --project tools/LegacyWordHeap.Probe -c Release -- .artifacts/legacy-word-heap-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyWordRouter.Probe/reference_controls.py .artifacts/legacy-word-router-controls.json
+          dotnet run --project tools/LegacyWordRouter.Probe -c Release -- .artifacts/legacy-word-router-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyWordContinuation.Probe/reference_controls.py .artifacts/legacy-word-continuation-controls.json
+          dotnet run --project tools/LegacyWordContinuation.Probe -c Release -- .artifacts/legacy-word-continuation-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyWordRow.Probe/reference_controls.py .artifacts/legacy-word-row-controls.json
+          dotnet run --project tools/LegacyWordRow.Probe -c Release -- .artifacts/legacy-word-row-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyNeuralLineProposals.Probe/reference_controls.py .artifacts/legacy-neural-line-proposals-controls.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res
+          dotnet run --project tools/LegacyNeuralLineProposals.Probe -c Release -- .artifacts/legacy-neural-line-proposals-controls.json
+          python tools/LegacyUnknownLineGroup.Probe/reference_controls.py .artifacts/legacy-unknown-line-group-controls.json .artifacts/legacy-neural-line-proposals-controls.json
+          dotnet run --project tools/LegacyUnknownLineGroup.Probe -c Release -- .artifacts/legacy-unknown-line-group-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res
+          python tools/LegacyOrdinaryLineScale.Probe/reference_controls.py .artifacts/legacy-ordinary-line-scale-controls.json
+          dotnet run --project tools/LegacyOrdinaryLineScale.Probe -c Release -- .artifacts/legacy-ordinary-line-scale-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res
           python tools/handwriting/fetch_russian_track_corpus.py --self-test
           dotnet build tools/LegacyRussianCorpus.Probe -c Release
           python tools/LegacyVariableWord.Probe/reference_controls.py .artifacts/legacy-variable-word-controls.json
@@ -536,6 +554,15 @@ jobs:
             @{ Name = 'LegacyLinguisticRefresh'; Args = @('.artifacts/legacy-linguistic-refresh-controls.json') },
             @{ Name = 'LegacyWordPathBoundary'; Args = @('.artifacts/legacy-word-path-boundary-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacySourceEndpoint'; Args = @('.artifacts/legacy-source-endpoint-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyDictionaryWorkingMap'; Args = @('.artifacts/legacy-dictionary-working-map-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
+            @{ Name = 'LegacyInitialWordRecord'; Args = @('.artifacts/legacy-initial-word-record-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyWordHeap'; Args = @('.artifacts/legacy-word-heap-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyWordRouter'; Args = @('.artifacts/legacy-word-router-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyWordContinuation'; Args = @('.artifacts/legacy-word-continuation-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyWordRow'; Args = @('.artifacts/legacy-word-row-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyNeuralLineProposals'; Args = @('.artifacts/legacy-neural-line-proposals-controls.json') },
+            @{ Name = 'LegacyUnknownLineGroup'; Args = @('.artifacts/legacy-unknown-line-group-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res') },
+            @{ Name = 'LegacyOrdinaryLineScale'; Args = @('.artifacts/legacy-ordinary-line-scale-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res') },
             @{ Name = 'LegacyVariableWord'; Args = @('.artifacts/legacy-variable-word-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyHandwritingFontSize'; Args = @('.artifacts/font-size-controls.json') }
           )
