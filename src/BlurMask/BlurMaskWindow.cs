@@ -49,6 +49,13 @@ public sealed class BlurMaskWindow : Window
 
     public BlurMaskWindow()
     {
+        if (OperatingSystem.IsWindows())
+        {
+            // A borderless overlapped HWND still has Win32's 32×39 minimum.
+            // Privacy covers are popups, so even a one-pixel child can be covered.
+            Win32Properties.AddWindowStylesCallback(this, static (style, exStyle) => (style | 0x80000000u, exStyle));
+            Win32Properties.SetWindowCornerPreference(this, Win32Properties.WindowCornerPreference.DoNotRound);
+        }
         Title = "BlurMask";
         Width = 360;
         Height = 360;
