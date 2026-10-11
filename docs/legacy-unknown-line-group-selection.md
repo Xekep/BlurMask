@@ -12,11 +12,20 @@ uses the descending-confidence middle-pivot sort `180072360`, including equal
 key exchanges. Label-one edges are not joined. Physical membership initially
 contains `-1`, and creating, extending, merging and deleting groups preserve the
 native group-index updates. Unassigned strokes remain `-1`; this API does not
-replace the later `18007a850` attachment/singleton/ordering pass.
+replace the later `18007a850` mean-Y ordering/adjacent-merge pass.
+The actual upstream singleton fallback belongs to `07d7c0`, not this helper.
 
 The associated evidence table follows `18007be60`: physical endpoint order,
 then `log(confidence)` and `log(float(1.0000001192092896-confidence))`, with
-the channels swapped for label one. `180079750` accumulates float join/split
+the channels swapped for label one. Before confidence sorting, that producer **mutates**
+the pair list into first-ID order and second-ID order within each accepted
+first-ID block. In this final-strip/all-pairs scope, unique undirected IDs make
+that order unambiguous. Starting the confidence partition sort from original
+proposal encounter order was incorrect: equal-confidence exchanges then changed
+physical group history. The corrected selector includes this preprocessing.
+64 shuffled equal-confidence controls all fail the previous encounter-order
+path and pass the native producer order. Non-final future-endpoint/block
+filtering belongs to the separate full vertical sweep consumer. `180079750` accumulates float join/split
 logs across the supplied group IDs. Its uncertain band uses the native
 `-5`/`5.5` thresholds and the centroid-spacing predicate `1800794a0`.
 `180078f30` weights mean Y by `max(arc length,1)`, sums weights in float and
@@ -53,7 +62,7 @@ in source `18015b260`. All three original Russian scalar nodes at offsets
 is guessed. Initial scale, source direction/boundary metadata, other cache flags
 and the existing bounded word search remain explicit diagnostic policy.
 
-Managed and Windows Native AOT pass 386 independent cases and 473 produced
+Managed and Windows Native AOT pass 450 independent cases and 537 produced
 groups. These include equal-confidence histories, wide-flat strokes, near native
 thresholds, merges/deletions, explicit unassigned strokes, malformed pairs and
 cancellation. The live own printed MIR fixture gives one group; two translated
@@ -64,9 +73,12 @@ cost 54456. The former manually supplied 90/80 frame had it fourth.
 
 This is a useful real-model regression for **one original printed fixture**,
 not Russian cursive accuracy, a corpus evaluation or automatic UI acceptance.
-The source219 scale sample/configuration chain, vertical sweep/pruning, full
-`18007a850` post-selection policy, native winner/confidence and production
-integration remain unfinished. No vendor DLL or GUI is executed.
+The source219 scale/sample chain and the scoped ordinary `18007a850`
+postselection are now separate checked components, documented in
+[ordinary source line frames](legacy-ordinary-source-line-frames.md) and
+[ordinary postselection](legacy-ordinary-line-postselection.md). The full
+vertical sweep/pruning, source configuration dispatch, native winner/confidence
+and production integration remain unfinished. No vendor DLL or GUI is executed.
 
 ```powershell
 python tools/LegacyUnknownLineGroup.Probe/reference_controls.py D:/BlurMask-checks/groups.json D:/BlurMask-checks/proposals.json

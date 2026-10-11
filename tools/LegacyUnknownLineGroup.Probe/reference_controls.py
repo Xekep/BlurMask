@@ -58,7 +58,7 @@ def select(stats, pairs, scale):
             if not(ox > 0 and max(f(ox/bw),f(ox/aw)) >= .75): return True
             oy = f(f(bh+ah)-f(max(aa[3],bb[3])-min(aa[1],bb[1])))
             return bool(max(f(oy/bh),f(oy/ah)) >= .75)
-    for a,b,p,label in sort_desc(pairs):
+    for a,b,p,label in sort_desc(sorted(pairs,key=lambda p:(p[0],p[1]))):
         if label: continue
         ga,gb = membership[a],membership[b]
         if ga == gb and ga >= 0: continue
@@ -95,6 +95,17 @@ def main():
                 pairs.append([a,b,float(p),bool(rng.random()<.25)])
         scale = f([10,50,100][index % 3]); groups,membership = select(stats,pairs,scale)
         controls.append(dict(statistics=[s.tolist() for s in stats],pairs=pairs,scale=float(scale),groups=groups,membership=membership))
+    #64 equal-confidence encounter permutations. Cost producer orders unique
+    #undirected identities before the confidence partition exchanges; native
+    #physical group order must not inherit raw proposal encounter order.
+    stats=[features.statistics([[i*20,0],[i*20,40]]) for i in range(6)]
+    base=[[a,b,float(f(.999)),False] for a in range(6) for b in range(a+1,6)]
+    expected,member=select(stats,base,f(100))
+    for trial in range(64):
+        shuffled=[base[i] for i in rng.permutation(len(base))]
+        groups,membership=select(stats,shuffled,f(100))
+        assert groups==expected and membership==member
+        controls.append(dict(statistics=[r.tolist() for r in stats],pairs=shuffled,scale=100,groups=groups,membership=membership))
     if len(sys.argv) > 2:
         proposal = json.loads(Path(sys.argv[2]).read_text())
         for rows,item in enumerate(proposal['controls'][-2:],1):

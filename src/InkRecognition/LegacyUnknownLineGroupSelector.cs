@@ -33,7 +33,11 @@ public static class LegacyUnknownLineGroupSelector
                 return p.LabelOne ? (Join: MathF.Log(other), Split: MathF.Log(p.Confidence)) :
                     (Join: MathF.Log(p.Confidence), Split: MathF.Log(other));
             });
-        var ordered = unique.ToArray(); SortConfidence(ordered, 0, ordered.Length - 1, cancellationToken);
+        //07be60 mutates the pairs into first-ID then second-ID order before
+        //07c160 sorts by confidence. With unique undirected identities, this
+        //final-strip order is unambiguous; equal confidence still swaps keys.
+        var ordered = unique.OrderBy(p => p.FirstStroke).ThenBy(p => p.SecondStroke).ToArray();
+        SortConfidence(ordered, 0, ordered.Length - 1, cancellationToken);
         int[] membership = Enumerable.Repeat(-1, records.Count).ToArray();
         var groups = new List<List<int>>();
         foreach (var pair in ordered)
