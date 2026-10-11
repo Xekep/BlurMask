@@ -323,6 +323,8 @@ jobs:
           dotnet run --project tools/LegacyPreparedWordGroup.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
           python tools/LegacyDeferredGraph.Probe/reference_controls.py .artifacts/legacy-deferred-graph-controls.json
           dotnet run --project tools/LegacyDeferredGraph.Probe -c Release -- .artifacts/legacy-deferred-graph-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyLinguisticMask.Probe/reference_controls.py .artifacts/legacy-linguistic-mask-controls.json
+          dotnet run --project tools/LegacyLinguisticMask.Probe -c Release -- .artifacts/legacy-linguistic-mask-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res
           python tools/handwriting/fetch_russian_track_corpus.py --self-test
           dotnet build tools/LegacyRussianCorpus.Probe -c Release
           python tools/LegacyVariableWord.Probe/reference_controls.py .artifacts/legacy-variable-word-controls.json
@@ -517,6 +519,7 @@ jobs:
             @{ Name = 'LegacySymbolMask'; Args = @('.artifacts/legacy-symbol-mask-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyPreparedWordGroup'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
             @{ Name = 'LegacyDeferredGraph'; Args = @('.artifacts/legacy-deferred-graph-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyLinguisticMask'; Args = @('.artifacts/legacy-linguistic-mask-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res') },
             @{ Name = 'LegacyVariableWord'; Args = @('.artifacts/legacy-variable-word-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyHandwritingFontSize'; Args = @('.artifacts/font-size-controls.json') }
           )
