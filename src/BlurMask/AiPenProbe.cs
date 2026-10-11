@@ -13,6 +13,7 @@ internal static class AiPenProbe
         SelectionProbe.Run();
         StrokeGeometryChecks.Run();
         BoardWriteReceiptChecks.Run();
+        AiInkBatchChecks.Run();
         InkRecognitionChecks.Run();
         var strokes = new[] { Stroke(10, 10), Stroke(32, 10), Stroke(10, 160), Stroke(32, 160) };
         var results = AiInkLayout.Recognize(strokes, new TestRecognizer());

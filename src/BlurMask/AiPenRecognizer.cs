@@ -3,42 +3,36 @@ using Avalonia.Threading;
 
 namespace BlurMask;
 
-internal sealed class AiPenRecognizer(InkDocument document, Func<string> recognitionMode) : IDisposable
+internal sealed class AiPenRecognizer(InkDocument document, Func<string> recognitionMode,
+    Func<InkMark[], string, CancellationToken, IReadOnlyList<AiInkLayout.Result>>? infer = null) : IDisposable
 {
     private static readonly SemaphoreSlim Inference = new(1, 1);
-    private readonly List<InkMark> _strokes = [];
-    private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(800) };
+    private readonly AiInkBatch _batch = new(document);
     private bool _disposed;
-    private bool _started;
     private int _generation;
-    private InkMark[]? _processing;
     private CancellationTokenSource? _work;
+    internal Task Pending { get; private set; } = Task.CompletedTask;
     internal void Pause()
     {
-        _timer.Stop(); _generation++; _work?.Cancel();
-        if (_processing is not { } previous) return;
-        _processing = null;
-        _strokes.InsertRange(0, previous.Where(m => document.Marks.Contains(m) || document.FadingMarks.Contains(m)));
+        if (_disposed) return;
+        _generation++; _work?.Cancel();
     }
-    internal void Resume() { if (!_disposed && _strokes.Count > 0) { _timer.Stop(); _timer.Start(); } }
+    internal void Resume() => Flush();
     internal void Add(InkMark mark)
     {
         if (_disposed) return;
-        if (!_started) { _timer.Tick += (_, _) => Flush(); _started = true; }
-        if (_strokes.Count > 0)
-        {
-            if (_strokes.Count >= 256 || _strokes.Sum(m => m.Points.Count) + mark.Points.Count > 20000) Flush();
-        }
-        _strokes.Add(mark); _timer.Stop(); _timer.Start();
+        _batch.Add(mark);
+        // Add is called by CompleteStroke on pointer release. Start inference
+        // now; a subsequent pen press cancels this generation, not its ink.
+        Flush();
     }
     internal void Flush()
     {
-        _timer.Stop();
-        _strokes.RemoveAll(m => !document.Marks.Contains(m) && !document.FadingMarks.Contains(m));
-        if (_disposed || _strokes.Count == 0) return;
-        var strokes = _strokes.ToArray(); _strokes.Clear(); _processing = strokes;
+        if (_disposed) return;
+        var strokes = _batch.Snapshot();
+        if (strokes.Length == 0) return;
         _work?.Cancel(); _work?.Dispose(); _work = new();
-        _ = ConvertAsync(strokes, ++_generation, recognitionMode(), _work.Token);
+        Pending = ConvertAsync(strokes, ++_generation, recognitionMode(), _work.Token);
     }
     private async Task ConvertAsync(InkMark[] strokes, int generation, string mode, CancellationToken cancellationToken)
     {
@@ -46,13 +40,14 @@ internal sealed class AiPenRecognizer(InkDocument document, Func<string> recogni
         {
             await Inference.WaitAsync(cancellationToken);
             IReadOnlyList<AiInkLayout.Result> results;
-            try { if (_disposed || generation != _generation) return; results = await Task.Run(() => mode switch
+            try { if (_disposed || generation != _generation) return; results = await Task.Run(() => infer is not null ? infer(strokes, mode, cancellationToken) : mode switch
                 {
                     "math" => AiMathLayout.Recognize(strokes, cancellationToken: cancellationToken),
                     "text" => AiInkLayout.Recognize(strokes, cancellationToken: cancellationToken),
                     _ => AiAutomaticLayout.Recognize(strokes, cancellationToken: cancellationToken)
                 }, cancellationToken); }
             finally { Inference.Release(); }
+            if (results.Count == 0) return;
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 if (_disposed || generation != _generation || document.HasActiveEdit) return;
@@ -60,14 +55,13 @@ internal sealed class AiPenRecognizer(InkDocument document, Func<string> recogni
                 {
                     var bounds = result.Strokes.Select(s => s.Bounds).Aggregate((a, b) => a.Union(b));
                     AiTypesetLayout.Fit(result.Text, bounds, result.SizingText, document.Marks);
-                    document.ReplaceRecognized(result.Strokes, result.Text);
+                    _batch.Apply(result);
                 }
             });
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
         catch (Exception ex) when (ex is IOException or InvalidDataException or ArgumentException or InvalidOperationException)
         { System.Diagnostics.Trace.WriteLine($"AI pen: {ex.Message}"); }
-        finally { if (generation == _generation) _processing = null; }
     }
-    public void Dispose() { _disposed = true; _timer.Stop(); _work?.Cancel(); _work?.Dispose(); _strokes.Clear(); _processing = null; }
+    public void Dispose() { _disposed = true; _work?.Cancel(); _work?.Dispose(); _batch.Clear(); }
 }

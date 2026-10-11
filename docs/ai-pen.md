@@ -1,6 +1,7 @@
 # AI pen
 
-AI pen batches strokes after an 800 ms pause and passes their coordinates to the
+AI pen starts asynchronous recognition immediately when the pen is released,
+passing the current ink fragment's coordinates to the
 portable [InkRecognition library](../src/InkRecognition/README.md). It does not
 rasterize handwriting, load MyScript DLLs, run Python, or contact a cloud service.
 The previous symbol/PARSeq recognizers, weights, training tools and fixtures have
@@ -13,7 +14,7 @@ and digits have been verified. Russian raw-stroke recognition is not ready.
 The separate **Formulas** mode uses the reusable native
 [InkRecognition.Math module](ink-math-engine.md) and a user-installed Math2 pack.
 The default **Automatic** mode selects text or mathematical notation after the
-pause. With an installed [Raw Content2 pack](raw-content-engine.md), a separate
+pen release. With an installed [Raw Content2 pack](raw-content-engine.md), a separate
 local neural analyzer first partitions text and formula regions in a mixed batch;
 drawings and uncertain regions stay handwritten. Each region uses its own decoder.
 Without this optional pack, confident natural text avoids loading the formula
@@ -35,6 +36,14 @@ Division by zero, unknown notation and inconsistent written equalities are kept
 without an answer. A result extends to the right while retaining the original
 height and can be undone together with recognition.
 Confidence is an acoustic score, not a calibrated probability of correct text.
+
+There is no artificial idle delay before inference. Model loading and computation
+still take time. A new pen press cancels obsolete work; the next release uses the
+retained original ink, including ink behind an already converted nearby word.
+This lets later crossbars, dots and equals signs refine the complete fragment.
+Only visible, unchanged text is eligible: manual edits, movement or deletion do
+not get overwritten. Original context is bounded to 256 strokes and 20,000 points;
+distant writing starts a new fragment. Undo/redo retain previous live associations.
 
 ## Model installation
 

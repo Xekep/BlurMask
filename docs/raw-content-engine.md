@@ -39,8 +39,9 @@ This is an **experimental recovered profile**, not a complete copy of MyScript's
 Raw Content engine. SDK incremental graph updates, semantic grouping, recognition
 feedback, decoration editing and lexical context are not implemented. Graph
 neighbor ties, floating-point rounding and segmentation thresholds have not been
-validated against the complete vendor pipeline. Recognition runs after the
-existing pause and considers the current pending batch, not the whole document.
+validated against the complete vendor pipeline. Recognition starts on pen
+release and considers the bounded current ink fragment, including retained
+original ink behind its unchanged live text, rather than the whole document.
 
 ## Private model installation
 

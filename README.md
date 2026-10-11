@@ -10,7 +10,7 @@ Build/package scripts live in `tools`, installer
 definitions in `packaging`, and documentation in `docs`.
 
 AI pen uses an experimental local stroke recognizer in a separate library. Install an
-English `.ikrpack` model in Settings, write a row and pause briefly; its printed replacement
+English `.ikrpack` model in Settings; recognition starts on pen release and its printed replacement
 keeps the original size and color. Recognition can be undone. Models are separate from
 installers; without a model, ink stays handwritten. Russian and formula integration remain
 in progress. See [AI pen documentation](docs/ai-pen.md).
