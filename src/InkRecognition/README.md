@@ -103,6 +103,13 @@ exact text mapping. Eight own separated printed МАМА/МИР controls then ra
 dictionary words мама/мир first. This returns dictionary spelling, does not
 retain written case and is not representative Russian handwriting accuracy.
 
+`LegacyAcousticLexicalMapping` shares that bounded Unicode mapping with other
+classifier families. Stored related forms keep the strongest source class for
+each dictionary label; duplicate aliases do not add probability. The segmented
+word probe checks different label spaces, overlapping aliases, absent symbols,
+score bounds and cancellation. This remains an original mapping policy, not the
+native ensemble or word-case algorithm.
+
 `LegacyLexicalLatticeDecoder` performs original bounded dictionary beam search
 over alternative caller-scored glyph cuts. It returns both the word labels and
 the selected boundaries, so callers can compare possible segmentations without

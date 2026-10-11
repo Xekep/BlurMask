@@ -61,6 +61,34 @@ if (args.Length == 0)
         try { _ = new LegacySegmentedWordRecognizer(ownNetwork, ownActivations, formsAcoustic, formsLexical, formsGraph, mode); throw new InvalidOperationException("Invalid relation mode accepted."); }
         catch (ArgumentOutOfRangeException) { }
     }
+    // All classifier families can share this mapping without assuming their
+    // acoustic IDs match dictionary IDs or adding duplicate alias evidence.
+    var mapping = new LegacyAcousticLexicalMapping(ownAcoustic, ownLexical, 2);
+    var mapped = mapping.Map([8192, 24576]);
+    Require(mapped.Length == 2 && mapped[0].Label == 0 && mapped[1].Label == 1 &&
+        Math.Abs(mapped[0].LogScore - Math.Log(.75)) < 1e-6 &&
+        Math.Abs(mapped[1].LogScore - Math.Log(.25)) < 1e-6,
+        "Reusable mapping assumed equal alphabet IDs or changed quantized probabilities.");
+    var sharedForms = new LegacyAcousticLexicalMapping(formsAcoustic, formsLexical, 3, 0);
+    var mergedForms = sharedForms.Map([8192, 0, 24576]);
+    Require(mergedForms.Length == 1 && mergedForms[0].Label == 1 &&
+        Math.Abs(mergedForms[0].LogScore - Math.Log(.75)) < 1e-6,
+        "Aliases from separate source classes summed evidence instead of retaining the strongest source.");
+    Require(sharedForms.Map([0, 32768, 0]).Length == 0 && mapping.Map([0, 0]).Length == 0,
+        "Absent dictionary symbols or zero-probability choices were invented.");
+    foreach (int[] bad in new[] { new[] { 1 }, new[] { -1, 1 }, new[] { 32769, 0 } })
+    {
+        try { mapping.Map(bad); throw new InvalidOperationException("Invalid acoustic scores accepted."); }
+        catch (ArgumentException) { }
+    }
+    try { mapping.Map([8192, 24576], canceled.Token); throw new InvalidOperationException("Reusable mapping ignored cancellation."); }
+    catch (OperationCanceledException) { }
+    foreach (int width in new[] { 0, 3, 513 })
+    {
+        try { _ = new LegacyAcousticLexicalMapping(ownAcoustic, ownLexical, width); throw new InvalidOperationException("Invalid mapping width accepted."); }
+        catch (ArgumentOutOfRangeException) { }
+    }
+    Console.WriteLine("PASS reusable acoustic/lexical mapping: reversed IDs, aliases, strongest-source merging, absent/zero scores, bounds and cancellation.");
     Console.WriteLine("PASS own segmented-word pipeline, reversed label spaces, probabilities, terminal boundaries and cancellation. No vendor assets required.");
     return;
 }
