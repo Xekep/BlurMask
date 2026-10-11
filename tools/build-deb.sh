@@ -38,7 +38,7 @@ Architecture: $arch
 Maintainer: Xekep <noreply@kiiko.ru>
 Section: graphics
 Priority: optional
-Depends: $dependencies, libx11-6, libxcb1, libice6, libsm6, libfontconfig1, libxcursor1, libxrandr2, libxi6, libxrender1, libdbus-1-3, libicu70 | libicu72 | libicu74 | libicu76 | libicu78, libssl3 | libssl3t64, zlib1g, ca-certificates
+Depends: $dependencies, libx11-6, libxcb1, libxcb-shape0, libice6, libsm6, libfontconfig1, libxcursor1, libxrandr2, libxi6, libxrender1, libdbus-1-3, libicu70 | libicu72 | libicu74 | libicu76 | libicu78, libssl3 | libssl3t64, zlib1g, ca-certificates
 Description: Desktop annotation and shared canvas
  Native desktop drawing, privacy masks, screenshots and collaborative canvas.
  No separately installed .NET runtime is required. Uses X11 or XWayland.

@@ -16,6 +16,7 @@ internal sealed class DesktopInkWindow : Window
     private IPointer? _pointer;
     private Point _lastErase;
     private readonly PixelRect _screenBounds;
+    private PixelRect[]? _controlRegion;
 
     public DesktopInkWindow(DrawingSession session, Screen screen)
     {
@@ -59,6 +60,8 @@ internal sealed class DesktopInkWindow : Window
             _session.SelectTool(InkTool.Cursor);
         };
         Closed += (_, _) => CancelGesture();
+        PositionChanged += (_, _) => UpdateControlExclusion();
+        SizeChanged += (_, _) => UpdateControlExclusion();
     }
 
     public void ApplyState()
@@ -82,7 +85,37 @@ internal sealed class DesktopInkWindow : Window
             // Never leave an invisible input-blocking window on unsupported backends.
             if (drawing && !IsVisible) Show();
             else if (!drawing && IsVisible) Hide();
+            UpdateControlExclusion();
         }
+    }
+
+    internal void UpdateControlExclusion()
+    {
+        if (!OperatingSystem.IsLinux() || !IsVisible || Bounds.Width <= 0 || Bounds.Height <= 0) return;
+        var bounds = new PixelRect(Position, new PixelSize((int)Math.Ceiling(Bounds.Width * RenderScaling),
+            (int)Math.Ceiling(Bounds.Height * RenderScaling)));
+        var regions = new List<PixelRect> { bounds };
+        foreach (var control in new Window?[] { _session.Toolbar, _session.Toolbar.OpenFlyout })
+        {
+            if (control is not { IsVisible: true } || control.Bounds.Width <= 0 || control.Bounds.Height <= 0) continue;
+            var hole = new PixelRect(control.Position, new PixelSize((int)Math.Ceiling(control.Bounds.Width * control.RenderScaling),
+                (int)Math.Ceiling(control.Bounds.Height * control.RenderScaling)));
+            var remaining = new List<PixelRect>();
+            foreach (var region in regions)
+            {
+                var overlap = region.Intersect(hole);
+                if (overlap.Width <= 0 || overlap.Height <= 0) { remaining.Add(region); continue; }
+                Add(new(region.X, region.Y, region.Width, overlap.Y - region.Y));
+                Add(new(region.X, overlap.Bottom, region.Width, region.Bottom - overlap.Bottom));
+                Add(new(region.X, overlap.Y, overlap.X - region.X, overlap.Height));
+                Add(new(overlap.Right, overlap.Y, region.Right - overlap.Right, overlap.Height));
+                void Add(PixelRect rectangle) { if (rectangle.Width > 0 && rectangle.Height > 0) remaining.Add(rectangle); }
+            }
+            regions = remaining;
+        }
+        var next = regions.ToArray();
+        if (_controlRegion?.SequenceEqual(next) == true) return;
+        if (DesktopInkNative.ExcludeControls(this, bounds, next)) _controlRegion = next;
     }
 
     public void Refresh() => _surface.InvalidateVisual();

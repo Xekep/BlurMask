@@ -86,6 +86,12 @@ it uses XWayland. Missing cursor files during theme fallback in `strace` are
 normal if a later cursor lookup succeeds; `killed by SIGINT` indicates an
 interrupt signal and does not establish that the application crashed.
 
+The Linux ink layer excludes the drawing panel and its menus from both its
+visible shape and its pointer input region. This keeps the controls usable even
+when a compositor ignores requests to raise a window. This requires the X11
+Shape library (`libxcb` on Arch, `libxcb-shape0` on Debian/Ubuntu), included in
+the installer dependencies.
+
 ## Right-click seems to do nothing
 
 The mode changes immediately. The tray tooltip shows the current mode. Pixel Blur, Scramble, Glass Refraction and Blackout are visually obvious; Blur depends on the OS compositor.

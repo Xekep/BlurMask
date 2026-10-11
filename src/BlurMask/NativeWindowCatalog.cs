@@ -208,9 +208,45 @@ internal sealed partial class XcbWindowCatalog(nint connection, uint root) : IWi
             xcb_configure_window_checked(_connection, (uint)id, 64, in above));
         if (error != 0) free(error);
     }
+    internal unsafe bool SetInkRegion(nuint id, PixelRect bounds, IReadOnlyList<PixelRect> regions)
+    {
+        if (xcb_connection_has_error(_connection) != 0) return false;
+        var rectangles = regions.Select(r => new ShapeRectangle
+        {
+            X = (short)(r.X - bounds.X), Y = (short)(r.Y - bounds.Y),
+            Width = (ushort)r.Width, Height = (ushort)r.Height
+        }).ToArray();
+        var windows = new List<uint> { (uint)id };
+        // GLX/EGL render into a child X window. Its input shape needs the same
+        // holes as the parent, otherwise it can still intercept the controls.
+        var reply = xcb_query_tree_reply(_connection, xcb_query_tree(_connection, (uint)id), out var treeError);
+        try
+        {
+            if (reply != 0)
+            {
+                var count = Math.Min(64, xcb_query_tree_children_length(reply));
+                var children = xcb_query_tree_children(reply);
+                for (var i = 0; i < count; i++) windows.Add(unchecked((uint)Marshal.ReadInt32(children, i * 4)));
+            }
+        }
+        finally { Free(reply, treeError); }
+        var success = true;
+        fixed (ShapeRectangle* data = rectangles)
+            foreach (var window in windows)
+                foreach (byte kind in new byte[] { 0, 2 }) // Bounding and Input.
+                {
+                    var error = xcb_request_check(_connection,
+                        xcb_shape_rectangles_checked(_connection, 0, kind, 0, window, 0, 0, (uint)rectangles.Length, data));
+                    if (error == 0) continue;
+                    success = false;
+                    free(error);
+                }
+        return success;
+    }
     private static void Free(nint reply, nint error) { if (reply != 0) free(reply); if (error != 0) free(error); }
     public void Dispose() => xcb_disconnect(_connection);
     [StructLayout(LayoutKind.Sequential)] private struct Cookie { public uint Sequence; }
+    [StructLayout(LayoutKind.Sequential)] private struct ShapeRectangle { public short X, Y; public ushort Width, Height; }
     [StructLayout(LayoutKind.Sequential)] private struct ScreenIterator { public nint Data; public int Remaining, Index; }
     [LibraryImport("libc.so.6")] private static partial void free(nint pointer);
     [LibraryImport("libxcb.so.1")] private static partial nint xcb_connect(nint display, out int screen);
@@ -237,4 +273,6 @@ internal sealed partial class XcbWindowCatalog(nint connection, uint root) : IWi
     [LibraryImport("libxcb.so.1")] private static partial nint xcb_translate_coordinates_reply(nint connection, Cookie cookie, out nint error);
     [LibraryImport("libxcb.so.1")] private static partial Cookie xcb_configure_window_checked(nint connection, uint window, ushort mask, in uint values);
     [LibraryImport("libxcb.so.1")] private static partial nint xcb_request_check(nint connection, Cookie cookie);
+    [LibraryImport("libxcb-shape.so.0")] private static unsafe partial Cookie xcb_shape_rectangles_checked(nint connection,
+        byte operation, byte kind, byte ordering, uint window, short x, short y, uint length, ShapeRectangle* rectangles);
 }

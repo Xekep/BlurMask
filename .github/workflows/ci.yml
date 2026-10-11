@@ -195,7 +195,7 @@ jobs:
         with:
           dotnet-version: 11.0.100-preview.7.26381.103
       - name: Install Native AOT and X11 smoke-test dependencies
-        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev xvfb libx11-6 libice6 libsm6 libfontconfig1
+        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev xvfb libx11-6 libxcb-shape0 libice6 libsm6 libfontconfig1
       - run: dotnet restore src/BlurMask/BlurMask.csproj
       - run: bash ./tools/build.sh linux-x64
       - name: Native offline AI pen probe
@@ -235,7 +235,7 @@ jobs:
         with:
           name: BlurMask-linux-x64
           path: .artifacts/native-cloud
-      - run: sudo apt-get update && sudo apt-get install -y xvfb libx11-6 libice6 libsm6 libfontconfig1
+      - run: sudo apt-get update && sudo apt-get install -y xvfb libx11-6 libxcb-shape0 libice6 libsm6 libfontconfig1
       - name: Exercise native clients against the real API and live channel
         shell: bash
         run: |

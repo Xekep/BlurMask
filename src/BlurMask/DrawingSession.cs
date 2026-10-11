@@ -234,6 +234,10 @@ internal sealed class DrawingSession : IDisposable
         _historyState = (Document.CanUndo, Document.CanRedo);
         StateChanged?.Invoke();
     }
+    internal void UpdateOverlayRegions()
+    {
+        foreach (var overlay in _overlays) overlay.UpdateControlExclusion();
+    }
     private void RefreshDesktopDocument()
     {
         if (DesktopDocument.FadingMarks.Count > 0) _fadeTimer.Start();

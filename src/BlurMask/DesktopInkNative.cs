@@ -82,6 +82,12 @@ internal sealed partial class DesktopInkNative : IDisposable
         _x11Stacking?.Dispose();
         _x11Stacking = null;
     }
+    internal static bool ExcludeControls(Window window, PixelRect bounds, IReadOnlyList<PixelRect> regions)
+    {
+        if (!OperatingSystem.IsLinux() || window.TryGetPlatformHandle() is not { HandleDescriptor: "XID" } handle) return false;
+        _x11Stacking ??= XcbWindowCatalog.TryCreate();
+        return _x11Stacking?.SetInkRegion((nuint)handle.Handle, bounds, regions) == true;
+    }
     internal static void VerifyClickThrough(Window window)
     {
         var style = GetWindowLongPtrW(Handle(window), ExStyle).ToInt64();

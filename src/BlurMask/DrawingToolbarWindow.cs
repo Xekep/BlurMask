@@ -155,8 +155,8 @@ internal sealed class DrawingToolbarWindow : Window
                     screen.WorkingArea.Y + Math.Max(16, (screen.WorkingArea.Height - (int)(Height * screen.Scaling)) / 2));
             }
         };
-        PositionChanged += (_, _) => PlaceFlyout();
-        LayoutUpdated += (_, _) => PlaceFlyout();
+        PositionChanged += (_, _) => { PlaceFlyout(); session.UpdateOverlayRegions(); };
+        LayoutUpdated += (_, _) => { PlaceFlyout(); session.UpdateOverlayRegions(); };
         KeyDown += (_, e) =>
         {
             if (session.HandleLocalShortcut(e)) return;
@@ -470,11 +470,13 @@ internal sealed class DrawingToolbarWindow : Window
             _flyoutName = null;
             _flyoutAnchor = null;
             _toolButtons.Clear();
+            _session.UpdateOverlayRegions();
         };
         _flyout.KeyDown += (_, e) => { if (e.Key == Key.Escape) CloseFlyout(); };
         _flyout.Opened += (_, _) => PlaceFlyout();
         _flyout.Resized += (_, _) => PlaceFlyout();
         _flyout.LayoutUpdated += (_, _) => PlaceFlyout();
+        _flyout.PositionChanged += (_, _) => _session.UpdateOverlayRegions();
         _flyout.Show(this);
         PlaceFlyout();
         Dispatcher.UIThread.Post(PlaceFlyout, DispatcherPriority.Loaded);
@@ -495,6 +497,7 @@ internal sealed class DrawingToolbarWindow : Window
         var position = new PixelPoint(Math.Clamp(x, area.X, Math.Max(area.X, area.Right - width)),
             Math.Clamp(y, area.Y, Math.Max(area.Y, area.Bottom - height)));
         if (flyout.Position != position) flyout.Position = position;
+        _session.UpdateOverlayRegions();
     }
     public void CloseFlyout()
     {
@@ -504,6 +507,7 @@ internal sealed class DrawingToolbarWindow : Window
         _flyoutAnchor = null;
         _toolButtons.Clear();
         flyout?.Close();
+        _session.UpdateOverlayRegions();
     }
     public void RaiseAboveInk() { DesktopInkNative.Raise(this); if (_flyout is not null) DesktopInkNative.Raise(_flyout); }
     internal Window? OpenFlyout => _flyout;
