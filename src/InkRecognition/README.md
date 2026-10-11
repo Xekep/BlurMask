@@ -405,3 +405,12 @@ restores the checked `convert.match-text-size` value calculation from recognized
 range geometry and rendered `x` metrics, optional prepared math contributions,
 quantization and dirty tolerance. Its values use model units; recognition-range
 production, display conversion and final baseline placement remain separate.
+
+[`LegacyOrdinaryGraphAcousticPermissionSession` and
+`LegacyPreparedOrdinaryGraphAcousticProducer`](../../docs/legacy-ordinary-graph-acoustic-lifecycle.md)
+connect the immutable ordinary candidate graph to actual acoustic rows,
+permissions and dictionary maps. They preserve native span selection, computed
+and pool reuse, scoped invalidation and pooled buffer identity. Ordinary group
+kind and physical primitive metadata come from their checked producers. Guide
+frames and remaining external cache policy are explicit; this is not a final
+native winner or a complete automatic Russian recognizer.

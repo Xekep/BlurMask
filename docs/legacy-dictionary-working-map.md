@@ -82,3 +82,10 @@ descriptor and permission producer are now separate
 and the [ordinary neural line sweep](legacy-ordinary-neural-line-sweep.md) are also
 separate components. Final native beam/winner/confidence and complete ordinary
 application orchestration remain unfinished.
+
+The [ordinary graph acoustic lifecycle](legacy-ordinary-graph-acoustic-lifecycle.md)
+now selects real graph arcs by native span, derives ordinary group kind from the
+graph producer, and maintains the native computed/pool reuse and scoped buffer
+invalidation. Its model-backed producer derives physical primitive metadata
+from owned source ink. Guide frames and the remaining external cache policy
+remain explicit; final winner and mutable frontend orchestration are not inferred.

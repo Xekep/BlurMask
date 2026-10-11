@@ -363,6 +363,8 @@ jobs:
           dotnet run --project tools/LegacyAcousticDictionaryPermissions.Probe -c Release -- .artifacts/legacy-acoustic-dictionary-permissions-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           python tools/LegacyDictionaryQuery.Probe/reference_controls.py .artifacts/legacy-dictionary-query-controls.json
           dotnet run --project tools/LegacyDictionaryQuery.Probe -c Release -- .artifacts/legacy-dictionary-query-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
+            python tools/LegacyGraphAcousticLifecycle.Probe/reference_controls.py .artifacts/legacy-graph-acoustic-lifecycle-controls.json
+            dotnet run --project tools/LegacyGraphAcousticLifecycle.Probe -c Release -- .artifacts/legacy-graph-acoustic-lifecycle-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
           python tools/handwriting/fetch_russian_track_corpus.py --self-test
           dotnet build tools/LegacyRussianCorpus.Probe -c Release
           python tools/LegacyVariableWord.Probe/reference_controls.py .artifacts/legacy-variable-word-controls.json
@@ -575,6 +577,7 @@ jobs:
             @{ Name = 'LegacyLineSweep'; Args = @('.artifacts/legacy-line-sweep-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res') },
             @{ Name = 'LegacyAcousticDictionaryPermissions'; Args = @('.artifacts/legacy-acoustic-dictionary-permissions-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyDictionaryQuery'; Args = @('.artifacts/legacy-dictionary-query-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
+              @{ Name = 'LegacyGraphAcousticLifecycle'; Args = @('.artifacts/legacy-graph-acoustic-lifecycle-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
             @{ Name = 'LegacyVariableWord'; Args = @('.artifacts/legacy-variable-word-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyHandwritingFontSize'; Args = @('.artifacts/font-size-controls.json') }
           )
