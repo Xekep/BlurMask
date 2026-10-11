@@ -380,9 +380,10 @@ internal static class DrawingSmokeTest
                 {
                     mask.SetMode(mode); await Task.Delay(40);
                     var sources = optics.SourceUpdateCount; var regions = optics.RegionBuildCount;
+                    var start = catalog.Target.Bounds.Position;
                     for (var move = 0; move < 120; move++)
                     {
-                        catalog.Target = catalog.Target with { Bounds = new PixelRect(600 + move, 300 + move / 2, 400, 300) };
+                        catalog.Target = catalog.Target with { Bounds = new PixelRect(start.X + move + 1, start.Y + move / 2 + 1, 400, 300) };
                         attachment.Update();
                     }
                     Check(optics.SourceUpdateCount == sources, $"Optical capture blocked a synchronous attachment movement burst: {mode}, {sources} -> {optics.SourceUpdateCount}.");
