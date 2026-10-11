@@ -62,8 +62,15 @@ if (await solver.SolveAsync(@"\system{whoami}") is not null) throw new Exception
 if (await solver.SolveAsync("1/0") is not null) throw new Exception("Undefined arithmetic replaced the input.");
 if (await solver.SolveAsync("x=x") is not null) throw new Exception("Unresolved/identity root echoed as its own solution.");
 if (await solver.SolveAsync("x") is not null) throw new Exception("Unchanged variable treated as an answer.");
-using var activeCancellation = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+using var activeCancellation = new CancellationTokenSource();
+Process? child = null;
+var cancellableSolver = new SymbolicMathSolver(Path.GetFullPath(args[0]))
+{
+    ProcessStarted = id => { child = Process.GetProcessById(id); activeCancellation.Cancel(); }
+};
 var cancellationWatch = Stopwatch.StartNew();
-try { await solver.SolveAsync("(10^8)!", activeCancellation.Token); throw new Exception("Running calculation did not cancel."); } catch (OperationCanceledException) { }
+try { await cancellableSolver.SolveAsync("1+1", activeCancellation.Token); throw new Exception("Running calculation did not cancel."); } catch (OperationCanceledException) { }
+if (child is null || !child.HasExited) throw new Exception("Canceled CAS child was not reaped.");
+child.Dispose();
 if (cancellationWatch.Elapsed > TimeSpan.FromSeconds(2)) throw new Exception("Native child cancellation was slow.");
 Console.WriteLine($"PASS native Giac: {actualFixtures.Length} calculus/algebra fixtures, cancellation and undefined/injection guards; {watch.ElapsedMilliseconds} ms");

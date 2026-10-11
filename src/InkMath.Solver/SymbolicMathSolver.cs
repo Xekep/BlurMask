@@ -9,6 +9,9 @@ public sealed record MathSolution(string LaTex, bool IsEquation);
 public sealed class SymbolicMathSolver
 {
     private readonly string _executable;
+    // Headless diagnostic observer: verifies ownership/cleanup of a live OS
+    // process without relying on a particular CAS expression being slow.
+    internal Action<int>? ProcessStarted { get; init; }
     public SymbolicMathSolver(string executable)
     {
         _executable = Path.GetFullPath(executable);
@@ -107,6 +110,7 @@ public sealed class SymbolicMathSolver
         try
         {
             if (!process.Start()) return null;
+            ProcessStarted?.Invoke(process.Id);
             output = ReadBounded(process.StandardOutput, deadline);
             errors = ReadBounded(process.StandardError, deadline);
             monitor = LimitMemory(process, deadline);
