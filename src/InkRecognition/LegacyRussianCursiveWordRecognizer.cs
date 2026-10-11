@@ -111,7 +111,7 @@ public sealed class LegacyRussianCursiveWordRecognizer
             new int[source.Count], cancellationToken: cancellationToken);
         var wordScorer = new LegacyWordCandidateScorer(model.CreateResourceLanguageScorer(options.LanguageScale));
         var finalScores = new Dictionary<int, (int WordId, LegacyWordCandidateScore Score)>();
-        int classified = 0; byte[] enabled = options.IncludeBaselineFamilies ? [1,1,1,1,0,0,0] : [1,1,0,0,0,0,0];
+        int classified = 0; byte[] enabled = options.IncludeBaselineFamilies ? [1,1,1,1,0,0,0] : [0,0,1,1,0,0,0];
         ReadOnlyMemory<LegacyIntegerLexicalCandidate> ScoreGroup(LegacyCursiveCandidateGroup group)
         {
             if (++classified > options.MaximumScoredGroups)

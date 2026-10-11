@@ -65,6 +65,23 @@ var recognizer=new LegacyRussianCursiveWordRecognizer(bundle,relatedFormMode:0);
 InkStroke Stroke(params (float X,float Y)[] p)=>new(p.Select(v=>new InkPoint(v.X,v.Y)).ToArray());
 var printed=new InkStroke[]{Stroke((0,90),(0,10),(25,60),(50,10),(50,90)),Stroke((70,10),(70,90),(120,10),(120,90)),Stroke((140,90),(140,10),(180,10),(190,20),(190,40),(180,50),(140,50))};
 var joined=new InkStroke[]{Stroke((0,90),(10,20),(20,90),(30,20),(40,90),(50,90),(60,20),(70,90),(80,20),(90,90),(100,90),(110,20),(120,90),(130,20),(140,90))};
+var subsetMapping = new LegacyAcousticLexicalMapping(bundle.AcousticAlphabet, bundle.LexicalAlphabet,
+    bundle.CreateGlyphClassifier().OutputWidth, relatedFormMode: 0);
+int subsetGroups = 0;
+var subsetResult = recognizer.RecognizeSourceOrderDiagnostic(printed,
+    new LegacyCursiveWordSearchOptions(90,80,0,1,IncludeBaselineFamilies:false),
+    costAdapter: (group, glyph) =>
+    {
+        Require(glyph.Scores.FamilyProbabilities[0] is null && glyph.Scores.FamilyProbabilities[1] is null &&
+            glyph.Scores.FamilyProbabilities[2] is not null && glyph.Scores.FamilyProbabilities[3] is not null &&
+            glyph.ResolvedWeights.Span[0] == 0 && glyph.ResolvedWeights.Span[1] == 0 &&
+            glyph.ResolvedWeights.Span[2] > 0 && glyph.ResolvedWeights.Span[3] > 0,
+            "Two-family recognition activated unavailable baseline neural slots.");
+        subsetGroups++;
+        return subsetMapping.MapIntegerCosts(glyph.IntegerCosts.Span);
+    });
+Require(subsetGroups > 0 && subsetResult.ClassifiedGroups == subsetGroups, "Two-family word path did not evaluate real resources.");
+Console.WriteLine("PASS actual temporal/spatial-only word recognition and inactive baseline-family weights.");
 foreach(var(name,source)in new[]{("own printed MIR",printed),("own joined zigzag",joined)})
 {
  var options=new LegacyCursiveWordSearchOptions(90,80,0,1,BeamWidth:128,MaximumScoredGroups:512,MaximumExpandedChoices:10_000_000);
