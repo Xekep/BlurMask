@@ -363,7 +363,8 @@ internal sealed class DesktopInkWindow : Window
                 if (selection is { } selected)
                 {
                     // Coordinates inside this transform are physical screen pixels.
-                    context.DrawRectangle(null, new Pen(Brushes.Black, 1, new DashStyle([4, 3], 0)), selected);
+                    var frame = new Rect(selected.X + .5, selected.Y + .5, Math.Max(0, selected.Width - 1), Math.Max(0, selected.Height - 1));
+                    context.DrawRectangle(null, new Pen(Brushes.Black, 1, new DashStyle([4, 3], 0)), frame);
                     var scaling = window.RenderScaling;
                     var label = new FormattedText($"{(int)selected.Width} × {(int)selected.Height} px",
                         System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
