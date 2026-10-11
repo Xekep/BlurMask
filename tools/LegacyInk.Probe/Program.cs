@@ -2,6 +2,24 @@ using System.Buffers.Binary;
 using System.Text.Json;
 using InkRecognition;
 
+if (args.Length == 2 && args[0] == "--score-controls")
+{
+    using var controls = JsonDocument.Parse(File.ReadAllBytes(args[1]));
+    int count = 0;
+    foreach (var test in controls.RootElement.EnumerateArray())
+    {
+        var scores = LegacyClassScores.Convert(Values(test.GetProperty("raw")));
+        Require(scores.Probability32768.Span.SequenceEqual(Values(test.GetProperty("probability"))), "Quantized EXP probability mismatch.");
+        var expected = test.GetProperty("logarithms").EnumerateArray().Select(x => x.GetSingle()).ToArray();
+        for (int i = 0; i < expected.Length; i++)
+            Require(Math.Abs(scores.LogScores.Span[i] - expected[i]) < .00001f, "EXP log-score mismatch.");
+        Require(scores.StabilizationOffset == test.GetProperty("offset").GetInt32(), "Score stabilization mismatch.");
+        count++;
+    }
+    Console.WriteLine($"PASS {count} EXP conversion vectors. Candidate masks, ensemble and language decoding are not tested.");
+    return;
+}
+
 if (args.Length == 4 && args[0] == "--glyph-cases")
 {
     var resource = File.ReadAllBytes(args[1]);
@@ -12,13 +30,15 @@ if (args.Length == 4 && args[0] == "--glyph-cases")
     var root = cases.RootElement;
     var network = LegacyInkNetwork.Load(resource.AsSpan(root.GetProperty("offset").GetInt32(),
         root.GetProperty("end").GetInt32() - root.GetProperty("offset").GetInt32()));
-    Require(network.InputWidth == 247 && network.OutputWidth == 180, "Unexpected isolated classifier profile.");
+    Require(network.InputWidth is 247 or 229 && network.OutputWidth == 180, "Unexpected isolated classifier profile.");
     int count = 0;
     foreach (var test in root.GetProperty("cases").EnumerateArray())
     {
         var points = test.GetProperty("points").EnumerateArray().Select(x =>
             new LegacyInkPoint(checked((short)x[0].GetInt32()), checked((short)x[1].GetInt32()))).ToArray();
-        var scores = network.Evaluate(LegacyStrokeFeatures.ExtractIsolatedInput(points), activations);
+        var features = network.InputWidth == 229 ? LegacyRasterFeatures.ExtractIsolatedInput(new LegacyInkStroke[] { new(points) })
+            : LegacyStrokeFeatures.ExtractIsolatedInput(points);
+        var scores = network.Evaluate(features, activations);
         int best = 0;
         for (int i = 1; i < scores.Length; i++) if (scores[i] > scores[best]) best = i;
         Require(best == test.GetProperty("expectedOutput").GetInt32(), "Isolated glyph top output mismatch.");
@@ -44,9 +64,28 @@ if (args.Length == 4 && args[0] is "--controls" or "--raw-controls")
         var features = Values(test.GetProperty("features")).Select(x => checked((short)x)).ToArray();
         if (args[0] == "--raw-controls")
         {
-            var points = test.GetProperty("points").EnumerateArray().Select(x =>
-                new LegacyInkPoint(checked((short)x[0].GetInt32()), checked((short)x[1].GetInt32()))).ToArray();
-            Require(LegacyStrokeFeatures.ExtractIsolatedInput(points).SequenceEqual(features), "Raw stroke feature mismatch.");
+            short[] extracted;
+            if (test.TryGetProperty("strokes", out var strokes))
+            {
+                var glyph = strokes.EnumerateArray().Select(s => new LegacyInkStroke(s.EnumerateArray().Select(x =>
+                    new LegacyInkPoint(checked((short)x[0].GetInt32()), checked((short)x[1].GetInt32()))).ToArray())).ToArray();
+                if (test.TryGetProperty("baseline", out var baseline))
+                {
+                    var lineInfo = new LegacyInkBaseline(checked((short)baseline[0].GetInt32()), checked((short)baseline[1].GetInt32()));
+                    extracted = network.InputWidth == 238 ? LegacyRasterFeatures.ExtractIsolatedInputWithBaseline(glyph, lineInfo)
+                        : LegacyStrokeFeatures.ExtractIsolatedInputWithBaseline(glyph, lineInfo);
+                }
+                else
+                    extracted = network.InputWidth == 229 ? LegacyRasterFeatures.ExtractIsolatedInput(glyph)
+                        : LegacyStrokeFeatures.ExtractIsolatedInput(glyph);
+            }
+            else
+            {
+                var points = test.GetProperty("points").EnumerateArray().Select(x =>
+                    new LegacyInkPoint(checked((short)x[0].GetInt32()), checked((short)x[1].GetInt32()))).ToArray();
+                extracted = LegacyStrokeFeatures.ExtractIsolatedInput(points);
+            }
+            Require(extracted.SequenceEqual(features), "Raw stroke feature mismatch.");
         }
         Require(network.Evaluate(features, activations).SequenceEqual(Values(test.GetProperty("raw"))), "Raw reference mismatch.");
         Require(network.Evaluate(features, activations, true).SequenceEqual(Values(test.GetProperty("sigmoid"))), "Sigmoid reference mismatch.");
@@ -57,13 +96,25 @@ if (args.Length == 4 && args[0] is "--controls" or "--raw-controls")
         : $"PASS {count} legacy supplied-vector reference comparisons. Raw handwriting is not tested.");
     return;
 }
-if (args.Length != 0) throw new ArgumentException("Usage: LegacyInk.Probe [--controls|--raw-controls|--glyph-cases resource.res controls.json activations.json]");
+if (args.Length != 0) throw new ArgumentException("Usage: LegacyInk.Probe [--controls|--raw-controls|--glyph-cases resource.res controls.json activations.json] | [--score-controls controls.json]");
 
 // Independently constructed networks and arbitrary monotonic lookup tables.
 // No vendor weights, tables, alphabet or handwriting samples are checked in.
 var hiddenTable = Enumerable.Range(0, 48).Select(x => Math.Min(1018, x * 20)).ToArray();
 var outputTable = Enumerable.Range(0, 128).Select(x => Math.Min(1024, 512 + x * 4)).ToArray();
 var activation = new LegacyInkActivations(hiddenTable, outputTable);
+var equalScores = LegacyClassScores.Convert(new int[] { 0, 0, 0 });
+Require(equalScores.Probability32768.Span.ToArray().All(x => x == 10922), "Equal EXP probabilities.");
+var saturatedScores = LegacyClassScores.Convert(new int[] { 40 * 1024 * 1024, -20 * 1024 * 1024 });
+Require(saturatedScores.Probability32768.Span.SequenceEqual(new int[] { 32767, 0 }) &&
+    saturatedScores.StabilizationOffset > 0 && saturatedScores.LogScores.Span[1] == -4f, "Stabilized EXP path.");
+var emptyScores = LegacyClassScores.Convert(new int[] { int.MinValue, int.MinValue });
+Require(emptyScores.Probability32768.Span.ToArray().All(x => x == 0), "All-zero EXP path.");
+Require(LegacyClassScores.Calibrate(0) == .5f && LegacyClassScores.Calibrate(10000) == 1f &&
+    LegacyClassScores.Calibrate(-10000) == 0f, "Score calibration limits.");
+RequireThrows<ArgumentException>(() => LegacyClassScores.Calibrate(float.NaN));
+RequireThrows<ArgumentException>(() => LegacyClassScores.Convert(Array.Empty<int>()));
+RequireThrows<OperationCanceledException>(() => LegacyClassScores.Convert(new int[] { 0 }, new CancellationToken(true)));
 var bytes = Fixture(3, 3, 3, new sbyte[] { 0, 127, -127, 127, 0, 0 }, new byte[] { 2, 3 },
     new sbyte[] { 127, 127, -127, -127, -128, 127 }, new byte[] { 4, 5 });
 var model = LegacyInkNetwork.Load(bytes);
@@ -108,8 +159,40 @@ Require(isolated.Length == 247 && isolated.AsSpan(217, 28).ToArray().All(x => x 
 RequireThrows<ArgumentException>(() => LegacyStrokeFeatures.Extract(new LegacyInkPoint[] { new(1, 1), new(1, 1) }));
 RequireThrows<ArgumentException>(() => LegacyStrokeFeatures.Extract(new LegacyInkPoint[4097]));
 RequireThrows<OperationCanceledException>(() => LegacyStrokeFeatures.Extract(line, new CancellationToken(true)));
+var oneStroke = new LegacyInkStroke[] { new(line) };
+Require(geometry.SequenceEqual(LegacyStrokeFeatures.Extract(oneStroke)), "Single/multiple-stroke APIs disagree.");
+var raster = LegacyRasterFeatures.Extract(oneStroke);
+Require(raster.Length == 199 && raster.AsSpan(0, 7).SequenceEqual(geometry.AsSpan(210, 7)), "Raster statistics precede pixel channels.");
+Require(raster[7 + 7] == -960 && raster[7 + 6] == -1024, "Horizontal row endpoints.");
+Require(raster.AsSpan(7 + 32, 15).ToArray().All(x => x == -512) && raster[7 + 32 + 15] == -576, "Vertical projection endpoint counts.");
+Require(raster[7 + 64 + 7] == 768 && raster[7 + 128 + 7] == 770, "Horizontal left/right contours.");
+Require(raster.AsSpan(7 + 96, 15).ToArray().All(x => x == -16) && raster[7 + 96 + 15] == 114, "Vertical top contour and empty column.");
+Require(raster.SequenceEqual(LegacyRasterFeatures.Extract(new LegacyInkStroke[] {
+    new(new LegacyInkPoint[] { new(-128, 25), new(0, 25) }) })), "Raster translation invariance.");
+Require(LegacyRasterFeatures.ExtractIsolatedInput(oneStroke).Length == 229, "Isolated raster input width.");
+var unavailableBaseline = new LegacyInkBaseline(0, -1);
+var baselineTrajectory = LegacyStrokeFeatures.ExtractWithBaseline(oneStroke, unavailableBaseline);
+Require(baselineTrajectory.Length == 226 && baselineTrajectory.AsSpan(217, 9).ToArray().All(x => x == 0), "Unavailable baseline channels.");
+var baselineRaster = LegacyRasterFeatures.ExtractWithBaseline(oneStroke, unavailableBaseline);
+Require(baselineRaster.Length == 208 && baselineRaster.AsSpan(0, 7).SequenceEqual(raster.AsSpan(0, 7)) &&
+    baselineRaster.AsSpan(16, 192).SequenceEqual(raster.AsSpan(7, 192)), "Baseline raster channel order.");
+Require(LegacyStrokeFeatures.ExtractIsolatedInputWithBaseline(oneStroke, unavailableBaseline).Length == 256 &&
+    LegacyRasterFeatures.ExtractIsolatedInputWithBaseline(oneStroke, unavailableBaseline).Length == 238, "Baseline classifier widths.");
+var lineBaseline = LegacyStrokeFeatures.ExtractWithBaseline(oneStroke, new(0, 64));
+Require(lineBaseline.AsSpan(221, 3).SequenceEqual(new short[] { -1024, 1024, -1024 }), "Baseline raster regions.");
+var twoStrokes = new LegacyInkStroke[] { new(line), new(new LegacyInkPoint[] { new(128, 128), new(0, 128) }) };
+var multiGeometry = LegacyStrokeFeatures.Extract(twoStrokes);
+Require(multiGeometry.AsSpan(6, 30).Contains((short)-1024), "Pen-up path was not emitted.");
+Require(multiGeometry[214] == -512 && multiGeometry[216] < 1024, "Stroke count and physical-ink fraction.");
+var translatedMulti = new LegacyInkStroke[] { new(new LegacyInkPoint[] { new(-100, 20), new(28, 20) }),
+    new(new LegacyInkPoint[] { new(28, 148), new(-100, 148) }) };
+Require(multiGeometry.SequenceEqual(LegacyStrokeFeatures.Extract(translatedMulti)), "Multi-stroke translation invariance.");
+RequireThrows<ArgumentException>(() => LegacyStrokeFeatures.Extract(Array.Empty<LegacyInkStroke>()));
+RequireThrows<ArgumentException>(() => LegacyStrokeFeatures.Extract(Enumerable.Repeat(oneStroke[0], 16).ToArray()));
+RequireThrows<OperationCanceledException>(() => LegacyStrokeFeatures.Extract(twoStrokes, new CancellationToken(true)));
 Console.WriteLine("PASS legacy parser, scalar overflow, signed activations, bias, immutable weights, malformed input and cancellation checks.");
-Console.WriteLine("PASS raw single-stroke geometry, directional/curvature channels, translation, scale, context and cancellation checks.");
+Console.WriteLine("PASS raw single/multiple-stroke geometry, pen-up, directional/curvature channels, translation, scale, context and cancellation checks.");
+Console.WriteLine("PASS raster projections/contours, baseline ordering, stabilized EXP conversion and confidence calibration checks.");
 
 void Check(LegacyInkNetwork network, byte[] data, short[] input)
 {

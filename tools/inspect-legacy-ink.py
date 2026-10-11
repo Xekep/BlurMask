@@ -223,7 +223,7 @@ def inspect(data):
         raise ValueError('No supported legacy configuration')
     return dict(bytes=len(data), sha256=hashlib.sha256(data).hexdigest(),
                 configurations=configs, recognition_ready=False,
-                missing=['multi-stroke and baseline/raster fixed-vector extraction',
+                missing=['313-input profiles and automatic baseline estimation',
                          'complete classifier ensemble and virtual-label semantics',
                          'segmentation and language decoder'])
 

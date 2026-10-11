@@ -4,7 +4,7 @@ namespace InkRecognition;
 public readonly record struct LegacyInkPoint(short X, short Y);
 
 /// <summary>
-/// Experimental single-stroke geometry for the legacy 30-sample, exponent-10
+/// Experimental single- and multi-stroke geometry for the legacy 30-sample, exponent-10
 /// trajectory profile. This is not a word recognizer or a cursive segmenter.
 /// </summary>
 public static class LegacyStrokeFeatures
@@ -49,6 +49,18 @@ public static class LegacyStrokeFeatures
         Resample(x, y, lengths, total, sx, sy);
         cancellationToken.ThrowIfCancellationRequested();
 
+        return Compose(sx, sy, Enumerable.Repeat((short)Unit, SampleCount).ToArray(), 1, normalizedWidth, normalizedHeight);
+    }
+
+    /// <summary>Extract the same profile for a complete glyph of 1..15 physical strokes.</summary>
+    public static short[] Extract(IReadOnlyList<LegacyInkStroke> strokes, CancellationToken cancellationToken = default)
+    {
+        var ink = LegacyGlyphGeometry.Create(strokes, cancellationToken);
+        return Compose(ink.SampleX, ink.SampleY, ink.PenState, strokes.Count, ink.Width, ink.Height);
+    }
+
+    internal static short[] Compose(int[] sx, int[] sy, short[] pen, int strokeCount, int normalizedWidth, int normalizedHeight)
+    {
         var dx = new int[SampleCount - 1]; var dy = new int[SampleCount - 1];
         var distances = new int[SampleCount - 1]; int sampledLength = 0;
         for (int i = 0; i < dx.Length; i++)
@@ -59,6 +71,7 @@ public static class LegacyStrokeFeatures
         var result = new short[GeometryWidth]; var direction = new int[6];
         for (int i = 0; i < dx.Length; i++)
         {
+            if (pen[i] != Unit || (i + 1 < dx.Length && pen[i + 1] != Unit)) continue;
             AddDirection(direction, 0, dx[i], distances[i]); AddDirection(direction, 2, dy[i], distances[i]);
             if (i + 1 < dx.Length)
                 AddDirection(direction, 4, (dx[i] * dy[i + 1] - dy[i] * dx[i + 1]) >> 8,
@@ -70,13 +83,13 @@ public static class LegacyStrokeFeatures
             result[i] = (short)(sum == 0 ? -Unit : 2 * Unit * direction[i] / sum - Unit);
             result[i + 1] = (short)(sum == 0 ? -Unit : 2 * Unit * direction[i + 1] / sum - Unit);
         }
-        int sumX = 0, sumY = 0;
+        int sumX = 0, sumY = 0, physicalPoints = 0;
         for (int i = 0; i < SampleCount; i++)
         {
-            result[6 + i] = Unit;
+            result[6 + i] = pen[i];
             result[6 + SampleCount + i] = (short)(16 * sx[i] - Unit);
             result[6 + 2 * SampleCount + i] = (short)(16 * sy[i] - Unit);
-            sumX += sx[i]; sumY += sy[i];
+            if (pen[i] == Unit) { sumX += sx[i]; sumY += sy[i]; physicalPoints++; }
         }
         for (int i = 0; i < dx.Length; i++)
         {
@@ -90,13 +103,16 @@ public static class LegacyStrokeFeatures
             result[4 + 5 * SampleCount + i] = (short)((ax * bx + ay * by) >> 10);
             result[2 + 6 * SampleCount + i] = (short)((ax * by - bx * ay) >> 10);
         }
+        int physicalLength = 0;
+        for (int i = 0; i < distances.Length; i++)
+            if (pen[i] == Unit && pen[i + 1] == Unit) physicalLength += distances[i];
         result[210] = Unit;
         result[211] = (short)Math.Min(Unit, 256 * (normalizedHeight + 1) / (normalizedWidth + 1) - Unit);
-        result[212] = (short)(16 * sumX / SampleCount - Unit);
-        result[213] = (short)(16 * sumY / SampleCount - Unit);
-        result[214] = -768; // One physical stroke: 256 * 1 - 1024.
-        result[215] = (short)Math.Clamp(sampledLength / 8 - Unit, -Unit, Unit);
-        result[216] = (short)(sampledLength == 0 ? -Unit : Unit);
+        result[212] = (short)(16 * sumX / physicalPoints - Unit);
+        result[213] = (short)(16 * sumY / physicalPoints - Unit);
+        result[214] = (short)(256 * strokeCount - Unit);
+        result[215] = (short)Math.Clamp(physicalLength / 8 - Unit, -Unit, Unit);
+        result[216] = (short)(sampledLength == 0 ? -Unit : 2 * Unit * physicalLength / sampledLength - Unit);
         return result;
     }
 
@@ -114,6 +130,33 @@ public static class LegacyStrokeFeatures
         return input;
     }
 
+    /// <summary>Assemble isolated context for a complete multi-stroke glyph, without a word decoder.</summary>
+    public static short[] ExtractIsolatedInput(IReadOnlyList<LegacyInkStroke> strokes, CancellationToken cancellationToken = default)
+    {
+        var geometry = Extract(strokes, cancellationToken); var input = new short[IsolatedInputWidth];
+        geometry.CopyTo(input, 0); input.AsSpan(GeometryWidth, 28).Fill(-Unit);
+        input[^2] = Unit; input[^1] = Unit; return input;
+    }
+
+    /// <summary>Append nine caller-supplied baseline channels for the second trajectory profile.</summary>
+    public static short[] ExtractWithBaseline(IReadOnlyList<LegacyInkStroke> strokes, LegacyInkBaseline baseline,
+        CancellationToken cancellationToken = default)
+    {
+        var ink = LegacyGlyphGeometry.Create(strokes, cancellationToken);
+        var result = new short[226];
+        Compose(ink.SampleX, ink.SampleY, ink.PenState, strokes.Count, ink.Width, ink.Height).CopyTo(result, 0);
+        LegacyBaselineFeatures.Extract(ink, baseline, LegacyRasterFeatures.Rasterize(ink)).CopyTo(result, GeometryWidth);
+        cancellationToken.ThrowIfCancellationRequested(); return result;
+    }
+
+    public static short[] ExtractIsolatedInputWithBaseline(IReadOnlyList<LegacyInkStroke> strokes, LegacyInkBaseline baseline,
+        CancellationToken cancellationToken = default)
+    {
+        var result = new short[256];
+        ExtractWithBaseline(strokes, baseline, cancellationToken).CopyTo(result, 0);
+        result.AsSpan(226, 28).Fill(-Unit); result[^2] = Unit; result[^1] = Unit; return result;
+    }
+
     private static void AddDirection(int[] directions, int index, int sign, int length)
     {
         if (sign > 0) directions[index] += length;
@@ -123,7 +166,7 @@ public static class LegacyStrokeFeatures
 
     // The native 16K small-square table equals round(sqrt(n)) for every entry.
     // Derive it mathematically rather than distributing the vendor table.
-    private static int Distance(int ax, int ay, int bx, int by)
+    internal static int Distance(int ax, int ay, int bx, int by)
     {
         int dx = (bx - ax) * 16, dy = (by - ay) * 16, square = dx * dx + dy * dy, shift = 0;
         if (square >= 16384)
@@ -136,12 +179,13 @@ public static class LegacyStrokeFeatures
 
     // Preserve integer rounding and the repeated-segment branch of the observed
     // legacy resampler. Generic floating-point interpolation changes model inputs.
-    private static void Resample(int[] x, int[] y, int[] distances, int total, int[] sx, int[] sy)
+    internal static void Resample(int[] x, int[] y, int[] distances, int total, int[] sx, int[] sy, int outputOffset = 0, int count = SampleCount)
     {
-        int step = total / (SampleCount - 1), segment = 0, residual = 0, previousResidual = 0, emitted = 0;
+        sx[outputOffset] = x[0]; sy[outputOffset] = y[0];
+        if (count == 1) return;
+        int step = total / (count - 1), segment = 0, residual = 0, previousResidual = 0, emitted = 0;
         if (step == 0) throw new ArgumentException("The normalized stroke is too short.");
-        sx[0] = x[0]; sy[0] = y[0];
-        while (emitted < SampleCount - 1)
+        while (emitted < count - 1)
         {
             while (residual < step && segment < distances.Length)
             {
@@ -151,15 +195,15 @@ public static class LegacyStrokeFeatures
                 throw new ArgumentException("The stroke cannot be resampled.");
             int index = segment - 1, distance = distances[index], before = residual;
             emitted++;
-            sx[emitted] = x[index] + (step - previousResidual) * (x[index + 1] - x[index]) / distance;
-            sy[emitted] = y[index] + (step - previousResidual) * (y[index + 1] - y[index]) / distance;
+            sx[outputOffset + emitted] = x[index] + (step - previousResidual) * (x[index + 1] - x[index]) / distance;
+            sy[outputOffset + emitted] = y[index] + (step - previousResidual) * (y[index + 1] - y[index]) / distance;
             residual = distance - step + previousResidual;
             int multiple = 2;
-            while (residual >= step && emitted < SampleCount - 1)
+            while (residual >= step && emitted < count - 1)
             {
                 residual -= step; emitted++;
-                sx[emitted] = x[index] + (x[index + 1] - x[index]) * multiple * step / before;
-                sy[emitted] = y[index] + (y[index + 1] - y[index]) * multiple * step / before;
+                sx[outputOffset + emitted] = x[index] + (x[index + 1] - x[index]) * multiple * step / before;
+                sy[outputOffset + emitted] = y[index] + (y[index + 1] - y[index]) * multiple * step / before;
                 multiple++;
             }
         }

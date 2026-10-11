@@ -142,14 +142,25 @@ are 30, 247, 229, 256, 238 and 313; the old claim of 246/228/etc. omitted a chan
 incorrectly. These input vectors have no automatically inserted global bias.
 
 The backward-compatible extractor was found in the existing modern Text DLL.
-`LegacyStrokeFeatures` implements its first **single-stroke** trajectory profile:
-integer normalization into a 128×128 grid, 30-point integer arc-length resampling,
+`LegacyStrokeFeatures` implements integer normalization into a 128×128 grid,
+30-point integer resampling across physical strokes and pen-up transitions,
 210 pen-state/coordinate/tangent/curvature channels, and seven shape statistics.
+The physical/gap allocation and pen-up length are kept separate: gaps influence
+sample allocation but do not become raster ink. Inputs are limited to 15 strokes
+and 4,096 total points. Unverified degenerate interpolation branches fail closed.
 The native small-distance lookup equals `round(sqrt(n))` for every one of its
 16,384 entries, so the implementation derives it without distributing that table.
 An isolated complete glyph with no preceding candidates uses 28 context channels
 of -1024 and two boundary channels of +1024, producing the 247-input first model.
-This path does not segment a multi-stroke glyph, word, or joined handwriting.
+
+`LegacyRasterFeatures` draws the normalized/resampled physical ink into a binary
+128×128 raster and derives twelve 16-bin projection/contour banks. The **seven
+shape statistics precede the 192 raster channels**, yielding the 229-input model
+with context/boundaries. `LegacyInkBaseline` supplies the original-coordinate
+baseline and x-height; its nine features produce 256-input trajectory and
+238-input raster profiles. A negative height means unavailable (nine zeroes).
+Baseline inference from a word is not yet implemented; these values must be
+supplied by the caller. Neither API finds glyph boundaries or decodes words.
 
 Static evidence for that layout is Text `18000ac70` (registration), `180007470`
 (normalization), `180007b20` (resampling), `180008290` (trajectory), `180008770`
@@ -162,27 +173,46 @@ overrides still need their separate decoder rules. These are not CTC outputs.
 The second configuration's 192×4×2 global float table is model-major center/slope
 calibration: `18013e8e0` computes `sigmoid((score-center)*slope)`.
 
+`LegacyClassScores.Convert` restores the full unmasked exponent-10 EXP output
+path rather than treating raw dots or sigmoid scores as model probabilities.
+Text `1801b86f0` selects type212 slot0x50; `1800e82c0` stabilizes the raw scores,
+`180249db0` applies EXP, and `1800e69f0` performs quantized normalization.
+Every one of the 352 EXP table entries equals
+`floor(25*exp(-4+22*i/351))`, so no vendor table is embedded. The conversion
+exposes integer probabilities scaled by 32768 and the native unnormalized
+log-score channel (`1800ebd90`). Per-class confidence calibration is separate
+from this normalization. Candidate masks, special mixed sigmoid/EXP classes and
+complete ensemble ranking are not implemented by this API.
+
 Headless verification passed in managed .NET and Windows Native AOT: synthetic
 format/overflow/geometry/cancellation tests, 32 supplied-vector comparisons for
-all eight actual networks, and 60 raw-stroke/network comparisons on 30 synthetic
-strokes against an independent Python implementation. The checked-in
-`tools/LegacyInk.Probe/isolated-ru-i.json` supplies original four-point Cyrillic
-**И** controls: the actual RU trajectory model ranks canonical output 70 first
-for the original, translated, and two scaled variants. This is a concrete raw-ink
-result, **not a natural-handwriting accuracy benchmark**. Other geometric letters
-still confuse Latin/Russian lookalikes or symbols when ranked by one model alone.
+all eight actual networks, 60 single-stroke, 68 multiple-stroke, 70 raster and
+420 baseline feature/network comparisons against an independent Python
+implementation. Another 329 score vectors check EXP probabilities and log
+scores, including overflow rescaling and zero-probability paths. These are
+numerical conformance checks, not calls to an activated vendor recognizer.
+The checked-in `tools/LegacyInk.Probe/isolated-ru-i.json` supplies original
+four-point Cyrillic **И** controls: the actual RU trajectory model ranks
+canonical output 70 first for original, translated and scaled variants.
+`isolated-ru-pi-raster.json` independently tests **П** (output77) and **И**
+(output70) in eight raster-profile variants. These are concrete raw-ink results,
+**not a natural-handwriting accuracy benchmark or a recognized whole word**.
+Other geometric letters still confuse Latin/Russian lookalikes or symbols when
+ranked by one model alone.
 
 Reproduce the vendor-free tests with `python tools/test-legacy-ink.py` and
 `dotnet run --project tools/LegacyInk.Probe -c Release`. With locally supplied
 resource and activation JSON, use `--glyph-cases resource.res
 tools/LegacyInk.Probe/isolated-ru-i.json activations.json`, or `--raw-controls`
-with a local reference control file. Private static exports and controls are
+with a local reference control file. `--score-controls controls.json` checks
+caller-supplied raw/probability/log-score vectors. Private static exports and
+controls are
 ignored under `.artifacts/myscript-analysis/output/RussianAssetsSearch` and
 `RussianExtractorStage2` through `RussianExtractorStage5`.
 
-Remaining work: multi-stroke/pen-up extraction, raster and baseline profiles,
-ensemble score conversion/calibration, cursive segmentation, virtual-label and
-language/dictionary decoding, and validation on representative Russian ink.
+Remaining work: the two 313-input profiles, automatic baseline estimation,
+complete ensemble/candidate-mask handling, cursive segmentation, virtual-label
+and language/dictionary decoding, and validation on representative Russian ink.
 The English loader remains incompatible. Modern official RU assets still require
 signed URLs/cookies; no login or activation checks were bypassed. Russian word
 recognition is not enabled in the application or advertised as ready.

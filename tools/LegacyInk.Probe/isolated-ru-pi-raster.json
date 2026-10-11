@@ -1,0 +1,182 @@
+{
+  "offset": 105197,
+  "end": 187592,
+  "cases": [
+    {
+      "name": "printed-pe-scale1-at0,0",
+      "points": [
+        [
+          10,
+          90
+        ],
+        [
+          10,
+          10
+        ],
+        [
+          60,
+          10
+        ],
+        [
+          60,
+          90
+        ]
+      ],
+      "expectedOutput": 77
+    },
+    {
+      "name": "printed-pe-scale1-at-100,300",
+      "points": [
+        [
+          -90,
+          390
+        ],
+        [
+          -90,
+          310
+        ],
+        [
+          -40,
+          310
+        ],
+        [
+          -40,
+          390
+        ]
+      ],
+      "expectedOutput": 77
+    },
+    {
+      "name": "printed-pe-scale2-at0,0",
+      "points": [
+        [
+          20,
+          180
+        ],
+        [
+          20,
+          20
+        ],
+        [
+          120,
+          20
+        ],
+        [
+          120,
+          180
+        ]
+      ],
+      "expectedOutput": 77
+    },
+    {
+      "name": "printed-pe-scale3-at0,0",
+      "points": [
+        [
+          30,
+          270
+        ],
+        [
+          30,
+          30
+        ],
+        [
+          180,
+          30
+        ],
+        [
+          180,
+          270
+        ]
+      ],
+      "expectedOutput": 77
+    },
+    {
+      "name": "printed-i-scale1-at0,0",
+      "points": [
+        [
+          10,
+          10
+        ],
+        [
+          10,
+          90
+        ],
+        [
+          60,
+          10
+        ],
+        [
+          60,
+          90
+        ]
+      ],
+      "expectedOutput": 70
+    },
+    {
+      "name": "printed-i-scale1-at-100,300",
+      "points": [
+        [
+          -90,
+          310
+        ],
+        [
+          -90,
+          390
+        ],
+        [
+          -40,
+          310
+        ],
+        [
+          -40,
+          390
+        ]
+      ],
+      "expectedOutput": 70
+    },
+    {
+      "name": "printed-i-scale2-at0,0",
+      "points": [
+        [
+          20,
+          20
+        ],
+        [
+          20,
+          180
+        ],
+        [
+          120,
+          20
+        ],
+        [
+          120,
+          180
+        ]
+      ],
+      "expectedOutput": 70
+    },
+    {
+      "name": "printed-i-scale3-at0,0",
+      "points": [
+        [
+          30,
+          30
+        ],
+        [
+          30,
+          270
+        ],
+        [
+          180,
+          30
+        ],
+        [
+          180,
+          270
+        ]
+      ],
+      "expectedOutput": 70
+    }
+  ]
+}
