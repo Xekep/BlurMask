@@ -663,6 +663,29 @@ internal static class DrawingSmokeTest
         finally { toolbar.CloseFlyout(); session.SelectTool(original); }
     }
 
+    internal static async Task VerifyRegionScreenshotAsync(DrawingSession session)
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        var screen = session.Toolbar.Screens.Primary!;
+        var start = screen.Bounds.Position + new PixelPoint(200, 160);
+        var capture = session.CaptureScreenshotAsync();
+        await Task.Delay(100);
+        Check(session.PickingScreenshot && !session.Toolbar.IsVisible, "Screenshot tool did not enter region selection.");
+        session.BeginScreenshot(start); session.MoveScreenshot(start + new PixelPoint(120, 90)); session.CompleteScreenshot();
+        await capture.WaitAsync(TimeSpan.FromSeconds(10));
+        var actions = session.Toolbar.OpenFlyout ?? throw new InvalidOperationException("Screenshot actions did not open.");
+        var buttons = actions.GetVisualDescendants().OfType<Button>().ToArray();
+        Check(buttons.Length == 3 && buttons.All(b => b.Content is ToolbarIcon), "Screenshot actions must be a horizontal icon strip.");
+        buttons.Single(b => AutomationProperties.GetName(b) == UiText.T("Копировать снимок"))
+            .RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+        await Task.Delay(150);
+        using var bitmap = await session.Toolbar.Clipboard!.TryGetBitmapAsync();
+        Check(bitmap?.PixelSize == new PixelSize(120, 90), "Screenshot clipboard did not contain the selected area.");
+        var cancel = session.CaptureScreenshotAsync(); await Task.Delay(60); session.CancelScreenshot();
+        await cancel.WaitAsync(TimeSpan.FromSeconds(10));
+        Check(!session.PickingScreenshot && session.Toolbar.IsVisible && session.Toolbar.OpenFlyout is null, "Screenshot cancel left an input layer or actions open.");
+    }
+
     private static void SaveChalkIcon(string directory)
     {
         foreach (var size in new[] { 16, 24, 32, 48, 64, 128, 256 })
@@ -786,6 +809,16 @@ internal static class DrawingSmokeTest
         }
         else session.CanvasDocument.Add(new InkMark(InkTool.Pen, Colors.Black, 4, new Point(100, 100)));
         Check(session.DesktopDocument.Marks.SequenceEqual(new[] { desktopMark }), "Canvas changed desktop ink.");
+        byte[] RenderCanvas()
+        {
+            using var image = new RenderTargetBitmap(new PixelSize((int)Math.Ceiling(window.Surface.Bounds.Width), (int)Math.Ceiling(window.Surface.Bounds.Height)), new Vector(96, 96));
+            image.Render(window.Surface);
+            using var data = new MemoryStream(); image.Save(data, PngBitmapEncoderOptions.Default); return data.ToArray();
+        }
+        var beforeCollapse = RenderCanvas(); var activeCanvasTool = session.Tool;
+        session.Toolbar.ToggleCollapsed(); await Task.Delay(220);
+        Check(window.IsVisible && session.Tool == activeCanvasTool && RenderCanvas().SequenceEqual(beforeCollapse), "Eye collapse changed separate canvas ink or its selected tool.");
+        session.Toolbar.ToggleCollapsed(); await Task.Delay(220);
         session.Undo(); Check(session.CanvasDocument.Marks.Count == 0, "Canvas undo failed.");
         session.Redo(); Check(session.CanvasDocument.Marks.Count == 1, "Canvas redo failed.");
         var fixedMark = session.CanvasDocument.Marks[0]; var fixedOffset = window.Surface.Offset; var fixedZoom = window.Surface.Zoom;

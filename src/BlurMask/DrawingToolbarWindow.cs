@@ -12,6 +12,9 @@ using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using Avalonia.Input.Platform;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform.Storage;
 
 namespace BlurMask;
 
@@ -51,6 +54,7 @@ internal sealed class DrawingToolbarWindow : Window
     private bool _flyoutPointerOver;
     private string? _updateVersion;
     private Avalonia.Controls.Shapes.Path? _updateTail;
+    private PixelRect? _flyoutRegionAnchor;
 
     public DrawingToolbarWindow(DrawingSession session)
     {
@@ -521,6 +525,49 @@ internal sealed class DrawingToolbarWindow : Window
     }
 
     private Control? _flyoutAnchor;
+    internal void ShowScreenshotActions(byte[] png, PixelRect region)
+    {
+        var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 2 };
+        var save = IconButton(ToolbarGlyph.Save, UiText.T("Сохранить снимок"), () => { });
+        save.Click += async (_, _) =>
+        {
+            CloseFlyout();
+            try
+            {
+                var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+                {
+                    Title = UiText.T("Сохранить снимок"), SuggestedFileName = $"BlurMask-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.png",
+                    DefaultExtension = "png", FileTypeChoices = [new FilePickerFileType("PNG") { Patterns = ["*.png"] }],
+                    ShowOverwritePrompt = true
+                });
+                if (file is null) return;
+                await using var stream = await file.OpenWriteAsync();
+                stream.SetLength(0);
+                await stream.WriteAsync(png);
+            }
+            catch (Exception ex) { ShowMessage(UiText.T("Не удалось сохранить снимок"), ex.Message); }
+        };
+        var copy = IconButton(ToolbarGlyph.Copy, UiText.T("Копировать снимок"), () => { });
+        copy.IsEnabled = Clipboard is not null;
+        copy.Click += async (_, _) =>
+        {
+            CloseFlyout();
+            try
+            {
+                if (Clipboard is null) return;
+                using var memory = new MemoryStream(png, writable: false);
+                using var bitmap = new Bitmap(memory);
+                await Clipboard.SetBitmapAsync(bitmap);
+            }
+            catch (Exception ex) { ShowMessage(UiText.T("Не удалось скопировать снимок"), ex.Message); }
+        };
+        row.Children.Add(save); row.Children.Add(copy);
+        row.Children.Add(IconButton(ToolbarGlyph.Close, UiText.T("Отмена"), CloseFlyout));
+        ShowFlyout("screenshot", row, _handle);
+        _flyoutRegionAnchor = region;
+        PlaceFlyout();
+    }
+
     internal void ShowUpdateAvailable(string version)
     {
         _updateVersion = version;
@@ -614,14 +661,14 @@ internal sealed class DrawingToolbarWindow : Window
     private void PlaceFlyout()
     {
         if (_flyout is not { IsVisible: true } flyout || _flyoutAnchor is not { } anchor) return;
-        var screen = Screens.ScreenFromWindow(this) ?? Screens.Primary;
+        var screen = _flyoutRegionAnchor is { } regionAnchor ? Screens.ScreenFromPoint(regionAnchor.BottomRight) ?? Screens.Primary : Screens.ScreenFromWindow(this) ?? Screens.Primary;
         if (screen is null) return;
         var area = screen.WorkingArea;
         var scale = RenderScaling;
         var width = (int)Math.Ceiling(flyout.Bounds.Width * flyout.RenderScaling);
         var height = (int)Math.Ceiling(flyout.Bounds.Height * flyout.RenderScaling);
-        var x = Position.X + (int)Math.Ceiling(Bounds.Width * scale);
-        if (x + width > area.Right) x = Position.X - width;
+        var x = _flyoutRegionAnchor is { } selection ? selection.Right - width : Position.X + (int)Math.Ceiling(Bounds.Width * scale);
+        if (_flyoutRegionAnchor is null && x + width > area.Right) x = Position.X - width;
         if (_flyoutName == "update" && _updateTail is { } tail)
         {
             var left = x < Position.X;
@@ -629,7 +676,8 @@ internal sealed class DrawingToolbarWindow : Window
             tail.RenderTransform = left ? new ScaleTransform(-1, 1) : null;
         }
         // Anchor to the actual button after layout, including borders, margins and DPI.
-        var y = anchor.PointToScreen(default).Y - (int)Math.Round(4 * scale);
+        var y = _flyoutRegionAnchor is { } selectedArea ? selectedArea.Bottom + (int)Math.Round(6 * scale) : anchor.PointToScreen(default).Y - (int)Math.Round(4 * scale);
+        if (_flyoutRegionAnchor is { } selectedRegion && y + height > area.Bottom) y = selectedRegion.Y - height - (int)Math.Round(6 * scale);
         var position = new PixelPoint(Math.Clamp(x, area.X, Math.Max(area.X, area.Right - width)),
             Math.Clamp(y, area.Y, Math.Max(area.Y, area.Bottom - height)));
         if (flyout.Position != position) flyout.Position = position;
@@ -640,6 +688,7 @@ internal sealed class DrawingToolbarWindow : Window
         _hoverCloseTimer.Stop();
         _flyoutPointerOver = false;
         _updateTail = null;
+        _flyoutRegionAnchor = null;
         var popup = _waylandPopup; _waylandPopup = null;
         if (popup is not null) { popup.IsOpen = false; ((StackPanel)Content!).Children.Remove(popup); }
         var flyout = _flyout;

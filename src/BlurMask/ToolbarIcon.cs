@@ -4,7 +4,7 @@ using Avalonia.Media;
 
 namespace BlurMask;
 
-internal enum ToolbarGlyph { Nib, Eye, ClosedEye, Cursor, Select, Pen, Highlighter, Text, Line, Arrow, Rectangle, Ellipse, Eraser, Size, Undo, Redo, Trash, Board, Camera, Menu, Mask, Shapes, Fading, MaskBlur, MaskPixels, MaskScramble, MaskGlass, MaskBlackout, NewCanvas, Connect, Share, Background, Save, Screen, Fit, AiPen, MaskFill }
+internal enum ToolbarGlyph { Nib, Eye, ClosedEye, Cursor, Select, Pen, Highlighter, Text, Line, Arrow, Rectangle, Ellipse, Eraser, Size, Undo, Redo, Trash, Board, Camera, Menu, Mask, Shapes, Fading, MaskBlur, MaskPixels, MaskScramble, MaskGlass, MaskBlackout, NewCanvas, Connect, Share, Background, Save, Screen, Fit, AiPen, MaskFill, Copy, Close }
 
 internal sealed class ToolbarIcon(ToolbarGlyph glyph, bool circle = false, double timerFraction = .5) : Control
 {
@@ -15,6 +15,8 @@ internal sealed class ToolbarIcon(ToolbarGlyph glyph, bool circle = false, doubl
         [ToolbarGlyph.Cursor] = Geometry.Parse("M3,2 L20,12 L12,14 L16,21 L12,23 L8,16 L3,21 Z"),
         [ToolbarGlyph.Select] = Geometry.Parse("M2,8 L2,2 L8,2 M16,2 L22,2 L22,8 M22,16 L22,22 L16,22 M8,22 L2,22 L2,16 M8,7 L18,14 L13,15 L11,20 Z"),
         [ToolbarGlyph.Pen] = Geometry.Parse("M3,17 L16,4 L20,8 L7,21 L2,22 Z M13,7 L17,11 M3,17 L7,21"),
+        [ToolbarGlyph.Copy] = Geometry.Parse("M8,7 L21,7 L21,23 L8,23 Z M4,18 L2,18 L2,1 L15,1 L15,4"),
+        [ToolbarGlyph.Close] = Geometry.Parse("M5,5 L20,20 M20,5 L5,20"),
         [ToolbarGlyph.Trash] = Geometry.Parse("M5,7 L19,7 L18,23 L6,23 Z M3,4 L21,4 M9,4 L9,1 L15,1 L15,4 M9,10 L9,20 M12,10 L12,20 M15,10 L15,20"),
         [ToolbarGlyph.Board] = Geometry.Parse("M3,3 L21,3 L21,17 L3,17 Z M1,1 L23,1 M12,17 L12,23 M7,23 L10,17 M17,23 L14,17"),
         [ToolbarGlyph.Camera] = Geometry.Parse("M2,7 L7,7 L9,3 L16,3 L18,7 L23,7 L23,21 L2,21 Z"),

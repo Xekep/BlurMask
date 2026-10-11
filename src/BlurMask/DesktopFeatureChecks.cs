@@ -33,6 +33,17 @@ internal static class DesktopFeatureChecks
             Require(picker.Region is null, "Cancel left a preview region.");
         }
         Require(catalog.Disposed, "Picker leaked its native catalog.");
+        var selection = new ScreenRegionSelection();
+        selection.Begin(new(100, 80)); selection.Move(new(-50, -20));
+        Require(selection.Complete() == new PixelRect(-50, -20, 150, 100), "Reverse/multiple-screen screenshot selection changed physical pixels.");
+        var screen = new Rect(-200, -100, 600, 400);
+        var chosen = new Rect(-50, -20, 150, 100);
+        var outside = ScreenRegionSelection.Outside(screen, chosen);
+        Require(Math.Abs(outside.Sum(r => r.Width * r.Height) + chosen.Width * chosen.Height - screen.Width * screen.Height) < .001,
+            "Screenshot shading overlaps or misses its transparent selection.");
+        Require(outside.All(r => !r.Intersects(chosen)), "Screenshot shading entered the selected area.");
+        selection.Begin(new(0, 0)); selection.Move(new(1, 2));
+        Require(selection.Complete() is null, "Accidental click produced an empty screenshot.");
         Console.WriteLine("Desktop update checks: stable/RC versions, metadata guards; window fill: child identity, resize revalidation, cancel and native resource ownership passed.");
     }
 

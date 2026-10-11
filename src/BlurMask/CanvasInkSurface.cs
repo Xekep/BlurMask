@@ -12,7 +12,7 @@ internal sealed class CanvasInkSurface : Grid
     private readonly BoardSurface _surface;
     private readonly LiveSurface _liveSurface;
     private InkMark[] _retainedMarks = [];
-    private (double Zoom, Vector Offset, Rect Board, string Background, bool Visible, double Scale)? _retainedView;
+    private (double Zoom, Vector Offset, Rect Board, string Background, double Scale)? _retainedView;
     private readonly Canvas _editorLayer = new();
     private TextBox? _editor;
     private Point _textPoint;
@@ -78,7 +78,7 @@ internal sealed class CanvasInkSurface : Grid
     internal void RefreshContent()
     {
         var marks = _session.CanvasDocument.Marks;
-        var view = (Zoom, Offset, BoardBounds, _window.BoardBackground, _session.InkVisible,
+        var view = (Zoom, Offset, BoardBounds, _window.BoardBackground,
             TopLevel.GetTopLevel(this)?.RenderScaling ?? 1);
         var changed = _retainedView != view || _retainedMarks.Length != marks.Count;
         if (!changed)
@@ -237,7 +237,6 @@ internal sealed class CanvasInkSurface : Grid
             context.DrawRectangle(owner._window.BoardBackground == "black" ? Brushes.Black : Brushes.White,
                 new Pen(new SolidColorBrush(Color.Parse("#D8E0E5")), 1 / owner.Zoom), rect);
             using var clip = context.PushClip(rect);
-            if (!owner._session.InkVisible) return;
             var visible = new Rect(owner.ToBoard(default), owner.ToBoard(new Point(Bounds.Width, Bounds.Height))).Normalize();
             var scale = owner.Zoom * (TopLevel.GetTopLevel(owner)?.RenderScaling ?? 1);
             foreach (var mark in owner._session.CanvasDocument.Marks) if (mark.Bounds.Intersects(visible)) mark.Draw(context, scale);
@@ -247,7 +246,6 @@ internal sealed class CanvasInkSurface : Grid
     {
         public override void Render(DrawingContext context)
         {
-            if (!owner._session.InkVisible) return;
             using var transform = context.PushTransform(Matrix.CreateScale(owner.Zoom, owner.Zoom) * Matrix.CreateTranslation(owner.Offset));
             using var clip = context.PushClip(owner.BoardBounds);
             var visible = new Rect(owner.ToBoard(default), owner.ToBoard(new Point(Bounds.Width, Bounds.Height))).Normalize();

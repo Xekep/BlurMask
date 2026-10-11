@@ -93,13 +93,11 @@ internal sealed class CanvasWindow : Window
             (ToolbarGlyph.Share, "Совместная работа", () => _ = ShareAsync()),
             (ToolbarGlyph.Background, "Фон", ToggleBackground),
             (ToolbarGlyph.Save, "Сохранить PNG", SavePng),
-            (ToolbarGlyph.Screen, "Экран", session.SelectScreen),
             (ToolbarGlyph.Fit, "Вместить", _surface.Fit)
         })
         {
             var button = CanvasButton(new ToolbarIcon(glyph) { Width = 22, Height = 22 }, UiText.T(label), action);
             button.Width = 36; button.Padding = new Thickness(6, 4);
-            if (glyph == ToolbarGlyph.Screen && Program.UseNativeWayland) button.IsEnabled = false;
             top.Children.Add(button);
         }
         _chrome = new Border { Child = top, Background = Brushes.White, CornerRadius = new CornerRadius(12),

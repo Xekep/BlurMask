@@ -69,7 +69,7 @@ internal sealed class DesktopInkWindow : Window
 
     public void ApplyState()
     {
-        var drawing = _session.Target == DrawingTarget.Screen && (_session.PickingMaskRegion || _session.Tool != InkTool.Cursor) && _session.InkVisible;
+        var drawing = _session.PickingScreenshot || _session.Target == DrawingTarget.Screen && (_session.PickingMaskRegion || _session.Tool != InkTool.Cursor) && _session.InkVisible;
         _surface.Cursor = new Cursor(_session.Tool == InkTool.Select ? StandardCursorType.SizeAll : drawing ? StandardCursorType.Cross : StandardCursorType.Arrow);
         _surface.InvalidateVisual();
         if (OperatingSystem.IsWindows())
@@ -139,6 +139,14 @@ internal sealed class DesktopInkWindow : Window
             _session.CompleteWindowFill(new PixelPoint((int)Math.Round(DesktopPoint(point.Position).X), (int)Math.Round(DesktopPoint(point.Position).Y)));
             return;
         }
+        if (point.Properties.IsLeftButtonPressed && _session.PickingScreenshot)
+        {
+            _pointer = e.Pointer; e.Pointer.Capture(_surface);
+            var desktop = DesktopPoint(point.Position);
+            _session.BeginScreenshot(new PixelPoint((int)Math.Round(desktop.X), (int)Math.Round(desktop.Y)));
+            _session.MoveScreenshot(new PixelPoint((int)Math.Round(desktop.X), (int)Math.Round(desktop.Y)));
+            e.Handled = true; return;
+        }
         if (!point.Properties.IsLeftButtonPressed || _session.Tool == InkTool.Cursor || _session.Target != DrawingTarget.Screen) return;
         _session.Toolbar.CloseFlyout();
         e.Handled = true;
@@ -175,6 +183,15 @@ internal sealed class DesktopInkWindow : Window
 
     private void OnMoved(object? sender, PointerEventArgs e)
     {
+        if (_session.PickingScreenshot)
+        {
+            if (_pointer == e.Pointer)
+            {
+                var desktop = DesktopPoint(e.GetPosition(_surface));
+                _session.MoveScreenshot(new PixelPoint((int)Math.Round(desktop.X), (int)Math.Round(desktop.Y)));
+            }
+            e.Handled = true; return;
+        }
         if (_session.PickingMaskRegion)
         {
             var desktop = DesktopPoint(e.GetPosition(_surface));
@@ -187,6 +204,13 @@ internal sealed class DesktopInkWindow : Window
         if (_session.Tool == InkTool.Select)
             _surface.Cursor = InkSelection.NativeCursor(_session.DesktopSelection.CursorAt(DesktopPoint(e.GetPosition(_surface)), 1 / RenderScaling));
         if (_pointer != e.Pointer) return;
+        if (_session.PickingScreenshot)
+        {
+            var desktop = DesktopPoint(e.GetPosition(_surface));
+            _session.MoveScreenshot(new PixelPoint((int)Math.Round(desktop.X), (int)Math.Round(desktop.Y)));
+            _pointer = null; e.Pointer.Capture(null);
+            _session.CompleteScreenshot(); e.Handled = true; return;
+        }
         var point = DesktopPoint(e.GetPosition(_surface));
         if (_session.Tool == InkTool.Select) { _session.DesktopSelection.Move(point, constrain: e.KeyModifiers.HasFlag(KeyModifiers.Shift)); e.Handled = true; return; }
         if (_session.Tool == InkTool.Eraser)
@@ -245,6 +269,7 @@ internal sealed class DesktopInkWindow : Window
         _pointer = null;
         if (pointer is not null)
         {
+            if (_session.PickingScreenshot) _session.CancelScreenshot();
             pointer.Capture(null);
             _session.DesktopSelection.Cancel();
             _session.DesktopDocument.Cancel();
@@ -310,22 +335,33 @@ internal sealed class DesktopInkWindow : Window
     {
         public override void Render(DrawingContext context)
         {
-            var active = session.Target == DrawingTarget.Screen && (session.PickingMaskRegion || session.Tool != InkTool.Cursor) && session.InkVisible;
+            var active = session.PickingScreenshot || session.Target == DrawingTarget.Screen && (session.PickingMaskRegion || session.Tool != InkTool.Cursor) && session.InkVisible;
             // A non-zero alpha over the entire screen makes empty desktop areas accept ink.
             context.DrawRectangle(active ? new SolidColorBrush(Color.FromArgb(1, 0, 0, 0)) : Brushes.Transparent,
                 null, new Rect(Bounds.Size));
-            if (!session.InkVisible) return;
-            if (session.Board != BoardMode.Desktop)
+            if (!session.InkVisible && !session.PickingScreenshot) return;
+            if (session.InkVisible && session.Board != BoardMode.Desktop)
                 context.DrawRectangle(session.Board == BoardMode.White ? Brushes.White : Brushes.Black, null, new Rect(Bounds.Size));
             using var transform = context.PushTransform(
                 Matrix.CreateTranslation(-window.Position.X, -window.Position.Y) * Matrix.CreateScale(1 / window.RenderScaling, 1 / window.RenderScaling));
             var visible = new Rect(window.Position.X, window.Position.Y, Bounds.Width * window.RenderScaling, Bounds.Height * window.RenderScaling);
-            foreach (var mark in session.DesktopDocument.Marks) if (mark.Bounds.Intersects(visible)) mark.Draw(context);
-            foreach (var mark in session.DesktopDocument.FadingMarks) if (mark.Bounds.Intersects(visible)) mark.Draw(context);
+            if (session.InkVisible)
+            {
+                foreach (var mark in session.DesktopDocument.Marks) if (mark.Bounds.Intersects(visible)) mark.Draw(context);
+                foreach (var mark in session.DesktopDocument.FadingMarks) if (mark.Bounds.Intersects(visible)) mark.Draw(context);
+            }
             session.DesktopDocument.Preview?.Draw(context);
             if (session.PickingMaskRegion && session.WindowFillPreview is { } region)
                 context.DrawRectangle(Brushes.Black, null, new Rect(region.Bounds.X, region.Bounds.Y, region.Bounds.Width, region.Bounds.Height));
             if (session.Tool == InkTool.Select) session.DesktopSelection.Draw(context, 1 / window.RenderScaling);
+            if (session.PickingScreenshot)
+            {
+                Rect? selection = session.ScreenshotPreview is { } capture ? new Rect(capture.X, capture.Y, capture.Width, capture.Height) : null;
+                var shade = new SolidColorBrush(Color.FromArgb(75, 0, 0, 0));
+                foreach (var rectangle in ScreenRegionSelection.Outside(visible, selection))
+                    if (rectangle.Width > 0 && rectangle.Height > 0) context.DrawRectangle(shade, null, rectangle);
+                if (selection is { } selected) context.DrawRectangle(null, new Pen(new SolidColorBrush(Color.Parse("#27C4E5")), 2), selected);
+            }
         }
     }
 }

@@ -124,7 +124,7 @@ internal sealed partial class DesktopInkNative : IDisposable
 
     public static unsafe void SaveScreenshot(string path, PixelRect? region = null)
     {
-        if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException(UiText.T("Снимки рабочего стола поддерживаются в Windows."));
+        if (!OperatingSystem.IsWindows()) { DesktopScreenshotCapture.Save(path, region); return; }
         var x = region?.X ?? GetSystemMetrics(76);
         var y = region?.Y ?? GetSystemMetrics(77);
         var width = region?.Width ?? GetSystemMetrics(78);

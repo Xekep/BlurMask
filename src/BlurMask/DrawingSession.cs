@@ -33,6 +33,10 @@ internal sealed class DrawingSession : IDisposable
     private bool _disposed;
     private CancellationTokenSource? _mathSolve;
     private bool _capturing;
+    private ScreenRegionSelection? _screenshotSelection;
+    private TaskCompletionSource<PixelRect?>? _screenshotResult;
+    internal bool PickingScreenshot => _screenshotSelection is not null;
+    internal PixelRect? ScreenshotPreview => _screenshotSelection?.Region;
     private bool _inTray, _trayInkVisible, _trayCanvasVisible, _traySettingsVisible;
     private readonly DispatcherTimer _fadeTimer = new() { Interval = TimeSpan.FromMilliseconds(33) };
     private readonly DispatcherTimer _screenTimer = new() { Interval = TimeSpan.FromMilliseconds(300) };
@@ -194,6 +198,7 @@ internal sealed class DrawingSession : IDisposable
 
     public void SelectTool(InkTool tool, bool remember = true)
     {
+        CancelScreenshot();
         CancelWindowFill();
         if (Tool == InkTool.AiPen && tool != InkTool.AiPen) { _desktopAi.Flush(); _canvasAi.Flush(); }
         Toolbar.CloseFlyout();
@@ -213,12 +218,13 @@ internal sealed class DrawingSession : IDisposable
     }
     public void ToggleInk()
     {
+        CancelScreenshot();
         CancelWindowFill();
         foreach (var overlay in _overlays) { overlay.FinishText(); overlay.CancelGesture(); }
         Canvas?.FinishInput();
-        if (InkVisible) _toolBeforeHide = Tool;
+        if (InkVisible && Target == DrawingTarget.Screen) _toolBeforeHide = Tool;
         InkVisible = !InkVisible;
-        Tool = InkVisible ? _toolBeforeHide : InkTool.Cursor;
+        if (Target == DrawingTarget.Screen) Tool = InkVisible ? _toolBeforeHide : InkTool.Cursor;
         UpdateState();
     }
     public void SetBoard(BoardMode board) { Board = board; UpdateState(); }
@@ -315,6 +321,7 @@ internal sealed class DrawingSession : IDisposable
     public void Clear() { if (Target == DrawingTarget.Canvas && Canvas?.ReadOnly == true) return; FinishInput(); Document.Clear(); }
     private void FinishInput()
     {
+        CancelScreenshot();
         CancelWindowFill();
         _mathSolve?.Cancel();
         foreach (var overlay in _overlays) { overlay.FinishText(); overlay.CancelGesture(); }
@@ -452,31 +459,52 @@ internal sealed class DrawingSession : IDisposable
         if (_capturing) return;
         _capturing = true;
         FinishInput();
+        var previousTarget = Target;
         Toolbar.CloseFlyout();
         Toolbar.Hide();
         try
         {
-            // Give DWM time to remove the toolbar before capturing the annotated desktop.
+            Target = DrawingTarget.Screen;
+            _screenshotResult = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            _screenshotSelection = new();
+            UpdateState();
+            var active = _overlays.FirstOrDefault(w => w.IsVisible);
+            active?.Activate();
+            var region = await _screenshotResult.Task;
+            _screenshotSelection = null; _screenshotResult = null;
+            UpdateState();
+            if (region is null || _disposed) return;
+            // Remove selection shading/outline before capturing, keep annotated ink.
             await Task.Delay(180);
             if (_disposed) return;
-            var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "BlurMask");
-            Directory.CreateDirectory(directory);
-            var path = Path.Combine(directory, $"BlurMask-{DateTime.Now:yyyy-MM-dd-HH-mm-ss-fff}.png");
-            DesktopInkNative.SaveScreenshot(path);
+            var path = Path.Combine(Path.GetTempPath(), $"BlurMask-capture-{Guid.NewGuid():N}.png");
+            byte[] png;
+            try { await Task.Run(() => DesktopInkNative.SaveScreenshot(path, region)); png = await File.ReadAllBytesAsync(path); }
+            finally { File.Delete(path); }
             Toolbar.Show();
-            Toolbar.ShowMessage(UiText.T("Снимок сохранён"), path);
+            Toolbar.ShowScreenshotActions(png, region.Value);
         }
         catch (Exception ex)
         {
-            Toolbar.Show();
-            Toolbar.ShowMessage(UiText.T("Не удалось сохранить снимок"), ex.Message);
+            if (!_disposed) { Toolbar.Show(); Toolbar.ShowMessage(UiText.T("Не удалось сохранить снимок"), ex.Message); }
         }
         finally
         {
             _capturing = false;
-            if (!_disposed) Toolbar.RaiseAboveInk();
+            _screenshotSelection = null; _screenshotResult = null;
+            Target = previousTarget;
+            if (!_disposed) { UpdateState(); if (!_inTray) Toolbar.Show(); Toolbar.RaiseAboveInk(); }
         }
     }
+
+    internal void BeginScreenshot(PixelPoint point) => _screenshotSelection?.Begin(point);
+    internal void MoveScreenshot(PixelPoint point)
+    {
+        _screenshotSelection?.Move(point);
+        foreach (var overlay in _overlays) overlay.Refresh();
+    }
+    internal void CompleteScreenshot() => _screenshotResult?.TrySetResult(_screenshotSelection?.Complete());
+    internal void CancelScreenshot() => _screenshotResult?.TrySetResult(null);
 
     internal void SmokeTest()
     {
@@ -504,6 +532,7 @@ internal sealed class DrawingSession : IDisposable
     {
         if (_disposed) return;
         _disposed = true;
+        CancelScreenshot();
         CancelWindowFill();
         _mathSolve?.Cancel();
         _fadeTimer.Stop();

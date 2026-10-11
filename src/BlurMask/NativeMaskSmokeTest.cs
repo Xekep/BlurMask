@@ -71,6 +71,14 @@ internal static partial class NativeMaskSmokeTest
                 Directory.CreateDirectory(directory);
                 DesktopInkNative.SaveScreenshot(Path.Combine(directory, "attached-mask.png"), target.Bounds);
             }
+            var captured = Path.Combine(Path.GetTempPath(), $"BlurMask-native-region-{Guid.NewGuid():N}.png");
+            try
+            {
+                DesktopInkNative.SaveScreenshot(captured, new PixelRect(target.Bounds.Position, new PixelSize(32, 24)));
+                using var image = new Avalonia.Media.Imaging.Bitmap(captured);
+                Require(image.PixelSize == new PixelSize(32, 24), "Native area capture returned full-screen pixels or an invalid image.");
+            }
+            finally { File.Delete(captured); }
         }
         finally
         {

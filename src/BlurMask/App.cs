@@ -84,6 +84,7 @@ public sealed partial class App : Application
             VerifyMaskEraser();
             foreach (var mask in _masks) mask.Hide();
             await DrawingSmokeTest.VerifyCanvasAsync(_drawing!);
+            await DrawingSmokeTest.VerifyRegionScreenshotAsync(_drawing!);
             VerifyTrayToggle();
             await DrawingSmokeTest.VerifyScrambleAsync();
             await DrawingSmokeTest.VerifyWindowAttachmentAsync();
