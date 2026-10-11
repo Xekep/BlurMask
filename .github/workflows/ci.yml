@@ -297,6 +297,12 @@ jobs:
           dotnet run --project tools/LegacyAcousticCandidate.Probe -c Release -- .artifacts/legacy-acoustic-candidate-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
           python tools/LegacyAcousticCache.Probe/reference_controls.py .artifacts/legacy-acoustic-cache-controls.json
           dotnet run --project tools/LegacyAcousticCache.Probe -c Release -- .artifacts/legacy-acoustic-cache-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
+          python tools/LegacyWideSymbolPairs.Probe/reference_controls.py .artifacts/legacy-wide-symbol-pairs-controls.json
+          dotnet run --project tools/LegacyWideSymbolPairs.Probe -c Release -- .artifacts/legacy-wide-symbol-pairs-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/LegacySymbolRange.Probe/reference_controls.py .artifacts/legacy-symbol-range-controls.json
+          dotnet run --project tools/LegacySymbolRange.Probe -c Release -- .artifacts/legacy-symbol-range-controls.json
+          python tools/LegacyResultScore.Probe/reference_controls.py .artifacts/legacy-result-score-controls.json
+          dotnet run --project tools/LegacyResultScore.Probe -c Release -- .artifacts/legacy-result-score-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
           python tools/LegacyVariableWord.Probe/reference_controls.py .artifacts/legacy-variable-word-controls.json
           dotnet run --project tools/LegacyVariableWord.Probe -c Release -- .artifacts/legacy-variable-word-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           python tools/handwriting/create_font_size_controls.py .artifacts/font-size-controls.json
@@ -475,6 +481,9 @@ jobs:
             @{ Name = 'LegacyCursiveSeparation'; Args = @('.artifacts/legacy-cursive-separation-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyAcousticCandidate'; Args = @('.artifacts/legacy-acoustic-candidate-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyAcousticCache'; Args = @('.artifacts/legacy-acoustic-cache-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
+            @{ Name = 'LegacyWideSymbolPairs'; Args = @('.artifacts/legacy-wide-symbol-pairs-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacySymbolRange'; Args = @('.artifacts/legacy-symbol-range-controls.json') },
+            @{ Name = 'LegacyResultScore'; Args = @('.artifacts/legacy-result-score-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
             @{ Name = 'LegacyVariableWord'; Args = @('.artifacts/legacy-variable-word-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyHandwritingFontSize'; Args = @('.artifacts/font-size-controls.json') }
           )
