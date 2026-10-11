@@ -45,7 +45,7 @@ jobs:
         shell: pwsh
         run: |
           $reusePublish = -not [string]::IsNullOrEmpty($env:PUBLISH_ARTIFACT)
-          .\build-installer.ps1 -Version $env:INSTALLER_VERSION -SkipPublish:$reusePublish
+          .\tools\build-installer.ps1 -Version $env:INSTALLER_VERSION -SkipPublish:$reusePublish
       - name: Verify installation, upgrade, startup and uninstall
         shell: pwsh
         run: |

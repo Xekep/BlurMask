@@ -1,0 +1,30 @@
+[
+  {
+    "font": "Inter",
+    "source": "https://raw.githubusercontent.com/google/fonts/bd8f81ddb5c74d5c8897b36ad88b440266245103/ofl/inter/Inter%5Bopsz%2Cwght%5D.ttf",
+    "sha256": "29160a80ff49ddcab2c97711247e08b1fab27a484a329ce8b813d820dc559031",
+    "bytes": 876576,
+    "license": "SIL-OFL-1.1"
+  },
+  {
+    "font": "Manrope",
+    "source": "https://raw.githubusercontent.com/google/fonts/bd8f81ddb5c74d5c8897b36ad88b440266245103/ofl/manrope/Manrope%5Bwght%5D.ttf",
+    "sha256": "3ae11c49db0455a3cc33e37d380f20fdb8c7f8b41dc07625c177e3d87a9d6ae6",
+    "bytes": 164700,
+    "license": "SIL-OFL-1.1"
+  },
+  {
+    "font": "SourceSerif4",
+    "source": "https://raw.githubusercontent.com/google/fonts/bd8f81ddb5c74d5c8897b36ad88b440266245103/ofl/sourceserif4/SourceSerif4%5Bopsz%2Cwght%5D.ttf",
+    "sha256": "97b2d4da6e3cb494b5a1e66ae176914d852ccabef49e0c02c0df25f3e39aca0b",
+    "bytes": 1209508,
+    "license": "SIL-OFL-1.1"
+  },
+  {
+    "font": "STIXTwoMath",
+    "source": "https://raw.githubusercontent.com/google/fonts/bd8f81ddb5c74d5c8897b36ad88b440266245103/ofl/stixtwomath/STIXTwoMath-Regular.ttf",
+    "sha256": "562551b15b836e6e01d1b7350909baf3c8c8d83260c1190fbf4544333e6936de",
+    "bytes": 1517976,
+    "license": "SIL-OFL-1.1"
+  }
+]

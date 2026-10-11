@@ -37,13 +37,13 @@ jobs:
         if: inputs.publish-artifact != ''
         with:
           name: ${{ inputs.publish-artifact }}
-          path: bin/Release/net11.0/linux-x64/publish
+          path: src/BlurMask/bin/Release/net11.0/linux-x64/publish
       - if: inputs.publish-artifact == ''
-        run: bash ./build.sh linux-x64
+        run: bash ./tools/build.sh linux-x64
       - name: Package and test Debian installer
         run: |
           version="${PACKAGE_VERSION:-1.0.0-dev.$GITHUB_RUN_NUMBER}"
-          bash ./build-deb.sh linux-x64 "$version"
+          bash ./tools/build-deb.sh linux-x64 "$version"
           bash ./tools/test-deb.sh .artifacts/installers/*.deb
       - uses: actions/upload-artifact@v4
         with:

@@ -1,0 +1,74 @@
+AI pen symbol weights (src/BlurMask/Assets/AiPen.bin) and normalized symbol fixtures:
+BlurMask contributors, 2026. Licensed under CC BY-SA 4.0 (LICENSE-AI-PEN.txt).
+Trained from resized/augmented CoMNIST by Gregory Vial (CC BY-SA 4.0),
+https://github.com/GregVial/CoMNIST, revision 3716a52d7b7571e71b347039b167ea3359d14e7e;
+BHMSDS by Wojciech Blachowski (MIT), https://github.com/wblachowski/bhmsds,
+revision 07d208e41923b061e338c241e59daacdd2752d53;
+and original mathematical stroke drawings by BlurMask contributors.
+Training recipes and source hashes: tools/train-ai-pen.py and docs/ai-pen-training.json.
+
+Cursive line weights (src/BlurMask/Assets/AiHandwriting.bin):
+Hukyl/parseq-s-cyrillic-handwritten, CC BY-SA 4.0 (LICENSE-AI-PEN.txt).
+https://huggingface.co/Hukyl/parseq-s-cyrillic-handwritten
+Revision 7ee349c4aa082a3ea6a694263b329ae613ce4dcd.
+Changes: weights stored as FP16, inference in FP32 with native C# implementation.
+The upstream model credits these training sources:
+- UkrHandwritten by annyhnatiuk: CC BY-SA 4.0,
+  https://www.kaggle.com/datasets/annyhnatiuk/ukrainian-handwritten-text
+- Cyrillic Handwriting Dataset by constantinwerner: CC0,
+  https://www.kaggle.com/datasets/constantinwerner/cyrillic-handwriting-dataset
+- School Notebooks RU by ai-forever: MIT,
+  https://huggingface.co/datasets/ai-forever/school_notebooks_RU
+- pumb-ai/synthetic-cyrillic-large: Apache-2.0,
+  https://huggingface.co/datasets/pumb-ai/synthetic-cyrillic-large
+- nastyboget/synthetic_cyrillic_large: MIT,
+  https://huggingface.co/datasets/nastyboget/synthetic_cyrillic_large
+Attribution retained from the upstream model card; these contributors do not endorse BlurMask.
+
+English line weights (src/BlurMask/Assets/AiEnglish.bin):
+Darwin Bautista, baudm/parseq-small, Apache License 2.0 (LICENSE-AI-ENGINE.txt).
+https://huggingface.co/baudm/parseq-small, revision a1526c3d63740e460153987f9aaf6b86aa199dc1.
+Changes: FP16 storage and native C# inference. Source/model hashes: docs/ai-english-model.json.
+Pretrained for Latin scene text; English cursive quality depends on writing style.
+
+Embedded text fonts: Inter, Manrope, Source Serif 4 and STIX Two Math.
+SIL Open Font License 1.1; copyright notices and complete terms are preserved in
+LICENSE-FONT-Inter.txt, LICENSE-FONT-Manrope.txt, LICENSE-FONT-SourceSerif4.txt,
+and LICENSE-FONT-STIXTwoMath.txt. Source revisions/hashes: docs/ai-fonts.json.
+English synthetic smoke fixtures use Caveat (SIL OFL 1.1), see LICENSE-FONT-Caveat.txt.
+Fonts come from https://github.com/google/fonts; no font source was modified.
+
+PARSeq architecture/reference implementation:
+Copyright 2022 Darwin Bautista. Apache License 2.0 (LICENSE-AI-ENGINE.txt).
+https://github.com/baudm/parseq, revision 1902db043c029a7e03a3818c616c06600af574be.
+AiHandwritingNetwork.cs adapts the reference inference to native C#, SIMD and pooled buffers.
+No third-party Python engine is shipped. The remainder of the app source retains its MIT license.
+
+Cursive smoke fixtures:
+Five cropped grayscale words from image 2013.jpg, regions 0-4 in annotations_test.json,
+School Notebooks RU by ai-forever (MIT), revision a10cd26104f054dc116a9dbc4a29c34b494eb9ae.
+Changes: crop, grayscale, resize and normalization. The fixture decoder targets include
+upstream recognition errors; docs/ai-cursive-smoke.json separately records true annotations.
+
+BHMSDS license notice:
+MIT License
+
+Copyright (c) 2019 wblachowski
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

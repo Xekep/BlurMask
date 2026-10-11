@@ -1,0 +1,37 @@
+[
+  {
+    "annotation": "узнавая",
+    "recognized": "узновая",
+    "matches": false,
+    "image": "2013.jpg",
+    "region": 0
+  },
+  {
+    "annotation": "больше",
+    "recognized": "больше",
+    "matches": true,
+    "image": "2013.jpg",
+    "region": 1
+  },
+  {
+    "annotation": "всё",
+    "recognized": "всё",
+    "matches": true,
+    "image": "2013.jpg",
+    "region": 2
+  },
+  {
+    "annotation": "наспех",
+    "recognized": "распех",
+    "matches": false,
+    "image": "2013.jpg",
+    "region": 3
+  },
+  {
+    "annotation": "По",
+    "recognized": "По",
+    "matches": true,
+    "image": "2013.jpg",
+    "region": 4
+  }
+]

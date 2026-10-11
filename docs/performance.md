@@ -7,8 +7,8 @@ Desktop probes measure CPU time and managed allocations on a single thread, not 
 Isolated desktop smoke tests suppress the OS tray icon/taskbar entry and do not register global hotkeys; synthetic hotkey messages address only the app's own HWND. Full desktop/mask smoke tests run on CI runners. After an Explorer crash on the development desktop, further local full UI stress runs were stopped. Windows recorded `explorer.exe` / `twinui.pcshell.dll` / `0xc0000005`. Offline analysis with the matching Microsoft PDBs located a null read in `IWindowTabView::Id`, called by `WindowTabHost::OnActiveTabChanged` and `WindowTabDataModel::UpdateActiveTab` through `UpdateTabsForWindow`. This identifies the Windows window-tab handler that failed; it does not establish which application/event triggered it, or verify a fix for Explorer. The recovered Explorer process remained running through the subsequent server-only load tests.
 
 ```powershell
-dotnet build -c Release -p:PublishAot=false
-dotnet bin/Release/net11.0/BlurMask.dll --performance-test
+dotnet build src/BlurMask -c Release -p:PublishAot=false -p:SelfContained=false
+dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --performance-test
 # Or use the published Native AOT executable with --performance-test.
 ```
 
@@ -53,7 +53,7 @@ One socket per native client supports push, ink and notifications. Total connect
 
 ## Opt-in load tests
 
-`server/tests/load.mjs` checks every preview recipient, point order, cross-board isolation, persisted point equality, conditional reads and health latency. It creates uniquely prefixed test boards and writes their IDs separately for bounded cleanup. It never prints invitation keys. It paces public HTTP traffic below admission limits and stops on errors or health latency over two seconds.
+`src/BlurMask.Server/tests/load.mjs` checks every preview recipient, point order, cross-board isolation, persisted point equality, conditional reads and health latency. It creates uniquely prefixed test boards and writes their IDs separately for bounded cleanup. It never prints invitation keys. It paces public HTTP traffic below admission limits and stops on errors or health latency over two seconds.
 
 ```powershell
 $env:PEN_TEST_URL='http://127.0.0.1:5095'
@@ -62,7 +62,7 @@ $env:PEN_LOAD_USERS='4'
 $env:PEN_LOAD_WRITERS='2'
 $env:PEN_LOAD_SECONDS='6'
 $env:PEN_LOAD_OUTPUT='.artifacts/load-local.json'
-node server/tests/load.mjs
+node src/BlurMask.Server/tests/load.mjs
 ```
 
 Online probes require explicit `PEN_LOAD_ONLINE=yes`. `PEN_LOAD_HOST=127.0.0.1` runs from the server through its HTTPS nginx vhost with the public SNI name and normal certificate validation. Only the transport is loopback: the API, WebSocket proxy, auth and PostgreSQL are real. Different bound loopback source addresses model different clients while retaining IP limits. This does not measure Internet bandwidth or distant users' latency. `PEN_LOAD_STOP_FILE` lets a resource monitor request a graceful stop.

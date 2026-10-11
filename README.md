@@ -4,6 +4,18 @@ A small desktop annotation toolbar and always-on-top privacy mask for screen rec
 Create a rectangle from the toolbar, move/resize it over sensitive content, and
 switch privacy effects without doing post-production blur work.
 
+Sources are organized under `src/BlurMask` (desktop app), `src/BlurMask.Server` (API/download page)
+and `src/BlurMask.Shared` (wire contracts). Build/package scripts live in `tools`, installer
+definitions in `packaging`, and documentation in `docs`.
+
+AI pen recognizes English/Russian words, digits and mathematical signs locally. Write a row
+and pause briefly; its printed replacement keeps the original size and color. Choose Auto,
+English or Russian in the pen menu, and a replacement font in Settings. Recognition can be
+undone. Model scope, licenses and measured limits are in [AI pen documentation](docs/ai-pen.md).
+Selection supports eight resize handles and rotation outside each corner, on the desktop
+and canvas. Shift preserves proportions or snaps rotation to 15° steps; shared boards retain
+object transforms and font choices.
+
 ## Features
 
 - system tray application;
@@ -27,7 +39,12 @@ cursor, drawing tools, eraser, pen size, undo, clear, board, screenshot, menu, a
 Icons are drawn as local vector geometry. Reference: [Epic Pen toolbar screenshot](https://software.thaiware.com/13290.html)
 and [official tool guide](https://epicpen.com/userguide).
 
-- Select the pen button to open a side menu with **pen, highlighter, text, line, arrow, rectangle, ellipse**.
+- The pen menu contains **pen, AI pen, highlighter and text**. Shapes have their own button.
+- **AI pen** waits 1.8 seconds after the last stroke, then replaces a completed row with one typeset text object.
+  Symbols share a font size and baseline; position, bounding size and color are preserved. The pen menu also offers **Recognize now**.
+  Recognition runs locally in native C#, without a cloud service or extra ML libraries. Connected cursive handwriting uses an open
+  Cyrillic line model; separated Latin/Cyrillic letters, digits and basic mathematical signs use a small symbol model.
+  Uncertain results stay handwritten, and Undo restores the original strokes. See [model details and limits](docs/ai-pen.md).
 - Draw directly over the desktop and applications. On Windows, cursor mode leaves the ink visible
   and passes clicks to applications underneath. Right-click the drawing surface or press Esc to return to cursor mode.
 - The eraser removes entire strokes. Each eraser gesture, drawing operation, and clear can be undone.
@@ -86,7 +103,7 @@ exports and undo history; cancellation or disconnection clears them. View-only p
 receive live previews. Screen annotations and fading ink remain local.
 
 The minimalist software download page, ASP.NET Core API, PostgreSQL storage and Docker/Caddy configuration for
-`pen.kiiko.ru` are in [`server/`](server/README.md). Deployment requires a server and DNS
+`pen.kiiko.ru` are in [`src/BlurMask.Server/`](src/BlurMask.Server/README.md). Deployment requires a server and DNS
 configuration; see that README for launch commands. Accounts are not required: shared links
 carry permission to edit or view a particular board. The website has no drawing editor;
 opening an invitation there offers software downloads and a button to copy the invitation into BlurMask.
@@ -129,39 +146,39 @@ Normal verification build:
 
 ```powershell
 dotnet restore
-dotnet build -c Release -p:PublishAot=false
+dotnet build -c Release -p:PublishAot=false -p:SelfContained=false
 ```
 
 ### Windows x64 Native AOT
 
 ```powershell
-.\build.ps1 win-x64
+.\tools\build.ps1 win-x64
 ```
 
 Output:
 
 ```text
-bin\Release\net11.0\win-x64\publish\
+src\BlurMask\bin\Release\net11.0\win-x64\publish\
 ```
 
 The default Windows build is one native `BlurMask.exe`: Skia, HarfBuzz and ANGLE
 are statically linked using StaticLink.Avalonia. No external rendering DLLs or
 installed .NET runtime are required. Windows system libraries are still used.
-For renderer diagnostics, `./build.ps1 win-x64 -DynamicNativeLibraries` produces
+For renderer diagnostics, `./tools/build.ps1 win-x64 -DynamicNativeLibraries` produces
 the traditional build with three adjacent native DLLs; distribute that entire folder.
 
 ### Linux
 
 ```bash
-bash ./build.sh linux-x64
-bash ./build-deb.sh linux-x64 1.2.3
+bash ./tools/build.sh linux-x64
+bash ./tools/build-deb.sh linux-x64 1.2.3
 sudo apt install ./.artifacts/installers/blurmask_1.2.3_amd64.deb
 ```
 
 ### macOS
 
 ```bash
-bash ./build.sh osx-arm64
+bash ./tools/build.sh osx-arm64
 ```
 
 Native AOT is OS-specific: publish Windows on Windows, Linux on Linux, and macOS on macOS.
@@ -176,12 +193,12 @@ the Release workflow attaches them alongside Linux tar archives and Windows inst
 ### Windows installer (Inno Setup)
 
 ```powershell
-.\build-installer.ps1 -Version 1.2.3
+.\tools\build-installer.ps1 -Version 1.2.3
 ```
 
 This publishes Windows x64 Native AOT, downloads **Inno Setup 7.1.0 x64** from the
 official immutable release, verifies its pinned SHA-256, and compiles
-[`installer/BlurMask.iss`](installer/BlurMask.iss). The compiler is installed for
+[`packaging/BlurMask.iss`](packaging/BlurMask.iss). The compiler is installed for
 the current user under `.artifacts/tools`; no existing Inno Setup installation is required.
 Version 7.1.0 was the latest stable release on 2026-10-10; see the
 [official downloads](https://jrsoftware.org/isdl.php).
@@ -198,14 +215,14 @@ Uninstall removes the program, shortcuts and its startup entry while preserving 
 To package an existing Windows publish directory:
 
 ```powershell
-.\build-installer.ps1 -Version 1.2.3 -SkipPublish -PublishDirectory bin/Release/net11.0/win-x64/publish
+.\tools\build-installer.ps1 -Version 1.2.3 -SkipPublish -PublishDirectory src/BlurMask/bin/Release/net11.0/win-x64/publish
 ```
 
 Use the version corresponding to that payload. To verify installation, reinstallation,
 startup and removal on a clean Windows user/runner:
 
 ```powershell
-.\tools\test-installer.ps1 -InstallerPath .artifacts/installers/BlurMask-1.2.3-win-x64-Setup.exe -PublishDirectory bin/Release/net11.0/win-x64/publish
+.\tools\test-installer.ps1 -InstallerPath .artifacts/installers/BlurMask-1.2.3-win-x64-Setup.exe -PublishDirectory src/BlurMask/bin/Release/net11.0/win-x64/publish
 ```
 
 The test refuses to touch an existing BlurMask installation, shortcuts or startup
@@ -236,7 +253,7 @@ The app has a CI-only smoke mode that creates a mask, exercises the drawing docu
 toolbar, board modes, Windows mouse input/eraser, and click-through styles, then exits automatically:
 
 ```powershell
-.\bin\Release\net11.0\win-x64\publish\BlurMask.exe --smoke-test
+.\src\BlurMask\bin\Release\net11.0\win-x64\publish\BlurMask.exe --smoke-test
 ```
 
 This is used by CI to catch startup/native-loader failures that a compile-only workflow misses.

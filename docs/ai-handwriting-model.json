@@ -1,0 +1,10 @@
+{
+  "model": "Hukyl/parseq-s-cyrillic-handwritten",
+  "revision": "7ee349c4aa082a3ea6a694263b329ae613ce4dcd",
+  "architecture_revision": "1902db043c029a7e03a3818c616c06600af574be",
+  "source_sha256": "740c14f3eb61c97faa652a26a8c3f3521fcc9d8a8b202cd2be38aa838161799c",
+  "format": "FP16 storage, FP32 inference",
+  "license": "CC-BY-SA-4.0",
+  "bytes": 48434253,
+  "sha256": "12d02da99fd2c9c8deafbec07aa1dfd24f394fa2e6a245b0f0f68141635cab40"
+}

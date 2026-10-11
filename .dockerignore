@@ -2,6 +2,6 @@
 .artifacts
 **/bin
 **/obj
-server/.env
-server/.data
-server/node_modules
+src/BlurMask.Server/.env
+src/BlurMask.Server/.data
+src/BlurMask.Server/node_modules

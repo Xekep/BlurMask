@@ -22,19 +22,19 @@ Useful isolation steps:
 1. Build/run without AOT:
 
    ```powershell
-   dotnet run -c Release -p:PublishAot=false
+   dotnet run --project src/BlurMask -c Release -p:PublishAot=false
    ```
 
 2. Publish Native AOT again from the CLI, not by manually copying Visual Studio output:
 
    ```powershell
-   .\build.ps1 win-x64
+   .\tools\build.ps1 win-x64
    ```
 
 3. Run the CI smoke mode from the publish directory:
 
    ```powershell
-   .\bin\Release\net11.0\win-x64\publish\BlurMask.exe --smoke-test
+   .\src\BlurMask\bin\Release\net11.0\win-x64\publish\BlurMask.exe --smoke-test
    ```
 
 4. If non-AOT works but the complete Native AOT payload fails, capture the Windows

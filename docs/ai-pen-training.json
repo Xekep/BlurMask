@@ -1,0 +1,36 @@
+{
+  "sample_split_seed": 417,
+  "classes": 85,
+  "train_samples": 64285,
+  "test_samples": 7119,
+  "accuracy": 0.9469026923179626,
+  "confidence_threshold": 0.75,
+  "accepted_accuracy": 0.9781330823898315,
+  "accepted_fraction": 0.9314510822296143,
+  "sources": {
+    "Cyrillic.zip": "https://raw.githubusercontent.com/GregVial/CoMNIST/3716a52d7b7571e71b347039b167ea3359d14e7e/images/Cyrillic.zip",
+    "Latin.zip": "https://raw.githubusercontent.com/GregVial/CoMNIST/3716a52d7b7571e71b347039b167ea3359d14e7e/images/Latin.zip",
+    "math.tar.gz": "https://codeload.github.com/wblachowski/bhmsds/tar.gz/07d208e41923b061e338c241e59daacdd2752d53"
+  },
+  "source_sha256": {
+    "Cyrillic.zip": "f35b8584491c3b8991b25a82450b25868f1c2b3fe4f1e24ebad393acebd41238",
+    "Latin.zip": "2581b4558629ac3b329b718487bd1d18efb083552c3bed04fd61b40cc6904182",
+    "math.tar.gz": "adc0e3589eb38caf791df7f09a935f89d00655e7e3b34fbb13db8fffbf009618"
+  },
+  "groups": {
+    "basic-math": {
+      "accuracy": 0.9545623660087585,
+      "samples": 2685
+    },
+    "letters": {
+      "accuracy": 0.9093484282493591,
+      "samples": 2824
+    },
+    "vector-math": {
+      "accuracy": 1.0,
+      "samples": 1610
+    }
+  },
+  "model_bytes": 376452,
+  "model_sha256": "84d6b03475e607f59f1084d364d0dcd00ef2593fa3592762f938fa4301dc6710"
+}

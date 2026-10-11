@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: server
+        working-directory: src/BlurMask.Server
     services:
       postgres:
         image: postgres:17
@@ -83,8 +83,10 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 11.0.100-preview.7.26381.103
-      - run: dotnet restore
-      - run: dotnet build -c Release --no-restore -p:PublishAot=false
+      - run: dotnet restore src/BlurMask/BlurMask.csproj
+      - run: dotnet build src/BlurMask/BlurMask.csproj -c Release --no-restore -p:PublishAot=false -p:SelfContained=false
+      - name: Offline AI pen recognition, numerical equivalence and history
+        run: dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --ai-pen-test
 
   native-aot-windows:
     name: Native AOT / Windows x64
@@ -94,33 +96,38 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 11.0.100-preview.7.26381.103
-      - run: dotnet restore
+      - run: dotnet restore src/BlurMask/BlurMask.csproj
       - name: Publish
         shell: pwsh
-        run: .\build.ps1 win-x64 -Version "1.0.0-dev.$env:GITHUB_RUN_NUMBER"
+        run: .\tools\build.ps1 win-x64 -Version "1.0.0-dev.$env:GITHUB_RUN_NUMBER"
       - name: Verify single-executable native payload
         shell: pwsh
         run: |
-          $dir = "bin\Release\net11.0\win-x64\publish"
+          $dir = "src\BlurMask\bin\Release\net11.0\win-x64\publish"
           if (-not (Test-Path (Join-Path $dir 'BlurMask.exe'))) { throw 'Native executable is missing.' }
           if (Get-ChildItem $dir -Filter '*.dll') { throw 'Static native build contains external DLLs.' }
           if (Get-ChildItem $dir -Filter '*.pdb') { throw 'Native payload contains debug symbols.' }
       - name: Native hot-path performance probe
         shell: pwsh
         run: |
-          & ./bin/Release/net11.0/win-x64/publish/BlurMask.exe --performance-test | Out-Default
+          & ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe --performance-test | Out-Default
           if ($LASTEXITCODE -ne 0) { throw 'Native performance probe failed.' }
       - name: Native mask region equivalence and performance
         shell: pwsh
         run: |
-          & ./bin/Release/net11.0/win-x64/publish/BlurMask.exe --mask-performance-test | Out-Default
+          & ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe --mask-performance-test | Out-Default
           if ($LASTEXITCODE -ne 0) { throw 'Mask region probe failed.' }
+      - name: Native offline AI pen probe
+        shell: pwsh
+        run: |
+          & ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe --ai-pen-test | Out-Default
+          if ($LASTEXITCODE -ne 0) { throw 'AI pen probe failed.' }
       - name: Startup and single-instance smoke test
         shell: pwsh
         env:
           BLURMASK_SMOKE_ARTIFACTS: ${{ github.workspace }}/.artifacts/ui-preview
         run: |
-          $exe = Resolve-Path "bin\Release\net11.0\win-x64\publish\BlurMask.exe"
+          $exe = Resolve-Path "src\BlurMask\bin\Release\net11.0\win-x64\publish\BlurMask.exe"
 
           # First process owns the single-instance mutex and remains alive long enough
           # for a duplicate launch to be tested.
@@ -162,13 +169,13 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: BlurMask-win-x64
-          path: bin/Release/net11.0/win-x64/publish/
+          path: src/BlurMask/bin/Release/net11.0/win-x64/publish/
       - name: Software rendering / simulated RDP session
         shell: pwsh
         env:
           BLURMASK_TEST_REMOTE_SESSION: '1'
         run: |
-          $exe = Resolve-Path "bin\Release\net11.0\win-x64\publish\BlurMask.exe"
+          $exe = Resolve-Path "src\BlurMask\bin\Release\net11.0\win-x64\publish\BlurMask.exe"
           $test = Start-Process -FilePath $exe -ArgumentList '--smoke-test' -WindowStyle Hidden -PassThru
           if (-not $test.WaitForExit(45000)) { $test.Kill(); throw 'Software rendering smoke test timed out.' }
           if ($test.ExitCode -ne 0) { throw "Software rendering failed ($($test.ExitCode))." }
@@ -183,14 +190,16 @@ jobs:
           dotnet-version: 11.0.100-preview.7.26381.103
       - name: Install Native AOT and X11 smoke-test dependencies
         run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev xvfb libx11-6 libice6 libsm6 libfontconfig1
-      - run: dotnet restore
-      - run: bash ./build.sh linux-x64
+      - run: dotnet restore src/BlurMask/BlurMask.csproj
+      - run: bash ./tools/build.sh linux-x64
+      - name: Native offline AI pen probe
+        run: ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --ai-pen-test
       - name: Startup smoke test
-        run: xvfb-run -a ./bin/Release/net11.0/linux-x64/publish/BlurMask --smoke-test --minimized
+        run: xvfb-run -a ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --smoke-test --minimized
       - uses: actions/upload-artifact@v4
         with:
           name: BlurMask-linux-x64
-          path: bin/Release/net11.0/linux-x64/publish/
+          path: src/BlurMask/bin/Release/net11.0/linux-x64/publish/
 
   native-cloud:
     name: Native AOT / live collaboration / PostgreSQL
@@ -224,13 +233,13 @@ jobs:
       - name: Exercise native clients against the real API and live channel
         shell: bash
         run: |
-          cd server
+          cd src/BlurMask.Server
           dotnet build -c Release
           dotnet run --no-build -c Release --urls http://127.0.0.1:5079 > /tmp/pen-live.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid"' EXIT
           curl --fail --silent --retry 20 --retry-connrefused --retry-delay 1 http://127.0.0.1:5079/healthz
-          cd ..
+          cd ../..
           chmod +x .artifacts/native-cloud/BlurMask
           xvfb-run -a .artifacts/native-cloud/BlurMask --isolated-smoke-test --software-rendering
 
@@ -242,14 +251,16 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 11.0.100-preview.7.26381.103
-      - run: dotnet restore
+      - run: dotnet restore src/BlurMask/BlurMask.csproj
       - name: Publish for runner architecture
         shell: bash
         run: |
           if [[ "$(uname -m)" == "arm64" ]]; then RID=osx-arm64; else RID=osx-x64; fi
           echo "RID=$RID" >> "$GITHUB_ENV"
-          bash ./build.sh "$RID"
+          bash ./tools/build.sh "$RID"
+      - name: Native offline AI pen probe
+        run: ./src/BlurMask/bin/Release/net11.0/${{ env.RID }}/publish/BlurMask --ai-pen-test
       - uses: actions/upload-artifact@v4
         with:
           name: BlurMask-macos
-          path: bin/Release/net11.0/${{ env.RID }}/publish/
+          path: src/BlurMask/bin/Release/net11.0/${{ env.RID }}/publish/

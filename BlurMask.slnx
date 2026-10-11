@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BlurMask/BlurMask.csproj" />
+    <Project Path="src/BlurMask.Server/BlurMask.Server.csproj" />
+  </Folder>
+</Solution>

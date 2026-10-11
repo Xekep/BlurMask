@@ -22,17 +22,17 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 11.0.100-preview.7.26381.103
-      - run: dotnet restore
+      - run: dotnet restore src/BlurMask/BlurMask.csproj
       - shell: pwsh
         run: |
           $version = $env:RELEASE_VERSION -replace '^v', ''
-          .\build.ps1 win-x64 -Version $version
-          Compress-Archive -Path "bin\Release\net11.0\win-x64\publish\*" -DestinationPath BlurMask-win-x64.zip
-          .\build-installer.ps1 -Version $version -SkipPublish -PublishDirectory bin/Release/net11.0/win-x64/publish
+          .\tools\build.ps1 win-x64 -Version $version
+          Compress-Archive -Path "src\BlurMask\bin\Release\net11.0\win-x64\publish\*" -DestinationPath BlurMask-win-x64.zip
+          .\tools\build-installer.ps1 -Version $version -SkipPublish -PublishDirectory src/BlurMask/bin/Release/net11.0/win-x64/publish
           $installers = @(Get-ChildItem .artifacts/installers/*-Setup.exe)
           if ($installers.Count -ne 1) { throw 'Expected exactly one installer.' }
           $installer = $installers[0]
-          .\tools\test-installer.ps1 -InstallerPath $installer.FullName -PublishDirectory bin/Release/net11.0/win-x64/publish
+          .\tools\test-installer.ps1 -InstallerPath $installer.FullName -PublishDirectory src/BlurMask/bin/Release/net11.0/win-x64/publish
       - uses: actions/upload-artifact@v4
         with:
           name: release-windows
@@ -51,11 +51,11 @@ jobs:
         with:
           dotnet-version: 11.0.100-preview.7.26381.103
       - run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev dpkg-dev desktop-file-utils xvfb libx11-6 libice6 libsm6 libfontconfig1
-      - run: dotnet restore
+      - run: dotnet restore src/BlurMask/BlurMask.csproj
       - run: |
-          bash ./build.sh linux-x64
-          tar -C bin/Release/net11.0/linux-x64/publish -czf BlurMask-linux-x64.tar.gz .
-          bash ./build-deb.sh linux-x64 "${RELEASE_VERSION#v}"
+          bash ./tools/build.sh linux-x64
+          tar -C src/BlurMask/bin/Release/net11.0/linux-x64/publish -czf BlurMask-linux-x64.tar.gz .
+          bash ./tools/build-deb.sh linux-x64 "${RELEASE_VERSION#v}"
           bash ./tools/test-deb.sh .artifacts/installers/*.deb
       - uses: actions/upload-artifact@v4
         with:
@@ -71,12 +71,12 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 11.0.100-preview.7.26381.103
-      - run: dotnet restore
+      - run: dotnet restore src/BlurMask/BlurMask.csproj
       - shell: bash
         run: |
           if [[ "$(uname -m)" == "arm64" ]]; then RID=osx-arm64; else RID=osx-x64; fi
-          bash ./build.sh "$RID"
-          tar -C "bin/Release/net11.0/$RID/publish" -czf "BlurMask-$RID.tar.gz" .
+          bash ./tools/build.sh "$RID"
+          tar -C "src/BlurMask/bin/Release/net11.0/$RID/publish" -czf "BlurMask-$RID.tar.gz" .
       - uses: actions/upload-artifact@v4
         with:
           name: release-macos

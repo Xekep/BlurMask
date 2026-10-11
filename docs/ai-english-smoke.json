@@ -1,0 +1,44 @@
+[
+  {
+    "annotation": "hello",
+    "recognized": "hello",
+    "source": "Caveat font, synthetic smoke example",
+    "font_revision": "bd8f81ddb5c74d5c8897b36ad88b440266245103"
+  },
+  {
+    "annotation": "world",
+    "recognized": "world",
+    "source": "Caveat font, synthetic smoke example",
+    "font_revision": "bd8f81ddb5c74d5c8897b36ad88b440266245103"
+  },
+  {
+    "annotation": "English",
+    "recognized": "English",
+    "source": "Caveat font, synthetic smoke example",
+    "font_revision": "bd8f81ddb5c74d5c8897b36ad88b440266245103"
+  },
+  {
+    "annotation": "drawing",
+    "recognized": "drawing",
+    "source": "Caveat font, synthetic smoke example",
+    "font_revision": "bd8f81ddb5c74d5c8897b36ad88b440266245103"
+  },
+  {
+    "annotation": "test",
+    "recognized": "test",
+    "source": "Caveat font, synthetic smoke example",
+    "font_revision": "bd8f81ddb5c74d5c8897b36ad88b440266245103"
+  },
+  {
+    "annotation": "12345",
+    "recognized": "12345",
+    "source": "Caveat font, synthetic smoke example",
+    "font_revision": "bd8f81ddb5c74d5c8897b36ad88b440266245103"
+  },
+  {
+    "annotation": "x+2=5",
+    "recognized": "x+2=5",
+    "source": "Caveat font, synthetic smoke example",
+    "font_revision": "bd8f81ddb5c74d5c8897b36ad88b440266245103"
+  }
+]
