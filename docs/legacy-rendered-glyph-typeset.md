@@ -24,10 +24,14 @@ exposes left and right side bearings.
 
 Native `180450590` builds a one-character text/span, requests its rendered bounds,
 and returns the first positive height. With no returned box or nonpositive height
-it uses the style font-size field. The recovered callers at `1806e8df4` and
+it uses internal Style **+0x20**, the font line-height field. Native `18044fa00`
+maps +0x20 to external `graphics.Style` +0x68; exported `getFontLineHeight`
+at `180327090` reads +0x68. This corrects the earlier font-size interpretation:
+the actual font-size field is internal +0x1c, external +0x6c. The recovered callers at `1806e8df4` and
 `1806ecdc4` pass literal `0x78` (`x`) to this character-height helper. The port's
 `ReferenceCharacterHeight` implements the proven scalar result selection, with
-actual measured height and style size supplied explicitly.
+actual measured height and style font line height supplied explicitly. The port
+retains the original scalar selection without adding a font-size multiplication.
 
 Native `180450d20` copies six provider glyph values: box X/Y/width/height and two
 bearings. Negative provider width or height is clamped to zero; bearings are

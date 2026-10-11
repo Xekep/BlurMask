@@ -13,9 +13,9 @@ for i in range(240):
     source=[*origin,width if i%17 else -width,height if i%19 else -height,*bearing]
     if source[2]<=0:bearing[:]=0;source[4:]=list(bearing)
     prepared_height=f(rng.uniform(.1,100));prepared=[f(rng.uniform(-100,100)),f(rng.uniform(-100,100)),f(width*rng.uniform(.1,4)),prepared_height]
-    baseline=f(rng.uniform(-100,100));scale=f(rng.uniform(.1,5));style=f(rng.uniform(.1,40))
+    baseline=f(rng.uniform(-100,100));scale=f(rng.uniform(.1,5));style_line_height=f(rng.uniform(.1,40))
     measured=[None,f(0),f(-1),f(rng.uniform(.1,30))][i%4]
-    ref=measured if measured is not None and measured>0 else style
+    ref=measured if measured is not None and measured>0 else style_line_height
     nativebaseline=f(f(baseline-prepared[1])/prepared_height);nativex=f(f(ref/prepared_height)*scale)
     left=f(source[4]/max(source[2],0)) if any(source[4:]) else 0.
     right=f(f(source[5]/max(source[2],0))+1) if any(source[4:]) else 1.
@@ -25,7 +25,7 @@ for i in range(240):
     normalized=(inverse@np.array([baseline,1.]))[0]
     assert abs(normalized-nativebaseline)<=1e-6*max(1,abs(normalized))
     assert abs(nativex*prepared_height-ref*scale)<=1e-6*max(1,abs(ref*scale))
-    controls.append(dict(source=[float(v) for v in source],prepared=prepared,baseline=baseline,scale=scale,style=style,
+    controls.append(dict(source=[float(v) for v in source],prepared=prepared,baseline=baseline,scale=scale,styleLineHeight=style_line_height,
                          measured=measured,reference=ref,ratios=[nativebaseline,nativex,left,right]))
 path=Path(sys.argv[1]);path.parent.mkdir(parents=True,exist_ok=True);path.write_text(json.dumps(controls,allow_nan=False),encoding='utf-8')
 print(f'Generated {len(controls)} own rendered-glyph normalization controls')

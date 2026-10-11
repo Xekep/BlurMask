@@ -11,12 +11,12 @@ public readonly record struct LegacyGlyphTypesetGeometry(LegacyLineBounds Bounds
 /// </summary>
 public static class LegacyGlyphTypesetGeometryBuilder
 {
-    /// <summary>iink 180450590: use measured character height when positive, otherwise style size.</summary>
-    public static float ReferenceCharacterHeight(float? measuredHeight, float styleFontSize)
+    /// <summary>iink 180450590: use measured character height when positive, otherwise the style font line-height field.</summary>
+    public static float ReferenceCharacterHeight(float? measuredHeight, float styleFontLineHeight)
     {
-        if(!float.IsFinite(styleFontSize) || styleFontSize<=0 || measuredHeight is{} value && !float.IsFinite(value))
-            throw new ArgumentException("Expected finite font metrics and positive style size.");
-        return measuredHeight is{} height && height>0 ? height : styleFontSize;
+        if(!float.IsFinite(styleFontLineHeight) || styleFontLineHeight<=0 || measuredHeight is{} value && !float.IsFinite(value))
+            throw new ArgumentException("Expected finite font metrics and positive style font line height.");
+        return measuredHeight is{} height && height>0 ? height : styleFontLineHeight;
     }
 
     /// <summary>iink 180450d20: clamp negative provider box dimensions, preserve bearings.</summary>
