@@ -304,3 +304,9 @@ The checked [ordinary source-profile forwarding](../../docs/legacy-russian-word-
 reads source kind `0x135` from the acoustic resource and selects stored language
 profile2. `CreateResourceLanguageScorer` reproduces that branch while keeping
 runtime scale explicit. It does not infer global recognition modes or history.
+
+[`LegacyLineArcMoments`, `LegacyPreparedLineGroupCost` and `LegacyFreeLineGroupSearch`](../../docs/legacy-line-group-search.md)
+add arc-weighted raw stroke moments, projected native group costs and free
+row-count dynamic programming over explicit prepared candidates. Independent
+exhaustive partition checks verify the search minima. Candidate merging,
+the supplied row-lattice branch and full cluster fitting remain unfinished.

@@ -12,6 +12,8 @@ public sealed class LegacyLexiconWordIndex
     private readonly int[] _wordIds;
     public int WordCount { get; }
     public int StorageBytes => checked(_wordIds.Length * 4);
+    /// <summary>Terminal identities are valid only for the graph used to construct this index.</summary>
+    public bool IsForGraph(LegacyPackedLexicon graph) => ReferenceEquals(_graph, graph);
 
     public LegacyLexiconWordIndex(LegacyPackedLexicon graph, CancellationToken cancellationToken = default)
     {

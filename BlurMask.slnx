@@ -48,6 +48,7 @@
     <Project Path="tools/LegacyCursiveAtoms.Probe/LegacyCursiveAtoms.Probe.csproj" />
     <Project Path="tools/PreparedLineClassifier.Probe/PreparedLineClassifier.Probe.csproj" />
     <Project Path="tools/LegacyLinePairFeatures.Probe/LegacyLinePairFeatures.Probe.csproj" />
+    <Project Path="tools/LegacyLineGroupSearch.Probe/LegacyLineGroupSearch.Probe.csproj" />
     <Project Path="tools/LegacyCursiveGeometry.Probe/LegacyCursiveGeometry.Probe.csproj" />
     <Project Path="tools/LegacyCursivePreparedInk.Probe/LegacyCursivePreparedInk.Probe.csproj" />
     <Project Path="tools/LegacyCursiveCategory.Probe/LegacyCursiveCategory.Probe.csproj" />

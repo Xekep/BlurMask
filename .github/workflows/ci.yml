@@ -116,6 +116,11 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 11.0.100-preview.7.26381.103
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install independent neural reference dependencies
+        run: python -m pip install numpy
       - run: dotnet restore src/BlurMask/BlurMask.csproj
       - run: dotnet build src/BlurMask/BlurMask.csproj -c Release --no-restore -p:PublishAot=false -p:SelfContained=false
       - name: Portable stroke engine numerical goldens, model validation and ink history
@@ -235,6 +240,8 @@ jobs:
           dotnet run --project tools/LegacyCursiveCategory.Probe -c Release -- .artifacts/cursive-category-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
           python tools/LegacyWordCandidate.Probe/reference_controls.py .artifacts/word-candidate-controls.json
           dotnet run --project tools/LegacyWordCandidate.Probe -c Release -- --controls .artifacts/word-candidate-controls.json
+          python tools/LegacyLineGroupSearch.Probe/reference_controls.py .artifacts/line-group-search-controls.json
+          dotnet run --project tools/LegacyLineGroupSearch.Probe -c Release -- .artifacts/line-group-search-controls.json
       - name: Legacy stored word and class language costs
         run: |
           python tools/LegacyWordLanguage.Probe/reference_controls.py models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-language-controls.json
@@ -380,6 +387,7 @@ jobs:
             @{ Name = 'LegacyCursivePreparedInk'; Args = @('.artifacts/cursive-prepared-controls.json') },
             @{ Name = 'LegacyCursiveCategory'; Args = @('.artifacts/cursive-category-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyWordCandidate'; Args = @('--controls', '.artifacts/word-candidate-controls.json') }
+            @{ Name = 'LegacyLineGroupSearch'; Args = @('.artifacts/line-group-search-controls.json') }
           )
           foreach ($case in $cases) {
             $name = $case.Name
