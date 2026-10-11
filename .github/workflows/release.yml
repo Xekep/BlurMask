@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 env:
   DOTNET_NOLOGO: true
@@ -75,6 +76,13 @@ jobs:
       publish-artifact: BlurMask-linux-native
       version: ${{ github.ref_name }}
 
+  void:
+    needs: linux
+    uses: ./.github/workflows/xbps.yml
+    with:
+      publish-artifact: BlurMask-linux-native
+      version: ${{ github.ref_name }}
+
   macos:
     runs-on: macos-latest
     steps:
@@ -96,7 +104,7 @@ jobs:
   publish-release:
     permissions:
       contents: write
-    needs: [windows, linux, macos, arch]
+    needs: [windows, linux, macos, arch, void]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -108,6 +116,10 @@ jobs:
         with:
           name: BlurMask-Arch-Installer
           path: dist/arch
+      - uses: actions/download-artifact@v4
+        with:
+          name: BlurMask-Void-Installer
+          path: dist/void
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}

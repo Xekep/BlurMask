@@ -232,6 +232,36 @@ Arch is rolling release; the container validates current repositories, not every
 desktop/compositor or derivative distribution. This is a downloadable package,
 not an Arch repository/AUR registration.
 
+### Void Linux x86_64 (glibc)
+
+Download the `.x86_64.xbps` package and its SHA-256 file from the GitHub Release.
+XBPS installs packages from a repository directory, so index the downloaded file first:
+
+```bash
+sha256sum --check blurmask-1.2.5_1.x86_64.xbps.sha256
+mkdir -p blurmask-repo
+cp blurmask-1.2.5_1.x86_64.xbps blurmask-repo/
+xbps-rindex -a blurmask-repo/*.xbps
+sudo xbps-install -S --repository="$PWD/blurmask-repo" blurmask
+# Remove the application while preserving user canvases/settings:
+sudo xbps-remove blurmask
+```
+
+The package supports **glibc**, not Void musl. It reuses the tested Ubuntu 22.04
+Native AOT payload, includes the formula runtime and licenses, and installs system
+dependencies through XBPS. Desktop drawing uses X11/XWayland; the experimental
+native Wayland backend supports the separate canvas. The desktop environment
+must provide its graphics driver and XWayland when needed. Login startup is
+minimized and can be disabled in the desktop's Startup Applications settings.
+
+[`Void Installer`](.github/workflows/xbps.yml) packages as an unprivileged user
+in an official Void glibc container. A separate fresh container checks installation,
+native dependencies, ONNX Runtime C API, startup, real pointer/pixel drawing in
+both renderer modes, reinstallation and removal. CI and Release reuse the existing
+Linux artifact; the packager never rebuilds the application. Manual runs accept
+`source-run-id` or a checksum-verified existing `release-tag`. This is a downloadable
+package, not a registration in Void's official repository.
+
 ### Windows installer (Inno Setup)
 
 ```powershell

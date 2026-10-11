@@ -7,7 +7,7 @@ test('download page offers desktop software and keeps shared board keys out of r
   const html=await readFile(new URL('../wwwroot/index.html',import.meta.url),'utf8');
   const js=await readFile(new URL('../wwwroot/download.js',import.meta.url),'utf8');
   assert.ok(!/<canvas\b|data-tool=|app\.js/.test(html));
-  for(const platform of ['windows','linux','arch','macos'])assert.ok(html.includes(`id="${platform}"`));
+  for(const platform of ['windows','linux','arch','void','macos'])assert.ok(html.includes(`id="${platform}"`));
   assert.ok(!js.includes('/api/boards')&&!js.includes('localStorage'));
   assert.ok(js.includes("credentials:'omit'")&&js.includes("referrerPolicy:'no-referrer'"));
   assert.ok(html.includes('releases/latest'));
@@ -15,7 +15,7 @@ test('download page offers desktop software and keeps shared board keys out of r
 
 async function downloadPage(language,assets) {
   const source=await readFile(new URL('../wwwroot/download.js',import.meta.url),'utf8');
-  const links=Object.fromEntries(['windows','linux','arch','macos','invitation','copy-invite'].map(id=>[id,{
+  const links=Object.fromEntries(['windows','linux','arch','void','macos','invitation','copy-invite'].map(id=>[id,{
     href:'https://github.com/Xekep/BlurMask/releases/latest',
     dataset:{text:id},classList:{toggle(){}},parentElement:{prepend(){}}
   }]));
@@ -46,5 +46,22 @@ test('Arch download keeps the release fallback if metadata has no package or an 
   for(const assets of [[],[{name:'blurmask-1.2.3-1-x86_64.pkg.tar.zst',browser_download_url:'https://example.com/download'}]]) {
     const {links}=await downloadPage('en',assets);
     assert.equal(links.arch.href,'https://github.com/Xekep/BlurMask/releases/latest');
+  }
+});
+
+test('Void download selects glibc x86_64 and skips musl, other architectures and checksums',async()=>{
+  const url='https://github.com/Xekep/BlurMask/releases/download/v1.2.5/blurmask-1.2.5_1.x86_64.xbps';
+  for(const language of ['en','ru','fr','de']) {
+    const {links}=await downloadPage(language,[
+      {name:'blurmask-1.2.5_1.x86_64.xbps.sha256',browser_download_url:`${url}.sha256`},
+      {name:'blurmask-1.2.5_1.x86_64-musl.xbps',browser_download_url:'https://github.com/Xekep/BlurMask/releases/download/v1.2.5/musl.xbps'},
+      {name:'blurmask-1.2.5_1.aarch64.xbps',browser_download_url:'https://github.com/Xekep/BlurMask/releases/download/v1.2.5/arm.xbps'},
+      {name:'blurmask-1.2.5_1.x86_64.xbps',browser_download_url:url}
+    ]);
+    assert.equal(links.void.href,url);
+  }
+  for(const assets of [[],[{name:'blurmask-1.2.5_1.x86_64.xbps',browser_download_url:'https://example.com/download'}]]) {
+    const {links}=await downloadPage('en',assets);
+    assert.equal(links.void.href,'https://github.com/Xekep/BlurMask/releases/latest');
   }
 });

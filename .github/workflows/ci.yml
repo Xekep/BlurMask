@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 env:
   DOTNET_NOLOGO: true
@@ -29,6 +30,12 @@ jobs:
     name: Arch installer / Linux x64
     needs: native-aot-linux
     uses: ./.github/workflows/arch.yml
+    with:
+      publish-artifact: BlurMask-linux-x64
+  void:
+    name: Void installer / Linux x64 glibc
+    needs: native-aot-linux
+    uses: ./.github/workflows/xbps.yml
     with:
       publish-artifact: BlurMask-linux-x64
   server:

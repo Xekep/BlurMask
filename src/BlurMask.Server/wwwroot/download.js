@@ -22,7 +22,7 @@ for(const link of document.querySelectorAll('.download')) link.classList.toggle(
 fetch('https://api.github.com/repos/Xekep/BlurMask/releases/latest', {credentials:'omit',referrerPolicy:'no-referrer',signal:AbortSignal.timeout(5000)})
   .then(response=>response.ok?response.json():Promise.reject())
   .then(release=>{
-    const patterns={windows:/-win-x64-Setup\.exe$/,linux:/^blurmask_.*_amd64\.deb$/,arch:/^blurmask-[0-9].*-x86_64\.pkg\.tar\.zst$/,macos:/^BlurMask-osx-arm64\.tar\.gz$/};
+    const patterns={windows:/-win-x64-Setup\.exe$/,linux:/^blurmask_.*_amd64\.deb$/,arch:/^blurmask-[0-9].*-x86_64\.pkg\.tar\.zst$/,void:/^blurmask-[0-9].*\.x86_64\.xbps$/,macos:/^BlurMask-osx-arm64\.tar\.gz$/};
     for(const [os,pattern] of Object.entries(patterns)) {
       const asset=release.assets?.find(asset=>pattern.test(asset.name));
       if(asset?.browser_download_url?.startsWith('https://github.com/Xekep/BlurMask/releases/download/')) document.getElementById(os).href=asset.browser_download_url;
