@@ -395,3 +395,8 @@ the initial line-DAG order.
 restores the ordinary pen-up grouping penalty, with resource profile coefficients
 and an explicit native lookup table and resolved line height. Special-symbol
 bypass and the full acoustic/path scorer remain separate caller responsibilities.
+[`LegacyPreparedAcousticCandidateScorer`](../../docs/legacy-russian-acoustic-candidate-score.md)
+restores the checked scalar class/geometry/prior-path total, strict budget and
+special-symbol bypasses. `LegacyAcousticCandidateThresholds` reads its real Russian
+kind gates. Class-cache production, lexical mapping and search orchestration remain
+separate; this adapter does not enable automatic connected-word recognition.
