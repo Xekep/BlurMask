@@ -475,49 +475,24 @@ internal sealed class DrawingToolbarWindow : Window
     {
         var panel = new StackPanel { Width = 270, Spacing = 3, Margin = new Thickness(7) };
         panel.Children.Add(new TextBlock { Text = "BlurMask", FontSize = 18, FontWeight = FontWeight.SemiBold, Margin = new Thickness(5, 0, 0, 7) });
-        MenuItem(panel, AppSettings.Label(ShortcutAction.Canvas), _session.OpenCanvas, ShortcutAction.Canvas);
-        MenuItem(panel, AppSettings.Label(ShortcutAction.Screen), _session.SelectScreen, ShortcutAction.Screen);
-        MenuItem(panel, UiText.T("Новая маска"), _session.NewMask);
-        MenuItem(panel, AppSettings.Label(ShortcutAction.Undo), _session.Undo, ShortcutAction.Undo);
-        MenuItem(panel, AppSettings.Label(ShortcutAction.Redo), _session.Redo, ShortcutAction.Redo);
-        MenuItem(panel, AppSettings.Label(ShortcutAction.ToggleInk), _session.ToggleInk, ShortcutAction.ToggleInk);
-        MenuItem(panel, AppSettings.Label(ShortcutAction.Clear), _session.Clear, ShortcutAction.Clear);
-        panel.Children.Add(new Border { Height = 1, Background = Edge, Margin = new Thickness(0, 5) });
         panel.Children.Add(new TextBlock { Text = UiText.T("Размер текста"), FontSize = 12, Margin = new Thickness(5, 3) });
         var textSize = new Slider { Minimum = 14, Maximum = 72, Value = _session.TextSize, TickFrequency = 2, IsSnapToTickEnabled = true };
         textSize.ValueChanged += (_, _) => _session.TextSize = textSize.Value;
         panel.Children.Add(textSize);
-        MenuItem(panel, UiText.T("Горячие клавиши"), ShowShortcuts);
         MenuItem(panel, UiText.T("Настройки"), _session.ShowSettings);
-        MenuItem(panel, AppSettings.Label(ShortcutAction.Screenshot), () => _ = _session.CaptureScreenshotAsync(), ShortcutAction.Screenshot);
-        MenuItem(panel, UiText.T("Свернуть панель"), ToggleCollapsed);
-        MenuItem(panel, AppSettings.Label(ShortcutAction.ToggleToolbar), _session.ToggleToolbarVisibility, ShortcutAction.ToggleToolbar);
+        panel.Children.Add(new Border { Height = 1, Background = Edge, Margin = new Thickness(0, 5) });
         MenuItem(panel, UiText.T("Свернуть в трей"), _session.MinimizeToTray);
         MenuItem(panel, UiText.T("Выход"), _session.Exit);
         ShowFlyout("menu", panel, _menu);
     }
-    private Button MenuItem(StackPanel panel, string text, Action click, ShortcutAction? action = null)
+    private void MenuItem(StackPanel panel, string text, Action click)
     {
         Control content = new TextBlock { Text = text, TextWrapping = TextWrapping.Wrap };
-        var shortcutAt = text.IndexOf("Ctrl+", StringComparison.Ordinal);
-        if (action is not null || shortcutAt > 0)
-        {
-            var row = new DockPanel { LastChildFill = true };
-            var shortcut = new TextBlock { Text = action is { } a ? _session.ShortcutText(a) : text[shortcutAt..], Foreground = Brushes.Gray, FontSize = 11, Margin = new Thickness(12, 0, 0, 0) };
-            DockPanel.SetDock(shortcut, Dock.Right); row.Children.Add(shortcut);
-            row.Children.Add(new TextBlock { Text = action is not null ? text : text[..shortcutAt].TrimEnd(), TextWrapping = TextWrapping.Wrap });
-            content = row;
-        }
         var button = new Button { Theme = FlatButton, Content = new Border { Padding = new Thickness(7, 6), Child = content }, FontSize = 12, MinHeight = 30, HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Left, Padding = new Thickness(7, 6) };
-        if (Program.UseNativeWayland && (action is ShortcutAction.Screen or ShortcutAction.Screenshot || text == UiText.T("Новая маска"))) button.IsEnabled = false;
         button.Click += (_, _) => { CloseFlyout(); click(); };
         panel.Children.Add(button);
-        return button;
     }
-    private void ShowShortcuts() => ShowMessage(UiText.T("Горячие клавиши"),
-        string.Join("\n", Enum.GetValues<ShortcutAction>().Where(a => _session.Settings.Shortcuts[a].Enabled)
-            .Select(a => _session.ShortcutText(a) + "   " + AppSettings.Label(a))));
 
     public void ShowMessage(string title, string message)
     {
