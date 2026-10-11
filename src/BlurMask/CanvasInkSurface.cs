@@ -64,6 +64,12 @@ internal sealed class CanvasInkSurface : Grid
         if (_session.CanvasDocument.Preview is { } preview) BoardBounds = CanvasGeometry.Grow(BoardBounds, preview.Bounds);
     }
     internal Point ToBoard(Point point) => new((point.X - Offset.X) / Zoom, (point.Y - Offset.Y) / Zoom);
+    internal void SetTestView(double zoom, Vector offset)
+    {
+        if (!Program.SmokeTest) throw new InvalidOperationException("Test camera is for isolated smoke tests only.");
+        FinishInput(); _autoFit = false; Zoom = Math.Clamp(zoom, .002, 8); Offset = offset;
+        UpdateBounds(); InvalidateVisual(); ViewChanged?.Invoke();
+    }
     public new void InvalidateVisual() { base.InvalidateVisual(); _surface.InvalidateVisual(); }
     private void Pressed(object? sender, PointerPressedEventArgs e)
     {
@@ -165,6 +171,7 @@ internal sealed class CanvasInkSurface : Grid
         _textPoint = ClampPoint(ToBoard(new Point(Math.Clamp(local.X, 0, Math.Max(0, Bounds.Width - 340)),
             Math.Clamp(local.Y, 0, Math.Max(0, Bounds.Height - 60)))));
         _editor = new TextBox { Width = 340, MinHeight = 48, FontSize = Math.Max(14, _session.TextSize * Zoom),
+            FontFamily = InkFonts.Face("Inter").FontFamily,
             Foreground = new SolidColorBrush(_session.Color), Background = Brushes.White, AcceptsReturn = true,
             MaxLength = 4000, PlaceholderText = UiText.T("Текст · Enter — готово") };
         Canvas.SetLeft(_editor, Math.Clamp(local.X, 0, Math.Max(0, Bounds.Width - 340)));
@@ -177,7 +184,7 @@ internal sealed class CanvasInkSurface : Grid
         _editor = null; _editorLayer.Children.Remove(box);
         if (!cancel && !_window.ReadOnly && !string.IsNullOrWhiteSpace(box.Text))
             _session.CanvasDocument.Add(new InkMark(InkTool.Text, _session.Color, 1, _textPoint)
-                { Text = box.Text, FontSize = _session.TextSize, FadeSeconds = _session.FadeSeconds });
+                { Text = box.Text, Font = "Inter", FontSize = _session.TextSize, FadeSeconds = _session.FadeSeconds });
     }
     public void FinishInput() { FinishText(); CancelGesture(); }
     private void KeyPressed(object? sender, KeyEventArgs e)

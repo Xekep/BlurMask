@@ -58,6 +58,32 @@ Blur-behind is compositor-specific. Scramble and Blackout are compositor-indepen
 
 ## Linux / Hyprland: empty or transparent window
 
+New builds select CPU rendering automatically under Hyprland when its valid
+session environment is present. This avoids the GLX alpha path associated with
+black toolbars and uses less memory in isolated tests. A physical Hyprland/GPU
+confirmation is still required. Desktop ink disables blur/shadow/dimming only for
+its own mapped windows through bounded compositor IPC; no user rules are changed.
+
+Linux Settings offers **Auto**, **X11 / XWayland**, and **Wayland (experimental)**,
+applied after restarting. Auto retains X11 when `DISPLAY` is present, including
+XWayland on Hyprland, and uses Wayland on Wayland-only sessions. Native Wayland
+currently supports the separate canvas only: Avalonia 12.1.2 ignores absolute
+window positioning and Topmost, and provides no layer-shell role. Desktop overlays,
+privacy masks and desktop capture are disabled in that mode. Canvas pen menus use
+native relative popups and toolbar dragging uses the compositor's move operation.
+
+You can override a saved selection without editing configuration:
+
+```sh
+blurmask --display-backend x11 --software-rendering
+blurmask --display-backend wayland
+```
+
+Close the existing process first. Explicit Wayland needs `WAYLAND_DISPLAY`; without
+it the app reports a fallback to X11. `--software-rendering` is an X11 profile and
+cannot be combined with explicit native Wayland. These are different choices:
+window protocol (X11/Wayland) and drawing renderer (GLX/CPU).
+
 The desktop ink layer is transparent by design; it receives input while a drawing
 tool is selected. The separate **Canvas** window should have an opaque board and
 a toolbar. If that window is transparent, it is a rendering problem.

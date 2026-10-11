@@ -238,6 +238,7 @@ jobs:
       ConnectionStrings__Postgres: Host=127.0.0.1;Database=pen_live_test;Username=postgres;Password=postgres
       PublicUrl: http://127.0.0.1:5079
       BLURMASK_TEST_SERVER: http://127.0.0.1:5079
+      BLURMASK_SMOKE_ARTIFACTS: ${{ github.workspace }}/.artifacts/collaboration-visual
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -260,6 +261,13 @@ jobs:
           cd ../..
           chmod +x .artifacts/native-cloud/BlurMask
           xvfb-run -a .artifacts/native-cloud/BlurMask --isolated-smoke-test --software-rendering
+
+      - name: Upload native collaboration visual checks
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: BlurMask-collaboration-visual
+          path: .artifacts/collaboration-visual/
 
   native-aot-macos:
     name: Native AOT / macOS host architecture

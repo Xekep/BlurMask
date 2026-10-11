@@ -126,7 +126,7 @@ internal sealed class DrawingSession : IDisposable
     }
     private void RebuildOverlays()
     {
-        if (_disposed) return;
+        if (_disposed || Program.UseNativeWayland) return;
         if (Toolbar.Screens.All.Count == 0) return;
         foreach (var overlay in _overlays) { overlay.FinishText(); overlay.Close(); }
         _overlays.Clear();
@@ -177,18 +177,19 @@ internal sealed class DrawingSession : IDisposable
         if (seconds > 0) _previousFadeSeconds = seconds;
         NotifySettings();
     }
-    public void NewMask() { SelectScreen(); SelectTool(InkTool.Cursor); _newMask(); }
-    public void CreateMask(PrivacyMode mode) { SelectScreen(); SelectTool(InkTool.Cursor); _selectMask(mode); }
+    public void NewMask() { if (Program.UseNativeWayland) return; SelectScreen(); SelectTool(InkTool.Cursor); _newMask(); }
+    public void CreateMask(PrivacyMode mode) { if (Program.UseNativeWayland) return; SelectScreen(); SelectTool(InkTool.Cursor); _selectMask(mode); }
     public void CloseAllMasks() => _closeMask();
     public void SetMaskWindowAttachment(bool enabled)
     {
         AttachMasksToWindows = enabled; _setMaskAttachment?.Invoke(enabled); NotifySettings();
     }
-    public void OpenCanvas()
+    public void OpenCanvas() => OpenCanvas(null);
+    internal void OpenCanvas(string? isolatedStatePath)
     {
         _desktopAi.Flush();
         FinishInput();
-        if (Canvas is null) { Canvas = new CanvasWindow(this); Color = Colors.Black; }
+        if (Canvas is null) { Canvas = new CanvasWindow(this, isolatedStatePath); Color = Colors.Black; }
         Target = DrawingTarget.Canvas;
         InkVisible = true;
         if (Tool == InkTool.Cursor) Tool = InkTool.Pen;
@@ -198,6 +199,7 @@ internal sealed class DrawingSession : IDisposable
     }
     public void SelectScreen()
     {
+        if (Program.UseNativeWayland) { Target = DrawingTarget.Canvas; UpdateState(); return; }
         _canvasAi.Flush();
         FinishInput();
         Target = DrawingTarget.Screen;
@@ -334,6 +336,7 @@ internal sealed class DrawingSession : IDisposable
 
     public async Task CaptureScreenshotAsync()
     {
+        if (Program.UseNativeWayland) return;
         if (_capturing) return;
         _capturing = true;
         FinishInput();

@@ -72,6 +72,7 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
 
     public void Draw(DrawingContext context)
     {
+        using var quality = context.PushRenderOptions(new RenderOptions { EdgeMode = EdgeMode.Antialias, BitmapInterpolationMode = BitmapInterpolationMode.HighQuality });
         using var transformed = context.PushTransform(Transform);
         var brush = _brush ??= new SolidColorBrush(Color);
         var pen = _pen ??= new Pen(brush, Width, lineCap: PenLineCap.Round, lineJoin: PenLineJoin.Round);
@@ -125,7 +126,22 @@ internal sealed class InkMark(InkTool tool, Color color, double width, Point sta
                         _geometry = new StreamGeometry();
                         using var path = _geometry.Open();
                         path.BeginFigure(start, false);
-                        foreach (var point in Points.Skip(1)) path.LineTo(point);
+                        // Round gentle changes of direction, retaining deliberate corners.
+                        // Original samples remain unchanged for the wire, AI and editing.
+                        for (var i = 1; i < Points.Count - 1; i++)
+                        {
+                            var before = (Vector)(Points[i] - Points[i - 1]);
+                            var after = (Vector)(Points[i + 1] - Points[i]);
+                            var a = before.Length; var b = after.Length;
+                            if (a > 0 && b > 0 && Vector.Dot(before, after) / (a * b) > .5)
+                            {
+                                var trim = Math.Min(Math.Min(a, b) / 2, Width * 2);
+                                path.LineTo(Points[i] - before * (trim / a));
+                                path.QuadraticBezierTo(Points[i], Points[i] + after * (trim / b));
+                            }
+                            else path.LineTo(Points[i]);
+                        }
+                        path.LineTo(end);
                         path.EndFigure(false);
                     }
                     context.DrawGeometry(null, pen, _geometry);

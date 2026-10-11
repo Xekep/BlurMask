@@ -53,8 +53,10 @@ internal sealed class CanvasWindow : Window
     public int BoardWidth => _board.Width;
     public int BoardHeight => _board.Height;
     internal CanvasInkSurface Surface => _surface;
+    internal BoardConnection? Connection => _connection;
+    internal string? ViewKey => _viewKey;
 
-    public CanvasWindow(DrawingSession session)
+    public CanvasWindow(DrawingSession session, string? isolatedStatePath = null)
     {
         _session = session;
         Title = UiText.T("BlurMask — Полотно");
@@ -66,7 +68,8 @@ internal sealed class CanvasWindow : Window
         var storage = Program.SmokeTest
             ? Path.Combine(Environment.GetEnvironmentVariable("BLURMASK_SMOKE_ARTIFACTS") ?? Path.GetTempPath(), "canvas-smoke")
             : Path.GetDirectoryName(SettingsStore.PathName)!;
-        _statePath = Path.Combine(storage, "canvas.json");
+        if (isolatedStatePath is not null && !Program.SmokeTest) throw new InvalidOperationException("Isolated canvas state is for smoke tests only.");
+        _statePath = isolatedStatePath ?? Path.Combine(storage, "canvas.json");
         if (!Program.SmokeTest) LoadState();
         _surface = new CanvasInkSurface(session, this);
         var workspace = new Grid();
@@ -96,6 +99,7 @@ internal sealed class CanvasWindow : Window
         {
             var button = CanvasButton(new ToolbarIcon(glyph) { Width = 22, Height = 22 }, UiText.T(label), action);
             button.Width = 36; button.Padding = new Thickness(6, 4);
+            if (glyph == ToolbarGlyph.Screen && Program.UseNativeWayland) button.IsEnabled = false;
             top.Children.Add(button);
         }
         _chrome = new Border { Child = top, Background = Brushes.White, CornerRadius = new CornerRadius(12),

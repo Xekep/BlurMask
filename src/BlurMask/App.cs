@@ -49,6 +49,12 @@ public sealed partial class App : Application
         await Task.Delay(200);
         try
         {
+            if (Program.WaylandSmokeTest)
+            {
+                await DrawingSmokeTest.VerifyWaylandCanvasAsync(_drawing!);
+                desktop.Shutdown();
+                return;
+            }
             if (Program.StartMinimized && (_drawing is not null || desktop.Windows.Count != 0))
                 throw new InvalidOperationException("Minimized startup created an application window.");
             VerifyTrayToggle();
@@ -153,12 +159,14 @@ public sealed partial class App : Application
             };
         }
         _drawing.Show();
+        if (Program.UseNativeWayland && _drawing.Canvas is null) _drawing.OpenCanvas();
     }
 
     private void ShowMask() => ShowMask(PrivacyMode.Blur);
 
     private void ShowMask(PrivacyMode mode)
     {
+        if (Program.UseNativeWayland) return;
         _drawing?.SelectTool(InkTool.Cursor);
         var mask = new BlurMaskWindow();
         mask.SetMode(mode);

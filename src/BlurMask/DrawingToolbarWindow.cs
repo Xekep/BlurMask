@@ -36,6 +36,7 @@ internal sealed class DrawingToolbarWindow : Window
     private readonly Dictionary<InkTool, Button> _toolButtons = [];
     private readonly Dictionary<Button, ShortcutAction> _shortcutTips = [];
     private Window? _flyout;
+    private Popup? _waylandPopup;
     private string? _flyoutName;
     private bool _collapsed;
     private bool _placed;
@@ -105,8 +106,10 @@ internal sealed class DrawingToolbarWindow : Window
         _boards = IconButton(ToolbarGlyph.Board, UiText.T("Рабочий стол / белая / чёрная доска"), ShowBoards);
         _body.Children.Add(_boards);
         _masks = IconButton(ToolbarGlyph.Mask, UiText.T("Маски приватности"), ShowMasks);
+        _masks.IsEnabled = !Program.UseNativeWayland;
         _body.Children.Add(_masks);
         var camera = IconButton(ToolbarGlyph.Camera, UiText.T("Снимок экрана"), () => _ = session.CaptureScreenshotAsync());
+        camera.IsEnabled = !Program.UseNativeWayland;
         _body.Children.Add(camera); _shortcutTips[camera] = ShortcutAction.Screenshot;
         _menu = IconButton(ToolbarGlyph.Menu, UiText.T("Меню BlurMask"), ShowMenu);
         _body.Children.Add(_menu);
@@ -342,6 +345,7 @@ internal sealed class DrawingToolbarWindow : Window
     }
     private void ShowBoards()
     {
+        if (Program.UseNativeWayland) { _session.OpenCanvas(); return; }
         var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 2 };
         foreach (var (board, name, color) in new[]
         {
@@ -422,6 +426,7 @@ internal sealed class DrawingToolbarWindow : Window
         }
         var button = new Button { Theme = FlatButton, Content = new Border { Padding = new Thickness(7, 6), Child = content }, FontSize = 12, MinHeight = 30, HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Left, Padding = new Thickness(7, 6) };
+        if (Program.UseNativeWayland && (action is ShortcutAction.Screen or ShortcutAction.Screenshot || text == UiText.T("Новая маска"))) button.IsEnabled = false;
         button.Click += (_, _) => { CloseFlyout(); click(); };
         panel.Children.Add(button);
         return button;
@@ -448,6 +453,19 @@ internal sealed class DrawingToolbarWindow : Window
         CloseFlyout();
         _flyoutName = name;
         _flyoutAnchor = anchor;
+        if (Program.UseNativeWayland)
+        {
+            // Native xdg_popup placement is relative to its parent; absolute window
+            // coordinates and Topmost are unavailable on the Wayland backend.
+            var popup = new Popup { PlacementTarget = anchor, Placement = PlacementMode.Right,
+                IsLightDismissEnabled = true,
+                Child = new Border { Background = Brushes.White, BorderBrush = Edge, BorderThickness = new Thickness(1), Padding = new Thickness(3), Child = content } };
+            _waylandPopup = popup;
+            ((StackPanel)Content!).Children.Add(popup);
+            popup.Closed += (_, _) => { if (ReferenceEquals(_waylandPopup, popup)) CloseFlyout(); };
+            popup.IsOpen = true;
+            return;
+        }
         _flyout = new Window
         {
             Title = UiText.T("BlurMask — меню"), WindowDecorations = WindowDecorations.None,
@@ -496,6 +514,8 @@ internal sealed class DrawingToolbarWindow : Window
     }
     public void CloseFlyout()
     {
+        var popup = _waylandPopup; _waylandPopup = null;
+        if (popup is not null) { popup.IsOpen = false; ((StackPanel)Content!).Children.Remove(popup); }
         var flyout = _flyout;
         _flyout = null;
         _flyoutName = null;
@@ -508,6 +528,7 @@ internal sealed class DrawingToolbarWindow : Window
     internal Window? OpenFlyout => _flyout;
     public void ClampToScreen()
     {
+        if (Program.UseNativeWayland) return;
         var screen = Screens.ScreenFromWindow(this) ?? Screens.Primary;
         if (screen is null) return;
         var area = screen.WorkingArea;
@@ -528,6 +549,7 @@ internal sealed class DrawingToolbarWindow : Window
     {
         if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed) return;
         if (e.ClickCount == 2) { ToggleCollapsed(); e.Handled = true; return; }
+        if (Program.UseNativeWayland) { CloseFlyout(); BeginMoveDrag(e); e.Handled = true; return; }
         _dragStart = this.PointToScreen(e.GetPosition(this));
         _windowStart = Position;
         _dragPointer = e.Pointer;

@@ -239,6 +239,7 @@ internal sealed class DesktopInkWindow : Window
             Width = Math.Min(380, Math.Max(120, Bounds.Width - local.X)),
             MinHeight = 48,
             FontSize = _session.TextSize,
+            FontFamily = InkFonts.Face("Inter").FontFamily,
             Foreground = new SolidColorBrush(_session.Color),
             Background = new SolidColorBrush(Color.FromArgb(235, 255, 255, 255)),
             PlaceholderText = UiText.T("Текст · Enter — готово"),
@@ -262,7 +263,7 @@ internal sealed class DesktopInkWindow : Window
         _editLayer.Children.Remove(box);
         if (!cancel && !string.IsNullOrWhiteSpace(box.Text))
             _session.DesktopDocument.Add(new InkMark(InkTool.Text, _session.Color, 1, _textOrigin)
-            { Text = box.Text, FontSize = _session.TextSize * RenderScaling, FadeSeconds = _session.FadeSeconds });
+            { Text = box.Text, Font = "Inter", FontSize = _session.TextSize * RenderScaling, FadeSeconds = _session.FadeSeconds });
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs e)

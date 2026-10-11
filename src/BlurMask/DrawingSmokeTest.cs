@@ -14,6 +14,38 @@ namespace BlurMask;
 
 internal static class DrawingSmokeTest
 {
+    internal static async Task VerifyWaylandCanvasAsync(DrawingSession session)
+    {
+        Check(Program.UseNativeWayland && session.Overlays.Count == 0, "Native Wayland created an unsupported desktop overlay.");
+        session.OpenCanvas(); await Task.Delay(300);
+        var canvas = session.Canvas!;
+        Check(canvas.TryGetPlatformHandle() is null, "Wayland test unexpectedly received an X11 window handle.");
+        session.CanvasDocument.Clear();
+        var pen = new InkMark(InkTool.Pen, Colors.Red, 8, new Point(80, 100));
+        for (var i = 1; i <= 120; i++) pen.AddPoint(new Point(80 + i * 3, 100 + Math.Sin(i / 8.0) * 35));
+        session.CanvasDocument.Add(pen);
+        session.CanvasDocument.Add(new InkMark(InkTool.Text, Colors.Black, 1, new Point(80, 180)) { Text = "Wayland · English · русский", Font = "Inter", FontSize = 32 });
+        var math = new InkMark(InkTool.Text, Colors.Blue, 1, new Point(80, 250)) { Text = "\\frac{1}{x^{2}}", Font = "STIX Two Math", FontSize = 32 };
+        math.AddPoint(new Point(170, 340)); session.CanvasDocument.Add(math);
+        canvas.Surface.SetTestView(1, new Vector(24, 24));
+        await Task.Delay(400);
+        var size = new PixelSize((int)canvas.Surface.Bounds.Width, (int)canvas.Surface.Bounds.Height);
+        Check(size.Width >= 600 && size.Height >= 400, "Wayland canvas did not receive a usable configure size.");
+        using var bitmap = new RenderTargetBitmap(size, new Vector(96, 96)); bitmap.Render(canvas.Surface);
+        var pixels = new byte[size.Width * size.Height * 4];
+        var handle = System.Runtime.InteropServices.GCHandle.Alloc(pixels, System.Runtime.InteropServices.GCHandleType.Pinned);
+        try { bitmap.CopyPixels(new PixelRect(size), handle.AddrOfPinnedObject(), pixels.Length, size.Width * 4); }
+        finally { handle.Free(); }
+        var red = 0;
+        for (var i = 0; i < pixels.Length; i += 4)
+            if (pixels[i + 2] > 180 && pixels[i + 1] < 100 && pixels[i] < 100) red++;
+        Check(red > 500, "Native Wayland canvas did not render its red stroke.");
+        session.Undo(); Check(session.CanvasDocument.Marks.Count == 2, "Wayland canvas undo failed.");
+        session.Redo(); Check(session.CanvasDocument.Marks.Count == 3, "Wayland canvas redo failed.");
+        if (Environment.GetEnvironmentVariable("BLURMASK_SMOKE_ARTIFACTS") is { Length: > 0 } output)
+        { Directory.CreateDirectory(output); bitmap.Save(Path.Combine(output, "wayland-native-canvas.png"), PngBitmapEncoderOptions.Default); }
+        Console.WriteLine($"Native Wayland canvas: configured {size}, Inter/STIX, undo/redo, red stroke pixels={red}, no desktop overlay.");
+    }
     public static void VerifyDocument(InkDocument document)
     {
         VerifySelection();

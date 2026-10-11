@@ -51,7 +51,46 @@ These are warmed CPU/GDI measurements of region rebuilding during resize, not en
 
 One socket per native client supports push, ink and notifications. Total connection count and active drawing load are different capacities. Network egress grows with the number of receivers on each board. The current single-process hub needs a shared broker and board routing before deploying multiple replicas; increasing a configured limit does not provide horizontal scaling.
 
-## Opt-in load tests
+## Process memory regression (2026-10-11)
+
+Isolated Xvfb/picom/Openbox runs sampled `/proc/<own-pid>/status`,
+`smaps_rollup` and full `smaps` for the actual v1.2.4 package and 811725b.
+1600×1000 / 3840×2160 and default / CPU rendering were tested. No user's desktop
+was used. Numbers below are MiB, not decimal MB, and exclude compositor/Xvfb processes.
+
+| Scenario | RSS | PSS | Peak RSS |
+|---|---:|---:|---:|
+| v1.2.4, 4K, desktop pen before AI | 169.7 | 156.5 | 200.9 |
+| v1.2.4, 4K, after AI pen | 471.8 | 458.6 | 502.9 |
+| 811725b, 4K, desktop pen, optional models absent | 171.6 | — | — |
+
+The old AI increase is 302.1 MiB: 205.7 MiB anonymous allocations and 96.3 MiB
+resident executable/model pages. English and Russian float32 tensor dimensions
+account for 183.3 MiB of the anonymous increase. These old embedded raster models
+have been removed. The new model-free measurement is **not** a comparison of two
+loaded recognition engines. Six close/reopen canvas cycles showed no accumulating
+RSS (−0.1 MiB). In this software-driver environment, forcing CPU rendering saved
+about 48–50 MiB; physical GPU/Hyprland memory was not measured.
+
+The new headless Native AOT Windows probe with both English and formula models,
+30 recognitions each, measured 88.9 MiB after GC, 111.9 MiB peak, and 24.3 MiB
+after model disposal/GC. It excludes window and framebuffer memory. Formula pack
+graphs now borrow validated slices instead of duplicating the pack during loading;
+managed diagnostic peak fell from 145.2 to 127.7 MiB on the same input. Diagnostic
+GC is confined to probes and is not a production memory policy.
+
+Reproduce installed-app measurements with `tools/test-linux-memory.sh` in an
+isolated unprivileged container. The headless app command is:
+
+```sh
+BlurMask --recognition-memory-test --text-model /path/en-US.ikrpack --math-model /path/math2.ikrmath --input /path/strokes.json
+```
+
+The full UI matrix and old AI confirmation are archived in GitHub Actions runs
+[38129120038](https://github.com/Xekep/BlurMask/actions/runs/38129120038) and
+[38129441464](https://github.com/Xekep/BlurMask/actions/runs/38129441464).
+
+## Opt-in server load tests
 
 `src/BlurMask.Server/tests/load.mjs` checks every preview recipient, point order, cross-board isolation, persisted point equality, conditional reads and health latency. It creates uniquely prefixed test boards and writes their IDs separately for bounded cleanup. It never prints invitation keys. It paces public HTTP traffic below admission limits and stops on errors or health latency over two seconds.
 

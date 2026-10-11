@@ -3,7 +3,7 @@ using System.Text;
 
 namespace InkRecognition.Math;
 
-internal sealed record MathModel(string[] Labels, byte[][] Graphs)
+internal sealed record MathModel(string[] Labels, ReadOnlyMemory<byte>[] Graphs)
 {
     public static MathModel Read(Stream source)
     {
@@ -27,13 +27,16 @@ internal sealed record MathModel(string[] Labels, byte[][] Graphs)
             labels[i] = new UTF8Encoding(false, true).GetString(r.ReadBytes((int)length));
         }
         if (labels[0] != "[bos]" || labels[1] != "[eos]" || r.ReadUInt32() != 3) throw new InvalidDataException("Invalid Math vocabulary/graphs.");
-        var graphs = new byte[3][];
+        var graphs = new ReadOnlyMemory<byte>[3];
         for (int i = 0; i < graphs.Length; i++)
         {
             uint length = r.ReadUInt32();
             if (length < 8 || length > 32 * 1024 * 1024 || length > stream.Length - stream.Position) throw new InvalidDataException("Invalid Math graph size.");
-            graphs[i] = r.ReadBytes((int)length);
-            if (!graphs[i].AsSpan(4, 4).SequenceEqual("ORTM"u8)) throw new InvalidDataException("Expected ORT graph.");
+            // Borrow bounded slices of the already authenticated pack. Session creation
+            // copies its input by default; duplicating all three graphs doubles peak RAM.
+            graphs[i] = body.AsMemory((int)stream.Position, (int)length);
+            stream.Position += length;
+            if (!graphs[i].Span.Slice(4, 4).SequenceEqual("ORTM"u8)) throw new InvalidDataException("Expected ORT graph.");
         }
         if (stream.Position != stream.Length) throw new InvalidDataException("Unexpected Math profile data.");
         return new(labels, graphs);

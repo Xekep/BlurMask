@@ -41,7 +41,7 @@ internal static class AiPenProbe
         Console.WriteLine($"Local raw-stroke model → application layout/history: {result[0].Text.Text}; {marks.Count} original strokes preserved.");
     }
 
-    private static List<InkMark> ReadStrokes(string path)
+    internal static List<InkMark> ReadStrokes(string path)
     {
         using var json = System.Text.Json.JsonDocument.Parse(File.ReadAllBytes(path));
         var marks = new List<InkMark>();

@@ -14,6 +14,7 @@ internal sealed class SettingsWindow : Window
     private readonly Dictionary<ShortcutAction, Button> _buttons = [];
     private readonly ComboBox _language;
     private readonly CheckBox _enabled;
+    private readonly ComboBox? _displayBackend;
     private readonly TextBlock _message = new() { TextWrapping = TextWrapping.Wrap, FontSize = 12, Foreground = Brushes.Firebrick };
     private readonly TabControl _tabs;
     private AppSettings _draft;
@@ -48,6 +49,15 @@ internal sealed class SettingsWindow : Window
             SelectedIndex = Math.Max(0, Array.IndexOf(Languages, _draft.Language)), HorizontalAlignment = HorizontalAlignment.Stretch };
         general.Children.Add(_language);
         general.Children.Add(new TextBlock { Text = UiText.T("Изменение языка вступит в силу после перезапуска."), FontSize = 12, Foreground = Brushes.Gray, TextWrapping = TextWrapping.Wrap });
+        if (OperatingSystem.IsLinux())
+        {
+            general.Children.Add(new TextBlock { Text = UiText.T("Вывод окон Linux"), FontWeight = FontWeight.SemiBold });
+            _displayBackend = new ComboBox { ItemsSource = new[] { UiText.T("Авто"), "X11 / XWayland", UiText.T("Wayland · экспериментально") },
+                SelectedIndex = Array.IndexOf(new[] { "auto", "x11", "wayland" }, _draft.LinuxDisplayBackend), HorizontalAlignment = HorizontalAlignment.Stretch };
+            general.Children.Add(_displayBackend);
+            general.Children.Add(new TextBlock { Text = UiText.T("После перезапуска. X11 поддерживает рисование на рабочем столе. Нативный Wayland пока поддерживает только отдельное полотно."),
+                FontSize = 12, Foreground = Brushes.Gray, TextWrapping = TextWrapping.Wrap });
+        }
         var aiStatus = new TextBlock { Text = UiText.T(AiRecognitionModels.Current is null ? "Модель AI-пера не установлена" : "English · экспериментально"), FontSize = 12, TextWrapping = TextWrapping.Wrap };
         var importModel = new Button { Content = UiText.T("Установить модель AI-пера"), HorizontalAlignment = HorizontalAlignment.Left };
         importModel.Click += async (_, _) =>
@@ -143,7 +153,8 @@ internal sealed class SettingsWindow : Window
     internal bool Save()
     {
         EndCapture();
-        _draft = _draft with { Language = Languages[Math.Clamp(_language.SelectedIndex, 0, Languages.Length - 1)], HotkeysEnabled = _enabled.IsChecked == true };
+        _draft = _draft with { Language = Languages[Math.Clamp(_language.SelectedIndex, 0, Languages.Length - 1)], HotkeysEnabled = _enabled.IsChecked == true,
+            LinuxDisplayBackend = _displayBackend is null ? _draft.LinuxDisplayBackend : new[] { "auto", "x11", "wayland" }[Math.Clamp(_displayBackend.SelectedIndex, 0, 2)] };
         if (_draft.Validate() is { } error) { _message.Text = error; return false; }
         try { _session.SaveSettings(_draft); Close(); return true; }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)

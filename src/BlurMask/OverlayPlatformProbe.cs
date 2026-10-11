@@ -9,6 +9,18 @@ internal static class OverlayPlatformProbe
     internal static void Run() => VerifyAsync().GetAwaiter().GetResult();
     private static async Task VerifyAsync()
     {
+        if (LinuxDisplayPolicy.UseWayland("auto", ":0", "wayland-1") ||
+            !LinuxDisplayPolicy.UseWayland("auto", null, "wayland-1") ||
+            !LinuxDisplayPolicy.UseWayland("wayland", ":0", "wayland-1") ||
+            LinuxDisplayPolicy.UseWayland("x11", ":0", "wayland-1") ||
+            LinuxDisplayPolicy.UseWayland("wayland", ":0", null) ||
+            !LinuxDisplayPolicy.UseSoftware(false, false, true, false, Path.GetTempPath(), "valid-session") ||
+            LinuxDisplayPolicy.UseSoftware(false, false, true, false, Path.GetTempPath(), "../bad") ||
+            LinuxDisplayPolicy.UseSoftware(false, false, false, false, Path.GetTempPath(), "valid-session") ||
+            LinuxDisplayPolicy.UseSoftware(true, false, true, true, Path.GetTempPath(), "valid-session") ||
+            !LinuxDisplayPolicy.UseSoftware(true, false, false, false, null, null) ||
+            !LinuxDisplayPolicy.UseSoftware(false, true, false, false, null, null))
+            throw new InvalidOperationException("Linux backend/Hyprland software rendering policy failed.");
         const string title = "BlurMask — ink overlay";
         const string clients = """
             [{"pid":42,"mapped":true,"xwayland":true,"title":"BlurMask — ink overlay","address":"0xABC"},

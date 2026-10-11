@@ -9,6 +9,7 @@ internal static class InkFonts
     private static readonly Dictionary<string, Typeface> Faces = new(StringComparer.Ordinal);
     internal static Typeface Face(string name)
     {
+        if (string.IsNullOrEmpty(name)) name = "Inter";
         if (!Names.Contains(name)) return Typeface.Default;
         if (!Faces.TryGetValue(name, out var face))
             Faces[name] = face = new Typeface(new FontFamily($"avares://BlurMask/Assets/Fonts#{name}, avares://BlurMask/Assets/Fonts#STIX Two Math"));
