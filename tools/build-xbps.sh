@@ -46,7 +46,7 @@ cd "$output"
 xbps-create -A x86_64 -n "blurmask-${version}_1" \
   -s 'Native desktop annotation, privacy masks and shared canvas' \
   -S 'Native AOT application; no separately installed .NET runtime. Requires Void glibc. X11/XWayland supports desktop drawing; optional native Wayland supports the separate canvas. XWayland and the graphics driver are supplied by the desktop environment.' \
-  -l MIT -m 'Xekep <noreply@kiiko.ru>' -H 'https://github.com/Xekep/BlurMask' \
+  -l 'MIT, GPL-3.0-or-later' -m 'Xekep <noreply@kiiko.ru>' -H 'https://github.com/Xekep/BlurMask' \
   -D "$dependencies" -F /etc/xdg/autostart/blurmask.desktop --compression zstd "$root"
 [[ -s "$package" ]]
 sha256sum "$(basename "$package")" > "$package.sha256"

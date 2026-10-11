@@ -37,4 +37,13 @@ case "$RID" in
   *) echo "Formula runtime is not packaged for $RID; handwritten ink and text recognition remain available." ;;
 esac
 
+case "$RID" in
+  linux-x64|osx-x64|osx-arm64)
+    solver_dir=".artifacts/giac-runtime/$RID"
+    bash tools/prepare-giac-runtime.sh "$RID" "$solver_dir" .artifacts/installers
+    install -d "src/BlurMask/bin/Release/net11.0/$RID/publish/runtimes/$RID/solver"
+    cp -a "$solver_dir/." "src/BlurMask/bin/Release/net11.0/$RID/publish/runtimes/$RID/solver/" ;;
+  *) echo "Bundled Giac is not available for $RID." ;;
+esac
+
 echo "Published to: src/BlurMask/bin/Release/net11.0/$RID/publish/"

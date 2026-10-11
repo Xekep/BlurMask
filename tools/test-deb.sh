@@ -7,6 +7,9 @@ cleanup() { sudo apt-get purge -y blurmask; }
 trap cleanup EXIT
 sudo apt-get install -y "$package"
 test -x /opt/blurmask/BlurMask
+test -x /opt/blurmask/runtimes/linux-x64/solver/icas
+test -s /opt/blurmask/runtimes/linux-x64/solver/COPYING
+/usr/bin/blurmask --math-solver-test
 test -L /usr/bin/blurmask
 desktop-file-validate /usr/share/applications/blurmask.desktop
 desktop-file-validate /etc/xdg/autostart/blurmask.desktop
@@ -15,6 +18,7 @@ grep -Fx 'Exec=/opt/blurmask/BlurMask --minimized' /etc/xdg/autostart/blurmask.d
 xvfb-run -a /usr/bin/blurmask --smoke-test --minimized
 sudo apt-get install --reinstall -y "$package"
 test -x /opt/blurmask/BlurMask
+/usr/bin/blurmask --math-solver-test
 cleanup
 trap - EXIT
 test ! -e /opt/blurmask/BlurMask

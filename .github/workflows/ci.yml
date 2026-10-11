@@ -602,6 +602,13 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .artifacts/giac-runtime/win-x64
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz.sha256
+          key: giac-win-x64-${{ hashFiles('tools/prepare-giac-runtime.ps1', 'tools/giac-native/**') }}
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 11.0.100-preview.7.26381.103
@@ -609,6 +616,14 @@ jobs:
       - name: Publish
         shell: pwsh
         run: .\tools\build.ps1 win-x64 -Version "1.0.0-dev.$env:GITHUB_RUN_NUMBER"
+      - name: Native bundled Giac discovery and advanced mathematics
+        shell: pwsh
+        run: |
+          $env:BLURMASK_TEST_GIAC = (Resolve-Path 'src/BlurMask/bin/Release/net11.0/win-x64/publish/runtimes/win-x64/solver/icas.exe').Path
+          & ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe --math-solver-test | Out-Default
+          if ($LASTEXITCODE -ne 0) { throw 'Bundled solver discovery failed.' }
+          dotnet run --project tools/InkMath.Solver.Probe -c Release -- $env:BLURMASK_TEST_GIAC
+          if ($LASTEXITCODE -ne 0) { throw 'Bundled solver mathematical controls failed.' }
       - name: Verify static graphics and bundled formula runtime
         shell: pwsh
         run: |
@@ -695,18 +710,51 @@ jobs:
           if (-not $test.WaitForExit(45000)) { $test.Kill(); throw 'Software rendering smoke test timed out.' }
           if ($test.ExitCode -ne 0) { throw "Software rendering failed ($($test.ExitCode))." }
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BlurMask-Giac-Sources-win-x64
+          path: |
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz.sha256
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: BlurMask-Giac-Build-Logs-win-x64
+          path: |
+            .artifacts/giac-build/**/build-*/*.log
+            .artifacts/giac-build/**/build-*/**/*.log
+            .artifacts/giac-runtime/**/manifest.json
+            ${{ runner.temp }}/BlurMask-Giac-source-build/build-*/**/*.log
+          if-no-files-found: ignore
+
   native-aot-linux:
     name: Native AOT / Linux x64
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .artifacts/giac-runtime/linux-x64
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*-linux-x64.tar.gz
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*-linux-x64.tar.gz.sha256
+          key: giac-linux-x64-${{ hashFiles('tools/prepare-giac-runtime.sh', 'tools/giac-native/**') }}
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 11.0.100-preview.7.26381.103
       - name: Install Native AOT and X11 smoke-test dependencies
-        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev xvfb libx11-6 libxcb-shape0 libice6 libsm6 libfontconfig1
+        run: sudo apt-get update && sudo apt-get install -y clang build-essential m4 curl xz-utils zlib1g-dev xvfb libx11-6 libxcb-shape0 libice6 libsm6 libfontconfig1
       - run: dotnet restore src/BlurMask/BlurMask.csproj
       - run: bash ./tools/build.sh linux-x64
+      - name: Native bundled Giac discovery and advanced mathematics
+        shell: bash
+        run: |
+          publish="src/BlurMask/bin/Release/net11.0/linux-x64/publish"
+          export BLURMASK_TEST_GIAC="$PWD/$publish/runtimes/linux-x64/solver/icas"
+          "$publish/BlurMask" --math-solver-test
+          dotnet run --project tools/InkMath.Solver.Probe -c Release -- "$BLURMASK_TEST_GIAC"
       - name: Native offline AI pen probe
         run: ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --ai-pen-test
       - name: Native overlay IPC probe
@@ -717,6 +765,25 @@ jobs:
         with:
           name: BlurMask-linux-x64
           path: src/BlurMask/bin/Release/net11.0/linux-x64/publish/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BlurMask-Giac-Sources-linux-x64
+          path: |
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz.sha256
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: BlurMask-Giac-Build-Logs-linux-x64
+          path: |
+            .artifacts/giac-build/**/build-*/*.log
+            .artifacts/giac-build/**/build-*/**/*.log
+            .artifacts/giac-runtime/**/manifest.json
+            ${{ runner.temp }}/BlurMask-Giac-source-build/build-*/**/*.log
+          if-no-files-found: ignore
 
   native-cloud:
     name: Native AOT / live collaboration / PostgreSQL
@@ -833,12 +900,27 @@ jobs:
         with:
           dotnet-version: 11.0.100-preview.7.26381.103
       - run: dotnet restore src/BlurMask/BlurMask.csproj
-      - name: Publish for runner architecture
+      - name: Detect runner architecture
         shell: bash
         run: |
           if [[ "$(uname -m)" == "arm64" ]]; then RID=osx-arm64; else RID=osx-x64; fi
           echo "RID=$RID" >> "$GITHUB_ENV"
-          bash ./tools/build.sh "$RID"
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .artifacts/giac-runtime/${{ env.RID }}
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*-${{ env.RID }}.tar.gz
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*-${{ env.RID }}.tar.gz.sha256
+          key: giac-${{ env.RID }}-${{ hashFiles('tools/prepare-giac-runtime.sh', 'tools/giac-native/**') }}
+      - name: Publish for runner architecture
+        run: bash ./tools/build.sh "${{ env.RID }}"
+      - name: Native bundled Giac discovery and advanced mathematics
+        shell: bash
+        run: |
+          publish="src/BlurMask/bin/Release/net11.0/${{ env.RID }}/publish"
+          export BLURMASK_TEST_GIAC="$PWD/$publish/runtimes/${{ env.RID }}/solver/icas"
+          "$publish/BlurMask" --math-solver-test
+          dotnet run --project tools/InkMath.Solver.Probe -c Release -- "$BLURMASK_TEST_GIAC"
       - name: Native offline AI pen probe
         run: ./src/BlurMask/bin/Release/net11.0/${{ env.RID }}/publish/BlurMask --ai-pen-test
       - name: Native overlay IPC probe
@@ -847,6 +929,25 @@ jobs:
         with:
           name: BlurMask-macos
           path: src/BlurMask/bin/Release/net11.0/${{ env.RID }}/publish/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BlurMask-Giac-Sources-macos
+          path: |
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz.sha256
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: BlurMask-Giac-Build-Logs-macos
+          path: |
+            .artifacts/giac-build/**/build-*/*.log
+            .artifacts/giac-build/**/build-*/**/*.log
+            .artifacts/giac-runtime/**/manifest.json
+            ${{ runner.temp }}/BlurMask-Giac-source-build/build-*/**/*.log
+          if-no-files-found: ignore
 
   math-native-runtime:
     name: Formula runtime ABI / ${{ matrix.os }}

@@ -85,4 +85,20 @@ elseif ($Runtime -in @('linux-x64', 'osx-x64', 'osx-arm64')) {
 }
 else { Write-Warning "Formula runtime is not packaged for $Runtime; handwritten ink and text recognition remain available." }
 
+if ($Runtime -in @('win-x64', 'linux-x64', 'osx-x64', 'osx-arm64')) {
+    $solverDirectory = Join-Path $repoRoot ".artifacts/giac-runtime/$Runtime"
+    $sourcesDirectory = Join-Path $repoRoot '.artifacts/installers'
+    if ($Runtime -eq 'win-x64') {
+        & (Join-Path $PSScriptRoot 'prepare-giac-runtime.ps1') -OutputDirectory $solverDirectory -SourcesDirectory $sourcesDirectory | Out-Host
+    }
+    else {
+        & bash (Join-Path $PSScriptRoot 'prepare-giac-runtime.sh') $Runtime $solverDirectory $sourcesDirectory
+        if ($LASTEXITCODE -ne 0) { throw 'Giac runtime packaging failed.' }
+    }
+    $solverDestination = Join-Path $publishDir "runtimes/$Runtime/solver"
+    New-Item -ItemType Directory -Path $solverDestination -Force | Out-Null
+    Copy-Item -Path (Join-Path $solverDirectory '*') -Destination $solverDestination -Recurse -Force
+}
+else { Write-Warning "Bundled Giac is not available for $Runtime." }
+
 Write-Host "Published to: $publishDir"

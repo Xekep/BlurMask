@@ -5,12 +5,11 @@ pkgrel=1
 pkgdesc='Native desktop annotation, privacy masks and shared canvas'
 arch=('x86_64')
 url='https://github.com/Xekep/BlurMask'
-license=('MIT')
+license=('MIT' 'GPL-3.0-or-later')
 depends=('glibc>=2.35' 'gcc-libs' 'zlib' 'openssl' 'icu' 'ca-certificates'
          'libx11' 'libxcb' 'libice' 'libsm' 'fontconfig' 'libxcursor'
          'libxrandr' 'libxi' 'libxrender' 'dbus' 'wayland' 'libxkbcommon' 'libglvnd')
-optdepends=('xorg-xwayland: run in a Wayland desktop session'
-            'giac: local symbolic solver for AI pen calculus, equations and matrices')
+optdepends=('xorg-xwayland: run in a Wayland desktop session')
 backup=('etc/xdg/autostart/blurmask.desktop')
 # The payload is already stripped; never alter the tested native binaries.
 options=('!strip' '!debug')

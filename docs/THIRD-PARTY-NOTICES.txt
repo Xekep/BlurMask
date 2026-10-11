@@ -16,12 +16,11 @@ Its license, third-party notices and pinned archive hashes are included under
 runtimes/<platform>/native/. Windows builds include the four app-local Microsoft
 Visual C++ runtime dependencies from the builder's licensed Visual Studio REDIST.
 
-The Windows installer includes an independently built Giac CLI (GPL-3.0-or-later),
-running as a separate process and disabled by default. No Giac library is linked
-into BlurMask. The solver directory contains complete license texts, component
-notices, provenance and the matching source-archive SHA256. Corresponding source
-and the reproducible build recipe are supplied in the same release as
-BlurMask-Giac-corresponding-sources-bdbb1c41.tar.gz.
+Windows x64, Linux x64 and native macOS x64/arm64 builds include an independently
+built Giac CLI (GPL-3.0-or-later), running as a separate process and disabled by
+default. No Giac library is linked into BlurMask. The solver directory contains
+complete license texts, component notices, provenance and the matching
+source-archive SHA256. Corresponding source and the build recipe are supplied
+in the same release as BlurMask-Giac-corresponding-sources-bdbb1c41.tar.gz
+(Windows) or BlurMask-Giac-corresponding-sources-bdbb1c41-<RID>.tar.gz (POSIX).
 See docs/giac-runtime-build.md for pinned sources and build details.
-Other distributions use a separately installed upstream/OS Giac package:
-https://xcas.univ-grenoble-alpes.fr/backup/install_en

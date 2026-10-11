@@ -22,10 +22,12 @@ install -m 644 packaging/blurmask.desktop "$root/etc/xdg/autostart/blurmask.desk
 sed -i 's|^Exec=/opt/blurmask/BlurMask$|Exec=/opt/blurmask/BlurMask --minimized|' "$root/etc/xdg/autostart/blurmask.desktop"
 install -m 644 src/BlurMask/Assets/BlurMask.svg "$root/usr/share/icons/hicolor/scalable/apps/blurmask.svg"
 install -m 644 LICENSE "$root/usr/share/doc/blurmask/copyright"
+printf '\nBundled Giac is GPL-3.0-or-later. Complete solver/dependency licenses and\ncorresponding-source instructions: /opt/blurmask/runtimes/%s/solver/.\n' "$rid" >> "$root/usr/share/doc/blurmask/copyright"
 printf '/etc/xdg/autostart/blurmask.desktop\n' > "$root/DEBIAN/conffiles"
 mkdir "$stage/debian"
 printf 'Source: blurmask\nSection: graphics\nPriority: optional\nMaintainer: Xekep <noreply@kiiko.ru>\n\nPackage: blurmask\nArchitecture: %s\nDescription: Desktop annotation and shared canvas\n' "$arch" > "$stage/debian/control"
 elfs=(-e"$root/opt/blurmask/BlurMask")
+[[ ! -f "$root/opt/blurmask/runtimes/$rid/solver/icas" ]] || elfs+=(-e"$root/opt/blurmask/runtimes/$rid/solver/icas")
 while IFS= read -r -d '' library; do elfs+=(-e"$library"); done < <(find "$root/opt/blurmask" -name '*.so' -print0)
 dependencies="$(cd "$stage" && dpkg-shlibdeps -O -l"$root/opt/blurmask" "${elfs[@]}")"
 # dpkg-shlibdeps sees the executable's ELF dependencies. Avalonia also loads
@@ -39,7 +41,6 @@ Maintainer: Xekep <noreply@kiiko.ru>
 Section: graphics
 Priority: optional
 Depends: $dependencies, libx11-6, libxcb1, libxcb-shape0, libice6, libsm6, libfontconfig1, libxcursor1, libxrandr2, libxi6, libxrender1, libdbus-1-3, libwayland-client0, libxkbcommon0, libegl1, libicu70 | libicu72 | libicu74 | libicu76 | libicu78, libssl3 | libssl3t64, zlib1g, ca-certificates
-Suggests: xcas
 Description: Desktop annotation and shared canvas
  Native desktop drawing, privacy masks, screenshots and collaborative canvas.
  No separately installed .NET runtime is required. Uses X11/XWayland, with optional native Wayland for the separate canvas.

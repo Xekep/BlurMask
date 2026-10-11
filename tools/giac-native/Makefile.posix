@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Same pinned upstream source list as the Windows recipe, UNIX CMake defines.
+# GMP and MPFR must be built locally; upstream prebuilt libraries are not used.
+SOURCE ?= ../../sources/giac-bdbb1c41fe52d8b4fb7c1d15c2deaea88fc3803c
+PREFIX ?= ../../prefix
+RECIPE ?= .
+PLATFORM ?= linux
+.DEFAULT_GOAL := icas
+NAMES := alg_ext cocoa csturm derive desolve ezgcd freeglut_stroke_roman gauss gausspol gen global help identificateur ifactor index input_lexer input_parser intg intgab isom lin maple mathml misc modfactor modpoly moyal opengl pari permu plot plot3d prog quater risch rpn series solve sparse subst sym2poly symbolic tex threaded ti89 tinymt32 TmpFGLM TmpLESystemSolver unary usual vecteur
+OBJECTS := $(addsuffix .o,$(NAMES)) icas.o
+CPPFLAGS := -I$(PREFIX)/include -I$(SOURCE)/src/giac/headers -DHAVE_NO_HOME_DIRECTORY -DGIAC_GGB -DIN_GIAC -DHAVE_LIB_PTHREAD -DGIAC_GENERIC_CONSTANTS -DTIMEOUT -DSIZEOF_VOID_P=8 -DHAVE_LIBMPFR -DVERSION=\"bdbb1c41\" -DHAVE_SYS_TIMES_H -DHAVE_UNISTD_H -DHAVE_SYS_TIME_H -DHAVE_SYSCONF
+CXXFLAGS := -O2 -std=c++11 -fno-strict-aliasing -ffunction-sections -fdata-sections -w
+ifeq ($(PLATFORM),linux)
+CXXFLAGS += -fpermissive
+LINKFLAGS := -static-libgcc -static-libstdc++ -Wl,--gc-sections -pthread
+else ifeq ($(PLATFORM),darwin)
+CPPFLAGS += -DDONT_USE_LIBLAPLACK
+LINKFLAGS := -Wl,-dead_strip -pthread
+else
+$(error Unsupported PLATFORM: $(PLATFORM))
+endif
+VPATH := $(SOURCE)/src/giac/cpp
+$(OBJECTS): $(RECIPE)/Makefile.posix $(SOURCE)/src/giac/headers/gmp.h
+icas: $(OBJECTS)
+	$(CXX) $(LINKFLAGS) -o $@ $(OBJECTS) $(PREFIX)/lib/libmpfr.a $(PREFIX)/lib/libgmp.a -lm
+%.o: %.cc
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+%.o: %.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+%.o: %.c
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+icas.o: $(RECIPE)/icas.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@

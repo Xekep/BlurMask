@@ -1,5 +1,10 @@
 # Native Windows Giac runtime
 
+For native Linux x64 and macOS x64/arm64 builds, see
+[the POSIX source recipe](giac-posix-runtime.md). Both recipes use the same
+pinned Giac/GMP/MPFR sources and command transport. The application build scripts
+copy the platform runtime into `runtimes/<RID>/solver`, including portable builds.
+
 `tools/prepare-giac-runtime.ps1` builds a standalone, statically linked Windows
 x64 `icas.exe` from fixed source archives. This is BlurMask's minimal console
 transport around Giac, not the Xcas graphical installer or an upstream release

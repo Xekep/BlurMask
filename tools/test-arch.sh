@@ -10,6 +10,8 @@ cleanup() { pacman -R --noconfirm blurmask; }
 trap cleanup EXIT
 pacman -U --noconfirm "$package"
 test -x /opt/blurmask/BlurMask
+test -x /opt/blurmask/runtimes/linux-x64/solver/icas
+test -s /opt/blurmask/runtimes/linux-x64/solver/COPYING
 test "$(readlink /usr/bin/blurmask)" == /opt/blurmask/BlurMask
 test -s /usr/share/icons/hicolor/scalable/apps/blurmask.svg
 test -s /usr/share/licenses/blurmask/LICENSE
@@ -21,8 +23,9 @@ while IFS= read -r -d '' elf; do
   dependencies="$(ldd "$elf")"
   printf '%s\n%s\n' "$elf" "$dependencies"
   if [[ "$dependencies" == *'not found'* ]]; then exit 1; fi
-done < <(find /opt/blurmask -type f \( -name BlurMask -o -name '*.so' \) -print0)
+done < <(find /opt/blurmask -type f \( -name BlurMask -o -name icas -o -name '*.so' \) -print0)
 useradd --create-home blurmask-test
+runuser -u blurmask-test -- /usr/bin/blurmask --math-solver-test
 runuser -u blurmask-test -- /usr/bin/blurmask --ai-pen-test
 runuser -u blurmask-test -- /usr/bin/blurmask --overlay-platform-test
 runuser -u blurmask-test -- xvfb-run -a /usr/bin/blurmask --smoke-test --minimized
@@ -35,6 +38,7 @@ original_hash="$(sha256sum /opt/blurmask/BlurMask)"
 printf 'outdated payload\n' > /opt/blurmask/BlurMask
 pacman -U --noconfirm "$package"
 [[ "$(sha256sum /opt/blurmask/BlurMask)" == "$original_hash" ]]
+runuser -u blurmask-test -- /usr/bin/blurmask --math-solver-test
 pacman -Qkk blurmask
 cleanup
 trap - EXIT

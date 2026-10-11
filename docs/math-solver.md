@@ -8,34 +8,29 @@ for example, `\int_{1}^{10} x^2 dx=` produces `333` without an installed CAS.
 This path supports rational/decimal numeric bounds, polynomial degree at most32,
 and sums/products/powers/division by nonzero rational constants. Trigonometric
 functions, symbolic bounds and singular rational integrands still require Giac.
-The Windows installer includes a separately executed, statically built Giac CLI
-(about 19 MiB), without Xcas's graphical interface or additional solver DLLs.
-Its licenses and source-archive hash are installed beside the executable. The
-matching source archive and build recipe are published with the installer.
-Portable Windows archives and other platforms discover a separately installed
-Giac CLI. [Build details and provenance](giac-runtime-build.md).
+Windows x64 (installer and portable ZIP), Linux x64 (portable archive, Debian,
+Arch and Void/glibc packages) and native macOS x64/arm64 builds include a
+separately executed Giac CLI. GMP/MPFR are linked statically; Windows needs no
+additional solver DLLs, and Linux/macOS use only operating-system libraries.
+There is no Xcas graphical interface. Licenses and the corresponding-source
+archive hash are installed beside the solver; exact sources and build recipes
+are published with the release. [Build details and provenance](giac-runtime-build.md).
 
 ## Enable it
 
-With the Windows installer, enable **Settings → Use Giac**; no separate download
-or path selection is required. With other distributions, install
-[Giac/Xcas from upstream](https://xcas.univ-grenoble-alpes.fr/backup/install_en).
-Windows normally installs `C:\xcaswin\icas.exe`; macOS upstream documents
-`/Applications/usr/bin/icas`. Standard installed CLI paths are discovered
-automatically. **Settings → Use Giac** enables advanced CAS calculations and is
-off by default. Built-in numeric calculations and exact polynomial definite
-integrals work with it off. Settings has no path selectors or download buttons. For a
-custom developer installation, the following command selects `icas.exe` /
-`icas` / `giac`, rather than the graphical `xcas` executable, and verifies `1+1`:
+Enable **Settings ? Use Giac**; no separate installation or path selection is
+required for the bundled platforms. The switch is off by default. Built-in
+numeric calculations and exact polynomial definite integrals work with it off.
+Settings has no path selectors or download buttons. On other platforms, standard
+installed CLI paths are discovered automatically. A custom developer installation
+can select `icas.exe` / `icas` / `giac`, rather than the graphical `xcas` executable:
 
 ```text
 BlurMask --set-math-solver /absolute/path/to/icas
 ```
 
-Linux packages: `sudo apt install --no-install-recommends xcas` on Debian/Ubuntu,
-`sudo pacman -S giac` on Arch, or `sudo xbps-install -S giac` on Void. Arch marks
-Giac as an optional dependency and the Debian package suggests Xcas. Void users
-install Giac separately. No Python runtime is needed for calculations.
+The command verifies `1+1`; bundled native solvers take precedence. No Python
+runtime, web account or external service is needed for calculations.
 
 ## Requests and supported notation
 
@@ -62,7 +57,7 @@ write `x^2 dx` when integrating the square of x.
 | `\log_{2}{8}`, `log_{2}(8)` | Logarithm with explicit base |
 | `\lim_{x\to 0}\frac{\sin x}{x}` | Limit |
 | `\sum_{k=1}^{10}k`, `\prod_{k=1}^{4}k` | Finite sums/products |
-| `x^2-1=0` | Roots, displayed as `x ∈ {−1,1}` |
+| `x^2-1=0` | Roots, displayed as `x в€€ {в€’1,1}` |
 | A `cases` matrix of equations | Simultaneous equations |
 | Matrix, determinant, inverse, trace, rank, eigenvalues | Linear algebra |
 | Trigonometry, fractions, roots, powers, `factor`/`expand` | Exact simplification |
@@ -88,7 +83,7 @@ output stream, and cancellation which kills the process tree. The memory check
 is monitoring, not an OS sandbox or a strict instantaneous allocation cap.
 
 Input limits: 4 KiB, 512 expression nodes, depth 32, eight free variables and
-12×12 matrices. Supplied local engines must be trusted software. The installation
+12Г—12 matrices. Supplied local engines must be trusted software. The installation
 command verifies a calculation, not authenticity; use upstream or OS packages.
 
 ## Verification
@@ -96,17 +91,15 @@ command verifies a calculation, not authenticity; use upstream or OS packages.
 `tools/InkMath.Solver.Probe` checks parsing, forbidden commands, bounded
 complexity, actual calculus/algebra results and cancellation of a live native
 process. Pass the absolute CLI path to exercise Giac. Without it, only grammar
-tests run. `BLURMASK_TEST_GIAC` enables real CAS → application equals policy and
+tests run. `BLURMASK_TEST_GIAC` enables real CAS в†’ application equals policy and
 typesetting tests under `BlurMask --ai-pen-test`, without starting any GUI.
-CI exercises actual Windows and Ubuntu CLIs with a Native AOT probe; macOS builds
-the adapter and runs portable tests, but actual macOS Giac execution is not yet
-validated. The legacy Windows regression helper verifies the pinned upstream
-installer's hash and extracts its CLI without executing that installer. The
-bundled runtime has a separate source-build pipeline with pinned source hashes,
-transport tests and the full calculus/algebra probe. Installer tests verify the
-installed payload hashes, automatic discovery and the default-off toggle before
-testing upgrade and uninstall. `BlurMask --math-solver-test` runs these solver
-checks without opening any application windows.
+Native application CI builds the bundled CLI from pinned sources on Windows,
+Linux and macOS, then checks automatic discovery, the default-off toggle and
+calculus/algebra results. Package tests run `BlurMask --math-solver-test` after
+installation and reinstallation of Windows, Debian, Arch and Void packages.
+The legacy upstream CLI remains a separate regression control. Source-build
+transport tests and complete license/source manifests accompany every payload.
+All application solver checks are headless and do not open application windows.
 
 The 2026-10-12 integral update passed 31 grammar translations and 20 built-in
 exact integral cases, including rational/decimal bounds, reversed bounds,

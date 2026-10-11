@@ -22,10 +22,12 @@ trap cleanup EXIT
 cp "$package" "$repo/"
 xbps-rindex -a "$repo/$(basename "$package")"
 xbps-query -R --repository="$repo" -p architecture blurmask | grep -Fx x86_64
-xbps-query -R --repository="$repo" -p license blurmask | grep -Fx MIT
+xbps-query -R --repository="$repo" -p license blurmask | grep -Fx 'MIT, GPL-3.0-or-later'
 xbps-install -y --repository="$repo" blurmask
 installed=1
 test -x /opt/blurmask/BlurMask
+test -x /opt/blurmask/runtimes/linux-x64/solver/icas
+test -s /opt/blurmask/runtimes/linux-x64/solver/COPYING
 test "$(readlink /usr/bin/blurmask)" == /opt/blurmask/BlurMask
 test -s /usr/share/icons/hicolor/scalable/apps/blurmask.svg
 test -s /usr/share/licenses/blurmask/LICENSE
@@ -44,8 +46,9 @@ while IFS= read -r -d '' elf; do
   dependencies="$(ldd "$elf")"
   printf '%s\n%s\n' "$elf" "$dependencies"
   [[ "$dependencies" != *'not found'* ]]
-done < <(find /opt/blurmask -type f \( -name BlurMask -o -name '*.so' -o -name '*.so.*' \) -print0)
+done < <(find /opt/blurmask -type f \( -name BlurMask -o -name icas -o -name '*.so' -o -name '*.so.*' \) -print0)
 useradd --create-home blurmask-test
+runuser -u blurmask-test -- /usr/bin/blurmask --math-solver-test
 runuser -u blurmask-test -- /usr/bin/blurmask --ai-pen-test
 runuser -u blurmask-test -- /usr/bin/blurmask --overlay-platform-test
 # This explicitly checks the autostart mode leaves the application windows unmapped.
@@ -83,6 +86,7 @@ original_hash="$(sha256sum /opt/blurmask/BlurMask)"
 printf 'outdated payload\n' > /opt/blurmask/BlurMask
 xbps-install -yf --repository="$repo" blurmask
 [[ "$(sha256sum /opt/blurmask/BlurMask)" == "$original_hash" ]]
+runuser -u blurmask-test -- /usr/bin/blurmask --math-solver-test
 (cd /opt/blurmask; sha256sum --check /usr/share/doc/blurmask/payload.sha256)
 xbps-pkgdb --checks=files,dependencies blurmask
 xbps-remove -y blurmask

@@ -35,6 +35,8 @@ jobs:
         run: |
           $version = $env:RELEASE_VERSION -replace '^v', ''
           .\tools\build.ps1 win-x64 -Version $version
+          & ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe --math-solver-test | Out-Default
+          if ($LASTEXITCODE -ne 0) { throw 'Portable bundled solver discovery failed.' }
           Compress-Archive -Path "src\BlurMask\bin\Release\net11.0\win-x64\publish\*" -DestinationPath BlurMask-win-x64.zip
           .\tools\build-installer.ps1 -Version $version -SkipPublish -PublishDirectory src/BlurMask/bin/Release/net11.0/win-x64/publish
           if ($LASTEXITCODE -ne 0) { throw 'Windows installer build failed.' }
@@ -58,13 +60,23 @@ jobs:
       RELEASE_VERSION: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .artifacts/giac-runtime/linux-x64
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*-linux-x64.tar.gz
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*-linux-x64.tar.gz.sha256
+          key: giac-linux-x64-${{ hashFiles('tools/prepare-giac-runtime.sh', 'tools/giac-native/**') }}
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 11.0.100-preview.7.26381.103
-      - run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev dpkg-dev desktop-file-utils xvfb libx11-6 libxcb-shape0 libice6 libsm6 libfontconfig1
+      - run: sudo apt-get update && sudo apt-get install -y clang build-essential m4 curl xz-utils zlib1g-dev dpkg-dev desktop-file-utils xvfb libx11-6 libxcb-shape0 libice6 libsm6 libfontconfig1
       - run: dotnet restore src/BlurMask/BlurMask.csproj
       - run: |
           bash ./tools/build.sh linux-x64 "${RELEASE_VERSION#v}"
+          export BLURMASK_TEST_GIAC="$PWD/src/BlurMask/bin/Release/net11.0/linux-x64/publish/runtimes/linux-x64/solver/icas"
+          ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --math-solver-test
+          dotnet run --project tools/InkMath.Solver.Probe -c Release -- "$BLURMASK_TEST_GIAC"
           tar -C src/BlurMask/bin/Release/net11.0/linux-x64/publish -czf BlurMask-linux-x64.tar.gz .
           bash ./tools/build-deb.sh linux-x64 "${RELEASE_VERSION#v}"
           bash ./tools/test-deb.sh .artifacts/installers/*.deb
@@ -97,19 +109,36 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Detect runner architecture
+        shell: bash
+        run: |
+          if [[ "$(uname -m)" == "arm64" ]]; then RID=osx-arm64; else RID=osx-x64; fi
+          echo "RID=$RID" >> "$GITHUB_ENV"
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .artifacts/giac-runtime/${{ env.RID }}
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*-${{ env.RID }}.tar.gz
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*-${{ env.RID }}.tar.gz.sha256
+          key: giac-${{ env.RID }}-${{ hashFiles('tools/prepare-giac-runtime.sh', 'tools/giac-native/**') }}
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 11.0.100-preview.7.26381.103
       - run: dotnet restore src/BlurMask/BlurMask.csproj
       - shell: bash
         run: |
-          if [[ "$(uname -m)" == "arm64" ]]; then RID=osx-arm64; else RID=osx-x64; fi
           bash ./tools/build.sh "$RID" "${GITHUB_REF_NAME#v}"
+          export BLURMASK_TEST_GIAC="$PWD/src/BlurMask/bin/Release/net11.0/$RID/publish/runtimes/$RID/solver/icas"
+          ./src/BlurMask/bin/Release/net11.0/$RID/publish/BlurMask --math-solver-test
+          dotnet run --project tools/InkMath.Solver.Probe -c Release -- "$BLURMASK_TEST_GIAC"
           tar -C "src/BlurMask/bin/Release/net11.0/$RID/publish" -czf "BlurMask-$RID.tar.gz" .
       - uses: actions/upload-artifact@v4
         with:
           name: release-macos
-          path: BlurMask-osx-*.tar.gz
+          path: |
+            BlurMask-osx-*.tar.gz
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*-osx-*.tar.gz
+            .artifacts/installers/BlurMask-Giac-corresponding-sources-*-osx-*.tar.gz.sha256
 
   recognition-library:
     runs-on: ubuntu-latest
