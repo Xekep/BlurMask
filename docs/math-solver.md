@@ -17,7 +17,9 @@ license and dependencies are handled by the upstream installer/package manager.
 Install [Giac/Xcas from upstream](https://xcas.univ-grenoble-alpes.fr/backup/install_en).
 Windows normally installs `C:\xcaswin\icas.exe`; macOS upstream documents
 `/Applications/usr/bin/icas`. Standard installed CLI paths are discovered
-automatically. Settings has no solver configuration or download buttons. For a
+automatically. **Settings → Use Giac** enables advanced CAS calculations and is
+off by default. Built-in numeric calculations and exact polynomial definite
+integrals work with it off. Settings has no path selectors or download buttons. For a
 custom developer installation, the following command selects `icas.exe` /
 `icas` / `giac`, rather than the graphical `xcas` executable, and verifies `1+1`:
 

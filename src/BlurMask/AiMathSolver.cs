@@ -7,20 +7,20 @@ namespace BlurMask;
 internal static class AiMathSolver
 {
     private static string ConfigurationPath => Path.Combine(Path.GetDirectoryName(SettingsStore.PathName)!, "giac-path.txt");
+    internal static string BundledExecutable => Path.Combine(AppContext.BaseDirectory, "runtimes",
+        System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier, "solver", OperatingSystem.IsWindows() ? "icas.exe" : "icas");
     internal static string? Executable
     {
         get
         {
             try
             {
+                if (File.Exists(BundledExecutable)) return BundledExecutable;
                 if (File.Exists(ConfigurationPath) && new FileInfo(ConfigurationPath).Length <= 8192)
                 {
                     var configured = File.ReadAllText(ConfigurationPath).Trim();
                     if (Path.IsPathFullyQualified(configured) && File.Exists(configured)) return configured;
                 }
-                var rid = System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier;
-                var bundled = Path.Combine(AppContext.BaseDirectory, "runtimes", rid, "solver", OperatingSystem.IsWindows() ? "icas.exe" : "icas");
-                if (File.Exists(bundled)) return bundled;
                 var candidates = OperatingSystem.IsWindows() ? new[] { @"C:\xcaswin\icas.exe", @"C:\xcas64\icas.exe" } :
                     new[] { "/usr/bin/icas", "/usr/bin/giac", "/usr/local/bin/icas", "/usr/local/bin/giac", "/Applications/usr/bin/icas", "/Applications/xcas.app/Contents/MacOS/icas", "/opt/homebrew/bin/icas", "/opt/homebrew/bin/giac" };
                 return candidates.FirstOrDefault(File.Exists);
@@ -28,9 +28,43 @@ internal static class AiMathSolver
             catch (Exception e) when (e is IOException or UnauthorizedAccessException or ArgumentException) { return null; }
         }
     }
+
+    // Installer verification runs before any GUI, and deliberately refuses an
+    // external installation so a developer's configured CAS cannot mask a broken payload.
+    internal static async Task VerifyBundledAsync()
+    {
+        if (!File.Exists(BundledExecutable) || Executable != BundledExecutable)
+            throw new InvalidOperationException("The bundled Giac solver was not discovered automatically.");
+        var originalSettings = Program.Settings;
+        try
+        {
+            Program.Settings = new();
+            if (Calculate(@"\frac{d}{dx}\sin(x)", default) is not null ||
+                Calculate(@"\int_1^{10} x^2 dx", default)?.LaTex != "333")
+                throw new InvalidOperationException("Disabled Giac must preserve built-in integrals without running advanced CAS.");
+            Program.Settings = originalSettings with { GiacEnabled = true };
+            if (Calculate(@"\frac{d}{dx}\sin(x)", default)?.LaTex != @"\cos x")
+                throw new InvalidOperationException("The Giac toggle did not enable the automatically discovered engine.");
+        }
+        finally { Program.Settings = originalSettings; }
+        var solver = new SymbolicMathSolver(BundledExecutable);
+        foreach (var (formula, expected) in new (string, string)[]
+        {
+            (@"\int_{1}^{10} x^2 dx", "333"),
+            (@"\int_0^\infty e^{-x} dx", "1"),
+            (@"\frac{d}{dx}\sin(x)", @"\cos x"),
+            (@"\lim_{x\to 0}\frac{\sin x}{x}", "1")
+        })
+        {
+            if ((await solver.SolveAsync(formula))?.LaTex != expected)
+                throw new InvalidOperationException("Installed Giac calculation failed: " + formula);
+        }
+        Console.WriteLine("PASS bundled Giac: default-off toggle, built-in fallback, automatic discovery, definite/improper integrals, derivative and limit.");
+    }
     internal static MathSolution? Calculate(string latex, CancellationToken token)
     {
         if (PolynomialIntegralSolver.Solve(latex, token) is { } exact) return exact;
+        if (!Program.Settings.GiacEnabled) return null;
         try { return Executable is { } path ? new SymbolicMathSolver(path).SolveAsync(latex, token).GetAwaiter().GetResult() : null; }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException) { return null; }
     }

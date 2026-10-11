@@ -36,6 +36,8 @@ public static class UiText
         ["Модель AI-пера не установлена"] = ["AI pen model is not installed", "Le modèle du stylo IA n’est pas installé", "KI-Stift-Modell ist nicht installiert"],
         ["English · экспериментально"] = ["English · experimental", "English · expérimental", "English · experimentell"],
         ["Формулы"] = ["Formulas", "Formules", "Formeln"],
+        ["Использовать Giac"] = ["Use Giac", "Utiliser Giac", "Giac verwenden"],
+        ["Для сложных вычислений включите Giac в настройках."] = ["Enable Giac in settings for advanced calculations.", "Activez Giac dans les paramètres pour les calculs avancés.", "Aktivieren Sie Giac in den Einstellungen für komplexe Berechnungen."],
         ["Решатель Giac не подключён"] = ["Giac solver is not connected", "Le solveur Giac n’est pas connecté", "Giac-Rechner ist nicht verbunden"],
         ["Локальный решатель Giac подключён"] = ["Local Giac solver is connected", "Le solveur Giac local est connecté", "Lokaler Giac-Rechner ist verbunden"],
         ["Подключить решатель Giac"] = ["Connect Giac solver", "Connecter le solveur Giac", "Giac-Rechner verbinden"],

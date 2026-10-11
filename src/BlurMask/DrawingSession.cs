@@ -74,7 +74,9 @@ internal sealed class DrawingSession : IDisposable
     private void ShowMathCalculationFailure()
     {
         if (_disposed) return;
-        Toolbar.ShowMessage(UiText.T("Не удалось вычислить"), UiText.T(AiMathSolver.Executable is null
+        Toolbar.ShowMessage(UiText.T("Не удалось вычислить"), UiText.T(!Settings.GiacEnabled
+            ? "Для сложных вычислений включите Giac в настройках."
+            : AiMathSolver.Executable is null
             ? "Проверьте распознанную формулу. В этой сборке недоступны сложные вычисления."
             : "Проверьте распознанную формулу: эта запись не поддерживается или результат не найден."));
     }
@@ -461,8 +463,11 @@ internal sealed class DrawingSession : IDisposable
     {
         if (Settings.AiMode != settings.AiMode) RecognizeAiInk();
         if (!Program.SmokeTest) SettingsStore.Save(settings);
+        bool solverChanged = Settings.GiacEnabled != settings.GiacEnabled;
+        if (solverChanged) { _desktopAi.Pause(); _canvasAi.Pause(); _mathSolve?.Cancel(); }
         Settings = settings.CloneSettings();
-        if (!Program.SmokeTest) Program.Settings = settings.CloneSettings();
+        Program.Settings = settings.CloneSettings();
+        if (solverChanged) { _desktopAi.Resume(); _canvasAi.Resume(); }
         if (_settingsWindow is null)
         { _hotkeys?.Dispose(); _hotkeys = DesktopInkNative.TryRegisterHotkeys(Toolbar, HandleShortcut, Settings); }
         NotifySettings();

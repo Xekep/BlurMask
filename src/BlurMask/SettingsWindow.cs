@@ -14,6 +14,7 @@ internal sealed class SettingsWindow : Window
     private readonly Dictionary<ShortcutAction, Button> _buttons = [];
     private readonly ComboBox _language;
     private readonly CheckBox _enabled;
+    private readonly CheckBox _giac;
     private readonly ComboBox? _displayBackend;
     private readonly TextBlock _message = new() { TextWrapping = TextWrapping.Wrap, FontSize = 12, Foreground = Brushes.Firebrick };
     private readonly TabControl _tabs;
@@ -58,6 +59,8 @@ internal sealed class SettingsWindow : Window
             general.Children.Add(new TextBlock { Text = UiText.T("После перезапуска. X11 поддерживает рисование на рабочем столе. Нативный Wayland пока поддерживает только отдельное полотно."),
                 FontSize = 12, Foreground = Brushes.Gray, TextWrapping = TextWrapping.Wrap });
         }
+        _giac = new CheckBox { Content = UiText.T("Использовать Giac"), Name = "UseGiac", IsChecked = _draft.GiacEnabled };
+        general.Children.Add(_giac);
         _enabled = new CheckBox { Content = UiText.T("Включить горячие клавиши"), IsChecked = _draft.HotkeysEnabled, Margin = new Thickness(0, 10, 0, 0) };
         general.Children.Add(_enabled);
         general.Children.Add(new TextBlock { Text = UiText.T(OperatingSystem.IsWindows() ? "На Windows клавиши работают поверх других приложений." : "На этой платформе клавиши работают, когда окно BlurMask активно."),
@@ -113,7 +116,7 @@ internal sealed class SettingsWindow : Window
     internal bool Save()
     {
         EndCapture();
-        _draft = _draft with { Language = Languages[Math.Clamp(_language.SelectedIndex, 0, Languages.Length - 1)], HotkeysEnabled = _enabled.IsChecked == true,
+        _draft = _draft with { Language = Languages[Math.Clamp(_language.SelectedIndex, 0, Languages.Length - 1)], HotkeysEnabled = _enabled.IsChecked == true, GiacEnabled = _giac.IsChecked == true,
             LinuxDisplayBackend = _displayBackend is null ? _draft.LinuxDisplayBackend : new[] { "auto", "x11", "wayland" }[Math.Clamp(_displayBackend.SelectedIndex, 0, 2)] };
         if (_draft.Validate() is { } error) { _message.Text = error; return false; }
         try { _session.SaveSettings(_draft); Close(); return true; }

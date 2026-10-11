@@ -17,6 +17,10 @@ internal static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        if (args.Length == 1 && args[0] == "--math-solver-test")
+        {
+            AiMathSolver.VerifyBundledAsync().GetAwaiter().GetResult(); return;
+        }
         if (args.Length == 2 && args[0] == "--set-math-solver")
         {
             AiMathSolver.ConfigureAsync(args[1]).GetAwaiter().GetResult();
