@@ -52,7 +52,25 @@ internal static class BoardWriteReceiptChecks
         Check(!receipt.TryApply(before with { Revision = 2 }, patch.OperationId, out _) &&
             !noChange.TryApply(before with { Revision = 3, Marks = [image, peer, added] }, patch.OperationId, out _),
             "Stale/lost-reply acknowledgement overwrote a newer baseline.");
-        Console.WriteLine("Write receipt: generated JSON, canonical changes, unchanged PNG references, baseline ownership, stale replies and guards passed.");
+        var deleted = before with { Marks = [peer] };
+        var restored = before with { Marks = [added, image, peer] };
+        var restore = CanvasMerge.Difference(deleted, restored);
+        Check(restore.InsertBefore.Count == 2 && BoardValidation.Valid(restore), "Restore did not generate sparse layer anchors.");
+        var encodedRestore = LiveWire.EncodeChange(new() { Type = "changed", BaseRevision = 1, Revision = 2, Patch = restore });
+        Check(LiveProtocol.TryApply(deleted, LiveWire.Decode(encodedRestore), out var ordered) &&
+            ordered!.Marks.Select(m => m.Id).SequenceEqual(restored.Marks.Select(m => m.Id)) && ReferenceEquals(ordered.Marks[2], peer),
+            "Binary restored group changed layer order or copied the surviving peer.");
+        var restoreReceipt = receipt with { Title = before.Title, OperationId = restore.OperationId, Patch = restore };
+        var restoredWire = JsonSerializer.Serialize(restoreReceipt, BoardWriteReceiptJsonContext.Default.BoardWriteReceipt);
+        Check(JsonSerializer.Deserialize(restoredWire, BoardWriteReceiptJsonContext.Default.BoardWriteReceipt)!.TryApply(deleted, restore.OperationId, out ordered) &&
+            ordered!.Marks.Select(m => m.Id).SequenceEqual(restored.Marks.Select(m => m.Id)), "Receipt dropped restored layer positions.");
+        var concurrent = new InkMarkDto { Points = [new(100, 100), new(120, 120)] };
+        var rebased = CanvasMerge.Rebase(deleted with { Marks = [peer, concurrent] }, deleted, restored);
+        Check(rebased.Marks.Select(m => m.Id).SequenceEqual(new[] { added.Id, image.Id, peer.Id, concurrent.Id }), "Restoring a group lost or reordered concurrent peer ink.");
+        Check(CanvasMerge.Difference(before, before with { Marks = [image, peer, added] }).InsertBefore.Count == 0, "Ordinary append sends unnecessary layer anchors.");
+        foreach (var placement in new[] { new InkPlacement(added.Id, added.Id), new InkPlacement(Guid.Empty, peer.Id), new InkPlacement(peer.Id, image.Id) })
+            Check(!BoardValidation.Valid(restore with { InsertBefore = [placement] }), "Invalid restored layer anchor accepted.");
+        Console.WriteLine("Write receipt: generated JSON, canonical changes, unchanged PNG references, sparse restored layer order, binary/rebase paths, stale replies and guards passed.");
     }
     private static void Check(bool condition, string message) { if (!condition) throw new InvalidOperationException(message); }
 }

@@ -30,6 +30,7 @@ public sealed record BoardSnapshot
     public int Height { get; init; } = 1600;
     public List<InkMarkDto> Marks { get; init; } = [];
 }
+public sealed record InkPlacement(Guid Id, Guid Before);
 public sealed record BoardPatch
 {
     // A unique operation id makes retries safe, including a lost HTTP response.
@@ -38,8 +39,29 @@ public sealed record BoardPatch
     // A setter preserves the default for omitted fields in the .NET 10 generated serializer.
     public List<InkMarkDto> Update { get; set; } = [];
     public List<Guid> Remove { get; init; } = [];
+    // Sparse anchors preserve layer positions when undo restores removed marks.
+    public List<InkPlacement> InsertBefore { get; set; } = [];
     public string? Title { get; init; }
     public string? Background { get; init; }
+}
+public static class BoardOrder
+{
+    public static bool Apply(List<InkMarkDto> marks, IReadOnlyList<InkPlacement> placements)
+    {
+        if (placements.Count == 0) return false;
+        var order = new LinkedList<InkMarkDto>(marks);
+        var nodes = new Dictionary<Guid, LinkedListNode<InkMarkDto>>(marks.Count);
+        for (var node = order.First; node is not null; node = node.Next) nodes[node.Value.Id] = node;
+        var changed = false;
+        // Reverse chains: place B before C, then A before B. Missing concurrent
+        // anchors leave additions at the end; unknown marks are never removed.
+        for (var i = placements.Count - 1; i >= 0; i--)
+            if (nodes.TryGetValue(placements[i].Id, out var node) && nodes.TryGetValue(placements[i].Before, out var anchor) &&
+                node != anchor && node.Next != anchor)
+            { order.Remove(node); order.AddBefore(anchor, node); changed = true; }
+        if (changed) { marks.Clear(); marks.AddRange(order); }
+        return changed;
+    }
 }
 public sealed record CreateBoardRequest(string Title = "Новое полотно", string Background = "white");
 public sealed record BoardAccess(BoardSnapshot Board, string EditKey, string ViewKey, string EditUrl, string ViewUrl);
@@ -130,9 +152,17 @@ public static class BoardValidation
     }
     public static bool Same(InkMarkDto a, InkMarkDto b) => a.Tool == b.Tool && a.Color == b.Color && a.Width == b.Width &&
         a.FontSize == b.FontSize && a.Text == b.Text && a.Font == b.Font && a.Image == b.Image && a.Transform == b.Transform && a.Points.SequenceEqual(b.Points);
+    private static bool ValidPlacements(BoardPatch patch)
+    {
+        if (patch.InsertBefore.Count == 0) return true;
+        var added = patch.Add.Select(m => m.Id).ToHashSet(); var seen = new HashSet<Guid>();
+        return patch.InsertBefore.All(p => p is not null && p.Id != Guid.Empty && p.Before != Guid.Empty &&
+            p.Id != p.Before && added.Contains(p.Id) && seen.Add(p.Id));
+    }
     public static bool Valid(BoardPatch? patch) => patch is not null && patch.OperationId != Guid.Empty &&
         patch.Add is { Count: <= MaxMarks } && patch.Update is { Count: <= MaxMarks } && patch.Remove is { Count: <= MaxMarks } &&
         patch.Add.All(Valid) && patch.Update.All(Valid) && patch.Add.Concat(patch.Update).Sum(m => m.Points.Count) <= MaxPoints &&
+        patch.InsertBefore is { Count: <= MaxMarks } && ValidPlacements(patch) &&
         patch.Add.Concat(patch.Update).Select(m => m.Id).Distinct().Count() == patch.Add.Count + patch.Update.Count &&
         !patch.Update.Any(m => patch.Remove.Contains(m.Id)) &&
         patch.Add.Select(m => m.Id).Distinct().Count() == patch.Add.Count &&

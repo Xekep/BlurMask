@@ -171,6 +171,7 @@ internal static class CollaborationVisualProbe
             await Wait(() => fixtures.All(f => viewer.Snapshot().Marks.Any(m => m.Id == f.Mark.Id && BoardValidation.Same(m, InkDocument.ExportMark(f.Mark)))), "Group Delete undo did not restore all peer objects.");
             SetViews(owner, viewer);
             await CapturePair(owner, viewer, directory, "group-delete-undone", "ink-and-raster", MatrixRoi(), log);
+            Check(SameMarks(beforeView, viewer.Snapshot()), "Group Delete undo changed the shared layer order.");
             viewerSession.SelectTool(InkTool.Select); viewerSession.CanvasSelection.SelectAll();
             Check(!viewerSession.HandleSelectionKey(new Avalonia.Input.KeyEventArgs { Key = Avalonia.Input.Key.Delete }) && SameMarks(beforeView, viewer.Snapshot()),
                 "Readonly viewer accepted Delete on a selected group.");

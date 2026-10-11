@@ -32,6 +32,7 @@ public static class LiveProtocol
         var marks = before.Marks.Where(m => !removed.Contains(m.Id)).Select(m => updated.GetValueOrDefault(m.Id) ?? m).ToList();
         var ids = marks.Select(m => m.Id).ToHashSet();
         foreach (var mark in patch.Add) if (ids.Add(mark.Id)) marks.Add(mark);
+        BoardOrder.Apply(marks, patch.InsertBefore);
         var candidate = before with { Revision = frame.Revision, Marks = marks,
             Title = patch.Title?.Trim() ?? before.Title, Background = patch.Background ?? before.Background };
         if (!BoardValidation.Valid(candidate)) return false;

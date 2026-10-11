@@ -119,6 +119,7 @@ public sealed class BoardStore(NpgsqlDataSource source)
             { marks[i] = replacement; changed = true; }
         var existing = marks.Select(m => m.Id).ToHashSet();
         foreach (var mark in patch.Add) if (existing.Add(mark.Id)) { marks.Add(mark); changed = true; }
+        changed |= BoardOrder.Apply(marks, patch.InsertBefore);
         if (!changed && (patch.Title is null || patch.Title.Trim() == board.Title) &&
             (patch.Background is null || patch.Background == board.Background)) return (board, false, null);
         board = board with

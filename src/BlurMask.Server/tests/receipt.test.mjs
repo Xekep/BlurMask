@@ -59,4 +59,20 @@ test('compact write receipts: known revision, PNG omission, metadata, conflicts,
   assert.equal((await request(path+'/changes',access.viewKey,patch({add:[mark()]}),5)).status,403);
   assert.equal((await request(path+'/changes','x'.repeat(43),patch({add:[mark()]}),5)).status,404);
   const after=await (await request(path,access.editKey)).json(); assert.deepEqual(after,merged);
+
+  // Remove two lower layers, then restore them ahead of surviving layers.
+  // Only two UUID anchors are sent, rather than a complete document/order list.
+  const originalOrder=after.marks.map(m=>m.id), restoredLayers=after.marks.slice(0,2);
+  const removal=await request(path+'/changes',access.editKey,patch({remove:restoredLayers.map(m=>m.id)}),5);
+  assert.equal(removal.status,200); assert.equal((await removal.json()).revision,6);
+  const restore=patch({add:restoredLayers,insertBefore:[{id:restoredLayers[0].id,before:restoredLayers[1].id},{id:restoredLayers[1].id,before:after.marks[2].id}]});
+  const restored=await request(path+'/changes',access.editKey,restore,6);
+  assert.equal(restored.status,200); assert.equal(compact(restored),true);
+  const restoredReceipt=await restored.json(); assert.deepEqual(restoredReceipt.patch.insertBefore,restore.insertBefore);
+  const ordered=await (await request(path,access.editKey)).json(); assert.deepEqual(ordered.marks.map(m=>m.id),originalOrder);
+  for(const insertBefore of [null,[{id:restoredLayers[0].id,before:restoredLayers[0].id}],[{id:after.marks[2].id,before:restoredLayers[0].id}]])
+    assert.equal((await request(path+'/changes',access.editKey,patch({add:restoredLayers,insertBefore}))).status,400);
+  assert.equal((await request(path+'/changes',access.viewKey,restore,7)).status,403);
+  const again=await request(path+'/changes',access.editKey,restore,6); assert.equal(compact(again),false);
+  assert.deepEqual((await again.json()).marks.map(m=>m.id),originalOrder);
 });
