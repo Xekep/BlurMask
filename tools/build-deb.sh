@@ -16,6 +16,7 @@ install -d "$root/DEBIAN" "$root/opt/blurmask" "$root/usr/bin" "$root/usr/share/
 cp -a "$payload/." "$root/opt/blurmask/"
 find "$root/opt/blurmask" -type f \( -name '*.dbg' -o -name '*.pdb' \) -delete
 chmod 755 "$root/opt/blurmask/BlurMask"
+if [[ -f "$root/opt/blurmask/runtimes/$rid/solver/icas" ]]; then chmod 755 "$root/opt/blurmask/runtimes/$rid/solver/icas"; fi
 ln -s /opt/blurmask/BlurMask "$root/usr/bin/blurmask"
 install -m 644 packaging/blurmask.desktop "$root/usr/share/applications/blurmask.desktop"
 install -m 644 packaging/blurmask.desktop "$root/etc/xdg/autostart/blurmask.desktop"

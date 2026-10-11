@@ -20,6 +20,7 @@ package() {
   install -d "$pkgdir/opt/blurmask" "$pkgdir/usr/bin"
   cp -a "$srcdir/payload/." "$pkgdir/opt/blurmask/"
   chmod 755 "$pkgdir/opt/blurmask/BlurMask"
+  chmod 755 "$pkgdir/opt/blurmask/runtimes/linux-x64/solver/icas"
   ln -s /opt/blurmask/BlurMask "$pkgdir/usr/bin/blurmask"
   install -Dm644 "$srcdir/blurmask.desktop" "$pkgdir/usr/share/applications/blurmask.desktop"
   install -Dm644 "$srcdir/blurmask.desktop" "$pkgdir/etc/xdg/autostart/blurmask.desktop"

@@ -25,6 +25,7 @@ install -d "$root/opt/blurmask" "$root/usr/bin" "$root/usr/share/doc/blurmask"
 cp -a "$payload/." "$root/opt/blurmask/"
 find "$root/opt/blurmask" -type f \( -name '*.dbg' -o -name '*.pdb' \) -delete
 chmod 755 "$root/opt/blurmask/BlurMask"
+chmod 755 "$root/opt/blurmask/runtimes/linux-x64/solver/icas"
 ln -s /opt/blurmask/BlurMask "$root/usr/bin/blurmask"
 install -Dm644 packaging/blurmask.desktop "$root/usr/share/applications/blurmask.desktop"
 install -Dm644 packaging/blurmask.desktop "$root/etc/xdg/autostart/blurmask.desktop"
