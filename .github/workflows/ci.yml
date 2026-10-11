@@ -208,6 +208,19 @@ jobs:
         run: |
           python tools/LegacyWordLanguage.Probe/reference_controls.py models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-language-controls.json
           dotnet run --project tools/LegacyWordLanguage.Probe -c Release -- models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-language-controls.json
+      - name: Legacy dictionary terminal identity and language cost correspondence
+        run: |
+          python tools/LegacyWordIndex.Probe/reference_controls.py models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-word-index-controls.json
+          dotnet run --project tools/LegacyWordIndex.Probe -c Release -- models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-word-index-controls.json
+      - name: Legacy scalar word cost profiles and exact acoustic log costs
+        run: |
+          python tools/LegacyWordProfile.Probe/reference_controls.py .artifacts/legacy-word-profile-controls.json
+          dotnet run --project tools/LegacyWordProfile.Probe -c Release -- --controls .artifacts/legacy-word-profile-controls.json
+          dotnet run --project tools/LegacyWordProfile.Probe -c Release -- models/ru-RU/ru_RU-lk-text.lite.res
+          python tools/LegacyFixedLog.Probe/reference_controls.py .artifacts/legacy-fixed-log-controls.json
+          dotnet run --project tools/LegacyFixedLog.Probe -c Release -- .artifacts/legacy-fixed-log-controls.json
+          python tools/LegacyCostEnsemble.Probe/reference_controls.py .artifacts/legacy-cost-ensemble-controls.json
+          dotnet run --project tools/LegacyCostEnsemble.Probe -c Release -- .artifacts/legacy-cost-ensemble-controls.json
       - name: Install standalone recognition Native AOT prerequisites
         if: runner.os == 'Linux'
         run: |
@@ -228,6 +241,34 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $probe = if ($IsWindows) { './.artifacts/legacy-language-native/LegacyWordLanguage.Probe.exe' } else { './.artifacts/legacy-language-native/LegacyWordLanguage.Probe' }
           & $probe models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-language-controls.json
+          exit $LASTEXITCODE
+      - name: Publish and verify Russian dictionary word identities as Native AOT
+        shell: pwsh
+        run: |
+          dotnet publish tools/LegacyWordIndex.Probe/LegacyWordIndex.Probe.csproj -c Release -p:PublishAot=true -o .artifacts/legacy-word-index-native
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $probe = if ($IsWindows) { './.artifacts/legacy-word-index-native/LegacyWordIndex.Probe.exe' } else { './.artifacts/legacy-word-index-native/LegacyWordIndex.Probe' }
+          & $probe models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-word-index-controls.json
+          exit $LASTEXITCODE
+      - name: Publish and verify Russian cost arithmetic as Native AOT
+        shell: pwsh
+        run: |
+          dotnet publish tools/LegacyWordProfile.Probe/LegacyWordProfile.Probe.csproj -c Release -p:PublishAot=true -o .artifacts/legacy-word-profile-native
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $probe = if ($IsWindows) { './.artifacts/legacy-word-profile-native/LegacyWordProfile.Probe.exe' } else { './.artifacts/legacy-word-profile-native/LegacyWordProfile.Probe' }
+          & $probe --controls .artifacts/legacy-word-profile-controls.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & $probe models/ru-RU/ru_RU-lk-text.lite.res
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet publish tools/LegacyFixedLog.Probe/LegacyFixedLog.Probe.csproj -c Release -p:PublishAot=true -o .artifacts/legacy-fixed-log-native
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $probe = if ($IsWindows) { './.artifacts/legacy-fixed-log-native/LegacyFixedLog.Probe.exe' } else { './.artifacts/legacy-fixed-log-native/LegacyFixedLog.Probe' }
+          & $probe .artifacts/legacy-fixed-log-controls.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet publish tools/LegacyCostEnsemble.Probe/LegacyCostEnsemble.Probe.csproj -c Release -p:PublishAot=true -o .artifacts/legacy-cost-ensemble-native
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $probe = if ($IsWindows) { './.artifacts/legacy-cost-ensemble-native/LegacyCostEnsemble.Probe.exe' } else { './.artifacts/legacy-cost-ensemble-native/LegacyCostEnsemble.Probe' }
+          & $probe .artifacts/legacy-cost-ensemble-controls.json
           exit $LASTEXITCODE
 
   symbolic-math:

@@ -209,5 +209,23 @@ remains separate from the native word-cost channel.
 [`LegacyWordLanguageModel`](../../docs/legacy-russian-word-language.md) restores
 the stored Russian word classes and integer word/unigram/bigram lookup tables.
 The raw tables pass own format/boundary controls and 512 independent actual
-resource lookups. Dictionary terminal alignment, native weighting and history
-policy still need restoration before using these values to rank recognized text.
+resource lookups. Native weighting and history policy still need restoration
+before using these values to rank recognized text.
+
+[`LegacyLexiconWordIndex`](../../docs/legacy-russian-word-index.md) now aligns
+dictionary terminals with the language model's stored word IDs using checked
+terminal preorder, preserving terminal prefixes before descendants. The real
+dictionary has 439,826 terminals; independent word-ID/cost controls distinguish
+this order from BFS node IDs.
+
+[`LegacyWordLanguageCostProfile`](../../docs/legacy-russian-word-cost-profile.md)
+restores the stored four-profile scalar word and class calibration with an
+explicit runtime scale. [`LegacyAcousticFixedLog`](../../docs/legacy-russian-acoustic-fixed-log.md)
+restores the separate integer acoustic log-cost conversion across all 32,769
+probability values without embedding a vendor table.
+[`LegacyAcousticCostEnsemble`](../../docs/legacy-russian-acoustic-cost-ensemble.md)
+combines seven explicit weighted family slots with checked native scalar
+normalization; its integer costs remain separate from confidence probabilities.
+Native profile selection,
+history state and total acoustic/lexical scoring are still unfinished; these
+components do not enable Russian cursive recognition in the GUI.

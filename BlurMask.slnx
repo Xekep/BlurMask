@@ -34,6 +34,10 @@
     <Project Path="tools/LegacyAcousticEnsemble.Probe/LegacyAcousticEnsemble.Probe.csproj" />
     <Project Path="tools/LegacyDirectionalWord.Probe/LegacyDirectionalWord.Probe.csproj" />
     <Project Path="tools/LegacyWordLanguage.Probe/LegacyWordLanguage.Probe.csproj" />
+    <Project Path="tools/LegacyWordIndex.Probe/LegacyWordIndex.Probe.csproj" />
+    <Project Path="tools/LegacyWordProfile.Probe/LegacyWordProfile.Probe.csproj" />
+    <Project Path="tools/LegacyFixedLog.Probe/LegacyFixedLog.Probe.csproj" />
+    <Project Path="tools/LegacyCostEnsemble.Probe/LegacyCostEnsemble.Probe.csproj" />
     <Project Path="tools/InkMath.Solver.Probe/InkMath.Solver.Probe.csproj" />
   </Folder>
 </Solution>
