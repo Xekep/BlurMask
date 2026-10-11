@@ -196,6 +196,39 @@ jobs:
           dotnet run --project tools/LegacySpatialStatistics.Probe -c Release -- .artifacts/legacy-spatial-statistics-controls.json
       - name: Legacy complete spatial features and vendor-free model guards
         run: dotnet run --project tools/LegacySpatialModel.Probe -c Release
+      - name: Legacy per-class calibration and active acoustic family aggregation
+        run: |
+          python tools/LegacyAcousticEnsemble.Probe/reference_controls.py .artifacts/legacy-ensemble-controls.json
+          dotnet run --project tools/LegacyAcousticEnsemble.Probe -c Release -- .artifacts/legacy-ensemble-controls.json
+      - name: Legacy complete word scoring and acoustic to dictionary roundtrip
+        run: dotnet run --project tools/LegacyDirectionalWord.Probe -c Release
+      - name: Verify committed recognition resource fingerprints
+        run: python tools/verify-model-resources.py
+      - name: Legacy stored word and class language costs
+        run: |
+          python tools/LegacyWordLanguage.Probe/reference_controls.py models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-language-controls.json
+          dotnet run --project tools/LegacyWordLanguage.Probe -c Release -- models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-language-controls.json
+      - name: Install standalone recognition Native AOT prerequisites
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang zlib1g-dev
+      - name: Publish and run standalone Russian word pipeline as Native AOT
+        shell: pwsh
+        run: |
+          dotnet publish tools/LegacyDirectionalWord.Probe/LegacyDirectionalWord.Probe.csproj -c Release -p:PublishAot=true -o .artifacts/legacy-word-native
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $probe = if ($IsWindows) { './.artifacts/legacy-word-native/LegacyDirectionalWord.Probe.exe' } else { './.artifacts/legacy-word-native/LegacyDirectionalWord.Probe' }
+          & $probe
+          exit $LASTEXITCODE
+      - name: Publish and verify stored Russian language tables as Native AOT
+        shell: pwsh
+        run: |
+          dotnet publish tools/LegacyWordLanguage.Probe/LegacyWordLanguage.Probe.csproj -c Release -p:PublishAot=true -o .artifacts/legacy-language-native
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $probe = if ($IsWindows) { './.artifacts/legacy-language-native/LegacyWordLanguage.Probe.exe' } else { './.artifacts/legacy-language-native/LegacyWordLanguage.Probe' }
+          & $probe models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-language-controls.json
+          exit $LASTEXITCODE
 
   symbolic-math:
     name: Native local CAS / ${{ matrix.os }}

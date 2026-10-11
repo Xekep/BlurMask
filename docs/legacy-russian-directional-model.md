@@ -36,7 +36,11 @@ dotnet run --project tools/LegacyDirectionalModel.Probe -c Release
 dotnet run --project tools/LegacyDirectionalModel.Probe -c Release -- acoustic.res activations.json calibration.json
 ```
 
-The next requirements are verified automatic baseline/context profiles, the
-other model family's channel layout/combination policy, and representative real
-writer samples with character/word accuracy measurements. Joined Russian
-cursive and AI-pen UI integration are not complete.
+The [spatial family](legacy-russian-spatial-model.md),
+[explicit-line context](legacy-russian-context-windows.md) and
+[calibrated aggregation](legacy-russian-acoustic-ensemble.md) have since been
+restored separately. The [word module](legacy-russian-directional-words.md) now
+evaluates all four inspected families. Automatic baseline/line profiles,
+word/case policy and representative real writer samples with accuracy
+measurements are still required. Joined Russian cursive and AI-pen UI integration
+are not complete.

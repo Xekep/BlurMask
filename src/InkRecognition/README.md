@@ -183,3 +183,31 @@ controls in managed code and Windows Native AOT. Real model diagnostics on own
 printed ink show different strengths from the temporal classifier, requiring
 the remaining ensemble, lexical/case handling and joined-word segmentation.
 This remains a headless experimental path, without Russian AI-pen integration.
+
+[`LegacyAcousticEnsemble`](../../docs/legacy-russian-acoustic-ensemble.md) restores
+the inspected mode1 per-family/per-class logistic calibration and native-order
+mean for explicitly active families. Caller-owned coefficients are required;
+raw probabilities are not averaged. Managed and Windows Native AOT pass 640
+independent arithmetic references. Native case policy and representative
+joined-word recognition remain unfinished.
+
+The [word diagnostic](../../docs/legacy-russian-directional-words.md) now runs
+all four inspected families with explicit caller line/baseline and context,
+using the shared baseline trajectory/raster APIs as well as the temporal/spatial
+composers. Own scaled/translated printed МАМА ranks мама first in all four
+variants; МИР still ranks миф first and мир second. These narrow diagnostics
+expose the remaining lexical/case and joined-stroke dependencies rather than
+claiming full Russian recognition. CI also runs its resource-free pipeline as
+a standalone Native AOT executable on Windows, Linux and macOS.
+
+`LegacyDirectionalWordRecognizer` exposes that experimental word path as a
+reusable model/context/dictionary module with immutable coefficient snapshots,
+bounded ink, explicit source baseline and cancellable work. It returns word
+candidates and diagnostic counts. The original confidence-to-cost adapter
+remains separate from the native word-cost channel.
+
+[`LegacyWordLanguageModel`](../../docs/legacy-russian-word-language.md) restores
+the stored Russian word classes and integer word/unigram/bigram lookup tables.
+The raw tables pass own format/boundary controls and 512 independent actual
+resource lookups. Dictionary terminal alignment, native weighting and history
+policy still need restoration before using these values to rank recognized text.

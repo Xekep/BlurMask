@@ -35,7 +35,10 @@ python tools/LegacyIntersection.Probe/reference_controls.py .artifacts/ru-inters
 dotnet run --project tools/LegacyIntersection.Probe -c Release -- .artifacts/ru-intersections.json
 ```
 
-Local window statistics, channel assembly, baseline/context handling and
-representative joined-word ink controls still remain before the 313 networks
-can be evaluated correctly. These components do not enable Russian cursive
-recognition in the AI-pen interface.
+The later [temporal](legacy-russian-directional-model.md) and
+[spatial](legacy-russian-spatial-model.md) components now assemble and evaluate
+the 313 networks with explicit caller calibration, baseline and context.
+The [word module](legacy-russian-directional-words.md) combines all four families.
+Automatic line profiles, joined-character cuts and
+representative handwriting controls remain unfinished. These components do not
+enable Russian cursive recognition in the AI-pen interface.

@@ -59,7 +59,10 @@ python tools/LegacyDirectionalCoordinates.Probe/reference_controls.py .artifacts
 dotnet run --project tools/LegacyDirectionalCoordinates.Probe -c Release -- .artifacts/ru-coordinates.json
 ```
 
-Remaining work includes the 4f alternative window layout, baseline/context
-profiles, native case/virtual-label handling, candidate character
-cuts and representative joined-word ink controls. These passes are not enabled
-in AI-pen UI and do not make joined Russian cursive recognition ready.
+The [spatial 4f layout](legacy-russian-spatial-model.md),
+[explicit-line context](legacy-russian-context-windows.md) and
+[mode1 acoustic aggregation](legacy-russian-acoustic-ensemble.md) now have
+separate checked components. Automatic line/baseline profiles, the remaining
+native lexical/case handling, candidate character cuts and
+representative joined-word controls remain unfinished. These passes are not
+enabled in AI-pen UI and do not make joined Russian cursive recognition ready.

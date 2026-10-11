@@ -152,9 +152,21 @@ public static class LegacyStrokeFeatures
     public static short[] ExtractIsolatedInputWithBaseline(IReadOnlyList<LegacyInkStroke> strokes, LegacyInkBaseline baseline,
         CancellationToken cancellationToken = default)
     {
+        Span<short> context = stackalloc short[28]; context.Fill(-Unit);
+        return ExtractInputWithBaseline(strokes, baseline, context, Unit, Unit, cancellationToken);
+    }
+
+    /// <summary>Compose the baseline trajectory profile with explicit prior context and boundaries.</summary>
+    public static short[] ExtractInputWithBaseline(IReadOnlyList<LegacyInkStroke> strokes, LegacyInkBaseline baseline,
+        ReadOnlySpan<short> context, short startBoundary, short endBoundary,
+        CancellationToken cancellationToken = default)
+    {
+        if (context.Length != 28) throw new ArgumentException("Expected 28 caller-supplied context channels.", nameof(context));
+        cancellationToken.ThrowIfCancellationRequested();
         var result = new short[256];
         ExtractWithBaseline(strokes, baseline, cancellationToken).CopyTo(result, 0);
-        result.AsSpan(226, 28).Fill(-Unit); result[^2] = Unit; result[^1] = Unit; return result;
+        context.CopyTo(result.AsSpan(226, 28));
+        result[^2] = startBoundary; result[^1] = endBoundary; return result;
     }
 
     private static void AddDirection(int[] directions, int index, int sign, int length)

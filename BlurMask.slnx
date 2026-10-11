@@ -31,6 +31,9 @@
     <Project Path="tools/LegacySpatialWindows.Probe/LegacySpatialWindows.Probe.csproj" />
     <Project Path="tools/LegacySpatialStatistics.Probe/LegacySpatialStatistics.Probe.csproj" />
     <Project Path="tools/LegacySpatialModel.Probe/LegacySpatialModel.Probe.csproj" />
+    <Project Path="tools/LegacyAcousticEnsemble.Probe/LegacyAcousticEnsemble.Probe.csproj" />
+    <Project Path="tools/LegacyDirectionalWord.Probe/LegacyDirectionalWord.Probe.csproj" />
+    <Project Path="tools/LegacyWordLanguage.Probe/LegacyWordLanguage.Probe.csproj" />
     <Project Path="tools/InkMath.Solver.Probe/InkMath.Solver.Probe.csproj" />
   </Folder>
 </Solution>

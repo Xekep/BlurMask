@@ -46,9 +46,21 @@ public static class LegacyRasterFeatures
     public static short[] ExtractIsolatedInputWithBaseline(IReadOnlyList<LegacyInkStroke> strokes, LegacyInkBaseline baseline,
         CancellationToken cancellationToken = default)
     {
+        Span<short> context = stackalloc short[28]; context.Fill(-1024);
+        return ExtractInputWithBaseline(strokes, baseline, context, 1024, 1024, cancellationToken);
+    }
+
+    /// <summary>Compose the baseline raster profile with explicit prior context and boundaries.</summary>
+    public static short[] ExtractInputWithBaseline(IReadOnlyList<LegacyInkStroke> strokes, LegacyInkBaseline baseline,
+        ReadOnlySpan<short> context, short startBoundary, short endBoundary,
+        CancellationToken cancellationToken = default)
+    {
+        if (context.Length != 28) throw new ArgumentException("Expected 28 caller-supplied context channels.", nameof(context));
+        cancellationToken.ThrowIfCancellationRequested();
         var result = new short[238];
         ExtractWithBaseline(strokes, baseline, cancellationToken).CopyTo(result, 0);
-        result.AsSpan(208, 28).Fill(-1024); result[^2] = 1024; result[^1] = 1024; return result;
+        context.CopyTo(result.AsSpan(208, 28));
+        result[^2] = startBoundary; result[^1] = endBoundary; return result;
     }
 
     internal static bool[] Rasterize(LegacyGlyphGeometry ink)
