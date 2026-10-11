@@ -25,6 +25,10 @@ internal static class AiMathLayout
             if (result is not { Completed: true, LaTex: { Length: > 0 } latex } || !float.IsFinite(result.Confidence) ||
                 result.Confidence < .75f || !MathTypesetting.Supported(latex)) continue;
             var calculated = WithNumericResult(latex);
+            // Re-read geometry after numeric parsing. Undefined arithmetic is
+            // handled inside the parser; avoid carrying the Rect's floating
+            // locals across that exception path in the ARM64 AOT compiler.
+            bounds = sources.Select(s => s.Bounds).Aggregate((a, b) => a.Union(b));
             var mark = new InkMark(InkTool.Text, first.Color, first.Width, bounds.TopLeft)
             { Id = first.Id, Text = calculated, Font = "STIX Two Math", FontSize = Math.Clamp(bounds.Height, 8, 300), FadeSeconds = first.FadeSeconds };
             mark.AddPoint(bounds.BottomRight + new Avalonia.Vector(Math.Min(100000 - bounds.Right, ResultWidth(latex, calculated, bounds.Height)), 0));
