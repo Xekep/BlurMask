@@ -78,3 +78,14 @@ mapping, cursive segmentation and language costs remain unfinished.
 `LegacyInkAlphabet` reads caller-supplied acoustic and lexical alphabets so that
 their distinct numeric IDs can be mapped through Unicode text.
 See [lexical format evidence and checks](../../docs/legacy-russian-lexicon.md).
+
+`LegacySegmentedWordRecognizer` connects the isolated raster classifier to the
+dictionary through Unicode acoustic/lexical label mapping. The original
+`LegacySeparatedInkSegmenter` proposes left-to-right groups of overlapping
+whole physical strokes and preserves stroke acquisition order within groups.
+It retains connected cursive strokes intact; these groups do not prove letter
+boundaries. Vendor-free probes cover mapping, terminal words, grouping, late
+dots, geometry limits and cancellation. Four locally supplied classifier checks
+rank the original printed **ИП** sample first after automatic separated grouping.
+This remains an experimental headless path; general Russian words and joined
+handwriting are not enabled in the app. See [the checked pipeline and limits](../../docs/legacy-russian-segmented-word.md).

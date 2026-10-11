@@ -216,9 +216,17 @@ of caller-supplied per-glyph candidates. Ten local string/label lookups pass;
 the main graph uses 2,910,612 owned packed bytes. This advances word decoding,
 but does not supply automatic glyph boundaries or recognize cursive ink.
 
+The [experimental segmented word path](legacy-russian-segmented-word.md)
+now connects the checked raster model to that dictionary through distinct
+acoustic/lexical alphabets. Four original printed **ИП** examples, including
+translation/scale changes and reversed physical stroke acquisition order, rank
+**ИП** first after original whole-stroke separated grouping. This advances a
+small raw-ink-to-word path, rather than natural-handwriting accuracy. Connected
+cursive strokes remain intact; their internal cuts are not implemented.
+
 Remaining work: the two 313-input profiles, automatic baseline estimation,
 complete ensemble/candidate-mask handling, cursive segmentation, virtual-label
-full language-model costs and acoustic/lexical integration, and validation on representative Russian ink.
+rules, full language-model costs and representative Russian ink validation.
 The English loader remains incompatible. Modern official RU assets still require
 signed URLs/cookies; no login or activation checks were bypassed. Russian word
 recognition is not enabled in the application or advertised as ready.
