@@ -129,8 +129,8 @@ supplied by this API. See [the restored passes and remaining work](../../docs/le
 prepare power-of-two coordinates, constant-step physical strokes and native
 dimensions for the directional family. `LegacyArcLengthWindows` partitions
 prepared cumulative physical lengths. Independent own controls cover 655
-coordinate/resampling and 640 window cases; intersections, local channels,
-automatic baseline/context estimation and joined-word decoding remain unfinished.
+coordinate/resampling and 640 window cases; automatic baseline/context estimation
+and joined-word decoding remain unfinished.
 
 `LegacyDirectionalIntersections` consumes prepared samples and restores ordered
 spatial-grid crossing flags and self-loop intervals; the underlying
@@ -151,3 +151,12 @@ input. Its optional real-model diagnostic currently has weak class accuracy;
 automatic baseline/context inference and the full recognition profile remain
 unfinished. See [baseline mapping](../../docs/legacy-russian-directional-baseline.md)
 and [model diagnostic limits](../../docs/legacy-russian-directional-model.md).
+
+The checked prior-context path now has separate components for
+[`LegacyContextGeometry`](../../docs/legacy-russian-context-geometry.md) (30 raster/geometry channels),
+[`LegacyPriorContextSelection`](../../docs/legacy-russian-prior-context.md) (line/scope and target-stroke exclusion),
+[`LegacyContextWeighting`](../../docs/legacy-russian-context-weighting.md) (28 weighted channels) and
+[`LegacyFloatInputQuantization`](../../docs/legacy-russian-float-input.md) (model-scaled float input).
+They pass 2,304 own arithmetic/range references, including Windows Native AOT.
+Candidate-window generation and automatic line geometry are still required;
+these components do not enable full Russian handwriting in the app.

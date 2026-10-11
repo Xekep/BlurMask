@@ -23,6 +23,10 @@
     <Project Path="tools/LegacyDirectionalWindow.Probe/LegacyDirectionalWindow.Probe.csproj" />
     <Project Path="tools/LegacyDirectionalBaseline.Probe/LegacyDirectionalBaseline.Probe.csproj" />
     <Project Path="tools/LegacyDirectionalModel.Probe/LegacyDirectionalModel.Probe.csproj" />
+    <Project Path="tools/LegacyContextWeighting.Probe/LegacyContextWeighting.Probe.csproj" />
+    <Project Path="tools/LegacyFloatInput.Probe/LegacyFloatInput.Probe.csproj" />
+    <Project Path="tools/LegacyContextGeometry.Probe/LegacyContextGeometry.Probe.csproj" />
+    <Project Path="tools/LegacyPriorContext.Probe/LegacyPriorContext.Probe.csproj" />
     <Project Path="tools/InkMath.Solver.Probe/InkMath.Solver.Probe.csproj" />
   </Folder>
 </Solution>

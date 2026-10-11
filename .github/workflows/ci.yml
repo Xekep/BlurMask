@@ -168,6 +168,22 @@ jobs:
           dotnet run --project tools/LegacyDirectionalBaseline.Probe -c Release -- .artifacts/legacy-baseline-controls.json
       - name: Legacy composed temporal features and vendor-free model guards
         run: dotnet run --project tools/LegacyDirectionalModel.Probe -c Release
+      - name: Legacy asymmetric prior context weighting
+        run: |
+          python tools/LegacyContextWeighting.Probe/reference_controls.py .artifacts/legacy-context-weight-controls.json
+          dotnet run --project tools/LegacyContextWeighting.Probe -c Release -- .artifacts/legacy-context-weight-controls.json
+      - name: Legacy float input multiplication and quantization
+        run: |
+          python tools/LegacyFloatInput.Probe/reference_controls.py .artifacts/legacy-float-input-controls.json
+          dotnet run --project tools/LegacyFloatInput.Probe -c Release -- .artifacts/legacy-float-input-controls.json
+      - name: Legacy prior context raster and geometry channels
+        run: |
+          python tools/LegacyContextGeometry.Probe/reference_controls.py .artifacts/legacy-context-geometry-controls.json
+          dotnet run --project tools/LegacyContextGeometry.Probe -c Release -- .artifacts/legacy-context-geometry-controls.json
+      - name: Legacy physical context overlap and line selection
+        run: |
+          python tools/LegacyPriorContext.Probe/reference_controls.py .artifacts/legacy-prior-context-controls.json
+          dotnet run --project tools/LegacyPriorContext.Probe -c Release -- .artifacts/legacy-prior-context-controls.json
 
   symbolic-math:
     name: Native local CAS / ${{ matrix.os }}
