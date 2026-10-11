@@ -140,7 +140,7 @@ internal static class AiPenProbe
         {
             var engine = new InkMath.Solver.SymbolicMathSolver(System.IO.Path.GetFullPath(path));
             InkMath.Solver.MathSolution? Real(string text, CancellationToken token) => engine.SolveAsync(text, token).GetAwaiter().GetResult();
-            foreach (var source in new[] { @"\int_0^1 x^2 dx=", @"\frac{d}{dx}\sin(x)=", @"\lim_{x\to 0}\frac{\sin x}{x}=", @"\det\begin{matrix}1&2\\3&4\end{matrix}=", "x^2-1=0=", @"\begin{cases}x+y=3\\x-y=1\end{cases}=", @"\inv\begin{matrix}1&2\\3&4\end{matrix}=" })
+            foreach (var source in new[] { @"\int_0^1 x^2 dx=", @"\frac{d}{dx}\sin(x)=", @"\lim_{x\to 0}\frac{\sin x}{x}=", @"\det\begin{matrix}1&2\\3&4\end{matrix}=", "x^2-1=0=", @"\begin{cases}x+y=3\\x-y=1\end{cases}=", @"\inv\begin{matrix}1&2\\3&4\end{matrix}=", @"\left\{\begin{matrix}x+y=3\\x-y=1\end{matrix}\right.=", @"\left[\begin{matrix}1&2\\3&4\end{matrix}\right]^{-1}=" })
                 if (AiMathLayout.WithSolvedResult(source, solve: Real) == source) throw new InvalidOperationException("Real CAS → application result unchanged: " + source);
             Console.WriteLine("Native Giac → trailing equals policy/typesetting: passed.");
         }

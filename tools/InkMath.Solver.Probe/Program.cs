@@ -15,7 +15,11 @@ var fixtures = new (string Input, string Cas)[]
     (@"\frac{1}{2}+\sqrt{4}", "((1/2)+sqrt(4))"),
     ("-x^2", "(-1*(x^2))"), ("2x(x+1)", "((2*x)*(x+1))"),
     (@"\sqrt[3]{8}", "(8^(1/3))"),
-    (@"\begin{cases}x+y=3\\x-y=1\end{cases}", "[[((x+y)=3)],[((x-y)=1)]]")
+    (@"\begin{cases}x+y=3\\x-y=1\end{cases}", "[[((x+y)=3)],[((x-y)=1)]]"),
+    (@"\left\{\begin{matrix}x+y=3\\x-y=1\end{matrix}\right.", "[[((x+y)=3)],[((x-y)=1)]]"),
+    (@"\left|\begin{matrix}1&2\\3&4\end{matrix}\right|", "det([[1,2],[3,4]])"),
+    (@"\left[\begin{matrix}1&2\\3&4\end{matrix}\right]^{-1}", "([[1,2],[3,4]]^(-1*1))"),
+    (@"\sin\left(x\right)", "sin(x)")
 };
 foreach (var (input, expected) in fixtures)
 {
@@ -49,7 +53,10 @@ var actualFixtures = new (string Input, string Expected)[]
     (@"\inv\begin{matrix}1&2\\3&4\end{matrix}", @"\left[\begin{array}{cc}-2&1\\\frac{3}{2}&-\frac{1}{2}\end{array}\right]"),
     (@"\sin^2 x+\cos^2 x", "1"),
     (@"\operatorname{factor}(x^2+2x+1)", @"\left(x+1\right)^{2}"),
-    (@"\operatorname{expand}((x+1)^2)", "x^{2}+2 x+1")
+    (@"\operatorname{expand}((x+1)^2)", "x^{2}+2 x+1"),
+    (@"\left\{\begin{matrix}x+y=3\\x-y=1\end{matrix}\right.", @"(x,y)\in \left\{\left[2,1\right]\right\}"),
+    (@"\left|\begin{matrix}1&2\\3&4\end{matrix}\right|", "-2"),
+    (@"\left[\begin{matrix}1&2\\3&4\end{matrix}\right]^{-1}", @"\left[\begin{array}{cc}-2&1\\\frac{3}{2}&-\frac{1}{2}\end{array}\right]")
 };
 foreach (var (input, expected) in actualFixtures)
 {

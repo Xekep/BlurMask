@@ -43,8 +43,7 @@ internal sealed class MathExpressionParser
     internal MathExpressionParser(string source)
     {
         if (source.Length is 0 or > 4096 || source.Any(c => char.IsControl(c) && !char.IsWhiteSpace(c))) throw new FormatException("Invalid mathematics input.");
-        _source = source.Replace("\\left", "", StringComparison.Ordinal).Replace("\\right", "", StringComparison.Ordinal)
-            .Replace("\\,", " ", StringComparison.Ordinal).Replace("\\;", " ", StringComparison.Ordinal).Replace("\\!", "", StringComparison.Ordinal)
+        _source = source.Replace("\\,", " ", StringComparison.Ordinal).Replace("\\;", " ", StringComparison.Ordinal).Replace("\\!", "", StringComparison.Ordinal)
             .Replace("−", "-", StringComparison.Ordinal).Replace("×", "*", StringComparison.Ordinal).Replace("÷", "/", StringComparison.Ordinal);
     }
     internal Expression Parse()
@@ -80,7 +79,7 @@ internal sealed class MathExpressionParser
     private bool StartsAtom()
     {
         White(); if (_position == _source.Length || _differentialStop && Differential()) return false;
-        if (At("\\end") || At("\\\\")) return false;
+        if (At("\\end") || At("\\\\") || At("\\right")) return false;
         return char.IsLetterOrDigit(_source[_position]) || _source[_position] is '(' or '{' or '[' or '\\' or 'π' or '∞' or '∫' or '∑';
     }
     private Expression Multiply()
@@ -153,6 +152,7 @@ internal sealed class MathExpressionParser
                 if (Greek.TryGetValue(command, out var greek)) return Count(new Variable(greek));
                 switch (command)
                 {
+                    case "left": return Fence();
                     case "frac": case "dfrac": case "tfrac":
                         if (TryDerivative(out var derivative)) return derivative;
                         return Count(new Binary("/", Argument(), Argument()));
@@ -198,6 +198,26 @@ internal sealed class MathExpressionParser
         }
         return (lower, upper);
     }
+    private string Delimiter()
+    {
+        White();
+        foreach (var delimiter in new[] { "\\{", "\\}", "\\Vert" }) if (Take(delimiter)) return delimiter;
+        if (_position < _source.Length && _source[_position] is '(' or ')' or '[' or ']' or '|' or '.') return _source[_position++].ToString();
+        throw new FormatException("Unsupported math fence.");
+    }
+    private Expression Fence()
+    {
+        var left = Delimiter();
+        var right = left switch { "(" => ")", "[" => "]", "|" => "|", "\\{" => "\\}", _ => throw new FormatException("Unsupported math fence.") };
+        var body = Relation(); Require("\\right"); var actualRight = Delimiter();
+        if (actualRight != right && !(actualRight == "." && left == "\\{" && body is Matrix)) throw new FormatException("Unbalanced math fence.");
+        if (left == "\\{")
+        {
+            if (body is not Matrix matrix || !matrix.Rows.SelectMany(r => r).All(e => e is Binary { Operator: "=" })) throw new FormatException("Unsupported set/piecewise notation.");
+            return body;
+        }
+        return left == "|" ? Count(new Call(body is Matrix ? "det" : "abs", body)) : body;
+    }
     private Expression Integral()
     {
         var (lower, upper) = Bounds(); if ((lower is null) != (upper is null)) throw new FormatException("Both integral bounds are required.");
@@ -239,7 +259,13 @@ internal sealed class MathExpressionParser
         Require("{"); int start = _position;
         while (_position < _source.Length && char.IsAsciiLetter(_source[_position])) _position++;
         var environment = _source[start.._position]; Require("}");
-        if (environment is not ("matrix" or "pmatrix" or "bmatrix" or "vmatrix" or "cases")) throw new FormatException("Unsupported matrix environment.");
+        if (environment is not ("matrix" or "pmatrix" or "bmatrix" or "vmatrix" or "cases" or "array")) throw new FormatException("Unsupported matrix environment.");
+        if (environment == "array")
+        {
+            Require("{"); int columns = 0;
+            while (_position < _source.Length && _source[_position] is 'l' or 'c' or 'r' or '|') { _position++; if (++columns > 24) throw new FormatException("Matrix column limit."); }
+            Require("}");
+        }
         var rows = new List<Expression[]>(); var row = new List<Expression>();
         while (true)
         {
