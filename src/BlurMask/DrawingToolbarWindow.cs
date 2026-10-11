@@ -53,6 +53,8 @@ internal sealed class DrawingToolbarWindow : Window
     private readonly DispatcherTimer _hoverCloseTimer = new() { Interval = TimeSpan.FromMilliseconds(220) };
     private bool _flyoutPointerOver;
     private string? _updateVersion;
+    private Window? _updateWindow;
+    private Popup? _updatePopup;
     private Avalonia.Controls.Shapes.Path? _updateTail;
     private PixelRect? _flyoutRegionAnchor;
 
@@ -161,10 +163,6 @@ internal sealed class DrawingToolbarWindow : Window
         BindHoverMenu(_selectedColor, "palette", ShowPalette);
         foreach (var button in column.GetVisualDescendants().OfType<Button>())
             if (!_hoverMenus.Contains(button)) button.PointerEntered += (_, _) => CloseFlyout();
-        _handle.PointerEntered += (_, _) =>
-        {
-            if (_updateVersion is not null && _dragPointer is null) ShowUpdateAvailable(_updateVersion);
-        };
         _hoverCloseTimer.Tick += (_, _) =>
         {
             _hoverCloseTimer.Stop();
@@ -190,14 +188,21 @@ internal sealed class DrawingToolbarWindow : Window
                     screen.WorkingArea.Y + Math.Max(16, (screen.WorkingArea.Height - (int)(Height * screen.Scaling)) / 2));
             }
         };
-        PositionChanged += (_, _) => { PlaceFlyout(); session.UpdateOverlayRegions(); };
-        LayoutUpdated += (_, _) => { PlaceFlyout(); session.UpdateOverlayRegions(); };
+        PositionChanged += (_, _) => { PlaceUpdateNotice(); PlaceFlyout(); session.UpdateOverlayRegions(); };
+        LayoutUpdated += (_, _) => { PlaceUpdateNotice(); PlaceFlyout(); session.UpdateOverlayRegions(); };
+        PropertyChanged += (_, e) =>
+        {
+            if (e.Property != IsVisibleProperty) return;
+            if (!IsVisible) CloseUpdateNotice();
+            else if (_updateVersion is { } version)
+                Dispatcher.UIThread.Post(() => ShowUpdateAvailable(version), DispatcherPriority.Loaded);
+        };
         KeyDown += (_, e) =>
         {
             if (session.HandleSelectionKey(e) || session.HandleLocalShortcut(e)) return;
             if (e.Key == Key.Escape) { CloseFlyout(); session.SelectTool(InkTool.Cursor, remember: false); e.Handled = true; }
         };
-        Closed += (_, _) => { _hoverCloseTimer.Stop(); CloseFlyout(); session.StateChanged -= Refresh; };
+        Closed += (_, _) => { _updateVersion = null; _hoverCloseTimer.Stop(); CloseFlyout(); CloseUpdateNotice(); session.StateChanged -= Refresh; };
         Refresh();
     }
 
@@ -558,7 +563,7 @@ internal sealed class DrawingToolbarWindow : Window
     internal void ShowUpdateAvailable(string version)
     {
         _updateVersion = version;
-        if (_flyoutName is not null) return;
+        if (!IsVisible || _updateWindow is not null || _updatePopup is not null) return;
         var text = new StackPanel { Spacing = 7, Width = 220 };
         text.Children.Add(new TextBlock { Text = UiText.F("Вышла новая версия {0}", version),
             FontWeight = FontWeight.SemiBold, FontSize = 14, TextWrapping = TextWrapping.Wrap });
@@ -567,12 +572,11 @@ internal sealed class DrawingToolbarWindow : Window
         var download = new Button { Content = UiText.T("Скачать обновление"), FontSize = 12 };
         download.Click += async (_, _) =>
         {
-            CloseFlyout();
             try { await Launcher.LaunchUriAsync(new Uri(AppUpdates.Website)); }
             catch (Exception ex) when (ex is InvalidOperationException or System.ComponentModel.Win32Exception) { }
         };
         var later = new Button { Content = UiText.T("Позже"), FontSize = 12 };
-        later.Click += (_, _) => { _updateVersion = null; CloseFlyout(); };
+        later.Click += (_, _) => { _updateVersion = null; CloseUpdateNotice(); };
         actions.Children.Add(download); actions.Children.Add(later); text.Children.Add(actions);
         var fill = new SolidColorBrush(Color.Parse("#FFF9E8"));
         var bubble = new Grid { ColumnDefinitions = new ColumnDefinitions("10,*,10") };
@@ -580,10 +584,79 @@ internal sealed class DrawingToolbarWindow : Window
             Fill = fill, Width = 10, Height = 16, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(0, 12, 0, 0) };
         var body = new Border { Background = fill, CornerRadius = new CornerRadius(12), Padding = new Thickness(12), Child = text };
         Grid.SetColumn(body, 1); bubble.Children.Add(tail); bubble.Children.Add(body);
-        ShowFlyout("update", bubble, _handle);
         _updateTail = tail;
-        PlaceFlyout();
+        if (Program.UseNativeWayland)
+        {
+            // A persistent non-light-dismiss popup uses parent-relative placement;
+            // native Wayland has no global positioning for toplevel windows.
+            var popup = new Popup { PlacementTarget = _handle, Placement = PlacementMode.Top,
+                IsLightDismissEnabled = false, Child = bubble };
+            _updatePopup = popup;
+            ((StackPanel)Content!).Children.Add(popup);
+            popup.IsOpen = true;
+            return;
+        }
+        var notice = new Window
+        {
+            Title = UiText.T("Скачать обновление"), WindowDecorations = WindowDecorations.None,
+            SizeToContent = SizeToContent.WidthAndHeight, ShowInTaskbar = false, Topmost = true,
+            ShowActivated = false, CanResize = false, CanMinimize = false, CanMaximize = false,
+            RequestedThemeVariant = ThemeVariant.Light, Background = Brushes.White, Content = bubble
+        };
+        if (!OperatingSystem.IsLinux())
+        {
+            notice.Background = Brushes.Transparent;
+            notice.TransparencyLevelHint = [WindowTransparencyLevel.Transparent];
+            notice.TransparencyBackgroundFallback = Brushes.White;
+        }
+        _updateWindow = notice;
+        notice.Opened += (_, _) => { PlaceUpdateNotice(); PlaceFlyout(); };
+        notice.LayoutUpdated += (_, _) => PlaceUpdateNotice();
+        notice.PositionChanged += (_, _) => _session.UpdateOverlayRegions();
+        notice.Closed += (_, _) =>
+        {
+            if (!ReferenceEquals(_updateWindow, notice)) return;
+            _updateWindow = null;
+            _updateTail = null;
+            _session.UpdateOverlayRegions();
+        };
+        notice.Show(this);
+        Dispatcher.UIThread.Post(PlaceUpdateNotice, DispatcherPriority.Loaded);
     }
+
+    private void PlaceUpdateNotice()
+    {
+        if (_updateWindow is not { IsVisible: true } notice || Screens.ScreenFromWindow(this) is not { } screen) return;
+        var area = screen.WorkingArea;
+        var width = (int)Math.Ceiling(notice.Bounds.Width * notice.RenderScaling);
+        var height = (int)Math.Ceiling(notice.Bounds.Height * notice.RenderScaling);
+        var x = Position.X + (int)Math.Ceiling(Bounds.Width * RenderScaling);
+        if (x + width > area.Right) x = Position.X - width;
+        if (_updateTail is { } tail)
+        {
+            var left = x < Position.X;
+            Grid.SetColumn(tail, left ? 2 : 0);
+            tail.RenderTransform = left ? new ScaleTransform(-1, 1) : null;
+        }
+        var position = new PixelPoint(Math.Clamp(x, area.X, Math.Max(area.X, area.Right - width)),
+            Math.Clamp(_handle.PointToScreen(default).Y - (int)Math.Round(4 * RenderScaling),
+                area.Y, Math.Max(area.Y, area.Bottom - height)));
+        if (notice.Position != position) notice.Position = position;
+    }
+
+    private void CloseUpdateNotice()
+    {
+        var popup = _updatePopup; _updatePopup = null;
+        if (popup is not null) { popup.IsOpen = false; ((StackPanel)Content!).Children.Remove(popup); }
+        var notice = _updateWindow; _updateWindow = null;
+        _updateTail = null;
+        notice?.Close();
+        _session.UpdateOverlayRegions();
+    }
+
+    internal Window? UpdateNoticeWindow => _updateWindow;
+    internal Control? UpdateNoticeContent => _updateWindow?.Content as Control ?? _updatePopup?.Child;
+    internal bool IsUpdateNoticeVisible => _updateWindow?.IsVisible == true || _updatePopup?.IsOpen == true;
 
     private void ShowFlyout(string name, Control content, Control anchor)
     {
@@ -593,7 +666,6 @@ internal sealed class DrawingToolbarWindow : Window
         _flyoutAnchor = anchor;
         var surface = new Border { Background = Brushes.White, BorderBrush = Edge,
             BorderThickness = new Thickness(1), Padding = new Thickness(3), Child = content };
-        if (name == "update") { surface.Background = Brushes.Transparent; surface.BorderThickness = new Thickness(0); surface.Padding = new Thickness(0); }
         surface.PointerEntered += (_, _) => { _flyoutPointerOver = true; _hoverCloseTimer.Stop(); };
         surface.PointerExited += (_, _) => { _flyoutPointerOver = false; QueueFlyoutClose(); };
         if (Program.UseNativeWayland)
@@ -618,12 +690,6 @@ internal sealed class DrawingToolbarWindow : Window
             Background = Brushes.White,
             Content = surface
         };
-        if (name == "update" && !OperatingSystem.IsLinux())
-        {
-            _flyout.Background = Brushes.Transparent;
-            _flyout.TransparencyLevelHint = [WindowTransparencyLevel.Transparent];
-            _flyout.TransparencyBackgroundFallback = Brushes.White;
-        }
         var openedFlyout = _flyout;
         openedFlyout.Closed += (_, _) =>
         {
@@ -656,15 +722,15 @@ internal sealed class DrawingToolbarWindow : Window
         var height = (int)Math.Ceiling(flyout.Bounds.Height * flyout.RenderScaling);
         var x = _flyoutRegionAnchor is { } selection ? selection.Right - width : Position.X + (int)Math.Ceiling(Bounds.Width * scale);
         if (_flyoutRegionAnchor is null && x + width > area.Right) x = Position.X - width;
-        if (_flyoutName == "update" && _updateTail is { } tail)
-        {
-            var left = x < Position.X;
-            Grid.SetColumn(tail, left ? 2 : 0);
-            tail.RenderTransform = left ? new ScaleTransform(-1, 1) : null;
-        }
         // Anchor to the actual button after layout, including borders, margins and DPI.
         var y = _flyoutRegionAnchor is { } selectedArea ? selectedArea.Bottom + (int)Math.Round(6 * scale) : anchor.PointToScreen(default).Y - (int)Math.Round(4 * scale);
         if (_flyoutRegionAnchor is { } selectedRegion && y + height > area.Bottom) y = selectedRegion.Y - height - (int)Math.Round(6 * scale);
+        if (_updateWindow is { IsVisible: true } notice)
+        {
+            var noticeBounds = new PixelRect(notice.Position, new PixelSize(
+                (int)Math.Ceiling(notice.Bounds.Width * notice.RenderScaling), (int)Math.Ceiling(notice.Bounds.Height * notice.RenderScaling)));
+            if (new PixelRect(x, y, width, height).Intersects(noticeBounds)) y = noticeBounds.Bottom + (int)Math.Round(6 * scale);
+        }
         var position = new PixelPoint(Math.Clamp(x, area.X, Math.Max(area.X, area.Right - width)),
             Math.Clamp(y, area.Y, Math.Max(area.Y, area.Bottom - height)));
         if (flyout.Position != position) flyout.Position = position;
@@ -674,7 +740,6 @@ internal sealed class DrawingToolbarWindow : Window
     {
         _hoverCloseTimer.Stop();
         _flyoutPointerOver = false;
-        _updateTail = null;
         _flyoutRegionAnchor = null;
         var popup = _waylandPopup; _waylandPopup = null;
         if (popup is not null) { popup.IsOpen = false; ((StackPanel)Content!).Children.Remove(popup); }
@@ -686,7 +751,7 @@ internal sealed class DrawingToolbarWindow : Window
         flyout?.Close();
         _session.UpdateOverlayRegions();
     }
-    public void RaiseAboveInk() { DesktopInkNative.Raise(this); if (_flyout is not null) DesktopInkNative.Raise(_flyout); }
+    public void RaiseAboveInk() { DesktopInkNative.Raise(this); if (_flyout is not null) DesktopInkNative.Raise(_flyout); if (_updateWindow is not null) DesktopInkNative.Raise(_updateWindow); }
     internal Window? OpenFlyout => _flyout;
     public void ClampToScreen()
     {

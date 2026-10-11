@@ -99,7 +99,7 @@ internal sealed class DesktopInkWindow : Window
         var bounds = new PixelRect(Position, new PixelSize((int)Math.Ceiling(Bounds.Width * RenderScaling),
             (int)Math.Ceiling(Bounds.Height * RenderScaling)));
         var regions = new List<PixelRect> { bounds };
-        foreach (var control in new Window?[] { _session.Toolbar, _session.Toolbar.OpenFlyout })
+        foreach (var control in new Window?[] { _session.Toolbar, _session.Toolbar.OpenFlyout, _session.Toolbar.UpdateNoticeWindow })
         {
             if (control is not { IsVisible: true } || control.Bounds.Width <= 0 || control.Bounds.Height <= 0) continue;
             var hole = new PixelRect(control.Position, new PixelSize((int)Math.Ceiling(control.Bounds.Width * control.RenderScaling),

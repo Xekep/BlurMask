@@ -18,6 +18,7 @@ internal static class DrawingSmokeTest
     {
         Check(Program.UseNativeWayland && session.Overlays.Count == 0, "Native Wayland created an unsupported desktop overlay.");
         session.OpenCanvas(); await Task.Delay(300);
+        await VerifyUpdateNoticeAsync(session);
         var canvas = session.Canvas!;
         Check(canvas.TryGetPlatformHandle() is null, "Wayland test unexpectedly received an X11 window handle.");
         session.CanvasDocument.Clear();
@@ -576,6 +577,7 @@ internal static class DrawingSmokeTest
         var area = (toolbar.Screens.ScreenFromWindow(toolbar) ?? toolbar.Screens.Primary)!.WorkingArea;
         try
         {
+            await VerifyUpdateNoticeAsync(session);
             VerifyRememberedTools(session);
             foreach (var right in new[] { false, true })
             {
@@ -638,6 +640,62 @@ internal static class DrawingSmokeTest
         }
         finally { toolbar.CloseFlyout(); toolbar.Position = originalPosition; }
     }
+    private static async Task VerifyUpdateNoticeAsync(DrawingSession session)
+    {
+        var toolbar = session.Toolbar;
+        var originalPosition = toolbar.Position;
+        void Dismiss()
+        {
+            toolbar.UpdateNoticeContent?.GetVisualDescendants().OfType<Button>()
+                .Single(b => Equals(b.Content, UiText.T("Позже")))
+                .RaiseEvent(new Avalonia.Interactivity.RoutedEventArgs(Button.ClickEvent));
+        }
+        try
+        {
+            toolbar.ShowTools();
+            toolbar.ShowUpdateAvailable("99.0.0");
+            await Task.Delay(350);
+            Check(toolbar.IsUpdateNoticeVisible, "An update arriving while a tool menu was open needed logo hover.");
+            toolbar.CloseFlyout();
+            await Task.Delay(350);
+            Check(toolbar.IsUpdateNoticeVisible, "Closing a tool menu or moving away dismissed the update notice.");
+            toolbar.ShowSizes();
+            await Task.Delay(120);
+            Check(toolbar.IsUpdateNoticeVisible, "Opening another tool menu dismissed the update notice.");
+            toolbar.CloseFlyout();
+            if (!Program.UseNativeWayland)
+            {
+                toolbar.Position = new PixelPoint(originalPosition.X + 20, originalPosition.Y + 20);
+                await Task.Delay(100);
+                var notice = toolbar.UpdateNoticeWindow!;
+                Check(notice.IsVisible && Math.Abs(notice.Position.Y - toolbar.Position.Y) < 40 * toolbar.RenderScaling,
+                    "Persistent update notice did not follow the toolbar.");
+                if (Environment.GetEnvironmentVariable("BLURMASK_SMOKE_ARTIFACTS") is { Length: > 0 } directory)
+                { Directory.CreateDirectory(directory); SaveWindow(notice, Path.Combine(directory, "update-notice.png")); }
+            }
+            toolbar.Hide();
+            await Task.Delay(80);
+            Check(!toolbar.IsUpdateNoticeVisible, "Update notice remained on screen when the toolbar was hidden.");
+            toolbar.Show();
+            await Task.Delay(150);
+            Check(toolbar.IsUpdateNoticeVisible, "Showing the toolbar required hover to restore its update notice.");
+            Dismiss();
+            await Task.Delay(80);
+            Check(!toolbar.IsUpdateNoticeVisible, "The Later button did not dismiss the persistent notice.");
+            toolbar.Hide(); toolbar.Show();
+            await Task.Delay(100);
+            Check(!toolbar.IsUpdateNoticeVisible, "A dismissed update notice returned when the toolbar was restored.");
+            Console.WriteLine("Update notice: immediate with an existing menu, persistent across menu/hover dismissal, follows toolbar, hide/restore and explicit Later dismissal.");
+        }
+        finally
+        {
+            toolbar.CloseFlyout();
+            Dismiss();
+            if (!toolbar.IsVisible) toolbar.Show();
+            if (!Program.UseNativeWayland) toolbar.Position = originalPosition;
+        }
+    }
+
     private static void VerifyRememberedTools(DrawingSession session)
     {
         var toolbar = session.Toolbar;
