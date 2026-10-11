@@ -28,10 +28,14 @@ The following arithmetic passes have been restored in reusable managed code:
   exponent-10 residual/chord handling and the `0b4af0` prepared geometry. It
   preserves repeated rounded samples, original physical stroke boundaries and
   the final endpoint. This differs from the 229-input square-raster profile.
+- `LegacyQuantizedSegmentIntersection` and `LegacyDirectionalIntersections`
+  restore the fixed-point crossing helper and ordered spatial-grid flags,
+  including physical-stroke crossings and nonoverlapping self-loop intervals.
+  See [intersection arithmetic and controls](legacy-russian-intersections.md).
 
 Own analytic tests and independent Python references pass in managed execution
 and Windows Native AOT: 641 landmark cases, 512 global-statistic cases,
-640 window cases and 655 coordinate/resampling cases.
+640 window cases, 655 coordinate/resampling cases and 4,736 crossing cases.
 The references execute no vendor engine and include no vendor weights or ink.
 The comparison confirms the restored arithmetic against the separate reference;
 it does not measure Russian handwriting accuracy or demonstrate SDK parity.
@@ -49,8 +53,7 @@ python tools/LegacyDirectionalCoordinates.Probe/reference_controls.py .artifacts
 dotnet run --project tools/LegacyDirectionalCoordinates.Probe -c Release -- .artifacts/ru-coordinates.json
 ```
 
-Remaining work includes native intersection classification, both local-window
-layouts and channel assembly,
+Remaining work includes both local-window layouts and channel assembly,
 baseline/context profiles, case/virtual-label handling, candidate character
 cuts and representative joined-word ink controls. These passes are not enabled
 in AI-pen UI and do not make joined Russian cursive recognition ready.

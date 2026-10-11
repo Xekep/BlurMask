@@ -154,6 +154,10 @@ jobs:
           dotnet run --project tools/LegacyDirectionalCoordinates.Probe -c Release -- .artifacts/legacy-coordinate-controls.json
       - name: Overlay compositor IPC ownership, cancellation and transport
         run: dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --overlay-platform-test
+      - name: Legacy fixed point crossings and directional intersection classes
+        run: |
+          python tools/LegacyIntersection.Probe/reference_controls.py .artifacts/legacy-intersection-controls.json
+          dotnet run --project tools/LegacyIntersection.Probe -c Release -- .artifacts/legacy-intersection-controls.json
 
   symbolic-math:
     name: Native local CAS / ${{ matrix.os }}

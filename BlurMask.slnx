@@ -19,6 +19,7 @@
     <Project Path="tools/LegacyDirectionalStatistics.Probe/LegacyDirectionalStatistics.Probe.csproj" />
     <Project Path="tools/LegacyArcLengthWindows.Probe/LegacyArcLengthWindows.Probe.csproj" />
     <Project Path="tools/LegacyDirectionalCoordinates.Probe/LegacyDirectionalCoordinates.Probe.csproj" />
+    <Project Path="tools/LegacyIntersection.Probe/LegacyIntersection.Probe.csproj" />
     <Project Path="tools/InkMath.Solver.Probe/InkMath.Solver.Probe.csproj" />
   </Folder>
 </Solution>

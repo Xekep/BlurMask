@@ -131,3 +131,9 @@ dimensions for the directional family. `LegacyArcLengthWindows` partitions
 prepared cumulative physical lengths. Independent own controls cover 655
 coordinate/resampling and 640 window cases; intersections, local channels,
 baseline/context assembly and joined-word decoding remain unfinished.
+
+`LegacyDirectionalIntersections` consumes prepared samples and restores ordered
+spatial-grid crossing flags and self-loop intervals; the underlying
+`LegacyQuantizedSegmentIntersection` preserves the checked fixed-point
+arithmetic. Together they pass 4,736 own pair/classification references plus a
+complete prepared-ink smoke path. See [the intersection checks and limits](../../docs/legacy-russian-intersections.md).
