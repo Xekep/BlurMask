@@ -45,8 +45,8 @@ and [official tool guide](https://epicpen.com/userguide).
   Drawing, shape and cursor buttons remember their last mode for the current session.
   Click an inactive button once to restore that mode; click again to open its choices.
   Escape and right-click return to the ordinary cursor without forgetting the selected modes.
-- **AI pen** waits 0.8 seconds after the last stroke, then replaces a completed row with one typeset text object.
-  Symbols share a font size and baseline; position, bounding size and color are preserved. The pen menu also offers **Recognize now**.
+- **AI pen** starts recognition when a stroke ends and replaces a completed row after a 0.5-second writing pause.
+  Symbols share a font size and baseline; position, bounding size and color are preserved. Conversion is automatic.
   Recognition processes stroke coordinates locally: English text uses native C#; **Formulas** uses the bundled native CPU runtime.
   Models are installed separately. The previous raster recognizers have been removed. Russian handwriting is not ready.
   Fonts are automatic: Inter for text, STIX Two Math for formulas and STIX Two Text Italic for variables; settings has no font selector.
@@ -67,7 +67,7 @@ and [official tool guide](https://epicpen.com/userguide).
 - The eye button collapses the toolbar with an animation and hides ink; the chalk logo remains above the closed eye. Click the eye to restore the toolbar. **Minimize to tray** hides it completely; click the tray icon to restore it.
 - The cursor menu offers two modes: normal cursor and **Select and move**. Click a drawn object and drag it on the screen or canvas; Delete removes it. Moves support undo/redo.
 - Shapes have a separate button. The mask button opens a horizontal strip: each icon creates a new independent mask, and the last button removes all masks.
-- **Follow window** below the mask icons automatically detects the window under each mask's centre. Masks move with the window and scale their position and dimensions as it resizes, hide while it is minimized, and close with it. Moving/resizing a mask by hand updates its attachment. Windows uses out-of-context geometry events; macOS and X11 check geometry every 16 ms. Wayland disables the switch because it does not expose foreign window geometry. Masks remain independent overlays; unrelated application rendering is not modified.
+- **Follow window** below the mask icons automatically detects the window under each mask's centre. Attached masks share the target's stacking order, move with it, hide while it is minimized, and close with it. A target resize latches a full opaque cover until the mask is explicitly reconfigured, protecting content that reflows. **Fill window region** covers a clicked native child region with black and follows its real bounds (Windows/X11; macOS covers the whole window). Windows uses out-of-context geometry/stacking events; macOS and X11 poll every 32 ms. Native Wayland disables attachment because it does not expose foreign window geometry. See [window masks and platform limits](docs/window-masks.md).
 - The analog timer opens a horizontal strip: off, quick (2 s), long (10 s), very long (30 s), with progressively filled timer icons. Temporary ink fades locally and is excluded from saved/shared boards.
 - The canvas has a collapsible floating icon toolbar for new/connect/share/background/export/screen/fit actions. Click the chalk logo or press **Tab** to collapse/expand it. **Ctrl+V** pastes a screenshot from the clipboard as a movable image that is saved, shared and included in PNG exports.
 - Pasted images are normalized to PNG (up to 2048 px on the longest side); shared documents are limited to 4 MiB and 32 megapixels of raster content.

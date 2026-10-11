@@ -186,6 +186,16 @@ jobs:
           dotnet run --project tools/LegacyPriorContext.Probe -c Release -- .artifacts/legacy-prior-context-controls.json
       - name: Legacy initial context window enumeration and complete prior chain
         run: dotnet run --project tools/LegacyContextWindow.Probe -c Release
+      - name: Legacy spatial sample membership and independent interval controls
+        run: |
+          python tools/LegacySpatialWindows.Probe/reference_controls.py .artifacts/legacy-spatial-window-controls.json
+          dotnet run --project tools/LegacySpatialWindows.Probe -c Release -- .artifacts/legacy-spatial-window-controls.json
+      - name: Legacy spatial local statistics and calibrated channel controls
+        run: |
+          python tools/LegacySpatialStatistics.Probe/reference_controls.py .artifacts/legacy-spatial-statistics-controls.json
+          dotnet run --project tools/LegacySpatialStatistics.Probe -c Release -- .artifacts/legacy-spatial-statistics-controls.json
+      - name: Legacy complete spatial features and vendor-free model guards
+        run: dotnet run --project tools/LegacySpatialModel.Probe -c Release
 
   symbolic-math:
     name: Native local CAS / ${{ matrix.os }}

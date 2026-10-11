@@ -28,6 +28,9 @@
     <Project Path="tools/LegacyContextGeometry.Probe/LegacyContextGeometry.Probe.csproj" />
     <Project Path="tools/LegacyPriorContext.Probe/LegacyPriorContext.Probe.csproj" />
     <Project Path="tools/LegacyContextWindow.Probe/LegacyContextWindow.Probe.csproj" />
+    <Project Path="tools/LegacySpatialWindows.Probe/LegacySpatialWindows.Probe.csproj" />
+    <Project Path="tools/LegacySpatialStatistics.Probe/LegacySpatialStatistics.Probe.csproj" />
+    <Project Path="tools/LegacySpatialModel.Probe/LegacySpatialModel.Probe.csproj" />
     <Project Path="tools/InkMath.Solver.Probe/InkMath.Solver.Probe.csproj" />
   </Folder>
 </Solution>

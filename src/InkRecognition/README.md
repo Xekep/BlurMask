@@ -165,3 +165,14 @@ RU diagnostic now sends changing prior context into the directional classifier.
 Automatic line geometry, the full model ensemble and joined cursive cuts are
 still required; these components do not enable full Russian handwriting in
 the app.
+
+The alternative spatial family now has checked
+[`LegacySpatialWindows`](../../docs/legacy-russian-spatial-windows.md) membership,
+`LegacySpatialWindowStatistics`, `LegacySpatialFeatureAssembly` and
+[`LegacySpatialDirectionalFeatures`](../../docs/legacy-russian-spatial-model.md).
+It composes a complete 313-column input using caller-supplied spatial calibration,
+baseline and prior context. The spatial probes pass 1,792 independent arithmetic
+controls in managed code and Windows Native AOT. Real model diagnostics on own
+printed ink show different strengths from the temporal classifier, requiring
+the remaining ensemble, lexical/case handling and joined-word segmentation.
+This remains a headless experimental path, without Russian AI-pen integration.
