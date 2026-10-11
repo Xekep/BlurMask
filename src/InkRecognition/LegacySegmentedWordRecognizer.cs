@@ -21,28 +21,48 @@ public sealed class LegacySegmentedWordRecognizer
     private readonly LegacyInkActivations _activations;
     private readonly LegacyInkAlphabet _lexicalAlphabet;
     private readonly LegacyPackedLexicon _lexicon;
-    private readonly ushort?[] _outputLabels;
+    private readonly ushort[][] _outputLabels;
+    private readonly bool _expandRelatedForms;
 
     public LegacySegmentedWordRecognizer(LegacyInkNetwork rasterNetwork, LegacyInkActivations activations,
-        LegacyInkAlphabet acousticAlphabet, LegacyInkAlphabet lexicalAlphabet, LegacyPackedLexicon lexicon)
+        LegacyInkAlphabet acousticAlphabet, LegacyInkAlphabet lexicalAlphabet, LegacyPackedLexicon lexicon,
+        int? relatedFormMode = null)
     {
         ArgumentNullException.ThrowIfNull(rasterNetwork); ArgumentNullException.ThrowIfNull(activations);
         ArgumentNullException.ThrowIfNull(acousticAlphabet); ArgumentNullException.ThrowIfNull(lexicalAlphabet);
         ArgumentNullException.ThrowIfNull(lexicon);
         if (rasterNetwork.InputWidth != LegacyRasterFeatures.IsolatedInputWidth || rasterNetwork.Kind != 0x2f ||
-            rasterNetwork.OutputWidth > acousticAlphabet.LabelCount)
+            rasterNetwork.OutputWidth > acousticAlphabet.LabelCount || rasterNetwork.OutputWidth > 512)
             throw new ArgumentException("The checked isolated229 raster profile is required.", nameof(rasterNetwork));
+        if (relatedFormMode is < 0 or > 2) throw new ArgumentOutOfRangeException(nameof(relatedFormMode));
         _network = rasterNetwork; _activations = activations; _lexicalAlphabet = lexicalAlphabet; _lexicon = lexicon;
-        _outputLabels = new ushort?[rasterNetwork.OutputWidth];
+        _expandRelatedForms = relatedFormMode.HasValue;
+        _outputLabels = new ushort[rasterNetwork.OutputWidth][];
+        var allLabels = new HashSet<ushort>();
         for (ushort i = 0; i < _outputLabels.Length; i++)
-            if (acousticAlphabet.TryGetText(i, out string text) && lexicalAlphabet.TryGetLabel(text, out ushort label))
-                _outputLabels[i] = label;
+        {
+            var labels = new List<ushort>(4);
+            void Add(ushort acoustic)
+            {
+                if (acoustic != ushort.MaxValue && acousticAlphabet.TryGetText(acoustic, out string text) &&
+                    lexicalAlphabet.TryGetLabel(text, out ushort label) && !labels.Contains(label))
+                { labels.Add(label); allLabels.Add(label); }
+            }
+            Add(i);
+            if (relatedFormMode is int mode && acousticAlphabet.TryGetRelatedForms(i, mode, out var forms))
+            { Add(forms.First); Add(forms.Second); Add(forms.Third); }
+            _outputLabels[i] = labels.ToArray();
+        }
+        if (allLabels.Count > 512) throw new ArgumentException("Mapped glyph choices exceed the bounded decoder domain.", nameof(lexicalAlphabet));
     }
 
     /// <summary>
     /// Each entry is one complete, already segmented glyph in reading order.
     /// Context remains empty for this isolated-glyph profile. Scores are acoustic
     /// log probabilities summed along a dictionary path, not calibrated confidence.
+    /// Optional related-form mapping proposes supplied aliases at the source
+    /// class score and returns dictionary spelling. It is an original policy,
+    /// not the SDK's case scoring, case preservation or accent selection.
     /// </summary>
     public IReadOnlyList<LegacySegmentedWord> Recognize(IReadOnlyList<LegacyInkStroke[]> glyphs,
         int beamWidth = 64, CancellationToken cancellationToken = default)
@@ -104,11 +124,23 @@ public sealed class LegacySegmentedWordRecognizer
         short[] features = LegacyRasterFeatures.ExtractIsolatedInput(strokes, token);
         int[] raw = _network.Evaluate(features, _activations, cancellationToken: token);
         var probabilities = LegacyClassScores.Convert(raw).Probability32768.Span;
-        var choices = new List<LegacyLexicalCandidate>();
+        if (!_expandRelatedForms)
+        {
+            var exact = new List<LegacyLexicalCandidate>();
+            for (int output = 0; output < _outputLabels.Length; output++)
+                if (_outputLabels[output].Length != 0 && probabilities[output] > 0)
+                    exact.Add(new(_outputLabels[output][0], (float)Math.Log(probabilities[output] / 32768d)));
+            return exact.ToArray();
+        }
+        var choices = new Dictionary<ushort, float>();
         for (int output = 0; output < _outputLabels.Length; output++)
-            if (_outputLabels[output] is ushort label && probabilities[output] > 0)
-                choices.Add(new(label, (float)Math.Log(probabilities[output] / 32768d)));
-        return choices.ToArray();
+        {
+            if (probabilities[output] <= 0) continue;
+            float score = (float)Math.Log(probabilities[output] / 32768d);
+            foreach (ushort label in _outputLabels[output])
+                if (!choices.TryGetValue(label, out float previous) || score > previous) choices[label] = score;
+        }
+        return choices.OrderBy(choice => choice.Key).Select(choice => new LegacyLexicalCandidate(choice.Key, choice.Value)).ToArray();
     }
 
     private string MapLabels(ReadOnlySpan<ushort> labels)

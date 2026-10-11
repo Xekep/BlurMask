@@ -42,11 +42,31 @@ if (args.Length == 0)
     catch (OperationCanceledException) { }
     try { own.Recognize([OwnGlyphs(1, 0, 0)[0], OwnGlyphs(1, 0, 0)[1], OwnGlyphs(1, 0, 0)[0]]); throw new InvalidOperationException("Overlong word accepted."); }
     catch (ArgumentException) { }
+    // Two network outputs are uppercase И and unrelated к; lowercase и is
+    // present only as a stored related form, not as a classifier output.
+    var formsAcoustic = LegacyInkAlphabet.Load(BuildAlphabet("Ики", withRelatedForms: true), 0x103);
+    var formsLexical = LegacyInkAlphabet.Load(BuildAlphabet("пи"), 0x103);
+    var formsGraph = LegacyPackedLexicon.Load(BuildGraph(lastLabel: 1));
+    var exactForms = new LegacySegmentedWordRecognizer(ownNetwork, ownActivations, formsAcoustic, formsLexical, formsGraph);
+    var expandForms = new LegacySegmentedWordRecognizer(ownNetwork, ownActivations, formsAcoustic, formsLexical, formsGraph, relatedFormMode: 0);
+    Require(exactForms.Recognize(ownGroups).Count == 0, "Exact text mapping invented a lowercase candidate.");
+    var expanded = expandForms.Recognize(ownGroups);
+    Require(expanded.Count == 1 && expanded[0].Text == "ии" && Math.Abs(expanded[0].LogScore + 2 * Math.Log(2)) < 1e-6,
+        "Stored related forms were not mapped, or duplicate triplet entries inflated the class probability.");
+    var expandedCuts = expandForms.RecognizeAlternatives([new(0, 1, ownGroups[0]), new(1, 2, ownGroups[1])], 2);
+    Require(expandedCuts.Count == 1 && expandedCuts[0].Text == "ии" && Math.Abs(expandedCuts[0].LogScore - expanded[0].LogScore) < 1e-6,
+        "Alternative cuts did not retain related-form mapping.");
+    foreach (int mode in new[] { -1, 3 })
+    {
+        try { _ = new LegacySegmentedWordRecognizer(ownNetwork, ownActivations, formsAcoustic, formsLexical, formsGraph, mode); throw new InvalidOperationException("Invalid relation mode accepted."); }
+        catch (ArgumentOutOfRangeException) { }
+    }
     Console.WriteLine("PASS own segmented-word pipeline, reversed label spaces, probabilities, terminal boundaries and cancellation. No vendor assets required.");
     return;
 }
 bool benchmark = args.Length == 4 && args[3] == "--benchmark";
-if (args.Length != 3 && !benchmark) throw new ArgumentException("Usage: LegacySegmentedWord.Probe [acoustic.res lexical.res activations.json [--benchmark]]");
+bool relatedWords = args.Length == 4 && args[3] == "--related-words";
+if (args.Length != 3 && !benchmark && !relatedWords) throw new ArgumentException("Usage: LegacySegmentedWord.Probe [acoustic.res lexical.res activations.json [--benchmark | --related-words]]");
 byte[] acoustic = File.ReadAllBytes(args[0]), lexical = File.ReadAllBytes(args[1]);
 using var tables = JsonDocument.Parse(File.ReadAllBytes(args[2]));
 int[] Values(JsonElement x) => x.EnumerateArray().Select(x => x.GetInt32()).ToArray();
@@ -89,6 +109,43 @@ foreach (var (scale, x, y) in new[] { (1, 0, 0), (1, -100, 300), (2, 0, 0), (3, 
     }
 }
 Console.WriteLine("PASS four own separated printed ИП variants through original whole-stroke grouping, actual raw-ink classifier, alphabet mapping and dictionary. Joined cursive is not tested.");
+if (relatedWords)
+{
+    var expandedRecognizer = new LegacySegmentedWordRecognizer(network, activations, acousticAlphabet, lexicalAlphabet, graph, relatedFormMode: 0);
+    LegacyInkStroke[] Letter(params short[][][] strokes) => strokes.Select(stroke => new LegacyInkStroke(
+        stroke.Select(point => new LegacyInkPoint(point[0], point[1])).ToArray())).ToArray();
+    var m = Letter([[0, 90], [0, 10], [25, 60], [50, 10], [50, 90]]);
+    var a = Letter([[0, 90], [25, 10], [50, 90]], [[10, 60], [40, 60]]);
+    var i = Letter([[0, 10], [0, 90], [50, 10], [50, 90]]);
+    var r = Letter([[0, 90], [0, 10], [40, 10], [50, 20], [50, 40], [40, 50], [0, 50]]);
+    foreach (var (sample, expected, glyphs) in new (string, string, LegacyInkStroke[][])[] { ("МАМА", "мама", [m, a, m, a]), ("МИР", "мир", [m, i, r]) })
+    {
+        foreach (var (scale, x, y) in new[] { (1, 0, 0), (1, -100, 300), (2, 0, 0), (3, 200, -100) })
+        {
+            var physical = glyphs.SelectMany((glyph, index) => glyph.Select(stroke => new LegacyInkStroke(
+                stroke.Points.ToArray().Select(point => new LegacyInkPoint(checked((short)((point.X + index * 70) * scale + x)),
+                    checked((short)(point.Y * scale + y)))).ToArray()))).ToArray();
+            Require(LegacySeparatedInkSegmenter.TrySegment(physical, out var wordGroups) && wordGroups.Length == glyphs.Length,
+                "Original printed word did not produce one whole-stroke group per proposed letter.");
+            foreach (var (policy, engine) in new[] { ("exact", recognizer), ("storedForms", expandedRecognizer) })
+            {
+                var matches = engine.Recognize(wordGroups).Take(5).ToArray();
+                if (policy == "storedForms") Require(matches.Length != 0 && matches[0].Text == expected,
+                    "Original printed word is not the first related-form dictionary match.");
+                using var buffer = new MemoryStream(); using (var writer = new Utf8JsonWriter(buffer))
+                {
+                    writer.WriteStartObject(); writer.WriteString("ownPrintedSample", sample); writer.WriteString("mapping", policy);
+                    writer.WriteNumber("scale", scale); writer.WriteNumber("x", x); writer.WriteNumber("y", y);
+                    writer.WriteStartArray("matches"); foreach (var match in matches)
+                    { writer.WriteStartObject(); writer.WriteString("text", match.Text); writer.WriteNumber("logScore", match.LogScore); writer.WriteEndObject(); }
+                    writer.WriteEndArray(); writer.WriteEndObject();
+                }
+                Console.WriteLine(System.Text.Encoding.UTF8.GetString(buffer.ToArray()));
+            }
+        }
+    }
+    Console.WriteLine("PASS eight own separated printed МАМА/МИР variants through original whole-stroke grouping and optional stored-form dictionary mapping. This does not measure handwriting accuracy or preserve written case.");
+}
 if (benchmark)
 {
     var sample = OwnGlyphs(1, 0, 0);
@@ -124,24 +181,36 @@ static byte[] BuildNetwork()
     writer.Write(new byte[4]); writer.Write(new byte[] { 1, 1, 1 });
     var data = stream.ToArray(); BinaryPrimitives.WriteUInt32LittleEndian(data.AsSpan(4), (uint)data.Length - 8); return data;
 }
-static byte[] BuildAlphabet(string text)
+static byte[] BuildAlphabet(string text, bool withRelatedForms = false)
 {
+    var encoded = text.EnumerateRunes().Select(rune => System.Text.Encoding.UTF8.GetBytes(rune.ToString())).ToArray();
+    int count = encoded.Length;
     using var stream = new MemoryStream(); using var writer = new BinaryWriter(stream);
-    for (int i = 0; i < 7; i++) writer.Write((ushort)65535); writer.Write((ushort)2);
+    for (int i = 0; i < 7; i++) writer.Write((ushort)65535); writer.Write((ushort)count);
     writer.Write((ushort)1); writer.Write((ushort)0);
-    foreach (int count in new[] { 32, 64 })
-        for (int i = 0; i < count; i++) writer.Write(i == count - 1 ? (ushort)0 : (ushort)65535);
-    writer.Write((ushort)0); writer.Write((ushort)2);
-    writer.Write(0u); writer.Write(0u); writer.Write(2u); writer.Write(1u); writer.Write(4u); writer.Write(65535u);
-    writer.Write(System.Text.Encoding.UTF8.GetBytes(text)); writer.Write((ushort)0); writer.Write((ushort)1);
-    writer.Write((byte)0); writer.Write((ushort)0); return stream.ToArray();
+    foreach (int tableSize in new[] { 32, 64 })
+        for (int i = 0; i < tableSize; i++) writer.Write(i == tableSize - 1 ? (ushort)0 : (ushort)65535);
+    writer.Write((ushort)0); writer.Write((ushort)count);
+    uint offset = 0;
+    for (int i = 0; i < count; i++) { writer.Write(offset); writer.Write((uint)i); offset += (uint)encoded[i].Length; }
+    writer.Write(offset); writer.Write(65535u);
+    foreach (var bytes in encoded) writer.Write(bytes);
+    for (int i = 0; i < count; i++) writer.Write((ushort)i);
+    writer.Write((byte)0); writer.Write((ushort)(withRelatedForms ? 1 : 0));
+    if (withRelatedForms)
+    {
+        Require(count == 3, "Original related-form fixture expects three Cyrillic labels.");
+        writer.Write((ushort)0); writer.Write((ushort)2); writer.Write((ushort)0);
+        writer.Write(1u); writer.Write(new byte[] { 0, 255, 0 });
+    }
+    return stream.ToArray();
 }
-static byte[] BuildGraph()
+static byte[] BuildGraph(uint lastLabel = 0)
 {
     using var stream = new MemoryStream(); using var writer = new BinaryWriter(stream);
     writer.Write(0x0101fe90u); writer.Write(0u); writer.Write(0x2b4u); writer.Write(0x01000000u);
     writer.Write(0u); writer.Write(3u); writer.Write(2u);
-    writer.Write(0x01000000u); writer.Write(3u); writer.Write((byte)2); writer.Write(0b100100u); // 0,1,terminal|0.
+    writer.Write(0x01000000u); writer.Write(3u); writer.Write((byte)2); writer.Write(0b100100u | (lastLabel << 4)); // 0,1,terminal|lastLabel.
     writer.Write((byte)2);
     writer.Write(0x01000000u); writer.Write(3u); writer.Write((byte)1); writer.Write(0b011u); // Child counts1,1,0.
     writer.Write(1u); var data = stream.ToArray(); BinaryPrimitives.WriteUInt32LittleEndian(data.AsSpan(4), (uint)data.Length - 8); return data;

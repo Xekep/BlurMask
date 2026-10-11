@@ -97,6 +97,12 @@ rank the original printed **ИП** sample first after automatic separated groupi
 This remains an experimental headless path; general Russian words and joined
 handwriting are not enabled in the app. See [the checked pipeline and limits](../../docs/legacy-russian-segmented-word.md).
 
+An opt-in `relatedFormMode` expands candidates through supplied acoustic form
+relations and retains the strongest score per lexical label. The default uses
+exact text mapping. Eight own separated printed МАМА/МИР controls then rank
+dictionary words мама/мир first. This returns dictionary spelling, does not
+retain written case and is not representative Russian handwriting accuracy.
+
 `LegacyLexicalLatticeDecoder` performs original bounded dictionary beam search
 over alternative caller-scored glyph cuts. It returns both the word labels and
 the selected boundaries, so callers can compare possible segmentations without

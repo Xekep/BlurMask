@@ -24,6 +24,23 @@ This proves a small complete raw-ink→network→alphabet mapping→dictionary p
 Grouping uses only whole strokes; this abbreviation is not a representative
 handwriting benchmark or proof of slanted/joined Russian recognition.
 
+An optional `relatedFormMode` constructor argument enables original candidate
+expansion through the acoustic resource's stored three-form accessor. It maps
+each supplied related form through Unicode into the lexical alphabet, retaining
+the strongest source class score for duplicate lexical labels. This avoids
+double-counting duplicate triplet entries. It returns dictionary spelling;
+these expanded scores are not normalized word probabilities and do not restore
+the SDK's native case costs, case preservation or accent selection. The default
+remains exact text mapping. At most 512 distinct glyph choices are supported.
+
+Eight own **printed МАМА/МИР** controls (original, translated, 2x and 3x) use
+separate physical letters and whole-stroke grouping, including the separate
+crossbar of А. The supplied raster model plus optional form expansion ranks
+**мама** and **мир** first (scores -5.0654643 and -3.4854462). Exact mapping alone
+ranks **МДМА** and **НИР** first on these samples. These are narrow smoke controls,
+not natural-handwriting or cursive accuracy measurements. Written uppercase
+case is not retained by this experimental path.
+
 `RecognizeAlternatives` also scores caller-proposed complete glyphs spanning
 different ordered cut positions, then invokes the original dictionary
 [cut-lattice beam search](legacy-russian-lexicon.md). It returns the selected
@@ -52,6 +69,12 @@ legacy lite RU acoustic/lexical resources and activation JSON:
 ```powershell
 dotnet run --project tools/LegacySegmentedWord.Probe -c Release -- acoustic.res lexical.res activations.json
 ```
+
+Append `--related-words` to compare exact and stored-form mapping on the eight
+own printed word controls. They pass managed .NET and Windows Native AOT. The
+vendor-free toy probe also verifies an uppercase-only classifier output with a
+lowercase dictionary path and duplicated stored forms, in both fixed-position
+and alternative-cut decoding.
 
 Append `--benchmark` to measure 100 repeated alternative-word requests with
 reused models (400 actual raster classifier evaluations). The probe reports
