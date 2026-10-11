@@ -63,6 +63,17 @@ jobs:
           path: |
             BlurMask-linux-x64.tar.gz
             .artifacts/installers/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BlurMask-linux-native
+          path: src/BlurMask/bin/Release/net11.0/linux-x64/publish/
+
+  arch:
+    needs: linux
+    uses: ./.github/workflows/arch.yml
+    with:
+      publish-artifact: BlurMask-linux-native
+      version: ${{ github.ref_name }}
 
   macos:
     runs-on: macos-latest
@@ -85,13 +96,18 @@ jobs:
   publish-release:
     permissions:
       contents: write
-    needs: [windows, linux, macos]
+    needs: [windows, linux, macos, arch]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with:
           path: dist
+          pattern: 'release-*'
           merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: BlurMask-Arch-Installer
+          path: dist/arch
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}

@@ -190,6 +190,43 @@ The reusable/manual **Debian Installer** workflow verifies installation, startup
 reinstallation and removal. CI uploads `.deb` and SHA-256 as **BlurMask-Debian-Installer**;
 the Release workflow attaches them alongside Linux tar archives and Windows installers.
 
+### Arch Linux x86_64
+
+Download `blurmask-1.2.3-1-x86_64.pkg.tar.zst` from the GitHub Release, then install:
+
+```bash
+sudo pacman -U ./blurmask-1.2.3-1-x86_64.pkg.tar.zst
+# Remove the application while preserving user canvases/settings:
+sudo pacman -R blurmask
+```
+
+The package uses the same Ubuntu 22.04 Native AOT payload as the Linux archive;
+no installed .NET runtime is needed. Pacman installs its system library dependencies
+(glibc 2.35+, GCC runtime, X11, fontconfig, ICU, OpenSSL, zlib and D-Bus).
+Use an X11 session, or install `xorg-xwayland` on Wayland. It adds the launcher,
+icon, MIT license and minimized login startup in `/etc/xdg/autostart/blurmask.desktop`.
+Disable startup through the desktop's Startup Applications settings. User changes
+to the startup file are preserved during package upgrades by pacman's backup handling.
+
+To package an existing Linux x64 publish directory on Arch with `base-devel`, run
+as a normal user:
+
+```bash
+bash ./tools/build-arch.sh 1.2.3
+```
+
+The local-input [`PKGBUILD`](packaging/arch/PKGBUILD) gets SHA-256 checksums from
+the packaging script and keeps native binary bytes unchanged. The reusable/manual
+**Arch Installer** workflow packages in one Arch container, then installs, checks
+native dependencies, launches under Xvfb, reinstalls and removes in a fresh container.
+CI reuses its Linux Native AOT artifact and uploads the package/checksum as
+**BlurMask-Arch-Installer**; Release attaches both after testing. Manual runs can
+set `release-tag` to an existing release (for example `v1.2.3`), verifying the
+published Linux archive's GitHub SHA-256 digest before packaging it without rebuilding.
+Arch is rolling release; the container validates current repositories, not every
+desktop/compositor or derivative distribution. This is a downloadable package,
+not an Arch repository/AUR registration.
+
 ### Windows installer (Inno Setup)
 
 ```powershell

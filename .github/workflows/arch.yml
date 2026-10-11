@@ -1,0 +1,97 @@
+name: Arch Installer
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version; empty uses 1.0.0-dev.<run>'
+        required: false
+        type: string
+      release-tag:
+        description: 'Optional existing release tag: package its verified Linux archive without rebuilding'
+        required: false
+        type: string
+  workflow_call:
+    inputs:
+      publish-artifact:
+        required: false
+        default: ''
+        type: string
+      version:
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  arch:
+    runs-on: ubuntu-22.04
+    env:
+      PACKAGE_VERSION: ${{ inputs.version }}
+      RELEASE_TAG: ${{ inputs.release-tag }}
+      GH_TOKEN: ${{ github.token }}
+      PAYLOAD: src/BlurMask/bin/Release/net11.0/linux-x64/publish
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        if: inputs.publish-artifact != ''
+        with:
+          name: ${{ inputs.publish-artifact }}
+          path: src/BlurMask/bin/Release/net11.0/linux-x64/publish
+      - name: Download and verify the existing release payload
+        if: inputs.release-tag != ''
+        shell: bash
+        run: |
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.-][A-Za-z0-9.-]+)?$ ]]
+          [[ -z "$PACKAGE_VERSION" || "$PACKAGE_VERSION" == "${RELEASE_TAG#v}" ]]
+          echo "PACKAGE_VERSION=${RELEASE_TAG#v}" >> "$GITHUB_ENV"
+          mkdir -p .artifacts/arch-release "$PAYLOAD"
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --pattern BlurMask-linux-x64.tar.gz --dir .artifacts/arch-release
+          digest="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" --jq '.assets[] | select(.name == "BlurMask-linux-x64.tar.gz") | .digest')"
+          [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+          echo "${digest#sha256:}  .artifacts/arch-release/BlurMask-linux-x64.tar.gz" | sha256sum --check
+          tar -xzf .artifacts/arch-release/BlurMask-linux-x64.tar.gz -C "$PAYLOAD"
+      - uses: actions/setup-dotnet@v4
+        if: inputs.publish-artifact == '' && inputs.release-tag == ''
+        with:
+          dotnet-version: 11.0.100-preview.7.26381.103
+      - name: Build the Ubuntu 22.04 Native AOT payload
+        if: inputs.publish-artifact == '' && inputs.release-tag == ''
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang zlib1g-dev
+          bash ./tools/build.sh linux-x64
+      - name: Package in Arch with makepkg as an unprivileged user
+        shell: bash
+        run: |
+          version="${PACKAGE_VERSION:-1.0.0-dev.$GITHUB_RUN_NUMBER}"
+          version="${version#v}"
+          export SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
+          mkdir -p .artifacts/installers
+          docker pull archlinux:base
+          # Both containers use exactly the same image but separate writable filesystems.
+          image="$(docker image inspect archlinux:base --format '{{.Id}}')"
+          echo "ARCH_IMAGE=$image" >> "$GITHUB_ENV"
+          docker run --rm -v "$GITHUB_WORKSPACE:/workspace" -w /workspace \
+            -e BLURMASK_VERSION="$version" -e PAYLOAD -e SOURCE_DATE_EPOCH "$image" bash -euc '
+              pacman -Syu --noconfirm base-devel
+              useradd --create-home builder
+              chown builder /workspace/.artifacts/installers
+              runuser -u builder -- bash tools/build-arch.sh "$BLURMASK_VERSION" "$PAYLOAD"
+            '
+      - name: Install, launch, reinstall and remove in a fresh Arch container
+        shell: bash
+        run: |
+          docker run --rm -v "$GITHUB_WORKSPACE:/workspace:ro" -w /workspace "$ARCH_IMAGE" bash -euc '
+            pacman -Syu --noconfirm desktop-file-utils xorg-server-xvfb xorg-xauth ttf-dejavu
+            bash tools/test-arch.sh .artifacts/installers/*.pkg.tar.zst
+          '
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BlurMask-Arch-Installer
+          path: |
+            .artifacts/installers/*.pkg.tar.zst
+            .artifacts/installers/*.pkg.tar.zst.sha256
+          if-no-files-found: error
