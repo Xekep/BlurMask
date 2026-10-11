@@ -96,13 +96,31 @@ Argument/storage/alias/cancellation checks and the returned cleared-position
 count are original defensive/diagnostic behavior. Bounds cannot alias mutable
 masks. Cancellation during an in-place operation can leave a partial result.
 
-The upstream meaning of the byte category and production/default selection of
-the two arrays are not established by this loop. In particular, these are
-**ordinal bounds**, not demonstrated Latin/Cyrillic script masks. The helper
-requires explicit supplied bounds and category; it is not automatically wired
-into the ordinary Russian adapter with guessed defaults. Restoring the full
-resource→runtime bounds producer and source-category policy remains necessary
-before claiming that application routing reproduces this native stage.
+Further static analysis resolves this byte as a **source-stroke count**, rather
+than a script or letter-case category. Text1801b4e40 resets its output byte, walks
+the selected prepared ranges, and increments it only when the corresponding
+source record's first int32 identifier has not occurred in an earlier selected
+range. Several fragments from the same source stroke therefore count once.
+The byte has native modulo-256 arithmetic. Text1801b5cf0 first uses that same
+producer, then adds one for each synthetic prefix-template stroke it appends.
+The resulting byte reaches Text1801be930 argument 10 and then Text1801b95a0.
+It must not be guessed from character identity or replaced by a language enum.
+
+The resource producer is Text1801c2940. For versions at most 0x110 it writes
+NULL to both resource+148/+150. For a newer version it reads one presence byte;
+zero again writes both NULL, while nonzero calls global-context+98 service
+slot18 twice to load the packed minimum/maximum fields. Text1801b0560 copies
+resource bytes [0x8,0x158) to the same runtime offsets, including these pointers;
+Text1801b0660 performs the equivalent 0x150-byte body copy from an explicit
+configuration. The actual Russian ordinary acoustic node at resource offset
+189734 is version **0x110**: these bounds are absent and this filter is disabled
+for that node. It cannot explain or fix Latin/Cyrillic candidate preference in
+the current Russian diagnostic.
+
+The helper still requires supplied bounds and a count. Full newer-version
+packed-object decoding and upstream language/case mask routing are separate
+unresolved stages; no example-fitted Latin-to-Cyrillic substitution is inferred
+from this recovered count constraint.
 
 ## Reproduction and verification
 
