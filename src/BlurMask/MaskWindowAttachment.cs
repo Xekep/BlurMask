@@ -52,12 +52,17 @@ internal sealed class MaskWindowAttachment : IDisposable
         _timer.Interval = TimeSpan.FromMilliseconds(32);
         _mask.Topmost = target is null;
         AttachedMaskWindows.Remove(_mask);
-        if (target is null) { _coverage = null; _mask.SetPrivacyCover(false); return; }
+        if (target is null)
+        {
+            _catalog.ReleaseMask(_mask); _coverage = null;
+            _mask.SetPrivacyCover(false); _mask.SetAttachedTargetVisible(true); return;
+        }
         _mask.ShowActivated = false;
         AttachedMaskWindows.Register(_mask, target.StackingId);
         _coverage = new(target.Bounds, new PixelRect(_mask.Position,
             new PixelSize((int)Math.Ceiling(_mask.ClientSize.Width * _mask.RenderScaling), (int)Math.Ceiling(_mask.ClientSize.Height * _mask.RenderScaling))), _fillRegion);
         _mask.SetPrivacyCover(_fillRegion);
+        _ = _catalog.PlaceAbove(_mask, target);
         if (_catalog is WindowsWindowCatalog)
         {
             var root = _catalog.Read(target.StackingId);
@@ -71,7 +76,7 @@ internal sealed class MaskWindowAttachment : IDisposable
     }
     internal void Update()
     {
-        if (_disposed) return;
+        if (_disposed || _applying) return;
         try
         {
             if (_manualAt != 0)
@@ -95,7 +100,15 @@ internal sealed class MaskWindowAttachment : IDisposable
             try
             {
                 if (!root.Visible || !target.Visible || target.Bounds.Width <= 0 || target.Bounds.Height <= 0)
-                { if (!_hidden) { _hidden = true; _mask.Hide(); } return; }
+                {
+                    _mask.SetAttachedTargetVisible(false);
+                    // Win32 hides/restores owned popups with a minimized owner.
+                    // Explicit Hide/Show would delay restoration and Avalonia Show
+                    // resets the native owner before mapping the mask again.
+                    if (!_hidden && _catalog is WindowsWindowCatalog windows && windows.HidesWithMinimizedOwner(_mask, root)) return;
+                    if (!_hidden) { _hidden = true; _mask.Hide(); }
+                    return;
+                }
                 var rectangle = _coverage.Follow(target.Bounds);
                 _mask.SetPrivacyCover(_coverage.RequiresOpaqueCover);
                 var size = new Size(rectangle.Width / _mask.RenderScaling, rectangle.Height / _mask.RenderScaling);
@@ -104,6 +117,7 @@ internal sealed class MaskWindowAttachment : IDisposable
                 if (_mask.Position != rectangle.Position) { _expectedPosition = rectangle.Position; _mask.Position = rectangle.Position; }
                 if (_hidden) { _hidden = false; _mask.Show(); }
                 _ = _catalog.PlaceAbove(_mask, root);
+                _mask.SetAttachedTargetVisible(true);
             }
             finally { _applying = false; }
         }
@@ -115,11 +129,14 @@ internal sealed class MaskWindowAttachment : IDisposable
         if (_disposed) return;
         _disposed = true;
         AttachedMaskWindows.Remove(_mask);
+        _catalog.ReleaseMask(_mask);
         _timer.Stop(); _events?.Dispose(); _mask.PositionChanged -= OnMoved; _mask.Resized -= OnResized; _catalog.Dispose();
     }
     internal void Detach()
     {
-        Dispose(); _mask.Topmost = true; _mask.ShowActivated = true; _mask.SetPrivacyCover(false);
+        bool nativeHidden = _target is { } target && _catalog is WindowsWindowCatalog windows && windows.HidesWithMinimizedOwner(_mask, target);
+        Dispose(); _mask.Topmost = true; _mask.ShowActivated = true; _mask.SetPrivacyCover(false); _mask.SetAttachedTargetVisible(true);
+        if (nativeHidden && !_hidden) { _mask.Hide(); _hidden = true; }
         if (_hidden) { _hidden = false; _mask.Show(); }
     }
 }

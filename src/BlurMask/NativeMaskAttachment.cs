@@ -6,6 +6,38 @@ namespace BlurMask;
 
 internal sealed partial class WindowsWindowCatalog
 {
+    private readonly Dictionary<nint, (nint Owner, bool NoActivate)> _maskOwners = [];
+
+    private bool AttachMaskOwner(nint mask, nint root)
+    {
+        if (!_maskOwners.ContainsKey(mask))
+            _maskOwners[mask] = (GetMaskExStyle(mask, -8), (GetMaskExStyle(mask, -20) & 0x08000000) != 0);
+        if (GetMaskExStyle(mask, -8) != root)
+        {
+            _ = SetMaskExStyle(mask, -8, root); // GWLP_HWNDPARENT: owner of a top-level HWND.
+            if (GetMaskExStyle(mask, -8) != root) return false;
+        }
+        return true;
+    }
+    internal bool HidesWithMinimizedOwner(Window mask, TrackedWindow target) =>
+        mask.TryGetPlatformHandle() is { HandleDescriptor: "HWND" } handle &&
+        GetMaskExStyle(handle.Handle, -8) == (nint)target.StackingId && IsIconic((nint)target.StackingId) != 0;
+
+    public void ReleaseMask(Window mask)
+    {
+        if (mask.TryGetPlatformHandle() is { HandleDescriptor: "HWND" } handle) ReleaseMaskOwner(handle.Handle);
+    }
+    private void ReleaseMaskOwner(nint mask)
+    {
+        if (!_maskOwners.Remove(mask, out var original) || IsWindow(mask) == 0) return;
+        _ = SetMaskExStyle(mask, -8, IsWindow(original.Owner) != 0 ? original.Owner : 0);
+        var style = GetMaskExStyle(mask, -20);
+        _ = SetMaskExStyle(mask, -20, original.NoActivate ? style | (nint)0x08000000 : style & ~(nint)0x08000000);
+    }
+    private void ReleaseMaskOwners()
+    {
+        foreach (var mask in _maskOwners.Keys.ToArray()) ReleaseMaskOwner(mask);
+    }
     public TrackedWindow? FindChildAt(PixelPoint point)
     {
         var root = FindAt(point);
@@ -54,6 +86,9 @@ internal sealed partial class WindowsWindowCatalog
         if (mask.TryGetPlatformHandle() is not { HandleDescriptor: "HWND" } handle || handle.Handle == 0) return false;
         nint hwnd = handle.Handle, root = (nint)target.StackingId;
         if (IsWindow(root) == 0) return false;
+        // Owned HWNDs move with their owner in the native z-order transaction.
+        // Foreground switches must not wait for an out-of-context event or timer.
+        if (!AttachMaskOwner(hwnd, root)) return false;
         const uint flags = 0x0010 | 0x0001 | 0x0002 | 0x0200; // no activation, geometry or owner changes
         var style = GetMaskExStyle(hwnd, -20);
         if ((style & 0x08000000) == 0) // WS_EX_NOACTIVATE: apply once, not every tracking tick.

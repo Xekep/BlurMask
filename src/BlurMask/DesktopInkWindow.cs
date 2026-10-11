@@ -360,7 +360,22 @@ internal sealed class DesktopInkWindow : Window
                 var shade = new SolidColorBrush(Color.FromArgb(75, 0, 0, 0));
                 foreach (var rectangle in ScreenRegionSelection.Outside(visible, selection))
                     if (rectangle.Width > 0 && rectangle.Height > 0) context.DrawRectangle(shade, null, rectangle);
-                if (selection is { } selected) context.DrawRectangle(null, new Pen(new SolidColorBrush(Color.Parse("#27C4E5")), 2), selected);
+                if (selection is { } selected)
+                {
+                    // Coordinates inside this transform are physical screen pixels.
+                    context.DrawRectangle(null, new Pen(Brushes.Black, 1, new DashStyle([4, 3], 0)), selected);
+                    var scaling = window.RenderScaling;
+                    var label = new FormattedText($"{(int)selected.Width} × {(int)selected.Height} px",
+                        System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
+                        new Typeface("Inter"), 12 * scaling, Brushes.Black);
+                    var labelSize = new Size(label.Width + 12 * scaling, label.Height + 6 * scaling);
+                    var left = Math.Clamp(selected.Left, visible.Left, Math.Max(visible.Left, visible.Right - labelSize.Width));
+                    var top = selected.Top - labelSize.Height - 5 * scaling;
+                    if (top < visible.Top) top = selected.Top + 5 * scaling;
+                    top = Math.Clamp(top, visible.Top, Math.Max(visible.Top, visible.Bottom - labelSize.Height));
+                    context.DrawRectangle(Brushes.White, new Pen(Brushes.Black, 1), new Rect(new Point(left, top), labelSize), 3 * scaling, 3 * scaling);
+                    context.DrawText(label, new Point(left + 6 * scaling, top + 3 * scaling));
+                }
             }
         }
     }

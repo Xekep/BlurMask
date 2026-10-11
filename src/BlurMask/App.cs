@@ -237,7 +237,7 @@ public sealed partial class App : Application
         {
             double scale = (_drawing?.Toolbar.Screens.ScreenFromPoint(region.Bounds.Position) ?? _drawing?.Toolbar.Screens.Primary)?.Scaling ?? 1;
             mask.WindowStartupLocation = WindowStartupLocation.Manual; mask.Position = region.Bounds.Position;
-            mask.MinWidth = 1; mask.MinHeight = 1; mask.Width = region.Bounds.Width / scale; mask.Height = region.Bounds.Height / scale;
+            mask.MinWidth = 0; mask.MinHeight = 0; mask.Width = region.Bounds.Width / scale; mask.Height = region.Bounds.Height / scale;
             mask.Topmost = false; mask.ShowActivated = false;
         }
         _masks.Add(mask);

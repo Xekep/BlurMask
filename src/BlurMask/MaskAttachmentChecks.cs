@@ -17,6 +17,8 @@ internal static class MaskAttachmentChecks
         var fill = new MaskAttachmentCoverage(new(100, 200, 400, 300), default, true);
         Require(fill.Follow(new(120, 215, 80, 55)) == new PixelRect(120, 215, 80, 55) && fill.RequiresOpaqueCover,
             "Child fill scaled stale coordinates instead of covering its real bounds.");
+        Require(fill.Follow(new(-20, -10, 1, 1)) == new PixelRect(-20, -10, 1, 1) && fill.RequiresOpaqueCover,
+            "A one-pixel child fill was expanded by the ordinary mask minimum.");
         var reset = new MaskAttachmentCoverage(new(100, 200, 400, 300), new(160, 250, 60, 40), false);
         Require(reset.Follow(new(100, 200, 400, 300)) == new PixelRect(160, 250, 60, 40) && !reset.RequiresOpaqueCover,
             "Reconfiguration did not replace the old resize guard.");

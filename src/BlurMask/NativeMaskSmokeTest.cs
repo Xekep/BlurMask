@@ -17,7 +17,8 @@ internal static partial class NativeMaskSmokeTest
         var mask = new BlurMaskWindow { WindowStartupLocation = WindowStartupLocation.Manual, Position = new(470, 200),
             Width = 250, Height = 160, Topmost = false, ShowActivated = false };
         mask.SetMode(PrivacyMode.Blackout);
-        nint child = 0;
+        nint child = 0, tinyChild = 0;
+        BlurMaskWindow? secondMask = null;
         try
         {
             root.Show(); mask.Show(); blocker.Show(); await Task.Delay(120);
@@ -40,6 +41,7 @@ internal static partial class NativeMaskSmokeTest
                 await Task.Delay(50);
                 var region = win.FindChildRegion(target, point);
                 Require(region.Id == (nuint)child && region.ParentId == target.Id, "Point selection did not locate the native child.");
+                catalog.ReleaseMask(mask);
                 mask.AttachFilledRegion(new WindowsWindowCatalog(), region); mask.RefreshAttachment(); await Task.Delay(50);
                 Require(mask.HasPrivacyCover && mask.Position == region.Bounds.Position && Math.Abs(mask.Width * mask.RenderScaling - region.Bounds.Width) <= 1,
                     "Black fill did not use the native child's actual bounds.");
@@ -47,6 +49,42 @@ internal static partial class NativeMaskSmokeTest
                 var resized = win.ReadRegion(region)!;
                 Require(mask.Position == resized.Bounds.Position && Math.Abs(mask.Height * mask.RenderScaling - resized.Bounds.Height) <= 1,
                     "Black child fill did not track nonuniform child resize.");
+                tinyChild = CreateWindowExW(0, "STATIC", "Tiny private region", 0x50000000, 130, 90, 8, 6, (nint)target.Id, 0, 0, 0);
+                Require(tinyChild != 0, "Tiny child probe creation failed.");
+                var tinyRegion = win.ReadRegion(new((nuint)tinyChild, target.ProcessId, default, true, target.Id))!;
+                secondMask = new BlurMaskWindow { ShowActivated = false, Topmost = false, WindowStartupLocation = WindowStartupLocation.Manual };
+                secondMask.Show(); secondMask.AttachFilledRegion(new WindowsWindowCatalog(), tinyRegion); secondMask.RefreshAttachment();
+                await Task.Delay(60);
+                var secondId = (nuint)secondMask.TryGetPlatformHandle()!.Handle;
+                Require(secondMask.MinWidth == 0 && secondMask.MinHeight == 0 &&
+                    Math.Abs(secondMask.Width * secondMask.RenderScaling - 8) <= .01 &&
+                    Math.Abs(secondMask.Height * secondMask.RenderScaling - 6) <= .01,
+                    "Tiny child fill was enlarged by mask minimum dimensions.");
+                Require(GetOwner((nint)maskId, 4) == (nint)target.Id && GetOwner((nint)secondId, 4) == (nint)target.Id,
+                    "Attached masks have no native owner, leaving foreground changes dependent on callbacks.");
+                blocker.Show();
+                // No await/dispatcher callback/RefreshAttachment between restacking and assertions.
+                // Both fills must follow the owner's native z-order transaction immediately.
+                for (int i = 0; i < 20; i++)
+                {
+                    Require(RaiseWindow((nint)blockerId, 0, 0, 0, 0, 0, 0x0013) != 0, "Could not raise native occluder.");
+                    stack = Stack();
+                    Require(Array.IndexOf(stack, maskId) < Array.IndexOf(stack, blockerId) &&
+                        Array.IndexOf(stack, secondId) < Array.IndexOf(stack, blockerId), "Attached fills covered a foreground occluder.");
+                    Require(RaiseWindow((nint)target.Id, 0, 0, 0, 0, 0, 0x0013) != 0, "Could not raise native target.");
+                    stack = Stack();
+                    Require(Array.IndexOf(stack, target.Id) < Array.IndexOf(stack, maskId) &&
+                        Array.IndexOf(stack, target.Id) < Array.IndexOf(stack, secondId), "Owner promotion exposed a fill before its tracking callback.");
+                }
+                root.WindowState = WindowState.Minimized; await Task.Delay(60); mask.RefreshAttachment(); secondMask.RefreshAttachment();
+                Require(IsVisible((nint)maskId) == 0 && IsVisible((nint)secondId) == 0,
+                    "Native owner minimization left attached fills on screen.");
+                root.WindowState = WindowState.Normal; root.Activate(); await Task.Delay(80);
+                Require(IsVisible((nint)maskId) != 0 && IsVisible((nint)secondId) != 0 &&
+                    GetOwner((nint)maskId, 4) == (nint)target.Id && GetOwner((nint)secondId, 4) == (nint)target.Id,
+                    "Restoring the native owner lost a fill or reset its ownership.");
+                secondMask.Close(); secondMask = null; _ = DestroyWindow(tinyChild); tinyChild = 0;
+                blocker.Hide();
                 _ = DestroyWindow(child); child = 0; mask.RefreshAttachment();
                 await Task.Delay(100); mask.RefreshAttachment();
                 Require(mask.HasPrivacyCover && mask.Position == target.Bounds.Position && Math.Abs(mask.Width * mask.RenderScaling - target.Bounds.Width) <= 1,
@@ -83,6 +121,8 @@ internal static partial class NativeMaskSmokeTest
         finally
         {
             if (child != 0) _ = DestroyWindow(child);
+            if (tinyChild != 0) _ = DestroyWindow(tinyChild);
+            secondMask?.Close(); catalog.ReleaseMask(mask);
             mask.Close(); blocker.Close(); root.Close();
         }
     }
@@ -94,4 +134,7 @@ internal static partial class NativeMaskSmokeTest
     private static partial nint CreateWindowExW(uint style, string className, string title, uint flags, int x, int y, int width, int height, nint parent, nint menu, nint instance, nint parameter);
     [LibraryImport("user32.dll")] private static partial int MoveWindow(nint window, int x, int y, int width, int height, int repaint);
     [LibraryImport("user32.dll")] private static partial int DestroyWindow(nint window);
+    [LibraryImport("user32.dll", EntryPoint = "GetWindow")] private static partial nint GetOwner(nint window, uint command);
+    [LibraryImport("user32.dll", EntryPoint = "SetWindowPos")] private static partial int RaiseWindow(nint window, nint after, int x, int y, int width, int height, uint flags);
+    [LibraryImport("user32.dll", EntryPoint = "IsWindowVisible")] private static partial int IsVisible(nint window);
 }

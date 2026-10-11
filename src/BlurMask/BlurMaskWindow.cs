@@ -18,6 +18,8 @@ public enum PrivacyMode
 public sealed class BlurMaskWindow : Window
 {
     private const double Grip = 12;
+    internal const double MinimumMaskWidth = 30;
+    internal const double MinimumMaskHeight = 20;
 
     private static readonly Cursor MoveCursor = new(StandardCursorType.SizeAll);
     private static readonly Cursor HorizontalCursor = new(StandardCursorType.SizeWestEast);
@@ -34,6 +36,7 @@ public sealed class BlurMaskWindow : Window
     private WindowsGlassRefraction? _windowsGlass;
     private MaskWindowAttachment? _attachment;
     private bool _privacyCover;
+    private bool _attachedTargetVisible = true;
     internal bool HasPrivacyCover => _privacyCover;
     internal void RefreshAttachment() => _attachment?.Update();
 
@@ -49,8 +52,8 @@ public sealed class BlurMaskWindow : Window
         Title = "BlurMask";
         Width = 360;
         Height = 360;
-        MinWidth = 60;
-        MinHeight = 40;
+        MinWidth = MinimumMaskWidth;
+        MinHeight = MinimumMaskHeight;
         Topmost = true;
         ShowInTaskbar = false;
         CanResize = true;
@@ -105,6 +108,7 @@ public sealed class BlurMaskWindow : Window
             // Opened fires again after Hide/Show (e.g. minimizing the attached target).
             // Reuse the four existing planes instead of leaking another native backend.
             ApplyMode();
+            RefreshAttachment();
         };
         Closed += (_, _) =>
         {
@@ -131,9 +135,17 @@ public sealed class BlurMaskWindow : Window
     {
         if (_privacyCover == enabled) return;
         _privacyCover = enabled;
-        MinWidth = enabled ? 1 : 60; MinHeight = enabled ? 1 : 40;
+        // Region fills follow physical child bounds, even below a normal mask's
+        // user-resize limit (including sub-DIP bounds on a scaled monitor).
+        MinWidth = enabled ? 0 : MinimumMaskWidth; MinHeight = enabled ? 0 : MinimumMaskHeight;
         ToolTip.SetTip(_inputSurface, enabled && _attachment?.IsRegionFill != true ? UiText.T("Окно изменило размер. Настройте маску заново.") : null);
         ApplyMode();
+    }
+    internal void SetAttachedTargetVisible(bool visible)
+    {
+        if (_attachedTargetVisible == visible) return;
+        _attachedTargetVisible = visible;
+        _windowsGlass?.SetEnabled(visible && !_privacyCover && Mode is PrivacyMode.GlassBlocks or PrivacyMode.Scramble);
     }
 
     private void InputSurfaceOnPointerPressed(object? sender, PointerPressedEventArgs e)
@@ -429,7 +441,7 @@ public sealed class BlurMaskWindow : Window
                     WindowTransparencyLevel.None
                 ];
                 _root.Background = Brushes.Black;
-                if (_windowsGlass is not null) _windowsGlass.SetEnabled(true);
+                if (_windowsGlass is not null) _windowsGlass.SetEnabled(_attachedTargetVisible);
                 else _scramble.IsVisible = true;
                 break;
 
@@ -445,7 +457,7 @@ public sealed class BlurMaskWindow : Window
                         WindowTransparencyLevel.Blur
                     ];
                     _root.Background = Brushes.Transparent;
-                    _windowsGlass.SetEnabled(true);
+                    _windowsGlass.SetEnabled(_attachedTargetVisible);
                 }
                 else
                 {

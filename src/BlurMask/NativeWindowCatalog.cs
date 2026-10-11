@@ -16,6 +16,7 @@ internal interface IWindowCatalog : IDisposable
     TrackedWindow? FindChildAt(PixelPoint point) => FindAt(point);
     TrackedWindow? ReadRegion(TrackedWindow region) => Read(region.Id);
     bool PlaceAbove(Window mask, TrackedWindow target);
+    void ReleaseMask(Window mask) { }
 }
 
 internal static class NativeWindowCatalog
@@ -56,7 +57,7 @@ internal sealed partial class WindowsWindowCatalog : IWindowCatalog
         if (DwmGetWindowAttribute(hwnd, 14, out var cloaked, 4) == 0 && cloaked != 0) visible = false;
         return new(id, (int)pid, new PixelRect(rect.Left, rect.Top, Math.Max(0, rect.Right - rect.Left), Math.Max(0, rect.Bottom - rect.Top)), visible);
     }
-    public void Dispose() { }
+    public void Dispose() => ReleaseMaskOwners();
     [StructLayout(LayoutKind.Sequential)] private struct NativeRect { public int Left, Top, Right, Bottom; }
     [LibraryImport("user32.dll")] private static partial nint GetTopWindow(nint hwnd);
     [LibraryImport("user32.dll")] private static partial nint GetWindow(nint hwnd, uint command);

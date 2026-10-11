@@ -413,7 +413,11 @@ internal static class DrawingSmokeTest
     internal static async Task VerifyScrambleAsync()
     {
         var minimum = new BlurMaskWindow();
-        Check(minimum.MinWidth == 60 && minimum.MinHeight == 40, "Mask minimum dimensions were not halved.");
+        Check(minimum.MinWidth == 30 && minimum.MinHeight == 20, "Mask minimum dimensions were not halved.");
+        minimum.SetPrivacyCover(true);
+        Check(minimum.MinWidth == 0 && minimum.MinHeight == 0, "Filled region retained user-resize limits.");
+        minimum.SetPrivacyCover(false);
+        Check(minimum.MinWidth == 30 && minimum.MinHeight == 20, "Ordinary mask resize limits were not restored.");
         minimum.Close();
         if (!OperatingSystem.IsWindows() || Program.SoftwareRendering) return;
         var source = new ScramblePattern();
@@ -436,7 +440,7 @@ internal static class DrawingSmokeTest
                 source.Flip = true; source.InvalidateVisual(); await Task.Delay(300);
                 Check(ScreenColorNear(DesktopInkNative.ReadScreenPixel(origin + new PixelPoint(4, 4)), 0x000000FF), "Scramble did not refresh live desktop content.");
             }
-            mask.Width = 60; mask.Height = 40;
+            mask.Width = 30; mask.Height = 20;
             foreach (var mode in Enum.GetValues<PrivacyMode>()) { mask.SetMode(mode); await Task.Delay(60); }
         }
         finally { mask.Close(); pattern.Close(); }
