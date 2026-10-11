@@ -118,6 +118,18 @@ internal static class AiPenProbe
 
     private static void VerifySymbolicMath()
     {
+        foreach (var input in new[] { @"\int_{1}^{10}x^2dx=", @"\int\limits_{1}^{10}x^2\mathrm{dx}=", @"\int_1^{10}dx=" })
+        {
+            var expected = input + (input.Contains("x^2", StringComparison.Ordinal) ? "333" : "9");
+            var result = AiMathLayout.WithSolvedResult(input);
+            if (result != expected || !MathTypesetting.Supported(result))
+                throw new InvalidOperationException("Built-in integral → application/typesetting failed: " + input + " → " + result);
+        }
+        var failure = new AiInkLayout.Result([], new InkMark(InkTool.Text, Avalonia.Media.Colors.Black, 1, new Avalonia.Point())
+            { Text = @"\int_1^{10}dx^2=" });
+        AiMathLayout.ApplySolvedResult(failure, default, (_, _) => null);
+        if (!failure.MathCalculationFailed || failure.Text.Text != @"\int_1^{10}dx^2=")
+            throw new InvalidOperationException("Ambiguous integral was replaced or failed without a notice.");
         int calls = 0;
         InkMath.Solver.MathSolution? Calculate(string source, CancellationToken token)
         {
@@ -265,6 +277,11 @@ internal static class AiPenProbe
     {
         var ink = new[] { Stroke(10, 10), Stroke(32, 10) };
         var uncertainText = new DelegateRecognizer((_, _) => new("unclear", .2f, 6));
+        var localIntegral = AiAutomaticLayout.Recognize(ink, uncertainText,
+            (_, _) => new(@"\int_{1}^{10}x^2dx=", @"\int_{1}^{10}x^2dx=", [], .99f, 10, true));
+        if (localIntegral.Count != 1 || localIntegral[0].Text.Text != @"\int_{1}^{10}x^2dx=333" || localIntegral[0].MathCalculationFailed)
+            throw new InvalidOperationException("Accepted definite integral did not calculate through the automatic route.");
+        VerifyReplacement(localIntegral[0], grows: true);
         int calls = 0;
         InkMath.Solver.MathSolution? Solve(string source, CancellationToken token)
         { token.ThrowIfCancellationRequested(); calls++; return source == "x^2" ? new("x^{2}", false) : null; }

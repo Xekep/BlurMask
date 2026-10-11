@@ -3,6 +3,11 @@
 The reusable `src/InkMath.Solver` module talks to the native C++ Giac/Xcas CLI in
 an isolated process. It has no dependency on Avalonia, recognition models,
 Python, a web account, or a cloud API. It is compatible with Native AOT.
+Finite definite polynomial integrals also have a built-in exact rational path;
+for example, `\int_{1}^{10} x^2 dx=` produces `333` without an installed CAS.
+This path supports rational/decimal numeric bounds, polynomial degree at most32,
+and sums/products/powers/division by nonzero rational constants. Trigonometric
+functions, symbolic bounds and singular rational integrands still require Giac.
 Giac is an optional, separately installed engine; no Giac binary is redistributed
 inside BlurMask. This keeps ordinary drawing installations small. Giac's GPL
 license and dependencies are handled by the upstream installer/package manager.
@@ -35,6 +40,11 @@ Automatic routing calculates only after accepting the OCR candidate or a complet
 raw-content region. Uncertain or rejected Math candidates do not start Giac.
 Accepted numeric requests classified as text still use the fast numeric evaluator.
 The result participates in document undo/redo and ordinary canvas synchronization.
+An unsuccessful requested calculation now reports a notice instead of silently
+retaining an unexplained `=`. The original formula remains editable. `\limits`
+and `\nolimits`, upright `\mathrm{dx}`/`\text{dx}` and a unit integrand `\int dx`
+are supported. A powered differential such as `dx^2` is ambiguous and rejected;
+write `x^2 dx` when integrating the square of x.
 
 | Input before the final `=` | Operation |
 | --- | --- |
@@ -87,8 +97,12 @@ validated. The Windows test helper verifies the pinned upstream installer's hash
 extracts only the CLI/dependencies/license with 7-Zip and never executes the
 installer or uploads the third-party runtime as an application artifact.
 
-The 2026-10-11 audit passed the managed and Windows NativeAOT probes with 24
-grammar translations and 25 actual Giac calculus/algebra cases, including improper
+The 2026-10-12 integral update passed 31 grammar translations and 20 built-in
+exact integral cases, including rational/decimal bounds, reversed bounds,
+zero-length intervals and varied differential notation. All 20 exact results are
+also compared against independent Giac calculations (decimal literals converted
+to equivalent fractions because Giac uses floating point for those literals).
+The managed and Windows NativeAOT probes exercise 29 actual Giac cases, including improper
 integrals, mixed partial derivatives, explicit log bases and plain recognized
 `sin^{2}(x)+cos^{2}(x)`. The headless application probe additionally exercised
 result typesetting, trailing-equals policy, rejection before CAS, complete-region

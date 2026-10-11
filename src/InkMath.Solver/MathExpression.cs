@@ -74,7 +74,17 @@ internal sealed class MathExpressionParser
         White(); return _source.AsSpan(_position).StartsWith("\\mathrm{d}", StringComparison.Ordinal) ||
             _source.AsSpan(_position).StartsWith("\\mathrm {d}", StringComparison.Ordinal) ||
             _source.AsSpan(_position).StartsWith("\\text{d}", StringComparison.Ordinal) ||
-            _position + 1 < _source.Length && _source[_position] == 'd' && (char.IsLetter(_source[_position + 1]) || char.IsWhiteSpace(_source[_position + 1]));
+            CombinedDifferential() ||
+            _position + 1 < _source.Length && _source[_position] == 'd' &&
+            (char.IsLetter(_source[_position + 1]) || char.IsWhiteSpace(_source[_position + 1]) || _source[_position + 1] is '{' or '\\');
+    }
+    private bool CombinedDifferential()
+    {
+        foreach (var prefix in new[] { "\\mathrm{d", "\\text{d" })
+            if (_source.AsSpan(_position).StartsWith(prefix, StringComparison.Ordinal) &&
+                _position + prefix.Length + 1 < _source.Length && char.IsAsciiLetter(_source[_position + prefix.Length]) &&
+                _source[_position + prefix.Length + 1] == '}') return true;
+        return false;
     }
     private bool StartsAtom()
     {
@@ -227,12 +237,23 @@ internal sealed class MathExpressionParser
     }
     private Expression Integral()
     {
+        if (!Take("\\limits")) Take("\\nolimits");
         var (lower, upper) = Bounds(); if ((lower is null) != (upper is null)) throw new FormatException("Both integral bounds are required.");
         var previous = _differentialStop; _differentialStop = true;
         Expression body;
-        try { body = Add(); } finally { _differentialStop = previous; }
-        if (!(Take("\\mathrm{d}") || Take("\\mathrm {d}") || Take("\\text{d}") || Take("d"))) throw new FormatException("Integral needs an explicit differential.");
-        var variable = Atom(); if (variable is not Variable) throw new FormatException("Invalid integration variable.");
+        try { body = Differential() ? Count(new Number("1")) : Add(); } finally { _differentialStop = previous; }
+        Expression variable;
+        if (CombinedDifferential())
+        {
+            var prefix = At("\\mathrm{d") ? "\\mathrm{d" : "\\text{d";
+            Require(prefix); variable = Count(new Variable(_source[_position++].ToString())); Require("}");
+        }
+        else
+        {
+            if (!(Take("\\mathrm{d}") || Take("\\mathrm {d}") || Take("\\text{d}") || Take("d"))) throw new FormatException("Integral needs an explicit differential.");
+            variable = Atom();
+        }
+        if (variable is not Variable || At("^") || At("_")) throw new FormatException("Invalid or ambiguous integration differential.");
         return Count(lower is null ? new Call("integrate", body, variable) : new Call("integrate", body, variable, lower, upper!));
     }
     private Expression Aggregate(string function)

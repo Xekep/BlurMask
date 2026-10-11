@@ -30,6 +30,7 @@ internal static class AiMathSolver
     }
     internal static MathSolution? Calculate(string latex, CancellationToken token)
     {
+        if (PolynomialIntegralSolver.Solve(latex, token) is { } exact) return exact;
         try { return Executable is { } path ? new SymbolicMathSolver(path).SolveAsync(latex, token).GetAwaiter().GetResult() : null; }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException) { return null; }
     }

@@ -225,16 +225,16 @@ internal static class DrawingSmokeTest
         Check(variable.FamilyName == "STIX Two Text" && variable.Style == FontStyle.Italic && variable.CharacterToGlyphMap.TryGetGlyph('x', out _), "Embedded italic math variable font did not load.");
         var formulaPreview = new StackPanel { Spacing = 16 };
         formulaPreview.Children.Add(new TextBlock { Text = "English · русский · 123", FontFamily = InkFonts.Face("Inter").FontFamily, FontSize = 28 });
-        foreach (var formula in new[] { "y=3x+2", "\\frac{1}{x^{2}}", "\\left\\{\\begin{matrix}\\sqrt{3}\\\\\\sqrt{6}\\end{matrix}\\right." })
+        foreach (var formula in new[] { "y=3x+2", "\\frac{1}{x^{2}}", "\\left\\{\\begin{matrix}\\sqrt{3}\\\\\\sqrt{6}\\end{matrix}\\right.", @"\int\limits_{1}^{10}x^2\mathrm{dx}=333" })
         {
             var geometry = MathTypesetting.Build(formula, 32);
             Check(geometry is not null && double.IsFinite(geometry.Bounds.Width) && double.IsFinite(geometry.Bounds.Height) && geometry.Bounds.Width > 0 && geometry.Bounds.Height > 0,
                 "Formula geometry is empty or nonfinite.");
             formulaPreview.Children.Add(new Avalonia.Controls.Shapes.Path { Data = geometry, Fill = Brushes.Black, Width = geometry!.Bounds.Width, Height = geometry.Bounds.Height, Stretch = Stretch.Uniform, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left });
         }
-        var preview = new Border { Width = 640, Height = 400, Padding = new Thickness(24), Background = Brushes.White, Child = formulaPreview };
-        preview.Measure(new Size(640, 400)); preview.Arrange(new Rect(0, 0, 640, 400));
-        using (var bitmap = new RenderTargetBitmap(new PixelSize(640, 400), new Vector(96, 96)))
+        var preview = new Border { Width = 640, Height = 560, Padding = new Thickness(24), Background = Brushes.White, Child = formulaPreview };
+        preview.Measure(new Size(640, 560)); preview.Arrange(new Rect(0, 0, 640, 560));
+        using (var bitmap = new RenderTargetBitmap(new PixelSize(640, 560), new Vector(96, 96)))
         {
             bitmap.Render(preview);
             if (Environment.GetEnvironmentVariable("BLURMASK_SMOKE_ARTIFACTS") is { Length: > 0 } output)

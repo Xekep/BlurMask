@@ -146,6 +146,7 @@ internal sealed class SettingsWindow : Window
             catch (Exception ex) when (ex is InvalidOperationException or System.ComponentModel.Win32Exception) { _message.Text = ex.Message; }
         };
         general.Children.Add(solverStatus); general.Children.Add(chooseSolver); general.Children.Add(getSolver);
+        general.Children.Add(new TextBlock { Text = UiText.T("Определённые интегралы полиномов вычисляются без Giac."), FontSize = 12, Foreground = Brushes.Gray, TextWrapping = TextWrapping.Wrap });
         general.Children.Add(new TextBlock { Text = UiText.T("Giac устанавливается отдельно. Допишите = для вычисления; готовое уравнение можно выделить и решить кнопкой = в меню курсора."), FontSize = 12, Foreground = Brushes.Gray, TextWrapping = TextWrapping.Wrap });
         _enabled = new CheckBox { Content = UiText.T("Включить горячие клавиши"), IsChecked = _draft.HotkeysEnabled, Margin = new Thickness(0, 10, 0, 0) };
         general.Children.Add(_enabled);

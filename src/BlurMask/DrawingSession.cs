@@ -66,10 +66,18 @@ internal sealed class DrawingSession : IDisposable
     private readonly AiPenRecognizer _desktopAi, _canvasAi;
     internal void RecognizeAiInk() { FinishInput(); _desktopAi.Flush(); _canvasAi.Flush(); }
 
-    internal bool CanSolveSelectedMath => AiMathSolver.Executable is not null &&
+    internal bool CanSolveSelectedMath =>
         !(Target == DrawingTarget.Canvas && Canvas?.ReadOnly == true) &&
         Document.Marks.Any(m => (Target == DrawingTarget.Canvas ? CanvasSelection : DesktopSelection).SelectedIds.Contains(m.Id) &&
             m.Tool == InkTool.Text && (m.Font == "STIX Two Math" || AiAutomaticLayout.Mathematical(m.Text)));
+
+    private void ShowMathCalculationFailure()
+    {
+        if (_disposed) return;
+        Toolbar.ShowMessage(UiText.T("Не удалось вычислить"), UiText.T(AiMathSolver.Executable is null
+            ? "Проверьте распознанную формулу. Для сложных вычислений подключите Giac в настройках."
+            : "Проверьте распознанную формулу: эта запись не поддерживается или результат не найден."));
+    }
 
     internal async Task SolveSelectedMathAsync()
     {
@@ -81,12 +89,17 @@ internal sealed class DrawingSession : IDisposable
             (m.Font == "STIX Two Math" || AiAutomaticLayout.Mathematical(m.Text))).Take(16).ToArray();
         _mathSolve?.Cancel();
         using var cancellation = new CancellationTokenSource(); _mathSolve = cancellation;
+        bool failureShown = false;
         try
         {
             foreach (var original in sources)
             {
                 var text = original.Text; var request = text.TrimEnd().TrimEnd('=').TrimEnd();
                 var solution = await Task.Run(() => AiMathSolver.Calculate(request, cancellation.Token), cancellation.Token);
+                if (!_disposed && !cancellation.IsCancellationRequested && original.Text == text && solution is null && !failureShown)
+                {
+                    ShowMathCalculationFailure(); failureShown = true;
+                }
                 if (_disposed || cancellation.IsCancellationRequested || original.Text != text || solution is null ||
                     !document.Marks.Contains(original) || document.HasActiveEdit || ReferenceEquals(document, CanvasDocument) && Canvas?.ReadOnly == true) continue;
                 var calculated = request + (solution.IsEquation ? "\\Rightarrow " : "=") + solution.LaTex;
@@ -109,6 +122,8 @@ internal sealed class DrawingSession : IDisposable
         DesktopSelection = new(DesktopDocument);
         CanvasSelection = new(CanvasDocument);
         _desktopAi = new(DesktopDocument, () => Settings.AiMode); _canvasAi = new(CanvasDocument, () => Settings.AiMode);
+        _desktopAi.CalculationFailed += ShowMathCalculationFailure;
+        _canvasAi.CalculationFailed += ShowMathCalculationFailure;
         _newMask = newMask;
         _exit = exit;
         _selectMask = selectMask;

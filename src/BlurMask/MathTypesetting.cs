@@ -57,11 +57,22 @@ internal static class MathTypesetting
             return new(geometry, lead + content.Width + size * .06, height + size * .08, content.Baseline + size * .08);
         }
     }
-    private sealed record Script(Node Base, Node? Sub, Node? Sup) : Node
+    private sealed record Script(Node Base, Node? Sub, Node? Sup, bool UseLimits = false) : Node
     {
         internal override Box Layout(double size)
         {
             var body = Base.Layout(size); var sub = Sub?.Layout(size * .65); var sup = Sup?.Layout(size * .65);
+            if (UseLimits)
+            {
+                double width = Math.Max(body.Width, Math.Max(sub?.Width ?? 0, sup?.Width ?? 0));
+                double top = sup is null ? 0 : sup.Height + size * .12;
+                double bottom = sub is null ? 0 : sub.Height + size * .12;
+                var limits = new GeometryGroup();
+                if (sup is not null) Add(limits, sup, (width - sup.Width) / 2, 0);
+                Add(limits, body, (width - body.Width) / 2, top);
+                if (sub is not null) Add(limits, sub, (width - sub.Width) / 2, top + body.Height + size * .12);
+                return new(limits, width, top + body.Height + bottom, top + body.Baseline);
+            }
             var up = sup?.Height * .6 ?? 0; var down = sub?.Height * .6 ?? 0;
             var geometry = new GeometryGroup(); Add(geometry, body, 0, up);
             if (sup is not null) Add(geometry, sup, body.Width, 0);
@@ -132,6 +143,9 @@ internal static class MathTypesetting
             {
                 if (++_nodes > 1024) throw new FormatException("Formula node limit.");
                 var c = source[Position];
+                // TeX whitespace separates commands; it must not become the
+                // base of a following upper/lower limit.
+                if (char.IsWhiteSpace(c)) { Position++; continue; }
                 if (c is '^' or '_')
                 {
                     Position++; if (nodes.Count == 0) throw new FormatException("Missing script base.");
@@ -150,6 +164,10 @@ internal static class MathTypesetting
                 var command = Command();
                 switch (command)
                 {
+                    case "limits": case "nolimits":
+                        if (nodes.Count == 0 || nodes[^1] is not Run { Text: "∫" or "∑" or "∏" or "lim" })
+                            throw new FormatException("Limit placement needs a large operator.");
+                        nodes[^1] = new Script(nodes[^1], null, null, command == "limits"); break;
                     case "mathrm": case "operatorname": case "text":
                         Require("{"); var wordStart = Position;
                         while (Position < source.Length && (char.IsAsciiLetter(source[Position]) || source[Position] == ' ')) Position++;

@@ -5,6 +5,13 @@ var fixtures = new (string Input, string Cas)[]
 {
     (@"\int x^2 dx", "integrate((x^2),x)"),
     (@"\int_0^1 x^2 dx", "integrate((x^2),x,0,1)"),
+    (@"\int_{1}^{10} x^2 dx", "integrate((x^2),x,1,10)"),
+    (@"\int\limits_{1}^{10} x^2 \,\mathrm{dx}", "integrate((x^2),x,1,10)"),
+    (@"\int^ {10}_{1} x^2 \mathrm{d}x", "integrate((x^2),x,1,10)"),
+    (@"\int_1^{10} dx", "integrate(1,x,1,10)"),
+    (@"\int_1^{10} d{x}", "integrate(1,x,1,10)"),
+    (@"\int_1^{10} x^2 \text{dx}", "integrate((x^2),x,1,10)"),
+    (@"\int_1^{10} \theta^2 d\theta", "integrate((theta^2),theta,1,10)"),
     (@"\frac{d}{dx}\sin(x)", "diff(sin(x),x,1)"),
     (@"\frac{d^2}{dx^2}x^3", "diff((x^3),x,2)"),
     (@"\lim_{x\to 0}\frac{\sin x}{x}", "limit((sin(x)/x),x,0)"),
@@ -32,12 +39,46 @@ foreach (var (input, expected) in fixtures)
     var actual = new MathExpressionParser(input).Parse().Cas;
     if (actual != expected) throw new Exception($"Math grammar differs for {input}: {actual}");
 }
-foreach (var forbidden in new[] { @"\system{whoami}", "read(\"secret\")", "x;system(1)", "x:=1", "__import__('os')", "x\0", new string('-', 4096) + "x", new string('-', 200) + "x", string.Join('^', Enumerable.Repeat("x", 200)), new string('(', 100) + "x" + new string(')', 100), "2+", @"\begin{matrix}1&2\\3\end{matrix}" })
+foreach (var forbidden in new[] { @"\int_1^{10} dx^2", @"\int_1^{10} x dx_2", @"\int_1 x^2 dx", @"\system{whoami}", "read(\"secret\")", "x;system(1)", "x:=1", "__import__('os')", "x\0", new string('-', 4096) + "x", new string('-', 200) + "x", string.Join('^', Enumerable.Repeat("x", 200)), new string('(', 100) + "x" + new string(')', 100), "2+", @"\begin{matrix}1&2\\3\end{matrix}" })
 {
     try { new MathExpressionParser(forbidden).Parse(); throw new Exception("Unsafe/invalid input accepted: " + forbidden); }
     catch (FormatException) { }
 }
 Console.WriteLine($"PASS math grammar: {fixtures.Length} translations, command injection and complexity guards");
+var polynomialFixtures = new (string Input, string Expected)[]
+{
+    (@"\int_{1}^{10} x^2 dx", "333"),
+    (@"\int\limits_{1}^{10} x^2 \mathrm{dx}", "333"),
+    (@"∫_1^{10} x^2 dx", "333"),
+    (@"\int^{10}_{1} x^2 \text{d}x", "333"),
+    (@"\int_1^{10} dx", "9"),
+    (@"\int_1^{10} d{x}", "9"),
+    (@"\int_1^{10} \theta^2 d\theta", "333"),
+    (@"\int_1^{10} 5 dx", "45"),
+    (@"\int_1^{10} (x+1)^2 dx", "441"),
+    (@"\int_1^{10} (x^2-2x+1) dx", "243"),
+    (@"\int_{-0.5}^{0.5} x^2 dx", @"\frac{1}{12}"),
+    (@"\int_{10}^{1} x^2 dx", "-333"),
+    (@"\int_2^2 x^2 dx", "0"),
+    (@"\int_0^2 (2x^3-x+1) dx", "8"),
+    (@"\int_1^{10} \frac{x^2}{2} dx", @"\frac{333}{2}"),
+    (@"\int_0^1 (x+1)^4 dx", @"\frac{31}{5}"),
+    (@"\int_0^3 2 dx", "6"),
+    (@"\int_0^3 0 dx", "0"),
+    (@"\int_1^{10} x^0 dx", "9"),
+    (@"\int_1^2 0.123x dx", @"\frac{369}{2000}")
+};
+foreach (var (input, expected) in polynomialFixtures)
+    if (PolynomialIntegralSolver.Solve(input)?.LaTex != expected) throw new Exception("Built-in exact integral differs: " + input);
+foreach (var input in new[] { @"\int_0^1 \sin x dx", @"\int_0^1 \frac{1}{x}dx", @"\int_0^a x dx", @"\int_0^1 xy dx", @"\int_0^1 0^0 dx", @"\int_0^1 x^{33} dx", @"\int_0^1 \frac{1}{0}dx", @"\int_1^{10} dx^2", @"\int_0^1 e^2 de", "1+1", @"\system{whoami}" })
+    if (PolynomialIntegralSolver.Solve(input) is not null) throw new Exception("Unsupported/ambiguous local integral computed: " + input);
+using (var canceled = new CancellationTokenSource())
+{
+    canceled.Cancel();
+    try { PolynomialIntegralSolver.Solve(polynomialFixtures[0].Input, canceled.Token); throw new Exception("Local integral cancellation lost."); }
+    catch (OperationCanceledException) { }
+}
+Console.WriteLine($"PASS built-in exact rational integrals: {polynomialFixtures.Length} fixtures, unsupported/ambiguous notation and cancellation");
 if (new MathExpressionParser("plot(x)").Parse().Cas.Contains("plot(", StringComparison.Ordinal)) throw new Exception("Arbitrary function name passed to CAS.");
 if (args.Length == 0) return;
 var solver = new SymbolicMathSolver(Path.GetFullPath(args[0]));
@@ -47,6 +88,10 @@ var actualFixtures = new (string Input, string Expected)[]
 {
     (@"\int x^2 dx", @"\frac{x^{3}}{3}+C"),
     (@"\int_0^1 x^2 dx", @"\frac{1}{3}"),
+    (@"\int_{1}^{10} x^2 dx", "333"),
+    (@"\int\limits_1^{10} x^2 \mathrm{dx}", "333"),
+    (@"\int_1^{10} dx", "9"),
+    (@"\int_1^{10} \theta^2 d\theta", "333"),
     (@"\frac{d}{dx}\sin(x)", @"\cos x"),
     (@"\frac{d^2}{dx^2}x^3", "6 x"),
     (@"\lim_{x\to 0}\frac{\sin x}{x}", "1"),
@@ -75,6 +120,15 @@ foreach (var (input, expected) in actualFixtures)
 {
     var value = await solver.SolveAsync(input);
     if (value?.LaTex != expected) throw new Exception($"Native CAS differs: {input} → {value?.LaTex ?? "null"}; expected {expected}");
+}
+foreach (var (input, expected) in polynomialFixtures)
+{
+    // Giac treats decimal literals as floating point. Compare exact equivalent
+    // rational inputs against our decimal-as-rational integration path.
+    var exactInput = input.Replace("-0.5", "-1/2", StringComparison.Ordinal).Replace("0.5", "1/2", StringComparison.Ordinal)
+        .Replace("0.123", @"\frac{123}{1000}", StringComparison.Ordinal);
+    var actual = (await solver.SolveAsync(exactInput))?.LaTex;
+    if (actual != expected) throw new Exception($"Independent Giac/local polynomial comparison differs: {input} → {actual}; expected {expected}");
 }
 using var cancel = new CancellationTokenSource(); cancel.Cancel();
 try { await solver.SolveAsync("1+1", cancel.Token); throw new Exception("Cancellation lost."); } catch (OperationCanceledException) { }

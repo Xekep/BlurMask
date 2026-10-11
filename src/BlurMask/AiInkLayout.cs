@@ -10,6 +10,7 @@ internal static class AiInkLayout
     internal sealed record Result(InkMark[] Strokes, InkMark Text, float Confidence = 1)
     {
         internal string? SizingText { get; set; }
+        internal bool MathCalculationFailed { get; set; }
     }
     private sealed class Group(InkMark stroke)
     {

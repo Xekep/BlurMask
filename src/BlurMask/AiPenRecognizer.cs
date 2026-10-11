@@ -14,6 +14,7 @@ internal sealed class AiPenRecognizer(InkDocument document, Func<string> recogni
     private int _generation;
     private CancellationTokenSource? _work;
     internal Task Pending { get; private set; } = Task.CompletedTask;
+    internal event Action? CalculationFailed;
     internal void Pause()
     {
         if (_disposed) return;
@@ -70,6 +71,7 @@ internal sealed class AiPenRecognizer(InkDocument document, Func<string> recogni
                     AiTypesetLayout.Fit(result.Text, bounds, result.SizingText, document.Marks);
                     _batch.Apply(result);
                 }
+                if (results.Any(result => result.MathCalculationFailed)) CalculationFailed?.Invoke();
             });
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }

@@ -34,7 +34,11 @@ internal static class AiMathLayout
             var mark = new InkMark(InkTool.Text, first.Color, first.Width, bounds.TopLeft)
             { Id = first.Id, Text = calculated, Font = "STIX Two Math", FontSize = Math.Clamp(bounds.Height, 8, 300), FadeSeconds = first.FadeSeconds };
             mark.AddPoint(bounds.BottomRight + new Avalonia.Vector(Math.Min(100000 - bounds.Right, ResultWidth(latex, calculated, bounds.Height)), 0));
-            results.Add(new(sources, mark, result.Confidence) { SizingText = latex });
+            results.Add(new(sources, mark, result.Confidence)
+            {
+                SizingText = latex,
+                MathCalculationFailed = calculate && calculated == latex && HasCalculationRequest(latex)
+            });
         }
         return results;
     }
@@ -58,12 +62,23 @@ internal static class AiMathLayout
         Func<string, CancellationToken, InkMath.Solver.MathSolution?>? solve = null)
     {
         var original = result.Text.Text;
+        result.MathCalculationFailed = false;
         var calculated = WithSolvedResult(original, token, solve);
-        if (calculated == original) return;
+        if (calculated == original)
+        {
+            result.MathCalculationFailed = HasCalculationRequest(original);
+            return;
+        }
         result.SizingText = original;
         var bounds = result.Text.Bounds;
         result.Text.Text = calculated;
         result.Text.AddPoint(bounds.BottomRight + new Avalonia.Vector(Math.Min(100000 - bounds.Right, ResultWidth(original, calculated, bounds.Height)), 0));
+    }
+
+    internal static bool HasCalculationRequest(string expression)
+    {
+        int equal = expression.LastIndexOf('=');
+        return equal > 0 && expression[(equal + 1)..].Trim().Length == 0;
     }
 
     internal static string WithSolvedResult(string expression, CancellationToken token = default,
