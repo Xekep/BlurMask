@@ -2,7 +2,7 @@
 
 `LegacyPreparedResultScore.Evaluate` restores the ordinary scalar cost stage of
 `180225fb0`. It accepts explicit cumulative path cost, current candidate cost,
-previously accounted signed64 cost, source node end index, extra-node flag,
+explicit signed64 reference cost, source node end index, extra-node flag,
 source multiplier and language cost. It returns separate normalized path and
 language channels, log mass and unnormalised exponential mass.
 It does not select a word, change the dictionary beam or decide whether AI-pero
@@ -11,11 +11,19 @@ should replace handwriting. Mass can exceed1 and is not acceptance confidence.
 The checked branch has no alternate-source record (`param2+68 == null`) and no
 detailed-cost bookkeeping (`runtime+2368 ==0`). Native first adds signed32
 `runtime2520[sourceNodeEnd] + candidateRecord4`, converts that sum to float,
-then subtracts the independently float-converted signed64 context offset at
+then subtracts the independently float-converted signed64 reference cost at
 `outputContext78`. It divides by
 `(sourceNodeEnd +1 + (configurationC4 !=0))*8192`.
 This denominator describes native source nodes; it is not proven to equal
 letters, glyph count or the independently prepared cut-atom count.
+
+The reference-cost producer is `2271f0`: the result context starts with0 at
+offset78. For its first output alternative, when both configuration99 and
+configurationA8 are0, it replaces that field with the sign-extended best
+terminal path cost selected by `2257c0`. The API name `PreviouslyAccountedCost`
+remains a generic explicit input; this field must not be interpreted as an
+accumulated cost of prior text. The complete terminal-path selection policy
+and alternate source construction are not part of this scalar API.
 
 The language channel independently converts its supplied signed32 cost to float
 and multiplies by1/8192. The result exponent is the negative explicit multiplier

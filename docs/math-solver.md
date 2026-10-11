@@ -95,8 +95,13 @@ result typesetting, trailing-equals policy, rejection before CAS, complete-regio
 coverage and written-RHS preservation.
 
 This is solver verification, not proof that all those expressions are recognized
-accurately from handwriting. Real Math2/ORT 1.23.2 inference was separately tested
-on three public raw-stroke fixtures: `1`, `y=3x+2`, and a bracketed two-row root
-matrix. The equation also passed the application's automatic route, replacement,
-history and persistence checks. Complex handwritten calculus still needs a larger
-independent stroke corpus; synthetic structural-token tests verify formatting only.
+accurately from handwriting. A separate [actual handwriting corpus audit](math-ocr-corpus-audit.md)
+checks Math2/ORT 1.23.2 on fourteen independently labeled trajectories covering
+integrals, derivatives, matrices, limits and a quadratic-root expression. Ten
+match their labels after limited notation normalization; four contain genuine
+high-confidence symbol errors. Managed and Windows NativeAOT results agree.
+The application accepts fourteen direct mathematical candidates and automatically
+routes thirteen; one correctly decoded integral stays handwritten because the
+raw-content classifier falls below the confidence gate. A larger held-out corpus
+and recovered native search/context policies are still needed. Synthetic
+structural-token tests verify formatting only.
