@@ -9,7 +9,7 @@ No vendor code is executed by the library or the controls.
 The evidence is static decompilation and PE pointer/byte inspection of
 MyScriptText.dll and MyScriptEngine.dll. Addresses below refer to that inspected
 x64 snapshot, not an API guaranteed across vendor versions. The private analysis
-exports live under `.artifacts/myscript-analysis/output/RussianMaskProducerNext`.
+exports live under `research/myscript/output/RussianMaskProducerNext`.
 
 ## Proven producer and operation order
 

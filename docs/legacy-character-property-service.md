@@ -137,7 +137,7 @@ asset is distributed by this batch.
 
 ```powershell
 python tools/handwriting/audit_legacy_character_properties.py `
-  .artifacts/myscript-analysis/sdk/build/x64/MyScriptEngine.dll `
+  research/myscript/sdk/build/x64/MyScriptEngine.dll `
   D:/UnicodeData-9.0.0.txt D:/unicode-service-report.json
 python tools/LegacySymbolRange.Probe/reference_controls.py D:/symbol-range.json
 dotnet run --project tools/LegacySymbolRange.Probe -- D:/symbol-range.json

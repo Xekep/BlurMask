@@ -62,8 +62,8 @@ strict majority, source ordering, the native500-point limit, malformed coordinat
 invalid ordinals and cancellation.
 
 ```powershell
-python tools/LegacySourceEnclosure.Probe/reference_controls.py .artifacts/myscript-analysis/output/RussianAssetsSearch/legacy-source-enclosure-controls.json
-dotnet run --project tools/LegacySourceEnclosure.Probe/LegacySourceEnclosure.Probe.csproj -c Release -- .artifacts/myscript-analysis/output/RussianAssetsSearch/legacy-source-enclosure-controls.json
+python tools/LegacySourceEnclosure.Probe/reference_controls.py research/myscript/output/RussianAssetsSearch/legacy-source-enclosure-controls.json
+dotnet run --project tools/LegacySourceEnclosure.Probe/LegacySourceEnclosure.Probe.csproj -c Release -- research/myscript/output/RussianAssetsSearch/legacy-source-enclosure-controls.json
 ```
 
 These controls verify the restored geometry primitive, not Russian handwriting

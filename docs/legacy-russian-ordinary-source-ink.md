@@ -75,6 +75,6 @@ computed `[0,0,0]` scores. That result is specific to that ink, not a universal
 source probability and not evidence of handwriting recognition accuracy.
 
 ```powershell
-python tools/LegacyOrdinarySource.Probe/reference_controls.py .artifacts/myscript-analysis/output/RussianAssetsSearch/legacy-ordinary-source-controls.json
-dotnet run --project tools/LegacyOrdinarySource.Probe/LegacyOrdinarySource.Probe.csproj -c Release -- .artifacts/myscript-analysis/output/RussianAssetsSearch/legacy-ordinary-source-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+python tools/LegacyOrdinarySource.Probe/reference_controls.py research/myscript/output/RussianAssetsSearch/legacy-ordinary-source-controls.json
+dotnet run --project tools/LegacyOrdinarySource.Probe/LegacyOrdinarySource.Probe.csproj -c Release -- research/myscript/output/RussianAssetsSearch/legacy-ordinary-source-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
 ```

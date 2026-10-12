@@ -43,8 +43,8 @@ points are read in place and remain unchanged; output retains the exact
 prepared source object and selected range provenance.
 
 ```powershell
-python tools/LegacyPreparedNormalization.Probe/reference_controls.py .artifacts/myscript-analysis/output/RussianAssetsSearch/legacy-prepared-normalization-controls.json
-dotnet run --project tools/LegacyPreparedNormalization.Probe -c Release -- --controls .artifacts/myscript-analysis/output/RussianAssetsSearch/legacy-prepared-normalization-controls.json
+python tools/LegacyPreparedNormalization.Probe/reference_controls.py research/myscript/output/RussianAssetsSearch/legacy-prepared-normalization-controls.json
+dotnet run --project tools/LegacyPreparedNormalization.Probe -c Release -- --controls research/myscript/output/RussianAssetsSearch/legacy-prepared-normalization-controls.json
 dotnet run --project tools/LegacyPreparedNormalization.Probe -c Release -- --resource models/ru-RU/ru_RU-ak-cur.lite.res
 ```
 

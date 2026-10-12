@@ -37,5 +37,5 @@ python tools/LegacyAggregateDictionaryQuery.Probe/reference_controls.py D:/BlurM
 dotnet run --project tools/LegacyAggregateDictionaryQuery.Probe -c Release -- D:/BlurMask-build-artifacts-20261011/aggregate-dictionary-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
 dotnet publish tools/LegacyAggregateDictionaryQuery.Probe -c Release -r win-x64 -p:PublishAot=true -o D:/BlurMask-build-artifacts-20261011/aggregate-dictionary-aot
 & D:/BlurMask-build-artifacts-20261011/aggregate-dictionary-aot/LegacyAggregateDictionaryQuery.Probe.exe D:/BlurMask-build-artifacts-20261011/aggregate-dictionary-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
-python tools/handwriting/audit_ordinary_dictionary_owner.py .artifacts/myscript-analysis/sdk/build/x64/MyScriptText.dll D:/BlurMask-build-artifacts-20261011/ordinary-dictionary-owner-audit.json
+python tools/handwriting/audit_ordinary_dictionary_owner.py research/myscript/sdk/build/x64/MyScriptText.dll D:/BlurMask-build-artifacts-20261011/ordinary-dictionary-owner-audit.json
 ```

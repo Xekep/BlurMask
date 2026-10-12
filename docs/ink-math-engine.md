@@ -119,7 +119,7 @@ constructed tiny ONNX Identity graph (no vendor weights), including tensor
 reading, zero-length caches, inference, termination and releases. It is suitable
 for platform CI even when recognition models are unavailable.
 Private analysis fixtures, model provenance and Windows results are under
-`.artifacts/myscript-analysis/output/MathIntegrationStage5`; they are excluded
+`research/myscript/output/MathIntegrationStage5`; they are excluded
 from Git and releases.
 
 ## Russian text preparation
@@ -208,7 +208,7 @@ tools/LegacyInk.Probe/isolated-ru-i.json activations.json`, or `--raw-controls`
 with a local reference control file. `--score-controls controls.json` checks
 caller-supplied raw/probability/log-score vectors. Private static exports and
 controls are
-ignored under `.artifacts/myscript-analysis/output/RussianAssetsSearch` and
+ignored under `research/myscript/output/RussianAssetsSearch` and
 `RussianExtractorStage2` through `RussianExtractorStage5`.
 
 The [legacy lexical backend](legacy-russian-lexicon.md) now reads the actual

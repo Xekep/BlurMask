@@ -65,7 +65,7 @@ For reproducible **static preparation only**, the optional exporter reads the
 SHA-pinned original PE and writes the same JSON; it never loads vendor code:
 
 ```powershell
-python tools/handwriting/export_character_line_categories.py .artifacts/myscript-analysis/sdk/build/x64/MyScriptDocument.dll models/line-geometry/character-line-categories.json
+python tools/handwriting/export_character_line_categories.py research/myscript/sdk/build/x64/MyScriptDocument.dll models/line-geometry/character-line-categories.json
 ```
 
 Installing the asset into every application package is a separate build/runtime

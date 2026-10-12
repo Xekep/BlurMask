@@ -82,8 +82,8 @@ Runtime enabled-family selection and native full word search remain separate.
 ## Checks
 
 ```powershell
-python tools/LegacyDynamicWeights.Probe/reference_controls.py .artifacts/myscript-analysis/output/RussianAssetsSearch/legacy-dynamic-weights-controls.json
-dotnet run --project tools/LegacyDynamicWeights.Probe -c Release -- --controls .artifacts/myscript-analysis/output/RussianAssetsSearch/legacy-dynamic-weights-controls.json
+python tools/LegacyDynamicWeights.Probe/reference_controls.py research/myscript/output/RussianAssetsSearch/legacy-dynamic-weights-controls.json
+dotnet run --project tools/LegacyDynamicWeights.Probe -c Release -- --controls research/myscript/output/RussianAssetsSearch/legacy-dynamic-weights-controls.json
 dotnet run --project tools/LegacyDynamicWeights.Probe -c Release -- --resource models/ru-RU/ru_RU-ak-cur.lite.res
 ```
 

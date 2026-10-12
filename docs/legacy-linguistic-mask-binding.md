@@ -94,7 +94,7 @@ Optional static audit needs a separately available, hash-matching DLL; the tool
 does not download, load or redistribute it:
 
 ```powershell
-python tools/handwriting/audit_legacy_linguistic_mask_binding.py --text-dll .artifacts/myscript-analysis/sdk/build/x64/MyScriptText.dll --acoustic-res models/ru-RU/ru_RU-ak-cur.lite.res --out D:/BlurMask-build-artifacts-20261011/linguistic-mask-binding/static-report.json
+python tools/handwriting/audit_legacy_linguistic_mask_binding.py --text-dll research/myscript/sdk/build/x64/MyScriptText.dll --acoustic-res models/ru-RU/ru_RU-ak-cur.lite.res --out D:/BlurMask-build-artifacts-20261011/linguistic-mask-binding/static-report.json
 ```
 
 ## Remaining boundary

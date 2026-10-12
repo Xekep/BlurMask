@@ -77,8 +77,8 @@ scope explicitly enables a different primitive branch from earlier all-partial
 diagnostics, so their top candidates need not match.
 
 ```powershell
-python tools/LegacyOrdinaryCutSource.Probe/reference_controls.py .artifacts/myscript-analysis/output/RussianAssetsSearch/legacy-ordinary-cut-source-controls.json
-dotnet run --project tools/LegacyOrdinaryCutSource.Probe -c Release -- .artifacts/myscript-analysis/output/RussianAssetsSearch/legacy-ordinary-cut-source-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+python tools/LegacyOrdinaryCutSource.Probe/reference_controls.py research/myscript/output/RussianAssetsSearch/legacy-ordinary-cut-source-controls.json
+dotnet run --project tools/LegacyOrdinaryCutSource.Probe -c Release -- research/myscript/output/RussianAssetsSearch/legacy-ordinary-cut-source-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
 ```
 
 Upstream group/baseline processing, ordinary source resampling, opaque/custom

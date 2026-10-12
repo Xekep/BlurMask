@@ -21,3 +21,6 @@ src/BlurMask.Server/.env
 src/BlurMask.Server/.data/
 src/BlurMask.Server/tests/.data/
 src/BlurMask.Server/node_modules/
+
+# Local static-analysis sources, SDK and Ghidra projects.
+research/myscript/

@@ -92,7 +92,7 @@ initial raw x-height or native font placement has been integrated into the UI.
 
 ```powershell
 python tools/LegacyCharacterLineCategories.Probe/reference_controls.py D:/BlurMask-build-artifacts-20261011/character-line-category-controls.json
-python tools/handwriting/audit_character_line_categories.py .artifacts/myscript-analysis/sdk/build/x64/MyScriptDocument.dll D:/BlurMask-build-artifacts-20261011/character-line-category-audit.json
+python tools/handwriting/audit_character_line_categories.py research/myscript/sdk/build/x64/MyScriptDocument.dll D:/BlurMask-build-artifacts-20261011/character-line-category-audit.json
 dotnet run --project tools/LegacyCharacterLineCategories.Probe -c Release -- D:/BlurMask-build-artifacts-20261011/character-line-category-controls.json D:/BlurMask-build-artifacts-20261011/character-line-category-audit.json
 dotnet publish tools/LegacyCharacterLineCategories.Probe -c Release -r win-x64 -p:PublishAot=true -o D:/BlurMask-build-artifacts-20261011/character-line-category-aot
 D:/BlurMask-build-artifacts-20261011/character-line-category-aot/LegacyCharacterLineCategories.Probe.exe D:/BlurMask-build-artifacts-20261011/character-line-category-controls.json D:/BlurMask-build-artifacts-20261011/character-line-category-audit.json

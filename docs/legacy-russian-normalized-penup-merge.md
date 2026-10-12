@@ -26,8 +26,8 @@ still enforce their explicit pre-merge bound. This standalone checked stage
 does not silently expand that endpoint or imply native chronology resolution.
 
 ```powershell
-python tools/LegacyPenUpMerge.Probe/reference_controls.py .artifacts/myscript-analysis/output/RussianAssetsSearch/legacy-penup-merge-controls.json
-dotnet run --project tools/LegacyPenUpMerge.Probe -c Release -- --controls .artifacts/myscript-analysis/output/RussianAssetsSearch/legacy-penup-merge-controls.json
+python tools/LegacyPenUpMerge.Probe/reference_controls.py research/myscript/output/RussianAssetsSearch/legacy-penup-merge-controls.json
+dotnet run --project tools/LegacyPenUpMerge.Probe -c Release -- --controls research/myscript/output/RussianAssetsSearch/legacy-penup-merge-controls.json
 ```
 
 512 independent own unique-gap fixtures compare retained boundaries against

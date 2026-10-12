@@ -76,7 +76,7 @@ without loading either DLL. Private focused decompilation evidence is under
 `DocumentSourceItemCopyNext`, and `TextResultLineOwnerNext`.
 
 ```powershell
-python tools/handwriting/audit_recognized_source_line_pipeline.py .artifacts/myscript-analysis/sdk/build/x64 D:/BlurMask-build-artifacts-20261011/recognized-source-line-pipeline-audit.json
+python tools/handwriting/audit_recognized_source_line_pipeline.py research/myscript/sdk/build/x64 D:/BlurMask-build-artifacts-20261011/recognized-source-line-pipeline-audit.json
 ```
 
 The reusable metric/model APIs require only committed portable data, not these

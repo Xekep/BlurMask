@@ -87,7 +87,7 @@ The graph offset identifies the actual nested type2b4 object. A control file has
 `{"cases":[{"labels":[94,82,94,82],"terminal":true}]}`. Label IDs depend on the
 parent lexical alphabet and must not be copied from the acoustic alphabet.
 Managed .NET and Windows Native AOT pass the same checks. Private controls and
-static exports remain ignored under `.artifacts/myscript-analysis/output`.
+static exports remain ignored under `research/myscript/output`.
 
 Full Russian handwritten words and joined cursive remain unfinished. The next
 required work is calibrated acoustic ensembles, stroke segmentation, baseline

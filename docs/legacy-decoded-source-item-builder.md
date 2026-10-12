@@ -93,7 +93,7 @@ the current evidence.
 ## Reproduction and remaining work
 
 ```powershell
-python tools/handwriting/audit_decoded_source_item_builder.py .artifacts/myscript-analysis/sdk/build/x64 D:/BlurMask-build-artifacts-20261011/decoded-source-item-builder-audit.json
+python tools/handwriting/audit_decoded_source_item_builder.py research/myscript/sdk/build/x64 D:/BlurMask-build-artifacts-20261011/decoded-source-item-builder-audit.json
 ```
 
 The auditor verifies12 SHA-pinned direct-call and descriptor/table bindings,
