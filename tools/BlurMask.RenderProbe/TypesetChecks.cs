@@ -2,6 +2,7 @@ using System.Globalization;
 using Avalonia;
 using Avalonia.Media;
 using BlurMask.Shared;
+using InkRecognition;
 
 namespace BlurMask;
 
@@ -44,10 +45,35 @@ internal static class TypesetChecks
         var next = Create("world"); AiTypesetLayout.Fit(next, nextInk, null, [word]); Natural(next);
         if (next.FontSize != word.FontSize || Math.Abs(Baseline(next) - Baseline(word)) > .00001)
             throw new InvalidOperationException("Nearby words did not share font size and baseline.");
+        // Use real embedded glyph metrics: changing just one ascender must not
+        // enlarge a row of otherwise equally sized handwriting.
+        var bodies = new[] { new Rect(50, 80, 12, 20), new Rect(72, 80, 12, 20), new Rect(94, 80, 12, 20) };
+        var mixed = bodies.Append(new Rect(116, 40, 12, 60)).ToArray();
+        var ordinary = Create("hello"); AiTypesetLayout.Fit(ordinary, new Rect(50, 80, 80, 20), null, [], bodies); Natural(ordinary);
+        var tall = Create("hello"); AiTypesetLayout.Fit(tall, new Rect(50, 40, 80, 60), null, [], mixed); Natural(tall);
+        if (ordinary.FontSize != tall.FontSize || Math.Abs(Baseline(ordinary) - Baseline(tall)) > .00001)
+            throw new InvalidOperationException("One tall handwriting component changed the row's font size or baseline.");
+        var punctuated = mixed.Concat([new Rect(137, 97, 3, 3), new Rect(50, 65, 90, 2)]).ToArray();
+        var dots = Create("hello."); AiTypesetLayout.Fit(dots, new Rect(50, 40, 90, 60), null, [], punctuated); Natural(dots);
+        if (dots.FontSize != ordinary.FontSize)
+            throw new InvalidOperationException("A dot or detached crossbar shrank the writing scale.");
+        var bodyEstimate = AiTypesetLayout.WritingBody(mixed)!.Value;
+        var scaledEstimate = AiTypesetLayout.WritingBody(mixed.Select(b => new Rect(b.X * 3, b.Y * 3, b.Width * 3, b.Height * 3)).ToArray())!.Value;
+        if (scaledEstimate.Height != bodyEstimate.Height * 3 || scaledEstimate.Baseline != bodyEstimate.Baseline * 3)
+            throw new InvalidOperationException("Writing body size depends on camera scale rather than ink coordinates.");
+        LegacyFontSizeTextSample[] prepared = [new('a', 1, 20, 0, 10), new('b', 1, 20, 10, 20), new('c', 1, 40, 20, 30), new('.', 1, 1, 30, 31)];
+        var native = Create("abc."); AiTypesetLayout.Fit(native, ink, null, [], mixed, prepared); Natural(native);
+        var x = new FormattedText("x", CultureInfo.CurrentCulture, FlowDirection.LeftToRight, InkFonts.Face("Inter"), 64, Brushes.Black);
+        var expectedPrepared = LegacyHandwritingFontSizePolicy.MatchPrepared(64, (float)x.BuildGeometry(default)!.Bounds.Height, prepared);
+        if (Math.Abs(native.FontSize - expectedPrepared) > .00001)
+            throw new InvalidOperationException("Prepared recognition ranges were sized by minimum/maximum instead of the recovered mean policy.");
         var expression = Create("2+2=", "STIX Two Math"); AiTypesetLayout.Fit(expression, ink, "2+2=", []); Natural(expression);
         var answer = Create("2+2=4", "STIX Two Math"); AiTypesetLayout.Fit(answer, ink, "2+2=", []); Natural(answer);
         if (answer.FontSize != expression.FontSize || answer.Bounds.Width <= expression.Bounds.Width)
             throw new InvalidOperationException("Computed answer changed the expression's font size or did not extend naturally.");
+        var hintedMath = Create("2+2=", "STIX Two Math"); AiTypesetLayout.Fit(hintedMath, ink, "2+2=", [], mixed, prepared); Natural(hintedMath);
+        if (hintedMath.FontSize != expression.FontSize)
+            throw new InvalidOperationException("Text body hints changed a structural formula's size.");
         var fraction = Create("\\frac{1}{2}=0.5", "STIX Two Math");
         AiTypesetLayout.Fit(fraction, ink, "\\frac{1}{2}=", []); Natural(fraction);
         foreach (var (source, result) in new[]
@@ -68,6 +94,6 @@ internal static class TypesetChecks
         var edge = Create("hello"); AiTypesetLayout.Fit(edge, new Rect(99990, 99000, 10, 900), null, []); Natural(edge);
         var peer = new InkDocument(); peer.Import([InkDocument.ExportMark(answer)]);
         if (!peer.Marks[0].Same(answer)) throw new InvalidOperationException("Peer changed the typeset size or natural aspect ratio.");
-        Console.WriteLine("AI typeset: real embedded font metrics, natural aspect, writing scale, neighbor baseline, numeric answer size and peer roundtrip passed.");
+        Console.WriteLine("AI typeset: real embedded font metrics, tall-component/dot rejection, prepared range mean, natural aspect, writing scale, neighbor baseline, numeric answer size and peer roundtrip passed.");
     }
 }

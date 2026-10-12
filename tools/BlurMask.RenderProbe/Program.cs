@@ -24,8 +24,8 @@ internal static class Program
         var options = new Dictionary<string, string>();
         for (var i = 0; i < args.Length; i += 2)
         {
-            if (i + 1 >= args.Length || args[i] is not ("--board" or "--output" or "--label" or "--frames"))
-                throw new ArgumentException("Use --board <private JSON> --output <local folder> --label <revision> --frames <count>.");
+            if (i + 1 >= args.Length || args[i] is not ("--board" or "--output" or "--label" or "--frames" or "--typeset-only"))
+                throw new ArgumentException("Use --board <private JSON> --output <local folder> --label <revision> --frames <count> --typeset-only true.");
             options.Add(args[i], args[i + 1]);
         }
         _output = Path.GetFullPath(options.GetValueOrDefault("--output", ".artifacts/render-probe"));
@@ -37,6 +37,7 @@ internal static class Program
             .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false })
             .SetupWithoutStarting();
         TypesetChecks.Run();
+        if (options.GetValueOrDefault("--typeset-only") == "true") return;
         if (options.TryGetValue("--board", out var boardPath))
         {
             var board = JsonSerializer.Deserialize(File.ReadAllText(boardPath), BoardJsonContext.Default.BoardSnapshot)

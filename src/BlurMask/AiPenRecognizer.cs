@@ -68,7 +68,8 @@ internal sealed class AiPenRecognizer(InkDocument document, Func<string> recogni
                 foreach (var result in results)
                 {
                     var bounds = result.Strokes.Select(s => s.Bounds).Aggregate((a, b) => a.Union(b));
-                    AiTypesetLayout.Fit(result.Text, bounds, result.SizingText, document.Marks);
+                    AiTypesetLayout.Fit(result.Text, bounds, result.SizingText, document.Marks,
+                        result.SizingComponents, result.PreparedFontSizeSamples);
                     _batch.Apply(result);
                 }
                 if (results.Any(result => result.MathCalculationFailed)) CalculationFailed?.Invoke();

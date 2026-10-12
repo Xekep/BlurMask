@@ -10,6 +10,8 @@ internal static class AiInkLayout
     internal sealed record Result(InkMark[] Strokes, InkMark Text, float Confidence = 1)
     {
         internal string? SizingText { get; set; }
+        internal Rect[]? SizingComponents { get; init; }
+        internal LegacyFontSizeTextSample[]? PreparedFontSizeSamples { get; init; }
         internal bool MathCalculationFailed { get; set; }
     }
     private sealed class Group(InkMark stroke)
@@ -55,6 +57,8 @@ internal static class AiInkLayout
             var bounds = row.Select(g => g.Bounds).Aggregate((a, b) => a.Union(b));
             if (bounds.Width < 2 || bounds.Height < 2 || bounds.Left < -100000 || bounds.Top < -100000 || bounds.Right > 100000 || bounds.Bottom > 100000) continue;
             var value = new StringBuilder(); var uncertain = false; var confidence = 1f;
+            var sizing = new List<Rect>(); var preparedSizes = new List<LegacyFontSizeTextSample>();
+            bool completePreparedSizes = true;
             for (var i = 0; i < row.Count;)
             {
                 if (i > 0 && row[i].Bounds.Left - row[i - 1].Bounds.Right > bounds.Height * .65) value.Append(' ');
@@ -67,6 +71,12 @@ internal static class AiInkLayout
                 if (!float.IsFinite(line.Confidence) || line.Confidence < .75f || string.IsNullOrWhiteSpace(line.Text) || value.Length + line.Text.Length > 4000)
                 { uncertain = true; break; }
                 confidence = Math.Min(confidence, line.Confidence);
+                // Keep recognized-range metadata distinct from original component
+                // boxes. The latter provide a conservative display fallback only.
+                sizing.AddRange(row.Skip(i).Take(end - i).Select(g => g.Bounds));
+                if (line.FontSizeSamples is { Count: > 0 and <= 4096 } samples && preparedSizes.Count <= 4096 - samples.Count)
+                    preparedSizes.AddRange(samples);
+                else completePreparedSizes = false;
                 value.Append(line.Text); i = end;
             }
             var sources = row.SelectMany(g => g.Strokes).ToArray(); var first = sources[0];
@@ -74,7 +84,11 @@ internal static class AiInkLayout
             if (uncertain) continue;
             var text = new InkMark(InkTool.Text, first.Color, first.Width, bounds.TopLeft)
                 { Id = first.Id, Text = value.ToString(), Font = "Inter", FontSize = Math.Clamp(bounds.Height, 8, 300), FadeSeconds = first.FadeSeconds };
-            text.AddPoint(bounds.BottomRight); results.Add(new(sources, text, confidence));
+            text.AddPoint(bounds.BottomRight); results.Add(new(sources, text, confidence)
+            {
+                SizingComponents = sizing.ToArray(),
+                PreparedFontSizeSamples = completePreparedSizes ? preparedSizes.ToArray() : null
+            });
         }
         return results;
     }

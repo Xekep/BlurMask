@@ -1,6 +1,8 @@
 using System.Globalization;
+using System.Text;
 using Avalonia;
 using Avalonia.Media;
+using InkRecognition;
 
 namespace BlurMask;
 
@@ -19,14 +21,38 @@ internal static class AiTypesetLayout
         return 16 * Math.Pow(Step, Math.Round(Math.Log(size / 16, Step)));
     }
 
-    internal static void Fit(InkMark mark, Rect ink, string? sizingText, IEnumerable<InkMark> nearby)
+    internal static void Fit(InkMark mark, Rect ink, string? sizingText, IEnumerable<InkMark> nearby,
+        IReadOnlyList<Rect>? sizingComponents = null,
+        IReadOnlyList<LegacyFontSizeTextSample>? preparedFontSizeSamples = null)
     {
         if (mark.Tool != InkTool.Text || ink.Height <= 0 || ink.Width <= 0) return;
         var original = Measure(sizingText ?? mark.Text, mark.Font, 64);
         if (original is null || original.Bounds.Height <= 0) return;
         var desiredSize = MatchSize(ink.Height, original.Bounds.Height, 64);
+        double? writingBaseline = null;
+        if (mark.Font != "STIX Two Math")
+        {
+            var body = WritingBody(sizingComponents);
+            if (body is { } writing)
+            {
+                var reference = Measure((sizingText ?? mark.Text).EnumerateRunes().Any(Rune.IsLower) ? "x" : "H", mark.Font, 64);
+                if (reference?.Bounds.Height > 0)
+                    desiredSize = MatchSize(writing.Height, reference.Bounds.Height, 64);
+                writingBaseline = writing.Baseline;
+            }
+            if (preparedFontSizeSamples is { Count: > 0 and <= 4096 })
+            {
+                // The recovered native policy averages eligible recognized
+                // ranges. It is used only when the decoder supplies real x-height;
+                // component boxes are never relabeled as prepared character data.
+                var reference = Measure("x", mark.Font, 64);
+                if (reference?.Bounds.Height > 0)
+                    desiredSize = LegacyHandwritingFontSizePolicy.MatchPrepared(64,
+                        (float)reference.Bounds.Height, preparedFontSizeSamples.ToArray());
+            }
+        }
         if (!double.IsFinite(desiredSize) || desiredSize <= 0) return;
-        double? alignedBaseline = null;
+        double? alignedBaseline = writingBaseline;
         // A previously converted nearby word in the same row supplies the
         // shared size/baseline. Skip transformed objects and other font families.
         foreach (var neighbor in nearby.Where(m => m.Tool == InkTool.Text && m.Points.Count == 2 &&
@@ -60,6 +86,22 @@ internal static class AiTypesetLayout
         top = Math.Clamp(top, -CanvasGeometry.CoordinateLimit, CanvasGeometry.CoordinateLimit - height);
         mark.Points[0] = new(ink.Left, top);
         mark.AddPoint(new(ink.Left + output.Bounds.Width * uniform, top + height));
+    }
+
+    internal static (double Height, double Baseline)? WritingBody(IReadOnlyList<Rect>? components)
+    {
+        if (components is null || components.Count is < 2 or > 256) return null;
+        var candidates = components.Where(b => double.IsFinite(b.Height) && double.IsFinite(b.Width) &&
+            double.IsFinite(b.Bottom) && b.Height >= 2 && b.Width >= 0 && b.Height >= b.Width * .15)
+            .OrderBy(b => b.Height).ToArray();
+        if (candidates.Length < 2) return null;
+        // Use the lower body-size cluster. An unusually tall capital/descender
+        // cannot raise its threshold; small detached dots/crossbars are excluded.
+        double lowerMedian = candidates[(candidates.Length - 1) / 2].Height;
+        candidates = candidates.Where(b => b.Height >= lowerMedian * .35).ToArray();
+        double height = candidates[(int)Math.Floor((candidates.Length - 1) * .35)].Height;
+        var bottoms = candidates.Select(b => b.Bottom).Order().ToArray();
+        return (height, bottoms[(bottoms.Length - 1) / 2]);
     }
 
     private static Metrics? Measure(string text, string font, double size)

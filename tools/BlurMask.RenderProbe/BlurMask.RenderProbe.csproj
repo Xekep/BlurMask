@@ -10,6 +10,7 @@
     <InkDocumentSource Condition="'$(InkDocumentSource)' == ''">../../src/BlurMask/InkDocument.cs</InkDocumentSource>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../../src/InkRecognition/InkRecognition.csproj" />
     <PackageReference Include="Avalonia.Headless" Version="12.1.2" />
     <PackageReference Include="Avalonia.Skia" Version="12.1.2" />
     <Compile Include="$(InkDocumentSource)" Link="Production/InkDocument.cs" />

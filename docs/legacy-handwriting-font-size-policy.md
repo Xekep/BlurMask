@@ -55,3 +55,15 @@ dotnet run --project tools/LegacyHandwritingFontSize.Probe -- .artifacts/font-si
 ```
 
 This is a proven executable prepared-input font-size policy. Full automatic grouping, preparation of its source geometry, embedded-math sizing and final baseline placement must remain separately identified until their complete callers/producers are recovered and tested.
+
+## Desktop display adapter
+
+`TextRecognition.FontSizeSamples` can carry actual prepared recognized-range geometry, expressed in the same world-coordinate units as the input ink. `AiInkLayout` copies it into an owned row snapshot; `AiTypesetLayout` calls the recovered policy with the real embedded font's rendered `x` height in those same units. It does not use minimum or maximum character height. Input box geometry is never substituted for a prepared character's x-height. The currently used CTC recognizer does not supply this metadata.
+
+Without prepared metadata, the desktop adapter uses an explicitly original fallback for rows with multiple separate handwriting components. It removes flat crossbars and very small detached marks, estimates ordinary body height from a lower height quantile, and aligns to the median component bottom. It measures `x` for text containing lowercase letters and `H` otherwise. This prevents one tall component from enlarging the whole row, while a dot does not shrink it. A single connected word still uses the existing whole-word metric fallback until its decoder supplies prepared range geometry. This is not a claim that native handwriting segmentation or baseline placement has been ported.
+
+Structural math retains its formula metrics, including fraction and integral heights. Nearby converted text can still share its size and baseline; persisted text keeps its natural glyph aspect ratio. Offscreen production-font checks cover an isolated tall component, punctuation/crossbars, world-coordinate scaling, the prepared-range average, formula isolation and peer serialization:
+
+```powershell
+dotnet run --project tools/BlurMask.RenderProbe -c Release -- --typeset-only true
+```

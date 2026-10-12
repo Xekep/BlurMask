@@ -2,7 +2,14 @@ namespace InkRecognition;
 
 public readonly record struct InkPoint(float X, float Y);
 public sealed record InkStroke(IReadOnlyList<InkPoint> Points);
-public sealed record TextRecognition(string Text, float Confidence, int Frames);
+public sealed record TextRecognition(string Text, float Confidence, int Frames)
+{
+    /// <summary>Optional actual recognized-range geometry for font matching.
+    /// Heights and horizontal coordinates must use the same units as input ink.
+    /// A decoder without prepared character x-height leaves this absent; stroke
+    /// boxes must not be passed off as recognized character measurements.</summary>
+    public IReadOnlyList<LegacyFontSizeTextSample>? FontSizeSamples { get; init; }
+}
 
 public interface IStrokeTextRecognizer
 {

@@ -21,6 +21,12 @@ internal static class AiPenProbe
         if (results.Count != 2 || results.Any(r => r.Text.Text != "hello" || r.Strokes.Length != 2))
             throw new InvalidOperationException("AI row layout split pen lifts or merged separate rows.");
         foreach (var result in results) VerifyReplacement(result);
+        if (results.Any(r => r.SizingComponents is not { Length: 2 } || r.PreparedFontSizeSamples is not null))
+            throw new InvalidOperationException("Component size hints were lost or mislabeled as native recognized character geometry.");
+        LegacyFontSizeTextSample[] sizes = [new('h', 1, 18, 10, 20), new('e', 1, 20, 32, 42)];
+        var sized = AiInkLayout.Recognize(strokes, new DelegateRecognizer((_, _) => new("hello", .99f, 6) { FontSizeSamples = sizes }));
+        if (sized.Count != 2 || sized.Any(r => r.PreparedFontSizeSamples is not { Length: 2 } metadata || !metadata.AsSpan().SequenceEqual(sizes) || ReferenceEquals(metadata, sizes)))
+            throw new InvalidOperationException("Prepared size metadata did not survive recognition as an owned row snapshot.");
         if (AiInkLayout.Recognize(strokes, new TestRecognizer(.2f)).Count != 0)
             throw new InvalidOperationException("Uncertain AI recognition replaced handwriting.");
         if (AiRecognitionModels.Current is null && AiInkLayout.Recognize(strokes).Count != 0)
