@@ -77,8 +77,10 @@ promotion observations carry owned whole-record snapshots; rollback is not claim
 Prepared quotas and storage identities remain explicit. The separate
 [fresh heap preparation](legacy-native-word-heap-preparation.md) now supplies
 checked `1fbb90` source-weight fields and initial allocation. This quota
-controller does not port the `212d80` reset pass or choose a
-native language winner/confidence. Supported finite secondary shares are at
+controller does not choose a native language winner/confidence. The separate
+[pass reset](legacy-native-word-pass-reset.md) restores `212d80`, including
+retained heap allocation and both trace-vector reset/free branches.
+Supported finite secondary shares are at
 most one; nonpositive values use the native primary branch. NaN/infinity,
 outside-long float conversions, capacities above4096, arrays above512,
 unpaired positive-share work and trace transport refuse. Values are not silently

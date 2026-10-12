@@ -65,6 +65,14 @@ public sealed class LegacyNativeWordHeapDescriptor
         return backing.ToArray();
     }
 
+    // 212d80 writes descriptor00 before invoking 1f73d0. Retained storage,
+    // allocation identity and quota fields must survive this logical reset.
+    internal void ClearActiveCount()
+    {
+        if (resizing || mutating) throw new InvalidOperationException("Descriptor reset is not reentrant.");
+        Count = 0;
+    }
+
     public bool TryInsertRecord(ReadOnlyMemory<byte> record,
         Action<ReadOnlyMemory<byte>>? onEvictedRoot = null)
     {
@@ -91,6 +99,7 @@ public sealed class LegacyNativeWordHeapDescriptor
                 if (growthProvider is null)
                     throw new NotSupportedException("Native growth needs explicit allocator bytes and storage identity.");
                 var grown = growthProvider(descriptorIndex, new(backing.ToArray(), StorageTag10, Capacity));
+                cancellationToken.ThrowIfCancellationRequested();
                 if (grown is null) return false;
                 if (grown.Value.Storage.Length != Capacity * 128 ||
                     !grown.Value.Storage.Span[..backing.Length].SequenceEqual(backing))

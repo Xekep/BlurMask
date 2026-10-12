@@ -449,8 +449,23 @@ now consume stored parents; the
 [initial stored-parent branch](../../docs/legacy-native-word-initial-parent-alternatives.md)
 and [anchored continuation](../../docs/legacy-native-word-anchored-alternatives.md)
 preserve actual pool/context lineage and their distinct composition rules.
-Higher-arc branches, rejection-prepass production, complete scheduling and
+Higher-arc branches, complete rejection-prepass scheduling and
 native winner/confidence remain separate unresolved stages.
+
+The [rejection ancestry collector](../../docs/legacy-native-word-rejection-collector.md)
+now produces native 36-byte candidates from live owning rows, preserving actual
+marker/protected ancestry and anchored corrections. Its
+[sorting and row-repair consumers](../../docs/legacy-native-word-rejection-selection.md)
+mutate those same owning primary blocks before the next parent producer.
+Successful candidate-vector allocation and nontracing operation are explicit
+scope boundaries; source headers, marker mode and stack residue are not guessed.
+
+The [pass reset](../../docs/legacy-native-word-pass-reset.md) clears each heap's
+active count before resizing to its phase quota, reuses retained allocation,
+and restores both native trace-vector reset/free decisions. The
+[first acoustic recurrence](../../docs/legacy-first-acoustic-recurrence.md)
+adds native 40-byte records and compatible graph predecessors; mandatory
+geometry callbacks and final text merging/winner remain distinct producers.
 
 The [higher-arc reset branch](../../docs/legacy-native-word-higherarc-reset-alternatives.md)
 is also restored, including its source-header predicate and raw secondary
