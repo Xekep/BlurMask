@@ -55,5 +55,23 @@ public sealed class LegacyFirstOrdinaryCacheScorer
         return new(glyph,final);
     }
 
+    /// <summary>Produce source scope after exact normalization/pen-up reduction.
+    /// The callback returns cache context; it does not replace prepared ownership.</summary>
+    public LegacyFirstOrdinaryCacheScores Score(LegacySmoothedRowCutResult cuts,ReadOnlySpan<LegacyInkRange> ranges,
+        short startBoundary,short endBoundary,int maximumRangesBeforeMerge,int maximumStrokesAfterMerge,
+        ReadOnlySpan<byte> enabledSymbols,Func<LegacyFirstPreparedAcousticScores,LegacyOrdinaryAcousticCacheContext> contextProducer,
+        ReadOnlySpan<LegacyAcousticCachePair> nativePairs,CancellationToken cancellationToken=default)
+    {
+        ArgumentNullException.ThrowIfNull(contextProducer);cancellationToken.ThrowIfCancellationRequested();
+        if(enabledSymbols.Length!=Alphabet.LabelCount)throw new ArgumentException("Mask must belong to the owned source alphabet.",nameof(enabledSymbols));
+        var glyph=context.Classify(cuts,ranges,startBoundary,endBoundary,maximumRangesBeforeMerge,maximumStrokesAfterMerge,
+            enabledSymbols[..ModelWidth(Model)],cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        var state=contextProducer(glyph)??throw new ArgumentException("Context producer returned null.",nameof(contextProducer));
+        cancellationToken.ThrowIfCancellationRequested();
+        var final=cache.Build(glyph.IntegerCosts.Span,glyph.MergedGeometry.Strokes,enabledSymbols,state,nativePairs,cancellationToken);
+        return new(glyph,final);
+    }
+
     private static int ModelWidth(LegacyFirstAcousticModel model)=>model.TrajectoryNetwork.OutputWidth;
 }

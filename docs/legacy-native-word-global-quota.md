@@ -74,8 +74,10 @@ promotion observations carry owned whole-record snapshots; rollback is not claim
 
 ## Checked boundaries
 
-Prepared quotas and storage identities remain explicit. This batch does not
-port their `1fbb90` source-weight production or `212d80` reset pass, nor choose a
+Prepared quotas and storage identities remain explicit. The separate
+[fresh heap preparation](legacy-native-word-heap-preparation.md) now supplies
+checked `1fbb90` source-weight fields and initial allocation. This quota
+controller does not port the `212d80` reset pass or choose a
 native language winner/confidence. Supported finite secondary shares are at
 most one; nonpositive values use the native primary branch. NaN/infinity,
 outside-long float conversions, capacities above4096, arrays above512,

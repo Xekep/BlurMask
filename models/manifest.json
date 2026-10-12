@@ -32,6 +32,11 @@
       "sha256": "0a59f9ff16d52c696b59191f89681bb94c7083f9a242f88eb2f7cd9821648472"
     },
     {
+      "path": "line-geometry/character-line-categories.json",
+      "bytes": 62849,
+      "sha256": "7acc1e57124cb49e31a4c2bf75008710b0509ccdbc9d0e88d92f8b52fdd7c158"
+    },
+    {
       "path": "line-geometry/line-2e3-30.res",
       "bytes": 85812,
       "sha256": "10f4b43cd02873f1995f543dece70e70c1f22cbdb7dcbf63e1c5c205966ac70e"

@@ -409,9 +409,52 @@ production, display conversion and final baseline placement remain separate.
 [`LegacyPreparedCharacterLineEquations`](../../docs/legacy-character-line-equations.md)
 restores the initial line fitter's weighted boundary/profile moments and
 constrained baseline/x-height/slope equations. It fits prepared observations
-rather than choosing the smallest or tallest character. Candidate preparation,
-iterative reweighting and acceptance remain separate; this kernel is not yet
+rather than choosing the smallest or tallest character. The subsequent prepared
+fit/category producers are described below; this kernel is not yet
 used to size automatically recognized connected handwriting in the application.
+
+[`LegacyPreparedCharacterLineFit`](../../docs/legacy-prepared-character-line-fit.md)
+restores the prepared C1A iterative boundary/profile fit, including the native
+251-pass limit and diagnostic affinity behavior. Its
+[category/item producer](../../docs/legacy-prepared-character-line-categories.md)
+uses actual resolved alphabet labels and preserves the source template's state.
+The [portable category model](../../docs/legacy-character-line-category-model.md)
+ships3923 entries and45 profiles, including122 Cyrillic entries, with a pinned
+ordered-table checksum and no vendor DLL requirement. Per-symbol source geometry
+and actual decoded character source-line IDs remain necessary for integration.
+
+[`LegacyPreparedResultLineMetrics`](../../docs/legacy-prepared-result-line-metrics.md)
+now transports actual source-line x-height into the correct result-line owner,
+SDK binary32 metric and font-size sample. The native one-neighbor source-ID pass
+and exact cursor ranges remain intact. Actual decoded character source IDs,
+source geometry and application recognizer integration are still upstream.
+
+[`LegacyFreshFirstGlyphSession`](../../docs/legacy-fresh-first-session.md)
+connects an already-selected raw row to first-source frame/cuts/context/NN,
+constructor/resource cache policy and post-merge primitive scope. This is the
+acoustic-only class23f child, distinct from the main class240 dictionary decoder.
+Its [first-source shift-zero graph](../../docs/legacy-first-shift-zero-seeds.md)
+uses the actual first21b profile rather than the main source's shift-one policy.
+The [selector-specific connection accessor](../../docs/legacy-ordinary-candidate-connections.md)
+preserves ordinary successor order and the special node-minus-one source root.
+Its [ranked cache accessor](../../docs/legacy-ordinary-ranked-acoustic-group.md)
+provides actual geometry-aware costs and top20-normalized likelihood, which must
+not be interpreted as recognition acceptance confidence.
+
+The [fresh word heap preparation](../../docs/legacy-native-word-heap-preparation.md)
+supplies packed source flags, first-iteration count limits, source-weight quotas
+and explicit record allocations. Native word ordinals and
+[continuation alternatives](../../docs/legacy-native-word-continuation-alternatives.md)
+now consume stored parents; the
+[initial stored-parent branch](../../docs/legacy-native-word-initial-parent-alternatives.md)
+and [anchored continuation](../../docs/legacy-native-word-anchored-alternatives.md)
+preserve actual pool/context lineage and their distinct composition rules.
+Higher-arc branches, rejection-prepass production, complete scheduling and
+native winner/confidence remain separate unresolved stages.
+
+The [higher-arc reset branch](../../docs/legacy-native-word-higherarc-reset-alternatives.md)
+is also restored, including its source-header predicate and raw secondary
+composition. The other higher-arc callback/recombination path remains unported.
 
 [`LegacyOrdinaryGraphAcousticPermissionSession` and
 `LegacyPreparedOrdinaryGraphAcousticProducer`](../../docs/legacy-ordinary-graph-acoustic-lifecycle.md)

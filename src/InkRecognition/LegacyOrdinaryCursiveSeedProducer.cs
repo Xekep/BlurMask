@@ -11,8 +11,8 @@ public readonly record struct LegacyOrdinaryCursiveSeedProfile(bool Reorder, byt
         _ = LegacyCursiveLatticeSpanProfile.ReadV10aResourceNode(resource, nodeOffset);
         var node = resource.Slice(nodeOffset, 355);
         // Two6x6 scalar tables precede the three reorder flags.
-        if (node[306] > 1 || node[307] != 1 || node[308] != 0)
-            throw new NotSupportedException("Expected ordinary geometry reorder and one-slot insertion policy.");
+        if (node[306] > 1 || node[307] > 1 || node[308] != 0)
+            throw new NotSupportedException("Expected ordinary geometry reorder and zero/one-slot insertion policy.");
         // Ordinary LTR branch: vertical-position adjustments must be zero.
         if (Read(node,333) != 0 || Read(node,337) != 0 || Read(node,341) != 0)
             throw new NotSupportedException("Nonzero source-height positioning adjustments are not supported.");
@@ -35,8 +35,9 @@ public sealed class LegacyOrdinaryCursiveSeedResult
     private readonly LegacyOrdinaryCursiveSeed[] seeds;
     public IReadOnlyList<LegacyOrdinaryCursiveSeed> Seeds => Array.AsReadOnly(seeds);
     public int DeferredCount { get; }
-    internal LegacyOrdinaryCursiveSeedResult(LegacyOrdinaryCursiveSeed[] seeds)
-    { this.seeds = seeds; DeferredCount = seeds.Count(s => s.Deferred); }
+    public byte InsertionShift {get;}
+    internal LegacyOrdinaryCursiveSeedResult(LegacyOrdinaryCursiveSeed[] seeds,byte insertionShift=1)
+    { this.seeds = seeds; DeferredCount = seeds.Count(s => s.Deferred); InsertionShift=insertionShift; }
 
     /// <summary>
     /// Only the nondeferred branch has native ordinary-chain seed arcs. Deferred
@@ -67,7 +68,7 @@ public static class LegacyOrdinaryCursiveSeedProducer
     {
         ArgumentNullException.ThrowIfNull(cuts);
         cancellationToken.ThrowIfCancellationRequested();
-        if (!float.IsFinite(sourceHeight) || sourceHeight <= 0 || profile.InsertionShift != 1 ||
+        if (!float.IsFinite(sourceHeight) || sourceHeight <= 0 || profile.InsertionShift > 1 ||
             !float.IsFinite(profile.BackwardHeightTolerance) || profile.BackwardHeightTolerance < 0 ||
             !float.IsFinite(profile.InsertionFraction) || profile.InsertionFraction is < 0 or > 1)
             throw new ArgumentException("Invalid explicit ordinary seed frame/policy.");
@@ -159,6 +160,6 @@ public static class LegacyOrdinaryCursiveSeedProducer
             seed = seed with { InsertionDisplacement = checked((sbyte)(seed.OriginalInsertionSlot - at)) };
             ordinary.Insert(at, seed); deferred.RemoveAt(selected);
         }
-        return new(ordinary.ToArray());
+        return new(ordinary.ToArray(),profile.InsertionShift);
     }
 }

@@ -25,7 +25,14 @@ Let `n` be range character count, `h` its containing source line's prepared x-he
 - Other two-character ranges contribute `(h + w/n)/n`.
 - Other longer ranges contribute `w/n`.
 
-**1807035c0** supplies a range tuple whose first two integers are character start/end. The third integer is passed by **180860ac0** to **1806b4cd0**, then **1804c2660**, as the containing line index. The wrapper obtains Document interface **CA8** and calls table **180200620+78 = 1800b6810**. This method validates the index against `voTextInspector.virtual140` and calls `virtual148 = 180177590` to fill writable `lineInfo`. It copies the line object's **double+20** into `lineInfo.float+18`; the iink success payload transports that float at **+1c**. Independently, JIIX exporter **1806db5a0** emits this metric under the literal key `x-height`. These steps prove a prepared **line-level** metric, not individual character geometry. The writer of the line object's double+20 remains a separate unresolved upstream producer; neither a stroke bounding box nor a glyph metric is substituted for it.
+**1807035c0** supplies a range tuple whose first two integers are character start/end. The third integer is passed by **180860ac0** to **1806b4cd0**, then **1804c2660**, as the containing line index. The wrapper obtains Document interface **CA8** and calls table **180200620+78 = 1800b6810**. This method validates the index against `voTextInspector.virtual140` and calls `virtual148 = 180177590` to fill writable `lineInfo`. It copies the source line object's **double+20** into `lineInfo.float+18`; the iink success payload transports that float at **+1c**. Independently, JIIX exporter **1806db5a0** emits this metric under the literal key `x-height`. These steps prove a prepared **line-level** metric, not individual character geometry. The prepared source-line fit is restored separately; its actual decoded symbol inputs still require upstream production. A stroke bounding box is never relabeled as its x-height.
+
+The separate [result-line owner binder](legacy-prepared-result-line-metrics.md)
+now restores Text050660's source2DA.F8-to-result2DB58 record binding and
+Document177590 narrowing. The source-line writer and owner chain are therefore
+identified and executable with prepared inputs. Actual decoded character IDs
+and their raw source geometry remain upstream; this does not make the current
+application decoder supply native line metadata automatically.
 
 The policy averages contributions **per eligible range**, not per character. If the rendered font's literal `x` height is positive, it computes:
 

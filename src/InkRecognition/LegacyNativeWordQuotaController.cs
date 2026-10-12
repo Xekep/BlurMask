@@ -2,7 +2,8 @@ namespace InkRecognition;
 
 /// <summary>Literal finite-fraction nontracing 212ec0 global quota decisions,
 /// over explicit prepared descriptors/configuration and allocator growth bytes.
-/// Descriptor-limit production and native word winner/confidence are separate.</summary>
+/// Fresh limits come from LegacyNativeWordHeapPreparation; native word
+/// winner/confidence and complete scheduling remain separate.</summary>
 public static class LegacyNativeWordQuotaController
 {
     public static bool Apply(IReadOnlyList<LegacyNativeWordHeapDescriptor> descriptors,

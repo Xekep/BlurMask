@@ -38,11 +38,49 @@ public sealed class LegacyOrdinaryCursiveSeedGraph
         CancellationToken cancellationToken = default)
         => Create(source, false, cancellationToken);
 
+    /// <summary>Native noNN1a1ef0 with resource12d=0: only placement0 and no
+    /// displaced restoration pass. Deferred-first and adjacent deferred seeds
+    /// remain in19f850's supplied shift-zero sorted order; no alternatives added.</summary>
+    public static LegacyOrdinaryCursiveSeedGraph CreateShiftZero(LegacyOrdinaryCursiveSeedResult source,
+        CancellationToken cancellationToken=default)
+    {
+        ArgumentNullException.ThrowIfNull(source);cancellationToken.ThrowIfCancellationRequested();
+        var seeds=source.Seeds.ToArray();
+        if(source.InsertionShift!=0||seeds.Length is <1 or >4096||seeds.Any(s=>s.InsertionDisplacement!=0))
+            throw new ArgumentException("Owned shift-zero ordinary seeds with placement0 required.");
+        var physical=seeds.Select(s=>s.Atom.Range.StrokeIndex).ToArray();
+        var first=new Dictionary<int,int>();var last=new Dictionary<int,int>();
+        for(int node=0;node<seeds.Length;node++)
+        {cancellationToken.ThrowIfCancellationRequested();first.TryAdd(physical[node],node);last[physical[node]]=node;}
+        // A physical interval crosses boundaries first+1 through last.
+        // Accumulate those intervals once instead of scanning every source
+        // at every node (quadratic for long rows with many physical strokes).
+        var changes=new int[seeds.Length+1];
+        foreach(var pair in first)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if(pair.Value<last[pair.Key]){changes[pair.Value+1]++;changes[last[pair.Key]+1]--;}
+        }
+        var nodes=new LegacyOrdinaryCursiveSeedArc[seeds.Length][];
+        int crossing=0;
+        for(int node=0;node<nodes.Length;node++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            //1a4f10 clearsbit4 when some physical source spans both the prefix
+            //(excluding this group) and the suffix(including this group).
+            crossing+=changes[node];bool overlap=crossing!=0;
+            nodes[node]=[new(node,0,overlap?(byte)0:(byte)4,new[]{node==0?-1:0},
+                node+1<nodes.Length?new[]{0}:Array.Empty<int>(),checked((uint)node*128),checked((uint)node*128+3))];
+        }
+        return new(nodes,Enumerable.Repeat((byte)1,seeds.Length).ToArray());
+    }
+
     private static LegacyOrdinaryCursiveSeedGraph Create(LegacyOrdinaryCursiveSeedResult source,
         bool singleDeferredOnly, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(source);
         cancellationToken.ThrowIfCancellationRequested();
+        if(source.InsertionShift!=1)throw new ArgumentException("Use CreateShiftZero for an owned shift-zero source.",nameof(source));
         var seeds = source.Seeds.ToArray();
         if (seeds.Length is < 1 or > 4096) throw new ArgumentException("Expected1..4096 native source seeds.");
         if (singleDeferredOnly && source.DeferredCount > 1)
