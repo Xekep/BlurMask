@@ -469,7 +469,25 @@ geometry callbacks and final text merging/winner remain distinct producers.
 
 The [higher-arc reset branch](../../docs/legacy-native-word-higherarc-reset-alternatives.md)
 is also restored, including its source-header predicate and raw secondary
-composition. The other higher-arc callback/recombination path remains unported.
+composition. The other higher-arc branch now has an executable persistent
+[incoming workspace](../../docs/legacy-native-secondary-recombination-workspace.md),
+[secondary merge](../../docs/legacy-native-secondary-recombination-merge.md)
+and [owning-parent context refresh](../../docs/legacy-native-secondary-recombination-projection.md).
+Its eligibility, complete source request and adjusted-cost callbacks remain
+separate unresolved producers.
+
+The [fresh raw packet](../../docs/legacy-fresh-ordinary-raw-packet.md) now derives
+input descriptor ownership from physical strokes and carries that same ingress
+through the first fitted frame. Descriptor identity is separate from physical
+pen-up chronology. General semantic packet events and continuation geometry
+remain explicit boundaries.
+
+The [source-position range stage](../../docs/legacy-native-ink-position-ranges.md)
+and [actual cropped-stroke geometry](../../docs/legacy-native-decoded-stroke-geometry.md)
+connect indexed raw points, fractional endpoint views and per-item bounds to
+the character catalog, iterative line fit and SDK x-height/font policy.
+Winning endpoints and labels must still come from a real decoder; these ports
+do not make the application's connected-word bounding-box fallback native.
 
 [`LegacyOrdinaryGraphAcousticPermissionSession` and
 `LegacyPreparedOrdinaryGraphAcousticProducer`](../../docs/legacy-ordinary-graph-acoustic-lifecycle.md)

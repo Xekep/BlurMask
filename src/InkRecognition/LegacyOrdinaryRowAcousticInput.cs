@@ -58,6 +58,18 @@ public sealed class LegacyOrdinaryRowAcousticInput
     {
         ArgumentNullException.ThrowIfNull(profile);cancellationToken.ThrowIfCancellationRequested();
         var source=LegacyOrdinarySourceInk.Prepare(rawRow,profile.Source,cancellationToken);
+        return PrepareOwnedSource(source,profile,cancellationToken);
+    }
+
+    /// <summary>Continue from an owned raw ingress result, retaining descriptor
+    /// producer/source chronology/probability ownership instead of repeating
+    /// duplicate suppression. The selected profile must belong to that source.</summary>
+    public static LegacyOrdinaryRowAcousticInput PrepareOwnedSource(LegacyOrdinarySourceInk source,
+        LegacyOrdinaryRowAcousticProfile profile,CancellationToken cancellationToken=default)
+    {
+        ArgumentNullException.ThrowIfNull(source);ArgumentNullException.ThrowIfNull(profile);
+        cancellationToken.ThrowIfCancellationRequested();
+        if(source.Profile!=profile.Source)throw new ArgumentException("Prepared raw source must belong to the selected row profile.",nameof(source));
         var metrics=LegacySourceOrientationPreparation.ExtractMetrics(source,cancellationToken);
         var original=source.Strokes.Select(s=>s.Points.ToArray()).ToArray();
         var estimate=LegacyAutomaticLineEstimator.Estimate(original,profile.Geometry,cancellationToken);
