@@ -89,3 +89,9 @@ graph producer, and maintains the native computed/pool reuse and scoped buffer
 invalidation. Its model-backed producer derives physical primitive metadata
 from owned source ink. Guide frames and the remaining external cache policy
 remain explicit; final winner and mutable frontend orchestration are not inferred.
+
+The [native word query caller audit](legacy-native-word-dictionary-query-binding.md)
+now proves ordinary startup sends node0/capacity128 through the aggregate to
+the dictionary unchanged. Descriptor field80=1 is a separate constructor probe.
+Actual initial symbol contexts must come from the shared mapped-symbol factory;
+zero-context pagination diagnostics do not establish that downstream binding.

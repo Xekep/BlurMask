@@ -6,7 +6,7 @@ This adds checked pieces of the legacy Text class-2dd / class-2e2 geometry chain
 
 `LegacyLineArcMoments.ExtractStroke` implements the moment portion of `18006e080`. A segment contributes its length as weight and its midpoint to X/Y/XX/YY/XY moments. Midpoint addition and coordinate subtraction retain native float precision; length and moments use double. The last point contributes an additional unit weight. The bounds include every input point. Zero-length segments remain valid; a one-point stroke has unit weight. This is not the unweighted mean in the separate 17-channel class-2e3 feature producer. Stroke grouping, temporal metadata and language-specific flags are separate native stages and are not inferred here.
 
-`LegacyPreparedLineGroupCost.Score` implements `180068950` (X projection) and `1800682f0` (Y projection), on explicit native-style 0x90 group records. Those records contain start/end stroke indices, weight and six moment fields, axis bounds, and caller-provided flags/labels. The native class-2dd search `18006f6e0` produces such candidates; that preceding search is not yet ported.
+`LegacyPreparedLineGroupCost.Score` implements `180068950` (X projection) and `1800682f0` (Y projection), on explicit native-style 0x90 group records. Those records contain start/end stroke indices, weight and six moment fields, axis bounds, and caller-provided flags/labels. The preceding class-2dd search `18006f6e0` now has a separately checked [ordinary raw-candidate producer](legacy-raw-line-candidates.md); temporal/special scoring and prior-row remapping remain separate.
 
 The cost includes:
 
@@ -36,14 +36,14 @@ The known chain is:
 
 ```text
 points -> 2dd arc moments                 [ported]
-       -> 2dd candidate merging/search    [not ported]
+       -> 2dd candidate merging/search    [ordinary non-special branch ported]
        -> 2e2 projected costs             [ported]
        -> free row-count DP               [ported]
        -> groups/cluster fitting          [not complete]
        -> prepared cluster baseline data [materializer already ported separately]
 ```
 
-Calling the free search on one independently extracted record per stroke supplies an explicit candidate list; it does not reproduce the missing native candidate merging. The newer 2e3 neural boundaries already have a separate checked feature/inference path, but their downstream candidate merging and baseline calculation are also incomplete. No separate learned font-placement network is established by these findings.
+Calling the free search on one independently extracted record per stroke supplies an explicit candidate list; the ordinary2dd producer is now available separately. Source-driven prior remapping and final materialization still require verified composition. The newer2e3 path now also has a [whole ordinary neural sweep](legacy-ordinary-neural-line-sweep.md). Complete automatic source orchestration remains unfinished. No separate learned font-placement network is established by these findings.
 
 ## Validation
 

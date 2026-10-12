@@ -414,3 +414,19 @@ and pool reuse, scoped invalidation and pooled buffer identity. Ordinary group
 kind and physical primitive metadata come from their checked producers. Guide
 frames and remaining external cache policy are explicit; this is not a final
 native winner or a complete automatic Russian recognizer.
+
+[`LegacyRawLineCandidateProducer`](../../docs/legacy-raw-line-candidates.md)
+restores ordinary raw-stroke candidate costs, merge gates and suffix search
+before the prepared2e2 row search. Prior-row remapping, special temporal costs
+and complete source materialization still require separate verified stages.
+[`LegacyLineOrientationProfile`, `LegacyLineOrientationProjection` and
+`LegacyLineOrientationPolicy`](../../docs/legacy-line-orientation.md) restore
+the optional2d0 scale, histogram, shortlist and decision policy.
+[`LegacyOrientationStrokePreparation` and
+`LegacyCubicStrokeSmoothing`](../../docs/legacy-orientation-stroke-smoothing.md)
+restore its actual265 spline/Bezier evaluation input. Source enablement/metric
+forwarding and primary249 native child costs remain explicit upstream boundaries.
+[`LegacySourceOrientationPreparation`](../../docs/legacy-source-orientation-preparation.md)
+now supplies fresh-source exact segment metrics to that265 producer and the
+projection consumer. This differs from265's tolerant negative-metric fallback.
+Orientation enablement and the primary249 decision remain separate.
