@@ -513,3 +513,20 @@ forwarding and primary249 native child costs remain explicit upstream boundaries
 now supplies fresh-source exact segment metrics to that265 producer and the
 projection consumer. This differs from265's tolerant negative-metric fallback.
 Orientation enablement and the primary249 decision remain separate.
+
+The [first geometry corrections](../../docs/legacy-first-acoustic-transition-geometry.md)
+now derive ordinary118/140 costs from actual first-source candidate groups,
+including the frontend kind2 whole-start guard. The
+[A8 shortlist](../../docs/legacy-first-acoustic-shortlist.md) retains fixed
+beam-width storage and opaque bytes. The
+[terminal scan](../../docs/legacy-first-terminal-selection.md) requires actual
+merged B8 contexts, preserves identity exclusion and native scalar channels;
+it does not materialize complete273 character/source results.
+
+The [legacy source line publication](../../docs/legacy-native-source-line-publication.md)
+transports source218 prepared guide metrics through2DA and SDK narrowing.
+The [prepared source-reference projection](../../docs/legacy-native-text-source-projection.md)
+connects actual source keys and fractional views to indexed raw points.
+Real decoded labels, group prefix production and winner materialization remain
+required. None of these component controls demonstrate improved English or
+finished Russian cursive recognition in the application.

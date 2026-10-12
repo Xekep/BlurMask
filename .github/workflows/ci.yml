@@ -418,6 +418,17 @@ jobs:
           dotnet run --project tools/LegacyWordPassReset.Probe -c Release -- .artifacts/legacy-word-pass-reset-controls.json
           python tools/LegacyFirstRecurrence.Probe/reference_controls.py .artifacts/legacy-first-recurrence-controls.json
           dotnet run --project tools/LegacyFirstRecurrence.Probe -c Release -- .artifacts/legacy-first-recurrence-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyFirstShortlist.Probe/reference_controls.py .artifacts/legacy-first-shortlist-controls.json
+          dotnet run --project tools/LegacyFirstShortlist.Probe -c Release -- .artifacts/legacy-first-shortlist-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyFirstTransition.Probe/reference_controls.py .artifacts/legacy-first-transition-controls.json
+          dotnet run --project tools/LegacyFirstTransition.Probe -c Release -- .artifacts/legacy-first-transition-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-first-transition-actual.json
+          python tools/LegacyFirstTransition.Probe/reference_controls.py --audit .artifacts/legacy-first-transition-actual.json
+          python tools/LegacyFirstTerminalSelection.Probe/reference_controls.py .artifacts/legacy-first-terminal-controls.json
+          dotnet run --project tools/LegacyFirstTerminalSelection.Probe -c Release -- .artifacts/legacy-first-terminal-controls.json
+          python tools/LegacySourceLinePublication.Probe/reference_controls.py .artifacts/legacy-source-publication-controls.json
+          dotnet run --project tools/LegacySourceLinePublication.Probe -c Release -- .artifacts/legacy-source-publication-controls.json
+          python tools/LegacyTextSourceProjection.Probe/reference_controls.py .artifacts/legacy-source-projection-controls.json
+          dotnet run --project tools/LegacyTextSourceProjection.Probe -c Release -- .artifacts/legacy-source-projection-controls.json models/line-geometry/character-line-categories.json
           python tools/LegacyWordRejection.Probe/reference_controls.py .artifacts/legacy-word-rejection-controls.json
           dotnet run --project tools/LegacyWordRejection.Probe -c Release -- .artifacts/legacy-word-rejection-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           python tools/LegacyWordRejectionCollector.Probe/reference_controls.py .artifacts/legacy-word-rejection-collector-controls.json
@@ -689,6 +700,11 @@ jobs:
             @{ Name = 'LegacyWordHeapPreparation'; Args = @('.artifacts/legacy-word-heap-preparation-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyWordPassReset'; Args = @('.artifacts/legacy-word-pass-reset-controls.json') },
             @{ Name = 'LegacyFirstRecurrence'; Args = @('.artifacts/legacy-first-recurrence-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyFirstShortlist'; Args = @('.artifacts/legacy-first-shortlist-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyFirstTransition'; Args = @('.artifacts/legacy-first-transition-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-first-transition-native-actual.json') },
+            @{ Name = 'LegacyFirstTerminalSelection'; Args = @('.artifacts/legacy-first-terminal-controls.json') },
+            @{ Name = 'LegacySourceLinePublication'; Args = @('.artifacts/legacy-source-publication-controls.json') },
+            @{ Name = 'LegacyTextSourceProjection'; Args = @('.artifacts/legacy-source-projection-controls.json', 'models/line-geometry/character-line-categories.json') },
             @{ Name = 'LegacyWordRejection'; Args = @('.artifacts/legacy-word-rejection-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyWordRejectionCollector'; Args = @('.artifacts/legacy-word-rejection-collector-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyRawPacket'; Args = @('.artifacts/legacy-raw-packet-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
@@ -715,6 +731,10 @@ jobs:
             $probeArgs = $case.Args
             & $probe @probeArgs
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            if ($name -eq 'LegacyFirstTransition') {
+              python tools/LegacyFirstTransition.Probe/reference_controls.py --audit .artifacts/legacy-first-transition-native-actual.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
           }
           $suffix = if ($IsWindows) { '.exe' } else { '' }
           & "./.artifacts/LegacyIntegerWord-native/LegacyIntegerWord.Probe$suffix" models/ru-RU/ru_RU-lk-text.lite.res
