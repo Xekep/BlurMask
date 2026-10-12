@@ -13,6 +13,7 @@ public sealed class LegacyPreparedDictionaryQuery
     public ushort Flags24 { get; set; }
     public ushort Flags26 { get; set; }
     public byte Category18 { get; set; }
+    public byte Parameter19 { get; set; }
     public ulong ContextRoot { get; set; }
     public ulong ParentContext { get; set; }
     internal LegacyPreparedDictionaryQuerySource? Owner;
@@ -38,6 +39,7 @@ public sealed class LegacyPreparedDictionaryQuerySource
     private readonly ulong[] initialContexts;
     private int nextSlot;
     private bool reading;
+    public uint DescriptorFlags => map.DescriptorFlags;
 
     private sealed class Slot
     {

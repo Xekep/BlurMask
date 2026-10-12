@@ -1,8 +1,8 @@
 namespace InkRecognition;
 
-/// <summary>Explicit recognized range inputs consumed by iink 180860ac0. Coordinates and x-height use model units.</summary>
+/// <summary>Explicit recognized range inputs consumed by iink 180860ac0. Coordinates and containing-line x-height use model units.</summary>
 public readonly record struct LegacyFontSizeTextSample(int FirstCodePoint, int CharacterCount,
-    float FirstCharacterXHeight, float WordLeft, float WordRight, uint Flags = 0);
+    float SourceLineXHeight, float WordLeft, float WordRight, uint Flags = 0);
 
 /// <summary>Prepared embedded-math contribution from iink 180833b30; the producer remains caller supplied.</summary>
 public readonly record struct LegacyFontSizeMathSample(ulong CharacterCount, float FontSize);
@@ -28,11 +28,11 @@ public static class LegacyHandwritingFontSizePolicy
             Validate(item);
             if ((item.Flags & ((1u << 10) | (1u << 21))) != 0 || IsExcludedCodePoint(item.FirstCodePoint)) continue;
             float sample;
-            if (item.CharacterCount == 1 || UsesCharacterXHeight(item.FirstCodePoint)) sample = item.FirstCharacterXHeight;
+            if (item.CharacterCount == 1 || UsesCharacterXHeight(item.FirstCodePoint)) sample = item.SourceLineXHeight;
             else
             {
                 sample = (item.WordRight - item.WordLeft) / (float)item.CharacterCount;
-                if (item.CharacterCount == 2) sample = (item.FirstCharacterXHeight + sample) / (float)item.CharacterCount;
+                if (item.CharacterCount == 2) sample = (item.SourceLineXHeight + sample) / (float)item.CharacterCount;
             }
             sum = sample + sum;
             groups = checked(groups + 1); textCharacters = checked(textCharacters + item.CharacterCount);
@@ -65,7 +65,7 @@ public static class LegacyHandwritingFontSizePolicy
             InRange(cp, 0x20a0, 0x1f) || InRange(cp, 0x2000, 11);
     }
 
-    /// <summary>Native fullwidth/CJK/Hangul/high-surrogate range branches, retained literally.</summary>
+    /// <summary>Native code-point branches which select the containing line's x-height; intervals retained literally.</summary>
     public static bool UsesCharacterXHeight(int codePoint)
     {
         ValidateCodePoint(codePoint); uint cp = (uint)codePoint;
@@ -109,7 +109,7 @@ public static class LegacyHandwritingFontSizePolicy
     private static void Validate(LegacyFontSizeTextSample item)
     {
         ValidateCodePoint(item.FirstCodePoint);
-        if (item.CharacterCount <= 0 || !float.IsFinite(item.FirstCharacterXHeight) || item.FirstCharacterXHeight < 0 ||
+        if (item.CharacterCount <= 0 || !float.IsFinite(item.SourceLineXHeight) || item.SourceLineXHeight < 0 ||
             !float.IsFinite(item.WordLeft) || !float.IsFinite(item.WordRight) || item.WordRight < item.WordLeft)
             throw new ArgumentException("Invalid prepared text range geometry.");
     }

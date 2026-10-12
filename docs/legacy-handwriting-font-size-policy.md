@@ -15,17 +15,17 @@ Source binary: `iink.dll`, SHA-256 `d637e88db41f00b463d0f2dc1ff9df5346ed2c86f107
 
 ## Prepared range sampling
 
-Each range supplies its first decoded code point, character count, first prepared character's x-height, word left/right coordinates and native range flags. The original range enumerator is **1807035a0/1807035c0**; character decoding is **1806b4930 → 180645d30**. The port accepts those prepared inputs instead of claiming to reproduce their upstream recognizer.
+Each range supplies its first decoded code point, character count, containing source line's prepared x-height, word left/right coordinates and native range flags. The original range enumerator is **1807035a0/1807035c0**; character decoding is **1806b4930 → 180645d30**. The port accepts those prepared inputs instead of claiming to reproduce their upstream recognizer. The typed metric is `SourceLineXHeight`; it is not an individual character's box or glyph height.
 
 Ranges with flag bit 10 or 21 are skipped. The first code point is filtered by the original masks and exact intervals for punctuation, spaces and currency symbols; the port preserves these intervals rather than using generalized Unicode categories. Cyrillic letters pass this filter.
 
-Let `n` be range character count, `h` its first character's prepared x-height, and `w = right − left`:
+Let `n` be range character count, `h` its containing source line's prepared x-height, and `w = right − left`:
 
 - Single-character ranges and the native fullwidth/CJK/Hangul/high-surrogate intervals contribute `h`.
 - Other two-character ranges contribute `(h + w/n)/n`.
 - Other longer ranges contribute `w/n`.
 
-**1806b4cd0** obtains the source x-height from prepared character record **+1c**, via **1804c2660**. Independently, JIIX exporter **1806db5a0** reads that same field and emits the literal key `x-height`, proving the field's semantics.
+**1807035c0** supplies a range tuple whose first two integers are character start/end. The third integer is passed by **180860ac0** to **1806b4cd0**, then **1804c2660**, as the containing line index. The wrapper obtains Document interface **CA8** and calls table **180200620+78 = 1800b6810**. This method validates the index against `voTextInspector.virtual140` and calls `virtual148 = 180177590` to fill writable `lineInfo`. It copies the line object's **double+20** into `lineInfo.float+18`; the iink success payload transports that float at **+1c**. Independently, JIIX exporter **1806db5a0** emits this metric under the literal key `x-height`. These steps prove a prepared **line-level** metric, not individual character geometry. The writer of the line object's double+20 remains a separate unresolved upstream producer; neither a stroke bounding box nor a glyph metric is substituted for it.
 
 The policy averages contributions **per eligible range**, not per character. If the rendered font's literal `x` height is positive, it computes:
 
@@ -58,7 +58,7 @@ This is a proven executable prepared-input font-size policy. Full automatic grou
 
 ## Desktop display adapter
 
-`TextRecognition.FontSizeSamples` can carry actual prepared recognized-range geometry, expressed in the same world-coordinate units as the input ink. `AiInkLayout` copies it into an owned row snapshot; `AiTypesetLayout` calls the recovered policy with the real embedded font's rendered `x` height in those same units. It does not use minimum or maximum character height. Input box geometry is never substituted for a prepared character's x-height. The currently used CTC recognizer does not supply this metadata.
+`TextRecognition.FontSizeSamples` can carry actual prepared recognized ranges and their containing-line x-height, expressed in the same world-coordinate units as the input ink. `AiInkLayout` copies it into an owned row snapshot; `AiTypesetLayout` calls the recovered policy with the real embedded font's rendered `x` height in those same units. It does not use minimum or maximum character height. Input box geometry is never substituted for a prepared line's x-height. The currently used CTC recognizer does not supply this metadata.
 
 Without prepared metadata, the desktop adapter uses an explicitly original fallback for rows with multiple separate handwriting components. It removes flat crossbars and very small detached marks, estimates ordinary body height from a lower height quantile, and aligns to the median component bottom. It measures `x` for text containing lowercase letters and `H` otherwise. This prevents one tall component from enlarging the whole row, while a dot does not shrink it. A single connected word still uses the existing whole-word metric fallback until its decoder supplies prepared range geometry. This is not a claim that native handwriting segmentation or baseline placement has been ported.
 

@@ -43,8 +43,8 @@ internal static class AiTypesetLayout
             if (preparedFontSizeSamples is { Count: > 0 and <= 4096 })
             {
                 // The recovered native policy averages eligible recognized
-                // ranges. It is used only when the decoder supplies real x-height;
-                // component boxes are never relabeled as prepared character data.
+                // ranges. It requires their prepared containing-line x-height;
+                // component boxes are never relabeled as prepared line data.
                 var reference = Measure("x", mark.Font, 64);
                 if (reference?.Bounds.Height > 0)
                     desiredSize = LegacyHandwritingFontSizePolicy.MatchPrepared(64,

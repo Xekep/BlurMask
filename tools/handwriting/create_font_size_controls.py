@@ -1,4 +1,4 @@
-"""Own deterministic float32 controls for the recovered prepared-range typesetting policy.
+"""Own float32 controls: each range supplies its containing source line's x-height.
 
 No vendor binaries/resources or SDK invocation. Requires NumPy; emits supplied output path.
 """
@@ -20,11 +20,11 @@ def reference(c):
     eligible = [s for s in c['text'] if s[0] not in excluded and not s[5] & 0x200400]
     if not eligible: return float(size)
     values = []
-    for cp, n, xheight, left, right, flags in eligible:
-        if n == 1 or wide(cp): value = f(xheight)
+    for cp, n, line_xheight, left, right, flags in eligible:
+        if n == 1 or wide(cp): value = f(line_xheight)
         else:
             value = f(f(f(right) - f(left)) / f(n))
-            if n == 2: value = f(f(f(xheight) + value) / f(2))
+            if n == 2: value = f(f(f(line_xheight) + value) / f(2))
         values.append(value)
     total = f(0)
     for value in values: total = f(value + total)

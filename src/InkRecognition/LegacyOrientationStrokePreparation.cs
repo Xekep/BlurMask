@@ -24,6 +24,9 @@ public sealed record LegacyOrientationSmoothingProfile(float Minimum, float Maxi
 }
 public readonly record struct LegacyOrientationStrokeMetrics(float OrthogonalFraction, float CornerFraction);
 public sealed record LegacyOrientationStrokePreparationResult(IReadOnlyList<InkStroke> Strokes, LegacyOrientationStrokeMetrics Metrics, float SmoothingWeight);
+public sealed record LegacyOrientationStrokePreparationWithKeysResult(IReadOnlyList<InkStroke> Strokes,
+    LegacyOrientationStrokeMetrics Metrics, float SmoothingWeight, ReadOnlyMemory<int> PointKeys200,
+    ReadOnlyMemory<int> PhysicalPointCounts);
 
 /// <summary>
 /// Ordinary no-associated-record/no-key-output child265 path173b90→1728c0,
@@ -53,6 +56,19 @@ public static class LegacyOrientationStrokePreparation
     public static LegacyOrientationStrokePreparationResult Prepare(IReadOnlyList<InkStroke> strokes, LegacyOrientationSmoothingProfile profile,
         float scale, LegacyOrientationStrokeMetrics sourceMetrics, CancellationToken cancellationToken = default)
     {
+        var result = PrepareCore(strokes, profile, scale, sourceMetrics, false, cancellationToken);
+        return new(result.Strokes, result.Metrics, result.SmoothingWeight);
+    }
+
+    /// <summary>Ordinary source265 mapping at multiplier200; maps current input point ordinals, not arbitrary timestamps.</summary>
+    public static LegacyOrientationStrokePreparationWithKeysResult PrepareWithPointKeys(IReadOnlyList<InkStroke> strokes,
+        LegacyOrientationSmoothingProfile profile, float scale, LegacyOrientationStrokeMetrics sourceMetrics,
+        CancellationToken cancellationToken = default) => PrepareCore(strokes, profile, scale, sourceMetrics, true, cancellationToken);
+
+    private static LegacyOrientationStrokePreparationWithKeysResult PrepareCore(IReadOnlyList<InkStroke> strokes,
+        LegacyOrientationSmoothingProfile profile, float scale, LegacyOrientationStrokeMetrics sourceMetrics,
+        bool includePointKeys, CancellationToken cancellationToken)
+    {
         ArgumentNullException.ThrowIfNull(profile); profile.Validate(); LegacyLineOrientationProjection.Validate(strokes, cancellationToken);
         if (!float.IsFinite(scale) || scale <= 0 || scale > 1_000_000 || !float.IsFinite(sourceMetrics.OrthogonalFraction) || !float.IsFinite(sourceMetrics.CornerFraction) ||
             sourceMetrics.OrthogonalFraction < -1 || sourceMetrics.CornerFraction < -1 || sourceMetrics.OrthogonalFraction > 4096 || sourceMetrics.CornerFraction > 4096)
@@ -67,17 +83,29 @@ public static class LegacyOrientationStrokePreparation
             if (metrics.CornerFraction > profile.CornerHigh) weight += profile.Extra;
             else if (metrics.CornerFraction > profile.CornerLow) weight += ((metrics.CornerFraction - profile.CornerLow) * profile.Extra) / (profile.CornerHigh - profile.CornerLow);
         }
-        var result = new List<InkStroke>(); int total = 0;
+        var result = new List<InkStroke>(); var keys = new List<int>(); int total = 0, inputOffset = 0;
         foreach (var stroke in strokes)
         {
             cancellationToken.ThrowIfCancellationRequested();
             //Native bypasses all smoothing for fewer than3 original points.
-            var unique = new List<InkPoint> { stroke.Points[0] };
+            var unique = new List<InkPoint> { stroke.Points[0] }; var acceptedIndices = new List<int> { 0 };
             for (int i = 1; i < stroke.Points.Count; i++)
-                if (!LegacyLineOrientationProjection.Approximately(stroke.Points[i].X, unique[^1].X) || !LegacyLineOrientationProjection.Approximately(stroke.Points[i].Y, unique[^1].Y)) unique.Add(stroke.Points[i]);
+            {
+                if (!LegacyLineOrientationProjection.Approximately(stroke.Points[i].X, unique[^1].X) || !LegacyLineOrientationProjection.Approximately(stroke.Points[i].Y, unique[^1].Y))
+                { unique.Add(stroke.Points[i]); acceptedIndices.Add(i); }
+                else if (i == stroke.Points.Count - 1) acceptedIndices[^1] = i; //native final duplicate updates key, not retained coordinate.
+            }
             var output = new List<InkPoint>();
-            if (stroke.Points.Count < 3 || unique.Count < 2) output.AddRange(stroke.Points);
-            else if (unique.Count < 4) output.AddRange(unique);
+            if (stroke.Points.Count < 3 || unique.Count < 2)
+            {
+                output.AddRange(stroke.Points);
+                if (includePointKeys) for (int i = 0; i < stroke.Points.Count; i++) keys.Add((inputOffset + i) * 200);
+            }
+            else if (unique.Count < 4)
+            {
+                output.AddRange(unique);
+                if (includePointKeys) foreach (int i in acceptedIndices) keys.Add((inputOffset + i) * 200);
+            }
             else
             {
                 var lengths = new double[unique.Count - 1]; double arc = 0;
@@ -93,27 +121,33 @@ public static class LegacyOrientationStrokePreparation
                 for (int i = 0; i < lengths.Length; i++)
                 {
                     double h = lengths[i]; var bx = ToBezier(x[i], h); var by = ToBezier(y[i], h);
-                    if (i == 0) Add(new((float)bx[0], (float)by[0]));
-                    Flatten(bx, by, 0);
+                    if (i == 0) Add(new((float)bx[0], (float)by[0]), (inputOffset + acceptedIndices[0]) * 200);
+                    int next = inputOffset + acceptedIndices[i + 1];
+                    Flatten(bx, by, 0, 0, 1, false, next);
                 }
-                void Flatten(double[] bx, double[] by, int depth)
+                void Flatten(double[] bx, double[] by, int depth, float from, float to, bool interpolated, int next)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     if (depth >= 11 || (Distance(bx[1], by[1], bx[0], by[0], bx[3], by[3]) < threshold && Distance(bx[2], by[2], bx[0], by[0], bx[3], by[3]) < threshold))
-                    { Add(new((float)bx[3], (float)by[3])); return; }
-                    var (leftX, rightX) = Split(bx); var (leftY, rightY) = Split(by);
-                    Flatten(leftX, leftY, depth + 1); Flatten(rightX, rightY, depth + 1);
+                    {
+                        int key = interpolated ? (int)MathF.Round(((float)(next - 1) + to) * 200f, MidpointRounding.AwayFromZero) : next * 200;
+                        Add(new((float)bx[3], (float)by[3]), key); return;
+                    }
+                    var (leftX, rightX) = Split(bx); var (leftY, rightY) = Split(by); float middle = (from + to) * .5f;
+                    //1722d0 left descends into171f00; its entire subtree rounds fractional keys.
+                    Flatten(leftX, leftY, depth + 1, from, middle, true, next);
+                    Flatten(rightX, rightY, depth + 1, middle, to, interpolated, next);
                 }
-                void Add(InkPoint point)
+                void Add(InkPoint point, int key)
                 {
                     if (output.Count >= 4096 - total || !float.IsFinite(point.X) || !float.IsFinite(point.Y)) throw new InvalidDataException("Bounded orientation smoothing output exceeded or nonfinite.");
-                    output.Add(point);
+                    output.Add(point); if (includePointKeys) keys.Add(key);
                 }
             }
             if (output.Count > 4096 - total) throw new InvalidDataException("Bounded orientation smoothing output exceeded.");
-            total += output.Count; result.Add(new(output.ToArray()));
+            total += output.Count; result.Add(new(output.ToArray())); inputOffset += stroke.Points.Count;
         }
-        return new(result.AsReadOnly(), metrics, weight);
+        return new(result.AsReadOnly(), metrics, weight, keys.ToArray(), result.Select(s => s.Points.Count).ToArray());
     }
 
     private static double[] ToBezier(LegacyCubicCoefficients c, double length) =>

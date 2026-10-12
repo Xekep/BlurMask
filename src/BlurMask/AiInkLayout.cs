@@ -71,8 +71,8 @@ internal static class AiInkLayout
                 if (!float.IsFinite(line.Confidence) || line.Confidence < .75f || string.IsNullOrWhiteSpace(line.Text) || value.Length + line.Text.Length > 4000)
                 { uncertain = true; break; }
                 confidence = Math.Min(confidence, line.Confidence);
-                // Keep recognized-range metadata distinct from original component
-                // boxes. The latter provide a conservative display fallback only.
+                // Keep prepared containing-line/range metadata distinct from
+                // original component boxes, which provide a display fallback only.
                 sizing.AddRange(row.Skip(i).Take(end - i).Select(g => g.Bounds));
                 if (line.FontSizeSamples is { Count: > 0 and <= 4096 } samples && preparedSizes.Count <= 4096 - samples.Count)
                     preparedSizes.AddRange(samples);

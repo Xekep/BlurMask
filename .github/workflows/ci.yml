@@ -373,6 +373,23 @@ jobs:
             dotnet run --project tools/LegacyOrientationSmoothing.Probe -c Release -- .artifacts/legacy-orientation-smoothing-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
             python tools/LegacySourceOrientation.Probe/reference_controls.py .artifacts/legacy-source-orientation-controls.json
             dotnet run --project tools/LegacySourceOrientation.Probe -c Release -- .artifacts/legacy-source-orientation-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/LegacySymbolContext.Probe/reference_controls.py .artifacts/legacy-symbol-context-controls.json
+          dotnet run --project tools/LegacySymbolContext.Probe -c Release -- .artifacts/legacy-symbol-context-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
+          python tools/LegacySourceSelection.Probe/reference_controls.py .artifacts/legacy-source-selection-controls.json
+          dotnet run --project tools/LegacySourceSelection.Probe -c Release -- .artifacts/legacy-source-selection-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
+          python tools/LegacyWordOrdering.Probe/reference_controls.py .artifacts/legacy-word-ordering-controls.json
+          dotnet run --project tools/LegacyWordOrdering.Probe -c Release -- .artifacts/legacy-word-ordering-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyWordAlternatives.Probe/reference_controls.py .artifacts/legacy-word-alternative-controls.json
+          dotnet run --project tools/LegacyWordAlternatives.Probe -c Release -- .artifacts/legacy-word-alternative-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacySmoothingPointKeys.Probe/reference_controls.py .artifacts/legacy-smoothing-point-keys-controls.json
+          dotnet run --project tools/LegacySmoothingPointKeys.Probe -c Release -- .artifacts/legacy-smoothing-point-keys-controls.json
+          dotnet run --project tools/LegacyRowAcousticInput.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
+          dotnet run --project tools/LegacyFirstAcoustic.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json
+          dotnet run --project tools/LegacyFirstPreparedAcoustic.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json
+          python tools/LegacyAggregateDictionaryQuery.Probe/reference_controls.py .artifacts/legacy-aggregate-dictionary-query-controls.json
+          dotnet run --project tools/LegacyAggregateDictionaryQuery.Probe -c Release -- .artifacts/legacy-aggregate-dictionary-query-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
+          python tools/LegacyOrdinaryDictionaryQuery.Probe/reference_controls.py .artifacts/legacy-ordinary-dictionary-query-controls.json
+          dotnet run --project tools/LegacyOrdinaryDictionaryQuery.Probe -c Release -- .artifacts/legacy-ordinary-dictionary-query-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
           python tools/handwriting/fetch_russian_track_corpus.py --self-test
           dotnet build tools/LegacyRussianCorpus.Probe -c Release
           python tools/LegacyVariableWord.Probe/reference_controls.py .artifacts/legacy-variable-word-controls.json
@@ -590,6 +607,16 @@ jobs:
               @{ Name = 'LegacyLineOrientation'; Args = @('.artifacts/legacy-line-orientation-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
               @{ Name = 'LegacyOrientationSmoothing'; Args = @('.artifacts/legacy-orientation-smoothing-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
               @{ Name = 'LegacySourceOrientation'; Args = @('.artifacts/legacy-source-orientation-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacySymbolContext'; Args = @('.artifacts/legacy-symbol-context-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
+            @{ Name = 'LegacySourceSelection'; Args = @('.artifacts/legacy-source-selection-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
+            @{ Name = 'LegacyWordOrdering'; Args = @('.artifacts/legacy-word-ordering-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyWordAlternatives'; Args = @('.artifacts/legacy-word-alternative-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacySmoothingPointKeys'; Args = @('.artifacts/legacy-smoothing-point-keys-controls.json') },
+            @{ Name = 'LegacyRowAcousticInput'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
+            @{ Name = 'LegacyFirstAcoustic'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
+            @{ Name = 'LegacyFirstPreparedAcoustic'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
+            @{ Name = 'LegacyAggregateDictionaryQuery'; Args = @('.artifacts/legacy-aggregate-dictionary-query-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
+            @{ Name = 'LegacyOrdinaryDictionaryQuery'; Args = @('.artifacts/legacy-ordinary-dictionary-query-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
             @{ Name = 'LegacyVariableWord'; Args = @('.artifacts/legacy-variable-word-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyHandwritingFontSize'; Args = @('.artifacts/font-size-controls.json') }
           )

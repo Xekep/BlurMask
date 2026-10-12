@@ -8,7 +8,7 @@ foreach (var c in doc.RootElement.GetProperty("filters").EnumerateArray())
 {
     int cp = c[0].GetInt32();
     Require(LegacyHandwritingFontSizePolicy.IsExcludedCodePoint(cp) == c[1].GetBoolean(), $"Excluded U+{cp:X}");
-    Require(LegacyHandwritingFontSizePolicy.UsesCharacterXHeight(cp) == c[2].GetBoolean(), $"Character-height U+{cp:X}"); filterCount++;
+    Require(LegacyHandwritingFontSizePolicy.UsesCharacterXHeight(cp) == c[2].GetBoolean(), $"Source-line-height branch U+{cp:X}"); filterCount++;
 }
 foreach (var c in doc.RootElement.GetProperty("policy").EnumerateArray())
 {
@@ -27,7 +27,13 @@ Throws<ArgumentException>(() => LegacyHandwritingFontSizePolicy.MatchPrepared(4,
 Throws<InvalidDataException>(() => LegacyHandwritingFontSizePolicy.MatchPrepared(float.MaxValue, float.Epsilon, [new(65, 1, 1, 0, 1)]));
 Throws<InvalidDataException>(() => LegacyHandwritingFontSizePolicy.QuantizePrepared(float.MaxValue, float.Epsilon, .1f));
 Throws<ArgumentException>(() => LegacyHandwritingFontSizePolicy.RequiresSizeUpdate(1, float.PositiveInfinity));
+var sharedLine = new[] {
+    new LegacyFontSizeTextSample(FirstCodePoint: 65, CharacterCount: 1, SourceLineXHeight: 9, WordLeft: 0, WordRight: 3),
+    new LegacyFontSizeTextSample(FirstCodePoint: 0x431, CharacterCount: 2, SourceLineXHeight: 9, WordLeft: 0, WordRight: 10)
+};
+Equal(LegacyHandwritingFontSizePolicy.MatchPrepared(4, 2, sharedLine), 16);
 Console.WriteLine($"PASS {policyCount} prepared handwriting font-size controls, {filterCount} Unicode branch controls, {quantizeCount} quantization controls, {updateCount} dirty-tolerance controls; finite/overflow rejection.");
+Console.WriteLine("PASS named SourceLineXHeight input shared by differently sized character ranges; no per-character or stroke-box height substituted.");
 static void Equal(float a, float b) => Require(BitConverter.SingleToInt32Bits(a) == BitConverter.SingleToInt32Bits(b), $"Size {a:R} vs {b:R}");
 static void Require(bool value, string message) { if (!value) throw new InvalidOperationException(message); }
 static void Throws<T>(Action action) where T : Exception { try { action(); } catch (T) { return; } throw new InvalidOperationException($"Expected {typeof(T).Name}"); }
