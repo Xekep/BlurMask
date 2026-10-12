@@ -64,6 +64,13 @@ Without prepared metadata, the desktop adapter uses an explicitly original fallb
 
 Structural math retains its formula metrics, including fraction and integral heights. Nearby converted text can still share its size and baseline; persisted text keeps its natural glyph aspect ratio. Offscreen production-font checks cover an isolated tall component, punctuation/crossbars, world-coordinate scaling, the prepared-range average, formula isolation and peer serialization:
 
+The recovered [initial character-line equations](legacy-character-line-equations.md)
+fit weighted prepared boundary/profile observations to baseline, x-height and
+slope. This is a separate upstream step from the range-average size policy.
+Its equation kernel has independent managed and NativeAOT controls; its candidate
+preparation and iterative orchestration still need integration before it can
+replace the application's connected-word bounding-box fallback.
+
 ```powershell
 dotnet run --project tools/BlurMask.RenderProbe -c Release -- --typeset-only true
 ```

@@ -406,6 +406,13 @@ range geometry and rendered `x` metrics, optional prepared math contributions,
 quantization and dirty tolerance. Its values use model units; recognition-range
 production, display conversion and final baseline placement remain separate.
 
+[`LegacyPreparedCharacterLineEquations`](../../docs/legacy-character-line-equations.md)
+restores the initial line fitter's weighted boundary/profile moments and
+constrained baseline/x-height/slope equations. It fits prepared observations
+rather than choosing the smallest or tallest character. Candidate preparation,
+iterative reweighting and acceptance remain separate; this kernel is not yet
+used to size automatically recognized connected handwriting in the application.
+
 [`LegacyOrdinaryGraphAcousticPermissionSession` and
 `LegacyPreparedOrdinaryGraphAcousticProducer`](../../docs/legacy-ordinary-graph-acoustic-lifecycle.md)
 connect the immutable ordinary candidate graph to actual acoustic rows,

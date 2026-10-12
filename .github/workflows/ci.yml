@@ -393,6 +393,8 @@ jobs:
           dotnet run --project tools/LegacyZeroContext.Probe -c Release -- .artifacts/legacy-zero-context-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json
           python tools/LegacyGlyphLineMetric.Probe/reference_controls.py .artifacts/legacy-glyph-line-metric-controls.json
           dotnet run --project tools/LegacyGlyphLineMetric.Probe -c Release -- .artifacts/legacy-glyph-line-metric-controls.json
+          python tools/LegacyCharacterLineEquations.Probe/reference_controls.py .artifacts/legacy-character-line-equation-controls.json
+          dotnet run --project tools/LegacyCharacterLineEquations.Probe -c Release -- .artifacts/legacy-character-line-equation-controls.json
           python tools/LegacyWordContextAlternatives.Probe/reference_controls.py .artifacts/legacy-word-context-alternatives-controls.json
           dotnet run --project tools/LegacyWordContextAlternatives.Probe -c Release -- .artifacts/legacy-word-context-alternatives-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           python tools/LegacyWordQuota.Probe/reference_controls.py .artifacts/legacy-word-quota-controls.json
@@ -630,6 +632,7 @@ jobs:
             @{ Name = 'LegacyFirstCache'; Args = @('.artifacts/legacy-acoustic-cache-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
             @{ Name = 'LegacyZeroContext'; Args = @('.artifacts/legacy-zero-context-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
             @{ Name = 'LegacyGlyphLineMetric'; Args = @('.artifacts/legacy-glyph-line-metric-controls.json') },
+            @{ Name = 'LegacyCharacterLineEquations'; Args = @('.artifacts/legacy-character-line-equation-controls.json') },
             @{ Name = 'LegacyWordContextAlternatives'; Args = @('.artifacts/legacy-word-context-alternatives-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyWordQuota'; Args = @('.artifacts/legacy-word-quota-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyAggregateDictionaryQuery'; Args = @('.artifacts/legacy-aggregate-dictionary-query-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
