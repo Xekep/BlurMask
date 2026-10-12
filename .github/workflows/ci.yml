@@ -386,6 +386,17 @@ jobs:
           dotnet run --project tools/LegacyRowAcousticInput.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
           dotnet run --project tools/LegacyFirstAcoustic.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json
           dotnet run --project tools/LegacyFirstPreparedAcoustic.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json
+          python tools/LegacyFirstRowContext.Probe/reference_controls.py .artifacts/legacy-first-row-context-controls.json
+          dotnet run --project tools/LegacyFirstRowContext.Probe -c Release -- .artifacts/legacy-first-row-context-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json
+          dotnet run --project tools/LegacyFirstCache.Probe -c Release -- .artifacts/legacy-acoustic-cache-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json
+          python tools/LegacyZeroContext.Probe/reference_controls.py .artifacts/legacy-zero-context-controls.json
+          dotnet run --project tools/LegacyZeroContext.Probe -c Release -- .artifacts/legacy-zero-context-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json
+          python tools/LegacyGlyphLineMetric.Probe/reference_controls.py .artifacts/legacy-glyph-line-metric-controls.json
+          dotnet run --project tools/LegacyGlyphLineMetric.Probe -c Release -- .artifacts/legacy-glyph-line-metric-controls.json
+          python tools/LegacyWordContextAlternatives.Probe/reference_controls.py .artifacts/legacy-word-context-alternatives-controls.json
+          dotnet run --project tools/LegacyWordContextAlternatives.Probe -c Release -- .artifacts/legacy-word-context-alternatives-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyWordQuota.Probe/reference_controls.py .artifacts/legacy-word-quota-controls.json
+          dotnet run --project tools/LegacyWordQuota.Probe -c Release -- .artifacts/legacy-word-quota-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           python tools/LegacyAggregateDictionaryQuery.Probe/reference_controls.py .artifacts/legacy-aggregate-dictionary-query-controls.json
           dotnet run --project tools/LegacyAggregateDictionaryQuery.Probe -c Release -- .artifacts/legacy-aggregate-dictionary-query-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
           python tools/LegacyOrdinaryDictionaryQuery.Probe/reference_controls.py .artifacts/legacy-ordinary-dictionary-query-controls.json
@@ -615,6 +626,12 @@ jobs:
             @{ Name = 'LegacyRowAcousticInput'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
             @{ Name = 'LegacyFirstAcoustic'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
             @{ Name = 'LegacyFirstPreparedAcoustic'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
+            @{ Name = 'LegacyFirstRowContext'; Args = @('.artifacts/legacy-first-row-context-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
+            @{ Name = 'LegacyFirstCache'; Args = @('.artifacts/legacy-acoustic-cache-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
+            @{ Name = 'LegacyZeroContext'; Args = @('.artifacts/legacy-zero-context-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
+            @{ Name = 'LegacyGlyphLineMetric'; Args = @('.artifacts/legacy-glyph-line-metric-controls.json') },
+            @{ Name = 'LegacyWordContextAlternatives'; Args = @('.artifacts/legacy-word-context-alternatives-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyWordQuota'; Args = @('.artifacts/legacy-word-quota-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyAggregateDictionaryQuery'; Args = @('.artifacts/legacy-aggregate-dictionary-query-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
             @{ Name = 'LegacyOrdinaryDictionaryQuery'; Args = @('.artifacts/legacy-ordinary-dictionary-query-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
             @{ Name = 'LegacyVariableWord'; Args = @('.artifacts/legacy-variable-word-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
@@ -655,6 +672,12 @@ jobs:
       - name: Install Linux CAS CLI and Native AOT build dependencies
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends xcas clang zlib1g-dev
+      - name: Cache pinned official Windows CAS archive
+        if: runner.os == 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: .artifacts/giac-test/xcaswininst.exe
+          key: windows-cas-archive-2811493b3caf207614ebcb6d0fab46fa76c3c7938c064076d1ebb96cc389514f
       - name: Extract verified official Windows CLI without running its installer
         if: runner.os == 'Windows'
         shell: pwsh

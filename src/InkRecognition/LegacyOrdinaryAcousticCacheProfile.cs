@@ -10,6 +10,25 @@ public sealed record LegacyOrdinaryAcousticCacheProfile(float FallbackPenalty,fl
         CancellationToken cancellationToken=default)
     {
         _=LegacyDirectionalAcousticWeightConfiguration.LoadV110Prefix(serialized,out int prefix,cancellationToken);
+        return ReadValidatedTail(serialized,prefix,cancellationToken);
+    }
+
+    /// <summary>Load the first current-row model and its cache configuration from
+    /// the same validated source hierarchy. No arbitrary prefix or unrelated model
+    /// instance can be supplied to this ownership boundary.</summary>
+    public static LegacyOrdinaryAcousticCacheProfile ReadFirstSource(ReadOnlySpan<byte> resource,int sourceOffset,
+        out LegacyFirstAcousticModel firstModel,CancellationToken cancellationToken=default)
+    {
+        firstModel=LegacyFirstAcousticModel.ReadSource(resource,sourceOffset,cancellationToken);
+        int offset=firstModel.OrdinaryNodeOffset;
+        int length=checked((int)BinaryPrimitives.ReadUInt32LittleEndian(resource[(offset+4)..])+8);
+        return ReadValidatedTail(resource.Slice(offset,length),firstModel.PrefixBytesConsumed,cancellationToken);
+    }
+
+    private static LegacyOrdinaryAcousticCacheProfile ReadValidatedTail(ReadOnlySpan<byte> serialized,int prefix,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
         if(BinaryPrimitives.ReadUInt16LittleEndian(serialized[12..])!=0)throw new InvalidDataException("Compressed acoustic objects unsupported.");
         int length=checked((int)BinaryPrimitives.ReadUInt32LittleEndian(serialized[4..])+8);
         var r=new Reader(serialized[prefix..length]);

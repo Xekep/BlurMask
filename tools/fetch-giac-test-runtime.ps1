@@ -5,8 +5,10 @@ $output = [IO.Path]::GetFullPath($OutputDirectory)
 New-Item -ItemType Directory -Path $output -Force | Out-Null
 if (-not $ArchivePath) {
     $ArchivePath = Join-Path $output 'xcaswininst.exe'
-    & curl.exe --fail --location --retry 2 --max-time 180 --output $ArchivePath 'https://xcas.univ-grenoble-alpes.fr/backup/giac/xcaswininst.exe'
-    if ($LASTEXITCODE -ne 0) { throw 'Official Giac download failed.' }
+    if (-not (Test-Path -LiteralPath $ArchivePath -PathType Leaf)) {
+        & curl.exe --fail --silent --show-error --location --retry 2 --connect-timeout 30 --max-time 900 --output $ArchivePath 'https://xcas.univ-grenoble-alpes.fr/backup/giac/xcaswininst.exe'
+        if ($LASTEXITCODE -ne 0) { throw 'Official Giac download failed.' }
+    }
 }
 $archive = (Resolve-Path -LiteralPath $ArchivePath).Path
 if ((Get-Item -LiteralPath $archive).Length -ne 222920022 -or

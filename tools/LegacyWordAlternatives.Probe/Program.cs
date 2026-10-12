@@ -117,6 +117,38 @@ try
 }
 catch (NotSupportedException) { }
 
+// Continuation2144f0 merges only secondary1f9830. The primary pool below
+// would visibly change under initial1f93a0, but must keep all of its bytes.
+var phaseSlots = new byte[256];
+BinaryPrimitives.WriteInt32LittleEndian(phaseSlots.AsSpan(0x10), 5);
+BinaryPrimitives.WriteInt32LittleEndian(phaseSlots.AsSpan(128 + 0x10), 7);
+BinaryPrimitives.WriteInt32LittleEndian(phaseSlots.AsSpan(128 + 0x58), 1);
+var phasePrimary = Enumerable.Repeat((byte)0xa7, 160).ToArray();
+var phaseSecondary = Enumerable.Repeat((byte)0x5b, 160).ToArray();
+for (int index = 0; index < 2; index++)
+{
+    int at = index * 80;
+    BinaryPrimitives.WriteInt32LittleEndian(phasePrimary.AsSpan(at), index == 0 ? 3 : 1);
+    BinaryPrimitives.WriteUInt64LittleEndian(phasePrimary.AsSpan(at + 8), (ulong)(100 + index));
+    phasePrimary[at + 31] = 0;
+    BinaryPrimitives.WriteInt32LittleEndian(phasePrimary.AsSpan(at + 40), 0x4000000);
+    BinaryPrimitives.WriteInt32LittleEndian(phaseSecondary.AsSpan(at), index == 0 ? 5 : 7);
+    BinaryPrimitives.WriteUInt64LittleEndian(phaseSecondary.AsSpan(at + 8), 200);
+    BinaryPrimitives.WriteInt32LittleEndian(phaseSecondary.AsSpan(at + 40), 0x4000000);
+}
+var phaseResult = LegacyNativeWordAlternativeOrdering.Prepare(phaseSlots, 2, true, fresh,
+    new uint[] { 0 }, false, new(2, phasePrimary), new(2, phaseSecondary));
+Require(phaseResult.UniqueCount == 1 && phaseResult.PrimaryAlternativeStorage.Span.SequenceEqual(phasePrimary),
+    "Continuation executed primary initial-phase merge or changed unused primary bytes.");
+var noPrimary = LegacyNativeWordAlternativeOrdering.Prepare(phaseSlots, 2, true, fresh,
+    new uint[] { 0 }, false, null, new(2, phaseSecondary));
+Require(noPrimary.UniqueCount == 1 && noPrimary.PrimaryAlternativeStorage.IsEmpty,
+    "Continuation required an unused primary pool or changed prepared2/2 configuration.");
+var forcedInitial = new LegacyNativeWordAlternativeBuffer(2, phasePrimary);
+forcedInitial.MergePrimary(phaseSlots.AsSpan(0, 128), phaseSlots.AsSpan(128, 128));
+Require(!forcedInitial.GetSnapshot().Span.SequenceEqual(phasePrimary),
+    "Focused phase regression did not distinguish the erroneous primary merge.");
+
 // Existing actual RU ingress/cuts/context/neural/cache lifecycle provides real
 // initial and continuation records; alternative initialization remains explicit.
 var acoustic = File.ReadAllBytes(args[1]);

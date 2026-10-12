@@ -34,6 +34,10 @@ public sealed class LegacyNativeWordRecordHeap
         return slots.AsSpan(slotIndex * SlotSize, SlotSize).ToArray();
     }
 
+    /// <summary>Owned full-capacity slot storage, including inactive bytes.
+    /// Capacity resizing must retain those bytes rather than infer zeroes.</summary>
+    public ReadOnlyMemory<byte> GetSlotStorageSnapshot() => slots.ToArray();
+
     /// <summary>
     /// A full heap rejects equal/worse cost; equal children prefer the right
     /// child. An optional eviction callback runs before movement, as in native.

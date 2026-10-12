@@ -171,7 +171,8 @@ for variant in (0, 4):
             leader = unique - 1
             if compare(variant, [0], compact[leader], compact[index]) == 0:
                 compact[leader], compact[index], _ = merge('secondary', 2, secondary, compact[leader], compact[index])
-                compact[leader], compact[index], _ = merge('primary', 2, primary, compact[leader], compact[index])
+                if variant == 0:
+                    compact[leader], compact[index], _ = merge('primary', 2, primary, compact[leader], compact[index])
             else:
                 compact[unique] = compact[index]
                 unique += 1

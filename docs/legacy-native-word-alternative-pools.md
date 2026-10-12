@@ -87,7 +87,11 @@ Trace pointer replacement is not performed in nontracing scope.
 prepared configuration and explicit frontend280 result. It applies native
 midpoint quicksort, then calls secondary merging first (or the ordinary full
 record cost swap when secondary count is not greater than one), followed by
-primary merging. Later comparisons see the updated leader fields, as native.
+primary merging only in the initial phase. The continuation duplicate block
+(`2144f0` after `211eb0`, calls at `1f9830`) has no `1f93a0` call: it leaves
+primary pool bytes unchanged and accepts an absent primary pool while retaining
+the actual prepared primary count2. An explicitly supplied primary pool remains
+an owned unchanged snapshot. Later comparisons see updated leader fields, as native.
 Distinct records compact forward and rebuild through `203de0`/`1f75b0`.
 
 The returned complete pool snapshots remain indexed by the transported `58`
@@ -96,6 +100,12 @@ primary arc limit; secondary blocks copy under their own enabled count. No
 pool is replaced by a text-string dictionary, generic score ranking or a
 one-alternative production default. Cancellation can leave prior pool merges
 applied; transaction rollback is not claimed.
+
+The focused phase regression uses two duplicate slots whose primary alternatives
+would visibly change under `1f93a0`. It proves unchanged primary bytes in
+continuation mode, optional absence of that unused pool, and that the same
+fixture changes under the initial merge. The independent 128 continuation
+ordering streams also expect the complete original primary bytes.
 
 ## Validation
 

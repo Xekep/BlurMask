@@ -40,7 +40,8 @@ public static class LegacyNativeWordAlternativeOrdering
         if (slotStorage.Length % 128 != 0 || slotStorage.Length / 128 > 4096 ||
             (uint)activeCount > (uint)(slotStorage.Length / 128))
             throw new ArgumentException("Explicit slot storage must cover all active native records.");
-        CheckPool(configuration.PrimaryAlternativeCount2402, primaryPool);
+        if (!continuation)
+            CheckPool(configuration.PrimaryAlternativeCount2402, primaryPool);
         CheckPool(configuration.SecondaryAlternativeCount2404, secondaryPool);
         if (configuration.PrimaryAlternativeCount2402 > 1 && configuration.SecondaryAlternativeCount2404 > 1 &&
             ReferenceEquals(primaryPool, secondaryPool))
@@ -62,7 +63,9 @@ public static class LegacyNativeWordAlternativeOrdering
                     secondaryPool!.MergeSecondary(Slot(working, leader), Slot(working, index));
                 else if (Cost(Slot(working, index)) < Cost(Slot(working, leader)))
                     Swap(working, leader, index);
-                if (configuration.PrimaryAlternativeCount2402 > 1)
+                // The second2144f0 phase only merges secondary1f9830.
+                // Primary1f93a0 belongs to the first(initial) phase.
+                if (!continuation && configuration.PrimaryAlternativeCount2402 > 1)
                     primaryPool!.MergePrimary(Slot(working, leader), Slot(working, index));
             }
             else
