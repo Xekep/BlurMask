@@ -425,6 +425,13 @@ jobs:
           python tools/LegacyFirstTransition.Probe/reference_controls.py --audit .artifacts/legacy-first-transition-actual.json
           python tools/handwriting/fetch_unicode9_reference_data.py .artifacts/unicode9-reference
           dotnet run --project tools/LegacyUnicodeNormalizationData.Probe -c Release -- models/text-unicode/legacy-normalization-data.json .artifacts/unicode9-reference/UnicodeData.txt .artifacts/unicode9-reference/DerivedNormalizationProps.txt
+          dotnet run --project tools/LegacyCanonicalScratch.Probe -c Release -- models/text-unicode/legacy-normalization-data.json .artifacts/unicode9-reference/NormalizationTest.txt
+          python tools/LegacyTextGlyphPublication.Probe/reference_controls.py models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-text-glyph-publication-controls.json
+          dotnet run --project tools/LegacyTextGlyphPublication.Probe -c Release -- models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json .artifacts/legacy-text-glyph-publication-controls.json .artifacts/unicode9-reference/auxiliary/GraphemeBreakTest.txt models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/LegacyFirstSourceRecord.Probe/reference_controls.py .artifacts/legacy-first-source-record-controls.json
+          dotnet run --project tools/LegacyFirstSourceRecord.Probe -c Release -- .artifacts/legacy-first-source-record-controls.json
+          python tools/LegacyWordAcousticRequest.Probe/reference_controls.py .artifacts/legacy-word-acoustic-request-controls.json
+          dotnet run --project tools/LegacyWordAcousticRequest.Probe -c Release -- .artifacts/legacy-word-acoustic-request-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           python tools/LegacyGlyphUtf8Tokens.Probe/reference_controls.py .artifacts/legacy-glyph-utf8-controls.json
           dotnet run --project tools/LegacyGlyphUtf8Tokens.Probe -c Release -- .artifacts/legacy-glyph-utf8-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
           dotnet run --project tools/LegacyFreshFirstTextPolicy.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res
@@ -722,6 +729,10 @@ jobs:
             @{ Name = 'LegacyFirstShortlist'; Args = @('.artifacts/legacy-first-shortlist-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyFirstTransition'; Args = @('.artifacts/legacy-first-transition-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-first-transition-native-actual.json') },
             @{ Name = 'LegacyUnicodeNormalizationData'; Args = @('models/text-unicode/legacy-normalization-data.json', '.artifacts/unicode9-reference/UnicodeData.txt', '.artifacts/unicode9-reference/DerivedNormalizationProps.txt') },
+            @{ Name = 'LegacyCanonicalScratch'; Args = @('models/text-unicode/legacy-normalization-data.json', '.artifacts/unicode9-reference/NormalizationTest.txt') },
+            @{ Name = 'LegacyTextGlyphPublication'; Args = @('models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', '.artifacts/legacy-text-glyph-publication-controls.json', '.artifacts/unicode9-reference/auxiliary/GraphemeBreakTest.txt', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyFirstSourceRecord'; Args = @('.artifacts/legacy-first-source-record-controls.json') },
+            @{ Name = 'LegacyWordAcousticRequest'; Args = @('.artifacts/legacy-word-acoustic-request-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyGlyphUtf8Tokens'; Args = @('.artifacts/legacy-glyph-utf8-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyFreshFirstTextPolicy'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyFreshDirectInvocation'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res') },

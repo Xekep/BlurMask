@@ -8,6 +8,8 @@ from pathlib import Path
 FILES = {
     'UnicodeData.txt': '68dfc414d28257b9b5d6ddbb8b466c768c00ebdf6cbf7784364a9b6cad55ee8f',
     'DerivedNormalizationProps.txt': '02d8e12cea7c61a9f3cc5fbf8eaceadf8da23fe83d60c64cf647088830b810cc',
+    'NormalizationTest.txt': '2d48d848656b3cf889df59980ab13551988950c4ca8c5190a17c691a17f8b9bb',
+    'auxiliary/GraphemeBreakTest.txt': 'c76e7ed44a602f85161758ec54d2bcbcb7baf38f97720605a3e81ce02af47061',
 }
 
 
@@ -15,6 +17,7 @@ def fetch(folder):
     folder.mkdir(parents=True, exist_ok=True)
     for name, expected in FILES.items():
         target = folder / name
+        target.parent.mkdir(parents=True, exist_ok=True)
         if target.is_file() and hashlib.sha256(target.read_bytes()).hexdigest() == expected:
             continue
         for attempt in range(3):
@@ -31,7 +34,7 @@ def fetch(folder):
                 if attempt == 2:
                     raise
                 time.sleep(1)
-    print('PASS two official Unicode9 reference files, verified SHA256.')
+    print(f'PASS {len(FILES)} official Unicode9 reference files, verified SHA256.')
 
 
 if __name__ == '__main__':

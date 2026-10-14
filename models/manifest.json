@@ -100,6 +100,11 @@
       "path": "text-unicode/legacy-normalization-data.json",
       "bytes": 57864,
       "sha256": "3cc1d91269959a13b5700b7463d3db7442b83b593ba70435a94665d6531226f2"
+    },
+    {
+      "path": "text-unicode/legacy-text-publication-data.json",
+      "bytes": 19024,
+      "sha256": "6daddbc9ce3d1d3d2e9e179ce008db60887f2c6a13c52ab8bb47dcb215890673"
     }
   ]
 }
