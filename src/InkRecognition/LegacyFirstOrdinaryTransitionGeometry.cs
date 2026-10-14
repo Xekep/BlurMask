@@ -17,6 +17,7 @@ public sealed class LegacyFirstOrdinaryTransitionGeometry
     private readonly int[][][] matrixCosts;
     private readonly bool[] wholeStarts;
     private readonly float height;
+    private readonly ushort replacementSymbol;
     public int NodeCount=>bounds.Length;
 
     public LegacyFirstOrdinaryTransitionGeometry(LegacyFirstTransitionGeometryProfile profile,
@@ -30,6 +31,7 @@ public sealed class LegacyFirstOrdinaryTransitionGeometry
             cuts.Cuts.PreparedInk.StrokePointCounts.Length!=frame.Packet.PhysicalStrokeCount||graph.NodeCount>4096||graph.CandidateCount>131072)
             throw new ArgumentException("Owned fresh unscoped raw packet/frame/cuts and matching first resource required.");
         this.profile=profile;this.graph=graph;height=frame.Row.Frame.Line.Height;
+        replacementSymbol=profile.Alphabet.TryGetLabel("\ufffd",out ushort replacement)?replacement:ushort.MaxValue;
         if(!float.IsFinite(height)||height<=0)throw new ArgumentException("Positive native source line height required.");
         var connections=new LegacyOrdinaryCandidateConnections(graph,cancellationToken);
         bounds=new LegacyFirstTransitionBounds[graph.NodeCount][];futureMinimum=new float[graph.NodeCount][];
@@ -145,6 +147,11 @@ public sealed class LegacyFirstOrdinaryTransitionGeometry
         //Graph191=1 routes6 to195650; first sampler210=1 bypasses its
         //enclosure residual body and returns true with the exact input cost.
         if(request.Kind==6)return new(true,incomingCost);
+        //1ACFA0 resolves graph1BE from the source alphabet's U+FFFD. Either
+        //ordinary endpoint makes scratch20 true and skips195B30. Its final
+        //budget check still applies; kind6 above bypasses that check too.
+        if(!requirePlainSymbols&&(request.CurrentSymbol==replacementSymbol||request.PreviousSymbol==replacementSymbol))
+            return new(incomingCost<0x4000000,incomingCost);
         int current=profile.Categories.CompositeCategories.Span[request.CurrentCategory].GeometryIndex;
         int previous=profile.Categories.CompositeCategories.Span[request.PreviousCategory].GeometryIndex;
         int delta=PairCost(bounds[request.CurrentNode][request.CurrentArc],bounds[request.PreviousNode][request.PreviousArc],

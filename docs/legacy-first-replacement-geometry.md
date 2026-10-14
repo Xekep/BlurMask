@@ -1,0 +1,9 @@
+# First ordinary replacement endpoint correction
+
+`CorrectLiteral140` now implements the source-alphabet replacement endpoint guard in Text `1ACFA0`. Initialization `1A6980` resolves U+FFFD through the owned source alphabet into graph field `1BE`; the current Russian first source maps it to label 189. The graph checks either symbol endpoint, sets scratch byte 20 and reaches the final cost comparison with a zero geometric delta. It still requires the incoming cost to be strictly below the request limit. First kind 6 dispatch precedes this guard and returns true with the unchanged cost without that comparison.
+
+The previous implementation incorrectly applied the ordinary `195B30` pair residual to these literal endpoints. The strict plain Latin/Cyrillic/digit APIs retain their previous validation and behavior. This correction is required even when `1EE3B0` excludes a kind-0 transition with exactly one replacement endpoint: both replacement endpoints remain eligible, and kind 2 has its own path.
+
+`LegacyFirstReplacementGeometry.Probe` constructs the actual first-source frame, cuts and resource-cap/pruned graph, then exercises current-only, previous-only, both and neither replacement endpoints for kinds 0, 2 and 6. It checks signed extremes, the impossible sentinel and cancellation. Its captured ordinary pair costs are audited by an independent Python binary32 residual calculation; the early-return truth table is checked separately. The static auditor pins the DLL hash, actual source alphabet, ownership and instruction order without loading vendor code.
+
+This does not implement generic main-sampler dispatch, opaque/cross-descriptor groups, a complete blank/ancestor search or a final word winner. It changes no labels and does not convert mixed Latin/Cyrillic output into Russian.
