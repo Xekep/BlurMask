@@ -1,9 +1,11 @@
 # Fresh first literal context and glyph materialization
 
-This closes one first-controller branch: a real retained `F0001` cache candidate
-can pass through primary98, B0/B8 and the literal fresh6C word materializer.
-`F0001` stays the private Unicode symbol selected by the engine. It is not
-converted into a guessed Russian letter. The main240 linguistic decoder and
+This closes one first-controller context branch: a real retained `F0001` cache
+candidate can pass through primary98 and B0/B8. It remains in the selected
+source trace, but the outer1F42D0 allocation guard suppresses its glyph when
+the owned invocation99 is false. It is not converted into a guessed letter.
+See [the publication correction](legacy-first-selected-glyph-publication.md).
+The main240 linguistic decoder and
 complete native primary proposal producer are separate unfinished work.
 
 `LegacyFreshFirstLiteralContextPolicy.ReadSource` requires the matching owned
@@ -53,8 +55,9 @@ alternatives are not supplied by this overload.
 The headless probe draws an original rectangle and a separate interior stroke.
 Actual source/frame/cuts produce3 first NN/cache groups. Prepared bounded
 six-category top20 proposals reach primary98 and B8: cost12111, labels134,191.
-The selected word contains two literal glyphs, including one `F0001` with its
-original source probability. The proposal enumeration is an explicit fixture
+The selected trace contains134,191; the native allocation guard produces one
+word glyph134 and suppresses selected F0001. Its original source probability
+remains independently available. The proposal enumeration is an explicit fixture
 policy (maximum5 atoms, old descending spans), not the complete native primary
 enumerator (resource cap7 and ascending spans). This result proves the branch
 composition, not handwriting accuracy or a whole273 winner.

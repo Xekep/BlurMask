@@ -9,6 +9,15 @@ public sealed record LegacyFirstMaterializedPlainWord(LegacyFreshFirstPlainResul
     IReadOnlyDictionary<ulong,float> OwnerFirstScores1C, float MinimumOwnerFirstScore80,
     LegacyFirstTerminalChoice Selection);
 
+/// <summary>The selected B8 path may consist solely of E2/E4 cells. Native
+///1F42D0 then publishes no word and bypasses the leading-endpoint branch,
+/// while preserving the trailing pool endpoint and selected/source ownership.</summary>
+public sealed record LegacyFirstMaterializedPlainResult(LegacyFreshFirstPlainResult Result,
+    LegacySmoothedRowCutResult Cuts,LegacyOrdinaryCursiveCandidateGraph Graph,LegacyNativePublishedWordNode? PublishedWord,
+    IReadOnlyList<ulong> GlyphReferences,ulong DetachedTrailingReference,ulong? DetachedLeadingReference,
+    IReadOnlyDictionary<ulong,float> OwnerFirstScores1C,float MinimumOwnerFirstScore80,LegacyFirstTerminalChoice Selection,
+    LegacyFirstPlainWordScalars WordScalars);
+
 public readonly record struct LegacyFirstPlainWordScalars(float LogMass10,float Calibration14,
     float NormalizedUnadjustedCost18,float NormalizedAcousticCost1C)
 {
@@ -26,8 +35,9 @@ public readonly record struct LegacyFirstPlainWordScalars(float LogMass10,float 
 /// <summary>Fresh first23f single plain word subset of1f42d0. Consumes actual
 /// owned first NN/cache groups and prepared B8/primary98 tables; it is not the
 /// whole controller, main240 language decoder, source720 or final SDK result.
-/// Both zero-span endpoint records remain pool-owned but reset out of the
-/// selected word. Owner64.1C scores are separate from individual glyph40 rows.</summary>
+/// A published plain word owns two detached zero-span endpoints; a hidden
+/// selected root bypasses publication and the leading-endpoint branch.
+/// Owner64.1C scores are separate from individual glyph40 rows.</summary>
 public sealed class LegacyFirstPlainWordMaterializer
 {
     private readonly LegacyFreshFirstResultOwnershipFactory factory;
@@ -65,7 +75,7 @@ public sealed class LegacyFirstPlainWordMaterializer
         LegacyOrdinaryCursiveCandidateGraph graph,LegacyFirstOrdinaryAcousticRecurrence primary98,
         LegacyFirstOrdinaryContextPasses merged,IReadOnlyList<LegacyFirstOrdinaryCacheScores> actualGroupScores,
         CancellationToken cancellationToken=default)
-        =>MaterializeCore(cuts,graph,primary98,merged,actualGroupScores,null,cancellationToken);
+        =>RequireWord(MaterializeCore(cuts,graph,primary98,merged,actualGroupScores,null,cancellationToken));
 
     /// <summary>Fresh6C literal single-word extension, including actual primitive
     /// labels. Uses the caller's matching source bytes to bind literal policy;
@@ -75,10 +85,19 @@ public sealed class LegacyFirstPlainWordMaterializer
         LegacySmoothedRowCutResult cuts,LegacyOrdinaryCursiveCandidateGraph graph,
         LegacyFirstOrdinaryAcousticRecurrence primary98,LegacyFirstOrdinaryContextPasses merged,
         IReadOnlyList<LegacyFirstOrdinaryCacheScores> actualGroupScores,CancellationToken cancellationToken=default)
+        =>RequireWord(MaterializeNativePlainResult(actualResource,sourceOffset,cuts,graph,primary98,merged,actualGroupScores,cancellationToken));
+
+    /// <summary>Same owned literal branch with native no-word publication
+    /// represented explicitly. Selected E2/E4 cells are still traversed; this
+    /// is not post-filtering recognition rows or replacing their source spans.</summary>
+    public LegacyFirstMaterializedPlainResult MaterializeNativePlainResult(ReadOnlySpan<byte> actualResource,int sourceOffset,
+        LegacySmoothedRowCutResult cuts,LegacyOrdinaryCursiveCandidateGraph graph,
+        LegacyFirstOrdinaryAcousticRecurrence primary98,LegacyFirstOrdinaryContextPasses merged,
+        IReadOnlyList<LegacyFirstOrdinaryCacheScores> actualGroupScores,CancellationToken cancellationToken=default)
         =>MaterializeCore(cuts,graph,primary98,merged,actualGroupScores,
             LegacyFreshFirstGlyphSymbolPlan.ReadSource(actualResource,sourceOffset,factory,cancellationToken),cancellationToken);
 
-    private LegacyFirstMaterializedPlainWord MaterializeCore(LegacySmoothedRowCutResult cuts,
+    private LegacyFirstMaterializedPlainResult MaterializeCore(LegacySmoothedRowCutResult cuts,
         LegacyOrdinaryCursiveCandidateGraph graph,LegacyFirstOrdinaryAcousticRecurrence primary98,
         LegacyFirstOrdinaryContextPasses merged,IReadOnlyList<LegacyFirstOrdinaryCacheScores> actualGroupScores,
         LegacyFreshFirstGlyphSymbolPlan? literalSymbols,CancellationToken cancellationToken)
@@ -107,6 +126,7 @@ public sealed class LegacyFirstPlainWordMaterializer
         if(selection.Choices.Count!=1)throw new NotSupportedException("This fresh single-word endpoint requires one surviving terminal choice.");
         var choice=selection.Choices[0];var trace=LegacyFirstSelectedGlyphTrace.Read(grid,choice,cancellationToken);
         if(trace.Count==0||trace.Count>4094)throw new ArgumentException("Plain materialization requires1..4094 selected glyphs plus two detached endpoints.");
+        var publication=LegacyFreshFirstSelectedGlyphPublication.Create(factory,cancellationToken);
         var ownedConfidence=new LegacyFirstOwnedGlyphConfidence(confidence,factory,cuts,graph,actualGroupScores,cancellationToken);
         var scalarCaches=new LegacyNativeGlyphScoreCache?[graph.Groups.Count];
         LegacyNativeGlyphScoreCache ScoreCache(int group)
@@ -158,12 +178,18 @@ public sealed class LegacyFirstPlainWordMaterializer
         for(int i=trace.Count-1;i>=0;i--)
         {
             cancellationToken.ThrowIfCancellationRequested();var cell=trace[i];var arcs=graph.GetNode(cell.Node);
-            if(cell.Arc>=arcs.Count||arcs[cell.Arc].Span!=cell.Span||i>0&&cell.WordBoundaryBit)
-                throw new NotSupportedException("Only the actual single-word path is materialized; split-word/interior delimiter policy is separate.");
+            if(cell.Arc>=arcs.Count||arcs[cell.Arc].Span!=cell.Span)
+                throw new InvalidDataException("Selected source arc/span escapes the owned graph.");
             if(literalSymbols is null&&(
                 cell.Symbol>=confidence.NetworkClassCount||!binding.Alphabet.TryGetText(cell.Symbol,out string text)||text.Length!=1||
                 !(char.IsAsciiLetterOrDigit(text[0])||text[0] is >= '\u0400' and <= '\u04ff')))
                 throw new NotSupportedException("Only the actual single plain Latin/Cyrillic/digit word path is materialized.");
+            //Native outer guard precedes AppendGlyph, link, symbol update and
+            //every score callback, as well as this cell's word-publication
+            //boundary branch. The full B8/source walk still visits the cell.
+            if(!publication.ShouldAllocate(cell.Symbol,cancellationToken))continue;
+            if(i>0&&cell.WordBoundaryBit)
+                throw new NotSupportedException("Only the actual single-word path is materialized; split-word/interior delimiter policy is separate.");
             var primary=primary98.GetRowCopy(cell.Node);if(cell.Row>=primary.Count)throw new InvalidDataException("B8 row escapes its actual primary98 owner.");
             var literal=literalSymbols?.Create(cell.Symbol,primary.Get(cell.Row).CompositeCategory,cancellationToken);
             ushort symbol=literal?.PublishedLabel??cell.Symbol;
@@ -185,18 +211,30 @@ public sealed class LegacyFirstPlainWordMaterializer
             references.Add(added.Reference);previous=added.Reference;
         }
         var scalars=LegacyFirstPlainWordScalars.ReadUnadjusted(choice.TotalCost,choice.AcousticCost,grid.NodeCount,binding.SourceKind);
-        word.SetRawScalars(scalars.LogMass10,scalars.Calibration14,scalars.NormalizedUnadjustedCost18,scalars.NormalizedAcousticCost1C,cancellationToken);
         int nativeParam7=Last(terminal.Node,terminal.Arc);
-        var published=result.WordPublisher.Publish(word,First,Last,nativeParam7,-1,cancellationToken);
+        bool allocateRoot=publication.ShouldAllocate(trace[0].Symbol,cancellationToken);
+        if(allocateRoot)word.SetRawScalars(scalars.LogMass10,scalars.Calibration14,scalars.NormalizedUnadjustedCost18,scalars.NormalizedAcousticCost1C,cancellationToken);
+        var published=!allocateRoot||word.GetSymbolSpan(cancellationToken)==0?null:
+            result.WordPublisher.Publish(word,First,Last,nativeParam7,-1,cancellationToken);
         //The root publication is followed by another reset and a zero-span
         //leading endpoint; it remains in the pool and does not form a word.
-        word=LegacyNativeWordBuilder.CreateEmpty(result.GlyphPool,new byte[120],cancellationToken);
-        var root=trace[0];ulong leading=Endpoint(root.Node,root.Arc,true);
-        if(word.GetSymbolSpan(cancellationToken)!=0)throw new InvalidDataException("Fresh leading endpoint unexpectedly contains text.");
-        float minimum=1;foreach(ulong reference in published.Word.FlatReferences)
+        ulong? leading=null;
+        if(allocateRoot)
+        {
+            word=LegacyNativeWordBuilder.CreateEmpty(result.GlyphPool,new byte[120],cancellationToken);
+            var root=trace[0];leading=Endpoint(root.Node,root.Arc,true);
+            if(word.GetSymbolSpan(cancellationToken)!=0)throw new InvalidDataException("Fresh leading endpoint unexpectedly contains text.");
+        }
+        float minimum=1;if(published is not null)foreach(ulong reference in published.Word.FlatReferences)
         {cancellationToken.ThrowIfCancellationRequested();float value=ownerScores[LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(reference)];if(value<minimum)minimum=value;}
         references.Reverse();return new(result,cuts,graph,published,references.AsReadOnly(),trailing,leading,
-            new ReadOnlyDictionary<ulong,float>(ownerScores),minimum,choice);
+            new ReadOnlyDictionary<ulong,float>(ownerScores),minimum,choice,scalars);
+    }
+    private static LegacyFirstMaterializedPlainWord RequireWord(LegacyFirstMaterializedPlainResult actual)
+    {
+        if(actual.PublishedWord is null)throw new NotSupportedException("Actual selected first path publishes no word; use MaterializeNativePlainResult to retain that native result.");
+        return new(actual.Result,actual.Cuts,actual.Graph,actual.PublishedWord,actual.GlyphReferences,
+            actual.DetachedTrailingReference,actual.DetachedLeadingReference??throw new InvalidDataException("Published word lacks its actual leading endpoint."),actual.OwnerFirstScores1C,actual.MinimumOwnerFirstScore80,actual.Selection);
     }
     private static int I32(ReadOnlySpan<byte> b,int p)=>BinaryPrimitives.ReadInt32LittleEndian(b[p..]);
     private static ushort U16(ReadOnlySpan<byte> b,int p)=>BinaryPrimitives.ReadUInt16LittleEndian(b[p..]);

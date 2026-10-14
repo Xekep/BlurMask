@@ -75,16 +75,19 @@ var merged=Capture(primary,requests,GlyphCost,geometry.CorrectLiteral118,geometr
 var grid=new LegacyFirstMergedRecordGrid(1,merged.BeamWidth,merged.CopyB8Storage());var selected=LegacyFirstTerminalSelection.Select(grid,new(factory.InvocationPolicy.Binding.TrailingSymbolE6,0xa000,false,false,factory.InvocationPolicy.Binding.SourceKind,0));
 var choice=selected.Choices[0];var trace=LegacyFirstSelectedGlyphTrace.Read(grid,choice);Console.WriteLine($"prepared B8 cost{choice.TotalCost}: {string.Join(',',trace.Select(c=>c.Symbol))}; primitive proposals{primitiveRequests}");
 var materializer=new LegacyFirstPlainWordMaterializer(resource,6120,factory,table);var literal=materializer.MaterializeLiteralSymbols(resource,6120,cuts,graph,primary,merged,scores);
-Require(literal.GlyphReferences.Count==trace.Count&&literal.PublishedWord.Word.GetSymbolSpan()==trace.Count,"Literal selected glyph/source ownership differs.");
-var confidence=new LegacyFirstOwnedGlyphConfidence(LegacyFirstOrdinaryGlyphScoreProducer.ReadFreshSelectedSource(resource,6120),factory,cuts,graph,scores);int closedGlyphs=0;
-for(int i=0;i<trace.Count;i++)
+var allocation=LegacyFreshFirstSelectedGlyphPublication.Create(factory);var emitted=trace.Where(c=>allocation.ShouldAllocate(c.Symbol)).ToArray();
+Require(literal.GlyphReferences.Count==emitted.Length&&literal.PublishedWord.Word.GetSymbolSpan()==emitted.Length,"Native allocation guard/source ownership differs.");
+var confidence=new LegacyFirstOwnedGlyphConfidence(LegacyFirstOrdinaryGlyphScoreProducer.ReadFreshSelectedSource(resource,6120),factory,cuts,graph,scores);int closedSelected=0;
+foreach(var cell in trace.Where(c=>c.Symbol==closed))
+{Require(confidence.ReadSymbolScore(graph.GetNode(cell.Node)[cell.Arc].GroupId,closed)>=0,"Selected primitive confidence lost its source owner.");closedSelected++;}
+for(int i=0;i<emitted.Length;i++)
 {
- var cell=trace[i];byte[] glyph=literal.Result.GlyphPool.CopyRecord(literal.GlyphReferences[i]);ushort published=BinaryPrimitives.ReadUInt16LittleEndian(glyph.AsSpan(8));
- if(cell.Symbol==closed){Require(published==closed&&(BinaryPrimitives.ReadUInt16LittleEndian(glyph.AsSpan(4))&7)==0&&BinaryPrimitives.ReadSingleLittleEndian(glyph.AsSpan(16))==confidence.ReadSymbolScore(graph.GetNode(cell.Node)[cell.Arc].GroupId,closed),"Primitive glyph substituted label/kind/source confidence.");closedGlyphs++;}
+ var cell=emitted[i];byte[] glyph=literal.Result.GlyphPool.CopyRecord(literal.GlyphReferences[i]);ushort published=BinaryPrimitives.ReadUInt16LittleEndian(glyph.AsSpan(8));
+ Require(published==cell.Symbol&&published!=closed,"Fresh99=false E4 unexpectedly allocated a glyph.");
 }
-Require(closedGlyphs>0,"Own prepared B8 diagnostic did not choose a retained primitive; this fixture cannot prove that branch.");
+Require(closedSelected>0&&emitted.Length<trace.Count,"Own prepared B8 diagnostic did not exercise actual selected E4 allocation suppression.");
 try{materializer.Materialize(cuts,graph,primary,merged,scores);throw new Exception("Original strict API unexpectedly accepted primitive.");}catch(NotSupportedException){}
-Console.WriteLine($"PASS actual source/frame/NN/{scores.Length} groups ->supplied actual-cache proposals ->native98/A8/B0/B8 ->literal first275 ({closedGlyphs} F0001). Proposal enumeration is explicit bounded six-category fixture scope; not complete native automatic273 controller/Russian accuracy.");
+Console.WriteLine($"PASS actual source/frame/NN/{scores.Length} groups ->supplied actual-cache proposals ->native98/A8/B0/B8 ->first275 ({closedSelected} selected F0001 suppressed by native99=false guard). Proposal enumeration is explicit bounded six-category fixture scope; not complete native automatic273 controller/Russian accuracy.");
 
 //Independent scalar callbacks distinguish request kind6 from record kind0,
 //and compare subsequent symbolic paths with the Python tuple oracle.

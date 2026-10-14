@@ -499,6 +499,14 @@ jobs:
           dotnet run --project tools/LegacyMainSpanPreparation.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           python tools/LegacyCaseAlphabetRanges.Probe/reference_controls.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-case-alphabet-ranges-controls.json
           dotnet run --project tools/LegacyCaseAlphabetRanges.Probe -c Release -- models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-case-alphabet-ranges-controls.json
+          python tools/LegacyCaseSymbolEnumeration.Probe/reference_controls.py .artifacts/legacy-case-alphabet-ranges-controls.json .artifacts/legacy-case-symbol-controls.json
+          dotnet run --project tools/LegacyCaseSymbolEnumeration.Probe -c Release -- models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-case-symbol-controls.json
+          python tools/LegacyMainControllerPolicy.Probe/reference_controls.py .artifacts/legacy-main-controller-policy-controls.json
+          dotnet run --project tools/LegacyMainControllerPolicy.Probe -c Release -- .artifacts/legacy-main-controller-policy-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          dotnet run --project tools/LegacyFirstSelectedPublication.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-first-selected-publication-managed-audit.json
+          python tools/LegacyFirstSelectedPublication.Probe/audit_output.py .artifacts/legacy-first-selected-publication-managed-audit.json
+          dotnet run --project tools/LegacyMainFirstResultLines.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-first-lines-managed-audit.json
+          python tools/LegacyMainFirstResultLines.Probe/audit_output.py .artifacts/legacy-main-first-lines-managed-audit.json
           dotnet run --project tools/LegacyFirstProtocolOwnership.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           dotnet run --project tools/LegacyFirstBlankContext.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-first-blank-context-managed-audit.json
           python tools/LegacyFirstBlankContext.Probe/audit_output.py .artifacts/legacy-first-blank-context-managed-audit.json
@@ -875,6 +883,10 @@ jobs:
             @{ Name = 'LegacyFreshMainDescriptorSplit'; Args = @('.artifacts/legacy-fresh-main-split-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res') },
             @{ Name = 'LegacyCaseContext'; Args = @('models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-normalization-data.json', '.artifacts/legacy-native-case-controls.json', '.artifacts/legacy-case-context-controls.json') },
             @{ Name = 'LegacyMainSpanPreparation'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyCaseSymbolEnumeration'; Args = @('models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-case-symbol-controls.json') },
+            @{ Name = 'LegacyMainControllerPolicy'; Args = @('.artifacts/legacy-main-controller-policy-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyFirstSelectedPublication'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-first-selected-publication-native-audit.json') },
+            @{ Name = 'LegacyMainFirstResultLines'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-first-lines-native-audit.json') },
             @{ Name = 'LegacyCaseAlphabetRanges'; Args = @('models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-case-alphabet-ranges-controls.json') },
             @{ Name = 'LegacyFirstProtocolOwnership'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyFreshMainPhysicalReordering'; Args = @('.artifacts/legacy-main-reordering-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res') },
@@ -982,6 +994,14 @@ jobs:
             }
             if ($name -eq 'LegacyFirstPrimaryProducer') {
               python tools/LegacyFirstPrimaryProducer.Probe/audit_output.py .artifacts/legacy-first-primary-native-captures.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+            if ($name -eq 'LegacyFirstSelectedPublication') {
+              python tools/LegacyFirstSelectedPublication.Probe/audit_output.py .artifacts/legacy-first-selected-publication-native-audit.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+            if ($name -eq 'LegacyMainFirstResultLines') {
+              python tools/LegacyMainFirstResultLines.Probe/audit_output.py .artifacts/legacy-main-first-lines-native-audit.json
               if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             }
             if ($name -eq 'LegacyFirstBlankContext') {

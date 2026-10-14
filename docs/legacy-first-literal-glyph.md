@@ -1,10 +1,13 @@
 # Fresh first-model literal glyph production
 
-`LegacyFreshFirstGlyphSymbolPlan` restores the already-selected symbol branch
+`LegacyFreshFirstGlyphSymbolPlan` restores the inner already-selected symbol branch
 of1F42D0 under actual fresh configuration6C. This flag bypasses alias and case
 conversion for every symbol, including primitives. The glyph receives count1
 and13AF30 kind0 with the literal selected label. F0001 is not converted into a
-guessed letter or circle character.
+guessed letter or circle character. This inner plan does not decide whether
+1F42D0 reaches the allocation branch: its outer E2/E4/99 guard suppresses
+selected blank/F0001 under fresh99=false. See
+[selected glyph publication](legacy-first-selected-glyph-publication.md).
 
 Before that branch, E2 (alphabet.virtual10 label count192) is replaced with the
 actual alphabet headerE label178. That label is **virtual**, not a space.
@@ -25,8 +28,10 @@ tables in Python. They cover195 labels, six primary categories, missing maps,
 virtual blank replacement and exact40-byte updates preserving unrelated fields.
 An actual raw enclosing contour runs first frame/cuts/neural networks and final
 cache; its retained F0001 candidate reaches literal kind0, private UTF8 and a
-single-reference WORD275 publication with source-owned confidence. Selection
-of that retained candidate is explicit. This does not prove the complete
+single-reference prepared WORD275 publication with source-owned confidence.
+That explicitly supplied inner-plan control bypasses the outer1F42D0
+allocation decision; it is not actual fresh-controller publication of F0001.
+Selection of that retained candidate is explicit. This does not prove the complete
 first273 terminal winner or Russian/cursive accuracy.
 
 ```powershell
