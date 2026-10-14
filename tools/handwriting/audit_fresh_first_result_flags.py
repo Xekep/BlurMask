@@ -10,6 +10,8 @@ def main():
     f=functions();cs=capstone.Cs(capstone.CS_ARCH_X86,capstone.CS_MODE_64)
     def asm(first,last):return '\n'.join(f'{i.address:x} {i.mnemonic} {i.op_str}' for i in cs.disasm(b.data[b.off(first):b.off(last)],first))
     for name in ['180155ef0','180155da0']:assert '*(undefined1 *)(param_2 + 0x220) = 0' in f[name]
+    for name in ['180155ef0','180155da0']:assert '*(undefined4 *)(param_2 + 0x1c8) = 0x3f800000' in f[name]
+    assert 'param_2 + 0x1c8,4,1' in f['180158bc0']
     bind=f['180156630'];assert '+ 0x9b) = local_res18' in bind and 'local_res18 = param_3' in bind
     invocation=f['180158970'];assert 'FUN_180156630(param_1,param_2,*(undefined1 *)(param_2 + 0x220))' in invocation
     config=f['18000eca0'];assert '+ 0x9b) !=' in config and '0x12d0081' in config
@@ -26,6 +28,7 @@ def main():
     word=f['1801f42d0'];assert 'uVar33 = *(undefined1 *)(param_2 + 0xf0)' in word and 'local_4a8 = uVar33' in word
     result=dict(bindings=14,freshCapture='driver220=0 ->config9B=0 ->controller101=0;driver220 ->TOP27341 ->27410',
                 wordGeometry='selected247 virtual68=1D62A0 ->resourceB9 ->controllerF0 ->279/275 finalize+sort',
+                sourceScoreExponent='155DA0/155EF0 fresh1C8=3F800000; serialized-driver158BC0 override excluded by raw API',
                 policy='No reused driver/property-event overrides; true actualB9 does not get coerced tofalse',scope='Static PE reads only; no vendor execution')
     pathlib.Path(a.output).write_bytes((json.dumps(result,separators=(',',':'))+'\n').encode());print(json.dumps(result))
 if __name__=='__main__':main()

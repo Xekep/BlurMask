@@ -444,6 +444,9 @@ jobs:
           dotnet run --project tools/LegacyWordSymbolQualification.Probe -c Release -- .artifacts/legacy-word-symbol-qualification-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           python tools/LegacyOrdinaryWordStartup.Probe/reference_controls.py .artifacts/legacy-ordinary-word-startup-controls.json
           dotnet run --project tools/LegacyOrdinaryWordStartup.Probe -c Release -- .artifacts/legacy-ordinary-word-startup-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyGraphSourceRanges.Probe/reference_controls.py .artifacts/legacy-graph-source-controls.json
+          dotnet run --project tools/LegacyGraphSourceRanges.Probe -c Release -- .artifacts/legacy-graph-source-controls.json models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-graph-source-managed-audit.json
+          python tools/LegacyGraphSourceRanges.Probe/reference_controls.py --audit .artifacts/legacy-graph-source-managed-audit.json
           python tools/LegacySourceEndingMetadata.Probe/reference_controls.py .artifacts/legacy-source-ending-metadata-controls.json
           dotnet run --project tools/LegacySourceEndingMetadata.Probe -c Release -- .artifacts/legacy-source-ending-metadata-controls.json
           python tools/LegacyWordBuilder.Probe/reference_controls.py .artifacts/legacy-word-builder-controls.json
@@ -767,6 +770,7 @@ jobs:
             @{ Name = 'LegacyFirstGlyphScoreProducer'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', '.artifacts/legacy-first-glyph-score-native-audit.json') },
             @{ Name = 'LegacyWordSymbolQualification'; Args = @('.artifacts/legacy-word-symbol-qualification-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyOrdinaryWordStartup'; Args = @('.artifacts/legacy-ordinary-word-startup-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyGraphSourceRanges'; Args = @('.artifacts/legacy-graph-source-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', '.artifacts/legacy-graph-source-native-audit.json') },
             @{ Name = 'LegacySourceEndingMetadata'; Args = @('.artifacts/legacy-source-ending-metadata-controls.json') },
             @{ Name = 'LegacyWordBuilder'; Args = @('.artifacts/legacy-word-builder-controls.json') },
             @{ Name = 'LegacyFreshFirstResultFactory'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', '.artifacts/legacy-fresh-first-result-factory-controls.json') },
@@ -820,6 +824,10 @@ jobs:
             }
             if ($name -eq 'LegacyFirstTransition') {
               python tools/LegacyFirstTransition.Probe/reference_controls.py --audit .artifacts/legacy-first-transition-native-actual.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+            if ($name -eq 'LegacyGraphSourceRanges') {
+              python tools/LegacyGraphSourceRanges.Probe/reference_controls.py --audit .artifacts/legacy-graph-source-native-audit.json
               if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             }
             if ($name -eq 'LegacyFirstGlyphScoreProducer') {

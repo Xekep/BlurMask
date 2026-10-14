@@ -16,7 +16,8 @@ foreach(var test in controls.RootElement.GetProperty("cases").EnumerateArray())
     var factory=LegacyFreshFirstResultOwnershipFactory.Prepare(snapshot,6120,inputs);factories.Add(factory);
     if(factory.SourceFingerprint!=test.GetProperty("fingerprint").GetString()||factory.ResourceB9Offset!=controls.RootElement.GetProperty("b9Offset").GetInt32()||
         factory.FinalizeWordGeometry!=test.GetProperty("wordGeometry").GetBoolean()||factory.SortWordsByGeometry!=factory.FinalizeWordGeometry||
-        factory.CaptureGlyphGeometry||!factory.Configuration6C||factory.InvocationPolicy.Binding.OwnerFlagC4)
+        factory.CaptureGlyphGeometry||!factory.Configuration6C||factory.InvocationPolicy.Binding.OwnerFlagC4||
+        BitConverter.SingleToInt32Bits(factory.SourceScoreExponent)!=0x3f800000)
         throw new Exception($"Fresh flags differ: hash={factory.SourceFingerprint}; B9offset={factory.ResourceB9Offset}; geometry={factory.FinalizeWordGeometry};6C={factory.Configuration6C};C4={factory.InvocationPolicy.Binding.OwnerFlagC4}.");
     factory.ValidateInvocation(factory.AcousticModel,factory.Frame,factory.InvocationPolicy);
     if(factory.FinalizeWordGeometry){Reject(()=>factory.CreatePlainResult());continue;}

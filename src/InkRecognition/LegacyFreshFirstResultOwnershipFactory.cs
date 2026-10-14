@@ -12,6 +12,10 @@ public sealed class LegacyFreshFirstResultOwnershipFactory
     public bool FinalizeWordGeometry {get;}
     public bool SortWordsByGeometry=>FinalizeWordGeometry;
     public bool Configuration6C=>true;
+    /// <summary>155DA0/155EF0 initialize the fresh source-row confidence
+    /// exponent1C8 to binary32 one. This raw no-property/no-serialized-driver
+    /// factory cannot receive158BC0's separate driver-payload override.</summary>
+    public float SourceScoreExponent=>1f;
     public int ResourceB9Offset {get;}
     private LegacyFreshFirstResultOwnershipFactory(LegacyFirstAcousticModel model,
         LegacyFreshOrdinaryPacketFrame frame,LegacyFreshDirectFirstInvocationPolicy invocation,bool geometry,int b9Offset)

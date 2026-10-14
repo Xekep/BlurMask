@@ -31,3 +31,9 @@ python tools/handwriting/audit_fresh_first_result_flags.py --output D:/factory-f
 ```
 
 The static auditor checks14 concrete native bindings from the pinned Text PE18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f. Probes are headless managed/NativeAOT code and never load a vendor DLL. Actual720-byte first-result source rows → main247 frame, winner glyph/word materialization and general geometric publication remain separate stages.
+
+The raw factory also exposes `SourceScoreExponent` as binary32 one: both
+`155DA0` and `155EF0` initialize driver field `1C8` to `3F800000`. The
+separate serialized-driver reader `158BC0` can override this field, but is
+not part of this no-property-event raw factory. Reused or deserialized
+drivers must provide their actual exponent rather than reuse this value.
