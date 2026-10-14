@@ -118,9 +118,14 @@ public sealed class LegacyNativeFirstDictionaryWordCompletion
             (query32[23] & 7) is not (0 or 2) || BinaryPrimitives.ReadUInt64LittleEndian(query32[24..]) != 0)
             throw new NotSupportedException("Regular nonspecial, mode22f6=false, ec<=0 first-word/root anchor branch required.");
         ushort symbol = BinaryPrimitives.ReadUInt16LittleEndian(query32[20..]);
-        if (!alphabet.TryGetText(symbol, out string text) || text.Length != 1 ||
-            text[0] is not (>= 'A' and <= 'Z' or >= 'a' and <= 'z' or >= '\u0400' and <= '\u04ff' or >= '0' and <= '9'))
-            throw new NotSupportedException("Plain actual terminal query label required.");
+        //204290 does not apply a Unicode letter/digit gate. Nonvirtual
+        //ordinary AL punctuation uses the same category/resource language
+        //path. FFFD/current-force and virtual protocol branches remain outside
+        //this bounded first-word producer until their owning policy is supplied.
+        if (symbol >= alphabet.LabelCount || alphabet.IsVirtual(symbol) ||
+            !alphabet.TryGetText(symbol, out _) || symbol == replacement ||
+            BinaryPrimitives.ReadUInt16LittleEndian(storedParent88[36..]) == replacement)
+            throw new NotSupportedException("Ordinary nonvirtual AL terminal without replacement-force policy required.");
         var currentCategory = categoryPolicy.Resolve(storedParent88[26], symbol, query32[22],
             checked((ushort)alphabet.LabelCount), query32[23], replacement, false, cancellationToken);
         int previousCategory = categories.GetBeamFirstId(ownedAnchor88[26]);
