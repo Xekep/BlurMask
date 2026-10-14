@@ -27,6 +27,30 @@ public sealed class LegacyFirstOrdinaryAcousticRecurrence
     public int BeamWidth {get;}
     private LegacyFirstOrdinaryAcousticRecurrence(LegacyFirstAcousticRecordTable[] rows,int width)
     {this.rows=rows;BeamWidth=width;}
+
+    //Internal bridge for independently verified owning primary producers. It
+    //copies storage; callers cannot mutate the returned recurrence's tables.
+    internal static LegacyFirstOrdinaryAcousticRecurrence FromOwnedRows(IReadOnlyList<LegacyFirstAcousticRecordTable> source,
+        int width,CancellationToken cancellationToken=default)
+    {
+        ArgumentNullException.ThrowIfNull(source);cancellationToken.ThrowIfCancellationRequested();
+        if(source.Count is <1 or >4096||width is <1 or >256)throw new ArgumentException("Bounded owning primary rows and width required.");
+        var owned=new LegacyFirstAcousticRecordTable[source.Count];
+        for(int n=0;n<owned.Length;n++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();var row=source[n]??throw new ArgumentException("Null owned primary row.");
+            if(row.Capacity!=width)throw new ArgumentException("Primary row capacity differs from native width.");
+            owned[n]=new(row.CopyStorage(),row.Count);
+            for(int a=0;a<owned[n].Count;a++)
+            {
+                var r=owned[n].Get(a);int parent=n-r.Span-1;
+                if(r.TotalCost>=0x4000000||parent<-1||parent==-1&&r.PreviousAlternative!=255||
+                    parent>=0&&r.PreviousAlternative>=owned[parent].Count)
+                    throw new InvalidDataException("Invalid finite primary source/predecessor record.");
+            }
+        }
+        return new(owned,width);
+    }
     public LegacyFirstAcousticRecordTable GetRowCopy(int node)
     {
         if((uint)node>=(uint)rows.Length)throw new ArgumentOutOfRangeException(nameof(node));

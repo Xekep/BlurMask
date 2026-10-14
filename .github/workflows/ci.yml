@@ -494,6 +494,12 @@ jobs:
           dotnet run --project tools/LegacyPhysicalIntervalOrder.Probe -c Release -- .artifacts/legacy-physical-interval-controls.json
           python tools/LegacyNativeCase.Probe/reference_controls.py models/text-unicode/legacy-case-data.json .artifacts/legacy-native-case-controls.json
           dotnet run --project tools/LegacyNativeCase.Probe -c Release -- models/text-unicode/legacy-case-data.json .artifacts/legacy-native-case-controls.json models/text-unicode/legacy-text-publication-data.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res
+          python tools/LegacyCaseContext.Probe/reference_controls.py .artifacts/legacy-native-case-controls.json models/text-unicode/legacy-normalization-data.json .artifacts/legacy-case-context-controls.json
+          dotnet run --project tools/LegacyCaseContext.Probe -c Release -- models/text-unicode/legacy-case-data.json models/text-unicode/legacy-normalization-data.json .artifacts/legacy-native-case-controls.json .artifacts/legacy-case-context-controls.json
+          dotnet run --project tools/LegacyMainSpanPreparation.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          dotnet run --project tools/LegacyFirstBlankPrimary.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-first-blank-primary-managed-audit.json
+          python tools/LegacyFirstBlankPrimary.Probe/audit_output.py .artifacts/legacy-first-blank-primary-managed-audit.json
+          python tools/LegacyFirstPrimitiveWord.Probe/audit_contexts.py .artifacts/legacy-first-blank-primary-managed-audit.json.contexts.json
           python tools/LegacyFirstBlankGeometry.Probe/reference_controls.py .artifacts/legacy-first-blank-controls.json
           dotnet run --project tools/LegacyFirstBlankGeometry.Probe -c Release -- .artifacts/legacy-first-blank-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-separation-profile.json .artifacts/legacy-first-blank-managed-audit.json
           python tools/LegacyFirstBlankGeometry.Probe/audit_actual.py .artifacts/legacy-first-blank-managed-audit.json
@@ -857,6 +863,9 @@ jobs:
             @{ Name = 'LegacyMainFlagPrepass'; Args = @('.artifacts/legacy-main-flag-prepass-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyPhysicalIntervalOrder'; Args = @('.artifacts/legacy-physical-interval-controls.json') },
             @{ Name = 'LegacyFreshMainDescriptorSplit'; Args = @('.artifacts/legacy-fresh-main-split-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res') },
+            @{ Name = 'LegacyCaseContext'; Args = @('models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-normalization-data.json', '.artifacts/legacy-native-case-controls.json', '.artifacts/legacy-case-context-controls.json') },
+            @{ Name = 'LegacyMainSpanPreparation'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyFirstBlankPrimary'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-first-blank-primary-native-audit.json') },
             @{ Name = 'LegacyNativeCase'; Args = @('models/text-unicode/legacy-case-data.json', '.artifacts/legacy-native-case-controls.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res') },
             @{ Name = 'LegacyFirstBlankGeometry'; Args = @('.artifacts/legacy-first-blank-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-first-blank-native-audit.json') },
             @{ Name = 'LegacyFreshMainGrouping'; Args = @('.artifacts/legacy-fresh-main-grouping-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res') },
@@ -957,6 +966,12 @@ jobs:
             }
             if ($name -eq 'LegacyFirstPrimaryProducer') {
               python tools/LegacyFirstPrimaryProducer.Probe/audit_output.py .artifacts/legacy-first-primary-native-captures.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+            if ($name -eq 'LegacyFirstBlankPrimary') {
+              python tools/LegacyFirstBlankPrimary.Probe/audit_output.py .artifacts/legacy-first-blank-primary-native-audit.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+              python tools/LegacyFirstPrimitiveWord.Probe/audit_contexts.py .artifacts/legacy-first-blank-primary-native-audit.json.contexts.json
               if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             }
             if ($name -eq 'LegacyFirstAncestor') {
