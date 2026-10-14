@@ -1,7 +1,14 @@
-﻿namespace InkRecognition;
+namespace InkRecognition;
 
 public sealed record LegacyOrdinaryNeuralLineInference(LegacyPrepared2e3LineFrameSnapshot Frames,
     float NeuralScale, int VerticalStripCount, ReadOnlyMemory<int> TinyPhysicalStrokeIndices);
+
+/// <summary>Owned grouping result before any separately selected24A fitting
+/// callback. Native physical memberships/NN pairs are preserved; no line frame
+/// or guessed geometric profile is attached by this stage.</summary>
+public sealed record LegacyOrdinaryNeuralLineGrouping(LegacyOrdinaryLineScaleSnapshot Source,
+    LegacyUnknownLineGroups Selected, float NeuralScale, int VerticalStripCount,
+    ReadOnlyMemory<int> TinyPhysicalStrokeIndices, IReadOnlyList<LegacyNeuralLinePair> NeuralPairs);
 
 /// <summary>
 /// Ordinary135 unknown-row07d7c0 vertical sweep, explicit2e3 scalar configuration,
@@ -20,6 +27,32 @@ public static class LegacyOrdinaryNeuralLineInferenceFactory
         ArgumentNullException.ThrowIfNull(source);ArgumentNullException.ThrowIfNull(source.Source);
         ArgumentNullException.ThrowIfNull(spatial30);ArgumentNullException.ThrowIfNull(physical50);
         geometryProfile.Validate();cancellationToken.ThrowIfCancellationRequested();
+        var grouping=InferGrouping(source,inputResolution,halfHorizontalWeights,quarterVerticalWhenHalfHorizontal,
+            internalScaleQuantile,spatial30,physical50,windowWidthMultiplier,overlap,cancellationToken);
+        var strokes=source.Source.Strokes.Select(s=>s.Points.ToArray()).ToArray();
+        var frames=new List<LegacyPrepared2e3LineFrame>();
+        foreach(var group in grouping.Selected.Groups)
+        {
+            int[] ids=group.ToArray();Array.Sort(ids);var row=ids.Select(i=>strokes[i]).ToArray();
+            var estimate=LegacyAutomaticLineEstimator.Estimate(row,geometryProfile,cancellationToken);
+            frames.Add(new(ids,estimate,LegacyLineDeskew.Apply(row,estimate.Line,(float)estimate.Slope,cancellationToken)));
+        }
+        return new(new(source,frames.AsReadOnly(),grouping.Selected.StrokeGroupIndices,grouping.NeuralPairs),grouping.NeuralScale,grouping.VerticalStripCount,grouping.TinyPhysicalStrokeIndices);
+    }
+    /// <summary>Same restored unknown-row grouping producer as Infer, stopping
+    /// before the explicit geometry callback. No geometry-profile default is
+    /// selected. This permits the fresh15B260 membership stage to consume real groups
+    /// independently of the later24A main guide publication. Descriptor splitting
+    /// and the subsequent15F050 physical reorder remain separate producers.</summary>
+    public static LegacyOrdinaryNeuralLineGrouping InferGrouping(LegacyOrdinaryLineScaleSnapshot source,
+        float inputResolution, ReadOnlySpan<bool> halfHorizontalWeights, bool quarterVerticalWhenHalfHorizontal,
+        float internalScaleQuantile, PreparedLineBoundaryClassifier spatial30,
+        PreparedLineBoundaryClassifier physical50, float windowWidthMultiplier, float overlap,
+        CancellationToken cancellationToken=default)
+    {
+        ArgumentNullException.ThrowIfNull(source);ArgumentNullException.ThrowIfNull(source.Source);
+        ArgumentNullException.ThrowIfNull(spatial30);ArgumentNullException.ThrowIfNull(physical50);
+        cancellationToken.ThrowIfCancellationRequested();
         var strokes=source.Source.Strokes.Select(s=>s.Points.ToArray()).ToArray();
         if(source.Source.Profile.SourceKind!=0x135 || halfHorizontalWeights.Length!=strokes.Length ||
             spatial30.HiddenWidth!=30 || physical50.HiddenWidth!=50 || !float.IsFinite(inputResolution) || inputResolution<0 || inputResolution>1_000_000 ||
@@ -96,14 +129,7 @@ public static class LegacyOrdinaryNeuralLineInferenceFactory
             selected=new(groups.Select(g=>new ReadOnlyMemory<int>(g)).ToArray(),membership);
         }
         selected=LegacyUnknownLinePostselection.Apply(records,selected,scale,cancellationToken);
-        var frames=new List<LegacyPrepared2e3LineFrame>();
-        foreach(var group in selected.Groups)
-        {
-            int[] ids=group.ToArray();Array.Sort(ids);var row=ids.Select(i=>strokes[i]).ToArray();
-            var estimate=LegacyAutomaticLineEstimator.Estimate(row,geometryProfile,cancellationToken);
-            frames.Add(new(ids,estimate,LegacyLineDeskew.Apply(row,estimate.Line,(float)estimate.Slope,cancellationToken)));
-        }
-        return new(new(source,frames.AsReadOnly(),selected.StrokeGroupIndices,Array.AsReadOnly(all)),scale,strips,tiny);
+        return new(source,selected,scale,strips,tiny,Array.AsReadOnly(all));
     }
     private static float[] InternalSamples(InkPoint[] raw,bool half,bool quarter,CancellationToken cancellationToken)
     {

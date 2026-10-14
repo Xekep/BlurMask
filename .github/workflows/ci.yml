@@ -486,6 +486,11 @@ jobs:
           python tools/LegacyFreshMainPostprocessing.Probe/audit_output.py .artifacts/legacy-fresh-main-postprocessing-managed-audit.json
           dotnet run --project tools/LegacyFreshMainSampler.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-fresh-main-sampler-managed-audit.json
           python tools/LegacyFreshMainSampler.Probe/audit_output.py .artifacts/legacy-fresh-main-sampler-managed-audit.json
+          python tools/LegacyFirstBlankGeometry.Probe/reference_controls.py .artifacts/legacy-first-blank-controls.json
+          dotnet run --project tools/LegacyFirstBlankGeometry.Probe -c Release -- .artifacts/legacy-first-blank-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-separation-profile.json .artifacts/legacy-first-blank-managed-audit.json
+          python tools/LegacyFirstBlankGeometry.Probe/audit_actual.py .artifacts/legacy-first-blank-managed-audit.json
+          python tools/LegacyFreshMainGrouping.Probe/reference_controls.py .artifacts/legacy-fresh-main-grouping-controls.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res
+          dotnet run --project tools/LegacyFreshMainGrouping.Probe -c Release -- .artifacts/legacy-fresh-main-grouping-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res
           dotnet run --project tools/LegacyFirstReplacementGeometry.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-separation-profile.json .artifacts/legacy-first-replacement-managed-audit.json
           python tools/LegacyFirstReplacementGeometry.Probe/audit_output.py .artifacts/legacy-first-replacement-managed-audit.json
           dotnet run --project tools/LegacyFreshMainAcoustic.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-fresh-main-acoustic-managed-audit.json
@@ -838,6 +843,8 @@ jobs:
             @{ Name = 'LegacyFreshMainLine'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-fresh-main-line-controls.json', '.artifacts/legacy-fresh-main-line-native-audit.json') },
             @{ Name = 'LegacyFreshMainPostprocessing'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-fresh-main-postprocessing-native-audit.json') },
             @{ Name = 'LegacyFreshMainSampler'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-fresh-main-sampler-native-audit.json') },
+            @{ Name = 'LegacyFirstBlankGeometry'; Args = @('.artifacts/legacy-first-blank-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-first-blank-native-audit.json') },
+            @{ Name = 'LegacyFreshMainGrouping'; Args = @('.artifacts/legacy-fresh-main-grouping-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res') },
             @{ Name = 'LegacyFirstReplacementGeometry'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-first-replacement-native-audit.json') },
             @{ Name = 'LegacyFreshMainAcoustic'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-fresh-main-acoustic-native-audit.json') },
             @{ Name = 'LegacyFirstSourceMaterialization'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-first-source-materialization-native-audit.json') },
@@ -935,6 +942,10 @@ jobs:
             }
             if ($name -eq 'LegacyFirstPrimaryProducer') {
               python tools/LegacyFirstPrimaryProducer.Probe/audit_output.py .artifacts/legacy-first-primary-native-captures.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+            if ($name -eq 'LegacyFirstBlankGeometry') {
+              python tools/LegacyFirstBlankGeometry.Probe/audit_actual.py .artifacts/legacy-first-blank-native-audit.json
               if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             }
             if ($name -eq 'LegacyFirstReplacementGeometry') {
