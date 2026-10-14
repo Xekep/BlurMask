@@ -464,6 +464,10 @@ jobs:
           dotnet run --project tools/LegacyMainLanguageContext.Probe -c Release -- .artifacts/legacy-main-language-context-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           python tools/LegacyFirstLiteralGlyph.Probe/reference_controls.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-first-literal-glyph-controls.json
           dotnet run --project tools/LegacyFirstLiteralGlyph.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-first-literal-glyph-controls.json models/ru-RU/legacy-engine-profile.json
+          dotnet run --project tools/LegacyFirstPrimitiveWord.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-first-primitive-managed-captures.json
+          python tools/LegacyFirstPrimitiveWord.Probe/audit_contexts.py .artifacts/legacy-first-primitive-managed-captures.json
+          python tools/LegacySourceIdentifier.Probe/reference_controls.py .artifacts/legacy-source-identifier-controls.json
+          dotnet run --project tools/LegacySourceIdentifier.Probe -c Release -- .artifacts/legacy-source-identifier-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
           dotnet run --project tools/LegacySamplerGroupPruning.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-separation-profile.json .artifacts/legacy-sampler-group-pruning-managed-audit.json
           python tools/LegacySamplerGroupPruning.Probe/audit_output.py .artifacts/legacy-sampler-group-pruning-managed-audit.json
           python tools/LegacyFreshMainLine.Probe/reference_controls.py .artifacts/legacy-fresh-main-line-controls.json
@@ -811,6 +815,8 @@ jobs:
             @{ Name = 'LegacyMainLanguageGate'; Args = @('.artifacts/legacy-main-language-gate-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyMainLanguageContext'; Args = @('.artifacts/legacy-main-language-context-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyFirstLiteralGlyph'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', '.artifacts/legacy-first-literal-glyph-controls.json', 'models/ru-RU/legacy-engine-profile.json') },
+            @{ Name = 'LegacyFirstPrimitiveWord'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-first-primitive-native-captures.json') },
+            @{ Name = 'LegacySourceIdentifier'; Args = @('.artifacts/legacy-source-identifier-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacySamplerGroupPruning'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-sampler-group-pruning-native-audit.json') },
             @{ Name = 'LegacyFreshMainLine'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-fresh-main-line-controls.json', '.artifacts/legacy-fresh-main-line-native-audit.json') },
             @{ Name = 'LegacyFreshMainPostprocessing'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-fresh-main-postprocessing-native-audit.json') },
@@ -902,6 +908,10 @@ jobs:
             }
             if ($name -eq 'LegacyFreshMainSampler') {
               python tools/LegacyFreshMainSampler.Probe/audit_output.py .artifacts/legacy-fresh-main-sampler-native-audit.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+            if ($name -eq 'LegacyFirstPrimitiveWord') {
+              python tools/LegacyFirstPrimitiveWord.Probe/audit_contexts.py .artifacts/legacy-first-primitive-native-captures.json
               if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             }
           }

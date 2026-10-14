@@ -5,8 +5,9 @@ namespace InkRecognition;
 public delegate int LegacyFirstOrdinaryGlyphCost(int node,ushort arc,ushort symbol,byte compositeCategory,CancellationToken cancellationToken);
 
 /// <summary>Scoped fresh23f B0/B8 plain-label, zero-Arabic-trait passes from
-///1ef070. Aliasfold=0; no primitive, fallback, punctuation-skipping or cross-
-///descriptor branches. E0 and caps are explicit native caller policy; no
+///1ef070. Original Run is plain labels; the additive owned literal entry
+/// restores E4 correction6 with exact zero traits. Aliasfold=0; no fallback,
+/// ancestor-skipping or cross-descriptor branches. E0 and caps are caller policy; no
 ///source137/shadda/default owner flag is inferred. Not a dictionary decoder.</summary>
 public sealed class LegacyFirstOrdinaryContextPasses
 {
@@ -44,6 +45,30 @@ public sealed class LegacyFirstOrdinaryContextPasses
         LegacyFirstOrdinaryGlyphCost glyphCost,LegacyFirstOrdinaryTransitionCorrection correction118,
         LegacyFirstOrdinaryTransitionCorrection correction140,int columnCountB0,int columnCountB8,
         bool nativeModeE0,LegacySymbolContextFactory contexts,CancellationToken cancellationToken=default)
+        =>RunCore(primary,connections,ownedAlphabet,glyphCost,correction118,correction140,columnCountB0,columnCountB8,
+            nativeModeE0,contexts,null,cancellationToken);
+
+    /// <summary>Audited fresh literal labels with exact no-Arabic zero traits.
+    /// E4 overrides correction kind0 to6, while record path/identity semantics
+    /// still follow the original kind0 branch. B8 kind0 E4 preserves prior
+    /// identity, while B0 extends it. Skipped ancestors are refused.</summary>
+    public static LegacyFirstOrdinaryContextPasses RunForFreshLiteralSymbols(
+        LegacyFirstOrdinaryAcousticRecurrence primary,LegacyOrdinaryCandidateConnections connections,
+        LegacyFreshFirstLiteralContextPolicy policy,LegacyFirstOrdinaryGlyphCost glyphCost,
+        LegacyFirstOrdinaryTransitionCorrection correction118,LegacyFirstOrdinaryTransitionCorrection correction140,
+        LegacySymbolContextFactory contexts,CancellationToken cancellationToken=default)
+    {
+        ArgumentNullException.ThrowIfNull(policy);var binding=policy.Binding;
+        return RunCore(primary,connections,binding.Alphabet,glyphCost,correction118,correction140,
+            binding.ContextColumnsA2,binding.MergedColumnsA4,binding.NativeModeE0,contexts,policy,cancellationToken);
+    }
+
+    private static LegacyFirstOrdinaryContextPasses RunCore(LegacyFirstOrdinaryAcousticRecurrence primary,
+        LegacyOrdinaryCandidateConnections connections,LegacyInkAlphabet ownedAlphabet,
+        LegacyFirstOrdinaryGlyphCost glyphCost,LegacyFirstOrdinaryTransitionCorrection correction118,
+        LegacyFirstOrdinaryTransitionCorrection correction140,int columnCountB0,int columnCountB8,
+        bool nativeModeE0,LegacySymbolContextFactory contexts,LegacyFreshFirstLiteralContextPolicy? literal,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(primary);ArgumentNullException.ThrowIfNull(connections);ArgumentNullException.ThrowIfNull(ownedAlphabet);
         ArgumentNullException.ThrowIfNull(glyphCost);ArgumentNullException.ThrowIfNull(correction118);ArgumentNullException.ThrowIfNull(correction140);
@@ -57,6 +82,7 @@ public sealed class LegacyFirstOrdinaryContextPasses
         {
             cancellationToken.ThrowIfCancellationRequested();
             var r=row.Get(i);
+            if(literal is not null){literal.Validate(r.Symbol,r.Traits);continue;}
             if(r.Traits!=0||!ownedAlphabet.TryGetText(r.Symbol,out string text)||text.Length!=1||
                 !(text[0] is >= 'A' and <= 'Z' or >= 'a' and <= 'z' or >= '\u0400' and <= '\u04ff' or >= '0' and <= '9'))
                 throw new NotSupportedException("Only the proved plain Latin/Cyrillic/digit zero-trait context branch is supported.");
@@ -102,8 +128,9 @@ public sealed class LegacyFirstOrdinaryContextPasses
                             if(final?(!nativeModeE0||r.PathBit):r.PathBit)Insert(2);
                             void Insert(byte kind)
                             {
+                                byte correctionKind=kind==0&&literal is not null&&r.Symbol==literal.ClosedSymbolE4?(byte)6:kind;
                                 var request=new LegacyFirstOrdinaryTransitionRequest(node,r.ArcOrdinal,r.Symbol,r.CompositeCategory,
-                                    previousNode,p.ArcOrdinal,p.Symbol,p.CompositeCategory,r.Span,kind);
+                                    previousNode,p.ArcOrdinal,p.Symbol,p.CompositeCategory,r.Span,correctionKind);
                                 int subtotal=checked(p.TotalCost+groupCost);
                                 //Context passes reverse the primary callback order.
                                 cancellationToken.ThrowIfCancellationRequested();var a=correction140(request,subtotal,cancellationToken);
@@ -112,6 +139,9 @@ public sealed class LegacyFirstOrdinaryContextPasses
                                 cancellationToken.ThrowIfCancellationRequested();if(!b.Accepted||b.Cost>=0x4000000)return;
                                 ulong identity;
                                 if(!final&&kind==2)identity=contexts.ResolveInitial(r.Symbol,cancellationToken).Identity;
+                                //1EF070 B8 kind0 shares prior18 for E2/E4;
+                                //the B0 guard covers only E2 (unsupported here).
+                                else if(final&&kind==0&&literal is not null&&r.Symbol==literal.ClosedSymbolE4)identity=p.Identity;
                                 else
                                 {
                                     ulong parent=p.Identity;

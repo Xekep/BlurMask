@@ -65,6 +65,23 @@ public sealed class LegacyFirstPlainWordMaterializer
         LegacyOrdinaryCursiveCandidateGraph graph,LegacyFirstOrdinaryAcousticRecurrence primary98,
         LegacyFirstOrdinaryContextPasses merged,IReadOnlyList<LegacyFirstOrdinaryCacheScores> actualGroupScores,
         CancellationToken cancellationToken=default)
+        =>MaterializeCore(cuts,graph,primary98,merged,actualGroupScores,null,cancellationToken);
+
+    /// <summary>Fresh6C literal single-word extension, including actual primitive
+    /// labels. Uses the caller's matching source bytes to bind literal policy;
+    /// the strict original API keeps its existing alphabet/symbol restrictions.
+    /// This still consumes prepared selected B8, not the complete controller.</summary>
+    public LegacyFirstMaterializedPlainWord MaterializeLiteralSymbols(ReadOnlySpan<byte> actualResource,int sourceOffset,
+        LegacySmoothedRowCutResult cuts,LegacyOrdinaryCursiveCandidateGraph graph,
+        LegacyFirstOrdinaryAcousticRecurrence primary98,LegacyFirstOrdinaryContextPasses merged,
+        IReadOnlyList<LegacyFirstOrdinaryCacheScores> actualGroupScores,CancellationToken cancellationToken=default)
+        =>MaterializeCore(cuts,graph,primary98,merged,actualGroupScores,
+            LegacyFreshFirstGlyphSymbolPlan.ReadSource(actualResource,sourceOffset,factory,cancellationToken),cancellationToken);
+
+    private LegacyFirstMaterializedPlainWord MaterializeCore(LegacySmoothedRowCutResult cuts,
+        LegacyOrdinaryCursiveCandidateGraph graph,LegacyFirstOrdinaryAcousticRecurrence primary98,
+        LegacyFirstOrdinaryContextPasses merged,IReadOnlyList<LegacyFirstOrdinaryCacheScores> actualGroupScores,
+        LegacyFreshFirstGlyphSymbolPlan? literalSymbols,CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(cuts);ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(primary98);ArgumentNullException.ThrowIfNull(merged);ArgumentNullException.ThrowIfNull(actualGroupScores);
@@ -141,21 +158,28 @@ public sealed class LegacyFirstPlainWordMaterializer
         for(int i=trace.Count-1;i>=0;i--)
         {
             cancellationToken.ThrowIfCancellationRequested();var cell=trace[i];var arcs=graph.GetNode(cell.Node);
-            if(cell.Arc>=arcs.Count||arcs[cell.Arc].Span!=cell.Span||i>0&&cell.WordBoundaryBit||
+            if(cell.Arc>=arcs.Count||arcs[cell.Arc].Span!=cell.Span||i>0&&cell.WordBoundaryBit)
+                throw new NotSupportedException("Only the actual single-word path is materialized; split-word/interior delimiter policy is separate.");
+            if(literalSymbols is null&&(
                 cell.Symbol>=confidence.NetworkClassCount||!binding.Alphabet.TryGetText(cell.Symbol,out string text)||text.Length!=1||
-                !(char.IsAsciiLetterOrDigit(text[0])||text[0] is >= '\u0400' and <= '\u04ff'))
+                !(char.IsAsciiLetterOrDigit(text[0])||text[0] is >= '\u0400' and <= '\u04ff')))
                 throw new NotSupportedException("Only the actual single plain Latin/Cyrillic/digit word path is materialized.");
             var primary=primary98.GetRowCopy(cell.Node);if(cell.Row>=primary.Count)throw new InvalidDataException("B8 row escapes its actual primary98 owner.");
-            int composite=categories.GetSymbolCompositeCategory(cell.Symbol);
-            if(composite<0)throw new NotSupportedException("Plain symbol lacks native category mapping.");
-            int geometryIndex=profile.Categories.CompositeCategories.Span[composite].GeometryIndex;
+            var literal=literalSymbols?.Create(cell.Symbol,primary.Get(cell.Row).CompositeCategory,cancellationToken);
+            ushort symbol=literal?.PublishedLabel??cell.Symbol;
+            int composite=literal?.CompositeCategory??categories.GetSymbolCompositeCategory(symbol);
+            if(composite<0&&literalSymbols is null)throw new NotSupportedException("Plain symbol lacks native category mapping.");
+            int geometryIndex=literal?.GeometryIndex??profile.Categories.CompositeCategories.Span[composite].GeometryIndex;
             ulong key=((ulong)cell.Arc<<24)|(uint)cell.Node;
             var added=word.AppendGlyph(key,checked(LegacyFirstPlainWordDelimiters.FreshDescriptorIdBase+grid.ColumnCountA4*cell.Row+cell.Column),false,new byte[40],cancellationToken);
             if(previous!=ulong.MaxValue)word.LinkGlyph(previous,added.Reference,cancellationToken);
-            var cache=ScoreCache(arcs[cell.Arc].GroupId);_ =LegacyNativeGlyphSymbolUpdate.Apply(result.GlyphPool,added.Reference,cell.Symbol,1,0,false,cancellationToken);
+            var cache=ScoreCache(arcs[cell.Arc].GroupId);
+            if(literal is {} plan)literalSymbols!.Apply(result.GlyphPool,added.Reference,plan,primary.Get(cell.Row).CompositeCategory,cancellationToken);
+            else _=LegacyNativeGlyphSymbolUpdate.Apply(result.GlyphPool,added.Reference,symbol,1,0,false,cancellationToken);
             byte[] glyph=result.GlyphPool.CopyRecord(added.Reference,cancellationToken);ushort mismatch=primary.Get(cell.Row).CompositeCategory==composite?(ushort)0:(ushort)8;
-            W16(glyph,4,mismatch);W16(glyph,6,0x40);WF(glyph,12,primary.GetLikelihoodByte(cell.Row)/255f);WF(glyph,16,cache.ReadSymbolScore(cell.Symbol,0,cancellationToken));
-            byte[] request=new byte[16];W16(request,6,ushort.MaxValue);W16(request,8,cell.Symbol);request[10]=checked((byte)geometryIndex);request[11]=1;
+            if(literalSymbols is null){W16(glyph,4,mismatch);W16(glyph,6,0x40);}
+            WF(glyph,12,primary.GetLikelihoodByte(cell.Row)/255f);WF(glyph,16,cache.ReadSymbolScore(symbol,0,cancellationToken));
+            byte[] request=new byte[16];W16(request,6,ushort.MaxValue);W16(request,8,symbol);request[10]=checked((byte)geometryIndex);request[11]=1;
             BinaryPrimitives.WriteInt32LittleEndian(glyph.AsSpan(20),cache.ReadRequestCost(request,cancellationToken));
             result.GlyphPool.ReplaceRecord(added.Reference,glyph,cancellationToken);ownerScores[key]=cache.ReadFirstCandidateScore(cancellationToken);
             references.Add(added.Reference);previous=added.Reference;

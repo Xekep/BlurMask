@@ -3,8 +3,10 @@ namespace InkRecognition;
 public readonly record struct LegacyFirstTransitionBounds(float MinimumX,float MinimumY,float MaximumX,float MaximumY);
 
 /// <summary>Actual fresh one-descriptor line0 ordinary118/140 callbacks.
-/// No Arabic/primitive/opaque/cross-descriptor/special-boundary transitions are
-/// inferred. Native1941b0 prefix/suffix caches precede195c40/195b30 updates.</summary>
+/// Original APIs remain plain0/2. Additive literal APIs support native first
+/// kind6 unchanged-cost dispatch; Arabic/opaque/cross-descriptor or generic
+/// main-sampler transitions are not inferred. Native1941b0 caches precede
+///195c40/195b30 ordinary updates.</summary>
 public sealed class LegacyFirstOrdinaryTransitionGeometry
 {
     private readonly LegacyFirstTransitionGeometryProfile profile;
@@ -88,8 +90,24 @@ public sealed class LegacyFirstOrdinaryTransitionGeometry
 
     public LegacyFirstOrdinaryTransitionResult Correct118(LegacyFirstOrdinaryTransitionRequest request,int incomingCost,
         CancellationToken cancellationToken=default)
+        =>Correct118Core(request,incomingCost,true,cancellationToken);
+
+    /// <summary>Same owned ordinary first-sampler geometry/category branch for
+    /// native cache labels including primitives. This does not enable source
+    /// kind1/2/protocol groups or the generic main1A8670 label-dependent branch.
+    /// First kind6 is the exact sampler no-op, not an ordinary gap estimate.</summary>
+    public LegacyFirstOrdinaryTransitionResult CorrectLiteral118(LegacyFirstOrdinaryTransitionRequest request,int incomingCost,
+        CancellationToken cancellationToken=default)
+        =>Correct118Core(request,incomingCost,false,cancellationToken);
+
+    private LegacyFirstOrdinaryTransitionResult Correct118Core(LegacyFirstOrdinaryTransitionRequest request,int incomingCost,
+        bool requirePlainSymbols,CancellationToken cancellationToken)
     {
-        Check(request,cancellationToken);int cost;
+        Check(request,cancellationToken,requirePlainSymbols);
+        //First sampler210=1:195C40 has no case6 and returns true without
+        //touching the cost. Unlike ordinary0/2, no gap/translation applies.
+        if(request.Kind==6)return new(true,incomingCost);
+        int cost;
         if(request.Kind==0)cost=joinCosts[request.CurrentNode][request.CurrentArc];
         else
         {
@@ -114,8 +132,19 @@ public sealed class LegacyFirstOrdinaryTransitionGeometry
 
     public LegacyFirstOrdinaryTransitionResult Correct140(LegacyFirstOrdinaryTransitionRequest request,int incomingCost,
         CancellationToken cancellationToken=default)
+        =>Correct140Core(request,incomingCost,true,cancellationToken);
+
+    public LegacyFirstOrdinaryTransitionResult CorrectLiteral140(LegacyFirstOrdinaryTransitionRequest request,int incomingCost,
+        CancellationToken cancellationToken=default)
+        =>Correct140Core(request,incomingCost,false,cancellationToken);
+
+    private LegacyFirstOrdinaryTransitionResult Correct140Core(LegacyFirstOrdinaryTransitionRequest request,int incomingCost,
+        bool requirePlainSymbols,CancellationToken cancellationToken)
     {
-        Check(request,cancellationToken);
+        Check(request,cancellationToken,requirePlainSymbols);
+        //Graph191=1 routes6 to195650; first sampler210=1 bypasses its
+        //enclosure residual body and returns true with the exact input cost.
+        if(request.Kind==6)return new(true,incomingCost);
         int current=profile.Categories.CompositeCategories.Span[request.CurrentCategory].GeometryIndex;
         int previous=profile.Categories.CompositeCategories.Span[request.PreviousCategory].GeometryIndex;
         int delta=PairCost(bounds[request.CurrentNode][request.CurrentArc],bounds[request.PreviousNode][request.PreviousArc],
@@ -158,19 +187,22 @@ public sealed class LegacyFirstOrdinaryTransitionGeometry
         if(bitRounded)return Truncate(RoundBits(cost));
         return Truncate(cost<=0?cost-.5f:cost+.5f);
     }
-    private void Check(LegacyFirstOrdinaryTransitionRequest r,CancellationToken token)
+    private void Check(LegacyFirstOrdinaryTransitionRequest r,CancellationToken token,bool requirePlainSymbols)
     {
         token.ThrowIfCancellationRequested();
-        if(r.Kind is not (0 or 2)||(uint)r.CurrentNode>=(uint)bounds.Length||r.PreviousNode<0||
+        if((r.Kind is not (0 or 2)&&!(r.Kind==6&&!requirePlainSymbols))||(uint)r.CurrentNode>=(uint)bounds.Length||r.PreviousNode<0||
             r.PreviousNode!=r.CurrentNode-r.CurrentSpan-1||(uint)r.CurrentArc>=(uint)bounds[r.CurrentNode].Length||
             (uint)r.PreviousArc>=(uint)bounds[r.PreviousNode].Length||graph.GetNode(r.CurrentNode)[r.CurrentArc].Span!=r.CurrentSpan||
             !graph.GetNode(r.CurrentNode)[r.CurrentArc].PredecessorArcIndices.Span.Contains((int)r.PreviousArc)||
             r.CurrentCategory>=profile.Categories.CompositeCategories.Length||r.PreviousCategory>=profile.Categories.CompositeCategories.Length)
             throw new ArgumentException("Compatible bounded ordinary transition required.");
         foreach(ushort symbol in new[]{r.CurrentSymbol,r.PreviousSymbol})
-            if(!profile.Alphabet.TryGetText(symbol,out string text)||text.Length!=1||
+            if(requirePlainSymbols&&(!profile.Alphabet.TryGetText(symbol,out string text)||text.Length!=1||
                 !(text[0] is >= 'A' and <= 'Z' or >= 'a' and <= 'z' or >= '\u0400' and <= '\u04ff' or >= '0' and <= '9'))
+            )
                 throw new NotSupportedException("Only proved plain Latin/Cyrillic/digit same-packet transitions supported.");
+            else if(!requirePlainSymbols&&symbol>profile.Alphabet.LabelCount+2)
+                throw new ArgumentOutOfRangeException(nameof(r),"Literal first transition label is outside its owned cache.");
     }
     private static int Truncate(float value)
     {if(!float.IsFinite(value)||value>=2147483648f||value<int.MinValue)throw new NotSupportedException("Geometry arithmetic exceeds checked signed integer domain.");return(int)value;}

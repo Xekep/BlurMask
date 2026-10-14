@@ -58,13 +58,17 @@ if(args.Length==4)
    }
   }if(span==0)break;
  }
- var primary=LegacyFirstOrdinaryAcousticRecurrence.Run(links,requests,5,geometry.Correct118,geometry.Correct140);
+ Require(factory.PrimaryBeamWidthF8==5,"Actual first source BA/F8 capacity changed.");
+ var primary=LegacyFirstOrdinaryAcousticRecurrence.Run(links,requests,factory.PrimaryBeamWidthF8,geometry.Correct118,geometry.Correct140);
  int GlyphCost(int n,ushort arc,ushort symbol,byte category,CancellationToken token)=>ranked[graph.GetNode(n)[arc].GroupId].Query(symbol,ushort.MaxValue,category,true,false,token);
  var merged=LegacyFirstOrdinaryContextPasses.RunForFreshSelectedChild(primary,links,factory.InvocationPolicy.Binding,GlyphCost,geometry.Correct118,geometry.Correct140,new());
  var diagnosticGrid=new LegacyFirstMergedRecordGrid(1,merged.BeamWidth,merged.CopyB8Storage());
  var diagnosticChoice=LegacyFirstTerminalSelection.Select(diagnosticGrid,new(factory.InvocationPolicy.Binding.TrailingSymbolE6,0xa000,false,false,factory.InvocationPolicy.Binding.SourceKind,0)).Choices[0];
  foreach(var cell in LegacyFirstSelectedGlyphTrace.Read(diagnosticGrid,diagnosticChoice))Console.WriteLine($"cell node{cell.Node} arc{cell.Arc} span{cell.Span}/graph{graph.GetNode(cell.Node)[cell.Arc].Span} symbol{cell.Symbol} path{cell.WordBoundaryBit} row{cell.Row}");
  var materializer=new LegacyFirstPlainWordMaterializer(resource,6120,factory,logTable);var result=materializer.Materialize(cuts,graph,primary,merged,scores);
+ var literalResult=materializer.MaterializeLiteralSymbols(resource,6120,cuts,graph,primary,merged,scores);
+ Require(result.PublishedWord.Word.CopyStorage().SequenceEqual(literalResult.PublishedWord.Word.CopyStorage())&&result.PublishedWord.Span==literalResult.PublishedWord.Span&&result.Selection==literalResult.Selection,"Additive literal API changed the existing strict WORD path.");
+ for(int i=0;i<result.GlyphReferences.Count;i++)Require(result.Result.GlyphPool.CopyRecord(result.GlyphReferences[i]).SequenceEqual(literalResult.Result.GlyphPool.CopyRecord(literalResult.GlyphReferences[i])),"Additive literal API changed ordinary glyph byte/scalar ownership.");
  var grid=new LegacyFirstMergedRecordGrid(1,merged.BeamWidth,merged.CopyB8Storage());var cells=LegacyFirstSelectedGlyphTrace.Read(grid,result.Selection);
  Require(result.PublishedWord.Word.GetReferenceCount()==cells.Count&&result.PublishedWord.Word.GetSymbolSpan()==cells.Count,"Zero-count endpoint leaked into selected word refs.");
  Require(!result.PublishedWord.Word.FlatReferences.Contains(result.DetachedLeadingReference)&&!result.PublishedWord.Word.FlatReferences.Contains(result.DetachedTrailingReference),"Reset did not detach endpoint references.");
