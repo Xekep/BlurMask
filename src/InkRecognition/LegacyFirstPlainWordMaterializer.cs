@@ -90,6 +90,7 @@ public sealed class LegacyFirstPlainWordMaterializer
         if(selection.Choices.Count!=1)throw new NotSupportedException("This fresh single-word endpoint requires one surviving terminal choice.");
         var choice=selection.Choices[0];var trace=LegacyFirstSelectedGlyphTrace.Read(grid,choice,cancellationToken);
         if(trace.Count==0||trace.Count>4094)throw new ArgumentException("Plain materialization requires1..4094 selected glyphs plus two detached endpoints.");
+        var ownedConfidence=new LegacyFirstOwnedGlyphConfidence(confidence,factory,cuts,graph,actualGroupScores,cancellationToken);
         var scalarCaches=new LegacyNativeGlyphScoreCache?[graph.Groups.Count];
         LegacyNativeGlyphScoreCache ScoreCache(int group)
         {
@@ -107,14 +108,9 @@ public sealed class LegacyFirstPlainWordMaterializer
                 cancellationToken.ThrowIfCancellationRequested();var candidate=scores.Cache.Candidates.Span[i];
                 BinaryPrimitives.WriteInt32LittleEndian(rows.AsSpan(i*24+4),candidate.Cost);
                 BinaryPrimitives.WriteUInt16LittleEndian(rows.AsSpan(i*24+8),candidate.Symbol);
-                //Primitive confidence conversion is outside this scope. Such
-                //unread slots retain an explicit unavailable marker; neither
-                //selected symbol nor required first-candidate scalar may use it.
-                vectors[i]=new float[]{candidate.Symbol<confidence.NetworkClassCount?
-                    confidence.ReadSymbolScore(scores.Glyph.Scores,scores.Cache,candidate.Symbol,cancellationToken):float.NaN};
+                vectors[i]=new float[]{ownedConfidence.ReadSymbolScore(group,candidate.Symbol,cancellationToken)};
             }
-            if(vectors.Length==0||scores.Cache.Candidates.Span[0].Symbol>=confidence.NetworkClassCount)
-                throw new NotSupportedException("Owner first-candidate scalar requires the unresolved primitive confidence mapping.");
+            if(vectors.Length==0)throw new NotSupportedException("Owner first-candidate scalar requires an actual retained candidate.");
             //Validated first profile raw100=0 selects native group1C=1;
             //195520 writes the same exact separation cost for each prototype.
             return scalarCaches[group]=new(rows,vectors,Enumerable.Repeat(cost,profile.Categories.Prototypes.Length).ToArray(),

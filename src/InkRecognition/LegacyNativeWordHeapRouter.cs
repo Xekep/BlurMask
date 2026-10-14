@@ -85,6 +85,16 @@ public sealed class LegacyNativeWordHeapRouter
         return new(accepted, targetIndex, attempted, promoted);
     }
 
+    /// <summary>Actual primary bucket owner for source22e0's state index.
+    /// This excludes optional2458 override and secondary routing; no heap is
+    /// constructed or replaced. Language204290 reads this owner's live limit.</summary>
+    public LegacyNativeWordRecordHeap GetPrimaryHeap(int sourceStateIndex)
+    {
+        if ((uint)sourceStateIndex >= (uint)sourceStateBuckets.Length)
+            throw new ArgumentOutOfRangeException(nameof(sourceStateIndex));
+        return GetHeap(sourceStateBuckets[sourceStateIndex]);
+    }
+
     /// <summary>
     /// Initial writer -> live bucket routing -> allocator -> nontracing tail.
     /// A fallback to the primary heap retains the effective secondary flag in
