@@ -38,3 +38,10 @@ required before an application recognizer can use these choices. The probes
 are algorithm controls, not Russian or English recognition accuracy tests.
 No vendor DLL is loaded. The statically inspected Text binary SHA256 is
 `18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f`.
+
+The probe additionally consumes an actual raw/NN/B0/B8 captured grid and its
+owned RU alphabet, then checks selected cells under two explicit fixture
+score policies. Guarded zero traits and absence of E6 prove ranking does not
+depend on unproved score-only owner flags in this fixture. The real selected
+symbol-context path is still mixed Latin/Cyrillic; no script substitution or
+forced reference word is applied. This is not full273 Unicode materialization.

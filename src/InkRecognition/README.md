@@ -530,3 +530,13 @@ connects actual source keys and fractional views to indexed raw points.
 Real decoded labels, group prefix production and winner materialization remain
 required. None of these component controls demonstrate improved English or
 finished Russian cursive recognition in the application.
+
+The [plain-label B0/B8 context passes](../../docs/legacy-first-acoustic-context-passes.md)
+now feed actual merged buffers to the terminal selection probe. Both explicit
+E0 modes are checked independently; automatic owner policy remains unfinished.
+The [higher-arc controller](../../docs/legacy-native-higher-arc-recombination.md)
+assembles exact80-byte requests and owns persistent workspace/secondary merges,
+but full frontend callbacks and lexical scheduling remain explicit inputs.
+The [final scalar publication](../../docs/legacy-first-result-score-publication.md)
+preserves the native pairwise first-anchor comparisons and acoustic expf.
+These checked stages still do not establish final Russian/English accuracy.

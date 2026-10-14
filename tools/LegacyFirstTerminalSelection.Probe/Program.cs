@@ -2,7 +2,7 @@ using System.Buffers.Binary;
 using System.Text.Json;
 using InkRecognition;
 
-if (args.Length != 1) throw new ArgumentException("controls.json required");
+if (args.Length is not (1 or 3)) throw new ArgumentException("controls.json [actual-B8-capture.json ru-ak.res] required");
 using var controls = JsonDocument.Parse(File.ReadAllBytes(args[0]));
 int cases = 0, outputs = 0, infinities = 0, zeroIdentities = 0;
 void Require(bool value, string message) { if (!value) throw new InvalidOperationException(message); }
@@ -68,3 +68,45 @@ var later = (byte[])one.Clone(); later[9] = 1; later[10] = 0;
 Reject(() => LegacyFirstTerminalSelection.Select(new(1, 1, [one, later]), policyDefault));
 Require(infinities > 0 && zeroIdentities > 0, "Controls omitted native overflow or zero-context behavior.");
 Console.WriteLine($"PASS {cases} independent terminal grids / {outputs} choices / {zeroIdentities} zero identities / {infinities} nativeexp infinities; stable signed ranking, trailing metadata, reference flags, full storage ownership and guards.");
+
+if (args.Length == 3)
+{
+    using var capture = JsonDocument.Parse(File.ReadAllBytes(args[1]));
+    var root = capture.RootElement;
+    var storage = root.GetProperty("nodes").EnumerateArray().Select(n => (ReadOnlyMemory<byte>)Convert.FromHexString(n.GetString()!)).ToArray();
+    var actualGrid = new LegacyFirstMergedRecordGrid(root.GetProperty("columnCount").GetInt32(), root.GetProperty("beamWidth").GetInt32(), storage);
+    var alphabet = LegacyFirstTransitionGeometryProfile.ReadSource(File.ReadAllBytes(args[2]), 6120).Alphabet;
+    ushort trailing = alphabet.TryGetLabel("\u0651", out ushort label) ? label : ushort.MaxValue;
+    for (int node = 0; node < actualGrid.NodeCount; node++)
+        for (int row = 0; row < actualGrid.RowCountF8; row++)
+            for (int column = 0; column < actualGrid.ColumnCountA4; column++)
+            {
+                var record = actualGrid.CopyRecord(node, row, column).Span;
+                if (BinaryPrimitives.ReadInt32LittleEndian(record) >= 0x4000000) continue;
+                Require(record[32] == 0 && BinaryPrimitives.ReadUInt16LittleEndian(record[12..]) != trailing,
+                    "The actual fixture no longer satisfies policy-independent zero-trait/plain-label ranking.");
+            }
+    //Configuration99/A8 and reference are explicit fixture policy, not restored automatic defaults.
+    //The guard above proves their score-only effect here; they cannot alter selected cell/identity.
+    var selected = LegacyFirstTerminalSelection.Select(actualGrid, new(trailing, 0, false, false, 0x135, 0));
+    var alternativePolicy = LegacyFirstTerminalSelection.Select(actualGrid, new(trailing, 40960, true, true, 0x135, 123));
+    Require(selected.Choices.Select(c => (c.Row, c.Column, c.ContextIdentity, c.TotalCost)).SequenceEqual(
+        alternativePolicy.Choices.Select(c => (c.Row, c.Column, c.ContextIdentity, c.TotalCost))), "Fixture policy changed native selected cells.");
+    var contexts = root.GetProperty("contexts").EnumerateArray().ToDictionary(n => n.GetProperty("identity").GetUInt64(),
+        n => (Parent: n.GetProperty("parent").GetUInt64(), Symbol: n.GetProperty("symbol").GetUInt16()));
+    var text = new List<string>();
+    foreach (var choice in selected.Choices)
+    {
+        var reverse = new List<string>(); var seen = new HashSet<ulong>();
+        for (ulong id = choice.ContextIdentity; id != 0;)
+        {
+            Require(seen.Add(id) && contexts.ContainsKey(id), "Actual selected context is cyclic/unavailable.");
+            var context = contexts[id];
+            Require(context.Symbol == 0xfffb || alphabet.TryGetText(context.Symbol, out _), "Selected symbol is not in its owned alphabet.");
+            reverse.Add(context.Symbol == 0xfffb ? " " : alphabet.TryGetText(context.Symbol, out string value) ? value : throw new Exception());
+            id = context.Parent;
+        }
+        reverse.Reverse(); text.Add(string.Concat(reverse) + ":" + choice.TotalCost);
+    }
+    Console.WriteLine($"PASS real raw/NN/B0/B8 -> terminal selected contexts [{string.Join(", ", text)}]. Explicit fixture score flags; not273 glyph materialization or final Russian recognition.");
+}
