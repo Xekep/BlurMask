@@ -171,4 +171,7 @@ public sealed class LegacyOwnedMainWordSpanPreparation
         if (!valid || !ReferenceEquals(span.Owner, this) || span.Epoch != epoch)
             throw new InvalidOperationException("Span cache/query belongs to a stale or foreign D0 preparation.");
     }
+
+    internal void ValidateSpan(LegacyOwnedMainWordSpan span, CancellationToken token)
+        => Check(span, token);
 }

@@ -21,6 +21,51 @@ public sealed class LegacyFirstOrdinaryContextPasses
         int width,int cap0,int cap8,LegacySymbolContextFactory contexts)
     {this.b0=b0;this.b8=b8;BeamWidth=width;ColumnCountB0=cap0;ColumnCountB8=cap8;Contexts=contexts;}
 
+    //Only owning producing kernels may publish these tables. Dimensions,
+    //current-row fields, predecessor tuples and symbolic identities are checked
+    //before copying; no public caller-provided success/cost channel is added.
+    internal static LegacyFirstOrdinaryContextPasses FromOwnedTables(LegacyFirstOrdinaryAcousticRecurrence primary,
+        IReadOnlyList<LegacyFirstAcousticRecordTable[]> source0,IReadOnlyList<LegacyFirstAcousticRecordTable[]> source8,
+        int width,int cap0,int cap8,LegacySymbolContextFactory contexts,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(primary);ArgumentNullException.ThrowIfNull(source0);ArgumentNullException.ThrowIfNull(source8);
+        ArgumentNullException.ThrowIfNull(contexts);token.ThrowIfCancellationRequested();
+        if(width!=primary.BeamWidth||source0.Count!=primary.NodeCount||source8.Count!=primary.NodeCount||
+            cap0 is <1 or >20||cap8 is <1 or >20||(long)primary.NodeCount*width*(cap0+cap8)>1_048_576)
+            throw new ArgumentException("Bounded owning context tables and primary dimensions required.");
+        var identities=contexts.CopyNodes().Select(n=>n.Identity).ToHashSet();
+        return new(Copy(source0,cap0),Copy(source8,cap8),width,cap0,cap8,contexts);
+        LegacyFirstAcousticRecordTable[][] Copy(IReadOnlyList<LegacyFirstAcousticRecordTable[]> source,int cap)
+        {
+            var owned=new LegacyFirstAcousticRecordTable[source.Count][];
+            for(int n=0;n<owned.Length;n++)
+            {
+                token.ThrowIfCancellationRequested();var input=source[n]??throw new ArgumentException("Null owning context node.");
+                if(input.Length!=width)throw new ArgumentException("Context node row extent differs from primary beam.");
+                owned[n]=new LegacyFirstAcousticRecordTable[width];var pri=primary.GetRowCopy(n);
+                for(int row=0;row<width;row++)
+                {
+                    var table=input[row]??throw new ArgumentException("Null owning context row.");
+                    if(table.Capacity!=cap||row>=pri.Count&&table.Count!=0)throw new ArgumentException("Context capacity/active primary row mismatch.");
+                    owned[n][row]=new(table.CopyStorage(),table.Count);
+                    for(int a=0;a<table.Count;a++)
+                    {
+                        token.ThrowIfCancellationRequested();var r=owned[n][row].Get(a);var current=pri.Get(row);int parent=n-r.Span-1;
+                        if(r.TotalCost>=0x4000000||r.Identity==0||!identities.Contains(r.Identity)||r.Traits!=0||
+                            r.Symbol!=current.Symbol||r.ArcOrdinal!=current.ArcOrdinal||r.Span!=current.Span||r.CompositeCategory!=current.CompositeCategory||parent<-1)
+                            throw new InvalidDataException("Context record differs from its owning primary/symbolic identity.");
+                        if(parent==-1)
+                        {if(r.PreviousAlternative!=255)throw new InvalidDataException("Context root predecessor is invalid.");}
+                        else if(r.PreviousAlternative>=primary.GetRowCopy(parent).Count||
+                            r.ContinuationType>=owned[parent][r.PreviousAlternative].Count)
+                            throw new InvalidDataException("Context predecessor primary-row/context-alternative tuple is invalid.");
+                    }
+                }
+            }
+            return owned;
+        }
+    }
+
     public LegacyFirstAcousticRecordTable GetB0RowCopy(int node,int row)=>Copy(b0,node,row);
     public LegacyFirstAcousticRecordTable GetB8RowCopy(int node,int row)=>Copy(b8,node,row);
     public ReadOnlyMemory<byte>[] CopyB0Storage()=>Storage(b0,ColumnCountB0);
