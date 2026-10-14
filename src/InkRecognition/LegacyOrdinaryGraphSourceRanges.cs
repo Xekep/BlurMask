@@ -14,6 +14,17 @@ public sealed class LegacyOrdinaryGraphSourceRanges
     internal LegacySourcePointChronology PreparedChronology=>prepared;
     internal LegacyOrdinarySourceInk OriginalSource=>original;
 
+    /// <summary>Keep actual seed/chronology/raw-source ownership after the
+    /// native sampler eligibility pass removes and renumbers graph arcs.</summary>
+    public LegacyOrdinaryGraphSourceRanges WithSamplerPruning(LegacyOrdinarySamplerGroupPruningResult pruning,
+        CancellationToken cancellationToken=default)
+    {
+        ArgumentNullException.ThrowIfNull(pruning);cancellationToken.ThrowIfCancellationRequested();
+        if(!ReferenceEquals(pruning.OriginalGraph,Graph))
+            throw new ArgumentException("Sampler pruning must belong to this exact candidate graph.");
+        return new(seeds,seedGraph,pruning.Graph,prepared,original,keys);
+    }
+
     private LegacyOrdinaryGraphSourceRanges(LegacyOrdinaryCursiveSeedResult seeds,
         LegacyOrdinaryCursiveSeedGraph seedGraph, LegacyOrdinaryCursiveCandidateGraph graph,
         LegacySourcePointChronology prepared, LegacyOrdinarySourceInk original, LegacySourcePointKey[] keys)

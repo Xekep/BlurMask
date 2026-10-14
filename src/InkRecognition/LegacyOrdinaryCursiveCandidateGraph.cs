@@ -18,10 +18,13 @@ public sealed class LegacyOrdinaryCursiveCandidateGraph
     private readonly LegacyOrdinaryCursiveCandidateInk[] groups;
     public int NodeCount => nodes.Length;
     public int CandidateCount { get; }
+    /// <summary>Owned span cap used by this graph's Generate call. Native
+    /// graph30 lookahead must use the same cap, not a caller's unrelated limit.</summary>
+    public int MaximumAtoms { get; }
     public IReadOnlyList<LegacyOrdinaryCursiveCandidateInk> Groups => Array.AsReadOnly(groups);
-    private LegacyOrdinaryCursiveCandidateGraph(LegacyOrdinaryCursiveCandidateArc[][] nodes,
-        LegacyOrdinaryCursiveCandidateInk[] groups)
-    { this.nodes = nodes; this.groups = groups; CandidateCount = nodes.Sum(n => n.Length); }
+    internal LegacyOrdinaryCursiveCandidateGraph(LegacyOrdinaryCursiveCandidateArc[][] nodes,
+        LegacyOrdinaryCursiveCandidateInk[] groups, int maximumAtoms)
+    { this.nodes = nodes; this.groups = groups; MaximumAtoms = maximumAtoms; CandidateCount = nodes.Sum(n => n.Length); }
     public IReadOnlyList<LegacyOrdinaryCursiveCandidateArc> GetNode(int nodeIndex)
     {
         if ((uint)nodeIndex >= (uint)nodes.Length) throw new ArgumentOutOfRangeException(nameof(nodeIndex));
@@ -113,7 +116,7 @@ public sealed class LegacyOrdinaryCursiveCandidateGraph
         var result = mutable.Select(n => n.Select(a => new LegacyOrdinaryCursiveCandidateArc(a.Group, a.Span, a.Flags,
             a.StartId, a.EndId, a.Predecessors.ToArray(), Array.AsReadOnly(a.Successors.OrderBy(v => v.Key)
                 .SelectMany(v => v.Value.Select(i => new LegacyCursiveCandidateSuccessor(v.Key, i))).ToArray()))).ToArray()).ToArray();
-        return new(result, inkGroups.ToArray());
+        return new(result, inkGroups.ToArray(), maximumAtoms);
     }
     private sealed class Arc(int group,byte span,byte flags,uint start,uint end)
     {

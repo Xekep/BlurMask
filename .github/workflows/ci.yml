@@ -458,6 +458,12 @@ jobs:
           dotnet run --project tools/LegacyStoredWordCompaction.Probe -c Release -- .artifacts/legacy-stored-word-compaction-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           python tools/LegacyMainWordLanguage.Probe/reference_controls.py .artifacts/legacy-main-word-language-controls.json
           dotnet run --project tools/LegacyMainWordLanguage.Probe -c Release -- .artifacts/legacy-main-word-language-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyMainLanguageGate.Probe/reference_controls.py .artifacts/legacy-main-language-gate-controls.json
+          dotnet run --project tools/LegacyMainLanguageGate.Probe -c Release -- .artifacts/legacy-main-language-gate-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyFirstLiteralGlyph.Probe/reference_controls.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-first-literal-glyph-controls.json
+          dotnet run --project tools/LegacyFirstLiteralGlyph.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-first-literal-glyph-controls.json models/ru-RU/legacy-engine-profile.json
+          dotnet run --project tools/LegacySamplerGroupPruning.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-separation-profile.json .artifacts/legacy-sampler-group-pruning-managed-audit.json
+          python tools/LegacySamplerGroupPruning.Probe/audit_output.py .artifacts/legacy-sampler-group-pruning-managed-audit.json
           python tools/LegacyFreshMainLine.Probe/reference_controls.py .artifacts/legacy-fresh-main-line-controls.json
           dotnet run --project tools/LegacyFreshMainLine.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-fresh-main-line-controls.json .artifacts/legacy-fresh-main-line-managed-audit.json
           python tools/LegacyFreshMainLine.Probe/reference_controls.py --audit .artifacts/legacy-fresh-main-line-managed-audit.json
@@ -798,6 +804,9 @@ jobs:
             @{ Name = 'LegacyWordAlternativeCandidates'; Args = @('.artifacts/legacy-word-alternative-candidates-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyStoredWordCompaction'; Args = @('.artifacts/legacy-stored-word-compaction-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyMainWordLanguage'; Args = @('.artifacts/legacy-main-word-language-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyMainLanguageGate'; Args = @('.artifacts/legacy-main-language-gate-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyFirstLiteralGlyph'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', '.artifacts/legacy-first-literal-glyph-controls.json', 'models/ru-RU/legacy-engine-profile.json') },
+            @{ Name = 'LegacySamplerGroupPruning'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-sampler-group-pruning-native-audit.json') },
             @{ Name = 'LegacyFreshMainLine'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-fresh-main-line-controls.json', '.artifacts/legacy-fresh-main-line-native-audit.json') },
             @{ Name = 'LegacyFreshMainPostprocessing'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-fresh-main-postprocessing-native-audit.json') },
             @{ Name = 'LegacyFirstSourceMaterialization'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-first-source-materialization-native-audit.json') },
@@ -879,6 +888,10 @@ jobs:
             }
             if ($name -eq 'LegacyFreshMainPostprocessing') {
               python tools/LegacyFreshMainPostprocessing.Probe/audit_output.py .artifacts/legacy-fresh-main-postprocessing-native-audit.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+            if ($name -eq 'LegacySamplerGroupPruning') {
+              python tools/LegacySamplerGroupPruning.Probe/audit_output.py .artifacts/legacy-sampler-group-pruning-native-audit.json
               if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             }
           }
