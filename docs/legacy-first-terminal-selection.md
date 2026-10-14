@@ -45,3 +45,14 @@ score policies. Guarded zero traits and absence of E6 prove ranking does not
 depend on unproved score-only owner flags in this fixture. The real selected
 symbol-context path is still mixed Latin/Cyrillic; no script substitution or
 forced reference word is applied. This is not full273 Unicode materialization.
+
+The actual capture now includes invocation99/A8 from the proved new-direct
+source-frame producer. The consumer checks model/source/mode ownership;
+result reference and inactive trait penalty remain explicit fixture inputs.
+`LegacyFirstSelectedGlyphTrace` restores the selected B8 reverse predecessor
+walk, returning complete owned cells in source order, with actual node/arc,
+span, word-boundary bit and previous arc. It does not interpret word delimiters
+or construct nested glyph alternatives from top result mass.256 independently
+built causal ancestry fixtures check762 complete cells; the real plain MIR
+fixture also matches its independently owned symbol-context tree. Source
+range callbacks and rich273 glyph construction remain required.

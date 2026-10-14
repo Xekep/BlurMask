@@ -37,7 +37,8 @@ public sealed class LegacyNativeGlyphAlternateUtf8Table
 
 /// <summary>
 /// Native273.virtual50=13c920 ->274 token expansion13c840/139c90 ->13a0b0 raw byte emission.
-/// This is BEFORE Engine0491a0 canonical composition/circled-marker processing and021000 classification.
+/// This is before Engine0491a0's temporary canonical scratch/circled-marker processing and021000 classification.
+/// The native helper writes back only after a successful circled-marker replacement, not for ordinary text.
 /// </summary>
 public static class LegacyNativeGlyphUtf8Tokens
 {

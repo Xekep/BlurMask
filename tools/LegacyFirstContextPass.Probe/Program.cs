@@ -106,6 +106,9 @@ if(args.Length==4)
   LegacyFirstOrdinaryTransitionResult Apply140(LegacyFirstOrdinaryTransitionRequest r,int incoming,CancellationToken token){var v=geometry.Correct140(r,incoming,token);calls.Add((140,r,incoming,v));return v;}
   var contexts=LegacyFirstOrdinaryContextPasses.Run(recurrence,links,scorer.Alphabet,nativeCost,Apply118,Apply140,1,1,mode,new());
   var selectedPolicy=LegacyFreshFirstTextContextPolicy.ReadForFreshSelectedChild(bytes,6120);
+  var directInvocation=LegacyFreshDirectFirstInvocationPolicy.Create(bytes,6120,frame);
+  if(directInvocation.Invocation.NativeModeE0!=selectedPolicy.NativeModeE0||directInvocation.SourceFrameFlag150||directInvocation.Invocation.Configuration99||directInvocation.Invocation.ConfigurationA8)
+   throw new Exception("Actual new direct source's invocation flags differ from its proved producer.");
   if(mode==selectedPolicy.NativeModeE0)
   {
    var automatic=LegacyFirstOrdinaryContextPasses.RunForFreshSelectedChild(recurrence,links,selectedPolicy,nativeCost,geometry.Correct118,geometry.Correct140,new());
@@ -133,7 +136,7 @@ if(args.Length==4)
   if(finite==0||contexts.CopyB8Storage().Any(storage=>storage.Length!=200))throw new Exception("Actual first context passes did not reach fixedF8/A4 final grid.");
   Console.WriteLine($"Actual native explicitE0={mode}: B8 prepared alternatives[{string.Join(", ",outputs)}]; no final native273 result/automaticpolicy/accuracyclaim.");
   using var output=File.Create(args[0]+$".actual-e0-{mode}.json");using var writer=new Utf8JsonWriter(output);
-  writer.WriteStartObject();writer.WriteBoolean("modeE0",mode);writer.WriteNumber("beamWidth",contexts.BeamWidth);writer.WriteNumber("columnCount",contexts.ColumnCountB8);
+  writer.WriteStartObject();writer.WriteBoolean("modeE0",mode);writer.WriteBoolean("selectedChildE0",directInvocation.Invocation.NativeModeE0);writer.WriteBoolean("invocation99",directInvocation.Invocation.Configuration99);writer.WriteBoolean("invocationA8",directInvocation.Invocation.ConfigurationA8);writer.WriteNumber("sourceKind",selectedPolicy.SourceKind);writer.WriteNumber("beamWidth",contexts.BeamWidth);writer.WriteNumber("columnCount",contexts.ColumnCountB8);
   writer.WriteStartArray("nodes");foreach(var storage in contexts.CopyB8Storage())writer.WriteStringValue(Convert.ToHexString(storage.Span));writer.WriteEndArray();
   writer.WriteStartArray("b0");foreach(var storage in contexts.CopyB0Storage())writer.WriteStringValue(Convert.ToHexString(storage.Span));writer.WriteEndArray();
   writer.WriteStartArray("primary");for(int node=0;node<recurrence.NodeCount;node++)writer.WriteStringValue(Convert.ToHexString(recurrence.GetRowCopy(node).CopyStorage()));writer.WriteEndArray();

@@ -108,7 +108,37 @@ for case in range(512):
                       skip=skip, penalty=penalty, cfg99=cfg99, cfgA8=cfg_a8, kind=source_kind,
                       reference=reference, expected=expected, finalReference=final_reference))
 
+glyph_cases = []
+for case in range(256):
+    width, height, count = rng.randrange(1, 5), rng.randrange(1, 5), rng.randrange(1, 18)
+    nodes, paths, costs = [], {}, {}
+    for node in range(count):
+        data = bytearray()
+        for row in range(height):
+            for column in range(width):
+                span = rng.randrange(min(7, node) + 1)
+                parent = node - span - 1
+                pr, pc = (rng.randrange(height), rng.randrange(width)) if parent >= 0 else (255, 255)
+                record = bytearray(rng.randbytes(40))
+                total = rng.randrange(IMP)
+                struct.pack_into('<i', record, 0, total)
+                record[9], record[10], record[32] = pr, pc, 0
+                struct.pack_into('<H', record, 12, rng.randrange(1, 193))
+                struct.pack_into('<H', record, 14, (rng.randrange(64) << 4) | span << 1 | rng.randrange(2))
+                struct.pack_into('<H', record, 16, rng.randrange(256))
+                struct.pack_into('<Q', record, 24, (node * height + row) * width + column + 1)
+                # Causal ancestry, independently built before binary backtracking exists.
+                entry = dict(node=node, row=row, column=column, record=record.hex(), previous=parent,
+                             previousArc=field(record_at(nodes, width, parent, pr, pc), 16, 'H') if parent >= 0 else 65535)
+                paths[node, row, column] = (paths[parent, pr, pc] if parent >= 0 else []) + [entry]
+                costs[node, row, column] = total
+                data += record
+        nodes.append(data)
+    row, column = min(((r, c) for r in range(height) for c in range(width)), key=lambda rc: (costs[count-1, *rc], *rc))
+    glyph_cases.append(dict(width=width, height=height, nodes=[base64.b64encode(n).decode() for n in nodes],
+                            expected=paths[count - 1, row, column]))
+
 out = Path(sys.argv[1])
 out.parent.mkdir(parents=True, exist_ok=True)
-out.write_bytes((json.dumps(dict(cases=cases), separators=(',', ':')) + '\n').encode())
+out.write_bytes((json.dumps(dict(cases=cases, glyphCases=glyph_cases), separators=(',', ':')) + '\n').encode())
 print('Generated512 independent terminal-grid rankings, including256-column boundary, cost ties, zero identities and IEEE exp extremes')

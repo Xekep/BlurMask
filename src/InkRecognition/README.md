@@ -556,3 +556,14 @@ now supplies exact combining-class coverage, canonical mappings and composition
 pairs from a checked standalone model. Public Unicode9 references independently
 verify all assigned classes and eligible pairs; native gap/exception behavior
 is retained. This data is preparatory to the still-unfinished stream normalizer.
+
+The [direct first invocation](../../docs/legacy-source-frame-score-mode.md)
+now derives source150/A8 for the sealed fresh packet/frame scope, retaining
+explicit overrides for general sources. Selected glyph cells can be traversed
+without confusing source graph arcs with physical stroke ordinals.
+The [main full-packet geometry](../../docs/legacy-main-word-transition-geometry.md)
+provides real118/140 corrections to the higher-arc controller, with an explicit
+main-source frame/facts contract. The
+[ordinary glyph emitter](../../docs/legacy-native-ordinary-glyph-utf8.md)
+now includes the proven no-marker helper behavior, preserving original bytes.
+None of these stages supplies a complete Russian winner or app integration.

@@ -69,6 +69,28 @@ Reject(() => LegacyFirstTerminalSelection.Select(new(1, 1, [one, later]), policy
 Require(infinities > 0 && zeroIdentities > 0, "Controls omitted native overflow or zero-context behavior.");
 Console.WriteLine($"PASS {cases} independent terminal grids / {outputs} choices / {zeroIdentities} zero identities / {infinities} nativeexp infinities; stable signed ranking, trailing metadata, reference flags, full storage ownership and guards.");
 
+int glyphCases = 0, glyphCellsCount = 0;
+foreach (var fixture in controls.RootElement.GetProperty("glyphCases").EnumerateArray())
+{
+    var grid = new LegacyFirstMergedRecordGrid(fixture.GetProperty("width").GetInt32(), fixture.GetProperty("height").GetInt32(),
+        fixture.GetProperty("nodes").EnumerateArray().Select(n => (ReadOnlyMemory<byte>)Convert.FromBase64String(n.GetString()!)).ToArray());
+    var choice = LegacyFirstTerminalSelection.Select(grid, new(ushort.MaxValue, 0, false, false, 0x135, 0)).Choices[0];
+    var trace = LegacyFirstSelectedGlyphTrace.Read(grid, choice);
+    var expected = fixture.GetProperty("expected").EnumerateArray().ToArray();
+    Require(trace.Count == expected.Length, "Independent causal glyph ancestry length differs.");
+    for (int i = 0; i < trace.Count; i++)
+    {
+        var cell = trace[i]; var e = expected[i];
+        Require(cell.Node == e.GetProperty("node").GetInt32() && cell.Row == e.GetProperty("row").GetInt32() && cell.Column == e.GetProperty("column").GetInt32() &&
+            cell.PreviousNode == e.GetProperty("previous").GetInt32() && cell.PreviousArc == e.GetProperty("previousArc").GetUInt16() &&
+            cell.CopyRecord().Span.SequenceEqual(Convert.FromHexString(e.GetProperty("record").GetString()!)), "Independent glyph cell/source identity differs.");
+    }
+    Reject(() => LegacyFirstSelectedGlyphTrace.Read(grid, choice with { ContextIdentity = choice.ContextIdentity + 100000 }));
+    Reject(() => LegacyFirstSelectedGlyphTrace.Read(grid, choice, new CancellationToken(true)));
+    glyphCases++; glyphCellsCount += trace.Count;
+}
+Console.WriteLine($"PASS {glyphCases} causal ancestry fixtures/{glyphCellsCount} full selected glyph cells, source order, root sentinel, identity and cancellation. Glyph alternatives/source ranges remain separate.");
+
 if (args.Length == 3)
 {
     using var capture = JsonDocument.Parse(File.ReadAllBytes(args[1]));
@@ -86,10 +108,16 @@ if (args.Length == 3)
                 Require(record[32] == 0 && BinaryPrimitives.ReadUInt16LittleEndian(record[12..]) != trailing,
                     "The actual fixture no longer satisfies policy-independent zero-trait/plain-label ranking.");
             }
-    //Configuration99/A8 and reference are explicit fixture policy, not restored automatic defaults.
-    //The guard above proves their score-only effect here; they cannot alter selected cell/identity.
-    var selected = LegacyFirstTerminalSelection.Select(actualGrid, new(trailing, 0, false, false, 0x135, 0));
-    var alternativePolicy = LegacyFirstTerminalSelection.Select(actualGrid, new(trailing, 40960, true, true, 0x135, 123));
+    Require(root.GetProperty("modeE0").GetBoolean() == root.GetProperty("selectedChildE0").GetBoolean(),
+        "This consumer requires the actual selected-child mode capture, not a controlled alternate mode.");
+    var binding = LegacyFreshFirstTextContextPolicy.ReadForFreshSelectedChild(File.ReadAllBytes(args[2]), 6120);
+    Require(root.GetProperty("sourceKind").GetInt32() == binding.SourceKind, "Capture source kind differs from its owned model.");
+    Require(root.GetProperty("selectedChildE0").GetBoolean() == binding.NativeModeE0, "Capture mode differs from its owned new-child binding.");
+    //99/A8 are captured from the proved new-direct source invocation. The zero
+    //reference/unused penalty are explicit result fixture inputs, not generic defaults.
+    var selected = LegacyFirstTerminalSelection.Select(actualGrid, new(trailing, 0,
+        root.GetProperty("invocation99").GetBoolean(), root.GetProperty("invocationA8").GetBoolean(), binding.SourceKind, 0));
+    var alternativePolicy = LegacyFirstTerminalSelection.Select(actualGrid, new(trailing, 40960, true, true, binding.SourceKind, 123));
     Require(selected.Choices.Select(c => (c.Row, c.Column, c.ContextIdentity, c.TotalCost)).SequenceEqual(
         alternativePolicy.Choices.Select(c => (c.Row, c.Column, c.ContextIdentity, c.TotalCost))), "Fixture policy changed native selected cells.");
     var contexts = root.GetProperty("contexts").EnumerateArray().ToDictionary(n => n.GetProperty("identity").GetUInt64(),
@@ -97,16 +125,24 @@ if (args.Length == 3)
     var text = new List<string>();
     foreach (var choice in selected.Choices)
     {
+        var glyphCells = LegacyFirstSelectedGlyphTrace.Read(actualGrid, choice);
+        Require(glyphCells.Count > 0 && glyphCells.Zip(glyphCells.Skip(1)).All(pair => pair.First.Node < pair.Second.Node),
+            "Actual selected glyph cells are not in source order.");
         var reverse = new List<string>(); var seen = new HashSet<ulong>();
+        var reversedSymbols = new List<ushort>();
         for (ulong id = choice.ContextIdentity; id != 0;)
         {
             Require(seen.Add(id) && contexts.ContainsKey(id), "Actual selected context is cyclic/unavailable.");
             var context = contexts[id];
+            reversedSymbols.Add(context.Symbol);
             Require(context.Symbol == 0xfffb || alphabet.TryGetText(context.Symbol, out _), "Selected symbol is not in its owned alphabet.");
             reverse.Add(context.Symbol == 0xfffb ? " " : alphabet.TryGetText(context.Symbol, out string value) ? value : throw new Exception());
             id = context.Parent;
         }
+        reversedSymbols.Reverse();
+        Require(glyphCells.Select(cell => cell.Symbol).SequenceEqual(reversedSymbols),
+            "Actual plain fixture's merged glyph walk differs from its independently owned symbol-context path.");
         reverse.Reverse(); text.Add(string.Concat(reverse) + ":" + choice.TotalCost);
     }
-    Console.WriteLine($"PASS real raw/NN/B0/B8 -> terminal selected contexts [{string.Join(", ", text)}]. Explicit fixture score flags; not273 glyph materialization or final Russian recognition.");
+    Console.WriteLine($"PASS real raw/NN/B0/B8 -> terminal selected contexts [{string.Join(", ", text)}], proved new-direct invocation flags. Not273 glyph materialization or final Russian recognition.");
 }

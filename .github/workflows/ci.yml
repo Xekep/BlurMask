@@ -428,6 +428,12 @@ jobs:
           python tools/LegacyGlyphUtf8Tokens.Probe/reference_controls.py .artifacts/legacy-glyph-utf8-controls.json
           dotnet run --project tools/LegacyGlyphUtf8Tokens.Probe -c Release -- .artifacts/legacy-glyph-utf8-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
           dotnet run --project tools/LegacyFreshFirstTextPolicy.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res
+          dotnet run --project tools/LegacyFreshDirectInvocation.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/LegacyOrdinaryGlyphUtf8.Probe/reference_controls.py .artifacts/legacy-ordinary-utf8-controls.json
+          dotnet run --project tools/LegacyOrdinaryGlyphUtf8.Probe -c Release -- .artifacts/legacy-ordinary-utf8-controls.json .artifacts/legacy-glyph-utf8-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+          dotnet run --project tools/LegacyMainWordTransition.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/main-word-transition-audit.json
+          python tools/LegacyMainWordTransition.Probe/reference_controls.py .artifacts/main-word-transition-audit.json .artifacts/main-word-transition-controls.json
+          dotnet run --project tools/LegacyMainWordTransition.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/main-word-transition-audit.json .artifacts/main-word-transition-controls.json
           python tools/LegacyFirstContextPass.Probe/reference_controls.py .artifacts/legacy-first-context-pass-controls.json
           dotnet run --project tools/LegacyFirstContextPass.Probe -c Release -- .artifacts/legacy-first-context-pass-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           python tools/LegacyFirstContextPass.Probe/reference_controls.py --audit .artifacts/legacy-first-context-pass-controls.json.actual-e0-False.json
@@ -718,6 +724,9 @@ jobs:
             @{ Name = 'LegacyUnicodeNormalizationData'; Args = @('models/text-unicode/legacy-normalization-data.json', '.artifacts/unicode9-reference/UnicodeData.txt', '.artifacts/unicode9-reference/DerivedNormalizationProps.txt') },
             @{ Name = 'LegacyGlyphUtf8Tokens'; Args = @('.artifacts/legacy-glyph-utf8-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyFreshFirstTextPolicy'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyFreshDirectInvocation'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyOrdinaryGlyphUtf8'; Args = @('.artifacts/legacy-ordinary-utf8-controls.json', '.artifacts/legacy-glyph-utf8-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyMainWordTransition'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/main-word-transition-native-audit.json', '.artifacts/main-word-transition-controls.json') },
             @{ Name = 'LegacyFirstContextPass'; Args = @('.artifacts/legacy-first-context-pass-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyFirstResultScore'; Args = @('.artifacts/legacy-first-result-score-controls.json') },
             @{ Name = 'LegacyWordHigherArc'; Args = @('.artifacts/legacy-word-higherarc-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
