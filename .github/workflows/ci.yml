@@ -503,10 +503,15 @@ jobs:
           dotnet run --project tools/LegacyCaseSymbolEnumeration.Probe -c Release -- models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-case-symbol-controls.json
           python tools/LegacyCasePreparation.Probe/reference_controls.py .artifacts/legacy-case-alphabet-ranges-controls.json .artifacts/legacy-case-preparation-controls.json
           dotnet run --project tools/LegacyCasePreparation.Probe -c Release -- models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-case-preparation-controls.json
+          python tools/LegacyCasePermissions.Probe/reference_controls.py .artifacts/legacy-case-preparation-controls.json .artifacts/legacy-case-permissions-controls.json
+          dotnet run --project tools/LegacyCasePermissions.Probe -c Release -- models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-case-permissions-controls.json
           dotnet run --project tools/LegacyMainInitialLanguage.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           python tools/LegacyOrdinaryShear.Probe/reference_controls.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-ordinary-shear-controls.json
           dotnet run --project tools/LegacyOrdinaryShear.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-ordinary-shear-managed-audit.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-ordinary-shear-controls.json
           python tools/LegacyOrdinaryShear.Probe/audit_actual.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-ordinary-shear-managed-audit.json
+          python tools/LegacyOrdinaryGap.Probe/reference_controls.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-ordinary-gap-controls.json
+          dotnet run --project tools/LegacyOrdinaryGap.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-ordinary-gap-managed-audit.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-ordinary-gap-controls.json
+          python tools/LegacyOrdinaryGap.Probe/audit_actual.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-ordinary-gap-managed-audit.json
           python tools/LegacyMainControllerPolicy.Probe/reference_controls.py .artifacts/legacy-main-controller-policy-controls.json
           dotnet run --project tools/LegacyMainControllerPolicy.Probe -c Release -- .artifacts/legacy-main-controller-policy-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           dotnet run --project tools/LegacyFirstSelectedPublication.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-first-selected-publication-managed-audit.json
@@ -891,6 +896,8 @@ jobs:
             @{ Name = 'LegacyMainSpanPreparation'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyCaseSymbolEnumeration'; Args = @('models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-case-symbol-controls.json') },
             @{ Name = 'LegacyCasePreparation'; Args = @('models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-case-preparation-controls.json') },
+            @{ Name = 'LegacyCasePermissions'; Args = @('models/ru-RU/ru_RU-lk-text.lite.res', '.artifacts/legacy-case-permissions-controls.json') },
+            @{ Name = 'LegacyOrdinaryGap'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-ordinary-gap-native-audit.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-ordinary-gap-controls.json') },
             @{ Name = 'LegacyMainInitialLanguage'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyOrdinaryShear'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-ordinary-shear-native-audit.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-ordinary-shear-controls.json') },
             @{ Name = 'LegacyMainControllerPolicy'; Args = @('.artifacts/legacy-main-controller-policy-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
@@ -1015,6 +1022,10 @@ jobs:
             }
             if ($name -eq 'LegacyOrdinaryShear') {
               python tools/LegacyOrdinaryShear.Probe/audit_actual.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-ordinary-shear-native-audit.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+            if ($name -eq 'LegacyOrdinaryGap') {
+              python tools/LegacyOrdinaryGap.Probe/audit_actual.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-ordinary-gap-native-audit.json
               if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             }
             if ($name -eq 'LegacyFirstBlankContext') {

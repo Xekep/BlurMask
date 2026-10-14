@@ -16,6 +16,8 @@ public sealed class LegacyWordLanguageModel
     public int WordCount { get; }
     public int ClassCount { get; }
     public int DeclaredBigramCount { get; }
+    /// <summary>Stored native field150, read by0F3360 for case-path factory selection.</summary>
+    public ushort CasePathVersion { get; }
     /// <summary>First stored codebook level, not a scan of actual word frequencies.</summary>
     public int GetStoredInitialWordLevel() => _wordLevels[0];
     /// <summary>First stored unigram/bigram codebook level; no runtime history is selected.</summary>
@@ -24,11 +26,13 @@ public sealed class LegacyWordLanguageModel
         4 * (_wordLevels.Length + _unigramLevels.Length + _bigramLevels.Length);
 
     private LegacyWordLanguageModel(int words, int classes, int bigrams, int bits, byte[] packed,
-        byte[] wordCodes, byte[] unigram, byte[] bigram, int[] wordLevels, int[] unigramLevels, int[] bigramLevels)
+        byte[] wordCodes, byte[] unigram, byte[] bigram, int[] wordLevels, int[] unigramLevels, int[] bigramLevels,
+        ushort casePathVersion)
     {
         WordCount = words; ClassCount = classes; DeclaredBigramCount = bigrams; _classBits = bits;
         _classes = packed; _wordCodes = wordCodes; _unigramCodes = unigram; _bigramCodes = bigram;
         _wordLevels = wordLevels; _unigramLevels = unigramLevels; _bigramLevels = bigramLevels;
+        CasePathVersion=casePathVersion;
     }
 
     /// <summary>
@@ -65,10 +69,11 @@ public sealed class LegacyWordLanguageModel
         // are not interpreted by these raw lookup methods.
         if (r.U32() != 0 || r.U32() != 0) throw Invalid("Unsupported order2 backoff storage.");
         r.Skip(4 * 2 * 4 + 16 + 16 + 4 * 2 * 4 + 16 + 16);
-        r.Skip(2 + 16 + 16 + 0x2a4 + 0x2254);
+        ushort casePathVersion=r.U16();
+        r.Skip(16 + 16 + 0x2a4 + 0x2254);
         if (!r.Finished) throw Invalid("Unconsumed language object bytes.");
         var result = new LegacyWordLanguageModel(words, classes, bigrams, bits, packed, wordCodes, unigram, bigram,
-            wordLevels, unigramLevels, bigramLevels);
+            wordLevels, unigramLevels, bigramLevels, casePathVersion);
         for (int i = 0; i < words; i++)
         {
             if ((i & 1023) == 0) cancellationToken.ThrowIfCancellationRequested();

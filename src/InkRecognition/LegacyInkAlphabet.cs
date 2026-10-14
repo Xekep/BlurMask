@@ -117,6 +117,7 @@ public sealed class LegacyInkAlphabet
     public bool TryGetLabel(string text, out ushort label) => _labels.TryGetValue(text, out label);
     /// <summary>Native052BD0 checks the three stored relation-map pointers before its Unicode fallback scan.</summary>
     public bool HasStoredRelationMaps => _relationMaps.Any(map => map is not null);
+    internal LegacyInkRelatedForms[] CopyStoredCaseTriplets() => _forms.ToArray();
 
     /// <summary>Native reverse slot65535 marks a virtual symbol, independent of Unicode text.</summary>
     public bool IsVirtual(ushort label) { ValidateLabel(label); return _reverse[label] == ushort.MaxValue; }
