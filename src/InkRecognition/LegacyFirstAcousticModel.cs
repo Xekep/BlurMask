@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using System.Security.Cryptography;
 
 namespace InkRecognition;
 
@@ -18,12 +19,14 @@ public sealed class LegacyFirstAcousticModel
     public LegacyInkNetwork TrajectoryNetwork { get; }
     public LegacyInkNetwork RasterNetwork { get; }
     public ReadOnlyMemory<LegacyAcousticWeightSlot> Slots { get; }
+    internal string SourceFingerprint { get; }
 
     private LegacyFirstAcousticModel(LegacyOrdinaryRowAcousticProfile row,int offset,int consumed,
         byte selector,short target,LegacyInkNetwork context,LegacyInkNetwork trajectory,
-        LegacyInkNetwork raster,LegacyAcousticWeightSlot[] slots)
+        LegacyInkNetwork raster,LegacyAcousticWeightSlot[] slots,string sourceFingerprint)
     {RowProfile=row;OrdinaryNodeOffset=offset;PrefixBytesConsumed=consumed;ContextSelector=selector;
-        NormalizationTarget=target;ContextNetwork=context;TrajectoryNetwork=trajectory;RasterNetwork=raster;Slots=slots;}
+        NormalizationTarget=target;ContextNetwork=context;TrajectoryNetwork=trajectory;RasterNetwork=raster;Slots=slots;
+        SourceFingerprint=sourceFingerprint;}
 
     public static LegacyFirstAcousticModel ReadSource(ReadOnlySpan<byte> resource,int sourceOffset,
         CancellationToken cancellationToken=default)
@@ -68,7 +71,8 @@ public sealed class LegacyFirstAcousticModel
         if(context.InputWidth!=30||context.Kind!=0x7001||trajectory.InputWidth!=247||trajectory.Kind!=0x1f||
             raster.InputWidth!=229||raster.Kind!=0x2f||trajectory.OutputWidth!=raster.OutputWidth||trajectory.OutputWidth>512)
             throw new InvalidDataException("Network widths/kinds differ from the first acoustic profile.");
-        return new(row,offset,r.Position,selector,target,context,trajectory,raster,slots);
+        return new(row,offset,r.Position,selector,target,context,trajectory,raster,slots,
+            Convert.ToHexString(SHA256.HashData(resource.Slice(sourceOffset,sourceEnd-sourceOffset))));
     }
 
     /// <summary>Constructor1b0330 initializes mode1=0/mode2=1; without dynamic1b0,
@@ -83,7 +87,7 @@ public sealed class LegacyFirstAcousticModel
         var first=LegacyClassScores.Convert(TrajectoryNetwork.Evaluate(trajectory,activations,cancellationToken:cancellationToken),cancellationToken).Probability32768;
         var second=LegacyClassScores.Convert(RasterNetwork.Evaluate(raster,activations,cancellationToken:cancellationToken),cancellationToken).Probability32768;
         // No invented confidence calibration: this endpoint owns only the integer probability channel.
-        return new(first,second);
+        return new(first,second,SourceFingerprint);
     }
 
     private static int NodeEnd(ReadOnlySpan<byte> data,int offset,uint kind,ushort version,int end)
@@ -120,8 +124,9 @@ public sealed class LegacyFirstAcousticScores
 {
     public ReadOnlyMemory<int> TrajectoryProbability32768 {get;}
     public ReadOnlyMemory<int> RasterProbability32768 {get;}
-    internal LegacyFirstAcousticScores(ReadOnlyMemory<int> trajectory,ReadOnlyMemory<int> raster)
-    {TrajectoryProbability32768=trajectory;RasterProbability32768=raster;}
+    internal string SourceFingerprint {get;}
+    internal LegacyFirstAcousticScores(ReadOnlyMemory<int> trajectory,ReadOnlyMemory<int> raster,string sourceFingerprint)
+    {TrajectoryProbability32768=trajectory;RasterProbability32768=raster;SourceFingerprint=sourceFingerprint;}
     public int[] GetFreshIntegerCosts(ReadOnlySpan<byte> enabledClasses=default,CancellationToken cancellationToken=default)
         =>LegacyAcousticCostEnsemble.Combine(new LegacyAcousticCostFamily?[]{
             new(TrajectoryProbability32768,1),new(RasterProbability32768,1),null,null,null,null,null},

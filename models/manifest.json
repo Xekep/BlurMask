@@ -97,6 +97,11 @@
       "sha256": "d26ed08baf419361484958b3a04a5f740a228f4664f7e2643f43459223ef3e4e"
     },
     {
+      "path": "text-unicode/legacy-circled-payload-data.json",
+      "bytes": 3064,
+      "sha256": "701f03d601fa843a980abc4e9cf0c7175e707bb208b64866439b34871e9c05e2"
+    },
+    {
       "path": "text-unicode/legacy-normalization-data.json",
       "bytes": 57864,
       "sha256": "3cc1d91269959a13b5700b7463d3db7442b83b593ba70435a94665d6531226f2"

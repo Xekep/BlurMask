@@ -432,6 +432,20 @@ jobs:
           dotnet run --project tools/LegacyFirstSourceRecord.Probe -c Release -- .artifacts/legacy-first-source-record-controls.json
           python tools/LegacyWordAcousticRequest.Probe/reference_controls.py .artifacts/legacy-word-acoustic-request-controls.json
           dotnet run --project tools/LegacyWordAcousticRequest.Probe -c Release -- .artifacts/legacy-word-acoustic-request-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyTextGlyphCaller.Probe/reference_controls.py .artifacts/legacy-text-glyph-caller-controls.json
+          dotnet run --project tools/LegacyTextGlyphCaller.Probe -c Release -- .artifacts/legacy-text-glyph-caller-controls.json models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/LegacyGlyphRecordPool.Probe/reference_controls.py .artifacts/legacy-glyph-record-pool-controls.json
+          dotnet run --project tools/LegacyGlyphRecordPool.Probe -c Release -- .artifacts/legacy-glyph-record-pool-controls.json
+          python tools/LegacyGlyphScoreCache.Probe/reference_controls.py .artifacts/legacy-glyph-score-cache-controls.json
+          dotnet run --project tools/LegacyGlyphScoreCache.Probe -c Release -- .artifacts/legacy-glyph-score-cache-controls.json
+          dotnet run --project tools/LegacyFirstGlyphScoreProducer.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json .artifacts/legacy-first-glyph-score-audit.json
+          python tools/LegacyFirstGlyphScoreProducer.Probe/reference_controls.py .artifacts/legacy-first-glyph-score-audit.json
+          python tools/LegacyWordSymbolQualification.Probe/reference_controls.py .artifacts/legacy-word-symbol-qualification-controls.json
+          dotnet run --project tools/LegacyWordSymbolQualification.Probe -c Release -- .artifacts/legacy-word-symbol-qualification-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyOrdinaryWordStartup.Probe/reference_controls.py .artifacts/legacy-ordinary-word-startup-controls.json
+          dotnet run --project tools/LegacyOrdinaryWordStartup.Probe -c Release -- .artifacts/legacy-ordinary-word-startup-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyCircledUtf8.Probe/reference_controls.py .artifacts/unicode9-reference/UnicodeData.txt models/text-unicode/legacy-circled-payload-data.json .artifacts/legacy-circled-utf8-controls.json
+          dotnet run --project tools/LegacyCircledUtf8.Probe -c Release -- models/text-unicode/legacy-circled-payload-data.json models/text-unicode/legacy-normalization-data.json .artifacts/legacy-circled-utf8-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/text-unicode/legacy-text-publication-data.json
           python tools/LegacyGlyphUtf8Tokens.Probe/reference_controls.py .artifacts/legacy-glyph-utf8-controls.json
           dotnet run --project tools/LegacyGlyphUtf8Tokens.Probe -c Release -- .artifacts/legacy-glyph-utf8-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
           dotnet run --project tools/LegacyFreshFirstTextPolicy.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res
@@ -733,6 +747,13 @@ jobs:
             @{ Name = 'LegacyTextGlyphPublication'; Args = @('models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', '.artifacts/legacy-text-glyph-publication-controls.json', '.artifacts/unicode9-reference/auxiliary/GraphemeBreakTest.txt', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyFirstSourceRecord'; Args = @('.artifacts/legacy-first-source-record-controls.json') },
             @{ Name = 'LegacyWordAcousticRequest'; Args = @('.artifacts/legacy-word-acoustic-request-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyTextGlyphCaller'; Args = @('.artifacts/legacy-text-glyph-caller-controls.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyGlyphRecordPool'; Args = @('.artifacts/legacy-glyph-record-pool-controls.json') },
+            @{ Name = 'LegacyGlyphScoreCache'; Args = @('.artifacts/legacy-glyph-score-cache-controls.json') },
+            @{ Name = 'LegacyFirstGlyphScoreProducer'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', '.artifacts/legacy-first-glyph-score-native-audit.json') },
+            @{ Name = 'LegacyWordSymbolQualification'; Args = @('.artifacts/legacy-word-symbol-qualification-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyOrdinaryWordStartup'; Args = @('.artifacts/legacy-ordinary-word-startup-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyCircledUtf8'; Args = @('models/text-unicode/legacy-circled-payload-data.json', 'models/text-unicode/legacy-normalization-data.json', '.artifacts/legacy-circled-utf8-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/text-unicode/legacy-text-publication-data.json') },
             @{ Name = 'LegacyGlyphUtf8Tokens'; Args = @('.artifacts/legacy-glyph-utf8-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyFreshFirstTextPolicy'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyFreshDirectInvocation'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res') },
@@ -778,6 +799,10 @@ jobs:
             }
             if ($name -eq 'LegacyFirstTransition') {
               python tools/LegacyFirstTransition.Probe/reference_controls.py --audit .artifacts/legacy-first-transition-native-actual.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+            if ($name -eq 'LegacyFirstGlyphScoreProducer') {
+              python tools/LegacyFirstGlyphScoreProducer.Probe/reference_controls.py .artifacts/legacy-first-glyph-score-native-audit.json
               if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             }
           }

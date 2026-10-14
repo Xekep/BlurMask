@@ -15,7 +15,7 @@ except the last stroke when it is the sole submitted stroke. Thus child
 physical ordinals require an explicit retained-child-to-parent mapping.
 Kind6 bypasses that filter. Source ingestion and glyph emission are distinct.
 
-`156950` walks the linked120-byte glyph records under result273. The result
+`156950` walks linked120-byte **word276** records under result273. The result
 service+20 virtual48 returns a packed key with a **signed24** graph end node,
 **signed16** graph arc in bits24..39, and **signed16** selected273 alternative
 ordinal in bits40..55. A negative arc is skipped. These are not Unicode,
@@ -28,7 +28,7 @@ For a valid glyph the required callbacks are:
 | frontend168 | `152a10` → graph21b.B8 `1a7bf0` | Packed first boundary of that end-node/arc |
 | frontend170 | `152a30` → graph21b.C0 `1a7c70` | Packed last boundary |
 | frontend188 | `152b20` → graph21b.120 `1a9ae0`, mode0 | Array of inclusive24-byte source-key pairs |
-| nested glyph alternatives | result service+8.08, glyph120+48 | Nested owner+18 packed count and owner+20 pointer to40-byte glyph alternatives; selected ordinal from the packed key |
+| nested glyph alternatives | TOP273+48 pool, canonical graph key → result service+8.08 `13ac80` |64-byte AVL owner+18 packed count and owner+20 pointer to40-byte glyph alternatives; selected ordinal from the packed key |
 | categories | frontend48 `151bd0` → graph170 `1acf30` → graph188 | Start/end geometry maps and prototype table |
 
 `1a9ae0` has graph path/source-ref merging cases. The source row API requires
@@ -37,13 +37,26 @@ bounding box, all physical strokes, or a Unicode context path. Each endpoint
 key is `(sourceGroup, childPhysicalStroke, retainedPointOrdinal)`.
 
 The nested alternatives are **not the TOP273 alternatives**. `156950` starts
-at TOP273+68, follows its first40-byte alternative's linked glyph pointer+18,
-and resolves the120-byte glyph as `(node.owner+18)+node.index*78`. It then
-passes **glyph120+48** to the result service+8 virtual08. That returns a
-different nested owner, whose18 count/20 array contain labelU16+8 and glyph
-scores atC/10/14. TOP273 alternatives have float mass at8; feeding those rows
-to this source producer would corrupt labels. The current raw B8 terminal
-scanner alone has neither this nested owner nor the source callbacks.
+at TOP273+68, follows its first40-byte alternative's linked word pointer+18,
+and resolves the120-byte word as `(node.owner+18)+node.index*78`. The word
+service enumerates its packed graph references. For each reference `156950`
+passes **TOP273+48**, plus a canonical key retaining node24/arc16/bit56, to
+result service+8 virtual08 `13ac80`. This returns a64-byte AVL owner, whose18
+packed count/20 array contain labelU16+8 and glyph scores atC/10/14. The
+selected alternative ordinal is read separately from reference bits40..55.
+Service28 `13ae90` resolves the individual40-byte record using the same pool
+and that full reference; it returns a record, whereas08 returns its owner.
+
+The machine-code pins are explicit: entry156955 saves TOP273 argumentR8;
+156985 retains it inR13;156bf5 reloads that same saved argument;156c15 loads
+`RDX=[R13+48]`;156c2f selects service08 and156c33 calls it with the normalized
+key inR8. **Word120+48 is not this pool source.** The initial description
+confused Ghidra's unchanged `param_3` (TOP273) with the enumerated word object;
+that evidence error is corrected here without changing the prepared-row API.
+
+TOP273 alternatives have float mass at8; feeding those rows to this source
+producer would corrupt labels. The current raw B8 terminal scanner alone has
+neither this nested owner nor the source callbacks.
 
 ## Owned row representation
 

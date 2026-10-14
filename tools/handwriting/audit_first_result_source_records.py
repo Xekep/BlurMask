@@ -13,14 +13,22 @@ pe=PE(data)
 bindings={0x1802de610+0x48:0x180151bd0,0x1802de610+0x168:0x180152a10,
           0x1802de610+0x170:0x180152a30,0x1802de610+0x188:0x180152b20,
           0x1802e1ff0+0xb8:0x1801a7bf0,0x1802e1ff0+0xc0:0x1801a7c70,
-          0x1802e1ff0+0x120:0x1801a9ae0,0x1802e1ff0+0x170:0x1801acf30}
+          0x1802e1ff0+0x120:0x1801a9ae0,0x1802e1ff0+0x170:0x1801acf30,
+          0x1802dc680+0x08:0x18013ac80,0x1802dc680+0x20:0x18013acc0,
+          0x1802dc680+0x28:0x18013ae90,0x1802dc680+0x30:0x18013af30}
 for address,value in bindings.items():
     if pe.read(address,'Q')[0]!=value:raise ValueError(f'Producer table changed at{address:x}')
 instructions={0x180152a10:'488b5270488b024c8b90b8000000',
               0x180152a30:'488b5270488b024c8b90c0000000',
               0x180152b20:'488b5270488b024c8b9020010000',
               0x1801acf30:'488b8288010000c3',
-              0x1801a7c69:'8b440810c3',0x1801a7ce9:'8b440814c3'}
+              0x1801a7c69:'8b440810c3',0x1801a7ce9:'8b440814c3',
+              0x180156955:'4c89442418', #Entry argumentR8 is TOP273, saved before stack growth.
+              0x180156985:'4d8be8', #R13 initially retains TOP273.
+              0x180156bf5:'4c8bac24d0000000', #Reload same saved third argument.
+              0x180156c15:'498b5548', #RDX=[TOP273+48], not word120+48.
+              0x180156c2f:'4c8b4808', #Result pool service08 getter.
+              0x180156c33:'41ffd1'} #Call with TOP273pool and canonical graph keyR8.
 for address,value in instructions.items():
     if bytes(pe.read(address,f'{len(value)//2}B')).hex()!=value:raise ValueError(f'Callback implementation changed at{address:x}')
 if pe.read(0x1802ed2e8,'d')[0]!=3 or pe.read(0x1802ed1b0,'d')[0]!=.02:raise ValueError('Submission double constants changed')
@@ -43,8 +51,10 @@ for block,pattern in patterns:
 a.output.parent.mkdir(parents=True,exist_ok=True)
 a.output.write_text(json.dumps(dict(schemaVersion=1,dllSha256=sha,
     bindings={f'{k:x}':f'{v:x}' for k,v in bindings.items()},
-    topOwner='TOP273+68 -> firstTOPalternative+18 linked node -> owner+18+index*78 glyph',
-    nestedOwner='glyph120+48 -> result service8.virtual08 -> nestedOwner18count/20array',
+    topOwner='TOP273+68 -> firstTOPalternative+18 linked node -> wordOwner+18+index*78 word120',
+    nestedOwner='TOP273+48 pool + canonical node/arc/bit56 key -> service08/13AC80 ->64-byte AVL owner18count/20array',
+    selectedRecord='Same TOP273pool + reference including signed alternative ordinal -> service28/13AE90 ->40-byte row',
+    ownerArgumentInstructions={f'{k:x}':v for k,v in instructions.items() if 0x180156950 <= k < 0x180157000},
     warning='Nested glyph alternative label8 is not TOP273 mass8. Glyph materializer and source callback production remain upstream.',
     childPointIndices='Parent retained float buffers submitted as child raw strokes; child original point indices map to parent retained indices',
     filtering='Float height/width compared after conversion to double .02; width compared with double sourceScale*3',
