@@ -25,9 +25,16 @@ def main():
     load=f['1801d4950'];assert 'param_2 + 0xb9,1' in load
     merge=f['1801ef070'];assert '*(undefined1 *)(param_2 + 0xf0) = uVar12' in merge
     at=merge.index('*(undefined1 *)(param_2 + 0xf0) = uVar12');assert '*plVar22 + 0x68' in merge[at-100:at]
+    assert b.qwords(0x1802e5a20+0x70,1)[0]==0x1801d62b0
+    assert 'movzx eax, word ptr [rdx + 0xba]' in asm(0x1801d62b0,0x1801d62b8)
+    assert 'param_2 + 0xba,2' in load
+    at=merge.index('*(undefined2 *)(param_2 + 0xf8) = uVar15');assert '*plVar22 + 0x70' in merge[at-160:at]
+    assert '(param_1,0x28,*(undefined2 *)(param_2 + 0xf8))' in merge
+    assert '0xba' not in f['1801d60d0']
     word=f['1801f42d0'];assert 'uVar33 = *(undefined1 *)(param_2 + 0xf0)' in word and 'local_4a8 = uVar33' in word
-    result=dict(bindings=14,freshCapture='driver220=0 ->config9B=0 ->controller101=0;driver220 ->TOP27341 ->27410',
+    result=dict(bindings=16,freshCapture='driver220=0 ->config9B=0 ->controller101=0;driver220 ->TOP27341 ->27410',
                 wordGeometry='selected247 virtual68=1D62A0 ->resourceB9 ->controllerF0 ->279/275 finalize+sort',
+                primaryCapacity='selected247 virtual70=1D62B0 ->serializedBA ->controllerF8 ->40-byte primary allocation; distinct from21b span cap andA0/A2/A4 result columns',
                 sourceScoreExponent='155DA0/155EF0 fresh1C8=3F800000; serialized-driver158BC0 override excluded by raw API',
                 policy='No reused driver/property-event overrides; true actualB9 does not get coerced tofalse',scope='Static PE reads only; no vendor execution')
     pathlib.Path(a.output).write_bytes((json.dumps(result,separators=(',',':'))+'\n').encode());print(json.dumps(result))

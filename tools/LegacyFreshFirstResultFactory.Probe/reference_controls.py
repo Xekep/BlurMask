@@ -9,6 +9,6 @@ def main():
     for offset,value in [(-1,0),(187747,raw[187747]^1),(11376,1)]:
         data=bytearray(raw)
         if offset>=0:data[offset]=value
-        cases.append(dict(offset=offset,value=value,fingerprint=hashlib.sha256(data[start:end]).hexdigest().upper(),wordGeometry=data[11376]!=0))
+        cases.append(dict(offset=offset,value=value,fingerprint=hashlib.sha256(data[start:end]).hexdigest().upper(),wordGeometry=data[11376]!=0,primaryBeamWidth=struct.unpack_from('<H',data,11377)[0]))
     pathlib.Path(a.output).write_bytes((json.dumps(dict(sourceOffset=start,b9Offset=11376,cases=cases),separators=(',',':'))+'\n').encode());print(len(cases))
 if __name__=='__main__':main()

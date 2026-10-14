@@ -18,6 +18,15 @@ ControllerF0's constructor value is insufficient:1EF070 overwrites it from the s
 
 ## Ownership and fingerprint
 
+The same source prefix supplies `PrimaryBeamWidthF8`. Native247.virtual70 is
+`1D62B0`, an exact ushortBA getter. `1EF070` writes that value toF8 before
+allocating its40-byte primary result slots. The field is at
+`ParametersOffset-4`; the actual first source stores5. This primary capacity
+is distinct from the21b graph's maximum atom span7 and the selected child's
+A0/A2/A4 column counts1. The factory retains the source's ushort without
+substituting a bounded diagnostic default. Search APIs must still enforce
+their supported capacity domain.
+
 The factory snapshots the input resource before parsing/preparation and retains its `LegacyFirstAcousticModel`, `LegacyFreshOrdinaryPacketFrame` and `LegacyFreshDirectFirstInvocationPolicy` together. `ValidateInvocation` requires those exact objects; equal-resource foreign frames remain different invocations. `SourceFingerprint` is the actual first resource-node SHA256 already carried by first neural score channels. `ValidateScores` checks that fingerprint and both model output widths. This is a source-model check, not a replacement for per-group/candidate ownership or final-confidence selection.
 
 Every `CreatePlainResult` returns a fresh shared274 pool/publisher owner. WORD276 reference chains and published275 records retain that pool. Cross-result words are rejected. No native pointers, labels, geometry280 buffers or source boundaries are invented from the factory flags.
@@ -30,7 +39,7 @@ dotnet run --project tools/LegacyFreshFirstResultFactory.Probe -c Release -- mod
 python tools/handwriting/audit_fresh_first_result_flags.py --output D:/factory-flags-audit.json
 ```
 
-The static auditor checks14 concrete native bindings from the pinned Text PE18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f. Probes are headless managed/NativeAOT code and never load a vendor DLL. Actual720-byte first-result source rows → main247 frame, winner glyph/word materialization and general geometric publication remain separate stages.
+The static auditor checks16 concrete native bindings from the pinned Text PE18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f. Probes are headless managed/NativeAOT code and never load a vendor DLL. Actual720-byte first-result source rows → main247 frame, winner glyph/word materialization and general geometric publication remain separate stages.
 
 The raw factory also exposes `SourceScoreExponent` as binary32 one: both
 `155DA0` and `155EF0` initialize driver field `1C8` to `3F800000`. The

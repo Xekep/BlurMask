@@ -1,3 +1,5 @@
+using System.Buffers.Binary;
+
 namespace InkRecognition;
 
 /// <summary>One owned fresh selected-source invocation and its actual result274/279 factory policies.
@@ -17,9 +19,13 @@ public sealed class LegacyFreshFirstResultOwnershipFactory
     /// factory cannot receive158BC0's separate driver-payload override.</summary>
     public float SourceScoreExponent=>1f;
     public int ResourceB9Offset {get;}
+    /// <summary>Actual1EF070 F8 allocation/primary record capacity read from
+    /// selected247.virtual70=1D62B0's serializedBA. This is independent of the
+    ///21b candidate span cap and later A0/A2/A4 result-column counts.</summary>
+    public ushort PrimaryBeamWidthF8 {get;}
     private LegacyFreshFirstResultOwnershipFactory(LegacyFirstAcousticModel model,
-        LegacyFreshOrdinaryPacketFrame frame,LegacyFreshDirectFirstInvocationPolicy invocation,bool geometry,int b9Offset)
-    {AcousticModel=model;Frame=frame;InvocationPolicy=invocation;FinalizeWordGeometry=geometry;ResourceB9Offset=b9Offset;}
+        LegacyFreshOrdinaryPacketFrame frame,LegacyFreshDirectFirstInvocationPolicy invocation,bool geometry,int b9Offset,ushort primaryWidth)
+    {AcousticModel=model;Frame=frame;InvocationPolicy=invocation;FinalizeWordGeometry=geometry;ResourceB9Offset=b9Offset;PrimaryBeamWidthF8=primaryWidth;}
 
     /// <summary>Create the raw source, fitted first frame and first policy together. This no-property-event API
     /// never imports a reused driver's220/configuration9B or an external274 capture setting.</summary>
@@ -36,7 +42,8 @@ public sealed class LegacyFreshFirstResultOwnershipFactory
         //1D4950 forwards sequential B8/B9/BA/BC into247; ParametersOffset follows their1+1+2+2 bytes.
         int b9=model.RowProfile.Source.ParametersOffset-5;
         if(b9<sourceOffset || b9>=resource.Length || resource[b9]>1)throw new InvalidDataException("Actual serialized247 B9 required.");
-        cancellationToken.ThrowIfCancellationRequested();return new(model,frame,invocation,resource[b9]!=0,b9);
+        ushort primaryWidth=BinaryPrimitives.ReadUInt16LittleEndian(resource.AsSpan(b9+1,2));
+        cancellationToken.ThrowIfCancellationRequested();return new(model,frame,invocation,resource[b9]!=0,b9,primaryWidth);
     }
 
     public void ValidateInvocation(LegacyFirstAcousticModel actualModel,LegacyFreshOrdinaryPacketFrame actualFrame,
