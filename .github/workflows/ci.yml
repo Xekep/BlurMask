@@ -468,6 +468,8 @@ jobs:
           python tools/LegacyFirstPrimitiveWord.Probe/audit_contexts.py .artifacts/legacy-first-primitive-managed-captures.json
           python tools/LegacySourceIdentifier.Probe/reference_controls.py .artifacts/legacy-source-identifier-controls.json
           dotnet run --project tools/LegacySourceIdentifier.Probe -c Release -- .artifacts/legacy-source-identifier-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/LegacyDictionarySymbolPreparation.Probe/reference_controls.py .artifacts/legacy-dictionary-symbol-controls.json
+          dotnet run --project tools/LegacyDictionarySymbolPreparation.Probe -c Release -- .artifacts/legacy-dictionary-symbol-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res
           dotnet run --project tools/LegacySamplerGroupPruning.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-separation-profile.json .artifacts/legacy-sampler-group-pruning-managed-audit.json
           python tools/LegacySamplerGroupPruning.Probe/audit_output.py .artifacts/legacy-sampler-group-pruning-managed-audit.json
           python tools/LegacyFreshMainLine.Probe/reference_controls.py .artifacts/legacy-fresh-main-line-controls.json
@@ -477,6 +479,8 @@ jobs:
           python tools/LegacyFreshMainPostprocessing.Probe/audit_output.py .artifacts/legacy-fresh-main-postprocessing-managed-audit.json
           dotnet run --project tools/LegacyFreshMainSampler.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-fresh-main-sampler-managed-audit.json
           python tools/LegacyFreshMainSampler.Probe/audit_output.py .artifacts/legacy-fresh-main-sampler-managed-audit.json
+          dotnet run --project tools/LegacyFreshMainAcoustic.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-fresh-main-acoustic-managed-audit.json
+          python tools/LegacyFreshMainAcoustic.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json .artifacts/legacy-fresh-main-acoustic-managed-audit.json
           dotnet run --project tools/LegacyFirstSourceMaterialization.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-first-source-materialization-managed-audit.json
           python tools/LegacyFirstSourceMaterialization.Probe/reference_controls.py .artifacts/legacy-first-source-materialization-managed-audit.json
           python tools/LegacyGraphSourceRanges.Probe/reference_controls.py .artifacts/legacy-graph-source-controls.json
@@ -817,10 +821,12 @@ jobs:
             @{ Name = 'LegacyFirstLiteralGlyph'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', '.artifacts/legacy-first-literal-glyph-controls.json', 'models/ru-RU/legacy-engine-profile.json') },
             @{ Name = 'LegacyFirstPrimitiveWord'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-first-primitive-native-captures.json') },
             @{ Name = 'LegacySourceIdentifier'; Args = @('.artifacts/legacy-source-identifier-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyDictionarySymbolPreparation'; Args = @('.artifacts/legacy-dictionary-symbol-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res') },
             @{ Name = 'LegacySamplerGroupPruning'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-sampler-group-pruning-native-audit.json') },
             @{ Name = 'LegacyFreshMainLine'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-fresh-main-line-controls.json', '.artifacts/legacy-fresh-main-line-native-audit.json') },
             @{ Name = 'LegacyFreshMainPostprocessing'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-fresh-main-postprocessing-native-audit.json') },
             @{ Name = 'LegacyFreshMainSampler'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-fresh-main-sampler-native-audit.json') },
+            @{ Name = 'LegacyFreshMainAcoustic'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-fresh-main-acoustic-native-audit.json') },
             @{ Name = 'LegacyFirstSourceMaterialization'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-first-source-materialization-native-audit.json') },
             @{ Name = 'LegacyGraphSourceRanges'; Args = @('.artifacts/legacy-graph-source-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', '.artifacts/legacy-graph-source-native-audit.json') },
             @{ Name = 'LegacySourceEndingMetadata'; Args = @('.artifacts/legacy-source-ending-metadata-controls.json') },
@@ -912,6 +918,10 @@ jobs:
             }
             if ($name -eq 'LegacyFirstPrimitiveWord') {
               python tools/LegacyFirstPrimitiveWord.Probe/audit_contexts.py .artifacts/legacy-first-primitive-native-captures.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+            if ($name -eq 'LegacyFreshMainAcoustic') {
+              python tools/LegacyFreshMainAcoustic.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json .artifacts/legacy-fresh-main-acoustic-native-audit.json
               if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             }
           }
