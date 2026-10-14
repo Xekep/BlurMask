@@ -71,11 +71,21 @@ public sealed class LegacyNativePlainWordPublisher
     public LegacyNativePublishedWordNode Publish(LegacyNativeWordBuilder actualWord,
         Func<int,ushort,int> actualFirstBoundary,Func<int,ushort,int> actualLastBoundary,
         CancellationToken cancellationToken=default)
+        =>Publish(actualWord,actualFirstBoundary,actualLastBoundary,-1,-1,cancellationToken);
+
+    /// <summary>1416b0 param7 replaces Word40's first scalar, param8 its last,
+    /// each only when not-1. These are native span fields, not guessed source
+    /// points. Both callbacks still execute before the native overrides.</summary>
+    public LegacyNativePublishedWordNode Publish(LegacyNativeWordBuilder actualWord,
+        Func<int,ushort,int> actualFirstBoundary,Func<int,ushort,int> actualLastBoundary,
+        int actualFirstOverride,int actualLastOverride,CancellationToken cancellationToken=default)
     {
         ArgumentNullException.ThrowIfNull(actualWord);cancellationToken.ThrowIfCancellationRequested();
         if(!ReferenceEquals(actualWord.Pool,pool))throw new ArgumentException("Word and publisher must use the same TOP273 glyph pool.");
         if(nodeCount==4096)throw new ArgumentException("Published word nodes exceed the portable4096-node budget.");
         var span=actualWord.GetSourceSpan(actualFirstBoundary,actualLastBoundary,cancellationToken);
+        if(actualFirstOverride!=-1)span=span with {First=actualFirstOverride};
+        if(actualLastOverride!=-1)span=span with {Last=actualLastOverride};
         var chain=actualWord.CopyChain(cancellationToken);
         spans.TryGetValue(span,out var words);
         int index=-1;

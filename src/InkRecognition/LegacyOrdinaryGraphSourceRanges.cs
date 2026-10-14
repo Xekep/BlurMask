@@ -11,6 +11,8 @@ public sealed class LegacyOrdinaryGraphSourceRanges
     private readonly LegacyOrdinarySourceInk original;
     private readonly LegacySourcePointKey[] keys;
     public LegacyOrdinaryCursiveCandidateGraph Graph { get; }
+    internal LegacySourcePointChronology PreparedChronology=>prepared;
+    internal LegacyOrdinarySourceInk OriginalSource=>original;
 
     private LegacyOrdinaryGraphSourceRanges(LegacyOrdinaryCursiveSeedResult seeds,
         LegacyOrdinaryCursiveSeedGraph seedGraph, LegacyOrdinaryCursiveCandidateGraph graph,

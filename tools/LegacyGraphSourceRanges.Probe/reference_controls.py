@@ -16,13 +16,18 @@ if not a.audit:
                 if points and rng.randrange(3)==0:point=points[-1].copy()
                 points.append(point)
             raw.append(points)
-        cases.append(dict(raw=raw))
+        cases.append(dict(raw=raw,reorder=False,shift=0))
+    for i in range(64):
+        positions=[0,200,400,70+i%20,95+i%13]
+        raw=[[[x,10],[x+10,35],[x+20,75],[x+10,90]]for x in positions]
+        cases.append(dict(raw=raw,reorder=True,shift=1))
     pathlib.Path(a.path).write_text(json.dumps(dict(cases=cases)),encoding='utf-8')
-    print('Generated512 independent raw graph callback inputs')
+    print('Generated512 independent raw inputs and64 interacting deferred graph inputs')
 else:
-    query_count=0;merged=0;tail_differences=0
+    query_count=0;merged=0;tail_differences=0;branch_cases=0
     for case in json.loads(pathlib.Path(a.path).read_text(encoding='utf-8')):
         nodes=case['nodes'];seeds=case['seeds'];metadata=case['metadata'];keys=case['keys']
+        branch_cases+=any(len(node)>1 for node in nodes)
         def visit(node,ordinal,target):
             group,start,end,children=nodes[node][ordinal]
             if target<end:return None
@@ -58,5 +63,5 @@ else:
             result=[[r['first'][0],r['last'][1 if r['tail'] else 0]]for r in rows]
             assert result==query['ranges'],(result,query['ranges'])
             query_count+=1
-    assert query_count>1000 and merged>0 and tail_differences>0
-    print(f'PASS independent recursive21B forward-path oracle/{query_count} callbacks/{merged} exact reverse merges/{tail_differences} duplicate-tail key differences')
+    assert query_count>1000 and merged>0 and tail_differences>0 and branch_cases>=64
+    print(f'PASS independent recursive21B forward-path oracle/{query_count} callbacks/{merged} exact reverse merges/{tail_differences} duplicate-tail key differences/{branch_cases} interacting deferred graphs')

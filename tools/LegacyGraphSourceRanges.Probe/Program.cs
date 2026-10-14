@@ -14,7 +14,7 @@ foreach(var c in controls.RootElement.GetProperty("cases").EnumerateArray())
     var markers=new List<LegacyCursiveCutMarker>();
     for(int s=0;s<counts.Length;s++){markers.Add(new(0,s,0));if(counts[s]>2)markers.Add(new(0,s,counts[s]/2));}
     var cuts=new LegacyCursiveCutResult(ink,markers.ToArray(),LegacyCursiveInkAtoms.Build(counts,markers.ToArray()));
-    var seeds=LegacyOrdinaryCursiveSeedProducer.GenerateLeftToRight(cuts,80,new(false,0,.3f,.3f),new byte[counts.Length],Enumerable.Repeat(-1,counts.Length).ToArray());
+    var seeds=LegacyOrdinaryCursiveSeedProducer.GenerateLeftToRight(cuts,80,new(c.GetProperty("reorder").GetBoolean(),c.GetProperty("shift").GetByte(),.3f,.3f),new byte[counts.Length],Enumerable.Repeat(-1,counts.Length).ToArray());
     Inspect(seeds,chronology,original,3);cases++;
 }
 foreach(float scale in new[]{.5f,1f,2f})foreach(float shift in new[]{-70f,0f,130f})foreach(bool duplicates in new[]{false,true})

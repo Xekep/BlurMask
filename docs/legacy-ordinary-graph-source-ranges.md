@@ -15,9 +15,9 @@ can merge adjacent physical strokes into one inclusive source range.
 
 The independent Python auditor implements recursive graph search, a bubble
 comparator and reverse coalescing. Managed code uses an iterative search and
-stable sorting. It checks 5,831 callbacks from 512 independently generated
-raw inputs and 18 actual Russian resource/frame/cut cases, including duplicate
-points: 5,289 merges and 2,296 different duplicate-tail keys. Native AOT runs
+stable sorting. It checks 10,887 callbacks from 512 independently generated
+raw inputs, 64 interacting deferred graphs and 18 actual Russian resource/frame/cut cases, including duplicate
+points: 8,669 merges and 2,296 different duplicate-tail keys. Native AOT runs
 the same inputs and exports a separate audit for independent verification.
 
 The static auditor pins the Text binary SHA-256 and five callback bindings.

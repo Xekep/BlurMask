@@ -444,6 +444,19 @@ jobs:
           dotnet run --project tools/LegacyWordSymbolQualification.Probe -c Release -- .artifacts/legacy-word-symbol-qualification-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           python tools/LegacyOrdinaryWordStartup.Probe/reference_controls.py .artifacts/legacy-ordinary-word-startup-controls.json
           dotnet run --project tools/LegacyOrdinaryWordStartup.Probe -c Release -- .artifacts/legacy-ordinary-word-startup-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyFirstPlainWord.Probe/reference_controls.py .artifacts/legacy-first-plain-word-controls.json
+          dotnet run --project tools/LegacyFirstPlainWord.Probe -c Release -- .artifacts/legacy-first-plain-word-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacySourceAlphabetLookup.Probe/reference_controls.py .artifacts/legacy-source-alphabet-lookup-controls.json
+          dotnet run --project tools/LegacySourceAlphabetLookup.Probe -c Release -- .artifacts/legacy-source-alphabet-lookup-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/LegacyWordAlternativeCandidates.Probe/reference_controls.py .artifacts/legacy-word-alternative-candidates-controls.json
+          dotnet run --project tools/LegacyWordAlternativeCandidates.Probe -c Release -- .artifacts/legacy-word-alternative-candidates-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyStoredWordCompaction.Probe/reference_controls.py .artifacts/legacy-stored-word-compaction-controls.json
+          dotnet run --project tools/LegacyStoredWordCompaction.Probe -c Release -- .artifacts/legacy-stored-word-compaction-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyFreshMainLine.Probe/reference_controls.py .artifacts/legacy-fresh-main-line-controls.json
+          dotnet run --project tools/LegacyFreshMainLine.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-fresh-main-line-controls.json .artifacts/legacy-fresh-main-line-managed-audit.json
+          python tools/LegacyFreshMainLine.Probe/reference_controls.py --audit .artifacts/legacy-fresh-main-line-managed-audit.json
+          dotnet run --project tools/LegacyFirstSourceMaterialization.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-first-source-materialization-managed-audit.json
+          python tools/LegacyFirstSourceMaterialization.Probe/reference_controls.py .artifacts/legacy-first-source-materialization-managed-audit.json
           python tools/LegacyGraphSourceRanges.Probe/reference_controls.py .artifacts/legacy-graph-source-controls.json
           dotnet run --project tools/LegacyGraphSourceRanges.Probe -c Release -- .artifacts/legacy-graph-source-controls.json models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-graph-source-managed-audit.json
           python tools/LegacyGraphSourceRanges.Probe/reference_controls.py --audit .artifacts/legacy-graph-source-managed-audit.json
@@ -770,6 +783,12 @@ jobs:
             @{ Name = 'LegacyFirstGlyphScoreProducer'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', '.artifacts/legacy-first-glyph-score-native-audit.json') },
             @{ Name = 'LegacyWordSymbolQualification'; Args = @('.artifacts/legacy-word-symbol-qualification-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyOrdinaryWordStartup'; Args = @('.artifacts/legacy-ordinary-word-startup-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyFirstPlainWord'; Args = @('.artifacts/legacy-first-plain-word-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacySourceAlphabetLookup'; Args = @('.artifacts/legacy-source-alphabet-lookup-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyWordAlternativeCandidates'; Args = @('.artifacts/legacy-word-alternative-candidates-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyStoredWordCompaction'; Args = @('.artifacts/legacy-stored-word-compaction-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyFreshMainLine'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-fresh-main-line-controls.json', '.artifacts/legacy-fresh-main-line-native-audit.json') },
+            @{ Name = 'LegacyFirstSourceMaterialization'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-first-source-materialization-native-audit.json') },
             @{ Name = 'LegacyGraphSourceRanges'; Args = @('.artifacts/legacy-graph-source-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', '.artifacts/legacy-graph-source-native-audit.json') },
             @{ Name = 'LegacySourceEndingMetadata'; Args = @('.artifacts/legacy-source-ending-metadata-controls.json') },
             @{ Name = 'LegacyWordBuilder'; Args = @('.artifacts/legacy-word-builder-controls.json') },
@@ -824,6 +843,14 @@ jobs:
             }
             if ($name -eq 'LegacyFirstTransition') {
               python tools/LegacyFirstTransition.Probe/reference_controls.py --audit .artifacts/legacy-first-transition-native-actual.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+            if ($name -eq 'LegacyFreshMainLine') {
+              python tools/LegacyFreshMainLine.Probe/reference_controls.py --audit .artifacts/legacy-fresh-main-line-native-audit.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+            if ($name -eq 'LegacyFirstSourceMaterialization') {
+              python tools/LegacyFirstSourceMaterialization.Probe/reference_controls.py .artifacts/legacy-first-source-materialization-native-audit.json
               if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             }
             if ($name -eq 'LegacyGraphSourceRanges') {
