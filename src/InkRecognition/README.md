@@ -550,3 +550,9 @@ context API consumes this policy directly. The
 expands prepared glyph records and preserves raw bytes from their distinct
 alphabet owners, before the remaining native canonical/circled processing.
 These additions do not complete the main word decoder or handwriting accuracy.
+
+The [portable native Unicode scalar data](../../docs/legacy-native-unicode-normalization-data.md)
+now supplies exact combining-class coverage, canonical mappings and composition
+pairs from a checked standalone model. Public Unicode9 references independently
+verify all assigned classes and eligible pairs; native gap/exception behavior
+is retained. This data is preparatory to the still-unfinished stream normalizer.

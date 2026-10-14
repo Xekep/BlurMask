@@ -68,3 +68,10 @@ Known-word native lexical costs are available with explicit profiles and flags.
 See [portable Russian model loading](../docs/legacy-russian-model-bundle.md).
 See [the Russian word diagnostic](../docs/legacy-russian-directional-words.md) and
 [Raw Content installation](../docs/raw-content-engine.md).
+
+[text-unicode/legacy-normalization-data.json](text-unicode/legacy-normalization-data.json)
+is the portable default Unicode9 scalar table for native combining classes,
+canonical decomposition and composition. It is fingerprinted in the model
+manifest and read without a vendor DLL. Full stream ordering, marker handling
+and accepted text publication remain separate. See
+[normalization data](../docs/legacy-native-unicode-normalization-data.md).

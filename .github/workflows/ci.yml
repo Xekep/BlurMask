@@ -423,6 +423,8 @@ jobs:
           python tools/LegacyFirstTransition.Probe/reference_controls.py .artifacts/legacy-first-transition-controls.json
           dotnet run --project tools/LegacyFirstTransition.Probe -c Release -- .artifacts/legacy-first-transition-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-first-transition-actual.json
           python tools/LegacyFirstTransition.Probe/reference_controls.py --audit .artifacts/legacy-first-transition-actual.json
+          python tools/handwriting/fetch_unicode9_reference_data.py .artifacts/unicode9-reference
+          dotnet run --project tools/LegacyUnicodeNormalizationData.Probe -c Release -- models/text-unicode/legacy-normalization-data.json .artifacts/unicode9-reference/UnicodeData.txt .artifacts/unicode9-reference/DerivedNormalizationProps.txt
           python tools/LegacyGlyphUtf8Tokens.Probe/reference_controls.py .artifacts/legacy-glyph-utf8-controls.json
           dotnet run --project tools/LegacyGlyphUtf8Tokens.Probe -c Release -- .artifacts/legacy-glyph-utf8-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
           dotnet run --project tools/LegacyFreshFirstTextPolicy.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res
@@ -713,6 +715,7 @@ jobs:
             @{ Name = 'LegacyFirstRecurrence'; Args = @('.artifacts/legacy-first-recurrence-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyFirstShortlist'; Args = @('.artifacts/legacy-first-shortlist-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyFirstTransition'; Args = @('.artifacts/legacy-first-transition-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-first-transition-native-actual.json') },
+            @{ Name = 'LegacyUnicodeNormalizationData'; Args = @('models/text-unicode/legacy-normalization-data.json', '.artifacts/unicode9-reference/UnicodeData.txt', '.artifacts/unicode9-reference/DerivedNormalizationProps.txt') },
             @{ Name = 'LegacyGlyphUtf8Tokens'; Args = @('.artifacts/legacy-glyph-utf8-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyFreshFirstTextPolicy'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyFirstContextPass'; Args = @('.artifacts/legacy-first-context-pass-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
