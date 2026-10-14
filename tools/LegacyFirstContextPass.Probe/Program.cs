@@ -1,4 +1,5 @@
 using InkRecognition;
+using System.Buffers.Binary;
 using System.Text.Json;
 if(args.Length is not (1 or 4))throw new ArgumentException("Usage: LegacyFirstContextPass.Probe controls.json [ru-ak.res engine-profile.json separation-profile.json]");
 using var doc=JsonDocument.Parse(File.ReadAllBytes(args[0]));var alphabet=OwnAlphabet();int cases=0,totalCells=0;
@@ -104,6 +105,24 @@ if(args.Length==4)
   LegacyFirstOrdinaryTransitionResult Apply118(LegacyFirstOrdinaryTransitionRequest r,int incoming,CancellationToken token){var v=geometry.Correct118(r,incoming,token);calls.Add((118,r,incoming,v));return v;}
   LegacyFirstOrdinaryTransitionResult Apply140(LegacyFirstOrdinaryTransitionRequest r,int incoming,CancellationToken token){var v=geometry.Correct140(r,incoming,token);calls.Add((140,r,incoming,v));return v;}
   var contexts=LegacyFirstOrdinaryContextPasses.Run(recurrence,links,scorer.Alphabet,nativeCost,Apply118,Apply140,1,1,mode,new());
+  var selectedPolicy=LegacyFreshFirstTextContextPolicy.ReadForFreshSelectedChild(bytes,6120);
+  if(mode==selectedPolicy.NativeModeE0)
+  {
+   var automatic=LegacyFirstOrdinaryContextPasses.RunForFreshSelectedChild(recurrence,links,selectedPolicy,nativeCost,geometry.Correct118,geometry.Correct140,new());
+   foreach(bool merged in new[]{false,true})
+   {
+    var expected=merged?contexts.CopyB8Storage():contexts.CopyB0Storage();var actual=merged?automatic.CopyB8Storage():automatic.CopyB0Storage();
+    if(expected.Length!=actual.Length)throw new Exception("Automatic selected-child policy changed node ownership.");
+    for(int node=0;node<expected.Length;node++)for(int offset=0;offset<expected[node].Length;offset+=40)
+    {
+     if(!expected[node].Span.Slice(offset,24).SequenceEqual(actual[node].Span.Slice(offset,24))||!expected[node].Span.Slice(offset+32,8).SequenceEqual(actual[node].Span.Slice(offset+32,8)))
+      throw new Exception("Automatic owned E0/cap/alphabet binding changed audited full B0/B8 scalar/metadata fields.");
+     if(BinaryPrimitives.ReadInt32LittleEndian(expected[node].Span[offset..])<0x4000000&&!Sequence(contexts.Contexts,BinaryPrimitives.ReadUInt64LittleEndian(expected[node].Span[(offset+24)..])).SequenceEqual(Sequence(automatic.Contexts,BinaryPrimitives.ReadUInt64LittleEndian(actual[node].Span[(offset+24)..]))))
+      throw new Exception("Automatic context IDs no longer resolve to their actual symbol paths.");
+    }
+   }
+   Console.WriteLine("PASS automatic NEW selected-child policy -> B0/B8 equals independently audited native mode; stable context IDs remain container-owned. Not automatic text/math recognition.");
+  }
   var finalNode=graph.NodeCount-1;int finite=0;var outputs=new List<string>();
   for(int i=0;i<contexts.BeamWidth;i++)
   {

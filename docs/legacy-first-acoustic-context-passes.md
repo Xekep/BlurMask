@@ -81,7 +81,7 @@ The five final B8 diagnostic paths are the same for both explicit modes:
 `MИP:41268`, `Mrrp:42211`, `Mrrro:43748`, `Mrrр:44513`, `MlТ:45221`.
 These remain mixed-script acoustic alternatives. They are not returned as
 the application's Russian result; native terminal273 materialization and
-the genuine239/240 linguistic stage remain separate. A synthetic printed
+the genuine main240 linguistic stage remain separate. A synthetic printed
 fixture is not a representative cursive accuracy assessment.
 
 ```powershell
@@ -94,3 +94,13 @@ python tools/LegacyFirstContextPass.Probe/reference_controls.py --audit D:/contr
 The optional actual mode writes private captures next to the controls file:
 complete B8 and B0 buffers, primary records, callbacks, graph lists and portable
 symbol-context mappings. No vendor DLL is loaded or executed.
+
+`RunForFreshSelectedChild` additionally accepts the owned
+`LegacyFreshFirstTextContextPolicy`. It uses that policy's alphabet, column
+caps and proved E0 choice without a caller mode switch. The actual prepared
+MIR fixture matches the independently audited explicit-mode scalar/metadata
+fields and every finite symbol-context path in both B0 and B8. Stable numeric
+context IDs remain separate per-container identities. This convenience entry
+point retains the same plain-label scope; it is not automatic text/math
+classification or the main linguistic recognizer. Invocation score flagA8
+still requires the actual source-frame150 flag and is not guessed here.

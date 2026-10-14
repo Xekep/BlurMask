@@ -25,6 +25,20 @@ public sealed class LegacyFirstOrdinaryContextPasses
     public ReadOnlyMemory<byte>[] CopyB0Storage()=>Storage(b0,ColumnCountB0);
     public ReadOnlyMemory<byte>[] CopyB8Storage()=>Storage(b8,ColumnCountB8);
 
+    /// <summary>Plain-label context passes for the proved NEW selected-child binding.
+    /// E0, column counts and alphabet come from its owned policy. This does not
+    /// select text versus mathematics or run the main linguistic controller.</summary>
+    public static LegacyFirstOrdinaryContextPasses RunForFreshSelectedChild(
+        LegacyFirstOrdinaryAcousticRecurrence primary, LegacyOrdinaryCandidateConnections connections,
+        LegacyFreshFirstTextContextPolicy policy, LegacyFirstOrdinaryGlyphCost glyphCost,
+        LegacyFirstOrdinaryTransitionCorrection correction118, LegacyFirstOrdinaryTransitionCorrection correction140,
+        LegacySymbolContextFactory contexts, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(policy);
+        return Run(primary, connections, policy.Alphabet, glyphCost, correction118, correction140,
+            policy.ContextColumnsA2, policy.MergedColumnsA4, policy.NativeModeE0, contexts, cancellationToken);
+    }
+
     public static LegacyFirstOrdinaryContextPasses Run(LegacyFirstOrdinaryAcousticRecurrence primary,
         LegacyOrdinaryCandidateConnections connections,LegacyInkAlphabet ownedAlphabet,
         LegacyFirstOrdinaryGlyphCost glyphCost,LegacyFirstOrdinaryTransitionCorrection correction118,

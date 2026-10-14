@@ -540,3 +540,13 @@ but full frontend callbacks and lexical scheduling remain explicit inputs.
 The [final scalar publication](../../docs/legacy-first-result-score-publication.md)
 preserves the native pairwise first-anchor comparisons and acoustic expf.
 These checked stages still do not establish final Russian/English accuracy.
+
+The [fresh selected-child context policy](../../docs/legacy-fresh-first-text-context-policy.md)
+now proves preserved C4 through the new child configuration's complete binding
+chain, selects first E0 from the typed source and exact alphabet, and separates
+binding-time A8 from the source-frame flag copied at invocation. The scoped
+context API consumes this policy directly. The
+[glyph token/UTF8 producer](../../docs/legacy-native-glyph-utf8-tokens.md)
+expands prepared glyph records and preserves raw bytes from their distinct
+alphabet owners, before the remaining native canonical/circled processing.
+These additions do not complete the main word decoder or handwriting accuracy.
