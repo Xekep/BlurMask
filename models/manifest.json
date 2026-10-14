@@ -113,8 +113,8 @@
     },
     {
       "path": "text-unicode/legacy-case-data.json",
-      "bytes": 39489,
-      "sha256": "2d7b408d42fa2c12245fb707bd3004081da91efd6553065af0edc0482808eb44"
+      "bytes": 35482,
+      "sha256": "0a7a5dbf1f6e5c97c860e4b13a5f7533b6e766be92487fa43142a8817e14c3e9"
     }
   ]
 }

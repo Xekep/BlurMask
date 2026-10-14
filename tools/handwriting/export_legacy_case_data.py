@@ -81,7 +81,8 @@ def main():
     result['genericVariantDifferencesFromSimpleCasing'] = differences
     result['casePresenceDifferencesFromUnicodeReference'] = presence_differences
     args.output.parent.mkdir(parents=True,exist_ok=True)
-    args.output.write_text(json.dumps(result,indent=2)+'\n',encoding='utf8')
+    #The manifest hashes wire bytes, so output must not depend on host newline translation.
+    args.output.write_bytes((json.dumps(result,indent=2)+'\n').encode('utf8'))
     print(f'READ {compared} public reference records; {len(presence_differences)} presence differences retained; {len(differences)} variant/simple-triple differences retained, native130 special rows, SHA {result["tableSha256"]}. Contextual matching/case292 remain separate.')
 
 if __name__ == '__main__': main()
