@@ -101,6 +101,54 @@ internal static class ActualStartup
                 Require(row.Record.Span[..60].SequenceEqual(slot.Span[..60]), "Qualified native startup row changed in materialization.");
             }
         Require(queried > 0 && qualified > 0 && accepted > 0 && stored > 0, "Actual qualifier/query/cache/writer pipeline emitted no native rows.");
+        //Original scalar control: request starts with query37, native class
+        //cache321 and geometry0, so every accepted acoustic candidate costs358.
+        //This isolates the native routine's success from its heap acceptance.
+        ushort flatSymbol = 0, flatLexical = 0;
+        int flatNode = 0;
+        Require(model.AcousticAlphabet.TryGetLabel("м", out flatSymbol) &&
+            model.LexicalAlphabet.TryGetLabel("м", out flatLexical) &&
+            model.Lexicon.TryAdvance(0, flatLexical, out flatNode), "Actual Russian root label missing.");
+        byte[] flatQuery = new byte[32];
+        BinaryPrimitives.WriteUInt64LittleEndian(flatQuery, (uint)flatNode | 1UL << 32);
+        BinaryPrimitives.WriteUInt64LittleEndian(flatQuery.AsSpan(8), contexts.ResolveInitial(flatSymbol).Identity);
+        BinaryPrimitives.WriteInt32LittleEndian(flatQuery.AsSpan(16), 37);
+        BinaryPrimitives.WriteUInt16LittleEndian(flatQuery.AsSpan(20), flatSymbol);
+        var flatCosts = new LegacyNativeWordAcousticGroupCosts(
+            Enumerable.Repeat(321, model.AcousticAlphabet.LabelCount + 3).ToArray(), new int[35]);
+        var flatQualifier = new LegacyNativeWordSymbolQualifier(model.AcousticAlphabet.LabelCount, [flatCosts]);
+        int budgetControls = 0;
+        foreach (int delta in new[] { -1, 0, 1 })
+        {
+            var output = new LegacyNativeWordRecordHeap(1);
+            byte[] sentinel = Enumerable.Range(0, 128).Select(i => (byte)(i ^ 0xb7)).ToArray();
+            BinaryPrimitives.WriteInt32LittleEndian(sentinel.AsSpan(16), 358 + delta);
+            Require(output.TryAllocate(358 + delta, slot => sentinel.CopyTo(slot)), "Control heap seed failed.");
+            var boundedRouter = new LegacyNativeWordHeapRouter([output, new(0)], new byte[] { 0, 0 }, 0, uint.MaxValue);
+            var target = new LegacyNativeOrdinaryWordStartup(graph, model.AcousticAlphabet, model.CursiveCategoryProfiles[1],
+                contexts, scorer, new(0x1122334455667788, 0), new byte[80]);
+            var result = target.ProcessPage(flatQuery, (ushort)node, (byte)node, 0, flatQualifier,
+                new Dictionary<byte, uint> { [1] = descriptor.Flags }, (_, _) => flatCosts, boundedRouter,
+                0, false, 0, true, false, null);
+            Require(result.Succeeded && result.ScoringCalls > 0 && result.AcceptedAllocations == (delta > 0 ? 1 : 0),
+                "Independent358 strict/equal/loose startup heap decision aborted or accepted incorrectly.");
+            Require(delta > 0 ? BinaryPrimitives.ReadInt32LittleEndian(output.GetSlotSnapshot(0).Span[16..]) == 358
+                : output.GetSlotSnapshot(0).Span.SequenceEqual(sentinel), "Rejected startup altered complete128 storage.");
+            var repeated = target.ProcessPage(flatQuery, (ushort)node, (byte)node, 0, flatQualifier,
+                new Dictionary<byte, uint> { [1] = descriptor.Flags }, (_, _) => flatCosts, boundedRouter,
+                0, false, 0, true, false, null);
+            Require(repeated.Succeeded && repeated.AcceptedAllocations == 0,
+                "Repeated budget rejection invalidated the ordinary startup producer.");
+            budgetControls++;
+        }
+        var noSlotsTarget = new LegacyNativeOrdinaryWordStartup(graph, model.AcousticAlphabet, model.CursiveCategoryProfiles[1],
+            contexts, scorer, new(0x1122334455667788, 0), new byte[80]);
+        var noSlotsRouter = new LegacyNativeWordHeapRouter([new(0), new(0)], new byte[] { 0, 0 }, 0, uint.MaxValue);
+        var noSlots = noSlotsTarget.ProcessPage(flatQuery, (ushort)node, (byte)node, 0, flatQualifier,
+            new Dictionary<byte, uint> { [1] = descriptor.Flags }, (_, _) => flatCosts, noSlotsRouter,
+            0, false, 0, true, false, null);
+        Require(noSlots.Succeeded && noSlots.AcceptedAllocations == 0, "Zero-capacity startup rejection became native failure.");
+        Console.WriteLine($"PASS{budgetControls} independent358 strict/equal/loose startup full128 heaps, repeated reuse and zero capacity.");
         Console.WriteLine($"ACTUAL RU {prepared.PermissionPass.SelectedRows.Count} native selected NN/cache rows ({computed} initial computations), " +
             $"{pages} permission-filtered query pages / {queried} query labels / {qualified} frontend110 qualifiers / {acousticCalls} exact128 calls / {accepted} accepted / {stored} materialized heap rows PASS. " +
             "Guide/cache policy, source headers and main source frame remain explicit; writer fields now come from the checked ordinary startup branch; scheduler unfinished; no native winner or acceptance confidence claim.");

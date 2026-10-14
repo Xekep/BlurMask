@@ -62,6 +62,26 @@ if(mainScorer.Policy.FrontendFlags!=0x21400||mainScorer.Policy.MaximumSourceArcs
 short[] Calibration(string part,string field)=>engine.RootElement.GetProperty(part).GetProperty(field).EnumerateArray().Select(v=>v.GetInt16()).ToArray();
 var temporalMin=Calibration("temporal","minima");var temporalMax=Calibration("temporal","maxima");var spatialMin=Calibration("spatial","minima");var spatialMax=Calibration("spatial","maxima");
 var mainScores=Enumerable.Range(0,sampled.SourceRanges.Graph.Groups.Count).Select(g=>mainScorer.Score(g)).ToArray();
+//Actual dictionary/context/language objects also supply the linguistic mask:
+//this control needs neither a fabricated wildcard source nor a success input.
+var ownedDictionary=LegacyOwnedRussianDictionaryPreparation.Prepare(resource,File.ReadAllBytes(args[1]),mainModel,sampled);
+var dictionaryMask=ownedDictionary.CopyMasks();
+if(ownedDictionary.Descriptor.Flags!=0xc0a||ownedDictionary.SelectedSources.Single().Priority!=1024||
+   ownedDictionary.SourceSummary.Flags!=2||!ownedDictionary.CopySourceHeaders().SequenceEqual(new uint[]{0,0xc0a})||
+   !ownedDictionary.WordMetadata.IsForModel(mainModel)||!ownedDictionary.LanguageRecords.IsForModel(mainModel)||
+   dictionaryMask.Primary.Span.Count((byte)1)!=145)throw new Exception("Actual owned RU dictionary/mask/header/profile chain differs.");
+var ownedDictionaryScore=ownedDictionary.CreateAcousticScorer(resource).Score(0);
+for(int symbol=0;symbol<180;symbol++)if(dictionaryMask.Primary.Span[symbol]==0&&
+   (ownedDictionaryScore.Glyph.IntegerCosts.Span[symbol]!=0x4000000||ownedDictionaryScore.Cache.Costs.Span[symbol]!=0x4000000))
+   throw new Exception("Dictionary mask was not consumed by main integer/cache channels.");
+for(int family=0;family<4;family++)if(!ownedDictionaryScore.Glyph.Scores.FamilyProbabilities[family]!.Value.Span.SequenceEqual(mainScores[0].Glyph.Scores.FamilyProbabilities[family]!.Value.Span))
+   throw new Exception("Dictionary restriction changed the underlying NN probabilities.");
+var ownedQuery=new LegacyPreparedDictionaryQuery{Node=0,Capacity=256,ContextRoot=ownedDictionary.Contexts.ContainerIdentity};
+var ownedPage=ownedDictionary.DictionaryQueries.Read(8UL<<40,ownedQuery);
+if(ownedPage.ReturnedCount!=132||Enumerable.Range(0,132).Any(i=>ownedPage.Records.Span[i*32+4]!=1))
+   throw new Exception("Owned source selection/aggregate query did not stamp actual source1.");
+Reject(()=>LegacyOwnedRussianDictionaryPreparation.Prepare(resource,File.ReadAllBytes(args[1]),mainModel,sampled,new CancellationToken(true)));
+Console.WriteLine("PASS actual139 lexical/context maps +profile2 ->source1 C0A/implicit0 ->145-label dictionary mask ->owned main NN/integer/cache;132 aggregate root records. Native controller factory/decorator query/scheduler excluded.");
 if(mainScores.Any(s=>s.Glyph.Scores.FamilyProbabilities.Take(4).Any(p=>p is null)||s.Glyph.Scores.FamilyProbabilities.Skip(4).Any(p=>p is not null)||s.Cache.Costs.Length!=195||s.Context.Span.ToArray().Any(v=>v!=-1024)))throw new Exception("Actual four-family/main cache context differs.");
 var restrictedPrimary=mainMask.Primary.ToArray();restrictedPrimary[107]=0;
 var restricted=LegacyPreparedFreshMain240AcousticScorer.Prepare(resource,mainModel,sampled,new(restrictedPrimary,mainMask.Secondary));

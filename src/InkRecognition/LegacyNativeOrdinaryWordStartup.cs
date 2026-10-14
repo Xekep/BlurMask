@@ -63,7 +63,8 @@ public sealed class LegacyNativeOrdinaryWordStartup
     /// not enable1f7080. SuppressHeaderFlag22f7, permission2309, secondary
     /// heap scale and suppressPreviousContext2609 are explicit controller fields.
     /// Source headers are indexed by real aggregate source ID(tag byte04), not
-    /// a fabricated source ordinal. The normal router stops on allocation failure.
+    /// a fabricated source ordinal. Ordinary heap-budget rejection skips a
+    /// candidate: nontracing1f8d60 still returns native success without a slot.
     /// </summary>
     public LegacyNativeOrdinaryWordStartupResult ProcessPage(ReadOnlySpan<byte> queryRecords32,
         ushort endingNode, byte sourceSpan, ushort inputFlags,
@@ -159,8 +160,7 @@ public sealed class LegacyNativeOrdinaryWordStartup
                     var allocation = router.TryInsertInitialRecord(sourceId, false, fields, secondaryScale,
                         suppressPreviousContext2609, cancellationToken: cancellationToken);
                     cancellationToken.ThrowIfCancellationRequested();
-                    if (!allocation.Accepted) return new(false, visited, qualified, calls, accepted);
-                    accepted++;
+                    if (allocation.Accepted) accepted++;
                 }
             }
         }

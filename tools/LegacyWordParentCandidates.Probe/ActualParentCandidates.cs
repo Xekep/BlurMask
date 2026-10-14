@@ -196,10 +196,43 @@ internal static class ActualParentCandidates
             }, rows: (_, _) => { canceled.Cancel(); return parents[0]; }, token: canceled.Token));
             Reject(() => RunGuard(target, guardQuery, parents[0]));
         }
-        var failed = NewGuard();
-        Require(!RunGuard(failed, guardQuery, parents[0], guardRouter: GuardRouter(0)).Succeeded,
-            "Native parent allocation failure did not stop.");
-        Reject(() => RunGuard(failed, guardQuery, parents[0]));
+        var bounded = NewGuard();
+        var noSlots = RunGuard(bounded, guardQuery, parents[0], guardRouter: GuardRouter(0));
+        Require(noSlots.Succeeded && noSlots.AcceptedAllocations == 0,
+            "Native nontracing parent rejected heap slot must still succeed.");
+        Require(RunGuard(bounded, guardQuery, parents[0]).Succeeded,
+            "Ordinary heap-budget rejection invalidated the parent producer.");
+        //Zero-class/geometry cache leaves the actual118/140 cost cell unchanged
+        //at128. Record that value before allocation to avoid a heap-derived oracle.
+        var expectedCosts = new List<int>();
+        var controlCell = new LegacyNativeWordTransitionCostCell(0x1122334455667788, 0);
+        var controlTarget = new LegacyNativeOrdinaryParentWordCandidates(graph, model.AcousticAlphabet,
+            model.CursiveCategoryProfiles[1], contexts, geometry, scorer, controlCell, new byte[80]);
+        var warmHeap = new LegacyNativeWordRecordHeap(4096);
+        var warmRouter = new LegacyNativeWordHeapRouter([warmHeap, new(0)], new byte[] { 0, 0 }, 0, uint.MaxValue);
+        var warmResult = RunGuard(controlTarget, guardQuery, parents[0], lookup: (_, _) =>
+        { expectedCosts.Add(controlCell.Value); return guardCosts; }, guardRouter: warmRouter);
+        int minimum = expectedCosts.Min();
+        Require(warmResult.Succeeded && warmResult.AcceptedAllocations > 0 &&
+            Enumerable.Range(0, warmHeap.Count).Min(i => BinaryPrimitives.ReadInt32LittleEndian(warmHeap.GetSlotSnapshot(i).Span[16..])) == minimum,
+            "Parent zero-cache acoustic formula differs before heap allocation.");
+        foreach (int delta in new[] { -1, 0, 1 })
+        {
+            var output = new LegacyNativeWordRecordHeap(1);
+            byte[] sentinel = Enumerable.Range(0, 128).Select(i => (byte)(i ^ 0x9d)).ToArray();
+            BinaryPrimitives.WriteInt32LittleEndian(sentinel.AsSpan(16), minimum + delta);
+            Require(output.TryAllocate(minimum + delta, slot => sentinel.CopyTo(slot)), "Parent control seed failed.");
+            var outputRouter = new LegacyNativeWordHeapRouter([output, new(0)], new byte[] { 0, 0 }, 0, uint.MaxValue);
+            var target = NewGuard();
+            var result = RunGuard(target, guardQuery, parents[0], guardRouter: outputRouter);
+            Require(result.Succeeded && (delta > 0 ? result.AcceptedAllocations > 0 : result.AcceptedAllocations == 0),
+                "Parent strict/equal/loose full heap rejection became native failure.");
+            Require(delta > 0 ? BinaryPrimitives.ReadInt32LittleEndian(output.GetSlotSnapshot(0).Span[16..]) == minimum
+                : output.GetSlotSnapshot(0).Span.SequenceEqual(sentinel), "Parent full128 budget result differs.");
+            Require(RunGuard(target, guardQuery, parents[0], guardRouter: outputRouter).Succeeded,
+                "Parent producer invalidated after ordinary budget rejection.");
+        }
+        Console.WriteLine("PASS3 parent preallocation-cost strict/equal/loose full128 heaps and repeated reuse.");
         var mutatedParent = parents[0].ToArray();
         var mutatedQuery = guardQuery.ToArray();
         var ownerHeap = new LegacyNativeWordRecordHeap(16);

@@ -55,8 +55,9 @@ public sealed class LegacyNativeOrdinaryParentWordCandidates
     /// Call only after ApplyContinuation/query preparation accepted this actual
     /// parent row. Ordinary frontend280=false,2601=false and2368=false. Knowledge
     /// F5 and other controller/cache policy values are explicit, never guessed.
-    /// The incoming parent row is copied before callbacks; allocation failure or
-    /// throwing/canceled preparation invalidates this serialized producer.
+    /// The incoming parent row is copied before callbacks. Ordinary heap-budget
+    /// rejection skips that candidate; throwing/canceled preparation invalidates
+    /// this serialized producer.
     /// </summary>
     public LegacyNativeOrdinaryWordStartupResult ProcessPage(ReadOnlySpan<byte> queryRecords32,
         ushort endingNode, byte sourceSpan, int previousEndingNode, ushort previousRowOrdinal,
@@ -156,12 +157,7 @@ public sealed class LegacyNativeOrdinaryParentWordCandidates
                         var allocation = router.TryInsertInitialRecord(sourceId, false, fields, secondaryScale,
                             suppressPreviousContext2609, LookupRow, cancellationToken);
                         cancellationToken.ThrowIfCancellationRequested();
-                        if (!allocation.Accepted)
-                        {
-                            valid = false;
-                            return new(false, visited, qualified, calls, accepted);
-                        }
-                        accepted++;
+                        if (allocation.Accepted) accepted++;
                     }
                 }
             }

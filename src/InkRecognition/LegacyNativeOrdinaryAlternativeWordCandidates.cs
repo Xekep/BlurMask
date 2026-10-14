@@ -174,12 +174,7 @@ public sealed class LegacyNativeOrdinaryAlternativeWordCandidates
                     var allocation = router.TryInsertInitialRecord(sourceId, false, fields, knowledgeScaleEc,
                         suppressPrevious2609, Lookup, cancellationToken);
                     cancellationToken.ThrowIfCancellationRequested();
-                    if (!allocation.Accepted)
-                    {
-                        valid = false;
-                        return new(false, geometryCalls, acousticCalls, allocations);
-                    }
-                    allocations++;
+                    if (allocation.Accepted) allocations++;
                 }
             }
             cancellationToken.ThrowIfCancellationRequested();

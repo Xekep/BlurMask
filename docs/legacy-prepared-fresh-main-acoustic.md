@@ -14,6 +14,12 @@ matching alphabet. Prepared linguistic masks remain mandatory upstream data;
 an all-enabled mask, language restriction, script alias or label correction is
 not synthesized by this component.
 
+The separate [owned dictionary preparation](legacy-owned-russian-dictionary-preparation.md)
+supplies these masks from actual dictionary/context/language objects in an
+additional integration control. The unrestricted FFE3 capture below remains
+the independent NN/cache audit. Neither control claims the complete live240
+factory or a final word winner.
+
 ## Main ownership and native policy
 
 The source resource's **own main** metadata starts572577.00C860's new owner

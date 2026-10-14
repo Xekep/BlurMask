@@ -208,10 +208,10 @@ internal static class ActualAlternativeCandidates
             Func<int, ushort, LegacyNativeWordAcousticGroupCosts>? costs = null,
             Func<int, ushort, ReadOnlyMemory<byte>>? lookup = null, int capacity = 512,
             float ec = 0, bool penalty = false, bool limited = false, CancellationToken token = default,
-            IReadOnlyList<ReadOnlyMemory<byte>>? rows = null)
+            IReadOnlyList<ReadOnlyMemory<byte>>? rows = null, LegacyNativeWordHeapRouter? guardRouter = null)
             => target.ProcessQuery(queryBytes ?? firstQuery!, group ?? firstGroup!, rows ?? secondary, 1, 0, 0, 0,
                 guardQualifier, new Dictionary<byte, uint> { [1] = descriptor.Flags }, costs ?? ((_, _) => guardCosts),
-                lookup ?? ((_, ordinal) => parents[ordinal]), new([new(capacity), new(capacity)], new byte[] { 0, 0 }, 0, uint.MaxValue),
+                lookup ?? ((_, ordinal) => parents[ordinal]), guardRouter ?? new([new(capacity), new(capacity)], new byte[] { 0, 0 }, 0, uint.MaxValue),
                 ec, penalty, limited, false, false, 0, true, false, null, token);
         Reject(() => GuardRun(NewGuard(), new byte[31]));
         Reject(() => GuardRun(NewGuard(), group: firstGroup! with { SmallState21 = 64 }));
@@ -233,10 +233,41 @@ internal static class ActualAlternativeCandidates
                 lookup: (_, ordinal) => { if (!cancelCost) canceled.Cancel(); return parents[ordinal]; }, token: canceled.Token));
             Reject(() => GuardRun(target));
         }
-        var failed = NewGuard();
-        Require(!GuardRun(failed, capacity: 0).Succeeded, "Alternative allocation failure did not stop the producer.");
-        Reject(() => GuardRun(failed));
-        Console.WriteLine($"PASS {guards} alternative consumer ownership, cancellation, unsupported policy and invalidated allocation guards.");
+        var bounded = NewGuard();
+        var noSlots = GuardRun(bounded, capacity: 0);
+        Require(noSlots.Succeeded && noSlots.AcceptedAllocations == 0,
+            "Native nontracing alternative rejected heap slot must still succeed.");
+        Require(GuardRun(bounded).Succeeded, "Ordinary heap-budget rejection invalidated the alternative producer.");
+        var expectedCosts = new List<int>();
+        var controlCell = new LegacyNativeWordTransitionCostCell(0x1122334455667788, 0);
+        var controlTarget = new LegacyNativeOrdinaryAlternativeWordCandidates(graph, model.AcousticAlphabet,
+            model.CursiveCategoryProfiles[1], contexts, geometry, scorer, controlCell, new byte[80]);
+        var warmHeap = new LegacyNativeWordRecordHeap(4096);
+        var warmRouter = new LegacyNativeWordHeapRouter([warmHeap, new(0)], new byte[] { 0, 0 }, 0, uint.MaxValue);
+        var warmResult = GuardRun(controlTarget, costs: (_, _) =>
+        { expectedCosts.Add(controlCell.Value); return guardCosts; }, guardRouter: warmRouter);
+        int minimum = expectedCosts.Min();
+        Require(warmResult.Succeeded && warmResult.AcceptedAllocations > 0 &&
+            Enumerable.Range(0, warmHeap.Count).Min(i => BinaryPrimitives.ReadInt32LittleEndian(warmHeap.GetSlotSnapshot(i).Span[16..])) == minimum,
+            "Alternative zero-cache acoustic formula differs before heap allocation.");
+        foreach (int delta in new[] { -1, 0, 1 })
+        {
+            var budgetHeap = new LegacyNativeWordRecordHeap(1);
+            byte[] sentinel = Enumerable.Range(0, 128).Select(i => (byte)(i ^ 0xd1)).ToArray();
+            BinaryPrimitives.WriteInt32LittleEndian(sentinel.AsSpan(16), minimum + delta);
+            Require(budgetHeap.TryAllocate(minimum + delta, slot => sentinel.CopyTo(slot)), "Alternative control seed failed.");
+            var budgetRouter = new LegacyNativeWordHeapRouter([budgetHeap, new(0)], new byte[] { 0, 0 }, 0, uint.MaxValue);
+            var target = NewGuard();
+            var result = GuardRun(target, guardRouter: budgetRouter);
+            Require(result.Succeeded && (delta > 0 ? result.AcceptedAllocations > 0 : result.AcceptedAllocations == 0),
+                "Alternative strict/equal/loose full heap rejection became native failure.");
+            Require(delta > 0 ? BinaryPrimitives.ReadInt32LittleEndian(budgetHeap.GetSlotSnapshot(0).Span[16..]) == minimum
+                : budgetHeap.GetSlotSnapshot(0).Span.SequenceEqual(sentinel), "Alternative full128 budget result differs.");
+            Require(GuardRun(target, guardRouter: budgetRouter).Succeeded,
+                "Alternative producer invalidated after ordinary budget rejection.");
+        }
+        Console.WriteLine("PASS3 alternative preallocation-cost strict/equal/loose full128 heaps and repeated reuse.");
+        Console.WriteLine($"PASS {guards} alternative consumer ownership, cancellation, unsupported policy and invalidated preparation guards.");
     }
 
     private static InkStroke Draw(params (float X, float Y)[] points) => new(points.Select(p => new InkPoint(p.X, p.Y)).ToArray());

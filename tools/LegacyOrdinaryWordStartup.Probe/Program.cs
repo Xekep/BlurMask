@@ -70,11 +70,11 @@ LegacyNativeOrdinaryWordStartupResult RunGuard(LegacyNativeOrdinaryWordStartup p
     bool suppressed = false, Func<int, ushort, bool>? suppress = null, CancellationToken token = default)
     => producer.ProcessPage(row, 0, 0, 0, guardQualifier, guardHeaders, cache ?? ((_, _) => guardCosts), router ?? NewRouter(),
         1, false, 0, false, suppressed, suppress, token);
-var allocationFailed = NewGuard();
-var full = RunGuard(allocationFailed, guardQuery, router: NewRouter(0));
-Require(!full.Succeeded && full.RowsVisited == 1 && full.ScoringCalls == 1 && full.AcceptedAllocations == 0,
-    "Literal allocation failure did not stop ordinary startup.");
-Reject(() => RunGuard(allocationFailed, guardQuery));
+var bounded = NewGuard();
+var full = RunGuard(bounded, guardQuery, router: NewRouter(0));
+Require(full.Succeeded && full.RowsVisited == 1 && full.ScoringCalls > 0 && full.AcceptedAllocations == 0,
+    "Native ordinary heap-slot rejection did not preserve startup success.");
+Require(RunGuard(bounded, guardQuery).Succeeded, "Heap-slot rejection invalidated ordinary startup reuse.");
 foreach (bool suppression in new[] { false, true })
 {
     using var canceled = new CancellationTokenSource();
