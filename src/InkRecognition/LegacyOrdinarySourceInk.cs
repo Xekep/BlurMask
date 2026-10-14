@@ -16,6 +16,7 @@ public sealed class LegacyOrdinarySourceInk
     private readonly InkStroke[] strokes;
     private readonly int[][] rawIndices;
     private readonly float[] probabilities;
+    private readonly int[] originalCounts, metadataStarts;
     private readonly IReadOnlyList<InkStroke> strokeView;
     private readonly IReadOnlyList<ReadOnlyMemory<int>> indexView;
     public IReadOnlyList<InkStroke> Strokes => strokeView;
@@ -25,11 +26,13 @@ public sealed class LegacyOrdinarySourceInk
     public LegacyOrdinarySourceProfile Profile { get; }
 
     private LegacyOrdinarySourceInk(InkStroke[] strokes, int[][] rawIndices, float[] probabilities,
-        LegacySourcePointChronology chronology, LegacyOrdinarySourceProfile profile)
+        LegacySourcePointChronology chronology, LegacyOrdinarySourceProfile profile,int[] originalCounts)
     {
         this.strokes=strokes;this.rawIndices=rawIndices;this.probabilities=probabilities;
         strokeView=Array.AsReadOnly(strokes);indexView=Array.AsReadOnly(rawIndices.Select(a=>new ReadOnlyMemory<int>(a)).ToArray());
         Chronology=chronology;Profile=profile;
+        this.originalCounts=originalCounts;metadataStarts=new int[strokes.Length];
+        for(int i=1;i<metadataStarts.Length;i++)metadataStarts[i]=metadataStarts[i-1]+rawIndices[i-1].Length;
     }
 
     public static LegacyOrdinarySourceInk Prepare(IReadOnlyList<InkStroke> rawSource,
@@ -39,7 +42,7 @@ public sealed class LegacyOrdinarySourceInk
         cancellationToken.ThrowIfCancellationRequested();
         if(rawSource.Count is <1 or >256)throw new ArgumentException("Expected1..256 physical strokes.",nameof(rawSource));
         if(profile.SourceKind is <0x135 or >0x137)throw new ArgumentException("Unsupported ordinary source kind.",nameof(profile));
-        var strokes=new InkStroke[rawSource.Count];var rawIndices=new int[rawSource.Count][];
+        var strokes=new InkStroke[rawSource.Count];var rawIndices=new int[rawSource.Count][];var originalCounts=new int[rawSource.Count];
         var keys=new List<LegacySourcePointKey>();int rawTotal=0;
         for(int s=0;s<strokes.Length;s++)
         {
@@ -47,6 +50,7 @@ public sealed class LegacyOrdinarySourceInk
             if(raw.Count is <1 or >4096 || rawTotal>4096-raw.Count)
                 throw new ArgumentException("Expected1..4096 total raw points.",nameof(rawSource));
             rawTotal+=raw.Count;
+            originalCounts[s]=raw.Count;
             var retained=new List<InkPoint>();var indices=new List<int>();
             for(int p=0;p<raw.Count;p++)
             {
@@ -62,7 +66,27 @@ public sealed class LegacyOrdinarySourceInk
         int[] counts=strokes.Select(s=>s.Points.Count).ToArray();
         var chronology=LegacySourcePointChronology.CreatePrepared(counts,keys.ToArray(),Enumerable.Range(0,keys.Count).ToArray());
         float[] probabilities=profile.EnclosureEnabled?LegacySourceStrokeEnclosure.Extract(strokes,cancellationToken):new float[strokes.Length];
-        return new(strokes,rawIndices,probabilities,chronology,profile);
+        return new(strokes,rawIndices,probabilities,chronology,profile,originalCounts);
+    }
+
+    /// <summary>Ordinary167210 writes a second twelve-byte metadata owner108:
+    /// retained point's end ordinal is next retained original ordinal minus1,
+    /// or original input count minus1 at the physical end.168e10 addresses that
+    /// owner using the SAME ceil-map/d8 index as168d00. Prepared identity must
+    /// resolve this source's actual retained metadata; duplicate runs are not
+    /// collapsed to their starting ordinal.</summary>
+    public LegacySourcePointIdentity ResolveEndingMetadata(LegacySourcePointIdentity actualPreparedIdentity,
+        CancellationToken cancellationToken=default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        int physical=actualPreparedIdentity.Key.Second;
+        if(actualPreparedIdentity.Key.First!=0||(uint)physical>=(uint)rawIndices.Length)
+            throw new ArgumentException("Actual ordinary source metadata required.");
+        int local=actualPreparedIdentity.KeyRecordIndex-metadataStarts[physical];
+        if((uint)local>=(uint)rawIndices[physical].Length||actualPreparedIdentity.Key.Third!=rawIndices[physical][local])
+            throw new ArgumentException("Prepared metadata does not belong to this source's retained key owner.");
+        int end=local+1<rawIndices[physical].Length?rawIndices[physical][local+1]-1:originalCounts[physical]-1;
+        return actualPreparedIdentity with{Key=new(0,physical,end)};
     }
 
     /// <summary>

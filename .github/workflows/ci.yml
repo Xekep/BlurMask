@@ -444,6 +444,20 @@ jobs:
           dotnet run --project tools/LegacyWordSymbolQualification.Probe -c Release -- .artifacts/legacy-word-symbol-qualification-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           python tools/LegacyOrdinaryWordStartup.Probe/reference_controls.py .artifacts/legacy-ordinary-word-startup-controls.json
           dotnet run --project tools/LegacyOrdinaryWordStartup.Probe -c Release -- .artifacts/legacy-ordinary-word-startup-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacySourceEndingMetadata.Probe/reference_controls.py .artifacts/legacy-source-ending-metadata-controls.json
+          dotnet run --project tools/LegacySourceEndingMetadata.Probe -c Release -- .artifacts/legacy-source-ending-metadata-controls.json
+          python tools/LegacyWordBuilder.Probe/reference_controls.py .artifacts/legacy-word-builder-controls.json
+          dotnet run --project tools/LegacyWordBuilder.Probe -c Release -- .artifacts/legacy-word-builder-controls.json
+          python tools/LegacyFreshFirstResultFactory.Probe/reference_controls.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-fresh-first-result-factory-controls.json
+          dotnet run --project tools/LegacyFreshFirstResultFactory.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json .artifacts/legacy-fresh-first-result-factory-controls.json
+          python tools/LegacyGlyphSymbolUpdate.Probe/reference_controls.py .artifacts/legacy-glyph-symbol-update-controls.json
+          dotnet run --project tools/LegacyGlyphSymbolUpdate.Probe -c Release -- .artifacts/legacy-glyph-symbol-update-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/LegacyWordParentCandidates.Probe/reference_controls.py .artifacts/legacy-word-parent-candidates-controls.json
+          dotnet run --project tools/LegacyWordParentCandidates.Probe -c Release -- .artifacts/legacy-word-parent-candidates-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
+          python tools/LegacyFirstResultLine.Probe/reference_controls.py .artifacts/legacy-first-result-line-controls.json
+          dotnet run --project tools/LegacyFirstResultLine.Probe -c Release -- .artifacts/legacy-first-result-line-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
+          python tools/LegacyFirstResultDeskew.Probe/reference_controls.py .artifacts/legacy-first-result-deskew-controls.json
+          dotnet run --project tools/LegacyFirstResultDeskew.Probe -c Release -- .artifacts/legacy-first-result-deskew-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
           python tools/LegacyCircledUtf8.Probe/reference_controls.py .artifacts/unicode9-reference/UnicodeData.txt models/text-unicode/legacy-circled-payload-data.json .artifacts/legacy-circled-utf8-controls.json
           dotnet run --project tools/LegacyCircledUtf8.Probe -c Release -- models/text-unicode/legacy-circled-payload-data.json models/text-unicode/legacy-normalization-data.json .artifacts/legacy-circled-utf8-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/text-unicode/legacy-text-publication-data.json
           python tools/LegacyGlyphUtf8Tokens.Probe/reference_controls.py .artifacts/legacy-glyph-utf8-controls.json
@@ -753,6 +767,13 @@ jobs:
             @{ Name = 'LegacyFirstGlyphScoreProducer'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', '.artifacts/legacy-first-glyph-score-native-audit.json') },
             @{ Name = 'LegacyWordSymbolQualification'; Args = @('.artifacts/legacy-word-symbol-qualification-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyOrdinaryWordStartup'; Args = @('.artifacts/legacy-ordinary-word-startup-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacySourceEndingMetadata'; Args = @('.artifacts/legacy-source-ending-metadata-controls.json') },
+            @{ Name = 'LegacyWordBuilder'; Args = @('.artifacts/legacy-word-builder-controls.json') },
+            @{ Name = 'LegacyFreshFirstResultFactory'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', '.artifacts/legacy-fresh-first-result-factory-controls.json') },
+            @{ Name = 'LegacyGlyphSymbolUpdate'; Args = @('.artifacts/legacy-glyph-symbol-update-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyWordParentCandidates'; Args = @('.artifacts/legacy-word-parent-candidates-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyFirstResultLine'; Args = @('.artifacts/legacy-first-result-line-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
+            @{ Name = 'LegacyFirstResultDeskew'; Args = @('.artifacts/legacy-first-result-deskew-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyCircledUtf8'; Args = @('models/text-unicode/legacy-circled-payload-data.json', 'models/text-unicode/legacy-normalization-data.json', '.artifacts/legacy-circled-utf8-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/text-unicode/legacy-text-publication-data.json') },
             @{ Name = 'LegacyGlyphUtf8Tokens'; Args = @('.artifacts/legacy-glyph-utf8-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyFreshFirstTextPolicy'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res') },
