@@ -110,6 +110,11 @@
       "path": "text-unicode/legacy-text-publication-data.json",
       "bytes": 19024,
       "sha256": "6daddbc9ce3d1d3d2e9e179ce008db60887f2c6a13c52ab8bb47dcb215890673"
+    },
+    {
+      "path": "text-unicode/legacy-case-data.json",
+      "bytes": 39489,
+      "sha256": "2d7b408d42fa2c12245fb707bd3004081da91efd6553065af0edc0482808eb44"
     }
   ]
 }

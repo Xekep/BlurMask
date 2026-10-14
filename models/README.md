@@ -75,3 +75,10 @@ canonical decomposition and composition. It is fingerprinted in the model
 manifest and read without a vendor DLL. Full stream ordering, marker handling
 and accepted text publication remain separate. See
 [normalization data](../docs/legacy-native-unicode-normalization-data.md).
+
+[text-unicode/legacy-case-data.json](text-unicode/legacy-case-data.json) stores
+fingerprinted native scalar case alternatives and opaque contextual flags.
+Unicode9 is a comparison reference; native case behavior has retained
+reference differences. The independent loader and alphabet predicate require
+no vendor DLL. Full case292 query integration remains unfinished. See
+[case alternatives](../docs/legacy-native-case-alternatives.md).
