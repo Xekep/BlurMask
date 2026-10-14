@@ -440,6 +440,8 @@ jobs:
           dotnet run --project tools/LegacyGlyphScoreCache.Probe -c Release -- .artifacts/legacy-glyph-score-cache-controls.json
           dotnet run --project tools/LegacyFirstGlyphScoreProducer.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json .artifacts/legacy-first-glyph-score-audit.json
           python tools/LegacyFirstGlyphScoreProducer.Probe/reference_controls.py .artifacts/legacy-first-glyph-score-audit.json
+          python tools/LegacyConfidenceLabelMap.Probe/reference_controls.py .artifacts/legacy-confidence-label-map-controls.json
+          dotnet run --project tools/LegacyConfidenceLabelMap.Probe -c Release -- .artifacts/legacy-confidence-label-map-controls.json models/ru-RU/ru_RU-ak-cur.lite.res
           python tools/LegacyWordSymbolQualification.Probe/reference_controls.py .artifacts/legacy-word-symbol-qualification-controls.json
           dotnet run --project tools/LegacyWordSymbolQualification.Probe -c Release -- .artifacts/legacy-word-symbol-qualification-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           python tools/LegacyOrdinaryWordStartup.Probe/reference_controls.py .artifacts/legacy-ordinary-word-startup-controls.json
@@ -781,6 +783,7 @@ jobs:
             @{ Name = 'LegacyGlyphRecordPool'; Args = @('.artifacts/legacy-glyph-record-pool-controls.json') },
             @{ Name = 'LegacyGlyphScoreCache'; Args = @('.artifacts/legacy-glyph-score-cache-controls.json') },
             @{ Name = 'LegacyFirstGlyphScoreProducer'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', '.artifacts/legacy-first-glyph-score-native-audit.json') },
+            @{ Name = 'LegacyConfidenceLabelMap'; Args = @('.artifacts/legacy-confidence-label-map-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyWordSymbolQualification'; Args = @('.artifacts/legacy-word-symbol-qualification-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyOrdinaryWordStartup'; Args = @('.artifacts/legacy-ordinary-word-startup-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyFirstPlainWord'; Args = @('.artifacts/legacy-first-plain-word-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },

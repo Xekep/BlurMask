@@ -5,14 +5,17 @@ namespace InkRecognition;
 /// <summary>Actual fresh first-source default scalar confidence branch of
 ///1bcbd0: selected candidate's EXP channels, default mode0 calibration and
 /// two-family mean. No TOP273 mass, integer-cost exponential or OCR correction.
-/// Only native output labels are exposed; primitive/alias labels beyond the
-/// network output width require their separate mapping producers.</summary>
+/// Network input indices follow the actual3A0 source-derived prototype map,
+/// preserving output labels. Unmapped primitive/wide services are refused.</summary>
 public sealed class LegacyFirstOrdinaryGlyphScoreProducer
 {
     private readonly string fingerprint;
+    private readonly LegacyAcousticConfidenceLabelMap labelMap;
+    internal string SourceFingerprint=>fingerprint;
+    internal bool HasNeuralOutputFor(ushort symbol)=>labelMap.TryResolveOutputLabel(symbol,out _);
     public int NetworkClassCount {get;}
-    private LegacyFirstOrdinaryGlyphScoreProducer(LegacyFirstAcousticModel model)
-    {fingerprint=model.SourceFingerprint;NetworkClassCount=model.TrajectoryNetwork.OutputWidth;}
+    private LegacyFirstOrdinaryGlyphScoreProducer(LegacyFirstAcousticModel model,LegacyAcousticConfidenceLabelMap labelMap)
+    {fingerprint=model.SourceFingerprint;NetworkClassCount=model.TrajectoryNetwork.OutputWidth;this.labelMap=labelMap;}
 
     public static LegacyFirstOrdinaryGlyphScoreProducer ReadFreshSelectedSource(ReadOnlySpan<byte> resource,
         int sourceOffset,CancellationToken cancellationToken=default)
@@ -43,7 +46,8 @@ public sealed class LegacyFirstOrdinaryGlyphScoreProducer
         tail.Skip(4+2+2+12+1+4);
         if(tail.Byte()!=0||tail.I32()!=0)
             throw new NotSupportedException("Actual source requires obsolete conversion or nondefault score calibration.");
-        cancellationToken.ThrowIfCancellationRequested();return new(model);
+        var map=LegacyAcousticConfidenceLabelMap.ReadFreshFirstSource(resource,sourceOffset,cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();return new(model,map);
     }
 
     /// <summary>Final native candidate order determines the top20 cutoff. This
@@ -66,10 +70,10 @@ public sealed class LegacyFirstOrdinaryGlyphScoreProducer
             if(candidate.Symbol==symbol)break;index++;
         }
         if(index>=actualFinalCache.Candidates.Length||index>=20)return 0;
-        if(symbol>=NetworkClassCount)
-            throw new NotSupportedException("Selected primitive/alias label requires the actual confidence label mapping.");
-        float a=CalibrateDefault(actualScores.TrajectoryProbability32768.Span[symbol]*(1f/32768));
-        float b=CalibrateDefault(actualScores.RasterProbability32768.Span[symbol]*(1f/32768));
+        if(!labelMap.TryResolveOutputLabel(symbol,out ushort outputLabel))
+            throw new NotSupportedException("Selected label requires an unresolved primitive/wide probability service; no out-of-bounds neural lookup is performed.");
+        float a=CalibrateDefault(actualScores.TrajectoryProbability32768.Span[outputLabel]*(1f/32768));
+        float b=CalibrateDefault(actualScores.RasterProbability32768.Span[outputLabel]*(1f/32768));
         //Native order: family1 + family0, then five absent zero families.
         float sum=b+a;for(int i=2;i<7;i++)sum+=0f;
         float mean=sum/2;return mean>=1?1:mean;
