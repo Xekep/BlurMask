@@ -121,6 +121,23 @@ public sealed class LegacyNativeCaseData
         cancellationToken.ThrowIfCancellationRequested();
         return alphabet.HasStoredRelationMaps || HasAlphabetCaseAlternatives(alphabet,publication,cancellationToken);
     }
+
+    /// <summary>Engine059A70 per-symbol predicate. Stored maps suppress Unicode fallback even when this symbol has no entry.</summary>
+    public bool IsCasedSymbol(LegacyInkAlphabet alphabet,ushort label,LegacyNativeTextPublicationData publication)
+    {
+        ArgumentNullException.ThrowIfNull(alphabet);ArgumentNullException.ThrowIfNull(publication);
+        if(label>=alphabet.LabelCount)throw new ArgumentOutOfRangeException(nameof(label));
+        if(alphabet.HasStoredRelationMaps)
+        {
+            for(int mode=0;mode<3;mode++)if(alphabet.TryGetRelatedForms(label,mode,out _))return true;
+            return false;
+        }
+        if(alphabet.IsVirtual(label))return false;
+        if(!alphabet.TryGetText(label,out string text))throw new NotSupportedException("Native missing-label error cannot become a false predicate.");
+        foreach(var rune in text.EnumerateRunes())
+            if(publication.ReadScript(rune.Value)!=24 && GetAlternativeCount(rune.Value)!=0)return true;
+        return false;
+    }
     private static bool Contains(int[][] rows,int cp)
     { int i=LowerBound(rows,cp); return i<rows.Length && rows[i][0]==cp; }
     private static int LowerBound(int[][] rows,int cp)

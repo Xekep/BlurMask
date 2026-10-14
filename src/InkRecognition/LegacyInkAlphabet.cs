@@ -20,12 +20,14 @@ public sealed class LegacyInkAlphabet
     private readonly short[]?[] _relationMaps;
     public int LabelCount { get; }
     public int BytesConsumed { get; }
+    public bool IsCaseRangeMetadataEnabled { get; }
 
     private LegacyInkAlphabet(int count, int consumed, Dictionary<ushort, string> text,
-        ushort[] reverse, byte[] symbolFlags, LegacyInkRelatedForms[] forms, short[]?[] relationMaps)
+        ushort[] reverse, byte[] symbolFlags, LegacyInkRelatedForms[] forms, short[]?[] relationMaps, bool caseMetadata)
     {
         LabelCount = count; BytesConsumed = consumed; _text = text;
         _reverse = reverse; _symbolFlags = symbolFlags; _forms = forms; _relationMaps = relationMaps;
+        IsCaseRangeMetadataEnabled=caseMetadata;
         _labels = new(StringComparer.Ordinal);
         foreach (var item in text)
             if (!_labels.TryAdd(item.Value, item.Key) && _labels[item.Value] != item.Key)
@@ -107,8 +109,8 @@ public sealed class LegacyInkAlphabet
                     }
                 }
         }
-        if (version == 0x104) reader.U8();
-        return new(count, reader.Position, text, reverse, symbolFlags, forms, relationMaps);
+        bool caseMetadata=version==0x104 ? reader.U8()!=0 : triplets!=0;
+        return new(count, reader.Position, text, reverse, symbolFlags, forms, relationMaps,caseMetadata);
     }
 
     public bool TryGetText(ushort label, out string text) => _text.TryGetValue(label, out text!);

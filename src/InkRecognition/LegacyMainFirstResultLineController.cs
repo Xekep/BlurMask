@@ -54,6 +54,27 @@ public sealed class LegacyMainFirstResultLineController
     /// are synthesized. Physical resolution must be the actual source218 setter value.</summary>
     public static LegacyMainFirstResultLineController Prepare(ReadOnlySpan<byte> resource,int sourceOffset,
         IReadOnlyList<InkStroke> rawPhysicalStrokes,float actualPhysicalResolution,CancellationToken cancellationToken=default)
+        =>PrepareCore(resource,sourceOffset,rawPhysicalStrokes,actualPhysicalResolution,null,cancellationToken);
+
+    /// <summary>Actual current parent source after typed main15B260/15F050.
+    /// Uses its retained buffers, reordered probabilities and original metadata
+    /// chronology without another source filter. This method does not copy a
+    /// first-child frame into the main source or synthesize source descriptors.</summary>
+    public static LegacyMainFirstResultLineController PrepareOwnedCurrentSource(ReadOnlySpan<byte> resource,
+        LegacyFreshMainPhysicalReordering actualCurrentSource,CancellationToken cancellationToken=default)
+    {
+        ArgumentNullException.ThrowIfNull(actualCurrentSource);cancellationToken.ThrowIfCancellationRequested();
+        var source=LegacyOrdinarySourceInk.CreateOwnedMainPhysicalReorderedView(actualCurrentSource,cancellationToken);
+        if(!Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(resource)).Equals(
+            actualCurrentSource.Input.Input.SourceFingerprint,StringComparison.OrdinalIgnoreCase))
+            throw new ArgumentException("Current parent must retain its exact selected main resource.");
+        return PrepareCore(resource,actualCurrentSource.Input.Input.SourceOffset,source.Strokes,
+            actualCurrentSource.Input.Input.PhysicalResolution,source,cancellationToken);
+    }
+
+    private static LegacyMainFirstResultLineController PrepareCore(ReadOnlySpan<byte> resource,int sourceOffset,
+        IReadOnlyList<InkStroke> rawPhysicalStrokes,float actualPhysicalResolution,LegacyOrdinarySourceInk? ownedCurrentSource,
+        CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         if(!float.IsFinite(actualPhysicalResolution)||actualPhysicalResolution<0||actualPhysicalResolution>1_000_000)
@@ -80,7 +101,8 @@ public sealed class LegacyMainFirstResultLineController
         var profile=LegacyFirstResultLineProfile.ReadV103Node(snapshot,processor);
         if(profile.Option18!=0)throw new NotSupportedException("24B nonzero Option18 early-return branch is outside the fitting stage.");
         var categories=LegacySourceSamplerCategoryOwner.ReadFirstChildOf249(snapshot,firstProcessor,cancellationToken);
-        var source=LegacyOrdinarySourceInk.Prepare(rawPhysicalStrokes,config,cancellationToken);
+        var source=ownedCurrentSource??LegacyOrdinarySourceInk.Prepare(rawPhysicalStrokes,config,cancellationToken);
+        if(source.Profile!=config)throw new ArgumentException("Current parent profile differs from selected source.");
         return new(source,alphabet,profile,categories,actualPhysicalResolution,sourceOffset,processor,first);
     }
 

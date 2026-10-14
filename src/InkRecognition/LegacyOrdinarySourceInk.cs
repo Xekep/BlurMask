@@ -17,6 +17,7 @@ public sealed class LegacyOrdinarySourceInk
     private readonly int[][] rawIndices;
     private readonly float[] probabilities;
     private readonly int[] originalCounts, metadataStarts;
+    private readonly LegacyOrdinarySourceInk? originalMetadataOwner;
     private readonly IReadOnlyList<InkStroke> strokeView;
     private readonly IReadOnlyList<ReadOnlyMemory<int>> indexView;
     public IReadOnlyList<InkStroke> Strokes => strokeView;
@@ -26,12 +27,13 @@ public sealed class LegacyOrdinarySourceInk
     public LegacyOrdinarySourceProfile Profile { get; }
 
     private LegacyOrdinarySourceInk(InkStroke[] strokes, int[][] rawIndices, float[] probabilities,
-        LegacySourcePointChronology chronology, LegacyOrdinarySourceProfile profile,int[] originalCounts)
+        LegacySourcePointChronology chronology, LegacyOrdinarySourceProfile profile,int[] originalCounts,
+        LegacyOrdinarySourceInk? originalMetadataOwner=null)
     {
         this.strokes=strokes;this.rawIndices=rawIndices;this.probabilities=probabilities;
         strokeView=Array.AsReadOnly(strokes);indexView=Array.AsReadOnly(rawIndices.Select(a=>new ReadOnlyMemory<int>(a)).ToArray());
         Chronology=chronology;Profile=profile;
-        this.originalCounts=originalCounts;metadataStarts=new int[strokes.Length];
+        this.originalCounts=originalCounts;this.originalMetadataOwner=originalMetadataOwner;metadataStarts=new int[strokes.Length];
         for(int i=1;i<metadataStarts.Length;i++)metadataStarts[i]=metadataStarts[i-1]+rawIndices[i-1].Length;
     }
 
@@ -79,6 +81,7 @@ public sealed class LegacyOrdinarySourceInk
         CancellationToken cancellationToken=default)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        if(originalMetadataOwner is{} owner)return owner.ResolveEndingMetadata(actualPreparedIdentity,cancellationToken);
         int physical=actualPreparedIdentity.Key.Second;
         if(actualPreparedIdentity.Key.First!=0||(uint)physical>=(uint)rawIndices.Length)
             throw new ArgumentException("Actual ordinary source metadata required.");
@@ -87,6 +90,37 @@ public sealed class LegacyOrdinarySourceInk
             throw new ArgumentException("Prepared metadata does not belong to this source's retained key owner.");
         int end=local+1<rawIndices[physical].Length?rawIndices[physical][local+1]-1:originalCounts[physical]-1;
         return actualPreparedIdentity with{Key=new(0,physical,end)};
+    }
+
+    /// <summary>Typed current source218 view after the owned fresh main physical
+    /// reorder. No167210 filter/enclosure pass is repeated. Physical probabilities
+    /// and original point indices are permuted; original metadata keys continue
+    /// addressing the original raw owner even when current physical IDs differ.</summary>
+    internal static LegacyOrdinarySourceInk CreateOwnedMainPhysicalReorderedView(
+        LegacyFreshMainPhysicalReordering actualReordering,CancellationToken cancellationToken=default)
+    {
+        ArgumentNullException.ThrowIfNull(actualReordering);cancellationToken.ThrowIfCancellationRequested();
+        var original=actualReordering.Input.Input.Packet.Source;
+        int count=original.Strokes.Count;int[] order=actualReordering.OriginalPhysicalStrokeIndices.ToArray();
+        if(order.Length!=count||actualReordering.Strokes.Count!=count||order.Distinct().Count()!=count||
+            order.Any(i=>(uint)i>=(uint)count))throw new ArgumentException("Actual complete physical reorder required.");
+        var strokes=new InkStroke[count];var indices=new int[count][];var counts=new int[count];var probabilities=new float[count];
+        for(int current=0;current<count;current++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();int old=order[current];
+            var points=actualReordering.Strokes[current].Points;
+            if(!points.SequenceEqual(original.Strokes[old].Points)||actualReordering.SourceStrokeProbabilities.Span[current]!=original.probabilities[old])
+                throw new ArgumentException("Retained current points/probabilities do not belong to the original owner.");
+            for(int point=0;point<points.Count;point++)
+            {
+                var actual=actualReordering.Chronology.Resolve(current,point);var expected=original.Chronology.Resolve(old,point);
+                if(actual.Key!=expected.Key||actual.KeyRecordIndex!=expected.KeyRecordIndex||actual.MetadataPointIndex!=expected.MetadataPointIndex||actual.RemainderByte!=0)
+                    throw new ArgumentException("Actual original retained metadata identity required.");
+            }
+            strokes[current]=new(points.ToArray());indices[current]=original.rawIndices[old].ToArray();
+            counts[current]=original.originalCounts[old];probabilities[current]=original.probabilities[old];
+        }
+        return new(strokes,indices,probabilities,actualReordering.Chronology,original.Profile,counts,original);
     }
 
     /// <summary>
