@@ -130,6 +130,11 @@ public sealed class LegacyOwnedMainDirectWordPass
         languageGate = new(owner.DictionaryOwner.Model, owner.SourceGraph);
     }
 
+    /// <summary>Run the same single-use pass and retain immutable, source-bound
+    /// final row storage for the owned terminal invocation.</summary>
+    public LegacyOwnedMainDirectWordPassResult RunOwned(CancellationToken cancellationToken = default)
+        => LegacyOwnedMainDirectWordPassResult.Create(policy, Run(cancellationToken), cancellationToken);
+
     /// <summary>One owning ascending node/span pass. All backend pages are
     ///consumed; unsupported source/geometry/history branches fail the pass.
     ///Allocation bytes are caller-owned residue, not native zero assumptions.</summary>

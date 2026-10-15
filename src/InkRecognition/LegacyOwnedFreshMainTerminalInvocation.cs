@@ -3,8 +3,8 @@ namespace InkRecognition;
 /// <summary>The only possible2271F0 terminal invocation for the owned fresh
 /// DIRECT/no-property result route00ED90/00F460. Native param7 is true, but
 /// its rescue body is unreachable under this owner's actual22E8 flags.
-/// Candidate rows, source-end extent and2520 cumulative storage still require
-/// their own native producers. No case-aware or reused SDK context is accepted.</summary>
+/// Prepared rows can be supplied explicitly, or consumed from the matching
+/// owning DIRECT pass result. No case-aware or reused SDK context is accepted.</summary>
 public sealed class LegacyOwnedFreshMainTerminalInvocation
 {
     public LegacyOwnedFreshMainWordControllerPolicy ControllerOwner { get; }
@@ -42,6 +42,21 @@ public sealed class LegacyOwnedFreshMainTerminalInvocation
             sentinels, false, false, false, 0);
         cancellationToken.ThrowIfCancellationRequested();
         return new(actualPolicy, sources, options);
+    }
+
+    /// <summary>Select directly from the final rows and cumulative cost owned
+    /// by the exact controller that prepared this invocation.</summary>
+    public LegacyOwnedMainTerminalResult SelectOwnedPass(LegacyOwnedMainDirectWordPassResult result,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(result);
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!ReferenceEquals(result.ControllerOwner, ControllerOwner) ||
+            !ReferenceEquals(result.ControllerOwner.Owner.DictionaryOwner, SourceOwner.DictionaryOwner))
+            throw new ArgumentException("Terminal invocation and completed pass must have the same actual controller owner.", nameof(result));
+        var winner = SelectPreparedRows(result.FinalRecords, result.FinalSourceEnd,
+            result.FinalCumulativeCost, cancellationToken);
+        return LegacyOwnedMainTerminalResult.Create(result, winner, cancellationToken);
     }
 
     /// <summary>Apply the proven single invocation to explicit prepared source
