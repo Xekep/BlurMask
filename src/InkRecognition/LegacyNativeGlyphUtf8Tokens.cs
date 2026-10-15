@@ -44,6 +44,34 @@ public static class LegacyNativeGlyphUtf8Tokens
 {
     private static readonly UTF8Encoding Utf8 = new(false, true);
 
+    /// <summary>139c90's scalar read, including untouched caller residue for
+    /// zero-count kind3 and its subkind1. This is distinct from token expansion.
+    /// Byte3 is never written; alternate byte2 is not normalized on the no-write branch.</summary>
+    public static void ReadScalar(LegacyNativeGlyphSymbolDescriptor descriptor,
+        Span<byte> actualCallerStorage4, Func<string, ushort>? actualControlLabelLookup=null,
+        CancellationToken cancellationToken=default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if(actualCallerStorage4.Length!=4)throw new ArgumentException("Actual four-byte caller storage required.");
+        int kind=descriptor.KindFlags&7;ushort label=descriptor.SymbolOrRunLength;
+        if(kind==3)
+        {
+            if((label&0x7ffc)==0)return;
+            string? control=(label&3) switch{0=>"\n",2=>" ",3=>"\u00a0",_=>null};
+            if(control is not null)
+            {
+                if(actualControlLabelLookup is null)throw new ArgumentException("Actual result273+18 lookup required.");
+                label=actualControlLabelLookup(control);
+                System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(actualCallerStorage4,label);
+            }
+            actualCallerStorage4[2]=0;return;
+        }
+        if(kind==1)label=unchecked((ushort)((label&3)-7));
+        else if(kind is not (0 or 2 or 4))label=ushort.MaxValue;
+        System.Buffers.Binary.BinaryPrimitives.WriteUInt16LittleEndian(actualCallerStorage4,label);
+        actualCallerStorage4[2]=(byte)(kind==4?1:0);
+    }
+
     public static int ReadTokenCount(LegacyNativeGlyphSymbolDescriptor descriptor) =>
         (descriptor.KindFlags & 7) is 1 or 3 ? (descriptor.SymbolOrRunLength >> 2) & 0x1fff : 1;
 
