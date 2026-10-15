@@ -600,6 +600,8 @@ jobs:
           python tools/LegacyCaseGlyphBacktrackRows.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-case-backtrack-managed.json
           dotnet run --project tools/LegacyProtocolInteriorBinding.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-protocol-interior-managed.json
           python tools/LegacyProtocolInteriorBinding.Probe/audit_output.py .artifacts/legacy-protocol-interior-managed.json
+          dotnet run --project tools/LegacyMainResidualSource.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-main-residual-source-managed.json
+          python tools/LegacyMainResidualSource.Probe/audit_output.py .artifacts/legacy-main-residual-source-managed.json
           dotnet run --project tools/LegacyGlyphChainProduction.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-glyph-chain-managed.json
           python tools/LegacyGlyphChainProduction.Probe/audit_output.py .artifacts/legacy-glyph-chain-managed.json
           dotnet run --project tools/LegacyCaseResultQuery.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-case-result-query-managed.json
@@ -1057,6 +1059,7 @@ jobs:
             @{ Name = 'LegacyCaseMainCompactMaterialization'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-case-main-compact-native.json') },
             @{ Name = 'LegacyCaseGlyphBacktrackRows'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-case-backtrack-native.json') },
             @{ Name = 'LegacyProtocolInteriorBinding'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-protocol-interior-native.json') },
+            @{ Name = 'LegacyMainResidualSource'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-main-residual-source-native.json') },
             @{ Name = 'LegacyGlyphChainProduction'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-glyph-chain-native.json') },
             @{ Name = 'LegacyCaseResultQuery'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-case-result-query-native.json') },
             @{ Name = 'LegacyCaseMainPass'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-case-main-pass-native.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '15') },
@@ -1302,6 +1305,10 @@ jobs:
             if ($name -eq 'LegacyProtocolInteriorBinding') {
               python tools/LegacyProtocolInteriorBinding.Probe/audit_output.py .artifacts/legacy-protocol-interior-native.json
               if ($LASTEXITCODE -ne 0) { throw 'Owned glyph source binding audit failed' }
+            }
+            if ($name -eq 'LegacyMainResidualSource') {
+              python tools/LegacyMainResidualSource.Probe/audit_output.py .artifacts/legacy-main-residual-source-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'Owned residual source audit failed' }
             }
             if ($name -eq 'LegacyGlyphChainProduction') {
               python tools/LegacyGlyphChainProduction.Probe/audit_output.py .artifacts/legacy-glyph-chain-native.json

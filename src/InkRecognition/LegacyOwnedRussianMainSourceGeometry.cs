@@ -68,6 +68,10 @@ public sealed class LegacyOwnedRussianMainSourceGeometry
         if((uint)id>=(uint)ranges.Length)throw new InvalidDataException("Actual graph group identity required.");
         return id;
     }
+    internal LegacyInkRange[] CopyGroupRanges(int node,ushort arc,CancellationToken token=default)
+        =>ranges[Group(node,arc,token)].ToArray();
+    internal bool GroupRangesEqual(int group,ReadOnlySpan<LegacyInkRange> expected,CancellationToken token=default)
+    {token.ThrowIfCancellationRequested();if((uint)group>=(uint)ranges.Length)throw new ArgumentOutOfRangeException(nameof(group));return ranges[group].AsSpan().SequenceEqual(expected);}
     public byte ReadKind(int node,ushort arc,CancellationToken token=default){_=Group(node,arc,token);return 0;}
     public int ReadLine(int node,ushort arc,CancellationToken token=default){_=Group(node,arc,token);return line;}
     public LegacyNativeResidualGuide ReadGuide(int actualLine,CancellationToken token=default)
