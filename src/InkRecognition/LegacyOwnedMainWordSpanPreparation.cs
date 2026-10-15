@@ -40,6 +40,7 @@ public sealed class LegacyOwnedMainWordSpanPreparation
     private long epoch;
     private bool valid = true;
     private int active;
+    private LivePublicationEpoch? activeLivePublicationEpoch;
 
     /// <summary>Original DIRECT API; a case source is never represented by a
     /// fabricated parallel DIRECT owner.</summary>
@@ -285,6 +286,74 @@ public sealed class LegacyOwnedMainWordSpanPreparation
 
     internal void ValidateSpan(LegacyOwnedMainWordSpan span, CancellationToken token)
         => Check(span, token);
+
+    internal sealed class LivePublicationEpoch
+    {
+        internal LegacyOwnedMainWordSpanPreparation Owner { get; }
+        internal long Epoch { get; }
+        internal int EndingNode { get; }
+        internal bool Completed { get; set; }
+        internal LivePublicationEpoch(LegacyOwnedMainWordSpanPreparation owner, long epoch, int endingNode)
+        { Owner = owner; Epoch = epoch; EndingNode = endingNode; }
+    }
+
+    //2144F0's intermediate207CB0 precedes V80: retain the actual last D0
+    //map and query caches instead of manufacturing a final-result epoch.
+    internal LivePublicationEpoch CaptureLivePublicationEpoch(LegacyOwnedMainWordSpan span, CancellationToken token)
+    {
+        Enter();
+        try
+        {
+            Check(span, token);
+            dictionaryBinding.CaptureLivePublicationQueryLease(span.EndingNode, token);
+            return activeLivePublicationEpoch = new(this, epoch, span.EndingNode);
+        }
+        finally { Volatile.Write(ref active, 0); }
+    }
+
+    internal void ValidateLivePublicationEpoch(LivePublicationEpoch lease, CancellationToken token)
+    {
+        Enter();
+        try { CheckLivePublicationEpoch(lease, token); }
+        finally { Volatile.Write(ref active, 0); }
+    }
+
+    private void CheckLivePublicationEpoch(LivePublicationEpoch lease, CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(lease);
+        token.ThrowIfCancellationRequested();
+        if (!ReferenceEquals(lease.Owner, this) || !ReferenceEquals(lease, activeLivePublicationEpoch) ||
+            lease.Epoch != epoch || lease.Completed)
+            throw new InvalidOperationException("Live publication must retain its producing D0 owner and epoch.");
+        dictionaryBinding.ValidateLivePublicationQueryLease(token);
+    }
+
+    internal LegacyAggregateDictionaryQueryPage ReadLivePublicationQuery(LivePublicationEpoch lease, ulong tag,
+        LegacyPreparedDictionaryQuery query, bool auxiliary, CancellationToken token)
+    {
+        Enter();
+        try
+        {
+            CheckLivePublicationEpoch(lease, token);
+            return dictionaryBinding.ReadLivePublicationQuery(tag, query, auxiliary, token);
+        }
+        catch { valid = false; throw; }
+        finally { Volatile.Write(ref active, 0); }
+    }
+
+    internal void EndLivePublicationEpoch(LivePublicationEpoch lease, CancellationToken token)
+    {
+        Enter();
+        try
+        {
+            CheckLivePublicationEpoch(lease, token);
+            dictionaryBinding.EndLivePublicationQueryLease(token);
+            lease.Completed = true;
+            activeLivePublicationEpoch = null;
+        }
+        catch { valid = false; throw; }
+        finally { Volatile.Write(ref active, 0); }
+    }
 
     // Result reconstruction runs after the controller's final source V80.
     // Its query source is the same backend, without another D0 or map refresh.

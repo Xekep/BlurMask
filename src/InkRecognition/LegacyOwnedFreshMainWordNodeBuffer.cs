@@ -128,6 +128,41 @@ public sealed class LegacyOwnedFreshMainWordNodeBuffer
     }
 
     public ReadOnlyMemory<byte> CopyRecordStorage() => records.ToArray();
+    //207CB0 changes only publication marks and compact-relative indices in
+    //already completed source rows. Validate the entire allocation before
+    //writing anything: future2144F0 parents still own every other byte.
+    internal void ApplyCompactPublication(LegacyOwnedFreshMainWordControllerPolicy producingOwner,
+        LegacyMainDirectWordNodeResult published, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!ReferenceEquals(producingOwner, policy) || !compacted || published.EndingNode != EndingNode ||
+            published.SourceEnd23f0 != SourceEnd23f0 || published.RetainedEnd23f8 != RetainedEnd23f8 ||
+            published.Records.Length != records.Length || published.PrimaryAlternatives.Length != primary.Length)
+            throw new ArgumentException("Publication must retain the completed node's exact owner, counts and allocation extents.");
+        var updatedRecords = published.Records.Span;
+        var updatedPrimary = published.PrimaryAlternatives.Span;
+        for (int index = 0; index < records.Length; index++)
+        {
+            if ((index & 1023) == 0) cancellationToken.ThrowIfCancellationRequested();
+            int ordinal = index / 88, field = index % 88;
+            int allowed = ordinal < SourceEnd23f0 ? field == 6 ? 2 : field is 0x22 or 0x23 ? 255 : 0 : 0;
+            if (((records[index] ^ updatedRecords[index]) & ~allowed) != 0)
+                throw new InvalidDataException("Compact publication cannot change another source-row field.");
+        }
+        for (int index = 0; index < primary.Length; index++)
+        {
+            if ((index & 1023) == 0) cancellationToken.ThrowIfCancellationRequested();
+            int field = index % 40;
+            int allowed = field == 0x1b ? 128 : field is 0x1c or 0x1d ? 255 : 0;
+            if (((primary[index] ^ updatedPrimary[index]) & ~allowed) != 0)
+                throw new InvalidDataException("Compact publication cannot change another primary-alternative field.");
+        }
+        cancellationToken.ThrowIfCancellationRequested();
+        //No callbacks/cancellation points between the two owned-array copies.
+        updatedRecords.CopyTo(records);
+        updatedPrimary.CopyTo(primary);
+    }
+
     internal void ApplyPeriodicCostOffset(int positiveMinimum, CancellationToken cancellationToken)
     {
         if (!compacted) throw new InvalidOperationException("Periodic normalization follows completed node materialization.");

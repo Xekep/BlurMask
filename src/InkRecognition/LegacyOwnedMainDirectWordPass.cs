@@ -46,6 +46,7 @@ public sealed class LegacyOwnedMainDirectWordPass
     private readonly byte[] lexicalResidue;
     private LegacyNativeWordHeapDescriptor descriptor;
     private LegacyOwnedMainWordSpan? currentSpan;
+    private LegacyOwnedMainWordSpanPreparation.LivePublicationEpoch? livePublicationEpoch;
     private byte[] primaryPool;
     private ulong primaryPoolIdentity;
     private int started;
@@ -128,8 +129,10 @@ public sealed class LegacyOwnedMainDirectWordPass
             ? new(actualResource, owner.Acoustic, table, cell, flagResidue, cancellationToken)
             : new(actualResource, actualLineAcoustic, table, cell, flagResidue, cancellationToken);
         delimiter = new(owner.CommonModel.AcousticAlphabet, owner.Contexts,
-            (tag, request, token) => owner.Read(currentSpan ?? throw new InvalidOperationException("D0 must precede290 reads."),
-                tag, request, clearExtraCosts: false, cancellationToken: token),
+            (tag, request, token) => livePublicationEpoch is { } live
+                ? owner.ReadLivePublicationQuery(live, tag, request, false, token)
+                : owner.Read(currentSpan ?? throw new InvalidOperationException("D0 must precede290 reads."),
+                    tag, request, clearExtraCosts: false, cancellationToken: token),
             LegacyNativeDelimiterQuerySource.ReadV10dCoordinateMode(actualResource));
         auxiliaryDelimiter = new(owner.CommonModel.AcousticAlphabet, owner.Contexts,
             (tag, request, token) => owner.Read(currentSpan ?? throw new InvalidOperationException("D0 must precede auxiliary reads."),
@@ -147,10 +150,55 @@ public sealed class LegacyOwnedMainDirectWordPass
     public LegacyOwnedMainDirectWordPassResult RunOwned(CancellationToken cancellationToken = default)
         => LegacyOwnedMainDirectWordPassResult.Create(policy, Run(cancellationToken), cancellationToken);
 
+    /// <summary>Opt-in2144F0 intermediate207CB0 lifecycle. Uses the same live
+    /// D0 map and outer290 caches, writes actual publication marks/indices back
+    /// into the owning rows, and retains2460/2478/2488/2490 for final publication.
+    /// Allocator residue is explicit; unsupported native publication branches
+    /// fail this single-use pass rather than manufacturing a terminal.</summary>
+    public LegacyOwnedMainDirectWordPassResult RunOwnedWithIntermediatePublication(ReadOnlySpan<byte> actualResource,
+        LegacyOwnedRussianMainGlyphConfidence candidateOwner, ReadOnlySpan<byte> compactAllocatorResidue40,
+        Action<LegacyMainIntermediateCompactPublication>? publicationObserver = null, CancellationToken cancellationToken = default)
+        => RunOwnedWithPublicationCore(actualResource, candidateOwner, compactAllocatorResidue40,
+            publicationObserver, null, cancellationToken);
+
+    //Prepared consumer control, deliberately internal: an actual short source
+    //can exercise nonempty207CB0 before V80 without pretending its native120
+    //gate would fire there. Public scheduling never supplies this override.
+    internal LegacyOwnedMainDirectWordPassResult RunOwnedWithPreparedPublicationAtNode(ReadOnlySpan<byte> actualResource,
+        LegacyOwnedRussianMainGlyphConfidence candidateOwner, ReadOnlySpan<byte> compactAllocatorResidue40,
+        int endingNode, Action<LegacyMainIntermediateCompactPublication>? publicationObserver = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (endingNode < 0 || endingNode >= owner.SourceGraph.NodeCount - 1 ||
+            owner.SourceGraph.NodeCount > policy.MaximumParentDistance54)
+            throw new ArgumentOutOfRangeException(nameof(endingNode));
+        return RunOwnedWithPublicationCore(actualResource, candidateOwner, compactAllocatorResidue40,
+            publicationObserver, endingNode, cancellationToken);
+    }
+
+    private LegacyOwnedMainDirectWordPassResult RunOwnedWithPublicationCore(ReadOnlySpan<byte> actualResource,
+        LegacyOwnedRussianMainGlyphConfidence candidateOwner, ReadOnlySpan<byte> compactAllocatorResidue40,
+        Action<LegacyMainIntermediateCompactPublication>? publicationObserver, int? preparedEndingNode,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(candidateOwner);
+        cancellationToken.ThrowIfCancellationRequested();
+        LegacyOwnedMainCompactWordMaterialization.ValidatePublicationOwner(actualResource, policy, caseSourcePolicy, candidateOwner);
+        var publication = new IntermediatePublication(actualResource.ToArray(), candidateOwner,
+            new(policy, compactAllocatorResidue40), publicationObserver, preparedEndingNode);
+        var result = LegacyOwnedMainDirectWordPassResult.Create(policy, RunCore(cancellationToken, publication), cancellationToken);
+        result.BindIntermediatePublicationState(publication.State);
+        return result;
+    }
+
     /// <summary>One owning ascending node/span pass. All backend pages are
     ///consumed; unsupported source/geometry/history branches fail the pass.
     ///Allocation bytes are caller-owned residue, not native zero assumptions.</summary>
     public IReadOnlyList<LegacyMainDirectWordNodeResult> Run(CancellationToken cancellationToken = default)
+        => RunCore(cancellationToken, null);
+
+    private IReadOnlyList<LegacyMainDirectWordNodeResult> RunCore(CancellationToken cancellationToken,
+        IntermediatePublication? publication)
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (Interlocked.Exchange(ref started, 1) != 0)
@@ -260,6 +308,12 @@ public sealed class LegacyOwnedMainDirectWordPass
             output.Add(new(node, rootQueries, parentQueries, flagAllocations, primaryHeap.Count, language,
                 languageQueries, languageAllocations, buffer.SourceEnd23f0, buffer.RetainedEnd23f8,
                 buffer.CopyRecordStorage(), buffer.CopyPrimaryStorage(), cumulative[node], periodicOffset));
+            //215DC0..215DDE: intermediate207CB0 follows periodic cost changes
+            //and precedes the actual sourceV80. Both comparisons are signed.
+            if (publication is not null && (publication.PreparedEndingNode == node ||
+                publication.PreparedEndingNode is null && node + 1 < graph.NodeCount &&
+                unchecked(policy.MaximumParentDistance54 + publication.State.NextNode) <= node + 1))
+                PublishIntermediate(publication, node, output, cancellationToken);
             ResetSources(node, cancellationToken);
         }
         cancellationToken.ThrowIfCancellationRequested();
@@ -271,6 +325,45 @@ public sealed class LegacyOwnedMainDirectWordPass
             PrimaryAlternatives = nodes[result.EndingNode].CopyPrimaryStorage(),
             CumulativePathCost2520 = cumulative[result.EndingNode]
         }).ToList().AsReadOnly();
+    }
+
+    private sealed record IntermediatePublication(byte[] Resource, LegacyOwnedRussianMainGlyphConfidence Confidence,
+        LegacyMainCompactPublicationState State, Action<LegacyMainIntermediateCompactPublication>? Observer,
+        int? PreparedEndingNode);
+
+    private void PublishIntermediate(IntermediatePublication publication, int endingNode,
+        IReadOnlyList<LegacyMainDirectWordNodeResult> completed, CancellationToken token)
+    {
+        var span = currentSpan ?? throw new InvalidOperationException("Intermediate publication requires the actual last D0 span.");
+        if (span.EndingNode != endingNode || livePublicationEpoch is not null)
+            throw new InvalidOperationException("Intermediate publication cannot replace another active node/query scope.");
+        livePublicationEpoch = owner.CaptureLivePublicationEpoch(span, token);
+        var lease = livePublicationEpoch;
+        try
+        {
+            LegacyMainDirectWordNodeResult Snapshot(int node)
+            {
+                var result = completed[node];
+                return result with
+                {
+                    Records = nodes[node].CopyRecordStorage(), PrimaryAlternatives = nodes[node].CopyPrimaryStorage(),
+                    CumulativePathCost2520 = cumulative[node]
+                };
+            }
+            var source = new LegacyMainCompactPublicationSource(policy, caseSourcePolicy, publication.State.NextNode,
+                endingNode, Snapshot, delimiter, cancellation => owner.ValidateLivePublicationEpoch(lease, cancellation));
+            int previousCount = publication.State.Count;
+            var stage = LegacyOwnedMainCompactWordMaterialization.Publish(publication.Resource, source,
+                publication.Confidence, publication.State, token);
+            var observed = publication.Observer is null ? null :
+                new LegacyMainIntermediateCompactPublication(source, previousCount, publication.State, stage);
+            if (observed is not null) publication.Observer!(observed);
+            owner.ValidateLivePublicationEpoch(lease, token);
+            for (int node = source.StartingNode; node <= endingNode; node++)
+                nodes[node].ApplyCompactPublication(policy, stage.Nodes[node], token);
+            owner.EndLivePublicationEpoch(lease, token);
+        }
+        finally { livePublicationEpoch = null; }
     }
 
     private void RunLanguage(int node, LegacyOwnedFreshMainWordNodeBuffer buffer,

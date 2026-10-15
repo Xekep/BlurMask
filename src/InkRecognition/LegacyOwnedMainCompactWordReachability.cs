@@ -13,16 +13,18 @@ public sealed class LegacyOwnedMainCompactWordReachability
     private readonly Func<int, ushort, CancellationToken, bool> languageProbe;
     private readonly QueryCounters counters;
     private int activeQuery;
-    public LegacyOwnedMainDirectWordPassResult PassResult { get; }
+    private readonly LegacyMainCompactPublicationSource source;
+    public LegacyOwnedMainDirectWordPassResult PassResult => source.FinalPass ??
+        throw new InvalidOperationException("Intermediate publication has no manufactured final pass result.");
     public int FinalizedPrefixEnd { get; }
     public int QueryChecks => counters.Checks;
     public int BackendCalls => counters.Calls;
 
-    private LegacyOwnedMainCompactWordReachability(LegacyOwnedMainDirectWordPassResult pass,
+    private LegacyOwnedMainCompactWordReachability(LegacyMainCompactPublicationSource source,
         LegacyMainDirectWordNodeResult[] nodes, byte[] selectedNodes, int prefixEnd,
         QueryCounters counters, Func<int, ushort, CancellationToken, bool> languageProbe)
     {
-        PassResult = pass; this.nodes = nodes; this.selectedNodes = selectedNodes;
+        this.source = source; this.nodes = nodes; this.selectedNodes = selectedNodes;
         FinalizedPrefixEnd = prefixEnd; this.counters = counters; this.languageProbe = languageProbe;
     }
 
@@ -46,8 +48,17 @@ public sealed class LegacyOwnedMainCompactWordReachability
         cancellationToken.ThrowIfCancellationRequested();
         var pass = terminal.PassResult;
         pass.ValidateResultQueryEpoch(cancellationToken);
-        var policy = pass.ControllerOwner;
-        var owner = policy.Owner;
+        var source = LegacyMainCompactPublicationSource.Final(resource, pass, casePolicy, 0, cancellationToken);
+        return PrepareSource(resource, source, cancellationToken);
+    }
+
+    internal static LegacyOwnedMainCompactWordReachability PrepareSource(ReadOnlySpan<byte> resource,
+        LegacyMainCompactPublicationSource source, CancellationToken cancellationToken)
+    {
+        source.Validate(cancellationToken);
+        var policy = source.Controller;
+        var owner = source.Owner;
+        var casePolicy = source.CasePolicy;
         var configuration = policy.Configuration;
         if (casePolicy is null && owner.IsCaseAware)
             throw new NotSupportedException("The DIRECT reachability entrypoint does not accept a CASE source.");
@@ -65,41 +76,39 @@ public sealed class LegacyOwnedMainCompactWordReachability
         if (observed.Configuration != configuration || observed.Refresh != policy.Refresh)
             throw new ArgumentException("The result's exact selected main resource is required.");
         int primaryLimit = configuration.PrimaryArcLimit230a;
-        int lastNode = pass.NodeCount - 1;
+        int lastNode = source.EndingNode;
         //222.VA0/151FF0 ->21B.V30/1A75D0=min(node+1, graph8).
-        //The owning DIRECT pass supports fresh2601=0, and no earlier207CB0
-        //has advanced2490. Thus the initial materialization boundary is0.
-        int prefixEnd = lastNode - Math.Min(pass.NodeCount, owner.SourceGraph.MaximumAtoms);
-        var snapshots = new LegacyMainDirectWordNodeResult[pass.NodeCount];
-        var activeNodes = new byte[pass.NodeCount];
+        //The current publication source retains actual2490 and fresh2601=0.
+        //Earlier compact rows and predecessor indices remain untouched.
+        int prefixEnd = lastNode - Math.Min(lastNode + 1, owner.SourceGraph.MaximumAtoms);
+        var snapshots = new LegacyMainDirectWordNodeResult[lastNode + 1];
+        var activeNodes = new byte[lastNode + 1];
         for (int node = 0; node < snapshots.Length; node++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var snapshot = pass.GetNodeSnapshot(node);
+            var snapshot = source.Snapshot(node);
             if (snapshot.Records.Length % 88 != 0 || snapshot.SourceEnd23f0 > snapshot.Records.Length / 88 ||
                 snapshot.PrimaryAlternatives.Length != checked(primaryLimit * 2 * 40))
                 throw new InvalidDataException("Result rows must retain their full native source/pool extents.");
             byte[] records = snapshot.Records.ToArray(), alternatives = snapshot.PrimaryAlternatives.ToArray();
-            for (int ordinal = 0; ordinal < snapshot.SourceEnd23f0; ordinal++)
-                records[ordinal * 88 + 6] &= 0xfd;
-            for (int ordinal = 0; ordinal < primaryLimit * 2; ordinal++)
-                alternatives[ordinal * 40 + 0x1b] &= 0x7f;
+            if (node >= source.StartingNode)
+            {
+                for (int ordinal = 0; ordinal < snapshot.SourceEnd23f0; ordinal++)
+                    records[ordinal * 88 + 6] &= 0xfd;
+                for (int ordinal = 0; ordinal < primaryLimit * 2; ordinal++)
+                    alternatives[ordinal * 40 + 0x1b] &= 0x7f;
+            }
             snapshots[node] = snapshot with { Records = records, PrimaryAlternatives = alternatives };
-            activeNodes[node] = node > prefixEnd ? (byte)1 : (byte)0;
+            activeNodes[node] = node >= source.StartingNode && node > prefixEnd ? (byte)1 : (byte)0;
         }
 
-        var reader = new LegacyNativeDelimiterQuerySource(owner.CommonModel.AcousticAlphabet, owner.Contexts,
-            (tag, query, token) => pass.ReadResultQuery(tag, query, false, token),
-            LegacyNativeDelimiterQuerySource.ReadV10dCoordinateMode(resource));
-        //The pass has just forwarded its final sourceV80. Mirror that actual
-        //wrapper reset state without resetting/replacing the shared backend.
-        reader.ResetForControllerNode(cancellationToken);
+        var reader = source.Reader;
         var request = new LegacyNativeDelimiterQuery
         {
             Request = new() { Capacity = 128, ContextRoot = owner.Contexts.ContainerIdentity }
         };
         var counters = new QueryCounters();
-        for (int node = lastNode; node >= 0; node--)
+        for (int node = lastNode; node >= source.StartingNode; node--)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (activeNodes[node] == 0) continue;
@@ -115,7 +124,7 @@ public sealed class LegacyOwnedMainCompactWordReachability
                         var entry = snapshots[node].PrimaryAlternatives.Span.Slice((ordinal * 2 + alternative) * 40, 40);
                         if (I32(entry, 0) >= Impossible) break;
                         int previousNode = node, previousOrdinal = ordinal, previousAlternative = alternative;
-                        while (previousNode >= 0 && previousOrdinal < primaryLimit)
+                        while (previousNode >= source.StartingNode && previousOrdinal < primaryLimit)
                         {
                             cancellationToken.ThrowIfCancellationRequested();
                             byte[] pool = GetAlternativeStorage(previousNode, previousOrdinal, previousAlternative);
@@ -132,7 +141,7 @@ public sealed class LegacyOwnedMainCompactWordReachability
                 //Packed22E8.low3>1 takes the ordinary secondary branch;
                 //2404=1 selects the literal beam-chain marking loop2084BB.
                 int parentNode = node, parentOrdinal = ordinal;
-                while (parentNode >= 0)
+                while (parentNode >= source.StartingNode)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     byte[] records = GetRecordStorage(parentNode, parentOrdinal);
@@ -148,8 +157,8 @@ public sealed class LegacyOwnedMainCompactWordReachability
                 }
             }
         }
-        pass.ValidateResultQueryEpoch(cancellationToken);
-        return new(pass, snapshots, activeNodes, prefixEnd, counters,
+        source.Validate(cancellationToken);
+        return new(source, snapshots, activeNodes, prefixEnd, counters,
             (node, ordinal, token) => AcceptsLanguage(node,
                 snapshots[node].Records.Span.Slice(ordinal * 88, 88), token));
 
@@ -170,7 +179,7 @@ public sealed class LegacyOwnedMainCompactWordReachability
         }
         bool AcceptsLanguage(int node, ReadOnlySpan<byte> row, CancellationToken token)
         {
-            pass.ValidateResultQueryEpoch(token);
+            source.Validate(token);
             counters.Checks++;
             if ((row[6] & 1) != 0 || I32(row, 0x30) != -1) return false;
             if (((row[5] >> 1) & 1) != 0) return true;
@@ -210,7 +219,7 @@ public sealed class LegacyOwnedMainCompactWordReachability
     internal bool HasLanguageContinuation(int node, ushort primaryOrdinal, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        if ((uint)node >= nodes.Length || primaryOrdinal >= PassResult.ControllerOwner.Configuration.PrimaryArcLimit230a ||
+        if ((uint)node >= nodes.Length || primaryOrdinal >= source.Controller.Configuration.PrimaryArcLimit230a ||
             I32(nodes[node].Records.Span.Slice(primaryOrdinal * 88, 88), 0x10) >= Impossible)
             throw new ArgumentException("A finite primary row owned by this preparation is required.");
         if (Interlocked.CompareExchange(ref activeQuery, 1, 0) != 0)

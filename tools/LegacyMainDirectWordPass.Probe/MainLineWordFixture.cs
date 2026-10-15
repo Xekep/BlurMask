@@ -15,7 +15,7 @@ internal sealed record MainLineWordFixture(LegacyFreshMainSingleLineSampled Sour
             activation.GetProperty("hidden").EnumerateArray().Select(value => value.GetInt32()).ToArray(),
             activation.GetProperty("output").EnumerateArray().Select(value => value.GetInt32()).ToArray());
         var table = LegacyCursiveSeparationTable.Load(separation);
-        if (physicalCount is < 1 or > 32) throw new ArgumentOutOfRangeException(nameof(physicalCount));
+        if (physicalCount is < 1 or > 36) throw new ArgumentOutOfRangeException(nameof(physicalCount));
         var raw = Enumerable.Range(0, physicalCount).Select(index => new InkStroke(new InkPoint[]
         {
             new(index * 70, 90), new(index * 70, 10), new(index * 70 + 25, 60),

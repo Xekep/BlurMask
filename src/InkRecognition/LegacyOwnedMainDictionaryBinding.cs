@@ -9,6 +9,10 @@ internal sealed class LegacyOwnedMainDictionaryBinding
     private readonly LegacyPreparedAggregateDictionaryQuerySource? directQueries;
     private LegacyPreparedDictionaryWorkingMap? installedCaseMap;
     private LegacyPreparedCaseDictionarySession.ResultQueryLease? caseResultLease;
+    private LegacyPreparedCaseDictionarySession.LivePublicationQueryLease? caseLivePublicationLease;
+    private long directRevision,directLiveRevision;
+    private bool directLiveCaptured;
+    private int directCurrentNode=-1;
     public LegacyOwnedRussianDictionaryPreparation? Direct {get;}
     public LegacyFreshCaseRussianDictionaryPreparation? Case {get;}
     public LegacyRussianModelBundle Model=>Direct?.Model??Case!.Model;
@@ -33,13 +37,14 @@ internal sealed class LegacyOwnedMainDictionaryBinding
     {
         token.ThrowIfCancellationRequested();
         if(Case is{} owned){owned.Session.PrepareControllerNode(completedNode,token);installedCaseMap=null;}
-        else directBackend!.ResetQueries();
+        else{directRevision=checked(directRevision+1);directCurrentNode=-1;directBackend!.ResetQueries();}
     }
     public LegacyPreparedDictionaryWorkingMap Refresh(LegacyPreparedAcousticPermissionResult produced,
         LegacyOrdinaryCursiveCandidateGraph graph,int node,byte span,CancellationToken token)
     {
         if(!produced.Succeeded||produced.WorkingMap is null)throw new InvalidDataException("Failed acoustic permissions cannot refresh selected sources.");
         if(Case is{} owned)return installedCaseMap=owned.Session.RefreshOwnedSpanAndGetMap(produced.Permissions.Span,graph,node,span,token);
+        directRevision=checked(directRevision+1);directCurrentNode=node;
         directBackend!.SetWorkingMap(produced.WorkingMap);return produced.WorkingMap;
     }
     public LegacyAggregateDictionaryQueryPage Read(ulong tag,LegacyPreparedDictionaryQuery query,
@@ -50,6 +55,7 @@ internal sealed class LegacyOwnedMainDictionaryBinding
             if(extraCosts!=owned.CaptureSideCosts2368)throw new ArgumentException("Fresh case source has native capture2368=0.");
             return owned.Session.ReadForMap(installedCaseMap??throw new InvalidOperationException("Case span map is not prepared."),tag,query,auxiliary,token);
         }
+        directRevision=checked(directRevision+1);
         return directQueries!.Read(tag,query,auxiliary,extraCosts,token);
     }
     public ReadOnlyMemory<byte> ReadTerminal(ulong tag,ushort symbol,byte boundary,CancellationToken token)
@@ -83,6 +89,52 @@ internal sealed class LegacyOwnedMainDictionaryBinding
     {
         if(Case is{} owned)return owned.Session.ReadResultQuery(caseResultLease??
             throw new InvalidOperationException("Case result source was not captured after its final V80."),tag,query,auxiliary,token);
+        directRevision=checked(directRevision+1);
         return directQueries!.Read(tag,query,auxiliary,false,token);
+    }
+
+    internal void CaptureLivePublicationQueryLease(int endingNode,CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        if(Case is{} owned)caseLivePublicationLease=owned.Session.CaptureLivePublicationQueryLease(
+            installedCaseMap??throw new InvalidOperationException("Case live span map is not prepared."),endingNode,token);
+        else
+        {
+            if(endingNode<0||directCurrentNode!=endingNode)
+                throw new InvalidOperationException("DIRECT live publication requires this active D0 node.");
+            directLiveRevision=directRevision;directLiveCaptured=true;
+        }
+    }
+    internal void ValidateLivePublicationQueryLease(CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        if(Case is{} owned)owned.Session.ValidateLivePublicationQueryLease(caseLivePublicationLease??
+            throw new InvalidOperationException("Case live publication source was not captured."),token);
+        else if(!directLiveCaptured||directLiveRevision!=directRevision)
+            throw new InvalidOperationException("DIRECT live publication source changed or was not captured.");
+    }
+    internal LegacyAggregateDictionaryQueryPage ReadLivePublicationQuery(ulong tag,LegacyPreparedDictionaryQuery query,
+        bool auxiliary,CancellationToken token)
+    {
+        if(Case is{} owned)return owned.Session.ReadLivePublicationQuery(caseLivePublicationLease??
+            throw new InvalidOperationException("Case live publication source was not captured."),tag,query,auxiliary,token);
+        ValidateLivePublicationQueryLease(token);
+        try
+        {
+            var result=directQueries!.Read(tag,query,auxiliary,false,token);
+            directRevision=checked(directRevision+1);directLiveRevision=directRevision;return result;
+        }
+        catch{directLiveCaptured=false;throw;}
+    }
+    internal void EndLivePublicationQueryLease(CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        if(Case is{} owned)
+        {
+            owned.Session.EndLivePublicationQueryLease(caseLivePublicationLease??
+                throw new InvalidOperationException("Case live publication source was not captured."),token);
+            caseLivePublicationLease=null;
+        }
+        else{ValidateLivePublicationQueryLease(token);directLiveCaptured=false;}
     }
 }

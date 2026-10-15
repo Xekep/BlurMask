@@ -1,6 +1,7 @@
 using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
 [assembly:InternalsVisibleTo("LegacyCaseResultQuery.Probe")]
+[assembly:InternalsVisibleTo("LegacyMainLiveQuery.Probe")]
 namespace InkRecognition;
 
 /// <summary>One selected292 dictionary with shared owned backend for normal/auxiliary
@@ -15,6 +16,7 @@ public sealed class LegacyPreparedCaseDictionarySession
     private long controllerEpoch,preparedMapEpoch;
     private long queryRevision,queryResetRevision;
     private ResultQueryLease? activeResultLease;
+    private LivePublicationQueryLease? activeLivePublicationLease;
     private int nextControllerNode=-1,lastOwnedSpan=-1;
     private bool ownedKeyProgression,externalQuerySinceEpoch;
     private bool retainedOwnedSpanMap;
@@ -283,6 +285,72 @@ public sealed class LegacyPreparedCaseDictionarySession
             lease.Epoch!=controllerEpoch||lease.MapEpoch!=preparedMapEpoch||
             !ReferenceEquals(lease.Map,installedMap)||lease.Revision!=queryRevision)
             throw new InvalidOperationException("Result query source was changed by another map, controller epoch or external query.");
+    }
+
+    //2144F0 can call207CB0 before this node's V80. The current D0 map,
+    //backend and existing query slots remain live, unlike final publication.
+    internal sealed class LivePublicationQueryLease(LegacyPreparedCaseDictionarySession owner,long epoch,
+        LegacyPreparedDictionaryWorkingMap map,int node,byte span,long revision)
+    {
+        internal readonly LegacyPreparedCaseDictionarySession Owner=owner;
+        internal readonly long Epoch=epoch;
+        internal readonly LegacyPreparedDictionaryWorkingMap Map=map;
+        internal readonly int Node=node;
+        internal readonly byte Span=span;
+        internal long Revision=revision;
+    }
+
+    internal LivePublicationQueryLease CaptureLivePublicationQueryLease(LegacyPreparedDictionaryWorkingMap expectedMap,
+        int endingNode,CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(expectedMap);Enter(token);
+        try
+        {
+            RequireInstalledMap(expectedMap);
+            if(endingNode<0||endingNode>=Graph.NodeCount||nextControllerNode!=endingNode||
+                !retainedOwnedSpanMap||!ownedKeyProgression||externalQuerySinceEpoch||
+                currentOwnedKey is not{} key||key.Node!=endingNode||key.Span!=lastOwnedSpan)
+                throw new InvalidOperationException("Live publication requires this active node's actual D0 map before V80.");
+            return activeLivePublicationLease=new(this,controllerEpoch,installedMap,endingNode,key.Span,queryRevision);
+        }
+        finally{Exit();}
+    }
+
+    internal void ValidateLivePublicationQueryLease(LivePublicationQueryLease lease,CancellationToken token)
+    {Enter(token);try{RequireLivePublicationQueryLease(lease);}finally{Exit();}}
+
+    internal LegacyAggregateDictionaryQueryPage ReadLivePublicationQuery(LivePublicationQueryLease lease,
+        ulong tag,LegacyPreparedDictionaryQuery query,bool auxiliary,CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(query);Enter(token);
+        try
+        {
+            RequireLivePublicationQueryLease(lease);
+            try
+            {
+                var result=queries.Read(tag,query,auxiliary,extraCosts,token);
+                queryRevision=checked(queryRevision+1);lease.Revision=queryRevision;
+                return result;
+            }
+            catch{valid=false;throw;}
+        }
+        finally{Exit();}
+    }
+
+    internal void EndLivePublicationQueryLease(LivePublicationQueryLease lease,CancellationToken token)
+    {
+        Enter(token);try{RequireLivePublicationQueryLease(lease);activeLivePublicationLease=null;}finally{Exit();}
+    }
+
+    private void RequireLivePublicationQueryLease(LivePublicationQueryLease lease)
+    {
+        ArgumentNullException.ThrowIfNull(lease);
+        if(!ReferenceEquals(lease.Owner,this)||!ReferenceEquals(activeLivePublicationLease,lease)||
+            lease.Epoch!=controllerEpoch||preparedMapEpoch!=controllerEpoch||
+            !ReferenceEquals(lease.Map,installedMap)||lease.Revision!=queryRevision||
+            currentOwnedKey is not{} key||key.Node!=lease.Node||key.Span!=lease.Span||
+            nextControllerNode!=lease.Node||!ownedKeyProgression||externalQuerySinceEpoch)
+            throw new InvalidOperationException("Live publication source was changed by a span, V80, map or external query.");
     }
     private void InstallMap(LegacyPreparedDictionaryWorkingMap map)
     {dictionary.SetWorkingMap(map);Volatile.Write(ref installedMap,map);Volatile.Write(ref preparedMapEpoch,controllerEpoch);}

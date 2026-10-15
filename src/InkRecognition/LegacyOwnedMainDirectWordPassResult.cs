@@ -8,7 +8,15 @@ public sealed class LegacyOwnedMainDirectWordPassResult
     private readonly long resultQueryEpoch;
     private int compactPublicationStarted;
     internal LegacyOwnedFreshMainWordControllerPolicy ControllerOwner { get; }
+    internal LegacyMainCompactPublicationState? IntermediatePublicationState { get; private set; }
     public int NodeCount => nodes.Length;
+    public int IntermediatePublicationCount => IntermediatePublicationState?.PublicationCount ?? 0;
+    public int NextUnpublishedNode2490 => IntermediatePublicationState?.NextNode ?? 0;
+    public byte[] CopyIntermediateCompactStorage() => IntermediatePublicationState?.Storage.ToArray() ?? [];
+    public int[] CopyIntermediateNodeStarts2478() => IntermediatePublicationState is { } state
+        ? state.Starts.AsSpan(0, state.NextNode + 1).ToArray() : [];
+    public int[] CopyIntermediatePrefixOwners2488() => IntermediatePublicationState is { } state
+        ? state.PrefixOwners.AsSpan(0, state.NextNode + 1).ToArray() : [];
 
     private LegacyOwnedMainDirectWordPassResult(LegacyOwnedFreshMainWordControllerPolicy owner,
         LegacyMainDirectWordNodeResult[] nodes, long resultQueryEpoch)
@@ -42,6 +50,14 @@ public sealed class LegacyOwnedMainDirectWordPassResult
 
     public int[] CopyCumulativePathCosts()
         => nodes.Select(node => node.CumulativePathCost2520).ToArray();
+
+    internal void BindIntermediatePublicationState(LegacyMainCompactPublicationState state)
+    {
+        if (!ReferenceEquals(state.Controller, ControllerOwner) || IntermediatePublicationState is not null ||
+            state.NextNode >= NodeCount)
+            throw new ArgumentException("The completed pass requires its exact unfinished publication state.");
+        IntermediatePublicationState = state;
+    }
 
     internal ReadOnlySpan<byte> FinalRecords => nodes[^1].Records.Span;
     internal ushort FinalSourceEnd => nodes[^1].SourceEnd23f0;

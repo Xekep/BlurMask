@@ -30,6 +30,14 @@ public sealed class LegacyOwnedMainCaseWordPass
     /// selection or materialize the compact backtracking records.</summary>
     public LegacyOwnedMainCaseWordPassResult RunOwned(CancellationToken cancellationToken=default)
         =>new(SourcePolicy,scheduler.RunOwned(cancellationToken));
+
+    /// <summary>Actual live intermediate publication through this same typed
+    /// CASE scheduler and persistent292/290 source; no parallel DIRECT owner.</summary>
+    public LegacyOwnedMainCaseWordPassResult RunOwnedWithIntermediatePublication(ReadOnlySpan<byte> resource,
+        LegacyOwnedRussianMainGlyphConfidence candidateOwner, ReadOnlySpan<byte> compactAllocatorResidue40,
+        Action<LegacyMainIntermediateCompactPublication>? publicationObserver = null, CancellationToken cancellationToken = default)
+        => new(SourcePolicy, scheduler.RunOwnedWithIntermediatePublication(resource, candidateOwner,
+            compactAllocatorResidue40, publicationObserver, cancellationToken));
 }
 
 public sealed class LegacyOwnedMainCaseWordPassResult
@@ -46,4 +54,9 @@ public sealed class LegacyOwnedMainCaseWordPassResult
     }
     public LegacyMainDirectWordNodeResult GetNodeSnapshot(int endingNode)=>Storage.GetNodeSnapshot(endingNode);
     public int[] CopyCumulativePathCosts()=>Storage.CopyCumulativePathCosts();
+    public int IntermediatePublicationCount => Storage.IntermediatePublicationCount;
+    public int NextUnpublishedNode2490 => Storage.NextUnpublishedNode2490;
+    public byte[] CopyIntermediateCompactStorage() => Storage.CopyIntermediateCompactStorage();
+    public int[] CopyIntermediateNodeStarts2478() => Storage.CopyIntermediateNodeStarts2478();
+    public int[] CopyIntermediatePrefixOwners2488() => Storage.CopyIntermediatePrefixOwners2488();
 }

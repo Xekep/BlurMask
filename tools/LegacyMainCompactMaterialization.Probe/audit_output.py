@@ -257,5 +257,12 @@ expected=base64.b64decode(c['compact']);assert storage==expected, next(((i,a,b) 
 for n,out in enumerate(c['nodes']):
     assert rows[n]==base64.b64decode(out['rows']),('full beam storage',n)
     assert pools[n]==base64.b64decode(out['alternatives']),('full primary storage',n)
-assert starts[-2]+u16(rows[-1],c['winner']*88+34)==c['selected']
-print(f'PASS independent raw-LK207780, context identity/frame normalization, ordering/dedup/penalty and full {len(storage)} compact bytes, {sum(map(len,rows))+sum(map(len,pools))} beam/pool bytes; {count} genuine records, selected{c["selected"]}, no expected text')
+if c.get('publicationKind')=='live':
+    assert c['startingNode']==0 and c['previousCount']==0
+    assert c['actualGraphNodeCount']>len(rows)==c['nextNode2490']
+    if c['nativeGate']:assert len(rows)==120
+    else:assert c['actualGraphNodeCount']<=120 # explicitly prepared invocation, not a native gate
+    assert c['prefixOwners2488']==[-1]*len(rows)+[len(rows)-1]
+else:
+    assert starts[-2]+u16(rows[-1],c['winner']*88+34)==c['selected']
+print(f'PASS independent raw-LK207780, context identity/frame normalization, ordering/dedup/penalty and full {len(storage)} compact bytes, {sum(map(len,rows))+sum(map(len,pools))} beam/pool bytes; {count} genuine records, selected{c.get("selected","not invoked during LIVE publication")}, no expected text')

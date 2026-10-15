@@ -51,16 +51,53 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
     {
         ArgumentNullException.ThrowIfNull(terminal); ArgumentNullException.ThrowIfNull(confidence);
         cancellationToken.ThrowIfCancellationRequested();
-        var pass = terminal.PassResult; var owner = pass.ControllerOwner.Owner;
-        var configuration = pass.ControllerOwner.Configuration;
-        //2144F0 publishes an intermediate207CB0 only if node+1<GraphCount
-        //and knowledge54+2490<=node+1. Fresh2490=0 and owned54=120 prove no
-        //earlier publication here. Check this before winner inspection:
-        //a longer source cannot use this fresh one-shot state at all.
-        if (pass.NodeCount > pass.ControllerOwner.MaximumParentDistance54)
+        var pass = terminal.PassResult;
+        if (pass.IntermediatePublicationState is null && pass.NodeCount > pass.ControllerOwner.MaximumParentDistance54)
             throw new NotSupportedException("Fresh one-shot publication requires a source before the native intermediate-publication boundary.");
         if (!terminal.Winner.HasWinner)
             throw new NotSupportedException("A real preselected numeric terminal is required.");
+        ValidatePublicationOwner(resource, pass.ControllerOwner, casePolicy, confidence);
+        var state = pass.IntermediatePublicationState?.Copy() ?? new LegacyMainCompactPublicationState(pass.ControllerOwner, allocatorResidue40);
+        if (pass.IntermediatePublicationState is not null && !allocatorResidue40.SequenceEqual(state.InitialResidue))
+            throw new ArgumentException("Final publication must retain the intermediate compact allocator owner.");
+        pass.BeginCompactWordPublication(cancellationToken);
+        var source = LegacyMainCompactPublicationSource.Final(resource, pass, casePolicy, state.NextNode, cancellationToken);
+        var stage = Publish(resource, source, confidence, state, cancellationToken);
+        int selected = state.Starts[pass.NodeCount - 1] + U16(stage.Nodes[^1].Records.Span, terminal.Winner.Ordinal * 88 + 0x22);
+        if ((uint)selected >= state.Count) throw new InvalidDataException("Selected native row22 does not name the published compact pool.");
+        return new(terminal, stage.Reachability, confidence, state.Storage.ToArray(), state.Count,
+            state.Starts.ToArray(), stage.Nodes, selected, casePolicy);
+    }
+
+    internal sealed record PublicationStage(LegacyOwnedMainCompactWordReachability Reachability,
+        LegacyMainDirectWordNodeResult[] Nodes);
+
+    internal static void ValidatePublicationOwner(ReadOnlySpan<byte> resource,
+        LegacyOwnedFreshMainWordControllerPolicy controller, LegacyFreshCaseMainSourcePolicy? casePolicy,
+        LegacyOwnedRussianMainGlyphConfidence confidence)
+    {
+        var owner = controller.Owner;
+        if (!ReferenceEquals(confidence.Model, owner.CommonModel) || !ReferenceEquals(confidence.Graph, owner.SourceGraph) ||
+            (casePolicy is null ? owner.IsCaseAware || !ReferenceEquals(confidence.DirectDictionaryOwner, owner.DictionaryOwner) :
+                !owner.IsCaseAware || !ReferenceEquals(casePolicy.Controller, controller) ||
+                !ReferenceEquals(owner.CaseDictionaryOwner, casePolicy.DictionaryOwner) ||
+                !ReferenceEquals(confidence.CaseDictionaryOwner, casePolicy.DictionaryOwner)))
+            throw new ArgumentException("Publication requires its actual typed controller, graph and candidate owner.");
+        if (resource.Length != 572763 || !StringComparer.OrdinalIgnoreCase.Equals(
+            Convert.ToHexString(SHA256.HashData(resource)), owner.SelectedSourceOwner.SourceFingerprint))
+            throw new ArgumentException("Compact publication must use its exact selected main resource.");
+    }
+
+    internal static PublicationStage Publish(ReadOnlySpan<byte> resource, LegacyMainCompactPublicationSource source,
+        LegacyOwnedRussianMainGlyphConfidence confidence, LegacyMainCompactPublicationState state,
+        CancellationToken cancellationToken)
+    {
+        source.Validate(cancellationToken);
+        var owner = source.Owner;
+        var casePolicy = source.CasePolicy;
+        var configuration = source.Controller.Configuration;
+        if (!ReferenceEquals(state.Controller, source.Controller) || state.NextNode != source.StartingNode)
+            throw new ArgumentException("Publication must advance its actual persistent compact state.");
         if (!ReferenceEquals(confidence.Model, owner.CommonModel) || !ReferenceEquals(confidence.Graph, owner.SourceGraph))
             throw new ArgumentException("Candidate weights, source graph and terminal must share the actual model owner.");
         LegacyOwnedFreshCaseMainTerminalInvocation? caseInvocation = null;
@@ -71,48 +108,45 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
         }
         else
         {
-            if (!owner.IsCaseAware || !ReferenceEquals(casePolicy.Controller, pass.ControllerOwner) ||
+            if (!owner.IsCaseAware || !ReferenceEquals(casePolicy.Controller, source.Controller) ||
                 !ReferenceEquals(owner.CaseDictionaryOwner, casePolicy.DictionaryOwner) ||
                 !ReferenceEquals(confidence.CaseDictionaryOwner, casePolicy.DictionaryOwner))
                 throw new ArgumentException("One actual fresh CASE source/controller/candidate owner required.");
             caseInvocation = LegacyOwnedFreshCaseMainTerminalInvocation.Prepare(casePolicy, cancellationToken);
         }
-        if (allocatorResidue40.Length == 0 || allocatorResidue40.Length % 40 != 0 || allocatorResidue40.Length > 64 * 1024 * 1024)
-            throw new ArgumentException("Bounded explicit compact40 allocator residue required.");
         if (configuration.HeaderCount2400 != 2)
             throw new NotSupportedException("The actual fresh two-header publication policy is required.");
         if (resource.Length != 572763 || !StringComparer.OrdinalIgnoreCase.Equals(
             Convert.ToHexString(SHA256.HashData(resource)), owner.SelectedSourceOwner.SourceFingerprint))
             throw new ArgumentException("Compact publication must use its exact selected main resource.");
-        pass.BeginCompactWordPublication(cancellationToken);
-        var reachable = casePolicy is null
-            ? LegacyOwnedMainCompactWordReachability.Prepare(resource, terminal, cancellationToken)
-            : LegacyOwnedMainCompactWordReachability.PrepareCase(resource, terminal, casePolicy, cancellationToken);
+        var reachable = LegacyOwnedMainCompactWordReachability.PrepareSource(resource, source, cancellationToken);
         int primary = configuration.PrimaryArcLimit230a;
         var alphabet = owner.CommonModel.AcousticAlphabet;
         var categories = new LegacyCursiveCategoryMapper(owner.SelectedSourceOwner.Categories);
         var policy = LegacyPreparedCompactWordContextPolicy.FromAlphabet(alphabet, false, false,
             caseInvocation?.Options.ContextSentinels24b8 ??
-            LegacyOwnedFreshMainTerminalInvocation.Prepare(pass.ControllerOwner).Options.ContextSentinels24b8);
+            LegacyOwnedFreshMainTerminalInvocation.Prepare(source.Controller).Options.ContextSentinels24b8);
         ushort specialMarker = Label("\u0003");
         ushort shadda = Label("\u0651"), closed = Label("\U000f0001");
         byte[] header = alphabet.CopySerializedHeader();
         ushort[] reserved = [checked((ushort)alphabet.LabelCount), U16(header, 8), U16(header, 10), U16(header, 12)];
-        var snapshots = Enumerable.Range(0, pass.NodeCount).Select(reachable.GetNodeSnapshot).ToArray();
+        var snapshots = Enumerable.Range(0, source.EndingNode + 1).Select(reachable.GetNodeSnapshot).ToArray();
         var rows = snapshots.Select(s => s.Records.ToArray()).ToArray();
         var pools = snapshots.Select(s => s.PrimaryAlternatives.ToArray()).ToArray();
-        byte[] storage = allocatorResidue40.ToArray();
-        var nodeStarts = new int[pass.NodeCount + 1];
+        byte[] storage = state.Storage.ToArray();
+        var nodeStarts = state.Starts.ToArray();
+        var prefixOwners = state.PrefixOwners.ToArray();
         var scores = new Dictionary<int, LegacyOwnedRussianMainGlyphConfidenceGroup>();
-        int count = 0;
+        int count = state.Count;
         float penalty = (caseInvocation?.LanguagePenalty2534 ??
             LegacyOwnedRussianTerminalSources.Prepare(owner.DictionaryOwner, cancellationToken).LanguagePenalty2534) * .8f;
         int forcedPenalty = (int)(penalty <= 0 ? penalty - .5f : penalty + .5f);
 
-        for (int node = 0; node < pass.NodeCount; node++)
+        for (int node = source.StartingNode; node <= source.EndingNode; node++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             nodeStarts[node] = count;
+            prefixOwners[node] = source.StartingNode - 1;
             var usedArcs = new bool[owner.SourceGraph.GetNode(node).Count];
             var candidates = new List<Candidate>();
             for (ushort ordinal = 0; ordinal < primary; ordinal++)
@@ -247,13 +281,13 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
                 }
             }
         }
-        nodeStarts[^1] = count;
-        pass.ValidateResultQueryEpoch(cancellationToken);
-        int selected = nodeStarts[^2] + U16(rows[^1], terminal.Winner.Ordinal * 88 + 0x22);
-        if ((uint)selected >= count) throw new InvalidDataException("Selected native row22 does not name the newly published compact pool.");
+        nodeStarts[source.EndingNode + 1] = count;
+        prefixOwners[source.EndingNode + 1] = source.EndingNode;
+        source.Validate(cancellationToken);
         for (int node = 0; node < snapshots.Length; node++)
             snapshots[node] = snapshots[node] with { Records = rows[node], PrimaryAlternatives = pools[node] };
-        return new(terminal, reachable, confidence, storage, count, nodeStarts, snapshots, selected, casePolicy);
+        state.Commit(source, storage, count, nodeStarts, prefixOwners, cancellationToken);
+        return new(reachable, snapshots);
 
         ushort Label(string text) => alphabet.TryGetLabel(text, out ushort value) ? value : ushort.MaxValue;
         byte Category(ushort symbol) => unchecked((byte)categories.GetSymbolCompositeCategory(symbol));

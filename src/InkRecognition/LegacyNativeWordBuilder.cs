@@ -59,6 +59,20 @@ public sealed class LegacyNativeWordBuilder
         W64(data,8,reference);
     }
 
+    //21FE30 writes packet metadata before218560 constructs the chain.
+    internal void ApplyMainPublicationPacket(LegacyPreparedMainWordPublicationPacket packet,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(packet);token.ThrowIfCancellationRequested();
+        packet.CopyWordStorageWithPacketFields(data).CopyTo(data,0);
+    }
+
+    //13F110 on the supported plain owner, preserving bytes which native reset
+    //does not initialize. Auxiliary native-vector ownership stays refused.
+    internal void ResetPlain(CancellationToken token=default)
+    {
+        var reset=CreateEmpty(Pool,data,token);reset.data.CopyTo(data,0);
+    }
+
     /// <summary>276.38/13f4a0 ordinary one-component publication on13f180's
     /// last linked glyph. Zero-count/macro rows can be supplied by their
     /// actual independent record producer through the pool's ReplaceRecord.</summary>
