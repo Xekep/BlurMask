@@ -7,8 +7,11 @@ It never imports production C# or uses the selected text as feedback.
 import ast,base64,hashlib,json,math,struct,sys
 from array import array
 from pathlib import Path
-if len(sys.argv)!=4:raise SystemExit('AK LK capture.json')
+if len(sys.argv) not in (4,5):raise SystemExit('AK LK capture.json [--fresh-case]')
+case_mode=len(sys.argv)==5
+if case_mode:assert sys.argv[4]=='--fresh-case'
 ak=Path(sys.argv[1]).read_bytes();lk=Path(sys.argv[2]).read_bytes();c=json.loads(Path(sys.argv[3]).read_bytes())
+if case_mode:assert c['factory']==0x292
 assert hashlib.sha256(ak).hexdigest()=='7a5f08809e81fb4a2d4c78b3efd251d0986503b0d30d21de3695dab1f8a89978'
 assert hashlib.sha256(lk).hexdigest()=='d26ed08baf419361484958b3a04a5f740a228f4664f7e2643f43459223ef3e4e'
 def u16(b,p):return struct.unpack_from('<H',b,p)[0]
@@ -57,19 +60,21 @@ assert child_start[-1]==nodes_count
 rows=[bytearray(base64.b64decode(n['rows'])) for n in c['inputNodes']]
 pools=[bytearray(base64.b64decode(n['alternatives'])) for n in c['inputNodes']]
 limits=[n['sourceEnd'] for n in c['inputNodes']];primary=c['primary'];graph=c['graph']
-assert len(rows)==4 and len(graph)==4
+assert len(rows)==len(graph)
+if case_mode:assert 0<len(rows)<=c['maximumAtoms']
+else:assert len(rows)==4
 context={n[0]:(n[1],n[2]) for n in c['contexts']}
 def path(identity):
     result=[]
     while identity:
         result.append(identity);identity=context[identity][0]
     return result[::-1]
-#All four nodes are in the actual graph's lookahead suffix. Mark exact native
+#Every captured node is in the actual graph's complete lookahead suffix. Mark native
 #beam and alternative predecessors, including all allocated inactive bytes.
-for n in range(4):
+for n in range(len(rows)):
     for o in range(limits[n]):rows[n][o*88+6]&=253
     for o in range(primary*2):pools[n][o*40+27]&=127
-for n in reversed(range(4)):
+for n in reversed(range(len(rows))):
     for o in range(limits[n]):
         if i32(rows[n],o*88+16)>=67108864:continue
         if o<primary:
@@ -173,13 +178,14 @@ def pool(n,o,k):return memoryview(pools[n])[(o*2+k)*40:(o*2+k+1)*40]
 def beam(n,o):return memoryview(rows[n])[o*88:(o+1)*88]
 def previous(n,relative):return -1 if relative==65535 else starts[n]+relative
 penalty=int(f(f(f(c['penalty'])*f(.8))+.5))
-for n in range(4):
+for n in range(len(rows)):
     starts.append(count);used=set();candidates=[]
     for o in range(primary):
         for k in range(2):
             p=pool(n,o,k)
             if not p[27]&128:continue
-            r=beam(n,o);arc=u16(r,28);assert r[4]==1 and r[7]==0 and i32(r,48)==-1
+            r=beam(n,o);arc=u16(r,28);assert r[4]==1 and i32(r,48)==-1
+            assert (r[7]&1)==0 if case_mode else r[7]==0
             candidates.append(dict(o=o,k=k,cost=i32(p,0),inc=i32(p,4),tag=u64(r,0),ctx=u64(p,16),key=i32(r,52),end=graph[n][arc][2],forced=False))
     def compare(a,b):
         for field in ('key','end','cost'):

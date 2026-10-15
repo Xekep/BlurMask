@@ -31,6 +31,16 @@ public sealed class LegacyOwnedMainCompactWordReachability
     /// This does not produce a compact record or a reconstructed word.</summary>
     public static LegacyOwnedMainCompactWordReachability Prepare(ReadOnlySpan<byte> resource,
         LegacyOwnedMainTerminalResult terminal, CancellationToken cancellationToken = default)
+        => PrepareCore(resource, terminal, null, cancellationToken);
+
+    internal static LegacyOwnedMainCompactWordReachability PrepareCase(ReadOnlySpan<byte> resource,
+        LegacyOwnedMainTerminalResult terminal, LegacyFreshCaseMainSourcePolicy sourcePolicy,
+        CancellationToken cancellationToken)
+        => PrepareCore(resource, terminal, sourcePolicy, cancellationToken);
+
+    private static LegacyOwnedMainCompactWordReachability PrepareCore(ReadOnlySpan<byte> resource,
+        LegacyOwnedMainTerminalResult terminal, LegacyFreshCaseMainSourcePolicy? casePolicy,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(terminal);
         cancellationToken.ThrowIfCancellationRequested();
@@ -39,10 +49,16 @@ public sealed class LegacyOwnedMainCompactWordReachability
         var policy = pass.ControllerOwner;
         var owner = policy.Owner;
         var configuration = policy.Configuration;
-        if (owner.IsCaseAware || configuration.Mode22f6 != 0 || configuration.Trace2368 != 0 ||
+        if (casePolicy is null && owner.IsCaseAware)
+            throw new NotSupportedException("The DIRECT reachability entrypoint does not accept a CASE source.");
+        if (owner.IsCaseAware != (casePolicy is not null) ||
+            casePolicy is not null && (!ReferenceEquals(casePolicy.Controller, policy) ||
+                !ReferenceEquals(casePolicy.DictionaryOwner, owner.CaseDictionaryOwner)))
+            throw new ArgumentException("The result requires its actual typed DIRECT or fresh CASE source policy.");
+        if (configuration.Mode22f6 != 0 || configuration.Trace2368 != 0 ||
             configuration.PrimaryAlternativeCount2402 != 2 || configuration.SecondaryAlternativeCount2404 != 1 ||
             (configuration.PackedSource22e8 & 7) <= 1 || policy.SecondaryScaleEc != 0)
-            throw new NotSupportedException("Fresh DIRECT mode0/2/2/1 ordinary language reachability required.");
+            throw new NotSupportedException("Fresh mode0/2/2/1 ordinary language reachability required.");
         //The exact typed source is checked again before its coordinate-mode
         //reader can transport this resource into a result query wrapper.
         var observed = LegacyOwnedFreshMainWordControllerPolicy.Prepare(resource, owner, cancellationToken);

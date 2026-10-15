@@ -4,7 +4,8 @@ using System.Security.Cryptography;
 namespace InkRecognition;
 
 /// <summary>Owned ordinary207CB0 compact storage and its real per-node2478
-/// offsets. This is a DIRECT publication stage, not21FFD0 glyph/text output.</summary>
+/// offsets. Typed DIRECT/CASE entrypoints retain their exact source owner;
+/// this is not21FFD0 glyph/text output.</summary>
 public sealed class LegacyOwnedMainCompactWordMaterialization
 {
     private readonly byte[] storage;
@@ -13,17 +14,20 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
     public LegacyOwnedMainTerminalResult TerminalResult { get; }
     public LegacyOwnedMainCompactWordReachability Reachability { get; }
     public LegacyOwnedRussianMainGlyphConfidence ConfidenceOwner { get; }
+    public LegacyFreshCaseMainSourcePolicy? CaseSourcePolicy { get; }
     public int RecordCount { get; }
     public int SelectedRecordIndex { get; }
     public ushort SelectedAlternative => ushort.MaxValue;
 
     private LegacyOwnedMainCompactWordMaterialization(LegacyOwnedMainTerminalResult terminal,
         LegacyOwnedMainCompactWordReachability reachable, LegacyOwnedRussianMainGlyphConfidence confidence,
-        byte[] storage, int count, int[] starts, LegacyMainDirectWordNodeResult[] nodes, int selected)
+        byte[] storage, int count, int[] starts, LegacyMainDirectWordNodeResult[] nodes, int selected,
+        LegacyFreshCaseMainSourcePolicy? caseSourcePolicy)
     {
         TerminalResult = terminal; Reachability = reachable; ConfidenceOwner = confidence;
         this.storage = storage; RecordCount = count; this.starts = starts; this.nodes = nodes;
         SelectedRecordIndex = selected;
+        CaseSourcePolicy = caseSourcePolicy;
     }
 
     /// <summary>Fresh mode0/2/2/1 DIRECT route with no associated source or
@@ -32,6 +36,18 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
     public static LegacyOwnedMainCompactWordMaterialization Materialize(ReadOnlySpan<byte> resource,
         LegacyOwnedMainTerminalResult terminal, LegacyOwnedRussianMainGlyphConfidence confidence,
         ReadOnlySpan<byte> allocatorResidue40, CancellationToken cancellationToken = default)
+        => MaterializeCore(resource, terminal, confidence, allocatorResidue40, null, cancellationToken);
+
+    internal static LegacyOwnedMainCompactWordMaterialization MaterializeCase(ReadOnlySpan<byte> resource,
+        LegacyFreshCaseMainSourcePolicy sourcePolicy, LegacyOwnedMainTerminalResult terminal,
+        LegacyOwnedRussianMainGlyphConfidence confidence, ReadOnlySpan<byte> allocatorResidue40,
+        CancellationToken cancellationToken)
+        => MaterializeCore(resource, terminal, confidence, allocatorResidue40, sourcePolicy, cancellationToken);
+
+    private static LegacyOwnedMainCompactWordMaterialization MaterializeCore(ReadOnlySpan<byte> resource,
+        LegacyOwnedMainTerminalResult terminal, LegacyOwnedRussianMainGlyphConfidence confidence,
+        ReadOnlySpan<byte> allocatorResidue40, LegacyFreshCaseMainSourcePolicy? casePolicy,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(terminal); ArgumentNullException.ThrowIfNull(confidence);
         cancellationToken.ThrowIfCancellationRequested();
@@ -39,9 +55,22 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
         var configuration = pass.ControllerOwner.Configuration;
         if (!terminal.Winner.HasWinner)
             throw new NotSupportedException("A real preselected numeric terminal is required.");
-        if (owner.IsCaseAware || !ReferenceEquals(confidence.DirectDictionaryOwner, owner.DictionaryOwner) ||
-            !ReferenceEquals(confidence.Model, owner.CommonModel) || !ReferenceEquals(confidence.Graph, owner.SourceGraph))
-            throw new ArgumentException("Confidence, source graph and terminal must share the actual DIRECT owner.");
+        if (!ReferenceEquals(confidence.Model, owner.CommonModel) || !ReferenceEquals(confidence.Graph, owner.SourceGraph))
+            throw new ArgumentException("Candidate weights, source graph and terminal must share the actual model owner.");
+        LegacyOwnedFreshCaseMainTerminalInvocation? caseInvocation = null;
+        if (casePolicy is null)
+        {
+            if (owner.IsCaseAware || !ReferenceEquals(confidence.DirectDictionaryOwner, owner.DictionaryOwner))
+                throw new ArgumentException("The DIRECT entrypoint requires its actual DIRECT dictionary owner.");
+        }
+        else
+        {
+            if (!owner.IsCaseAware || !ReferenceEquals(casePolicy.Controller, pass.ControllerOwner) ||
+                !ReferenceEquals(owner.CaseDictionaryOwner, casePolicy.DictionaryOwner) ||
+                !ReferenceEquals(confidence.CaseDictionaryOwner, casePolicy.DictionaryOwner))
+                throw new ArgumentException("One actual fresh CASE source/controller/candidate owner required.");
+            caseInvocation = LegacyOwnedFreshCaseMainTerminalInvocation.Prepare(casePolicy, cancellationToken);
+        }
         if (allocatorResidue40.Length == 0 || allocatorResidue40.Length % 40 != 0 || allocatorResidue40.Length > 64 * 1024 * 1024)
             throw new ArgumentException("Bounded explicit compact40 allocator residue required.");
         if (configuration.HeaderCount2400 != 2)
@@ -52,13 +81,16 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
         if (pass.NodeCount > owner.SourceGraph.MaximumAtoms)
             throw new NotSupportedException("This first owning publication scope requires the graph's complete lookahead suffix.");
         pass.BeginCompactWordPublication(cancellationToken);
-        var reachable = LegacyOwnedMainCompactWordReachability.Prepare(resource, terminal, cancellationToken);
+        var reachable = casePolicy is null
+            ? LegacyOwnedMainCompactWordReachability.Prepare(resource, terminal, cancellationToken)
+            : LegacyOwnedMainCompactWordReachability.PrepareCase(resource, terminal, casePolicy, cancellationToken);
         if (reachable.FinalizedPrefixEnd >= 0)
             throw new InvalidOperationException("Owned lookahead boundary changed before publication.");
         int primary = configuration.PrimaryArcLimit230a;
         var alphabet = owner.CommonModel.AcousticAlphabet;
         var categories = new LegacyCursiveCategoryMapper(owner.SelectedSourceOwner.Categories);
         var policy = LegacyPreparedCompactWordContextPolicy.FromAlphabet(alphabet, false, false,
+            caseInvocation?.Options.ContextSentinels24b8 ??
             LegacyOwnedFreshMainTerminalInvocation.Prepare(pass.ControllerOwner).Options.ContextSentinels24b8);
         ushort specialMarker = Label("\u0003");
         ushort shadda = Label("\u0651"), closed = Label("\U000f0001");
@@ -71,7 +103,8 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
         var nodeStarts = new int[pass.NodeCount + 1];
         var scores = new Dictionary<int, LegacyOwnedRussianMainGlyphConfidenceGroup>();
         int count = 0;
-        float penalty = LegacyOwnedRussianTerminalSources.Prepare(owner.DictionaryOwner, cancellationToken).LanguagePenalty2534 * .8f;
+        float penalty = (caseInvocation?.LanguagePenalty2534 ??
+            LegacyOwnedRussianTerminalSources.Prepare(owner.DictionaryOwner, cancellationToken).LanguagePenalty2534) * .8f;
         int forcedPenalty = (int)(penalty <= 0 ? penalty - .5f : penalty + .5f);
 
         for (int node = 0; node < pass.NodeCount; node++)
@@ -91,8 +124,9 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
                         throw new NotSupportedException("Unexpanded ordinary source1 fallback candidate required.");
                     int arc = U16(row, 0x1c);
                     ValidateArc(node, arc);
-                    //2B7.V58=05A3F0 returns0: the native expanded list stays
-                    //empty and209095 publishes the original fallback candidate.
+                    //DIRECT2B7.V58=05A3F0 returns0. Fresh292 resets8FC0/count0
+                    //at finalV80, then233FC0 fetches this same empty innerV58.
+                    //Both owned routes publish209095's original fallback.
                     candidates.Add(new(ordinal, alternative, I32(pools[node], at), I32(pools[node], at + 4),
                         U64(row, 0), U64(pools[node], at + 0x10), I32(row, 0x34),
                         owner.SourceGraph.GetNode(node)[arc].EndContextId));
@@ -217,7 +251,7 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
         if ((uint)selected >= count) throw new InvalidDataException("Selected native row22 does not name the newly published compact pool.");
         for (int node = 0; node < snapshots.Length; node++)
             snapshots[node] = snapshots[node] with { Records = rows[node], PrimaryAlternatives = pools[node] };
-        return new(terminal, reachable, confidence, storage, count, nodeStarts, snapshots, selected);
+        return new(terminal, reachable, confidence, storage, count, nodeStarts, snapshots, selected, casePolicy);
 
         ushort Label(string text) => alphabet.TryGetLabel(text, out ushort value) ? value : ushort.MaxValue;
         byte Category(ushort symbol) => unchecked((byte)categories.GetSymbolCompositeCategory(symbol));
