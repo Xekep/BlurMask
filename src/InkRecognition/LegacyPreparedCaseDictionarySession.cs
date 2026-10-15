@@ -40,7 +40,7 @@ public sealed class LegacyPreparedCaseDictionarySession
             throw new ArgumentException("Case symbols/language must belong to the selected model, not equal-sized substitutes.");
         Model=model;Symbols=symbols;Graph=graph;restart=restartTags;
         this.ignoreCaseC4=ignoreCaseC4;extraCosts=extraCostSideTable;
-        installedMap=symbols.Symbols.CreateWorkingMap(symbols.DescriptorFlags);
+        installedMap=symbols.InitialWorkingMap;
         dictionary=new(model.Lexicon,installedMap,symbols.Symbols.CopyInitialContexts());
         var child=LegacyTaggedDictionaryChild.BindCase292(selectedResource,containerCaseMode90,
             model.LanguageModel,model.LexicalAlphabet,caseData,publication,symbols.Preparation,
@@ -63,6 +63,19 @@ public sealed class LegacyPreparedCaseDictionarySession
         try
         {
             RequireInstalledMap(expectedMap);
+            //292.V48/231AE0 bypasses233090 and selects immutable inner60,
+            //not source68's filtered50. Its1C/20 are the language owner's
+            //node/signed parent-row span, not the most recent D0 key.
+            //093B50 also compares the auxiliary mode in its shared slot key.
+            //Do not register this request as a normal50-map observation or
+            //revoke normal key progression merely because these keys differ.
+            if(auxiliary)
+            {
+                if(!installedMap.SharesAuxiliaryMap(Symbols.InitialWorkingMap))
+                    throw new InvalidOperationException("Auxiliary queries require the selected source's immutable60 map owner.");
+                try{return queries.Read(sourceTag,query,true,extraCosts,cancellationToken);}
+                catch{valid=false;throw;}
+            }
             bool ownedKey=expectedMap is not null&&ownedKeyProgression&&!externalQuerySinceEpoch&&
                 currentOwnedKey is{} key&&query.Parameter1c==(uint)key.Node&&query.Parameter20==key.Span;
             if(expectedMap is null)externalQuerySinceEpoch=true;

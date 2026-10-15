@@ -13,6 +13,8 @@ public sealed class LegacyPreparedCaseDictionarySymbolBinding
     public LegacyNativeCasePreparation Preparation { get; }
     public LegacyWordLanguageModel Language { get; }
     public uint DescriptorFlags => initialWorkingMap.DescriptorFlags;
+    //All source68 snapshots retain this same immutable58/60 owner.
+    internal LegacyPreparedDictionaryWorkingMap InitialWorkingMap => initialWorkingMap;
 
     public LegacyPreparedCaseDictionarySymbolBinding(LegacyDictionaryInitialSymbolMaps symbols,
         LegacyNativeCasePreparation preparation,LegacyWordLanguageModel language,uint descriptorFlags,

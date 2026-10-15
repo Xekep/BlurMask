@@ -21,6 +21,23 @@ foreach(int state in Enumerable.Range(0,32))
 }
 var raw=Source().Read(new(){Node=0,Capacity=512,ContextRoot=contexts.ContainerIdentity},true,clearExtraCosts:true);
 if(raw.ReturnedCount==0)throw new Exception("Actual prepared auxiliary32 fixture must contain real terminals.");
+//Positive cache-mode control, explicitly using the supplied broad map above.
+//Source68 changes50 only;60 and its terminal records must survive the refresh.
+var changingMap=new LegacyPreparedDictionaryWorkingMap(model.AcousticAlphabet.LabelCount,descriptor.Flags,map,map);
+var shared=new LegacyPreparedDictionaryQuerySource(model.Lexicon,changingMap,initial);
+var persistent=new LegacyPreparedDictionaryQuery{Node=0,Capacity=512,ContextRoot=contexts.ContainerIdentity};
+var normal=shared.Read(persistent,false);
+var firstAux=shared.Read(persistent,true);
+shared.SetWorkingMap(changingMap.Refresh(new byte[model.AcousticAlphabet.LabelCount]));
+var denied=shared.Read(persistent,false);
+var secondAux=shared.Read(persistent,true);
+if(normal.ReturnedCount<=0||denied.ReturnedCount!=0||!denied.Records.IsEmpty||
+    !firstAux.Records.Span.SequenceEqual(raw.Records.Span)||!secondAux.Records.Span.SequenceEqual(raw.Records.Span))
+    throw new Exception("Shared slot mode/immutable60 map did not survive source68 refresh.");
+shared.SetWorkingMap(changingMap);
+var restored=shared.Read(persistent,false);
+if(restored.ReturnedCount!=normal.ReturnedCount||!restored.Records.Span.SequenceEqual(normal.Records.Span))
+    throw new Exception("Normal slot did not recover after auxiliary mode.");
 using var file=File.Create(args[3]);using var w=new Utf8JsonWriter(file);w.WriteStartObject();w.WriteNumber("nativeRootRecords",0);w.WriteString("stressAuxiliaryMap","explicit exactMap forcopy stress, NOT native092990auxiliary60");w.WriteString("source",Convert.ToHexString(raw.Records.Span));w.WriteStartArray("states");int count=0;
 foreach(int state in Enumerable.Range(0,32))
 {
@@ -47,3 +64,4 @@ try{bad.Read(1,new(){Node=0});throw new Exception("Mismatched source tag accepte
 try{bad.Read(0,new(){Node=0});throw new Exception("Failed owner remained usable.");}catch(InvalidOperationException){}
 try{LegacyNativeCaseAuxiliaryQuerySource.BindOrdinaryDictionary(Source(),contexts,graph).Read(0,new(){Node=0},false,new(true));throw new Exception("Canceled aux accepted.");}catch(OperationCanceledException){}
 Console.WriteLine($"PASS actual owned092990auxiliary root0 for32states; supplied-map stress terminals={raw.ReturnedCount}/{count} records including31,7-record paging, unchanged contexts/costs, failure/cancellation guards. Not controller/winner.");
+Console.WriteLine($"PASS explicit supplied-map positive cache control: normal{normal.ReturnedCount},auxiliary{firstAux.ReturnedCount},denied normal0,unchanged auxiliary{secondAux.ReturnedCount},restored normal{restored.ReturnedCount}; one shared request, no resets.");

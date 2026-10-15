@@ -16,14 +16,32 @@ Multiple pages/queries under the same installed map retain their native caches.
 
 The older conservative prepared-query guard remains available. Missing/mismatched
 keys, repeated/descending spans, unexpected source nodes, and external public
-Session query/permission activity revoke the owning progression until another
-actual V80 epoch. Public prepared Session behavior remains unchanged. No Refresh
+normal-query/permission activity revoke the owning progression until another
+actual V80 epoch. No Refresh
 operation fabricates an epoch, and source/graph/map identities remain checked.
-External public queries are conservatively treated as cache contamination even
+External public normal queries are conservatively treated as cache contamination even
 when their numeric fields happen to match.
 Revoking this new progression is not a blanket rejection of the older prepared
 API: a first/same-map ordinary prepared read can still be accepted by its old
 conservative guard. It cannot use the new key exception to cross a later map.
+
+Auxiliary V48 queries are distinct.292.V48=231AE0 bypasses233090 and the inner
+backend selects immutable60 instead of filtered50.204290 writes1C from the
+language query's node and20 from a sign-extended parent-row span byte, so these
+fields need not equal the last D0 span. Auxiliary reads now validate the current
+owning lease and the immutable60 identity without registering a normal50-map
+observation or revoking normal key progression. Initial and refreshed maps share
+the same private60 array. Mode is already part of093B50's shared slot key; changing
+normal/auxiliary mode resets that slot through its native comparison, with no
+invented global or per-span reset.
+
+Ten actual span controls interleave owned/public auxiliary queries with span-1
+and resume identical normal records. The actual RU auxiliary map admits zero
+terminal records; this does not establish recognition quality. A separate broad
+supplied-map positive control exercises nonempty auxiliary results across a50
+permission refresh, an empty denied normal query, and normal slot recovery.
+It is explicitly a prepared backend control, not the native RU60 map. An auxiliary
+read through a stale owning lease remains rejected.
 
 The new headless probe starts at the existing raw own-ink/native first result,
 main source720/geometry/NN path. One292 backend and one persistent query produce
@@ -31,9 +49,9 @@ main source720/geometry/NN path. One292 backend and one persistent query produce
 node loop and after each completed node. There are no per-span resets. Independent
 Python reconstructs the raw195 NN-cost permission union, ordered case propagation,
 actual working maps and full397 case records. Every resulting context remains
-live in the same symbolic owner. Six separate regressions reject repeated,
+live in the same symbolic owner. Seven separate regressions reject repeated,
 descending, wrong-key, external-query, external-refresh and missing-node-epoch
-progressions without poisoning a newly valid owning session.
+progressions and stale auxiliary leases without poisoning a newly valid owning session.
 
 This is a source-level cache/permission proof. Its root query for a noninitial
 span is not a claim that the native240 startup consumer runs there. Full290/240
@@ -42,5 +60,6 @@ quality remain separate work.
 
 Probe: `LegacyCaseSpanKeys.Probe AK LK engine separation case-data publication capture`.
 Independent audit: `audit_output.py AK LK case-preparation-controls capture`.
-Static audit: `tools/handwriting/audit_case_span_keys.py [report]` pins12 PE
-instructions without loading the vendor engine.
+Static audit: `tools/handwriting/audit_case_span_keys.py [report]` pins23 PE
+instructions, two auxiliary dispatch slots and complete refresh/forwarder
+function hashes without loading the vendor engine.

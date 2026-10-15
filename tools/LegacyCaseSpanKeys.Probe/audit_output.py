@@ -10,5 +10,7 @@ for row in got['spans']:
  assert key not in seen and row['parameter1c']==key[0] and row['parameter20']==key[1]
  seen.add(key)
 assert len(seen)==10
+assert got['auxiliary']==[[s['node'],4294967295,0,0] for s in got['spans']]
 runpy.run_path(str(Path(__file__).resolve().parents[1]/'LegacyCaseMainSpan.Probe/audit_output.py'),run_name='__main__')
 print('PASS independent source keys: ten distinct(node,span), ONE node-boundary epoch sequence; same195cost->permission->case-map->397records oracle')
+print('PASS ten owned/public auxiliary immutable60 queries use signed span-1 independently of normal D0 keys; actual resource admits zero terminals')

@@ -16,6 +16,9 @@ public sealed class LegacyPreparedDictionaryWorkingMap
     public int LexicalSymbolCount => preserved.Length;
     public uint DescriptorFlags { get; }
 
+    internal bool SharesAuxiliaryMap(LegacyPreparedDictionaryWorkingMap other)
+        => ReferenceEquals(auxiliary, other.auxiliary);
+
     /// <summary>Own copies of explicit maps; absent auxiliary data cannot be silently selected.</summary>
     public LegacyPreparedDictionaryWorkingMap(int acousticSymbolCount, uint descriptorFlags,
         ReadOnlySpan<ushort> preservedMap, ReadOnlySpan<ushort> auxiliaryMap)
