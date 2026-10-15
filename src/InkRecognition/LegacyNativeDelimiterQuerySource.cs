@@ -63,7 +63,7 @@ public sealed class LegacyNativeDelimiterQuerySource
     private sealed class Level
     {
         public ulong Tag = ulong.MaxValue;
-        public readonly LegacyPreparedDictionaryQuery Query = new() { Capacity = 128 };
+        public LegacyPreparedDictionaryQuery Query = new() { Capacity = 128 };
         public byte[] Records = [];
         public int Cursor, Count;
     }
@@ -86,6 +86,35 @@ public sealed class LegacyNativeDelimiterQuerySource
         root2 = contexts.ResolveInitial(0xfffb).Identity;
         root34 = contexts.ResolveInitial(0xfffc).Identity;
         ordinary = contexts.ResolveInitial(0xfffa).Identity;
+    }
+
+    /// <summary>2372F0 ->237080 ->236F30 normal-cache portion of sourceV80.
+    ///The owning controller separately forwards the same epoch to its backend.
+    ///This is never an implicit response to a permission-map refresh.</summary>
+    public void ResetForControllerNode(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (Interlocked.CompareExchange(ref active, 1, 0) != 0)
+            throw new InvalidOperationException("Native delimiter reset must be serialized with reads.");
+        try
+        {
+            if (!valid) throw new InvalidOperationException("Failed delimiter preparation cannot be revived by a node reset.");
+            foreach (var slot in slots)
+            {
+                slot.Tag = ulong.MaxValue; slot.Accepted = -1;
+                slot.Parameter1c = slot.Parameter20 = uint.MaxValue;
+                slot.Flags24 = slot.Flags26 = ushort.MaxValue;
+                foreach (var level in slot.Levels)
+                {
+                    level.Tag = ulong.MaxValue; level.Cursor = level.Count = 0;
+                    //236F30 zeros query40/48 backend-owner/cache pointers.
+                    level.Query = new() { Capacity = 128 };
+                }
+            }
+            nextSlot = 0;
+        }
+        catch { valid = false; throw; }
+        finally { Volatile.Write(ref active, 0); }
     }
 
     public LegacyNativeDelimiterQueryPage Read(LegacyNativeDelimiterQuery query,

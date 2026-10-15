@@ -128,6 +128,13 @@ public sealed class LegacyOwnedFreshMainWordNodeBuffer
     }
 
     public ReadOnlyMemory<byte> CopyRecordStorage() => records.ToArray();
+    internal void ApplyPeriodicCostOffset(int positiveMinimum, CancellationToken cancellationToken)
+    {
+        if (!compacted) throw new InvalidOperationException("Periodic normalization follows completed node materialization.");
+        var shifted = LegacyNativeWordPeriodicCostNormalization.ApplySourceRows(records, SourceEnd23f0,
+            positiveMinimum, cancellationToken);
+        shifted.Span.CopyTo(records);
+    }
     public ReadOnlyMemory<byte> CopyPrimaryStorage() => primary.ToArray();
     public LegacyNativeStoredWordRecord Read(ushort ordinal)
     {

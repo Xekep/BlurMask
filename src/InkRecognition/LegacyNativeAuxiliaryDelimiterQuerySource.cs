@@ -22,7 +22,7 @@ public sealed class LegacyNativeAuxiliaryDelimiterQuerySource
     private sealed class Level
     {
         public ulong Tag = ulong.MaxValue;
-        public readonly LegacyPreparedDictionaryQuery Query = new() { Capacity = 128 };
+        public LegacyPreparedDictionaryQuery Query = new() { Capacity = 128 };
         public byte[] Records = [];
         public int Cursor, Count;
     }
@@ -40,6 +40,29 @@ public sealed class LegacyNativeAuxiliaryDelimiterQuerySource
         alphabetCount = checked((ushort)alphabet.LabelCount);
         zwnj = alphabet.TryGetLabel("\u200c", out ushort first) ? first : ushort.MaxValue;
         zwj = alphabet.TryGetLabel("\u200d", out ushort second) ? second : ushort.MaxValue;
+    }
+
+    /// <summary>237080/236F30's single auxiliary-cache portion of sourceV80.
+    ///Backend epoch forwarding belongs to the same owning controller call.</summary>
+    public void ResetForControllerNode(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (Interlocked.CompareExchange(ref active, 1, 0) != 0)
+            throw new InvalidOperationException("Auxiliary delimiter reset must be serialized with reads.");
+        try
+        {
+            if (!valid) throw new InvalidOperationException("Failed auxiliary preparation cannot be revived by a node reset.");
+            tag = ulong.MaxValue; accepted = -1;
+            parameter1c = parameter20 = uint.MaxValue;
+            flags24 = flags26 = ushort.MaxValue;
+            foreach (var level in levels)
+            {
+                level.Tag = ulong.MaxValue; level.Cursor = level.Count = 0;
+                level.Query = new() { Capacity = 128 };
+            }
+        }
+        catch { valid = false; throw; }
+        finally { Volatile.Write(ref active, 0); }
     }
 
     public LegacyNativeDelimiterQueryPage Read(ulong sourceTag, LegacyPreparedDictionaryQuery query,
