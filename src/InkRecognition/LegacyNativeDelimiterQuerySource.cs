@@ -135,20 +135,23 @@ public sealed class LegacyNativeDelimiterQuerySource
             //2382B0 prefixes literal source controls after traversal. This is
             //236E90 concatenation, not1F7FF0's control-normalizing composition.
             if ((query.SourceTag & (8UL << 40)) != 0 &&
-                (q.Parameter20 < q.Parameter1c || (q.Flags24 & 0x81) == 1))
+                (unchecked((int)q.Parameter20) < unchecked((int)q.Parameter1c) || (q.Flags24 & 0x81) == 1))
             {
                 if ((uint)query.SourceTag == 0)
                     for (int i = 0; i < written; i++)
                     {
                         var row = output.AsSpan(i * 32, 32);
+                        //238510 applies the OUTER tag's kind only in this
+                        //low-node-zero branch; it preserves the row's bit3.
+                        row[23] = Carry(row[23], (byte)(query.SourceTag >> 44 & 7), (byte)(row[23] >> 3 & 1));
                         int kind = row[23] & 7;
                         ulong prefix = kind switch { 0 => initial, 1 => root1, 2 => root2, 3 or 4 => root34, _ => 0 };
                         if (kind == 0 && contexts.ReadNode(initial).Symbol == 0xfffb) row[23] = (byte)(row[23] & 0xf8 | 2);
                         if (prefix != 0) Prefix(row, prefix);
                     }
+                else if ((query.SourceTag & (4UL << 40)) == 0)
+                    for (int i = 0; i < written; i++) Prefix(output.AsSpan(i * 32, 32), ordinary, allowExtra: false);
             }
-            else if ((query.SourceTag & (4UL << 40)) == 0)
-                for (int i = 0; i < written; i++) Prefix(output.AsSpan(i * 32, 32), ordinary);
             cancellationToken.ThrowIfCancellationRequested();
             return new(written, output.AsMemory(0, written * 32).ToArray(), query.SlotIndex, slot.Accepted, backendCalls);
 
@@ -251,9 +254,9 @@ public sealed class LegacyNativeDelimiterQuerySource
                 return level.Count != -1;
             }
 
-            void Prefix(Span<byte> row, ulong prefix)
+            void Prefix(Span<byte> row, ulong prefix, bool allowExtra = true)
             {
-                if ((q.Flags24 & 0x100) != 0)
+                if (allowExtra && (q.Flags24 & 0x100) != 0)
                 { BinaryPrimitives.WriteUInt64LittleEndian(row[24..], prefix); return; }
                 ulong suffix = BinaryPrimitives.ReadUInt64LittleEndian(row[8..]);
                 if (suffix != 0 && q.ContextRoot == 0)

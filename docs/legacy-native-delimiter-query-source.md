@@ -43,10 +43,16 @@ query calls it once. The probe checks callback logs, not only emitted output.
 Backend failure returns `-1`; exceptions, cancellation and failure invalidate
 the preparation. A new instance is required after failure.
 
-After traversal, `2382B0` prefixes the selected control root using literal
-`236E90` concatenation. It does **not** apply `1F7FF0` context normalization.
-Flag `100` transports the prefix in record `+24` instead of grafting `+08`.
-The explicit null-query-context branch writes null for a nonempty suffix.
+After traversal, `2382B0` only enters prefix processing when outer tag header
+bit 8 is set and either signed32 `Parameter20 < Parameter1c` or
+`(Flags24 & 81) == 1`. With low node zero it first applies the outer tag kind
+(byte5 bits4..6) to each returned kind, then chooses the initial/kind root.
+In this branch flag `100` writes that root to `+24` instead of grafting `+08`.
+With a nonzero low node it instead grafts the ordinary `FFFA` prefix only if
+header bit4 is clear; this branch always writes `+08`, ignoring flag `100`.
+All other queries retain their original contexts. Prefix concatenation is
+literal `236E90`, not `1F7FF0` context normalization. The explicit null-query-
+context branch writes null for a nonempty suffix.
 `LegacyNativeWordStartupRequestFactory.GraftOrdinaryInitialContext` now accepts
 the already-owned `FFFA(root) → single ordinary AL leaf` form without allocating
 a second prefix. Other initial paths remain unsupported by that startup helper.
@@ -57,6 +63,9 @@ This is the no-extra-cost-side-table, no-custom-`49F58` callback branch. Both
 require their actual owning producers before extension. The source coordinate
 mode, backend source and shared context factory remain explicit inputs; this
 class alone does not establish the complete `20C9D0` factory policy.
+The auxiliary `290.V48` tailcall `2392E0 -> 239100 -> 2388E0` is a distinct
+traversal and is not implemented by this `V40` API. A diagnostic controller
+that directly uses aggregate auxiliary pages must identify that boundary.
 
 Memory owned by query slots is bounded to 8 × 8 × 128 records, plus at most
 512 output records per call. The shared context factory has its own ownership
@@ -83,10 +92,24 @@ dotnet run --project tools/LegacyDelimiterQuery.Probe -c Release --artifacts-pat
 The 256 finite trees independently determine full 32-byte records, literal
 context paths and traversal order. They include 128-record paging boundaries,
 ancestor cycles, depth-nine chains, all supported mode/flag combinations,
-length/cost overflow and output capacities 1/3/17/128. The checked run has 2026
-expected rows, 1541 pagination calls and 7203 backend block requests, plus exact
+length/cost overflow and output capacities 1/3/17/128. An additional 256-case
+matrix covers every outer/current kind, zero/nonzero low node, header4/8,
+signed `FFFFFFFF` limits and flag `100`. The combined run has 4074 expected
+rows, 2629 pagination calls and 8291 backend block requests, plus exact
 empty-backend logs, nine-query slot eviction, null-context output and failure/
 cancellation ownership guards.
+
+The outer-prefix matrix corrects the first version of this port: its Python
+oracle repeated the same mistaken `else` placement and omitted outer-kind
+application. The corrected code follows direct instruction branches:
+`23849F -> 2388C1` bypasses all prefixes without header8, `2384AB` is signed
+`JG`, `2384D6 -> 2387D9` selects the nonzero-node branch, `238510..238576`
+applies the outer kind, and `2387D9..2388A3` performs ordinary grafting without
+testing flag `100`. Earlier path goldens are intentionally replaced where
+they disagreed with those instructions; retaining their output would preserve
+the bug. No vendor DLL execution was used.
+Within the original 256 controls, exactly 90 fixtures / 770 literal context
+paths change; all traversal counts and 32-byte scalar payloads stay unchanged.
 
 The real-resource control finds a parent with an actual mapped `FFFB` edge in
 the validated Russian trie, passes its unfiltered `2B7 → 28D` pages through this

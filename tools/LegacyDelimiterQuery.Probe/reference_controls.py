@@ -75,18 +75,21 @@ def oracle(nodes, source_tag, mode, flags24, first, span, zwj):
     visit(source_tag, [], 0, 0, 0, 0, [])
     for row, path in result:
         prefix = None
-        if source_tag & (8 << 40) and (span < first or flags24 & 0x81 == 1):
+        allow_extra = False
+        if source_tag & (8 << 40) and (wrap(span) < wrap(first) or flags24 & 0x81 == 1):
             if (source_tag & MASK) == 0:
+                row[23] = carry(row[23], (source_tag >> 44) & 7, (row[23] >> 3) & 1)
                 kind = row[23] & 7
                 prefix = {0: 0xfffa if mode in (3, 4) else 0xfffb,
                           1: 0xfff9, 2: 0xfffb, 3: 0xfffc, 4: 0xfffc}.get(kind)
                 if kind == 0 and mode not in (3, 4):
                     row[23] = (row[23] & 0xf8) | 2
-        elif not source_tag & (4 << 40):
-            prefix = 0xfffa
+                allow_extra = True
+            elif not source_tag & (4 << 40):
+                prefix = 0xfffa
         extra = None
         if prefix is not None:
-            if flags24 & 0x100:
+            if allow_extra and flags24 & 0x100:
                 extra = [prefix]
             else:
                 path.insert(0, prefix)
@@ -129,6 +132,26 @@ for case in range(256):
     tests.append(dict(nodes=[[row.hex() for row in rows] for rows in nodes], tag=source_tag,
                       mode=mode, flags=flags24, first=first, span=span, expected=expected,
                       capacity=[1, 3, 17, 128][case % 4]))
+
+#Original full outer-prefix branch matrix: all outer/current kinds, low-node
+#zero/nonzero, header4/8, signed1C/20 limits, Flags100 and high/bit3 payload.
+#A nonzero source node is a literal separate tree root, not a synthetic remap.
+for outer_kind in range(8):
+    for root_node in (0, 1):
+        for header in (0, 4, 8, 12):
+            for limits_index, (first, span, base_flags) in enumerate([
+                (0, 0, 0), (1, 0, 0), (0xffffffff, 0, 0), (0, 0, 1)
+            ]):
+                case = len(tests)
+                tag = root_node | (header << 40) | (outer_kind << 44)
+                mode = case % 5
+                flags24 = base_flags | (0x100 if limits_index % 2 else 0)
+                rows = [make_row(root_node, 7 + kind, 17 * kind, 250, 0xa8 | kind) for kind in range(8)]
+                nodes = [rows] if root_node == 0 else [[], rows]
+                expected = list(oracle(nodes, tag, mode, flags24, first, span, 184))
+                tests.append(dict(nodes=[[row.hex() for row in entries] for entries in nodes],
+                                  tag=tag, mode=mode, flags=flags24, first=first, span=span,
+                                  expected=expected, capacity=[1, 3, 17, 128][case % 4]))
 
 parser = argparse.ArgumentParser()
 parser.add_argument('output', type=Path)

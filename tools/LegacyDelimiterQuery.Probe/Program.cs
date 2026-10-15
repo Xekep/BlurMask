@@ -176,7 +176,10 @@ var nullSource = new LegacyNativeDelimiterQuerySource(model.AcousticAlphabet, nu
         if (row.Length != 0) { BinaryPrimitives.WriteUInt16LittleEndian(row.AsSpan(20), 7); BinaryPrimitives.WriteUInt64LittleEndian(row.AsSpan(8), initialLeaf); }
         return new(row.Length / 32, row, ReadOnlyMemory<byte>.Empty, 0, request.Skip, null);
     }, 2);
-var nullQuery = new LegacyNativeDelimiterQuery { SourceTag = 0, Request = new() { Capacity = 1 } };
+var nullQuery = new LegacyNativeDelimiterQuery
+{
+    SourceTag = 8UL << 40, Request = new() { Capacity = 1, Parameter1c = 1 }
+};
 var nullPage = nullSource.Read(nullQuery);
 Require(nullPage.ReturnedCount == 1 && BinaryPrimitives.ReadUInt64LittleEndian(nullPage.Records.Span[8..]) == 0,
     "Null query context must preserve native null suffix result.");
