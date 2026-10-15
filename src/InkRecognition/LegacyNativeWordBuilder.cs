@@ -50,6 +50,15 @@ public sealed class LegacyNativeWordBuilder
         W64(previous,32,nextReference);Pool.ReplaceRecord(previousReference,previous,cancellationToken);
     }
 
+    //218560 publishes the completed reverse-built chain only after all rows
+    //succeed. This internal operation cannot inject an unowned native pointer.
+    internal void ReplaceHeadReference(ulong reference,CancellationToken token=default)
+    {
+        token.ThrowIfCancellationRequested();
+        if(reference!=ulong.MaxValue)_=Pool.CopyRecord(reference,token);
+        W64(data,8,reference);
+    }
+
     /// <summary>276.38/13f4a0 ordinary one-component publication on13f180's
     /// last linked glyph. Zero-count/macro rows can be supplied by their
     /// actual independent record producer through the pool's ReplaceRecord.</summary>
