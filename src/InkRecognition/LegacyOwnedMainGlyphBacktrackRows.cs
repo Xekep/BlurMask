@@ -28,15 +28,40 @@ public sealed class LegacyOwnedMainGlyphBacktrackRows
         LegacyOwnedMainCompactWordMaterialization materialization,
         LegacyOwnedRussianMainSourceSymbolCallbacks sourceCallbacks,
         ReadOnlySpan<byte> stackRowResidue72,CancellationToken token=default)
+        =>PrepareCore(acousticResource,null,materialization,sourceCallbacks,stackRowResidue72,token);
+
+    /// <summary>The same numeric append algorithm over the genuine fresh292
+    /// CASE compact owner. Exact retained factory-policy identity is required;
+    /// no DIRECT dictionary or prepared winner substitutes for that owner.</summary>
+    public static LegacyOwnedMainGlyphBacktrackRows Prepare(ReadOnlySpan<byte> acousticResource,
+        LegacyFreshCaseMainSourcePolicy caseSourcePolicy,
+        LegacyOwnedMainCompactWordMaterialization materialization,
+        LegacyOwnedRussianMainSourceSymbolCallbacks sourceCallbacks,
+        ReadOnlySpan<byte> stackRowResidue72,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(caseSourcePolicy);
+        return PrepareCore(acousticResource,caseSourcePolicy,materialization,sourceCallbacks,stackRowResidue72,token);
+    }
+
+    private static LegacyOwnedMainGlyphBacktrackRows PrepareCore(ReadOnlySpan<byte> acousticResource,
+        LegacyFreshCaseMainSourcePolicy? caseSourcePolicy,
+        LegacyOwnedMainCompactWordMaterialization materialization,
+        LegacyOwnedRussianMainSourceSymbolCallbacks sourceCallbacks,
+        ReadOnlySpan<byte> stackRowResidue72,CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(materialization);ArgumentNullException.ThrowIfNull(sourceCallbacks);
         token.ThrowIfCancellationRequested();
         var terminal=materialization.TerminalResult;var policy=terminal.PassResult.ControllerOwner;
         var owner=policy.Owner;var confidence=materialization.ConfidenceOwner;
+        bool caseAware=caseSourcePolicy is not null;
         if(stackRowResidue72.Length!=72||!ReferenceEquals(sourceCallbacks.Owner,confidence)||
-            !ReferenceEquals(confidence.DirectDictionaryOwner,owner.DictionaryOwner)||
-            !ReferenceEquals(confidence.Graph,owner.SourceGraph)||owner.IsCaseAware)
-            throw new ArgumentException("Same owned DIRECT compact/source/confidence and complete72-byte stack residue required.");
+            !ReferenceEquals(confidence.Graph,owner.SourceGraph)||!ReferenceEquals(confidence.Model,owner.CommonModel)||
+            (caseAware? !owner.IsCaseAware||!ReferenceEquals(materialization.CaseSourcePolicy,caseSourcePolicy)||
+                !ReferenceEquals(caseSourcePolicy!.Controller,policy)||
+                !ReferenceEquals(confidence.CaseDictionaryOwner,caseSourcePolicy.DictionaryOwner):
+                owner.IsCaseAware||materialization.CaseSourcePolicy is not null||
+                !ReferenceEquals(confidence.DirectDictionaryOwner,owner.DictionaryOwner)))
+            throw new ArgumentException("Same actual compact/source/confidence/factory and complete72-byte stack residue required.");
         if(acousticResource.Length!=572763||!StringComparer.OrdinalIgnoreCase.Equals(
             Convert.ToHexString(SHA256.HashData(acousticResource)),owner.SelectedSourceOwner.SourceFingerprint)||
             policy.Configuration.Trace2368!=0||policy.Configuration.Mode22f6!=0||

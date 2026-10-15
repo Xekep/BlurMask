@@ -10,12 +10,14 @@ public sealed class LegacyOwnedRussianProtocolGlyphProducer
 {
     public LegacyOwnedFreshMainWordControllerPolicy Policy {get;}
     public LegacyOwnedRussianMainSourceSymbolCallbacks SourceCallbacks {get;}
+    public LegacyOwnedRussianMainInteriorDelimiter? InteriorDelimiter {get;}
     private readonly uint[] headers;
     private readonly ushort hyphen;
 
     private LegacyOwnedRussianProtocolGlyphProducer(LegacyOwnedFreshMainWordControllerPolicy policy,
-        LegacyOwnedRussianMainSourceSymbolCallbacks callbacks,uint[] headers,ushort hyphen)
-    {Policy=policy;SourceCallbacks=callbacks;this.headers=headers;this.hyphen=hyphen;}
+        LegacyOwnedRussianMainSourceSymbolCallbacks callbacks,uint[] headers,ushort hyphen,
+        LegacyOwnedRussianMainInteriorDelimiter? interior=null)
+    {Policy=policy;SourceCallbacks=callbacks;this.headers=headers;this.hyphen=hyphen;InteriorDelimiter=interior;}
 
     public static LegacyOwnedRussianProtocolGlyphProducer Prepare(ReadOnlySpan<byte> resource,
         LegacyOwnedFreshMainWordControllerPolicy policy,LegacyOwnedRussianMainSourceSymbolCallbacks callbacks,
@@ -36,6 +38,19 @@ public sealed class LegacyOwnedRussianProtocolGlyphProducer
         if(!owner.CommonModel.AcousticAlphabet.TryGetLabel("-",out ushort hyphen))
             throw new InvalidDataException("Actual ASCII hyphen marker required.");
         token.ThrowIfCancellationRequested();return new(policy,callbacks,headers,hyphen);
+    }
+
+    /// <summary>Add the actual same-owner kind1 geometry service. Its packet
+    /// remains prepared; this does not manufacture packetAC2 or a delimiter.</summary>
+    public static LegacyOwnedRussianProtocolGlyphProducer Prepare(ReadOnlySpan<byte> resource,
+        LegacyOwnedFreshMainWordControllerPolicy policy,LegacyOwnedRussianMainSourceSymbolCallbacks callbacks,
+        LegacyOwnedRussianMainInteriorDelimiter interior,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(interior);
+        var ordinary=Prepare(resource,policy,callbacks,token);
+        if(!ReferenceEquals(interior.Callbacks,callbacks)||!ReferenceEquals(interior.Geometry.Owner,callbacks.Owner))
+            throw new ArgumentException("The actual interior service must retain these exact source callbacks and geometry owner.");
+        token.ThrowIfCancellationRequested();return new(policy,callbacks,ordinary.headers,ordinary.hyphen,interior);
     }
 
     /// <summary>Build the full request64 preserving explicit stack padding,
@@ -91,7 +106,9 @@ public sealed class LegacyOwnedRussianProtocolGlyphProducer
         //Fresh knowledgeAA=0 (00C860 A4-qword zero), forwarded20C1C0 to2540;
         //no property/external controller path is accepted by this owning policy.
         request[60]=1;
-        var result=SourceCallbacks.ReadDelimiter(request,scratch.RemainingCursor,token);
+        var result=symbol==0xfffb&&InteriorDelimiter is not null
+            ?InteriorDelimiter.ReadDelimiter(request,scratch.RemainingCursor,token)
+            :SourceCallbacks.ReadDelimiter(request,scratch.RemainingCursor,token);
         foreach(ushort emitted in result.CopySymbols())
         {scratch.RemainingCursor=unchecked(scratch.RemainingCursor-1);scratch.Write(emitted);}
         if(scratch.RemainingCursor!=result.RemainingCursor)
