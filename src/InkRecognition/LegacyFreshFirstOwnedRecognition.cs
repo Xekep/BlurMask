@@ -1,4 +1,6 @@
 using System.Buffers.Binary;
+using System.Runtime.CompilerServices;
+[assembly:InternalsVisibleTo("LegacyMainOwnedInput.Probe")]
 
 namespace InkRecognition;
 
@@ -44,6 +46,34 @@ public sealed class LegacyFreshFirstOwnedRecognition
         }
         byte[] resource=sourceResource.ToArray();
         var factory=LegacyFreshFirstResultOwnershipFactory.Prepare(resource,sourceOffset,raw,cancellationToken);
+        return PrepareCore(resource,factory,activations,separationTable,cancellationToken);
+    }
+
+    /// <summary>Reuse one actual main249 submission's private fresh factory;
+    /// do not manufacture an equal-looking replacement frame/result owner.</summary>
+    internal static LegacyFreshFirstOwnedRecognition PrepareForOwnedFactory(ReadOnlySpan<byte> sourceResource,
+        LegacyFreshFirstResultOwnershipFactory factory,LegacyInkActivations activations,
+        LegacyCursiveSeparationTable separationTable,CancellationToken cancellationToken=default)
+    {
+        ArgumentNullException.ThrowIfNull(factory);ArgumentNullException.ThrowIfNull(activations);ArgumentNullException.ThrowIfNull(separationTable);
+        cancellationToken.ThrowIfCancellationRequested();
+        if(sourceResource.Length>64*1024*1024)throw new ArgumentOutOfRangeException(nameof(sourceResource));
+        return PrepareCore(sourceResource.ToArray(),factory,activations,separationTable,cancellationToken);
+    }
+
+    private static LegacyFreshFirstOwnedRecognition PrepareCore(byte[] resource,LegacyFreshFirstResultOwnershipFactory factory,
+        LegacyInkActivations activations,LegacyCursiveSeparationTable separationTable,CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();int sourceOffset=factory.InvocationPolicy.Binding.SourceOffset;
+        if(sourceOffset<0||sourceOffset>resource.Length-16)throw new ArgumentException("Owned selected first source is outside the resource.");
+        uint length=BinaryPrimitives.ReadUInt32LittleEndian(resource.AsSpan(sourceOffset+4));
+        if(length<8||length>(uint)(resource.Length-sourceOffset-8)||!StringComparer.Ordinal.Equals(factory.SourceFingerprint,
+            Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(resource.AsSpan(sourceOffset,checked((int)length+8))))))
+            throw new ArgumentException("The resource must contain this factory's exact selected first source snapshot.");
+        var model=LegacyFirstAcousticModel.ReadSource(resource,sourceOffset,cancellationToken);
+        if(model.SourceFingerprint!=factory.SourceFingerprint||model.RowProfile!=factory.Frame.Row.Profile)
+            throw new ArgumentException("The exact resource and actual owned first factory are required.");
+        factory.ValidateInvocation(factory.AcousticModel,factory.Frame,factory.InvocationPolicy,cancellationToken);
         var row=factory.Frame.Row;var cuts=row.GenerateRussianCuts(cancellationToken:cancellationToken);
         var profile=LegacyFirstTransitionGeometryProfile.ReadSource(resource,sourceOffset,cancellationToken);
         int graphOffset=checked(profile.SamplerOffset+8+(int)BinaryPrimitives.ReadUInt32LittleEndian(resource[(profile.SamplerOffset+4)..]));
@@ -55,7 +85,15 @@ public sealed class LegacyFreshFirstOwnedRecognition
             new byte[sourceCount],Enumerable.Repeat(-1,sourceCount).ToArray(),cancellationToken:cancellationToken);
         var prepared=LegacyFreshFirstCandidateGraphPreparer.Prepare(resource,factory,cuts,seeds,separationTable,cancellationToken);
         var masks=LegacyFreshFirstAcousticMaskPolicy.Create(resource,factory,cancellationToken);
-        var scope=new LegacyFirstRowPrimitiveScope(row,cuts,raw.Select(s=>s.Points.Count).ToArray(),cancellationToken);
+        //The actual108 ending owner preserves a trailing duplicate run, unlike
+        //last retained ordinal+1. No caller-supplied count/context is introduced.
+        var original=row.OriginalSource;var rawCounts=new int[original.Strokes.Count];
+        for(int stroke=0;stroke<rawCounts.Length;stroke++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();int last=original.Strokes[stroke].Points.Count-1;
+            rawCounts[stroke]=checked(original.ResolveEndingMetadata(original.Chronology.Resolve(stroke,last),cancellationToken).Key.Third+1);
+        }
+        var scope=new LegacyFirstRowPrimitiveScope(row,cuts,rawCounts,cancellationToken);
         var scorer=LegacyFirstOrdinaryCacheScorer.Prepare(resource,sourceOffset,row,activations,cancellationToken);
         byte[] primaryMask=masks.CopyWorkingPrimary(cancellationToken);var pairs=masks.CopyPairs(cancellationToken);
         var scores=new LegacyFirstOrdinaryCacheScores[prepared.SourceRanges.Graph.Groups.Count];
