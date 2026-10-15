@@ -10,14 +10,14 @@ public sealed record LegacyNativeFirstDictionaryWordCompletionResult(bool Langua
 /// terminal query -> source70 -> source50 -> category/cost/budget ->100090 record
 /// ->1f9080. This does not synthesize auxiliary queries, later-word context search,
 /// scheduler state, geometry frames or a native final winner.</summary>
-public sealed class LegacyNativeFirstDictionaryWordCompletion
+public sealed partial class LegacyNativeFirstDictionaryWordCompletion
 {
     private readonly LegacyInkAlphabet alphabet;
     private readonly LegacyCursiveCategoryMapper categories;
     private readonly LegacyOrdinaryWordCategoryPolicy categoryPolicy;
-    private readonly LegacyPreparedDictionaryWordMetadata metadata;
+    private readonly LegacyPreparedDictionaryWordMetadata? metadata;
     private readonly LegacyNativeKnownWordLanguageRecord language;
-    private readonly LegacyPreparedDictionaryRestartTags restart;
+    private readonly LegacyPreparedDictionaryRestartTags? restart;
     private readonly byte sourceId;
     private readonly uint sourceHeader;
     private readonly ushort replacement;
@@ -95,6 +95,7 @@ public sealed class LegacyNativeFirstDictionaryWordCompletion
         ArgumentNullException.ThrowIfNull(router);
         ArgumentNullException.ThrowIfNull(owningRowLookup);
         cancellationToken.ThrowIfCancellationRequested();
+        caseSpan?.Validate(endingNode, knowledgeF5, suppressPrevious2609, cancellationToken);
         if (endingNode < 0 || query32.Length != 32 || storedParent88.Length != 88 ||
             temporaryLexicalResidue40.Length != 40 || query32[4] != sourceId || storedParent88[4] != sourceId)
             throw new ArgumentException("Actual first-word owner rows, selected-source query and complete lexical residue required.");
@@ -108,6 +109,7 @@ public sealed class LegacyNativeFirstDictionaryWordCompletion
             throw new NotSupportedException("Actual materialized initial-word anchor required before lookup.");
         var anchor = owningRowLookup(anchorEnding, anchorOrdinal);
         cancellationToken.ThrowIfCancellationRequested();
+        caseSpan?.Validate(endingNode, knowledgeF5, suppressPrevious2609, cancellationToken);
         if (anchor.Length != 88) throw new InvalidDataException("Native anchor node/ordinal must own a complete stored88 row.");
         byte[] anchorSnapshot = anchor.ToArray();
         ReadOnlySpan<byte> ownedAnchor88 = anchorSnapshot;
@@ -142,13 +144,18 @@ public sealed class LegacyNativeFirstDictionaryWordCompletion
             ? BinaryPrimitives.ReadInt32LittleEndian(ownedPrimaryHeap.GetSlotSnapshot(0).Span[16..]) : 0x4000000;
         int lexicalBudget = checked(limit - path);
         ulong tag = BinaryPrimitives.ReadUInt64LittleEndian(query32);
-        var token = metadata.ReadTerminal(tag & ~(255UL << 32), 0, cancellationToken);
+        var token = caseSpan is null
+            ? metadata!.ReadTerminal(tag & ~(255UL << 32), 0, cancellationToken)
+            : caseSpan.ReadTerminal(tag, symbol, cancellationToken);
         //204DA5 loads the complete source70 token;2061D4 copies it into
         //request18, so request20 is token+8, not the geometry category.
         int languageCategory = BinaryPrimitives.ReadInt32LittleEndian(token.Span[8..]);
         var evaluation = language.Evaluate(token.Span, [], languageCategory, knowledgeF5,
             lexicalBudget, temporaryLexicalResidue40, cancellationToken);
-        ulong restartTag = restart.Resolve(tag & ~(255UL << 32));
+        ulong restartTag = caseSpan is null
+            ? restart!.Value.Resolve(tag & ~(255UL << 32))
+            : caseSpan.ResolveRestart(tag, cancellationToken);
+        caseSpan?.Validate(endingNode, knowledgeF5, suppressPrevious2609, cancellationToken);
         if ((restartTag & (4UL << 40)) != 0)
             restartTag = (restartTag & ~(255UL << 32)) | (ulong)sourceId << 32;
         //204290 installs candidate kind into restart header05.bits4..6.
@@ -166,6 +173,7 @@ public sealed class LegacyNativeFirstDictionaryWordCompletion
         var allocation = LegacyContinuationWordRecordProducer.TryInsert(router, endingNode, parentRowOrdinal,
             Lookup, fields, 0, suppressPrevious2609, cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
+        caseSpan?.Validate(endingNode, knowledgeF5, suppressPrevious2609, cancellationToken);
         return new(true, allocation, path, evaluation, restartTag);
 
         ReadOnlyMemory<byte> Lookup(int node, ushort ordinal)
@@ -173,6 +181,7 @@ public sealed class LegacyNativeFirstDictionaryWordCompletion
             if (node == endingNode && ordinal == parentRowOrdinal) return parent;
             var result = owningRowLookup(node, ordinal);
             cancellationToken.ThrowIfCancellationRequested();
+            caseSpan?.Validate(endingNode, knowledgeF5, suppressPrevious2609, cancellationToken);
             if (result.Length != 88) throw new InvalidDataException("History lookup must own a complete stored88 row.");
             return result;
         }
