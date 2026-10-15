@@ -34,10 +34,11 @@ internal sealed class LegacyOwnedMainDictionaryBinding
         if(Case is{} owned){owned.Session.PrepareControllerNode(completedNode,token);installedCaseMap=null;}
         else directBackend!.ResetQueries();
     }
-    public LegacyPreparedDictionaryWorkingMap Refresh(LegacyPreparedAcousticPermissionResult produced,CancellationToken token)
+    public LegacyPreparedDictionaryWorkingMap Refresh(LegacyPreparedAcousticPermissionResult produced,
+        LegacyOrdinaryCursiveCandidateGraph graph,int node,byte span,CancellationToken token)
     {
         if(!produced.Succeeded||produced.WorkingMap is null)throw new InvalidDataException("Failed acoustic permissions cannot refresh selected sources.");
-        if(Case is{} owned)return installedCaseMap=owned.Session.RefreshPermissionsAndGetMap(produced.Permissions.Span,token);
+        if(Case is{} owned)return installedCaseMap=owned.Session.RefreshOwnedSpanAndGetMap(produced.Permissions.Span,graph,node,span,token);
         directBackend!.SetWorkingMap(produced.WorkingMap);return produced.WorkingMap;
     }
     public LegacyAggregateDictionaryQueryPage Read(ulong tag,LegacyPreparedDictionaryQuery query,

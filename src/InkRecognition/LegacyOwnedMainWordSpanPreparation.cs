@@ -192,7 +192,7 @@ public sealed class LegacyOwnedMainWordSpanPreparation
             var result = session.Prepare(endingNode, span, false, cancellationToken);
             if (!result.PermissionPass.Succeeded || result.PermissionPass.PermissionResult.WorkingMap is null)
                 throw new InvalidOperationException("Owned main cache/source preparation failed.");
-            var actualMap=dictionaryBinding.Refresh(result.PermissionPass.PermissionResult,cancellationToken);
+            var actualMap=dictionaryBinding.Refresh(result.PermissionPass.PermissionResult,SourceGraph,endingNode,span,cancellationToken);
             //Permissions are the acoustic pre-wrapper bytes. WorkingMap is
             //the actual post234840 map installed in the case query backend.
             result=result with {PermissionPass=result.PermissionPass with

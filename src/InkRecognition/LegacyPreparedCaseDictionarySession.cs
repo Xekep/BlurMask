@@ -12,6 +12,9 @@ public sealed class LegacyPreparedCaseDictionarySession
     private readonly ConditionalWeakTable<LegacyPreparedDictionaryQuery,LegacyPreparedDictionaryWorkingMap> queryMaps=new();
     private LegacyPreparedDictionaryWorkingMap? queriedMap;
     private long controllerEpoch,preparedMapEpoch;
+    private int nextControllerNode=-1,lastOwnedSpan=-1;
+    private bool ownedKeyProgression,externalQuerySinceEpoch;
+    private (int Node,byte Span)? currentOwnedKey;
     private readonly LegacyTaggedAggregateDictionaryQuerySource queries;
     private readonly LegacyNativeCaseWordMetadata metadata;
     private readonly LegacyPreparedDictionaryRestartTags restart;
@@ -60,14 +63,18 @@ public sealed class LegacyPreparedCaseDictionarySession
         try
         {
             RequireInstalledMap(expectedMap);
-            if(expectedMap is not null&&queriedMap is not null&&!ReferenceEquals(queriedMap,expectedMap))
+            bool ownedKey=expectedMap is not null&&ownedKeyProgression&&!externalQuerySinceEpoch&&
+                currentOwnedKey is{} key&&query.Parameter1c==(uint)key.Node&&query.Parameter20==key.Span;
+            if(expectedMap is null)externalQuerySinceEpoch=true;
+            else if(!ownedKey)ownedKeyProgression=false;
+            if(!ownedKey&&expectedMap is not null&&queriedMap is not null&&!ReferenceEquals(queriedMap,expectedMap))
                 throw new InvalidOperationException("The shared backend's eight query slots have crossed a permission map without the native controller node epoch.");
             //The native controller resets query caches separately from source68.
             //This bounded owning-span adapter does not fabricate that epoch.
             //Refuse a persistent request across maps BEFORE backend error handling,
             //so another valid span can still use this shared session.
             if(queryMaps.TryGetValue(query,out var previousMap))
-            {if(expectedMap is not null&&!ReferenceEquals(previousMap,expectedMap))throw new InvalidOperationException("Case query reuse across permission maps requires the native controller query epoch, which this bounded span adapter does not produce.");}
+            {if(!ownedKey&&expectedMap is not null&&!ReferenceEquals(previousMap,expectedMap))throw new InvalidOperationException("Case query reuse across permission maps requires its proven source key progression or native controller query epoch.");}
             else queryMaps.Add(query,installedMap);
             queriedMap??=installedMap;
             try{return queries.Read(sourceTag,query,auxiliary,extraCosts,cancellationToken);}
@@ -88,6 +95,8 @@ public sealed class LegacyPreparedCaseDictionarySession
             if(completedNode< -1||completedNode>=Graph.NodeCount)throw new ArgumentOutOfRangeException(nameof(completedNode));
             queries.PrepareControllerNode(cancellationToken);
             queryMaps.Clear();queriedMap=null;controllerEpoch=checked(controllerEpoch+1);
+            nextControllerNode=completedNode+1;lastOwnedSpan=-1;
+            ownedKeyProgression=true;externalQuerySinceEpoch=false;currentOwnedKey=null;
         }
         finally{Exit();}
     }
@@ -102,12 +111,32 @@ public sealed class LegacyPreparedCaseDictionarySession
     //backend, not a second propagation or a stale pre-wrapper map snapshot.
     internal LegacyPreparedDictionaryWorkingMap RefreshPermissionsAndGetMap(ReadOnlySpan<byte> acousticPermissions,
         CancellationToken cancellationToken=default)
+        =>RefreshMapCore(acousticPermissions,null,cancellationToken);
+
+    //Only the actual graph/cache D0 owner supplies this key. It is not a caller
+    //success flag or a reset request: native1FD240/201270 write these exact1C/20.
+    internal LegacyPreparedDictionaryWorkingMap RefreshOwnedSpanAndGetMap(ReadOnlySpan<byte> acousticPermissions,
+        LegacyOrdinaryCursiveCandidateGraph graph,int node,byte span,CancellationToken cancellationToken)
+    {
+        if(!ReferenceEquals(graph,Graph))throw new ArgumentException("Span key requires this session's actual graph owner.");
+        if((uint)node>=Graph.NodeCount||span>node||!Graph.GetNode(node).Any(arc=>arc.Span>=span))
+            throw new ArgumentException("An actual graph span key is required.");
+        return RefreshMapCore(acousticPermissions,(node,span),cancellationToken);
+    }
+
+    private LegacyPreparedDictionaryWorkingMap RefreshMapCore(ReadOnlySpan<byte> acousticPermissions,
+        (int Node,byte Span)? ownedKey,CancellationToken cancellationToken)
     {
         Enter(cancellationToken);
         try
         {
             var map=Symbols.Refresh(acousticPermissions,cancellationToken);
-            cancellationToken.ThrowIfCancellationRequested();InstallMap(map);return map;
+            cancellationToken.ThrowIfCancellationRequested();InstallMap(map);
+            if(ownedKey is{} key&&ownedKeyProgression&&!externalQuerySinceEpoch&&
+                key.Node==nextControllerNode&&key.Span>lastOwnedSpan)
+            {currentOwnedKey=key;lastOwnedSpan=key.Span;}
+            else{currentOwnedKey=null;ownedKeyProgression=false;}
+            return map;
         }
         finally{Exit();}
     }
@@ -119,7 +148,7 @@ public sealed class LegacyPreparedCaseDictionarySession
         try
         {
             var produced=Symbols.BuildAndRefresh(actualGroups,cancellationToken);
-            if(produced.Succeeded){cancellationToken.ThrowIfCancellationRequested();InstallMap(produced.WorkingMap!);}
+            if(produced.Succeeded){cancellationToken.ThrowIfCancellationRequested();InstallMap(produced.WorkingMap!);currentOwnedKey=null;ownedKeyProgression=false;}
             return produced;
         }
         finally{Exit();}
