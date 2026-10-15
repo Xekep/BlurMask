@@ -96,6 +96,25 @@ public sealed class LegacyOwnedFreshMainWordNodeBuffer
         var result = LegacyNativeStoredWordCompaction.Prepare(records, SourceEnd23f0, PrimaryLimit, 1, [], comparer, cancellationToken);
         result.FullRecordStorage.Span.CopyTo(records);
         RetainedEnd23f8 = result.RetainedCount;
+        CleanupPrimaryAlternatives(cancellationToken);
+        compacted = true;
+    }
+
+    /// <summary>2144F0's false language-gate branch writes both counts to the
+    ///primary limit, bypasses212B10, and still performs the common alternative
+    ///cleanup. It must not sort or deduplicate the primary source rows again.</summary>
+    public void FinishWithoutLanguage(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!languageStarted || compacted || languageWritten != 0)
+            throw new InvalidOperationException("The false language branch requires a started node without language writes.");
+        SourceEnd23f0 = RetainedEnd23f8 = PrimaryLimit;
+        CleanupPrimaryAlternatives(cancellationToken);
+        compacted = true;
+    }
+
+    private void CleanupPrimaryAlternatives(CancellationToken cancellationToken)
+    {
         //2144F0 invalidates primary alternatives whose unreset parent points
         //into the secondary ordinals. Only cost00 is written in this cleanup.
         for (int index = 0; index < PrimaryLimit * 2; index++)
@@ -106,7 +125,6 @@ public sealed class LegacyOwnedFreshMainWordNodeBuffer
                 (alternative[31] & 32) == 0 && BinaryPrimitives.ReadUInt16LittleEndian(alternative[24..]) >= PrimaryLimit)
                 BinaryPrimitives.WriteInt32LittleEndian(alternative, 0x4000000);
         }
-        compacted = true;
     }
 
     public ReadOnlyMemory<byte> CopyRecordStorage() => records.ToArray();

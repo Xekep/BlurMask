@@ -80,6 +80,14 @@ The earlier parent, alternative and geometry probes retain their original
 goldens, including signed-wrap packets, first-parent ties, heap limits and
 7632 original geometry callbacks checked by the Python oracle.
 
+`FinishWithoutLanguage` restores the separate false language-gate branch of
+`2144F0`: it keeps both source/retained counts at125, bypasses `212B10`, and
+performs the same primary-alternative cleanup. It requires `BeginLanguage`,
+rejects prior language writes or repeated completion, and never sorts source
+rows.32 independent whole-storage controls preserve explicit allocation residue
+and verify that only eligible alternative cost00 changes. Existing compaction
+goldens remain unchanged; the expanded lifecycle checks total22.
+
 ## Remaining orchestration
 
 This stage connects actual whole-prefix startup, language materialization and

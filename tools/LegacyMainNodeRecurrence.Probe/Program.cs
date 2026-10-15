@@ -157,6 +157,31 @@ cleanup.CompactLanguage(new(headers));
 var expectedPool = pool80.ToArray(); W32(expectedPool, 0, Impossible);
 Require(cleanup.CopyPrimaryStorage().Span[..80].SequenceEqual(expectedPool), "Alternative cleanup changed reset/other payload bytes.");
 
+//The false native language gate bypasses212B10 entirely. Its cleanup must
+//preserve every source row and all alternative bytes except eligible cost00.
+int noLanguageControls = 0;
+for (int seed = 0; seed < 32; seed++)
+{
+    var untouched = Buffer(0, (byte)(seed * 13), (byte)(seed * 23));
+    untouched.WritePrimary(slot128, pool80);
+    untouched.BeginLanguage();
+    byte[] expectedRows = untouched.CopyRecordStorage().ToArray();
+    byte[] expectedPrimary = untouched.CopyPrimaryStorage().ToArray();
+    for (int index = 0; index < 250; index++)
+    {
+        int at = index * 40;
+        if (I32(expectedPrimary, at) < Impossible && (expectedPrimary[at + 31] & 32) == 0 &&
+            U16(expectedPrimary, at + 24) >= 125)
+            W32(expectedPrimary, at, Impossible);
+    }
+    untouched.FinishWithoutLanguage();
+    Require(untouched.SourceEnd23f0 == 125 && untouched.RetainedEnd23f8 == 125 &&
+        untouched.CopyRecordStorage().Span.SequenceEqual(expectedRows) &&
+        untouched.CopyPrimaryStorage().Span.SequenceEqual(expectedPrimary),
+        "False language gate sorted rows or changed native cleanup ownership.");
+    noLanguageControls++;
+}
+
 int lifecycleGuards = 0;
 void Reject(Action action)
 {
@@ -171,6 +196,17 @@ Reject(() => cleanup.CompactLanguage(new(headers)));
 Reject(() => cleanup.BeginLanguage());
 Reject(() => cleanup.WritePrimary(slot128, pool80));
 Reject(() => cleanup.Read(125));
+Reject(() => Buffer(0).FinishWithoutLanguage());
+Reject(() => cleanup.FinishWithoutLanguage());
+var completedWithoutLanguage = Buffer(0);
+completedWithoutLanguage.BeginLanguage();
+completedWithoutLanguage.FinishWithoutLanguage();
+Reject(() => completedWithoutLanguage.FinishWithoutLanguage());
+Reject(() => completedWithoutLanguage.CompactLanguage(new(headers)));
+var writtenLanguage = Buffer(0);
+writtenLanguage.BeginLanguage();
+writtenLanguage.WriteLanguage(firstLanguageSlot!);
+Reject(() => writtenLanguage.FinishWithoutLanguage());
 using (var canceled = new CancellationTokenSource())
 {
     canceled.Cancel();
@@ -286,7 +322,7 @@ if (alphabet.TryGetLabel("\u200c", out ushort joiner))
         (node, ordinal) => buffers[node].Read(ordinal).Record, Router(new(capacity)), 0, false, false,
         false, false, 0, false, false, null));
 }
-Console.WriteLine($"PASS {initializationControls} full-allocation controls; source127/retained126, alternative cleanup and {lifecycleGuards} lifecycle guards; {rootQueries} root queries / {terminalQueries} terminal queries -> {terminalAllocations} completions; {actualQueries} unfiltered alternative queries ({quotes} quotes), {fullRecords} alternative + {parentFullRecords} parent independent full128 records / {geometryControls} geometry controls.");
+Console.WriteLine($"PASS {initializationControls} full-allocation controls, {noLanguageControls} false-language whole-storage controls; source127/retained126, alternative cleanup and {lifecycleGuards} lifecycle guards; {rootQueries} root queries / {terminalQueries} terminal queries -> {terminalAllocations} completions; {actualQueries} unfiltered alternative queries ({quotes} quotes), {fullRecords} alternative + {parentFullRecords} parent independent full128 records / {geometryControls} geometry controls.");
 
 List<byte[]> ExpectedParent(ReadOnlySpan<byte> query, ushort parentOrdinal, ushort inputFlags)
 {
