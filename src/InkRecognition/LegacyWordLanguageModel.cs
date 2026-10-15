@@ -22,6 +22,9 @@ public sealed class LegacyWordLanguageModel
     public int GetStoredInitialWordLevel() => _wordLevels[0];
     /// <summary>First stored unigram/bigram codebook level; no runtime history is selected.</summary>
     public int GetStoredInitialClassLevel(bool bigram) => (bigram ? _bigramLevels : _unigramLevels)[0];
+    /// <summary>Last stored unigram/bigram codebook level. This is not the
+    /// cost of the last decoded class or the maximum observed class cost.</summary>
+    public int GetStoredFinalClassLevel(bool bigram) => (bigram ? _bigramLevels : _unigramLevels)[^1];
     public int StorageBytes => _classes.Length + _wordCodes.Length + _unigramCodes.Length + _bigramCodes.Length +
         4 * (_wordLevels.Length + _unigramLevels.Length + _bigramLevels.Length);
 
