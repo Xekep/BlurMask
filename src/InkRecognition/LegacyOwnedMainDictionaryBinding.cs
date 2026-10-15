@@ -8,6 +8,7 @@ internal sealed class LegacyOwnedMainDictionaryBinding
     private readonly LegacyPreparedDictionaryQuerySource? directBackend;
     private readonly LegacyPreparedAggregateDictionaryQuerySource? directQueries;
     private LegacyPreparedDictionaryWorkingMap? installedCaseMap;
+    private LegacyPreparedCaseDictionarySession.ResultQueryLease? caseResultLease;
     public LegacyOwnedRussianDictionaryPreparation? Direct {get;}
     public LegacyFreshCaseRussianDictionaryPreparation? Case {get;}
     public LegacyRussianModelBundle Model=>Direct?.Model??Case!.Model;
@@ -65,4 +66,23 @@ internal sealed class LegacyOwnedMainDictionaryBinding
     }
     public void ValidateCurrentMap()
     {if(Case is{} owned&&(installedCaseMap is null||!owned.Session.IsInstalledMap(installedCaseMap)))throw new InvalidOperationException("Case span map belongs to a different session refresh.");}
+
+    internal void CaptureResultQueryLease(CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        if(Case is{} owned)caseResultLease=owned.Session.CaptureResultQueryLease(token);
+    }
+    internal void ValidateResultQueryLease(CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        if(Case is{} owned)owned.Session.ValidateResultQueryLease(caseResultLease??
+            throw new InvalidOperationException("Case result source was not captured after its final V80."),token);
+    }
+    internal LegacyAggregateDictionaryQueryPage ReadResultQuery(ulong tag,LegacyPreparedDictionaryQuery query,
+        bool auxiliary,CancellationToken token)
+    {
+        if(Case is{} owned)return owned.Session.ReadResultQuery(caseResultLease??
+            throw new InvalidOperationException("Case result source was not captured after its final V80."),tag,query,auxiliary,token);
+        return directQueries!.Read(tag,query,auxiliary,false,token);
+    }
 }

@@ -1,5 +1,6 @@
 using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
+[assembly:InternalsVisibleTo("LegacyCaseResultQuery.Probe")]
 namespace InkRecognition;
 
 /// <summary>One selected292 dictionary with shared owned backend for normal/auxiliary
@@ -12,8 +13,11 @@ public sealed class LegacyPreparedCaseDictionarySession
     private readonly ConditionalWeakTable<LegacyPreparedDictionaryQuery,LegacyPreparedDictionaryWorkingMap> queryMaps=new();
     private LegacyPreparedDictionaryWorkingMap? queriedMap;
     private long controllerEpoch,preparedMapEpoch;
+    private long queryRevision,queryResetRevision;
+    private ResultQueryLease? activeResultLease;
     private int nextControllerNode=-1,lastOwnedSpan=-1;
     private bool ownedKeyProgression,externalQuerySinceEpoch;
+    private bool retainedOwnedSpanMap;
     private (int Node,byte Span)? currentOwnedKey;
     private readonly LegacyTaggedAggregateDictionaryQuerySource queries;
     private readonly LegacyNativeCaseWordMetadata metadata;
@@ -63,6 +67,7 @@ public sealed class LegacyPreparedCaseDictionarySession
         try
         {
             RequireInstalledMap(expectedMap);
+            queryRevision=checked(queryRevision+1);
             //292.V48/231AE0 bypasses233090 and selects immutable inner60,
             //not source68's filtered50. Its1C/20 are the language owner's
             //node/signed parent-row span, not the most recent D0 key.
@@ -108,6 +113,7 @@ public sealed class LegacyPreparedCaseDictionarySession
             if(completedNode< -1||completedNode>=Graph.NodeCount)throw new ArgumentOutOfRangeException(nameof(completedNode));
             queries.PrepareControllerNode(cancellationToken);
             queryMaps.Clear();queriedMap=null;controllerEpoch=checked(controllerEpoch+1);
+            queryResetRevision=queryRevision;
             nextControllerNode=completedNode+1;lastOwnedSpan=-1;
             ownedKeyProgression=true;externalQuerySinceEpoch=false;currentOwnedKey=null;
         }
@@ -147,8 +153,8 @@ public sealed class LegacyPreparedCaseDictionarySession
             cancellationToken.ThrowIfCancellationRequested();InstallMap(map);
             if(ownedKey is{} key&&ownedKeyProgression&&!externalQuerySinceEpoch&&
                 key.Node==nextControllerNode&&key.Span>lastOwnedSpan)
-            {currentOwnedKey=key;lastOwnedSpan=key.Span;}
-            else{currentOwnedKey=null;ownedKeyProgression=false;}
+            {currentOwnedKey=key;lastOwnedSpan=key.Span;retainedOwnedSpanMap=true;}
+            else{currentOwnedKey=null;ownedKeyProgression=false;retainedOwnedSpanMap=false;}
             return map;
         }
         finally{Exit();}
@@ -161,7 +167,7 @@ public sealed class LegacyPreparedCaseDictionarySession
         try
         {
             var produced=Symbols.BuildAndRefresh(actualGroups,cancellationToken);
-            if(produced.Succeeded){cancellationToken.ThrowIfCancellationRequested();InstallMap(produced.WorkingMap!);currentOwnedKey=null;ownedKeyProgression=false;}
+            if(produced.Succeeded){cancellationToken.ThrowIfCancellationRequested();InstallMap(produced.WorkingMap!);currentOwnedKey=null;ownedKeyProgression=false;retainedOwnedSpanMap=false;}
             return produced;
         }
         finally{Exit();}
@@ -219,6 +225,65 @@ public sealed class LegacyPreparedCaseDictionarySession
         =>ReferenceEquals(Volatile.Read(ref installedMap),expectedMap)&&Volatile.Read(ref preparedMapEpoch)==Volatile.Read(ref controllerEpoch);
     private void RequireInstalledMap(LegacyPreparedDictionaryWorkingMap? expectedMap)
     {if(expectedMap is not null&&(!ReferenceEquals(installedMap,expectedMap)||preparedMapEpoch!=controllerEpoch))throw new InvalidOperationException("Selected source map was refreshed by another owning span/session call or requires preparation after its controller node epoch.");}
+
+    //207780 executes after the final V80, whose query reset deliberately
+    //does not replace the last source68 permission map. A D0 span lease is
+    //stale here; a result lease retains this separate, exact lifecycle.
+    internal sealed class ResultQueryLease(LegacyPreparedCaseDictionarySession owner,long epoch,
+        long mapEpoch,LegacyPreparedDictionaryWorkingMap map,long revision)
+    {
+        internal readonly LegacyPreparedCaseDictionarySession Owner=owner;
+        internal readonly long Epoch=epoch,MapEpoch=mapEpoch;
+        internal readonly LegacyPreparedDictionaryWorkingMap Map=map;
+        internal long Revision=revision;
+    }
+
+    internal ResultQueryLease CaptureResultQueryLease(CancellationToken token)
+    {
+        Enter(token);
+        try
+        {
+            if(nextControllerNode!=Graph.NodeCount||currentOwnedKey is not null||preparedMapEpoch>=controllerEpoch||!retainedOwnedSpanMap||
+                queryRevision!=queryResetRevision)
+                throw new InvalidOperationException("Result queries require the completed graph's final V80 and its retained prior D0 map.");
+            return activeResultLease=new(this,controllerEpoch,preparedMapEpoch,installedMap,queryRevision);
+        }
+        finally{Exit();}
+    }
+
+    internal void ValidateResultQueryLease(ResultQueryLease lease,CancellationToken token)
+    {
+        Enter(token);try{RequireResultQueryLease(lease);}finally{Exit();}
+    }
+
+    internal LegacyAggregateDictionaryQueryPage ReadResultQuery(ResultQueryLease lease,ulong tag,
+        LegacyPreparedDictionaryQuery query,bool auxiliary,CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(query);Enter(token);
+        try
+        {
+            RequireResultQueryLease(lease);
+            //Use exactly the same292/backend and installed50 map. No map
+            //refresh, new query backend or implicit source reset is inserted.
+            try
+            {
+                var result=queries.Read(tag,query,auxiliary,extraCosts,token);
+                queryRevision=checked(queryRevision+1);lease.Revision=queryRevision;
+                return result;
+            }
+            catch{valid=false;throw;}
+        }
+        finally{Exit();}
+    }
+
+    private void RequireResultQueryLease(ResultQueryLease lease)
+    {
+        ArgumentNullException.ThrowIfNull(lease);
+        if(!ReferenceEquals(lease.Owner,this)||!ReferenceEquals(activeResultLease,lease)||
+            lease.Epoch!=controllerEpoch||lease.MapEpoch!=preparedMapEpoch||
+            !ReferenceEquals(lease.Map,installedMap)||lease.Revision!=queryRevision)
+            throw new InvalidOperationException("Result query source was changed by another map, controller epoch or external query.");
+    }
     private void InstallMap(LegacyPreparedDictionaryWorkingMap map)
     {dictionary.SetWorkingMap(map);Volatile.Write(ref installedMap,map);Volatile.Write(ref preparedMapEpoch,controllerEpoch);}
     private void Enter(CancellationToken token)
