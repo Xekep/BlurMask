@@ -22,4 +22,26 @@ public static class LegacyNativeMainSourceCoordinates
         }
         return 1;
     }
+
+    /// <summary>2075E0's callback-present counters. The supplied frame already
+    /// contains count25C and sixteen-byte coordinate items260. Count excludes
+    /// the last item's flag; field3A4 is a signed difference, without clamping.
+    /// This is not the distinct null-callback fallback, which zeros all three.</summary>
+    public static void WriteCallbackCounts(byte glyphDifference, Span<byte> sequenceFrame)
+    {
+        if (sequenceFrame.Length != 0x3b0)
+            throw new ArgumentException("Complete944-byte sequence frame required.", nameof(sequenceFrame));
+        int count = BinaryPrimitives.ReadInt32LittleEndian(sequenceFrame[0x25c..]);
+        if ((uint)count > 20)
+            throw new ArgumentException("Callback count must fit the native twenty-item buffer.", nameof(sequenceFrame));
+        int unflagged = 0, flagged = 0;
+        for (int item = count - 2; item >= 0; item--)
+        {
+            if ((sequenceFrame[0x268 + item * 16] & 1) == 0) unflagged++;
+            else flagged++;
+        }
+        BinaryPrimitives.WriteInt32LittleEndian(sequenceFrame[0x3a0..], unflagged);
+        BinaryPrimitives.WriteInt32LittleEndian(sequenceFrame[0x3a4..], glyphDifference - unflagged);
+        BinaryPrimitives.WriteInt32LittleEndian(sequenceFrame[0x3a8..], flagged);
+    }
 }
