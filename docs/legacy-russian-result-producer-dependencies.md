@@ -66,7 +66,12 @@ The scalar mode1 table/getter is now separately restored by
 The table has192 original-label rows per family, despite180 neural outputs;
 labels180..191 have stored coefficients. The full group/vector adapter above
 still needs to bind the neural alias to the original-label calibration and
-the actual source-owned group/channel.
+the actual source-owned group/channel. That owned scalar vector layer is now
+restored by `LegacyOwnedRussianMainGlyphConfidence`
+([scope and controls](legacy-owned-main-glyph-confidence.md)), for genuine
+DIRECT and case owners and their single-/multi-physical source scorers.
+Its closed-primitive channel retains the original source float. Geometry/cost
+requests and the enclosing216BC0 state machine remain separate work.
 
 After this adapter and216BC0, the remaining route still includes full207CB0
 materialization,21FFD0 row/protocol/callback production,217DB0 residual
