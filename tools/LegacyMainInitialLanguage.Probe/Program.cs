@@ -70,13 +70,17 @@ for (int node = 0; node < graph.NodeCount; node++)
 
                 int wordId = model.WordIndex.TryGetWordId(unchecked((int)U32(terminal, 0)), out int id)
                     ? id : throw new InvalidDataException("Actual terminal has no owned vocabulary ID.");
-                int composite = terminal[22] != 0 ? categories.StartCompositeMap.Span[U16(terminal, 20)] : parent.Span[26] & 63;
-                int category = categories.CompositeCategories.Span[composite].FirstId;
+                //Ordinary source70/094040 clears token+8.204DA5/205368
+                //transport that zero into LM request20. Sampler geometry is
+                //used separately below for the previous-category path penalty.
+                int category = 0;
                 int wordClass = model.LanguageModel.GetWordClass(wordId);
                 int wordCost = Transform(model.LanguageModel.GetStoredWordCost(wordId), profile.WordSlope, profile.WordOffset, scale);
                 int classCost = Transform(model.LanguageModel.GetStoredClassCost(wordClass), profile.UnigramSlope, profile.UnigramOffset, scale);
                 int categoryCost = category switch { 3 => 1, 5 or 6 => 2, 10 or 11 or 12 => 3, _ => 0 };
                 var token16 = dictionary.WordMetadata.ReadTerminal(U64(terminal, 0) & ~(255UL << 32), 0).Span;
+                Require(BinaryPrimitives.ReadInt32LittleEndian(token16[8..]) == 0,
+                    "Ordinary source70 must retain its independent zero metadata category.");
                 if (token16[13] != 0) categoryCost = 0;
                 int boundary = token16[12] != 0
                     ? (int)((scale * auxiliary.BoundaryOffset - scale * auxiliary.WordOffset) * -8192f) : 0;

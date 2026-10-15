@@ -69,7 +69,9 @@ flag distinct from source42 suppression and the request24 boundary flag.
 
 ## Numeric score, budget and cache lineage
 
-The current word category comes from the actual sampler composite mapper.
+Geometry categories come from the actual sampler composite mapper. The
+language category is source70 token+8 copied into request20 (zero for ordinary
+metadata); history preparation changes boundary24 without replacing category20.
 Path cost is context00 plus query cost10 and the source-line correction. The
 reused-history budget comes from `router.GetPrimaryHeap(selectedSourceId)`,
 the same owned bucket later used by insertion. Fallback localF8 retains literal

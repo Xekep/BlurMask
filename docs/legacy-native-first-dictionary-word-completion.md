@@ -85,8 +85,10 @@ zero, and preserves unassigned query24..31 from the supplied cache residue.
 `LegacyNativeFirstDictionaryWordCompletion` accepts the actual selected C00h
 source header, owned stored word row and query. It resolves the materialized
 anchor through that row's native38/3C pair and requires the word to start at
-source node0. Current category uses the existing actual sampler mapper; the
-starting category supplies the checked8192 correction for categories2/4.
+source node0. Geometry categories use the actual sampler mapper; the starting
+category supplies the checked8192 path correction for categories2/4. The
+language category comes from source70 token+8 (zero for ordinary094040), copied
+into request20; it is independent of those sampler categories.
 No category is inferred from Unicode or repaired between Latin and Cyrillic.
 
 The live language budget comes from `router.GetPrimaryHeap(sourceId)` and
