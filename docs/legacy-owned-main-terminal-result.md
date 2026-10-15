@@ -57,6 +57,16 @@ acceptance confidence. Native `207CB0` symbolic sequence/coordinates and compact
 source lineage through `206D30`/`21FFD0` remain the next bridge. The complete
 case-aware application recognition path is unfinished.
 
+Native `2271F0` calls `207CB0` before selecting its terminal row. The current
+bridge deliberately consumes the owning pass's **pre-207CB0** storage. In
+particular, native materialization rewrites beam field22 with a compact-relative
+index; `Winner.RowField22` and `CopySelectedRecord()` currently retain the raw
+pre-publication value instead. The full88-byte checks compare those pass bytes,
+not a completed native compact result. The numerical scan is independently
+checked for its supplied rows and owned options; equivalence to the complete
+result route still requires the missing materialization stage and its effects
+on every field used by selection to be checked.
+
 ## Reproduce
 
 Run the probe with `AK LK engine separation`, optionally followed by

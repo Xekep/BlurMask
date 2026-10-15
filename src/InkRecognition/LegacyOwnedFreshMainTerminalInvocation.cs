@@ -45,7 +45,9 @@ public sealed class LegacyOwnedFreshMainTerminalInvocation
     }
 
     /// <summary>Select directly from the final rows and cumulative cost owned
-    /// by the exact controller that prepared this invocation.</summary>
+    /// by the exact controller that prepared this invocation. These are the
+    /// pre-207CB0 rows: RowField22 is still raw pass storage, not a materialized
+    /// compact backtrack index. This does not run the complete2271F0 route.</summary>
     public LegacyOwnedMainTerminalResult SelectOwnedPass(LegacyOwnedMainDirectWordPassResult result,
         CancellationToken cancellationToken = default)
     {

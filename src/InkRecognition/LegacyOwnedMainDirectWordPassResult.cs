@@ -50,7 +50,8 @@ public sealed class LegacyOwnedMainDirectWordPassResult
 }
 
 /// <summary>Owned numeric terminal selection. No text reconstruction or
-/// acceptance confidence is inferred from the selected beam row.</summary>
+/// acceptance confidence is inferred from the selected pre-207CB0 beam row.
+/// In particular Winner.RowField22 is not a restored compact record index.</summary>
 public sealed class LegacyOwnedMainTerminalResult
 {
     private readonly byte[] selectedRecord;
