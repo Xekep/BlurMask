@@ -14,7 +14,7 @@ var cuts=new LegacyCursiveCutResult(ink,markers,LegacyCursiveInkAtoms.Build(ink.
 var seeds=LegacyOrdinaryCursiveSeedProducer.GenerateLeftToRight(cuts,80,new(false,1,0,.5f),[0],[-1]);
 var graph=LegacyOrdinaryCursiveCandidateGraph.Generate(seeds,LegacyOrdinaryCursiveSeedGraph.CreateOrdinaryDeferred(seeds),1);
 var restart=LegacyPreparedDictionaryRestartTags.CreateFresh();
-LegacyPreparedCaseDictionarySession Session(bool ignored=false)=>new(model,prefix,uint.MaxValue,ignored,caseData,publication,binding,graph,restart,true);
+LegacyPreparedCaseDictionarySession Session(bool ignored=false,bool extraCosts=true)=>new(model,prefix,uint.MaxValue,ignored,caseData,publication,binding,graph,restart,extraCosts);
 LegacyPreparedDictionaryQuery Q()=>new(){Node=0,Capacity=512,ContextRoot=contexts.ContainerIdentity,Category18=77};
 var raw=maps.CreateQuerySource(model.Lexicon,descriptor.Flags).Read(Q(),false,clearExtraCosts:true);
 if(raw.ReturnedCount!=132)throw new Exception("Actual RU root changed.");
@@ -27,6 +27,8 @@ for(int state=0;state<28;state++)
 {
  var session=Session();ulong tag=(0x83UL<<56)|((ulong)state<<58)|(0xa5UL<<48)|(0x89UL<<40);
  var actual=session.Read(tag,Q());
+ var noCosts=Session(extraCosts:false).Read(tag,Q());
+ if(noCosts.ReturnedCount!=actual.ReturnedCount||!noCosts.Records.Span.SequenceEqual(actual.Records.Span)||!noCosts.ExtraCosts.IsEmpty||actual.ExtraCosts.Length!=actual.ReturnedCount*12)throw new Exception("Side-cost presence changed normal records or extent.");
  if(actual.SelectedOrdinal!=0||actual.ReturnedCount<=0)throw new Exception("Owned normal source missing.");
  byte[] unstamped=actual.Records.ToArray();for(int i=0;i<actual.ReturnedCount;i++){if(unstamped[i*32+4]!=1)throw new Exception("Selected source stamp missing.");unstamped[i*32+4]=0;}
  w.WriteStartObject();w.WriteNumber("state",state);w.WriteString("records",Convert.ToHexString(unstamped));w.WriteEndObject();emitted+=actual.ReturnedCount;

@@ -24,6 +24,8 @@ preparation never forwards partial permissions or changes its working map.
 The probe uses actual RU resources and a supplied ordinary graph. It verifies
 5742 normal records across28 states,28 genuine auxiliary empty reads,512 terminal
 metadata combinations,512 restart tags and three targeted permission refreshes.
+Normal records are also compared with side costs enabled and disabled; only the
+12-byte-per-record side table extent changes, not the query records.
 Independent Python retains the older case expansion/metadata oracle unchanged;
 it additionally reconstructs raw AL triplets and checks filtered raw backend
 records and the complete64-bit restart values. This is state/ownership evidence,
