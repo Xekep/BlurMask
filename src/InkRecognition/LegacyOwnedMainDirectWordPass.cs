@@ -20,12 +20,14 @@ public sealed record LegacyMainDirectWordNodeResult(int EndingNode, int RootQuer
 
 /// <summary>Owned nontracing DIRECT main240 node/span loop. This consumes the
 ///prepared main source, real dictionary permissions and actual four-family
-///caches, but deliberately does not claim20C9D0's case-aware factory, grouped
+///caches. Public constructors retain the DIRECT scope; the typed case facade
+///provides an internal verified fresh292 source policy. Grouped
 ///1FA300 row-pointer allocation or native final winner/acceptance.</summary>
 public sealed class LegacyOwnedMainDirectWordPass
 {
     private const int Impossible = 0x4000000;
     private readonly LegacyOwnedFreshMainWordControllerPolicy policy;
+    private readonly LegacyFreshCaseMainSourcePolicy? caseSourcePolicy;
     private readonly LegacyOwnedMainWordSpanPreparation owner;
     private readonly LegacyNativeWordControllerConfiguration configuration;
     private readonly LegacyNativeWordHeapPreparation preparation;
@@ -61,30 +63,40 @@ public sealed class LegacyOwnedMainDirectWordPass
         LegacyOwnedFreshMainWordControllerPolicy policy, LegacyPreparedFreshMainLine240AcousticScorer? actualLineAcoustic,
         LegacyCursiveSeparationTable table, LegacyMainDirectStorageProvider allocator,
         CancellationToken cancellationToken = default)
+        : this(actualResource,policy,actualLineAcoustic,table,allocator,null,cancellationToken) { }
+
+    internal LegacyOwnedMainDirectWordPass(ReadOnlySpan<byte> actualResource,
+        LegacyOwnedFreshMainWordControllerPolicy policy, LegacyPreparedFreshMainLine240AcousticScorer? actualLineAcoustic,
+        LegacyCursiveSeparationTable table, LegacyMainDirectStorageProvider allocator,
+        LegacyFreshCaseMainSourcePolicy? caseSourcePolicy, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(policy);
         ArgumentNullException.ThrowIfNull(table);
         ArgumentNullException.ThrowIfNull(allocator);
         cancellationToken.ThrowIfCancellationRequested();
         this.policy = policy;
+        this.caseSourcePolicy = caseSourcePolicy;
         owner = policy.Owner;
         configuration = policy.Configuration;
         this.allocator = allocator;
         cumulative = new int[owner.SourceGraph.NodeCount];
-        if (owner.IsCaseAware || configuration.Mode22f6 != 0 || configuration.Trace2368 != 0 ||
+        if (owner.IsCaseAware != (caseSourcePolicy is not null) ||
+            caseSourcePolicy is not null && (!ReferenceEquals(caseSourcePolicy.Controller,policy) ||
+                !ReferenceEquals(caseSourcePolicy.DictionaryOwner,owner.CaseDictionaryOwner)) ||
+            configuration.Mode22f6 != 0 || configuration.Trace2368 != 0 ||
             configuration.PrimaryAlternativeCount2402 != 2 || configuration.SecondaryAlternativeCount2404 != 1 ||
             configuration.SuppressPreviousContext2609 != 0 || policy.SecondaryScaleEc != 0 ||
             policy.Refresh.ConsecutiveBlank22f7 != 0 || policy.KnowledgeF5)
-            throw new NotSupportedException("Owned fresh DIRECT mode0/2/2/1 without associated/trace state required.");
+            throw new NotSupportedException("Matching fresh DIRECT or typed case policy, mode0/2/2/1 without associated/trace state required.");
         if (actualLineAcoustic is not null && !ReferenceEquals(actualLineAcoustic, owner.MainLineAcoustic))
             throw new ArgumentException("Main line acoustic caches must belong to the exact supplied span owner.");
         if (actualResource.Length != 572763)
             throw new ArgumentException("Actual selected main resource/source ownership required.");
-        headers = owner.DictionaryOwner.CopySourceHeaders();
+        headers = owner.CopySourceHeaders();
         headerMap = headers.Select((header, index) => (header, index))
             .ToDictionary(item => checked((byte)item.index), item => item.header);
         preparation = LegacyNativeWordHeapPreparation.PrepareFresh(
-            [new(0, 0, 1), LegacyNativeWordPreparedSource.FromDictionary(owner.DictionaryOwner.Descriptor)], configuration, 0, cancellationToken);
+            [new(0, 0, 1), LegacyNativeWordPreparedSource.FromDictionary(owner.CommonDescriptor)], configuration, 0, cancellationToken);
         if (headers.Length != 2 || preparation.Limits.Count != 1 ||
             preparation.Sources.OverrideSourceIndex22f0 != -1 || preparation.Sources.SubwordSourceIndex22ec != -1)
             throw new NotSupportedException("Fresh implicit0 plus one ordinary C00 direct source required.");
@@ -107,19 +119,19 @@ public sealed class LegacyOwnedMainDirectWordPass
         initial = new(actualResource, owner, cell, initialResidue);
         var scorer = LegacyNativeWordAcousticRequestScorer.ForAlphabet(
             LegacyAcousticCandidateThresholds.ReadV110Node(actualResource[owner.OrdinaryAcousticOffset..], out _),
-            owner.DictionaryOwner.Model.AcousticAlphabet);
+            owner.CommonModel.AcousticAlphabet);
         var geometry = actualLineAcoustic is null ? owner.Source.CreatePrepared240TransitionGeometry(table) :
             actualLineAcoustic.Source.CreatePrepared240TransitionGeometry(table);
-        parents = new(owner.SourceGraph, owner.DictionaryOwner.Model.AcousticAlphabet, owner.SelectedSourceOwner.Categories,
+        parents = new(owner.SourceGraph, owner.CommonModel.AcousticAlphabet, owner.SelectedSourceOwner.Categories,
             owner.Contexts, geometry, scorer, cell, parentResidue);
         flagPrepass = actualLineAcoustic is null
             ? new(actualResource, owner.Acoustic, table, cell, flagResidue, cancellationToken)
             : new(actualResource, actualLineAcoustic, table, cell, flagResidue, cancellationToken);
-        delimiter = new(owner.DictionaryOwner.Model.AcousticAlphabet, owner.Contexts,
+        delimiter = new(owner.CommonModel.AcousticAlphabet, owner.Contexts,
             (tag, request, token) => owner.Read(currentSpan ?? throw new InvalidOperationException("D0 must precede290 reads."),
                 tag, request, clearExtraCosts: false, cancellationToken: token),
             LegacyNativeDelimiterQuerySource.ReadV10dCoordinateMode(actualResource));
-        auxiliaryDelimiter = new(owner.DictionaryOwner.Model.AcousticAlphabet, owner.Contexts,
+        auxiliaryDelimiter = new(owner.CommonModel.AcousticAlphabet, owner.Contexts,
             (tag, request, token) => owner.Read(currentSpan ?? throw new InvalidOperationException("D0 must precede auxiliary reads."),
                 tag, request, auxiliary: true, clearExtraCosts: false, cancellationToken: token), owner.SourceGraph.NodeCount);
         auxiliaryPages = new((tag, request, token) =>
@@ -127,7 +139,7 @@ public sealed class LegacyOwnedMainDirectWordPass
             var page = auxiliaryDelimiter.Read(tag, request, token);
             return new(page.ReturnedCount, page.Records, ReadOnlyMemory<byte>.Empty, -1, request.Skip, null);
         }, owner.Contexts, 128, auxiliaryScratch.Span);
-        languageGate = new(owner.DictionaryOwner.Model, owner.SourceGraph);
+        languageGate = new(owner.CommonModel, owner.SourceGraph);
     }
 
     /// <summary>Run the same single-use pass and retain immutable, source-bound
@@ -267,9 +279,11 @@ public sealed class LegacyOwnedMainDirectWordPass
         Reset(1, node, token);
         var heap = descriptor.GetHeapSnapshot();
         var router = Router(heap);
-        var dictionary = owner.DictionaryOwner;
-        var completion = new LegacyNativeFirstDictionaryWordCompletion(dictionary.Model, dictionary.WordMetadata,
-            dictionary.LanguageRecords, dictionary.RestartTags, 1, headers[1], false, 0, false, false);
+        var completion = caseSourcePolicy is not null
+            ? LegacyNativeFirstDictionaryWordCompletion.ForFreshCaseSpan(caseSourcePolicy,
+                currentSpan ?? throw new InvalidOperationException("Actual last D0 case lease required."),token)
+            : new LegacyNativeFirstDictionaryWordCompletion(owner.DictionaryOwner.Model, owner.DictionaryOwner.WordMetadata,
+                owner.DictionaryOwner.LanguageRecords, owner.DictionaryOwner.RestartTags, 1, headers[1], false, 0, false, false);
         int queryCount = 0, allocationCount = 0;
         for (ushort ordinal = 0; ordinal < configuration.PrimaryArcLimit230a; ordinal++)
         {

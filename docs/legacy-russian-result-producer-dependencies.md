@@ -5,6 +5,11 @@ prepared glyph finalizer are separate pieces. They do not yet form a complete
 case-aware main pass or a recognized-text pipeline. AI pen is not switched to
 these prepared components.
 
+The actual root-anchor case main loop is now connected by
+`LegacyOwnedMainCaseWordPass` ([scope and controls](legacy-owned-main-case-word-pass.md)).
+It covers genuine4/60-node source passes; the later/protocol language routes
+and full result-production chain are still not established by these controls.
+
 ## Symbol resolution216860
 
 The resource-bound no-wide/no-Arabic scalar branch is now restored in

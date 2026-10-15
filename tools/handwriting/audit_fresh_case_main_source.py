@@ -32,11 +32,21 @@ slot(0x1802e85b0,0x60,0x18005a400);slot(0x1802e8c60,0x60,0x18005a400);slot(0x180
 assert '*(longlong *)(param_2 + 0x2300) = param_3;' in f['18020c7f0']
 assert '(param_1,0x27b)' in f['1801eaeb0'] and '(param_1,0x13d)' in f['1801eaeb0']
 assert '**(longlong **)(param_2 + 0x30) + 0x60' in f['1802144f0'] and 'FUN_1801fe740' in f['1802144f0']
+#Fresh no-property Knowledge11/12 selects the symbol identity callback used
+#by primary alternatives. Other configured case/form callbacks are not covered.
+assert b.data[b.off(0x18000c939):b.off(0x18000c943)].hex()=='66c747100000c6471200'
+for a,m,o in [(0x1802149dd,'test','cl, cl'),
+ (0x1802149df,'lea','rax, [rip - 0x1c6e6]'),
+ (0x1802149e6,'lea','rdx, [rip - 0x1c81d]'),
+ (0x1802149ed,'cmovne','rax, rdx'),
+ (0x1802149f1,'mov','qword ptr [rsi + 0x2360], rax'),
+ (0x1801f8300,'movzx','eax, dx'),(0x1801f8303,'ret','')]:pin(a,m,o)
 lk=(ROOT/'models/ru-RU/ru_RU-lk-text.lite.res').read_bytes();assert hashlib.sha256(lk).hexdigest()=='d26ed08baf419361484958b3a04a5f740a228f4664f7e2643f43459223ef3e4e'
 assert struct.unpack_from('<I',lk,606964+8)[0]==0x13b
 report={'pins':pins,'parents':parents,'selectedWire13BOffset':606964,
  'factory':'NEW20E28zero; onlyactual13B source is139→27B, firstAddSource branch writesconfiguredlist notassociated28;1EB340 V50matches0 so noV48change2300',
  'gate':'292/290.V60false;28D ORonly292 false;2300zero→2144 first1FE740 gatefalse',
+ 'primarySymbolMapper':'Fresh constructor11/12zero without property/reuse events→2149DD identity1F8300; configured form callbacks not covered',
  'scope':'No external/reused/13D/configuration-event sources; no fullcase controller or winner claim'}
 if len(sys.argv)>1:
  out=Path(sys.argv[1]);out.parent.mkdir(parents=True,exist_ok=True);out.write_text(json.dumps(report,indent=2)+'\n')
