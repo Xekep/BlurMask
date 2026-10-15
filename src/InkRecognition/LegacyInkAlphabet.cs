@@ -18,16 +18,19 @@ public sealed class LegacyInkAlphabet
     private readonly byte[] _symbolFlags;
     private readonly LegacyInkRelatedForms[] _forms;
     private readonly short[]?[] _relationMaps;
+    private readonly byte[] _serializedHeader;
     public int LabelCount { get; }
     public int BytesConsumed { get; }
     public bool IsCaseRangeMetadataEnabled { get; }
 
     private LegacyInkAlphabet(int count, int consumed, Dictionary<ushort, string> text,
-        ushort[] reverse, byte[] symbolFlags, LegacyInkRelatedForms[] forms, short[]?[] relationMaps, bool caseMetadata)
+        ushort[] reverse, byte[] symbolFlags, LegacyInkRelatedForms[] forms, short[]?[] relationMaps, bool caseMetadata,
+        byte[] serializedHeader)
     {
         LabelCount = count; BytesConsumed = consumed; _text = text;
         _reverse = reverse; _symbolFlags = symbolFlags; _forms = forms; _relationMaps = relationMaps;
         IsCaseRangeMetadataEnabled=caseMetadata;
+        _serializedHeader=serializedHeader;
         _labels = new(StringComparer.Ordinal);
         foreach (var item in text)
             if (!_labels.TryAdd(item.Value, item.Key) && _labels[item.Value] != item.Key)
@@ -110,11 +113,13 @@ public sealed class LegacyInkAlphabet
                 }
         }
         bool caseMetadata=version==0x104 ? reader.U8()!=0 : triplets!=0;
-        return new(count, reader.Position, text, reverse, symbolFlags, forms, relationMaps,caseMetadata);
+        return new(count, reader.Position, text, reverse, symbolFlags, forms, relationMaps,caseMetadata,payload[..16].ToArray());
     }
 
     public bool TryGetText(ushort label, out string text) => _text.TryGetValue(label, out text!);
     public bool TryGetLabel(string text, out ushort label) => _labels.TryGetValue(text, out label);
+    /// <summary>Owned copy of the eight serialized special-label/count fields.</summary>
+    public byte[] CopySerializedHeader() => _serializedHeader.ToArray();
     /// <summary>Native052BD0 checks the three stored relation-map pointers before its Unicode fallback scan.</summary>
     public bool HasStoredRelationMaps => _relationMaps.Any(map => map is not null);
     internal LegacyInkRelatedForms[] CopyStoredCaseTriplets() => _forms.ToArray();

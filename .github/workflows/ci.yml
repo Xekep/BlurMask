@@ -512,6 +512,11 @@ jobs:
           python tools/LegacyCaseQuery.Probe/audit_actual.py .artifacts/legacy-case-preparation-controls.json .artifacts/legacy-case-query-managed-audit.json
           dotnet run --project tools/LegacyCaseAuxiliaryQuery.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json .artifacts/legacy-case-aux-managed-audit.json
           python tools/LegacyCaseAuxiliaryQuery.Probe/audit_output.py .artifacts/legacy-case-aux-managed-audit.json
+          dotnet run --project tools/LegacyCaseSymbolBinding.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-case-symbol-binding-managed-audit.json
+          python tools/LegacyCaseSymbolBinding.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-case-symbol-binding-managed-audit.json
+          dotnet run --project tools/LegacyTaggedAggregateQuery.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-tagged-aggregate-managed-audit.json
+          python tools/LegacyTaggedAggregateQuery.Probe/audit_output.py .artifacts/legacy-case-preparation-controls.json .artifacts/legacy-tagged-aggregate-managed-audit.json
+          dotnet run --project tools/LegacyMainNodeRecurrence.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           dotnet run --project tools/LegacyFirstOwnedRecognition.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-first-owned-managed-audit.json
           python tools/LegacyFirstOwnedRecognition.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-first-owned-managed-audit.json
           dotnet run --project tools/LegacyMainInitialLanguage.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
@@ -912,6 +917,9 @@ jobs:
             @{ Name = 'LegacyCaseContextRewrite'; Args = @('models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-case-context-rewrite-controls.json') },
             @{ Name = 'LegacyCaseQuery'; Args = @('models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-case-query-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', '.artifacts/legacy-case-query-native-audit.json') },
             @{ Name = 'LegacyCaseAuxiliaryQuery'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', '.artifacts/legacy-case-aux-native-audit.json') },
+            @{ Name = 'LegacyCaseSymbolBinding'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-case-symbol-binding-native-audit.json') },
+            @{ Name = 'LegacyTaggedAggregateQuery'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-tagged-aggregate-native-audit.json') },
+            @{ Name = 'LegacyMainNodeRecurrence'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyFirstOwnedRecognition'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-first-owned-native-audit.json') },
             @{ Name = 'LegacyOrdinaryGapMixture'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-ordinary-gap-mixture-native-audit.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-ordinary-gap-mixture-controls.json') },
             @{ Name = 'LegacyOrdinaryGap'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-ordinary-gap-native-audit.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-ordinary-gap-controls.json') },
@@ -1055,6 +1063,14 @@ jobs:
             }
             if ($name -eq 'LegacyCaseAuxiliaryQuery') {
               python tools/LegacyCaseAuxiliaryQuery.Probe/audit_output.py .artifacts/legacy-case-aux-native-audit.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+            if ($name -eq 'LegacyCaseSymbolBinding') {
+              python tools/LegacyCaseSymbolBinding.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-case-symbol-binding-native-audit.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+            if ($name -eq 'LegacyTaggedAggregateQuery') {
+              python tools/LegacyTaggedAggregateQuery.Probe/audit_output.py .artifacts/legacy-case-preparation-controls.json .artifacts/legacy-tagged-aggregate-native-audit.json
               if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             }
             if ($name -eq 'LegacyOrdinaryGapMixture') {

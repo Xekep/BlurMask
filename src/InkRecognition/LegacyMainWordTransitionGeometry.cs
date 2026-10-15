@@ -179,8 +179,7 @@ public sealed class LegacyMainWordTransitionGeometry
             request.ReadUInt16(12) >= bounds[current].Length || request.ReadUInt16(14) >= bounds[previous].Length || request.ReadUInt32(64) == 9)
             throw new NotSupportedException("Compatible prepared main source arcs and plain ordinary kinds0/2 required.");
         foreach (ushort symbol in new[] { request.ReadUInt16(36), request.ReadUInt16(38) })
-            if (!alphabet.TryGetText(symbol, out string text) || text.Length != 1 ||
-                !(text[0] is >= 'A' and <= 'Z' or >= 'a' and <= 'z' or >= '\u0400' and <= '\u04ff' or >= '0' and <= '9'))
+            if (!LegacyNativeOrdinaryWordSymbols.Supports(alphabet, symbol))
                 throw new NotSupportedException("Special/Arabic/primitive graph status policy is outside this ordinary main scope.");
     }
 

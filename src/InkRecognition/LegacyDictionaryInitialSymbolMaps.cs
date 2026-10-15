@@ -6,14 +6,16 @@ public sealed class LegacyDictionaryInitialSymbolMaps
     private readonly ushort[] primary, auxiliary;
     private readonly ulong[] contextIds;
     public int AcousticSymbolCount { get; }
+    public LegacyInkAlphabet AcousticAlphabet { get; }
+    public LegacyInkAlphabet LexicalAlphabet { get; }
     public LegacySymbolContextFactory Contexts { get; }
     public ushort[] CopyPrimary() => primary.ToArray();
     public ushort[] CopyAuxiliary() => auxiliary.ToArray();
     public ulong[] CopyInitialContexts() => contextIds.ToArray();
 
-    private LegacyDictionaryInitialSymbolMaps(int count, LegacySymbolContextFactory contexts,
+    private LegacyDictionaryInitialSymbolMaps(LegacyInkAlphabet acoustic, LegacyInkAlphabet lexical, LegacySymbolContextFactory contexts,
         ushort[] primary, ushort[] auxiliary, ulong[] contextIds)
-    { AcousticSymbolCount = count; Contexts = contexts; this.primary = primary; this.auxiliary = auxiliary; this.contextIds = contextIds; }
+    { AcousticAlphabet=acoustic;LexicalAlphabet=lexical;AcousticSymbolCount = acoustic.LabelCount; Contexts = contexts; this.primary = primary; this.auxiliary = auxiliary; this.contextIds = contextIds; }
 
     /// <summary>
     /// Native initializes auxiliary60 toFFFF only for nonvirtual symbols. It
@@ -48,7 +50,7 @@ public sealed class LegacyDictionaryInitialSymbolMaps
         }
         ulong[] initial = contexts.CreateInitialSourceMap(primary, cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
-        return new(acoustic.LabelCount, contexts, primary, auxiliary, initial);
+        return new(acoustic, lexical, contexts, primary, auxiliary, initial);
     }
 
     public LegacyPreparedDictionaryWorkingMap CreateWorkingMap(uint descriptorFlags)

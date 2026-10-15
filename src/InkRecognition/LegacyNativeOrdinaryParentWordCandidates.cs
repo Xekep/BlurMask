@@ -111,8 +111,8 @@ public sealed class LegacyNativeOrdinaryParentWordCandidates
                 byte length = row[22], flags = row[23];
                 if ((flags & 8) != 0 && parentAuxiliary30 != -1 || symbol == loop && parentAuxiliary30 == -1) continue;
                 byte kind = (byte)(flags & 7);
-                if (kind is not (0 or 2) || !Plain(symbol))
-                    throw new NotSupportedException("Plain ordinary kind0/2 source query required; special/type7/category policies remain unported.");
+                if (kind is not (0 or 2) || !LegacyNativeOrdinaryWordSymbols.Supports(alphabet, symbol))
+                    throw new NotSupportedException("Nonvirtual ordinary kind0/2 source query required; special/type7/category policies remain unported.");
                 ulong tag = BinaryPrimitives.ReadUInt64LittleEndian(row);
                 byte sourceId = (byte)(tag >> 32);
                 if (sourceId == 0 || !preparedSourceHeaders.TryGetValue(sourceId, out uint header))
@@ -121,9 +121,10 @@ public sealed class LegacyNativeOrdinaryParentWordCandidates
                 ulong context = BinaryPrimitives.ReadUInt64LittleEndian(row[8..]);
                 if (context == 0 || contexts.ReadNode(context).Symbol != symbol)
                     throw new InvalidDataException("Actual parent-query context symbol differs from its current label.");
+                LegacyNativeOrdinaryWordSymbols.CheckQuoteContext(alphabet, symbol, contexts, context);
                 if (!qualifier.Qualifies(symbol, length, context, contexts, cancellationToken)) continue;
                 qualified++;
-                for (int variant = 0; variant < ((inputFlags & 0x10) == 0 ? 2 : 1); variant++)
+                for (int variant = 0; variant < LegacyNativeOrdinaryWordSymbols.VariantCount(alphabet, symbol, inputFlags); variant++)
                 {
                     int category = categoryMap.GetSymbolCompositeCategory(symbol, endBoundary: variant != 0);
                     if (category < 0)
@@ -176,6 +177,4 @@ public sealed class LegacyNativeOrdinaryParentWordCandidates
         finally { Volatile.Write(ref active, 0); }
     }
 
-    private bool Plain(ushort symbol) => alphabet.TryGetText(symbol, out string text) && text.Length == 1 &&
-        text[0] is >= 'A' and <= 'Z' or >= 'a' and <= 'z' or >= '\u0400' and <= '\u04ff' or >= '0' and <= '9';
 }

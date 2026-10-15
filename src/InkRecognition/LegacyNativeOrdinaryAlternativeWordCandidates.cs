@@ -88,11 +88,12 @@ public sealed class LegacyNativeOrdinaryAlternativeWordCandidates
             var query = query32.ToArray();
             ushort symbol = U16(query, 20);
             byte length = query[22], flags = query[23], kind = (byte)(flags & 7);
-            if (kind is not (0 or 2) || !Plain(symbol) || U64(query, 24) != 0)
-                throw new NotSupportedException("Ordinary plain kind0/2 query without extra context required.");
+            if (kind is not (0 or 2) || !LegacyNativeOrdinaryWordSymbols.Supports(alphabet, symbol) || U64(query, 24) != 0)
+                throw new NotSupportedException("Ordinary nonvirtual kind0/2 query without extra context required.");
             ulong tag = U64(query, 0), context = U64(query, 8);
             if (context == 0 || contexts.ReadNode(context).Symbol != symbol)
                 throw new InvalidDataException("Current query label differs from its owned symbol context.");
+            LegacyNativeOrdinaryWordSymbols.CheckQuoteContext(alphabet, symbol, contexts, context);
             byte sourceId = query[4];
             if (sourceId == 0 || !sourceHeaders.TryGetValue(sourceId, out uint currentHeader))
                 throw new InvalidDataException("Query source ID has no prepared owner header.");
@@ -108,13 +109,13 @@ public sealed class LegacyNativeOrdinaryAlternativeWordCandidates
                 var row = storedRows88[ordinals[i]].Span;
                 if (U64(row, 40) != group.RestartTag28 || (row[33] & 63) != group.SmallState21 || (row[33] & 128) != 0)
                     throw new InvalidDataException("Restart group no longer matches its owning secondary rows.");
-                if (!Plain(U16(row, 36)))
+                if (!LegacyNativeOrdinaryWordSymbols.Supports(alphabet, U16(row, 36)))
                     throw new NotSupportedException("Special previous symbols, including U+FFFD's kind override, require their native state path.");
                 parents[i] = row.ToArray();
             }
             if (!qualifier.Qualifies(symbol, length, context, contexts, cancellationToken)) return new(true, 0, 0, 0);
             int geometryCalls = 0, acousticCalls = 0, allocations = 0;
-            for (int variant = 0; variant < ((inputFlags & 16) == 0 ? 2 : 1); variant++)
+            for (int variant = 0; variant < LegacyNativeOrdinaryWordSymbols.VariantCount(alphabet, symbol, inputFlags); variant++)
             {
                 int category = map.GetSymbolCompositeCategory(symbol, endBoundary: variant != 0);
                 if (category < 0)
@@ -192,8 +193,6 @@ public sealed class LegacyNativeOrdinaryAlternativeWordCandidates
         finally { Volatile.Write(ref active, 0); }
     }
 
-    private bool Plain(ushort symbol) => alphabet.TryGetText(symbol, out string text) && text.Length == 1 &&
-        text[0] is >= 'A' and <= 'Z' or >= 'a' and <= 'z' or >= '\u0400' and <= '\u04ff' or >= '0' and <= '9';
     private static ushort U16(ReadOnlySpan<byte> value, int offset) => BinaryPrimitives.ReadUInt16LittleEndian(value[offset..]);
     private static ulong U64(ReadOnlySpan<byte> value, int offset) => BinaryPrimitives.ReadUInt64LittleEndian(value[offset..]);
     private static void W16(LegacyNativeWordRecombinationRequest request, int offset, ushort value)
