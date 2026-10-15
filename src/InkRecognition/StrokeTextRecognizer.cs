@@ -4,6 +4,9 @@ public readonly record struct InkPoint(float X, float Y);
 public sealed record InkStroke(IReadOnlyList<InkPoint> Points);
 public sealed record TextRecognition(string Text, float Confidence, int Frames)
 {
+    /// <summary>Experimental first-stage scores are native candidate scores,
+    /// not calibrated recognition probabilities. Hosts must label this mode.</summary>
+    public bool ExperimentalCandidateScore { get; init; }
     /// <summary>Optional actual recognized-range geometry for font matching.
     /// Heights and horizontal coordinates must use the same units as input ink.
     /// A decoder without prepared containing-line x-height leaves this absent;

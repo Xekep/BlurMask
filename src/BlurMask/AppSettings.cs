@@ -55,6 +55,7 @@ internal sealed record AppSettings
     public string LinuxDisplayBackend { get; init; } = "auto";
     public string Language { get; init; } = "system";
     public string AiMode { get; init; } = "auto";
+    public bool ExperimentalTextEngine { get; init; }
     public bool GiacEnabled { get; init; }
     public bool HotkeysEnabled { get; init; } = true;
     public Dictionary<ShortcutAction, ShortcutBinding> Shortcuts { get; init; } = DefaultShortcuts();

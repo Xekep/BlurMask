@@ -35,6 +35,8 @@ jobs:
         run: |
           $version = $env:RELEASE_VERSION -replace '^v', ''
           .\tools\build.ps1 win-x64 -Version $version
+          & ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe --ai-pen-test | Out-Default
+          if ($LASTEXITCODE -ne 0) { throw 'Bundled experimental recognition verification failed.' }
           & ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe --math-solver-test | Out-Default
           if ($LASTEXITCODE -ne 0) { throw 'Portable bundled solver discovery failed.' }
           Compress-Archive -Path "src\BlurMask\bin\Release\net11.0\win-x64\publish\*" -DestinationPath BlurMask-win-x64.zip
@@ -74,6 +76,7 @@ jobs:
       - run: dotnet restore src/BlurMask/BlurMask.csproj
       - run: |
           bash ./tools/build.sh linux-x64 "${RELEASE_VERSION#v}"
+          ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --ai-pen-test
           export BLURMASK_TEST_GIAC="$PWD/src/BlurMask/bin/Release/net11.0/linux-x64/publish/runtimes/linux-x64/solver/icas"
           ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --math-solver-test
           dotnet run --project tools/InkMath.Solver.Probe -c Release -- "$BLURMASK_TEST_GIAC"
@@ -128,6 +131,7 @@ jobs:
       - shell: bash
         run: |
           bash ./tools/build.sh "$RID" "${GITHUB_REF_NAME#v}"
+          ./src/BlurMask/bin/Release/net11.0/$RID/publish/BlurMask --ai-pen-test
           export BLURMASK_TEST_GIAC="$PWD/src/BlurMask/bin/Release/net11.0/$RID/publish/runtimes/$RID/solver/icas"
           ./src/BlurMask/bin/Release/net11.0/$RID/publish/BlurMask --math-solver-test
           dotnet run --project tools/InkMath.Solver.Probe -c Release -- "$BLURMASK_TEST_GIAC"

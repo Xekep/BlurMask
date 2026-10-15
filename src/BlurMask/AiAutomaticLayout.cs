@@ -27,7 +27,7 @@ internal static class AiAutomaticLayout
         }
         var text = AiInkLayout.Recognize(strokes, textRecognizer, cancellationToken);
         var complete = text.SelectMany(r => r.Strokes).Distinct().Count() == strokes.Count;
-        if (complete && text.Count > 0 && text.All(r => r.Confidence >= .85f && NaturalText(r.Text.Text))) return text;
+        if (complete && text.Count > 0 && text.All(r => r.Confidence >= r.AcceptanceThreshold && NaturalText(r.Text.Text))) return text;
         cancellationToken.ThrowIfCancellationRequested();
         if (mathRecognizer is not null || AiMathRecognitionModels.Installed)
         {
@@ -40,9 +40,9 @@ internal static class AiAutomaticLayout
         }
         // Plain numeric input can still be computed with the text model alone.
         foreach (var result in text)
-            if (result.Confidence >= .85f && Mathematical(result.Text.Text) && MathTypesetting.Supported(result.Text.Text))
+            if (result.Confidence >= result.AcceptanceThreshold && Mathematical(result.Text.Text) && MathTypesetting.Supported(result.Text.Text))
                 AiMathLayout.ApplySolvedResult(result, cancellationToken, mathSolver);
-        return text.Where(r => r.Confidence >= .85f).ToArray();
+        return text.Where(r => r.Confidence >= r.AcceptanceThreshold).ToArray();
     }
 
     private static IReadOnlyList<AiInkLayout.Result> RecognizeRegions(IReadOnlyList<InkMark> strokes, RawContentResult classification,
@@ -61,7 +61,7 @@ internal static class AiAutomaticLayout
             var members = region.StrokeIndices.Order().Select(i => strokes[i]).ToArray();
             var decoded = region.Category == InkCategory.Text ? AiInkLayout.Recognize(members, textRecognizer, token) :
                 AiMathLayout.Recognize(members, mathRecognizer, token, calculate: false, minimumConfidence: .85f);
-            if (decoded.Count == 0 || decoded.Any(r => !float.IsFinite(r.Confidence) || r.Confidence < .85f) ||
+            if (decoded.Count == 0 || decoded.Any(r => !float.IsFinite(r.Confidence) || r.Confidence < r.AcceptanceThreshold) ||
                 decoded.SelectMany(r => r.Strokes).Distinct().Count() != members.Length) continue;
             foreach (var result in decoded)
                 if (Mathematical(result.Text.Text) && MathTypesetting.Supported(result.Text.Text))

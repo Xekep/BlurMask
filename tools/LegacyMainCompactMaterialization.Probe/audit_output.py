@@ -32,9 +32,19 @@ for item in tree.body:
     elif isinstance(item,ast.Assign) and any(isinstance(t,ast.Name) and t.id in names for t in item.targets):selected.append(item)
 ns={'struct':struct};exec(compile(ast.Module(body=selected,type_ignores=[]),str(source),'exec'),ns)
 normalize=ns['normalize']
-sys.path.insert(0,str(root/'research/myscript/scripts'))
-from inspect_text_features import parse_alphabet
-al=parse_alphabet(ak);labels={v:k for k,v in al['mapping'].items()};N=al['label_count']
+def read_alphabet(data):
+    # Standalone resource parser: CI must not depend on ignored PE research.
+    at=99;fields=struct.unpack_from('<8H',data,at);at+=16
+    n=u16(data,at);at+=2
+    for increment in (32,64,1):
+        table=struct.unpack_from('<'+'H'*n,data,at);at+=n*2
+        n=next(v+increment for v in reversed(table) if v!=65535)
+    spans=struct.unpack_from('<'+'H'*(n+1),data,at);at+=(n+1)*2
+    entries=[struct.unpack_from('<II',data,at+8*i) for i in range(spans[-1]+1)];at+=len(entries)*8
+    strings=data[at:at+entries[-1][0]]
+    mapping={label&65535:strings[offset:entries[i+1][0]].decode('utf8') for i,(offset,label) in enumerate(entries[:-1])}
+    return dict(fields=fields,label_count=fields[-1],mapping=mapping)
+al=read_alphabet(ak);labels={v:k for k,v in al['mapping'].items()};N=al['label_count']
 knowledge=al['fields'][3];special_de=labels.get('\u200c',65535);special_e2=labels.get('\u0651',65535);closed=labels['\U000f0001']
 reserved={N,*al['fields'][4:7]};zwj=labels.get('\u200d',65535)
 #Read native profile201 symbol->start-composite mapping directly from AK.

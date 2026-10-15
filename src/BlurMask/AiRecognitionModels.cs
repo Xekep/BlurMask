@@ -9,11 +9,20 @@ internal static class AiRecognitionModels
     private static StrokeTextRecognizer? _recognizer;
     private static DateTime _modified;
     private static long _length = -1;
+    private static readonly Lazy<ExperimentalFirstStageTextRecognizer> Experimental = new(() =>
+        ExperimentalFirstStageTextRecognizer.Load(ReadEmbedded("acoustic"), ReadEmbedded("engine"), ReadEmbedded("separation")));
+    private static byte[] ReadEmbedded(string name)
+    {
+        using var stream = typeof(AiRecognitionModels).Assembly.GetManifestResourceStream("BlurMask.ExperimentalInk." + name)
+            ?? throw new InvalidDataException("Bundled experimental model is missing.");
+        using var output = new MemoryStream(); stream.CopyTo(output); return output.ToArray();
+    }
 
     internal static IStrokeTextRecognizer? Current
     {
         get
         {
+            if (Program.Settings.ExperimentalTextEngine) return Experimental.Value;
             lock (Gate)
             {
                 try

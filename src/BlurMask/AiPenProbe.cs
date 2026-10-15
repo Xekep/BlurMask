@@ -35,12 +35,57 @@ internal static class AiPenProbe
         try { AiRecognitionModels.Install(invalid); throw new InvalidOperationException("Invalid model installation succeeded."); }
         catch (InvalidDataException) { }
         VerifyLocalModel();
+        VerifyExperimentalEngine();
         VerifyMath();
         AiMathCorpusProbe.RunIfRequested();
         VerifyAutomatic();
         VerifyAcceptedMathCalculation();
         VerifyRawContentDispatch();
         Console.WriteLine("AI row layout, uncertainty, model validation, history and peer ink: passed.");
+    }
+
+    private static void VerifyExperimentalEngine()
+    {
+        var original = Program.Settings;
+        try
+        {
+            var missing = System.Text.Json.JsonSerializer.Deserialize("{}", SettingsJsonContext.Default.AppSettings)!;
+            if (missing.ExperimentalTextEngine) throw new InvalidOperationException("Existing settings opted into an unfinished engine.");
+            var enabled = missing with { ExperimentalTextEngine = true };
+            var json = System.Text.Json.JsonSerializer.Serialize(enabled, SettingsJsonContext.Default.AppSettings);
+            if (System.Text.Json.JsonSerializer.Deserialize(json, SettingsJsonContext.Default.AppSettings)?.ExperimentalTextEngine != true)
+                throw new InvalidOperationException("Experimental engine setting did not survive serialization.");
+            Program.Settings = enabled;
+            var recognizer = AiRecognitionModels.Current;
+            if (recognizer is not ExperimentalFirstStageTextRecognizer || !ReferenceEquals(recognizer, AiRecognitionModels.Current))
+                throw new InvalidOperationException("Experimental mode did not select the bundled independent engine.");
+            InkStroke Draw(params (float X, float Y)[] points) => new(points.Select(p => new InkPoint(p.X, p.Y)).ToArray());
+            InkStroke[] ink = [Draw((0,90),(0,10),(25,60),(50,10),(50,90)),Draw((65,90),(65,10)),
+                Draw((65,90),(115,10)),Draw((115,90),(115,10)),Draw((130,90),(130,10),(175,10),(185,20),(185,45),(175,55),(130,55))];
+            var actual = recognizer.Recognize(ink);
+            if (actual.Text != "MИP" || !actual.ExperimentalCandidateScore || actual.Confidence < .5f)
+                throw new InvalidOperationException($"Experimental first-stage integration changed its actual diagnostic result: '{actual.Text}', score {actual.Confidence}.");
+            var marks = ink.Select(stroke =>
+            {
+                var mark = new InkMark(InkTool.Pen, Colors.Black, 3, new(stroke.Points[0].X, stroke.Points[0].Y));
+                foreach (var p in stroke.Points.Skip(1)) mark.AddPoint(new(p.X, p.Y)); return mark;
+            }).ToArray();
+            var rows = AiAutomaticLayout.Recognize(marks, recognizer);
+            if (rows.Count != 1 || rows[0].Text.Text != actual.Text || !rows[0].ExperimentalCandidateScore)
+                throw new InvalidOperationException("Actual experimental candidate scores were lost by the application layout: " +
+                    string.Join(" / ", rows.Select(r => $"'{r.Text.Text}' score={r.Confidence} experimental={r.ExperimentalCandidateScore}")));
+            if (recognizer.Recognize(Enumerable.Repeat(ink[0],33).ToArray()).Text.Length != 0 ||
+                recognizer.Recognize([Draw((float.NaN,0))]).Text.Length != 0)
+                throw new InvalidOperationException("Unsupported experimental input replaced handwriting.");
+            using var cancel = new CancellationTokenSource(); cancel.Cancel();
+            try { recognizer.Recognize(ink,cancel.Token); throw new InvalidOperationException("Canceled experimental request succeeded."); }
+            catch (OperationCanceledException) { }
+            Program.Settings = missing;
+            if (AiRecognitionModels.Current is ExperimentalFirstStageTextRecognizer)
+                throw new InvalidOperationException("Disabling experimental mode retained the wrong engine.");
+            Console.WriteLine($"Experimental bundled first-stage engine → application text layout: '{actual.Text}', native candidate score {actual.Confidence}; settings, rollback, bounds and cancellation passed. Russian cursive accuracy is not asserted.");
+        }
+        finally { Program.Settings = original; }
     }
 
     private static void VerifyLocalModel()

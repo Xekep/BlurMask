@@ -35,6 +35,9 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets/**" />
+    <EmbeddedResource Include="../../models/ru-RU/ru_RU-ak-cur.lite.res" LogicalName="BlurMask.ExperimentalInk.acoustic" />
+    <EmbeddedResource Include="../../models/ru-RU/legacy-engine-profile.json" LogicalName="BlurMask.ExperimentalInk.engine" />
+    <EmbeddedResource Include="../../models/ru-RU/legacy-separation-profile.json" LogicalName="BlurMask.ExperimentalInk.separation" />
     <ProjectReference Include="../InkRecognition/InkRecognition.csproj" />
     <ProjectReference Include="../InkRecognition.Math/InkRecognition.Math.csproj" />
     <ProjectReference Include="../InkRecognition.RawContent/InkRecognition.RawContent.csproj" />

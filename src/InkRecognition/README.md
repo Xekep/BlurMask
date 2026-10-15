@@ -47,6 +47,19 @@ model; Russian and Math2 are not implemented here. Confidence is an acoustic
 score. This is an experimental engine, not a reproduction of the complete
 MyScript SDK.
 
+`ExperimentalFirstStageTextRecognizer.Load(acousticResource, engineProfile,
+separationProfile)` exposes the restored ordinary first stage through the same
+`IStrokeTextRecognizer` interface. It requires the supported pinned Russian AK
+resource and the repository runtime profiles; it does not run vendor binaries.
+This adapter handles supported single-word paths only, without the unfinished
+main dictionary decoder. It can mix similar Cyrillic and Latin letters.
+`TextRecognition.ExperimentalCandidateScore` identifies its native glyph10
+candidate score, which must not be presented as a calibrated recognition
+probability. Unsupported paths return empty text. The adapter accepts at most32
+strokes/1024 finite points and has a two-second cooperative processing budget;
+external cancellation still propagates. The BlurMask application bundles these
+three assets and exposes the adapter behind a setting disabled by default.
+
 The legacy RU investigation has a separate experimental API:
 `LegacyInkNetwork.Load` reads a complete FEA0/version106 classifier. The caller
 supplies weights and activation tables. `LegacyStrokeFeatures` builds trajectory

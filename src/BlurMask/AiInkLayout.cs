@@ -13,6 +13,8 @@ internal static class AiInkLayout
         internal Rect[]? SizingComponents { get; init; }
         internal LegacyFontSizeTextSample[]? PreparedFontSizeSamples { get; init; }
         internal bool MathCalculationFailed { get; set; }
+        internal bool ExperimentalCandidateScore { get; init; }
+        internal float AcceptanceThreshold => ExperimentalCandidateScore ? .5f : .85f;
     }
     private sealed class Group(InkMark stroke)
     {
@@ -56,7 +58,7 @@ internal static class AiInkLayout
             row.Sort((a, b) => a.Bounds.X.CompareTo(b.Bounds.X));
             var bounds = row.Select(g => g.Bounds).Aggregate((a, b) => a.Union(b));
             if (bounds.Width < 2 || bounds.Height < 2 || bounds.Left < -100000 || bounds.Top < -100000 || bounds.Right > 100000 || bounds.Bottom > 100000) continue;
-            var value = new StringBuilder(); var uncertain = false; var confidence = 1f;
+            var value = new StringBuilder(); var uncertain = false; var confidence = 1f; var experimentalScore = false;
             var sizing = new List<Rect>(); var preparedSizes = new List<LegacyFontSizeTextSample>();
             bool completePreparedSizes = true;
             for (var i = 0; i < row.Count;)
@@ -68,8 +70,9 @@ internal static class AiInkLayout
                 // Preserve pen chronology for delayed dots/crossbars and connected words.
                 var part = strokes.Where(members.Contains).Select(s => new InkStroke(s.Points.Select(p => new InkPoint((float)p.X, (float)p.Y)).ToArray())).ToArray();
                 var line = recognizer.Recognize(part, cancellationToken);
-                if (!float.IsFinite(line.Confidence) || line.Confidence < .75f || string.IsNullOrWhiteSpace(line.Text) || value.Length + line.Text.Length > 4000)
+                if (!float.IsFinite(line.Confidence) || line.Confidence < (line.ExperimentalCandidateScore ? .5f : .75f) || string.IsNullOrWhiteSpace(line.Text) || value.Length + line.Text.Length > 4000)
                 { uncertain = true; break; }
+                experimentalScore |= line.ExperimentalCandidateScore;
                 confidence = Math.Min(confidence, line.Confidence);
                 // Keep prepared containing-line/range metadata distinct from
                 // original component boxes, which provide a display fallback only.
@@ -86,6 +89,7 @@ internal static class AiInkLayout
                 { Id = first.Id, Text = value.ToString(), Font = "Inter", FontSize = Math.Clamp(bounds.Height, 8, 300), FadeSeconds = first.FadeSeconds };
             text.AddPoint(bounds.BottomRight); results.Add(new(sources, text, confidence)
             {
+                ExperimentalCandidateScore = experimentalScore,
                 SizingComponents = sizing.ToArray(),
                 PreparedFontSizeSamples = completePreparedSizes ? preparedSizes.ToArray() : null
             });

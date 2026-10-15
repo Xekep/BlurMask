@@ -465,11 +465,11 @@ internal sealed class DrawingSession : IDisposable
     {
         if (Settings.AiMode != settings.AiMode) RecognizeAiInk();
         if (!Program.SmokeTest) SettingsStore.Save(settings);
-        bool solverChanged = Settings.GiacEnabled != settings.GiacEnabled;
-        if (solverChanged) { _desktopAi.Pause(); _canvasAi.Pause(); _mathSolve?.Cancel(); }
+        bool inferenceChanged = Settings.GiacEnabled != settings.GiacEnabled || Settings.ExperimentalTextEngine != settings.ExperimentalTextEngine;
+        if (inferenceChanged) { _desktopAi.Pause(); _canvasAi.Pause(); _mathSolve?.Cancel(); }
         Settings = settings.CloneSettings();
         Program.Settings = settings.CloneSettings();
-        if (solverChanged) { _desktopAi.Resume(); _canvasAi.Resume(); }
+        if (inferenceChanged) { _desktopAi.Resume(); _canvasAi.Resume(); }
         if (_settingsWindow is null)
         { _hotkeys?.Dispose(); _hotkeys = DesktopInkNative.TryRegisterHotkeys(Toolbar, HandleShortcut, Settings); }
         NotifySettings();
