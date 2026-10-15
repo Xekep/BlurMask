@@ -143,7 +143,10 @@ public sealed class LegacyNativeFirstDictionaryWordCompletion
         int lexicalBudget = checked(limit - path);
         ulong tag = BinaryPrimitives.ReadUInt64LittleEndian(query32);
         var token = metadata.ReadTerminal(tag & ~(255UL << 32), 0, cancellationToken);
-        var evaluation = language.Evaluate(token.Span, [], currentCategory.WordCategory, knowledgeF5,
+        //204DA5 loads the complete source70 token;2061D4 copies it into
+        //request18, so request20 is token+8, not the geometry category.
+        int languageCategory = BinaryPrimitives.ReadInt32LittleEndian(token.Span[8..]);
+        var evaluation = language.Evaluate(token.Span, [], languageCategory, knowledgeF5,
             lexicalBudget, temporaryLexicalResidue40, cancellationToken);
         ulong restartTag = restart.Resolve(tag & ~(255UL << 32));
         if ((restartTag & (4UL << 40)) != 0)

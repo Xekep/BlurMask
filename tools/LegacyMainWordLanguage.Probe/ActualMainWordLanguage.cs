@@ -193,6 +193,32 @@ internal static class ActualMainWordLanguage
         ushort selectedOrdinal = Enumerable.Range(0, parents.Length).Select(i => (ushort)i).First(i =>
             LegacyNativeFirstDictionaryWordCompletion.CreateAlreadyTerminalQuery(parents[i], new byte[32]).HasValue);
         byte[] selectedQuery = LegacyNativeFirstDictionaryWordCompletion.CreateAlreadyTerminalQuery(parents[selectedOrdinal], new byte[32])!.Value.ToArray();
+        //Independent mismatch control: ordinary094040 token category iszero,
+        //even when geometry resolves a nonzero category. Compare the complete
+        //40-byte language record rather than just equal zero category costs.
+        int mismatchedCategories = 0;
+        for (byte geometryId = 0; geometryId < 35; geometryId++)
+        {
+            byte[] variedParent = parents[selectedOrdinal].ToArray();
+            variedParent[26] = geometryId;
+            ushort terminalSymbol = BinaryPrimitives.ReadUInt16LittleEndian(selectedQuery.AsSpan(20));
+            var geometryCategory = new LegacyOrdinaryWordCategoryPolicy(categories).Resolve(geometryId,
+                terminalSymbol, selectedQuery[22], checked((ushort)model.AcousticAlphabet.LabelCount),
+                selectedQuery[23], ushort.MaxValue, false);
+            if (geometryCategory.WordCategory == 0) continue;
+            var ordinaryToken = metadata.ReadTerminal(BinaryPrimitives.ReadUInt64LittleEndian(selectedQuery) & ~(255UL << 32), 0);
+            Require(BinaryPrimitives.ReadInt32LittleEndian(ordinaryToken.Span[8..]) == 0, "Actual094040 token category changed.");
+            byte[] residue = Enumerable.Repeat((byte)0xa7, 40).ToArray();
+            var expectedLanguage = recordProducer.Evaluate(ordinaryToken.Span, [], 0, false, 0x4000000, residue);
+            var variedRouter = new LegacyNativeWordHeapRouter([new(64),new(64)],new byte[]{0,0},0,uint.MaxValue);
+            var got = NewGuard().ProcessCandidate(selectedQuery,0,selectedOrdinal,variedParent,variedRouter,false,residue,
+                (_, ordinal) => ordinal == selectedOrdinal ? variedParent : parents[ordinal],true);
+            Require(got.LanguageAccepted && got.Language.Record40.Span.SequenceEqual(expectedLanguage.Record40.Span) &&
+                got.Language.Score == expectedLanguage.Score, "Geometry category leaked into source70 LM request20.");
+            mismatchedCategories++;
+        }
+        Require(mismatchedCategories > 0, "Nonzero geometry/zero source-token category mismatch was not exercised.");
+        Console.WriteLine($"PASS {mismatchedCategories} nonzero geometry categories preserve actualsource70 category0/full40 language records.");
         var emptyOwner = new LegacyNativeWordRecordHeap(64);
         var selectedRouter = new LegacyNativeWordHeapRouter([emptyOwner, new(64)], new byte[] { 0, 0 }, 0, uint.MaxValue);
         LegacyNativeFirstDictionaryWordCompletionResult RunGuard(LegacyNativeFirstDictionaryWordCompletion target,

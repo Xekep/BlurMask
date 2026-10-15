@@ -172,7 +172,9 @@ for index in range(256):
         clear=prior_start==0 or prior_start<10 and lines[prior_start-1]!=-1 and lines[prior_start]!=lines[prior_start-1]
     use=previous[4]==1 and difference<=1 and not(subword==1 and path_suffix[0]==0xfffb)
     history=[history_value] if use and previous[64] else []
-    category=categories[index%35][0]
+    #094040 clears source70 token+8.204290 copies token into LM request18,
+    #and100090 reads its category atrequest20; geometry must not replace it.
+    category=0
     suppress=bool(current[5]&4)
     tag=0 if clear or not history else old_tag
     tagged=bool(category_flags and category and tag)

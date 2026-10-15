@@ -144,7 +144,10 @@ public sealed class LegacyNativeLaterDictionaryWordCompletion
         //Fallback localF8 stays mode0/count0; its request28 is the literalIMP
         //initialized once at204546, not a synthesized first-word request.
         int budget = history.UsesPreviousHistory ? checked(limit - path) : 0x4000000;
-        var evaluation = language.Evaluate(history.SourceToken16.Span, history.History.Span, category.WordCategory,
+        //205368/205BCD copy source70 into request18 without replacing
+        //its category at20. Geometry category remains a separate path input.
+        int languageCategory = BinaryPrimitives.ReadInt32LittleEndian(history.SourceToken16.Span[8..]);
+        var evaluation = language.Evaluate(history.SourceToken16.Span, history.History.Span, languageCategory,
             history.ClearsFirstCategoryTag, budget, lexicalResidue, cancellationToken);
         ulong restartTag = restart.Resolve(tag & ~(255UL << 32));
         if ((restartTag & (4UL << 40)) != 0)
