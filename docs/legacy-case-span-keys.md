@@ -37,7 +37,14 @@ invented global or per-span reset.
 
 Ten actual span controls interleave owned/public auxiliary queries with span-1
 and resume identical normal records. The actual RU auxiliary map admits zero
-terminal records; this does not establish recognition quality. A separate broad
+terminal records; this does not establish recognition quality. The capture also
+exports the selected fresh factory's map60. Independent scanning of all895571
+packed dictionary nodes confirms its two finite lexical mappings (ZWJ0 to184,
+space68 toFFFB),17 eligible graph edges and zero eligible terminal edges. This
+includes the root's reserved/skipped child and does not count it as a returned
+query record. The same global property is separately exercised by the older
+`LegacyAuxiliaryWordQuery.Probe` and `LegacyAuxiliaryDelimiter.Probe`.
+A separate broad
 supplied-map positive control exercises nonempty auxiliary results across a50
 permission refresh, an empty denied normal query, and normal slot recovery.
 It is explicitly a prepared backend control, not the native RU60 map. An auxiliary

@@ -9,7 +9,8 @@ var sampled=MainFixture.Create(ak,engine,table);var dictionary=LegacyFreshCaseRu
 var owner=new LegacyOwnedMainWordSpanPreparation(ak,dictionary,sampled,table);var graph=owner.SourceGraph;
 LegacyPreparedDictionaryQuery Q()=>new(){Capacity=512,ContextRoot=owner.Contexts.ContainerIdentity};
 var raw=dictionary.Symbols.Symbols.CreateQuerySource(model.Lexicon,dictionary.Descriptor.Flags).Read(Q(),false);
-using var output=File.Create(args[6]);using var w=new Utf8JsonWriter(output);w.WriteStartObject();w.WriteString("raw",Convert.ToHexString(raw.Records.Span));w.WriteStartArray("spans");
+using var output=File.Create(args[6]);using var w=new Utf8JsonWriter(output);w.WriteStartObject();w.WriteString("raw",Convert.ToHexString(raw.Records.Span));
+w.WriteStartArray("auxiliaryMap");foreach(ushort value in dictionary.Symbols.Symbols.CopyAuxiliary())w.WriteNumberValue(value);w.WriteEndArray();w.WriteStartArray("spans");
 int count=0,records=0;var events=new List<int>{-1};var query=Q();owner.AdvanceNodeEpoch(-1);
 var auxiliaryQuery=Q();var auxiliaryKeys=new List<(int Node,uint Span,int Owned,int Public)>();
 for(int node=0;node<graph.NodeCount;node++)
