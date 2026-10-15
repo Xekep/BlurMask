@@ -431,6 +431,8 @@ jobs:
           dotnet run --project tools/LegacyTextGlyphPublication.Probe -c Release -- models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json .artifacts/legacy-text-glyph-publication-controls.json .artifacts/unicode9-reference/auxiliary/GraphemeBreakTest.txt models/ru-RU/ru_RU-ak-cur.lite.res
           python tools/LegacyFirstSourceRecord.Probe/reference_controls.py .artifacts/legacy-first-source-record-controls.json
           dotnet run --project tools/LegacyFirstSourceRecord.Probe -c Release -- .artifacts/legacy-first-source-record-controls.json
+          python tools/LegacyDelimiterQuery.Probe/reference_controls.py .artifacts/legacy-delimiter-controls.json
+          dotnet run --project tools/LegacyDelimiterQuery.Probe -c Release -- .artifacts/legacy-delimiter-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
           python tools/LegacyWordAcousticRequest.Probe/reference_controls.py .artifacts/legacy-word-acoustic-request-controls.json
           dotnet run --project tools/LegacyWordAcousticRequest.Probe -c Release -- .artifacts/legacy-word-acoustic-request-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           python tools/LegacyTextGlyphCaller.Probe/reference_controls.py .artifacts/legacy-text-glyph-caller-controls.json
@@ -892,6 +894,7 @@ jobs:
             @{ Name = 'LegacyCanonicalScratch'; Args = @('models/text-unicode/legacy-normalization-data.json', '.artifacts/unicode9-reference/NormalizationTest.txt') },
             @{ Name = 'LegacyTextGlyphPublication'; Args = @('models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', '.artifacts/legacy-text-glyph-publication-controls.json', '.artifacts/unicode9-reference/auxiliary/GraphemeBreakTest.txt', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyFirstSourceRecord'; Args = @('.artifacts/legacy-first-source-record-controls.json') },
+            @{ Name = 'LegacyDelimiterQuery'; Args = @('.artifacts/legacy-delimiter-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
             @{ Name = 'LegacyWordAcousticRequest'; Args = @('.artifacts/legacy-word-acoustic-request-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyTextGlyphCaller'; Args = @('.artifacts/legacy-text-glyph-caller-controls.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacyGlyphRecordPool'; Args = @('.artifacts/legacy-glyph-record-pool-controls.json') },

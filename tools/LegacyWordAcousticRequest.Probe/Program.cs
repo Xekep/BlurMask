@@ -96,12 +96,23 @@ for (ushort key = 0; key < 64; key++)
     var child = contexts.ReadNode(firstGraft); var root = contexts.ReadNode(child.ParentLink);
     Require(firstGraft == secondGraft && contexts.NodeCount == nodes && child.Symbol == key && root.Symbol == 0xfffa && root.ParentLink == 0,
         "Independent ordinary sentinel-graft ownership/dedup changed.");
-    try
+    Require(LegacyNativeWordStartupRequestFactory.GraftOrdinaryInitialContext(contexts, firstGraft) == firstGraft &&
+        contexts.NodeCount == nodes, "Prepared FFFA prefix/AL leaf was rewritten or allocated twice.");
+    graftControls++;
+    var foreignPrefix = contexts.ResolveInitial(0xfffb);
+    var foreignLeaf = contexts.ResolveChild(foreignPrefix.Identity, key);
+    if (foreignLeaf.Created) contexts.LinkCreatedContext(foreignLeaf.Identity, foreignPrefix.Identity);
+    var secondLeaf = contexts.ResolveChild(firstGraft, key);
+    if (secondLeaf.Created) contexts.LinkCreatedContext(secondLeaf.Identity, firstGraft);
+    foreach (ulong unsupported in new[] { foreignLeaf.Identity, secondLeaf.Identity })
     {
-        LegacyNativeWordStartupRequestFactory.GraftOrdinaryInitialContext(contexts, firstGraft);
-        throw new Exception("Complex source-context rewrite was silently treated as ordinary.");
+        try
+        {
+            LegacyNativeWordStartupRequestFactory.GraftOrdinaryInitialContext(contexts, unsupported);
+            throw new Exception("Complex source-context rewrite was silently treated as ordinary.");
+        }
+        catch (NotSupportedException) { graftControls++; }
     }
-    catch (NotSupportedException) { graftControls++; }
 }
 var prefix = LegacyPreparedDictionarySourceDescriptorFactory.ReadV300Prefix(lk.AsSpan(606964, 4565174 - 606964));
 uint order = LegacyPreparedDictionarySourceDescriptorFactory.ReadLanguageOrder(lk.AsSpan(2513123, 4565174 - 2513123));

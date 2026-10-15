@@ -10,8 +10,10 @@ public static class LegacyNativeWordStartupRequestFactory
 {
     /// <summary>1fd240 ordinary single-symbol initial source context:
     ///1f6fb0 with equal null endpoints returns the FFFA sentinel prefix;
-    ///0918d0 then creates/resolves its current-symbol child. More complex
-    ///paths, control tokens and enabled case rewrites remain separate.</summary>
+    ///0918d0 then creates/resolves its current-symbol child.
+    ///The already grafted FFFA(root)-to-one-AL-leaf form from290 is also
+    ///accepted:1f6fb0's equal endpoints preserve that same prefix/leaf.
+    ///Other paths, control leaves and enabled case rewrites remain separate.</summary>
     public static ulong GraftOrdinaryInitialContext(LegacySymbolContextFactory contexts,
         ulong queryContextIdentity, CancellationToken cancellationToken = default)
     {
@@ -19,8 +21,15 @@ public static class LegacyNativeWordStartupRequestFactory
         cancellationToken.ThrowIfCancellationRequested();
         if (queryContextIdentity == 0) throw new ArgumentException("Actual ordinary initial source context required.");
         var query = contexts.ReadNode(queryContextIdentity);
-        if (query.ParentLink != 0 || query.Symbol >= 0xfff7)
+        if (query.Symbol >= 0xfff7)
             throw new NotSupportedException("Only ordinary single-symbol initial dictionary contexts are supported.");
+        if (query.ParentLink != 0)
+        {
+            var prefix = contexts.ReadNode(query.ParentLink);
+            if (prefix.Symbol == 0xfffa && prefix.ParentLink == 0)
+                return query.Identity;
+            throw new NotSupportedException("Only an existing FFFA root before the single initial AL leaf is supported.");
+        }
         var sentinel = contexts.ResolveInitial(0xfffa, cancellationToken);
         var result = contexts.ResolveChild(sentinel.Identity, query.Symbol, cancellationToken);
         if (result.Created) contexts.LinkCreatedContext(result.Identity, sentinel.Identity);
