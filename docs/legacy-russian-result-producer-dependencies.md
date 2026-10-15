@@ -7,6 +7,11 @@ these prepared components.
 
 ## Symbol resolution216860
 
+The resource-bound no-wide/no-Arabic scalar branch is now restored in
+`LegacyOwnedRussianGlyphSymbolResolver`
+([scope and controls](legacy-russian-glyph-symbol-resolution.md)). This does
+not restore the enclosing216BC0 producer or supply recognized text.
+
 The ordinary RU path can be bound to the actual acoustic alphabet and the same
 case preparation owned by the fresh dictionary. Its wide-pair list is empty
 and its Arabic shaping array is absent. These facts must come from the actual
@@ -27,6 +32,8 @@ apostrophe/quote: the caller's conversion byte determines whether to retain
 the extra ordinal or emit the corresponding ordinary AL label. Ordinary
 21FE30 calls218560 with that argument literally0;219580 uses1 on another
 reconstruction route. FFFD needs the real frontend1A8 fallback producer.
+This applies when knowledge99 is false; its explicit true scalar bypass
+retains the input after the early converted-quote branch.
 Multi-outputFFFA/B/C belongs to216BC0/frontend1A0, not216860.
 
 ## Main-source score ownership for216BC0
@@ -48,6 +55,13 @@ actual main source uses confidence mode1 (resource566408), four families,
 and no individual channels in flags21400. The first-source mode0 confidence
 adapter cannot replace it. Extended aliases need original-label calibration;
 indexing a mapped label's confidence alone is insufficient.
+
+The scalar mode1 table/getter is now separately restored by
+`LegacyMainConfidenceCalibration` ([scope and controls](legacy-main-confidence-calibration.md)).
+The table has192 original-label rows per family, despite180 neural outputs;
+labels180..191 have stored coefficients. The full group/vector adapter above
+still needs to bind the neural alias to the original-label calibration and
+the actual source-owned group/channel.
 
 After this adapter and216BC0, the remaining route still includes full207CB0
 materialization,21FFD0 row/protocol/callback production,217DB0 residual
