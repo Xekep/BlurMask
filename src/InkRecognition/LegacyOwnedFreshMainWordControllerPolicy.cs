@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Buffers.Binary;
 
 namespace InkRecognition;
 
@@ -32,13 +33,13 @@ public sealed class LegacyOwnedFreshMainWordControllerPolicy
         cancellationToken.ThrowIfCancellationRequested();
         if (resource.Length != 572763)
             throw new ArgumentException("Actual main resource extent required before hashing.");
-        var actualSource = owner.Acoustic.Source;
+        var actualSource = owner.SelectedSourceOwner;
         string fingerprint = Convert.ToHexString(SHA256.HashData(resource));
-        if (!StringComparer.OrdinalIgnoreCase.Equals(fingerprint, actualSource.Owner.CategoryOwner.SourceFingerprint) ||
-            actualSource.Owner.CategoryOwner.SelectedSourceOffset != 0)
+        if (!StringComparer.OrdinalIgnoreCase.Equals(fingerprint, actualSource.SourceFingerprint) ||
+            actualSource.SelectedSourceOffset != 0)
             throw new ArgumentException("Scalar preparation requires this owner's actual selected main0 resource.");
-        var selected = LegacyPreparedFreshMain240AcousticPolicy.Read(resource, actualSource.Owner);
-        if (selected != owner.Acoustic.Policy)
+        var selected = ReadSelectedPolicy(resource,owner.OrdinaryAcousticOffset,actualSource.SelectedSourceOffset);
+        if (selected != owner.AcousticPolicy)
             throw new ArgumentException("Selected source metadata must match the already prepared acoustic owner.");
         //1D60D0 preserves NEW00C860 mode13/variant2 and resolves28 from the
         //selected source's variant table.151BF0 writes54=120,58=that28.
@@ -58,6 +59,29 @@ public sealed class LegacyOwnedFreshMainWordControllerPolicy
             checked((uint)selected.MaximumSourceArcs), LegacyNativeWordKnowledgeLimits.CreateFresh00c860(), true);
         cancellationToken.ThrowIfCancellationRequested();
         return new(owner, prepared.Configuration, refresh, distance);
+    }
+
+    //The same selected metadata reader for both owned source variants. No
+    //single-glyph owner is manufactured to satisfy the earlier reader's type.
+    private static LegacyPreparedFreshMain240AcousticPolicy ReadSelectedPolicy(ReadOnlySpan<byte> resource,
+        int ordinary,int selectedSource)
+    {
+        int tail=checked(ordinary+8+(int)BinaryPrimitives.ReadUInt32LittleEndian(resource[(ordinary+4)..]));
+        int end=checked(selectedSource+8+(int)BinaryPrimitives.ReadUInt32LittleEndian(resource[(selectedSource+4)..]));
+        if(end-tail!=190||BinaryPrimitives.ReadInt32LittleEndian(resource[tail..])!=0)
+            throw new NotSupportedException("Selected main metadata without source extensions required.");
+        var metadata=resource.Slice(tail+4,186);const int mode=13,variant=2;
+        uint flags=0x21703u&~BinaryPrimitives.ReadUInt32LittleEndian(metadata[(mode*4)..]);
+        int arcs=BinaryPrimitives.ReadUInt16LittleEndian(metadata[(64+mode*2)..]);
+        int auxiliary=BinaryPrimitives.ReadUInt16LittleEndian(metadata[(96+mode*2)..]);
+        int alternatives=BinaryPrimitives.ReadUInt16LittleEndian(metadata[(162+variant*2)..]);
+        int network=ordinary+21;
+        int contextEnd=checked(network+8+(int)BinaryPrimitives.ReadUInt32LittleEndian(resource[(network+4)..]));
+        int profile=contextEnd+65;
+        short gate=BinaryPrimitives.ReadInt16LittleEndian(resource[profile..]);
+        int cap=gate==0?short.MaxValue:BinaryPrimitives.ReadInt16LittleEndian(resource[(profile+6)..])/3;
+        if(arcs<1||alternatives<1||cap<1)throw new InvalidDataException("Positive selected main source caps required.");
+        return new(flags,arcs,auxiliary,alternatives,metadata[128]>mode,cap);
     }
 
     /// <summary>201270 signed32 distance guard after reading the real parent

@@ -26,7 +26,7 @@ public sealed class LegacyOwnedFreshMainWordNodeBuffer
         var configuration = policy.Configuration;
         if (configuration.PrimaryAlternativeCount2402 != 2 || configuration.SecondaryAlternativeCount2404 != 1 ||
             configuration.Trace2368 != 0 || configuration.Mode22f6 != 0 ||
-            (uint)endingNode >= (uint)policy.Owner.Source.SourceRanges.Graph.NodeCount)
+            (uint)endingNode >= (uint)policy.Owner.SourceGraph.NodeCount)
             throw new NotSupportedException("Fresh owned nontracing DIRECT2/2/1 node required.");
         float expansion = ((configuration.PackedSource22e8 & 0x10) != 0 ? 2f : 1f) * configuration.ExpansionFactor230c;
         expansion *= configuration.PrimaryArcLimit230a;

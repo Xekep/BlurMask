@@ -42,33 +42,77 @@ public sealed class LegacyOwnedMainWordSpanPreparation
     private int active;
 
     public LegacyOwnedRussianDictionaryPreparation DictionaryOwner { get; }
-    public LegacyPreparedFreshMain240AcousticScorer Acoustic { get; }
+    private readonly LegacyPreparedFreshMain240AcousticScorer? singleAcoustic;
+    private readonly LegacyPreparedFreshMainLine240AcousticScorer? lineAcoustic;
+    private readonly SourceBinding source;
+    /// <summary>The original single-glyph acoustic API, preserved for its exact
+    /// owner. A multi-physical source is never cast into this earlier type.</summary>
+    public LegacyPreparedFreshMain240AcousticScorer Acoustic => singleAcoustic ??
+        throw new InvalidOperationException("The owned multi-physical line uses MainLineAcoustic.");
     public LegacyFreshSingleGlyphMainSampled Source => Acoustic.Source;
+    public LegacyPreparedFreshMainLine240AcousticScorer MainLineAcoustic => lineAcoustic ??
+        throw new InvalidOperationException("The owned single-glyph source uses Acoustic.");
+    public LegacyFreshMainSingleLineSampled MainLineSource => MainLineAcoustic.Source;
+    public LegacyOrdinaryCursiveCandidateGraph SourceGraph => source.Graph;
+    public LegacyCursivePreparedInk SourceInk => source.Ink;
+    public float SourceHeight => source.Height;
+    internal int OrdinaryAcousticOffset => source.Single is {} s ? s.Owner.AcousticOffset : source.Line!.Owner.AcousticOffset;
+    public LegacySourceSamplerCategoryOwner SelectedSourceOwner => source.Categories;
+    public LegacyPreparedFreshMain240AcousticPolicy AcousticPolicy => singleAcoustic?.Policy ?? lineAcoustic!.Policy;
     public LegacySymbolContextFactory Contexts => DictionaryOwner.Contexts;
-    public int SourceRowBudget => Acoustic.Policy.MaximumSourceArcs;
+    public int SourceRowBudget => AcousticPolicy.MaximumSourceArcs;
 
     public LegacyOwnedMainWordSpanPreparation(ReadOnlySpan<byte> acousticResource,
         ReadOnlySpan<byte> lexicalResource, ReadOnlySpan<byte> engineProfile,
         LegacyFreshSingleGlyphMainSampled actualSource, LegacyCursiveSeparationTable table,
         CancellationToken cancellationToken = default)
+        : this(acousticResource, lexicalResource, engineProfile,
+            SourceBinding.FromSingle(actualSource), null, table, cancellationToken) { }
+
+    /// <summary>Owned main single-descriptor/multi-physical acoustic and source68
+    /// lifecycle. The supplied context must be the same owned sampled source;
+    /// no first-source frame, synthetic singleton or neutral context is used.</summary>
+    public LegacyOwnedMainWordSpanPreparation(ReadOnlySpan<byte> acousticResource,
+        ReadOnlySpan<byte> lexicalResource, ReadOnlySpan<byte> engineProfile,
+        LegacyFreshMainSingleLineSampled actualSource, LegacyFreshMainSingleLineContext actualContext,
+        LegacyCursiveSeparationTable table, CancellationToken cancellationToken = default)
+        : this(acousticResource, lexicalResource, engineProfile,
+            SourceBinding.FromLine(actualSource), actualContext, table, cancellationToken) { }
+
+    private LegacyOwnedMainWordSpanPreparation(ReadOnlySpan<byte> acousticResource,
+        ReadOnlySpan<byte> lexicalResource, ReadOnlySpan<byte> engineProfile,
+        SourceBinding actualSource, LegacyFreshMainSingleLineContext? actualContext,
+        LegacyCursiveSeparationTable table, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(actualSource);
         ArgumentNullException.ThrowIfNull(table);
         cancellationToken.ThrowIfCancellationRequested();
+        source = actualSource;
         var model = LegacyRussianModelBundle.Load(acousticResource, lexicalResource, engineProfile);
-        DictionaryOwner = LegacyOwnedRussianDictionaryPreparation.Prepare(acousticResource,
-            lexicalResource, model, actualSource, cancellationToken);
-        Acoustic = DictionaryOwner.CreateAcousticScorer(acousticResource, cancellationToken);
+        if(actualSource.Single is {} single)
+        {
+            DictionaryOwner = LegacyOwnedRussianDictionaryPreparation.Prepare(acousticResource,
+                lexicalResource, model, single, cancellationToken);
+            singleAcoustic = DictionaryOwner.CreateAcousticScorer(acousticResource, cancellationToken);
+        }
+        else
+        {
+            ArgumentNullException.ThrowIfNull(actualContext);
+            if(!ReferenceEquals(actualContext.Source,actualSource.Line))
+                throw new ArgumentException("Context must belong to the actual multi-physical sampled source.");
+            DictionaryOwner = LegacyOwnedRussianDictionaryPreparation.Prepare(acousticResource,
+                lexicalResource, model, actualSource.Line!, cancellationToken);
+            lineAcoustic = DictionaryOwner.CreateAcousticScorer(acousticResource, actualContext, cancellationToken);
+        }
         this.table = table;
         separation = LegacyCursiveSeparationProfile.ReadV106Node(acousticResource,
-            actualSource.Owner.CategoryOwner.SamplerNodeOffset);
+            actualSource.Categories.SamplerNodeOffset);
         var map = DictionaryOwner.Symbols.CreateWorkingMap(DictionaryOwner.Descriptor.Flags);
         dictionary = new(model.Lexicon, map, DictionaryOwner.Symbols.CopyInitialContexts());
         aggregate = new([LegacyOrdinaryDictionarySourceOwner.BindDictionary(dictionary, Contexts,
-            actualSource.SourceRanges.Graph)]);
+            actualSource.Graph)]);
         ushort[] reserved = LegacyPreparedAcousticDictionaryPermissions.ReadReservedSlots(
             model.AcousticAlphabet, acousticResource.Slice(99, 16));
-        session = new(actualSource.SourceRanges.Graph, map, reserved, Compute);
+        session = new(actualSource.Graph, map, reserved, Compute);
         cancellationToken.ThrowIfCancellationRequested();
     }
 
@@ -77,7 +121,7 @@ public sealed class LegacyOwnedMainWordSpanPreparation
     /// It is neither node+1, maximum atoms nor the125 source-row budget.</summary>
     public int GetSpanExtent(int node)
     {
-        var arcs = Source.SourceRanges.Graph.GetNode(node);
+        var arcs = SourceGraph.GetNode(node);
         int extent = 0;
         foreach (var arc in arcs) extent = Math.Max(extent, arc.Span + 1);
         return extent;
@@ -115,7 +159,7 @@ public sealed class LegacyOwnedMainWordSpanPreparation
         try
         {
             Check(span, cancellationToken);
-            var arcs = Source.SourceRanges.Graph.GetNode(node);
+            var arcs = SourceGraph.GetNode(node);
             if (node != span.EndingNode || ordinal >= arcs.Count || arcs[ordinal].Span != span.Span)
                 throw new ArgumentException("Acoustic callback must remain inside its owned selected span.");
             if (!costs.TryGetValue(arcs[ordinal].GroupId, out var result))
@@ -143,14 +187,14 @@ public sealed class LegacyOwnedMainWordSpanPreparation
     private LegacyOrdinaryGraphAcousticRow Compute(LegacyOrdinaryCursiveCandidateInk group,
         CancellationToken token)
     {
-        var scores = Acoustic.Score(group.GroupId, token);
-        int geometry = LegacyCursiveGroupSeparationCost.Evaluate(Source.Cuts.PreparedInk,
-            group.Ranges.Span, Source.SourceHeight, separation.GapOffset, separation.Slope,
+        var scores = singleAcoustic is {} single ? single.Score(group.GroupId, token) : lineAcoustic!.Score(group.GroupId, token);
+        int geometry = LegacyCursiveGroupSeparationCost.Evaluate(SourceInk,
+            group.Ranges.Span, SourceHeight, separation.GapOffset, separation.Slope,
             table.Values.Span, separation.MaximumCost, cancellationToken: token);
         costs[group.GroupId] = new(scores.Cache.Costs.Span,
-            Enumerable.Repeat(geometry, Source.Owner.TransitionProfile.Categories.CompositeCategories.Length).ToArray());
+            Enumerable.Repeat(geometry, source.CompositeCategoryCount).ToArray());
         token.ThrowIfCancellationRequested();
-        return new(scores.Cache.Costs, Acoustic.CostScale);
+        return new(scores.Cache.Costs, (singleAcoustic?.CostScale ?? lineAcoustic!.CostScale));
     }
 
     private void Enter()
@@ -174,4 +218,19 @@ public sealed class LegacyOwnedMainWordSpanPreparation
 
     internal void ValidateSpan(LegacyOwnedMainWordSpan span, CancellationToken token)
         => Check(span, token);
+
+    private sealed record SourceBinding(LegacyFreshSingleGlyphMainSampled? Single, LegacyFreshMainSingleLineSampled? Line)
+    {
+        public static SourceBinding FromSingle(LegacyFreshSingleGlyphMainSampled source)
+        { ArgumentNullException.ThrowIfNull(source); return new(source,null); }
+        public static SourceBinding FromLine(LegacyFreshMainSingleLineSampled source)
+        { ArgumentNullException.ThrowIfNull(source); return new(null,source); }
+        public LegacyOrdinaryCursiveCandidateGraph Graph => Single is {} s ? s.SourceRanges.Graph : Line!.SourceRanges.Graph;
+        public LegacyCursivePreparedInk Ink => Single is {} s ? s.Cuts.PreparedInk : Line!.Cuts.PreparedInk;
+        public float Height => Single is {} s ? s.SourceHeight : Line!.Owner.SourceHeight;
+        public LegacySourceSamplerCategoryOwner Categories => Single is {} s ? s.Owner.CategoryOwner : Line!.Owner.CategoryOwner;
+        public int CompositeCategoryCount => Single is {} s ? s.Owner.TransitionProfile.Categories.CompositeCategories.Length :
+            Line!.Owner.TransitionProfile.Categories.CompositeCategories.Length;
+    }
+
 }
