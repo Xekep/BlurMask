@@ -466,6 +466,8 @@ jobs:
           python tools/LegacyMainLanguageContext.Probe/reference_controls.py .artifacts/legacy-main-language-context-controls.json
           dotnet run --project tools/LegacyMainLanguageContext.Probe -c Release -- .artifacts/legacy-main-language-context-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           python tools/LegacyLaterWordCompletion.Probe/reference_controls.py .artifacts/legacy-later-word-completion-controls.json
+          python tools/LegacyAuxiliaryDelimiter.Probe/reference_controls.py .artifacts/legacy-auxiliary-delimiter-controls.json
+          dotnet run --project tools/LegacyAuxiliaryDelimiter.Probe -c Release -- .artifacts/legacy-auxiliary-delimiter-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
           python tools/LegacyAuxiliaryWordQuery.Probe/reference_controls.py .artifacts/legacy-auxiliary-word-controls.json
           dotnet run --project tools/LegacyAuxiliaryWordQuery.Probe -c Release -- .artifacts/legacy-auxiliary-word-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res
           dotnet run --project tools/LegacyLaterWordCompletion.Probe -c Release -- .artifacts/legacy-later-word-completion-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
@@ -918,6 +920,7 @@ jobs:
             @{ Name = 'LegacyMainLanguageGate'; Args = @('.artifacts/legacy-main-language-gate-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyMainLanguageContext'; Args = @('.artifacts/legacy-main-language-context-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyLaterWordCompletion'; Args = @('.artifacts/legacy-later-word-completion-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyAuxiliaryDelimiter'; Args = @('.artifacts/legacy-auxiliary-delimiter-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
             @{ Name = 'LegacyAuxiliaryWordQuery'; Args = @('.artifacts/legacy-auxiliary-word-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res') },
             @{ Name = 'LegacyFirstLiteralGlyph'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', '.artifacts/legacy-first-literal-glyph-controls.json', 'models/ru-RU/legacy-engine-profile.json') },
             @{ Name = 'LegacyFirstPrimitiveWord'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-first-primitive-native-captures.json') },

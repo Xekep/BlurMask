@@ -17,7 +17,7 @@ public sealed record LegacyNativeAuxiliaryWordQueryResult(bool Completed, int So
 /// </summary>
 public sealed class LegacyNativeAuxiliaryWordQueryPages
 {
-    private readonly LegacyPreparedAggregateDictionaryQuerySource source;
+    private readonly LegacyNativeDelimiterBackend readSource;
     private readonly LegacyPreparedDictionaryQuery query;
     private readonly byte[] buffer;
     private bool valid = true;
@@ -27,14 +27,26 @@ public sealed class LegacyNativeAuxiliaryWordQueryPages
     /// including bytes24..31 which current-terminal injection does not write.</param>
     public LegacyNativeAuxiliaryWordQueryPages(LegacyPreparedAggregateDictionaryQuerySource source,
         LegacySymbolContextFactory contexts, int preparedCapacity, ReadOnlySpan<byte> bufferAllocationResidue)
+        : this(BindAggregate(source), contexts, preparedCapacity, bufferAllocationResidue) { }
+
+    /// <summary>The outer source's actual V48 reader, including290 when
+    ///present. No aggregate source-ID stamping is added after this callback.</summary>
+    public LegacyNativeAuxiliaryWordQueryPages(LegacyNativeDelimiterBackend readSource,
+        LegacySymbolContextFactory contexts, int preparedCapacity, ReadOnlySpan<byte> bufferAllocationResidue)
     {
-        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(readSource);
         ArgumentNullException.ThrowIfNull(contexts);
         if (preparedCapacity is < 1 or > 512 || bufferAllocationResidue.Length != preparedCapacity * 32)
             throw new ArgumentException("Actual prepared capacity and complete output-buffer allocation required.");
-        this.source = source;
+        this.readSource = readSource;
         query = new() { Capacity = preparedCapacity, ContextRoot = contexts.ContainerIdentity };
         buffer = bufferAllocationResidue.ToArray();
+    }
+
+    private static LegacyNativeDelimiterBackend BindAggregate(LegacyPreparedAggregateDictionaryQuerySource source)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        return (tag, request, token) => source.Read(tag, request, auxiliary: true, clearExtraCosts: false, token);
     }
 
     public LegacyNativeAuxiliaryWordQueryResult Run(ReadOnlySpan<byte> currentStored88, int endingNode,
@@ -91,7 +103,7 @@ public sealed class LegacyNativeAuxiliaryWordQueryPages
             int returned = 0;
             if (!bypassSource)
             {
-                var page = source.Read(tag, query, auxiliary: true, clearExtraCosts: false, cancellationToken);
+                var page = readSource(tag, query, cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
                 sourceReads++;
                 returned = page.ReturnedCount;
