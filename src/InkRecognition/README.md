@@ -567,3 +567,33 @@ main-source frame/facts contract. The
 [ordinary glyph emitter](../../docs/legacy-native-ordinary-glyph-utf8.md)
 now includes the proven no-marker helper behavior, preserving original bytes.
 None of these stages supplies a complete Russian winner or app integration.
+
+
+The [owned first invocation](../../docs/legacy-fresh-first-owned-recognition.md)
+now derives its fresh masks and runs selection/publication over actual raw ink.
+Its printed MIR control still publishes mixed-script `MИP`; this is explicitly
+not a finished Russian recognizer. The optional
+[coordinate corpus](../../docs/legacy-russian-coordinate-corpus.md) retains all
+60 real recorded inputs and mismatches, with missing pen-up information stated
+as an adaptation limit rather than an accuracy claim.
+
+The [main single-line ingress](../../docs/legacy-main-single-line-ingress.md)
+connects actual first results, assigned main guides, main sampling, lazy context
+and four acoustic families for one descriptor with multiple physical strokes.
+Its 420-group fixture has matching managed/Native AOT output and an independent
+network/context audit. The
+[owned node recurrence](../../docs/legacy-main-node-recurrence.md) preserves
+primary/language row storage and source versus retained extents. The complete
+ordered main loop, delimiter-wrapper lifecycle and final winner remain required.
+
+The case-aware path now has [stored alphabet preparation](../../docs/legacy-native-case-preparation.md),
+[ordered permissions](../../docs/legacy-native-case-permissions.md),
+[context rewriting](../../docs/legacy-native-case-context-rewrite.md),
+[normal queries](../../docs/legacy-case-query-source.md),
+[symbol binding](../../docs/legacy-case-symbol-binding.md) and a
+[shared dictionary session](../../docs/legacy-case-dictionary-session.md).
+The session keeps normal/auxiliary queries, refreshed maps, metadata and restart
+routing over one owner. Prepared container options are explicit; this endpoint
+does not implement the complete source factory or replace the application's
+current text recognizer. Mutable alphabet creation, remaining controller branches,
+joined-cursive accuracy and production integration are still unfinished.
