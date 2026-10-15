@@ -11,7 +11,7 @@ public sealed record LegacyNativeMainWordFlagPrepassResult(bool Applied, bool Qu
 /// remain explicit; no case-wrapper factory or native final winner is inferred.</summary>
 public sealed class LegacyNativeMainWordFlagPrepass
 {
-    private readonly LegacyPreparedFreshMain240AcousticScorer acoustic;
+    private readonly AcousticBinding acoustic;
     private readonly LegacyMainBlankTransitionGeometry geometry;
     private readonly LegacyNativeWordAcousticRequestScorer scorer;
     private readonly LegacyOrdinaryCandidateConnections connections;
@@ -24,11 +24,24 @@ public sealed class LegacyNativeMainWordFlagPrepass
     private int active;
 
     public LegacyNativeMainWordFlagPrepass(ReadOnlySpan<byte> actualResource,
-        LegacyPreparedFreshMain240AcousticScorer actualAcoustic, LegacyCursiveSeparationTable table,
-        LegacyNativeWordTransitionCostCell ownedCostCell, ReadOnlySpan<byte> existingRequestResidue80,
-        CancellationToken cancellationToken = default)
+        LegacyPreparedFreshMain240AcousticScorer actualAcoustic,LegacyCursiveSeparationTable table,
+        LegacyNativeWordTransitionCostCell ownedCostCell,ReadOnlySpan<byte> existingRequestResidue80,
+        CancellationToken cancellationToken=default)
+        :this(actualResource,AcousticBinding.FromSingle(actualAcoustic),table,ownedCostCell,existingRequestResidue80,cancellationToken) { }
+
+    /// <summary>The same2136D0 path over actual multi-physical main NN/context
+    /// caches. Previous rows, caller flags and request residue retain their
+    /// explicit ownership; no single-glyph proxy or zero context is created.</summary>
+    public LegacyNativeMainWordFlagPrepass(ReadOnlySpan<byte> actualResource,
+        LegacyPreparedFreshMainLine240AcousticScorer actualAcoustic,LegacyCursiveSeparationTable table,
+        LegacyNativeWordTransitionCostCell ownedCostCell,ReadOnlySpan<byte> existingRequestResidue80,
+        CancellationToken cancellationToken=default)
+        :this(actualResource,AcousticBinding.FromLine(actualAcoustic),table,ownedCostCell,existingRequestResidue80,cancellationToken) { }
+
+    private LegacyNativeMainWordFlagPrepass(ReadOnlySpan<byte> actualResource,AcousticBinding actualAcoustic,
+        LegacyCursiveSeparationTable table,LegacyNativeWordTransitionCostCell ownedCostCell,
+        ReadOnlySpan<byte> existingRequestResidue80,CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(actualAcoustic);
         ArgumentNullException.ThrowIfNull(table);
         ArgumentNullException.ThrowIfNull(ownedCostCell);
         cancellationToken.ThrowIfCancellationRequested();
@@ -39,13 +52,13 @@ public sealed class LegacyNativeMainWordFlagPrepass
         this.table = table;
         cell = ownedCostCell;
         residue = existingRequestResidue80.ToArray();
-        geometry = new(actualResource, actualAcoustic.Source, table, cancellationToken);
-        connections = new(actualAcoustic.Source.SourceRanges.Graph, cancellationToken);
+        geometry = actualAcoustic.CreateGeometry(actualResource,table,cancellationToken);
+        connections = new(actualAcoustic.Graph, cancellationToken);
         separation = LegacyCursiveSeparationProfile.ReadV106Node(actualResource,
-            actualAcoustic.Source.Owner.CategoryOwner.SamplerNodeOffset);
+            actualAcoustic.Categories.SamplerNodeOffset);
         scorer = LegacyNativeWordAcousticRequestScorer.ForAlphabet(
-            LegacyAcousticCandidateThresholds.ReadV110Node(actualResource[actualAcoustic.Source.Owner.AcousticOffset..], out _),
-            actualAcoustic.Source.Owner.AcousticAlphabet);
+            LegacyAcousticCandidateThresholds.ReadV110Node(actualResource[actualAcoustic.AcousticOffset..], out _),
+            actualAcoustic.Alphabet);
     }
 
     public LegacyNativeMainWordFlagPrepassResult Process(int currentEndingNode, byte currentSpan,
@@ -76,7 +89,7 @@ public sealed class LegacyNativeMainWordFlagPrepass
         ArgumentNullException.ThrowIfNull(contexts);
         ArgumentNullException.ThrowIfNull(router);
         token.ThrowIfCancellationRequested();
-        var graph = acoustic.Source.SourceRanges.Graph;
+        var graph = acoustic.Graph;
         if ((uint)currentEndingNode >= graph.NodeCount || previousEndingNode < 0 ||
             currentSpan > 14 || currentEndingNode - currentSpan - 1 != previousEndingNode ||
             actualSourceHeaders.Length is < 1 or > 256)
@@ -113,7 +126,7 @@ public sealed class LegacyNativeMainWordFlagPrepass
             token.ThrowIfCancellationRequested();
             ushort arc = checked((ushort)ordinal);
             var request = LegacyNativeWordFlagPrepassRequestFactory.Create(currentEndingNode, currentSpan,
-                previousEndingNode, parent, arc, headers[sourceId], acoustic.Source.Owner.TransitionProfile.Categories,
+                previousEndingNode, parent, arc, headers[sourceId], acoustic.CompositeCategories,
                 cell, residue, token);
             geometryCalls++;
             bool accepted = geometry.Calculate118(request, token) && geometry.Validate140(request, token);
@@ -151,18 +164,39 @@ public sealed class LegacyNativeMainWordFlagPrepass
 
     private LegacyNativeWordAcousticGroupCosts GetCosts(int node, ushort ordinal, CancellationToken token)
     {
-        var graph = acoustic.Source.SourceRanges.Graph;
+        var graph = acoustic.Graph;
         int group = graph.GetNode(node)[ordinal].GroupId;
         if (cache.TryGetValue(group, out var value)) return value;
         token.ThrowIfCancellationRequested();
         var scores = acoustic.Score(group, token);
         var ranges = graph.Groups[group].Ranges.Span;
-        int geometryCost = LegacyCursiveGroupSeparationCost.Evaluate(acoustic.Source.Cuts.PreparedInk, ranges,
-            acoustic.Source.SourceHeight, separation.GapOffset, separation.Slope, table.Values.Span, separation.MaximumCost,
+        int geometryCost = LegacyCursiveGroupSeparationCost.Evaluate(acoustic.Ink, ranges,
+            acoustic.Height, separation.GapOffset, separation.Slope, table.Values.Span, separation.MaximumCost,
             cancellationToken: token);
         value = new(scores.Cache.Costs.Span,
-            Enumerable.Repeat(geometryCost, acoustic.Source.Owner.TransitionProfile.Categories.CompositeCategories.Length).ToArray());
+            Enumerable.Repeat(geometryCost, acoustic.CompositeCategories.CompositeCategories.Length).ToArray());
         cache.Add(group, value);
         return value;
     }
+
+    private sealed record AcousticBinding(LegacyPreparedFreshMain240AcousticScorer? Single,LegacyPreparedFreshMainLine240AcousticScorer? Line)
+    {
+        public static AcousticBinding FromSingle(LegacyPreparedFreshMain240AcousticScorer acoustic)
+        {ArgumentNullException.ThrowIfNull(acoustic);return new(acoustic,null);}
+        public static AcousticBinding FromLine(LegacyPreparedFreshMainLine240AcousticScorer acoustic)
+        {ArgumentNullException.ThrowIfNull(acoustic);return new(null,acoustic);}
+        public LegacyOrdinaryCursiveCandidateGraph Graph=>Single is {} s?s.Source.SourceRanges.Graph:Line!.Source.SourceRanges.Graph;
+        public LegacyCursivePreparedInk Ink=>Single is {} s?s.Source.Cuts.PreparedInk:Line!.Source.Cuts.PreparedInk;
+        public LegacySourceSamplerCategoryOwner Categories=>Single is {} s?s.Source.Owner.CategoryOwner:Line!.Source.Owner.CategoryOwner;
+        public LegacyCursiveCategoryProfile CompositeCategories=>Single is {} s?s.Source.Owner.TransitionProfile.Categories:Line!.Source.Owner.TransitionProfile.Categories;
+        public int AcousticOffset=>Single is {} s?s.Source.Owner.AcousticOffset:Line!.Source.Owner.AcousticOffset;
+        public LegacyInkAlphabet Alphabet=>Single is {} s?s.Source.Owner.AcousticAlphabet:Line!.Source.Owner.AcousticAlphabet;
+        public float Height=>Single is {} s?s.Source.SourceHeight:Line!.Source.Owner.SourceHeight;
+        public int CacheWidth=>Single is {} s?s.CacheWidth:Line!.CacheWidth;
+        public LegacyPreparedFreshMain240AcousticScores Score(int group,CancellationToken token)
+            =>Single is {} s?s.Score(group,token):Line!.Score(group,token);
+        public LegacyMainBlankTransitionGeometry CreateGeometry(ReadOnlySpan<byte> resource,LegacyCursiveSeparationTable table,CancellationToken token)
+            =>Single is {} s?new(resource,s.Source,table,token):new(resource,Line!.Source,table,token);
+    }
+
 }
