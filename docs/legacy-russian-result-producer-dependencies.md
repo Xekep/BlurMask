@@ -15,7 +15,11 @@ and full result-production chain are still not established by these controls.
 The resource-bound no-wide/no-Arabic scalar branch is now restored in
 `LegacyOwnedRussianGlyphSymbolResolver`
 ([scope and controls](legacy-russian-glyph-symbol-resolution.md)). This does
-not restore the enclosing216BC0 producer or supply recognized text.
+not supply recognized text. The enclosing ordinary subtype0 producer is now
+restored separately for actual CASE and DIRECT owners
+([ordinary controls](legacy-owned-russian-ordinary-glyph-production.md),
+[DIRECT integration](legacy-direct-russian-ordinary-glyph-production.md)).
+Protocol output and full word reconstruction remain separate.
 
 The ordinary RU path can be bound to the actual acoustic alphabet and the same
 case preparation owned by the fresh dictionary. Its wide-pair list is empty
@@ -53,7 +57,7 @@ ordinal6=FFFF, label8, geometryA and zeroB/C. Geometry derives from the main
 sampler's start/end composite mappings, with the separate closed-primitive
 case. `LegacyNativeGlyphScoreCache` already implements the scalar getters.
 
-The missing adapter must retain the actual main group/node/arc and NN/cache
+The owned adapter retains the actual main group/node/arc and NN/cache
 owners. It must derive the selected vector channel, top20 cutoff, related
 label aliases, original-label calibration/fallback and geometry costs. The
 actual main source uses confidence mode1 (resource566408), four families,
@@ -71,11 +75,18 @@ restored by `LegacyOwnedRussianMainGlyphConfidence`
 ([scope and controls](legacy-owned-main-glyph-confidence.md)), for genuine
 DIRECT and case owners and their single-/multi-physical source scorers.
 Its closed-primitive channel retains the original source float. Geometry/cost
-requests and the enclosing216BC0 state machine remain separate work.
+requests and ordinary216BC0 are now separately restored by the owning ordinary
+producer. Full protocol/multi-output handling remains separate work.
 
-After this adapter and216BC0, the remaining route still includes full207CB0
-materialization,21FFD0 row/protocol/callback production,217DB0 residual
-association,218560 glyph-chain acquisition/linking and final quote/text
-publication. The full case main loop must also supply genuine203690 context
+The complete-lookahead DIRECT207CB0 route now has actual owned compact
+materialization, with separate1BE530 field0 weights; these are distinct from
+1C1300 channel0 confidence. Its numeric21FFD0 row walker and one ordinary
+216BC0 integration are verified without expected text. Older-prefix
+materialization, general CASE publication, full21FFD0 segment/protocol/callback
+production and218560 acquisition/linking remain incomplete.
+The217DB0 residual controller and21FBF0 quote normalizer are separately restored
+over explicit service/word owners. Genuine residual merge/reference ownership
+and an accepted end-to-end text result remain required. The full case main loop
+must also supply genuine203690 context
 policy, row extents and completion scheduling. Prepared controls establish
 individual calculations, not Russian cursive accuracy.

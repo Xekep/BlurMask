@@ -3,7 +3,7 @@ using System.Buffers.Binary;
 using System.Text.Json;
 if(args.Length!=3)throw new ArgumentException("AK scalar.bin words.json");
 byte[] resource=File.ReadAllBytes(args[0]);
-var alphabet=LegacyInkAlphabet.Load(resource.AsSpan(99),0x104);
+var alphabet=LegacyInkAlphabet.Load(resource.AsSpan(99),BinaryPrimitives.ReadUInt16LittleEndian(resource.AsSpan(97)));
 var normalizer=LegacyNativeWordQuoteNormalization.Prepare(alphabet);
 ushort Lookup(string value)=>value switch{"\n"=>501," "=>502,"\u00a0"=>503,_=>throw new Exception("Unknown control")};
 using(var stream=File.Create(args[1]))
