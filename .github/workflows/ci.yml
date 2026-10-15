@@ -518,6 +518,9 @@ jobs:
           python tools/LegacyTaggedAggregateQuery.Probe/audit_output.py .artifacts/legacy-case-preparation-controls.json .artifacts/legacy-tagged-aggregate-managed-audit.json
           dotnet run --project tools/LegacyCaseDictionarySession.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-case-session-managed-audit.json
           python tools/LegacyCaseDictionarySession.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-case-preparation-controls.json .artifacts/legacy-case-session-managed-audit.json
+          dotnet run --project tools/LegacyMainSingleLineIngress.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-line-managed-audit.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/ru-RU/ru_RU-lk-text.lite.res
+          python tools/LegacyMainSingleLineIngress.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json .artifacts/legacy-main-line-managed-audit.json
+          python tools/handwriting/import_russian_tracked_coordinates.py self-test
           dotnet run --project tools/LegacyMainNodeRecurrence.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           dotnet run --project tools/LegacyFirstOwnedRecognition.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-first-owned-managed-audit.json
           python tools/LegacyFirstOwnedRecognition.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-first-owned-managed-audit.json
@@ -922,6 +925,7 @@ jobs:
             @{ Name = 'LegacyCaseSymbolBinding'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-case-symbol-binding-native-audit.json') },
             @{ Name = 'LegacyTaggedAggregateQuery'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-tagged-aggregate-native-audit.json') },
             @{ Name = 'LegacyCaseDictionarySession'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-case-session-native-audit.json') },
+            @{ Name = 'LegacyMainSingleLineIngress'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-line-native-audit.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/ru-RU/ru_RU-lk-text.lite.res') },
             @{ Name = 'LegacyMainNodeRecurrence'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyFirstOwnedRecognition'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-first-owned-native-audit.json') },
             @{ Name = 'LegacyOrdinaryGapMixture'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-ordinary-gap-mixture-native-audit.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-ordinary-gap-mixture-controls.json') },
@@ -1071,6 +1075,10 @@ jobs:
             if ($name -eq 'LegacyCaseSymbolBinding') {
               python tools/LegacyCaseSymbolBinding.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-case-symbol-binding-native-audit.json
               if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+            if ($name -eq 'LegacyMainSingleLineIngress') {
+              python tools/LegacyMainSingleLineIngress.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json .artifacts/legacy-main-line-native-audit.json
+              if ($LASTEXITCODE -ne 0) { throw 'Main single-line ingress audit failed.' }
             }
             if ($name -eq 'LegacyCaseDictionarySession') {
               python tools/LegacyCaseDictionarySession.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-case-preparation-controls.json .artifacts/legacy-case-session-native-audit.json

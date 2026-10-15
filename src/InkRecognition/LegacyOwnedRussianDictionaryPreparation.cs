@@ -9,7 +9,7 @@ namespace InkRecognition;
 /// </summary>
 public sealed class LegacyOwnedRussianDictionaryPreparation
 {
-    private readonly LegacyFreshSingleGlyphMainSampled source;
+    private readonly MainSource source;
     private readonly LegacyAcousticSymbolMasks masks;
     public LegacyRussianModelBundle Model { get; }
     public LegacySymbolContextFactory Contexts { get; }
@@ -25,7 +25,7 @@ public sealed class LegacyOwnedRussianDictionaryPreparation
     public LegacyAcousticSymbolMasks CopyMasks() => new(masks.Primary.ToArray(), masks.Secondary.ToArray());
 
     private LegacyOwnedRussianDictionaryPreparation(LegacyRussianModelBundle model,
-        LegacyFreshSingleGlyphMainSampled source, LegacySymbolContextFactory contexts,
+        MainSource source, LegacySymbolContextFactory contexts,
         LegacyDictionaryInitialSymbolMaps symbols, LegacyPreparedDictionarySourceDescriptor descriptor,
         IReadOnlyList<LegacyPreparedSelectedDictionarySource> selected,
         LegacyPreparedAggregateDictionaryQuerySource queries, LegacyPreparedDictionaryWordMetadata metadata,
@@ -50,6 +50,24 @@ public sealed class LegacyOwnedRussianDictionaryPreparation
         LegacyFreshSingleGlyphMainSampled sampledSource, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(selectedModel); ArgumentNullException.ThrowIfNull(sampledSource);
+        return PrepareCore(acousticResource,lexicalResource,selectedModel,new(sampledSource,null),cancellationToken);
+    }
+
+    /// <summary>Bind the same actual dictionary/mask preparation to an owned
+    /// multi-physical main line. No single-glyph source or neutral context is
+    /// synthesized to satisfy the earlier overload.</summary>
+    public static LegacyOwnedRussianDictionaryPreparation Prepare(ReadOnlySpan<byte> acousticResource,
+        ReadOnlySpan<byte> lexicalResource,LegacyRussianModelBundle selectedModel,
+        LegacyFreshMainSingleLineSampled sampledSource,CancellationToken cancellationToken=default)
+    {
+        ArgumentNullException.ThrowIfNull(selectedModel);ArgumentNullException.ThrowIfNull(sampledSource);
+        return PrepareCore(acousticResource,lexicalResource,selectedModel,new(null,sampledSource),cancellationToken);
+    }
+
+    private static LegacyOwnedRussianDictionaryPreparation PrepareCore(ReadOnlySpan<byte> acousticResource,
+        ReadOnlySpan<byte> lexicalResource,LegacyRussianModelBundle selectedModel,MainSource sampledSource,
+        CancellationToken cancellationToken)
+    {
         cancellationToken.ThrowIfCancellationRequested();
         if (acousticResource.Length != 572763 || lexicalResource.Length != 6200992)
             throw new InvalidDataException("The actual Russian resource pair has fixed validated lengths.");
@@ -58,9 +76,9 @@ public sealed class LegacyOwnedRussianDictionaryPreparation
             !SHA256.HashData(lexicalResource).AsSpan().SequenceEqual(
                 Convert.FromHexString("d26ed08baf419361484958b3a04a5f740a228f4664f7e2643f43459223ef3e4e")))
             throw new InvalidDataException("The actual owned Russian resource pair is required.");
-        if (sampledSource.Owner.CategoryOwner.SelectedSourceOffset != 0 ||
-            !StringComparer.OrdinalIgnoreCase.Equals(sampledSource.Owner.CategoryOwner.SourceFingerprint, acousticHash) ||
-            sampledSource.Owner.SpanProfile != selectedModel.CursiveSpanProfile || selectedModel.SourceKind != 0x135)
+        if (sampledSource.CategoryOwner.SelectedSourceOffset != 0 ||
+            !StringComparer.OrdinalIgnoreCase.Equals(sampledSource.CategoryOwner.SourceFingerprint, acousticHash) ||
+            sampledSource.SpanProfile != selectedModel.CursiveSpanProfile || selectedModel.SourceKind != 0x135)
             throw new ArgumentException("Dictionary preparation must bind the actual sampled main0 owner.");
         var prefix = LegacyPreparedDictionarySourceDescriptorFactory.ReadV300Prefix(lexicalResource.Slice(606964, 4565174 - 606964));
         uint order = LegacyPreparedDictionarySourceDescriptorFactory.ReadLanguageOrder(lexicalResource.Slice(2513123, 4565174 - 2513123));
@@ -77,7 +95,7 @@ public sealed class LegacyOwnedRussianDictionaryPreparation
         selection.Add(LegacyPreparedDictionarySourceSelectionInput.FromObservedOrderTwoModel(descriptor, selectedModel.LanguageModel, contexts.ContainerIdentity));
         var selected = selection.Prepare(cancellationToken);
         var dictionary = symbols.CreateQuerySource(selectedModel.Lexicon, selected[0].Descriptor.Flags);
-        var child = LegacyOrdinaryDictionarySourceOwner.BindDictionary(dictionary, contexts, sampledSource.SourceRanges.Graph);
+        var child = LegacyOrdinaryDictionarySourceOwner.BindDictionary(dictionary, contexts, sampledSource.Graph);
         var queries = new LegacyPreparedAggregateDictionaryQuerySource([child]);
         var binding = new LegacyPreparedOrdinaryLinguisticMaskBinding(selectedModel.AcousticAlphabet,
             acousticResource.Slice(99, 16), [symbols.CreateSymbolSource()], cancellationToken);
@@ -99,5 +117,18 @@ public sealed class LegacyOwnedRussianDictionaryPreparation
 
     public LegacyPreparedFreshMain240AcousticScorer CreateAcousticScorer(ReadOnlySpan<byte> actualResource,
         CancellationToken cancellationToken = default)
-        => LegacyPreparedFreshMain240AcousticScorer.Prepare(actualResource, Model, source, masks, cancellationToken);
+        => LegacyPreparedFreshMain240AcousticScorer.Prepare(actualResource, Model,
+            source.Glyph??throw new InvalidOperationException("The multi-physical owner requires its actual main context overload."),masks,cancellationToken);
+
+    public LegacyPreparedFreshMainLine240AcousticScorer CreateAcousticScorer(ReadOnlySpan<byte> actualResource,
+        LegacyFreshMainSingleLineContext actualContext,CancellationToken cancellationToken=default)
+        =>LegacyPreparedFreshMainLine240AcousticScorer.Prepare(actualResource,Model,
+            source.Line??throw new InvalidOperationException("The single-glyph owner uses its original scorer overload."),actualContext,masks,cancellationToken);
+
+    private sealed record MainSource(LegacyFreshSingleGlyphMainSampled? Glyph,LegacyFreshMainSingleLineSampled? Line)
+    {
+        public LegacySourceSamplerCategoryOwner CategoryOwner=>Glyph is{} glyph?glyph.Owner.CategoryOwner:Line!.Owner.CategoryOwner;
+        public LegacyCursiveLatticeSpanProfile SpanProfile=>Glyph is{} glyph?glyph.Owner.SpanProfile:Line!.Owner.SpanProfile;
+        public LegacyOrdinaryCursiveCandidateGraph Graph=>Glyph is{} glyph?glyph.SourceRanges.Graph:Line!.SourceRanges.Graph;
+    }
 }
