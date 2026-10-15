@@ -23,18 +23,19 @@ def fit(profile,observations):
   constant=math.log((p1/math.sqrt(v1*6.283185307179586))/(p2/math.sqrt(v2*6.283185307179586)))+(linear1*m1-linear2*m2)
   discr=half*half-quadratic*constant
   if quadratic==0:
-   if half==0:raise ValueError('Nonfinite native intersection')
-   root=(constant*-.5)/half
+   with np.errstate(divide='ignore',invalid='ignore'):root=float(np.float64(constant*-.5)/np.float64(half))
   elif discr>=0:
    r=math.sqrt(discr);plus=(r-half)/quadratic;minus=(-half-r)/quadratic
    d=plus-m1;ap=math.exp(((d*-.5)*d)/v1)*p1;d=minus-m1;am=math.exp(((d*-.5)*d)/v1)*p1
    root=plus if am<=ap else minus
   else:root=f(m1+m2)*.5
-  if not math.isfinite(root):raise ValueError('Nonfinite native intersection')
-  attempts.append(dict(index=retry,iterations=iterations,firstMean=m1,secondMean=m2,firstVariance=v1,secondVariance=v2,firstPrior=p1,secondPrior=p2,intersection=root))
+  encoded=root if math.isfinite(root) else 'NaN' if math.isnan(root) else 'Infinity' if root>0 else '-Infinity'
+  attempts.append(dict(index=retry,iterations=iterations,firstMean=m1,secondMean=m2,firstVariance=v1,secondVariance=v2,firstPrior=p1,secondPrior=p2,intersection=encoded))
   if abs(f(m1-m2))>1e-6 and m1<root<m2:break
+ if not math.isfinite(root):raise ValueError('Nonfinite final native intersection')
  return dict(intersection=root,attempts=attempts)
 def gap_vectors(boxes,intervals,heights,minimum):
+ boxes=[[f(x) for x in row] for row in boxes];heights=list(map(f,heights))
  all_gaps=[];qualified=[];sorted_rows=[]
  def center(row):return f(f(boxes[row][0]+boxes[row][1])*.5)
  def sort(order,start,end):

@@ -65,6 +65,8 @@ The actual14-physical/56-node main pass reaches the first normalization and
 produces offset346098 at node49. An independent scheduler keeps delayed
 per-source offsets instead of mutating NodeBuffers or calling this helper;
 it compares all final stored rows, alternative payloads, cumulative state and
-symbolic ownership. The attempted uniform15-physical input fails earlier at
-the29B nonfinite mixture intersection; it is documented as an upstream gap,
-not presented as a successful60-node control.
+symbolic ownership. The former uniform15-physical29B failure was a premature
+portable rejection of a nonfinite intermediate before a native variance retry.
+The [retry correction](legacy-fresh-main-gap-mixture.md) now verifies that real
+15-stroke input through a finite gap and265 output. This does not by itself
+establish a successful60-node word-pass/normalization control.

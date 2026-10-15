@@ -107,11 +107,12 @@ no expected labels to the main recognizer. First-parser supported-context restri
 DIRECT dictionary factory scope and missing final-winner/acceptance calibration
 remain explicit; these tests do not enable production Russian AI-pen replacement.
 
-An additional attempted stress input of15 perfectly equally spaced copies
-stops upstream in `LegacyNativeOrdinaryGapMixture.Fit`: the29B mixture
-intersection is nonfinite. It does not reach the word pass. That geometry
-refusal remains unresolved and is not hidden by filtering its input or treated
-as a successful60-node decoding check. Further stress coverage is separate.
+The former15-copy uniformly spaced29B failure was traced to a premature
+portable finite guard before a native variance retry. The
+[retry correction](legacy-fresh-main-gap-mixture.md) independently verifies
+that exact15-stroke input through a finite gap and265 output, without changing
+its points. A successful60-node word-pass control does not follow from that
+geometry check alone; further decoding stress coverage remains separate.
 
 The old node probe additionally checks128 full-allocation controls,32
 false-language whole-storage controls and22 lifecycle guards without changing

@@ -16,7 +16,7 @@ for key in ['gap','blend','mean','variance','qualifying','observations']:np.test
 np.testing.assert_allclose(got['intersection'],expected['mixture']['intersection'],rtol=2e-6,atol=2e-6)
 assert len(got['attempts'])==len(expected['mixture']['attempts'])
 for a,b in zip(got['attempts'],expected['mixture']['attempts']):
- for key in b:np.testing.assert_allclose(a[key],b[key],rtol=2e-6,atol=2e-6,err_msg=key)
+ for key in b:np.testing.assert_allclose(float(a[key]),float(b[key]),rtol=2e-6,atol=2e-6,err_msg=key)
 folder=Path(__file__).resolve().parents[1];env={};source=folder/'LegacyOrientationSmoothing.Probe'/'reference_controls.py'
 tree=ast.parse(source.read_text(encoding='utf8'));defs=[n for n in tree.body if isinstance(n,(ast.Import,ast.ImportFrom,ast.FunctionDef)) or(isinstance(n,ast.Assign)and isinstance(n.value,ast.Lambda))]
 exec(compile(ast.Module(body=defs,type_ignores=[]),str(source),'exec'),env)
@@ -34,4 +34,4 @@ for tick in keys:
  whole,remainder=divmod(tick,200);delta=(((previous[whole+1]-previous[whole])&0xffffffff)*remainder&0xffffffff)//200 if remainder else 0
  mapped.append((previous[whole]+delta)&0xffffffff)
 assert mapped==got['mappedKeys200']
-print(f'PASS real14 NN720 -> qualifying{len(got["qualifying"])} gaps/blend{got["blend"]:.5g} ->{len(got["attempts"])} nativeEM attempts/gap{got["gap"]:.8g} ->dense265 {len(keys)} points and exact original keys.')
+print(f'PASS real{len(got["parentPoints"])} NN720 -> qualifying{len(got["qualifying"])} gaps/blend{got["blend"]:.5g} ->{len(got["attempts"])} nativeEM attempts/gap{got["gap"]:.8g} ->dense265 {len(keys)} points and exact original keys.')

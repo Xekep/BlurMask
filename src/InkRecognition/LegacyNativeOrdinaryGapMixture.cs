@@ -86,10 +86,13 @@ public static class LegacyNativeOrdinaryGapMixture
                 intersection=minusDensity<=plusDensity?plus:minus;
             }
             else intersection=(double)(firstMean+secondMean)*.5;
-            if(!double.IsFinite(intersection))throw new InvalidDataException("Native29B mixture intersection is nonfinite.");
             attempts.Add(new(attempt,iterations,firstMean,secondMean,firstVariance,secondVariance,firstPrior,secondPrior,intersection));
+            //1760CF..176117 tests convergence/root placement before retrying.
+            //Equal float means can produce an infinite intermediate root;
+            //the next narrower variance may recover. Do not reject it early.
             if((double)Math.Abs(firstMean-secondMean)>1e-6&&firstMean<intersection&&intersection<secondMean)break;
         }
+        if(!double.IsFinite(intersection))throw new InvalidDataException("Native29B final mixture intersection is nonfinite.");
         return new(intersection,attempts.AsReadOnly());
     }
 }

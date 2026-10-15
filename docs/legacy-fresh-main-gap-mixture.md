@@ -46,8 +46,12 @@ two roots it chooses the one having greater first-component density. An
 intersection outside the ordered means, or effectively equal means, retries
 with smaller variances. The library retains the native five-attempt outcome
 when it is finite; it does not silently replace it with a midpoint/default.
-Nonfinite state/intersection and excessive portable iteration counts are
-explicit failures.
+An intermediate infinite/NaN intersection is retained in the attempt trace and
+reaches the native placement/convergence tests before a narrower-variance retry.
+Assembly175FDB..176117 confirms there is no finite-value rejection between the
+equal-quadratic division and those retry tests. Nonfinite state, a nonfinite
+intersection after the final retry and excessive portable iteration counts
+remain explicit portable failures.
 
 The final publication blends the ordinary mean/stddev estimate with the
 mixture intersection, preserving native float rounding on `1−blend` and
@@ -77,11 +81,24 @@ native winner orchestration, general cursive accuracy or application font fit.
 
 ## Reproduction
 
-The independent suite includes192 component-fit cases:179 finite results with
-280 retry attempts, including all five retries, and13 nonfinite-intersection
+The independent suite includes192 component-fit cases:181 finite results with
+286 retry attempts, including all five retries, and11 final-nonfinite-intersection
 refusals. Another64 source720 fixtures verify the actual qualifying-gap
 producer, tie sorting, mean/variance and blended publication. Asymmetric and
 reversed component profiles test paths beyond the actual equal-variance seed.
+
+The optional final probe argument15 reproduces an additional real counterexample
+with fifteen equally spaced raw M-shaped trajectories. Fourteen qualifying gaps
+produce20/1564/6 iterations in three attempts. Attempt1's means become the same
+binary32 value, so its equal-variance linear denominator is zero and its root is
+negative infinity. Native retry2 recovers a finite intersection1.10086338156;
+the final gap is1.61128354 and265 produces465 points. The earlier per-attempt
+finite guard incorrectly rejected this recoverable state. It now runs only
+after the retry loop. Finite14-stroke regression output remains unchanged.
+The NumPy audit reconstructs exported single-precision input coordinates before
+recomputing gaps, and compares the nonfinite intermediate symbolically as well
+as every finite state and final publication. Nonfinite trace values are encoded
+as explicit JSON strings, not invalid JSON numeric literals.
 
 ```powershell
 python tools/LegacyOrdinaryGapMixture.Probe/reference_controls.py models/ru-RU/ru_RU-ak-cur.lite.res E:/BlurMask-build-artifacts-20261014/gap-mixture-controls.json

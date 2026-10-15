@@ -23,6 +23,13 @@ for address,target in [(0x180175d26,'0x18024e970'),(0x180175d54,'0x18024e970'),(
  assert lookup[address].mnemonic=='call'and lookup[address].op_str==target
  n=instructions.index(lookup[address]);checks[f'ASM{address:x}']=[hex(i.address)+' '+i.mnemonic+' '+i.op_str for i in instructions[n-12:n+4]]
 assert lookup[0x180175e76].mnemonic=='comisd';checks['convergence-double']=[lookup[0x180175e72].mnemonic+' '+lookup[0x180175e72].op_str,lookup[0x180175e76].mnemonic+' '+lookup[0x180175e76].op_str]
+expected_retry={0x180175fdb:('divsd','xmm10, xmm13'),0x180175fe0:('jmp','0x1801760b3'),
+ 0x1801760d7:('comisd','xmm0, xmmword ptr [rip + 0x177051]'),0x1801760df:('jbe','0x1801760ef'),
+ 0x1801760e1:('comisd','xmm10, xmm6'),0x1801760e6:('jbe','0x1801760ef'),
+ 0x1801760e8:('comisd','xmm3, xmm10'),0x1801760ed:('ja','0x18017611d'),
+ 0x1801760f7:('inc','r14'),0x180176113:('cmp','r14, 5'),0x180176117:('jb','0x180175c10')}
+for address,expected in expected_retry.items():assert (lookup[address].mnemonic,lookup[address].op_str)==expected
+checks['nonfinite-intermediate-retry']=[hex(a)+' '+lookup[a].mnemonic+' '+lookup[a].op_str for a in expected_retry]
 ak=(ROOT/'models/ru-RU/ru_RU-ak-cur.lite.res').read_bytes();assert hashlib.sha256(ak).hexdigest()=='7a5f08809e81fb4a2d4c78b3efd251d0986503b0d30d21de3695dab1f8a89978'
 checks['actualprofile']={'node':188050,'gaussians':struct.unpack_from('<6f',ak,188066),'countGate':list(ak[188090:188092])}
 Path(args.output).write_bytes((json.dumps(dict(checks=checks,scope='Fresh unknown720 +10=-1 family from156950. Reused recognized-input physical1000/nibbles gate excluded. Numeric EM and complete actual qualifying-gap/blend output restored; no OCR label aliases.'),indent=2)+'\n').encode())
