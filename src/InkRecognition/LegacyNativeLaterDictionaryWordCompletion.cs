@@ -10,14 +10,14 @@ public sealed record LegacyNativeLaterDictionaryWordCompletionResult(bool Langua
 /// <summary>Bounded204290 terminal/context-history consumer. Actual context16,
 ///anchor/node-row owners and required source descriptor-line getter feed100090,
 ///computed source50 restart and1f9080. Full scheduling/winner remains separate.</summary>
-public sealed class LegacyNativeLaterDictionaryWordCompletion
+public sealed partial class LegacyNativeLaterDictionaryWordCompletion
 {
     private readonly LegacyInkAlphabet alphabet;
     private readonly LegacyCursiveCategoryMapper categories;
     private readonly LegacyOrdinaryWordCategoryPolicy categoryPolicy;
-    private readonly LegacyPreparedDictionaryWordMetadata metadata;
+    private readonly LegacyPreparedDictionaryWordMetadata? metadata;
     private readonly LegacyNativeKnownWordLanguageRecord language;
-    private readonly LegacyPreparedDictionaryRestartTags restart;
+    private readonly LegacyPreparedDictionaryRestartTags? restart;
     private readonly byte sourceId;
     private readonly uint sourceHeader;
     private readonly ushort replacement, dash;
@@ -78,7 +78,7 @@ public sealed class LegacyNativeLaterDictionaryWordCompletion
         LegacySymbolContextFactory contexts, LegacyNativeWordHeapRouter router,
         bool knowledgeF5, int subwordSourceIndex22ec, bool extendedMarkers22f8,
         ReadOnlySpan<byte> queryCacheResidue32, ReadOnlySpan<byte> temporaryLexicalResidue40,
-        bool suppressPrevious2609, CancellationToken cancellationToken)
+        bool suppressPrevious2609, CancellationToken cancellationToken, byte[]? actualQuery32 = null)
     {
         ArgumentNullException.ThrowIfNull(contextResult);
         ArgumentNullException.ThrowIfNull(owningNodeRowsLookup);
@@ -87,6 +87,8 @@ public sealed class LegacyNativeLaterDictionaryWordCompletion
         ArgumentNullException.ThrowIfNull(contexts);
         ArgumentNullException.ThrowIfNull(router);
         cancellationToken.ThrowIfCancellationRequested();
+        caseSpan?.Validate(endingNode, contexts, knowledgeF5, subwordSourceIndex22ec, extendedMarkers22f8, suppressPrevious2609, cancellationToken);
+        caseSpan?.ValidateExtent(availableSourceNodes);
         if (availableSourceNodes is < 1 or > 1_000_000 || (uint)endingNode >= (uint)availableSourceNodes ||
             contextResult.LastRequest80.Length != 80 || contextResult.Candidates16.Length % 16 != 0 ||
             contextResult.Candidates16.Length / 16 > ushort.MaxValue ||
@@ -100,14 +102,29 @@ public sealed class LegacyNativeLaterDictionaryWordCompletion
         byte[] current = LookupBytes(endingNode, currentRowOrdinal);
         if (current[4] != sourceId || (current[6] & 1) != 0)
             throw new NotSupportedException("Regular current word row must own the selected dictionary source.");
-        var injected = LegacyNativeFirstDictionaryWordCompletion.CreateAlreadyTerminalQuery(current, queryResidue, cancellationToken);
-        if (!injected.HasValue) throw new NotSupportedException("Actual current-terminal injection required; auxiliary source queries remain separate.");
-        byte[] query = injected.Value.ToArray();
+        byte[] query;
+        if (actualQuery32 is null)
+        {
+            var injected = LegacyNativeFirstDictionaryWordCompletion.CreateAlreadyTerminalQuery(current, queryResidue, cancellationToken);
+            if (!injected.HasValue) throw new NotSupportedException("Actual current-terminal injection required; use ProcessActualQuery for a supplied source page.");
+            query = injected.Value.ToArray();
+        }
+        else
+        {
+            if (actualQuery32.Length != 32) throw new ArgumentException("A complete source-owned query32 is required.");
+            query = actualQuery32;
+            if (query[4] != sourceId) throw new ArgumentException("Query must own the bound selected source.");
+            ulong queryContext = U64(query, 8);
+            if (queryContext != 0) _ = contexts.ReadNode(queryContext);
+        }
         if (U64(query, 24) != 0 || (query[23] & 7) is not (0 or 2))
             throw new NotSupportedException("Ordinary cached terminal query without opaque extra context required.");
         ushort symbol = U16(query, 20);
-        if (!alphabet.TryGetText(symbol, out string text) || text.Length != 1 ||
-            text[0] is not (>= 'A' and <= 'Z' or >= 'a' and <= 'z' or >= '\u0400' and <= '\u04ff' or >= '0' and <= '9'))
+        if (actualQuery32 is null
+            ? !alphabet.TryGetText(symbol, out string text) || text.Length != 1 ||
+                text[0] is not (>= 'A' and <= 'Z' or >= 'a' and <= 'z' or >= '\u0400' and <= '\u04ff' or >= '0' and <= '9')
+            : symbol >= alphabet.LabelCount || alphabet.IsVirtual(symbol) || !alphabet.TryGetText(symbol, out _) ||
+                symbol == replacement || U16(current, 36) == replacement)
             throw new NotSupportedException("Plain actual terminal label required.");
         int anchorEnding = I32(current, 56);
         ushort anchorOrdinal = U16(current, 60);
@@ -119,6 +136,7 @@ public sealed class LegacyNativeLaterDictionaryWordCompletion
             I32(request, 32) != span || U16(request, 12) != U16(anchor, 28) || anchor[4] != sourceId)
             throw new ArgumentException("Context packet must belong to this current word's anchor/previous node.");
         ushort previousOrdinal = U16(context, 12);
+        caseSpan?.ValidateSecondaryOrdinal(previousOrdinal);
         if (U16(context, 14) != ushort.MaxValue && U16(context, 14) != currentRowOrdinal)
             throw new ArgumentException("Fast context lineage must reference this current word ordinal.");
         byte[] previous = LookupBytes(previousNode, previousOrdinal);
@@ -136,7 +154,9 @@ public sealed class LegacyNativeLaterDictionaryWordCompletion
         var heap = router.GetPrimaryHeap(sourceId);
         int limit = heap.Count != 0 && heap.Count == heap.Capacity ? I32(heap.GetSlotSnapshot(0).Span, 16) : 0x4000000;
         ulong tag = U64(query, 0);
-        var token = metadata.ReadTerminal(tag & ~(255UL << 32), 0, cancellationToken);
+        var token = caseSpan is null
+            ? metadata!.ReadTerminal(tag & ~(255UL << 32), 0, cancellationToken)
+            : caseSpan.ReadTerminal(tag, symbol, cancellationToken);
         var history = LegacyNativeWordHistoryPreparation.Prepare(token.Span, sourceId, previous, previousNode,
             anchor, boundary.BoundaryDifference, subwordSourceIndex22ec, extendedMarkers22f8, knowledgeF5,
             dash, availableSourceNodes, contexts, LookupRecord, Header, Line, cancellationToken);
@@ -149,12 +169,15 @@ public sealed class LegacyNativeLaterDictionaryWordCompletion
         int languageCategory = BinaryPrimitives.ReadInt32LittleEndian(history.SourceToken16.Span[8..]);
         var evaluation = language.Evaluate(history.SourceToken16.Span, history.History.Span, languageCategory,
             history.ClearsFirstCategoryTag, budget, lexicalResidue, cancellationToken);
-        ulong restartTag = restart.Resolve(tag & ~(255UL << 32));
+        ulong restartTag = caseSpan is null
+            ? restart!.Value.Resolve(tag & ~(255UL << 32))
+            : caseSpan.ResolveRestart(tag, cancellationToken);
         if ((restartTag & (4UL << 40)) != 0)
             restartTag = (restartTag & ~(255UL << 32)) | (ulong)sourceId << 32;
         restartTag = (restartTag & ~(0x70UL << 40)) | (ulong)(query[23] << 4 & 0x70) << 40;
         ulong lineage = (ulong)BinaryPrimitives.ReadUInt32LittleEndian(context.AsSpan(8)) << 32 |
             (ulong)U16(context, 12) << 16 | U16(context, 14);
+        caseSpan?.Validate(endingNode, contexts, knowledgeF5, subwordSourceIndex22ec, extendedMarkers22f8, suppressPrevious2609, cancellationToken);
         if (!evaluation.Accepted) return new(false, default, path, history, evaluation, restartTag, lineage, boundary);
         uint[] payload = new uint[5];
         for (int index = 0; index < 5; index++) payload[index] = BinaryPrimitives.ReadUInt32LittleEndian(evaluation.Record40.Span[(8 + index * 4)..]);
@@ -164,6 +187,7 @@ public sealed class LegacyNativeLaterDictionaryWordCompletion
         var allocation = LegacyContinuationWordRecordProducer.TryInsert(router, endingNode, currentRowOrdinal,
             (node, ordinal) => LookupBytes(node, ordinal), fields, 0, suppressPrevious2609, cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
+        caseSpan?.Validate(endingNode, contexts, knowledgeF5, subwordSourceIndex22ec, extendedMarkers22f8, suppressPrevious2609, cancellationToken);
         return new(true, allocation, path, history, evaluation, restartTag, lineage, boundary);
 
         byte[] LookupBytes(int node, ushort ordinal)
@@ -173,6 +197,7 @@ public sealed class LegacyNativeLaterDictionaryWordCompletion
             {
                 var rows = owningNodeRowsLookup(node);
                 cancellationToken.ThrowIfCancellationRequested();
+                caseSpan?.Validate(endingNode, contexts, knowledgeF5, subwordSourceIndex22ec, extendedMarkers22f8, suppressPrevious2609, cancellationToken);
                 if (rows is null || rows.Count > ushort.MaxValue) throw new ArgumentException("Node getter must return its actual bounded rows.");
                 snapshot = new byte[rows.Count][];
                 for (int index = 0; index < rows.Count; index++)
@@ -197,12 +222,15 @@ public sealed class LegacyNativeLaterDictionaryWordCompletion
         {
             uint value = preparedSourceHeader(id);
             cancellationToken.ThrowIfCancellationRequested();
+            caseSpan?.ValidateHeader(id, value);
+            caseSpan?.Validate(endingNode, contexts, knowledgeF5, subwordSourceIndex22ec, extendedMarkers22f8, suppressPrevious2609, cancellationToken);
             return value;
         }
         int Line(int node, int ordinal)
         {
             int value = descriptorLineE8(node, ordinal);
             cancellationToken.ThrowIfCancellationRequested();
+            caseSpan?.Validate(endingNode, contexts, knowledgeF5, subwordSourceIndex22ec, extendedMarkers22f8, suppressPrevious2609, cancellationToken);
             return value;
         }
     }

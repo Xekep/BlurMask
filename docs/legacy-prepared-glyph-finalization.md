@@ -2,7 +2,7 @@
 
 `LegacyPreparedGlyphFinalization` ports the complete nontracing post216BC0 part of2173E0. It updates one actual mutable274 pool record and reuses the existing13AF30 symbol update. The output of216BC0 is explicitly prepared input: this API does not determine a handwritten symbol, case variant, confidence, component count or final winner.
 
-The input snapshot contains the216BC0 success flag, signed remaining scratch cursor (initially256),256 UTF16 labels, component flag, external-variant byte, raw32-bit score fields0C/10, signed cost14 and publication word06. Successful snapshots own their scratch copy. Failed outputs do not consume the glyph reference or row72. The supplied72-byte2498 row contributes only its mismatch byte3D at this stage.
+The input snapshot contains the216BC0 success flag, signed remaining scratch cursor (initially256),256 ushort AL/synthetic labels, component flag, external-variant byte, raw32-bit score fields0C/10, signed cost14 and publication word06. These are symbol IDs and protocol labels, not Unicode UTF-16 code units. Successful snapshots own their scratch copy. Failed outputs do not consume the glyph reference or row72. The supplied72-byte2498 row contributes only its mismatch byte3D at this stage.
 
 The native order is:
 
