@@ -53,6 +53,12 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
         cancellationToken.ThrowIfCancellationRequested();
         var pass = terminal.PassResult; var owner = pass.ControllerOwner.Owner;
         var configuration = pass.ControllerOwner.Configuration;
+        //2144F0 publishes an intermediate207CB0 only if node+1<GraphCount
+        //and knowledge54+2490<=node+1. Fresh2490=0 and owned54=120 prove no
+        //earlier publication here. Check this before winner inspection:
+        //a longer source cannot use this fresh one-shot state at all.
+        if (pass.NodeCount > pass.ControllerOwner.MaximumParentDistance54)
+            throw new NotSupportedException("Fresh one-shot publication requires a source before the native intermediate-publication boundary.");
         if (!terminal.Winner.HasWinner)
             throw new NotSupportedException("A real preselected numeric terminal is required.");
         if (!ReferenceEquals(confidence.Model, owner.CommonModel) || !ReferenceEquals(confidence.Graph, owner.SourceGraph))
@@ -78,14 +84,10 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
         if (resource.Length != 572763 || !StringComparer.OrdinalIgnoreCase.Equals(
             Convert.ToHexString(SHA256.HashData(resource)), owner.SelectedSourceOwner.SourceFingerprint))
             throw new ArgumentException("Compact publication must use its exact selected main resource.");
-        if (pass.NodeCount > owner.SourceGraph.MaximumAtoms)
-            throw new NotSupportedException("This first owning publication scope requires the graph's complete lookahead suffix.");
         pass.BeginCompactWordPublication(cancellationToken);
         var reachable = casePolicy is null
             ? LegacyOwnedMainCompactWordReachability.Prepare(resource, terminal, cancellationToken)
             : LegacyOwnedMainCompactWordReachability.PrepareCase(resource, terminal, casePolicy, cancellationToken);
-        if (reachable.FinalizedPrefixEnd >= 0)
-            throw new InvalidOperationException("Owned lookahead boundary changed before publication.");
         int primary = configuration.PrimaryArcLimit230a;
         var alphabet = owner.CommonModel.AcousticAlphabet;
         var categories = new LegacyCursiveCategoryMapper(owner.SelectedSourceOwner.Categories);

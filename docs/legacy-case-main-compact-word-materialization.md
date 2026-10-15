@@ -21,11 +21,12 @@ fetches the actual inner `2B7.V58`, whose `05A3F0` returns 0. The original candi
 therefore the real `207CB0` fallback. This does not implement nonempty generic 292
 expansion or assume that all case dictionaries have empty V58 results.
 
-The same source-owned ordinary compact restrictions remain: complete native
-lookahead suffix, mode 0/primary 2/secondary 1, no trace or associated source,
+The same source-owned ordinary compact restrictions remain: fresh one-shot
+publication, mode 0/primary 2/secondary 1, no trace or associated source,
 ordinary primary candidates, supported beam alternatives and no forced-boundary
-marker alternatives. The observed main graph maximum atoms is8. Larger sources
-are explicitly refused until finalized-prefix publication is restored. Physical
+marker alternatives. The observed main graph maximum atoms is8; finalized
+prefixes are now accepted within the proved120-node one-shot boundary, described
+in `legacy-main-compact-one-shot-publication.md`. Longer sources are refused. Physical
 ring allocation remains an explicit residue input. Getter copies, cancellation,
 foreign owner checks and the single-use result lease apply to both routes.
 
@@ -36,12 +37,12 @@ Expected transcription is never read by recognition. These tracks omit pen-up;
 the whole track is intentionally supplied as one unsegmented path, which is a
 diagnostic input assumption rather than reconstructed stroke metadata. No text
 or handwriting accuracy is claimed here. `21FFD0/218560` are separate consumers.
-Actual corpus word index 4 reaches a numeric terminal over 22 nodes, then
-explicitly refuses older-prefix publication at the proven 8-node lookahead bound.
+Actual corpus word index 4 now also reaches compact publication over22 nodes.
 
 `LegacyCaseMainCompactMaterialization.Probe` accepts the standard seven fixture
 arguments, optionally followed by line30, line50, the pinned recorded manifest
-and word index. The common independent publication audit accepts `--fresh-case`:
+and word index. Alternatively the optional three arguments are line30, line50
+and generated physical count. The common independent publication audit accepts `--fresh-case`:
 it keeps actual case-state tag bits while independently checking raw-LK Boolean
 availability, integer-cost `1BE530` weights, context normalization, sorting and every
 allocated compact/beam/pool byte. The tested captures establish these Boolean
@@ -49,7 +50,7 @@ results for their actual retained map; this is not an independent implementation
 of every 292 query transformation. Static audit pins final reset, V58 dispatch and
 the exact empty child. The original DIRECT oracle mode remains restricted to its
 four-node fixture. Managed and Windows Native AOT outputs match byte for byte
-for all three publication captures and the 22-node refusal; the independent
+for the original three publication captures; their independent
 audits compare 491,520 compact bytes and 450,832 beam/pool bytes. Each publication
 probe also checks eleven cancellation, source ownership, DIRECT/CASE boundary
 and single-use guards. Vendor PE files are only read, never loaded or executed.

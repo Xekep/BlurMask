@@ -61,7 +61,7 @@ rows=[bytearray(base64.b64decode(n['rows'])) for n in c['inputNodes']]
 pools=[bytearray(base64.b64decode(n['alternatives'])) for n in c['inputNodes']]
 limits=[n['sourceEnd'] for n in c['inputNodes']];primary=c['primary'];graph=c['graph']
 assert len(rows)==len(graph)
-if case_mode:assert 0<len(rows)<=c['maximumAtoms']
+if case_mode:assert 0<len(rows)<=c.get('intermediatePublicationDistance',c['maximumAtoms'])
 else:assert len(rows)==4
 context={n[0]:(n[1],n[2]) for n in c['contexts']}
 def path(identity):
@@ -69,29 +69,6 @@ def path(identity):
     while identity:
         result.append(identity);identity=context[identity][0]
     return result[::-1]
-#Every captured node is in the actual graph's complete lookahead suffix. Mark native
-#beam and alternative predecessors, including all allocated inactive bytes.
-for n in range(len(rows)):
-    for o in range(limits[n]):rows[n][o*88+6]&=253
-    for o in range(primary*2):pools[n][o*40+27]&=127
-for n in reversed(range(len(rows))):
-    for o in range(limits[n]):
-        if i32(rows[n],o*88+16)>=67108864:continue
-        if o<primary:
-            for k in range(2):
-                if i32(pools[n],(o*2+k)*40)>=67108864:break
-                pn,po,pa=n,o,k
-                while pn>=0 and po<primary:
-                    at=(po*2+pa)*40;b=pools[pn]
-                    if b[at+27]&128:break
-                    b[at+27]|=128
-                    if b[at+31]&32:break
-                    po,pn,pa=u16(b,at+24),pn-s8(b,at+26)-1,b[at+27]&127
-        pn,po=n,o
-        while pn>=0:
-            at=po*88;b=rows[pn]
-            if po<primary and b[at+6]&2:break
-            b[at+6]|=2;po,pn=u16(b,at+30),pn-s8(b,at+32)-1
 #Reconstruct final D0's working50 from actual whole-span final195 costs.
 allowed=set(al['fields'][4:7])|{labels.get(t,65535) for t in ('\U000f0000','\u200c','\u200d')}
 last_span=max(arc[1] for arc in graph[-1])
@@ -120,6 +97,38 @@ def continuation(row,n):
             elif kind in (1,2):return True
         return False
     return follow(u32(row,0),0,0)
+#Independent active-node frontier and predecessor marking. Earlier nodes become
+#active only through a retained secondary predecessor; a primary outside the
+#lookahead also requires the actual raw-LK continuation predicate.
+prefix=len(rows)-1-min(len(rows),c['maximumAtoms'] if case_mode else len(rows))
+active=[n>prefix for n in range(len(rows))]
+for n in range(len(rows)):
+    for o in range(limits[n]):rows[n][o*88+6]&=253
+    for o in range(primary*2):pools[n][o*40+27]&=127
+for n in reversed(range(len(rows))):
+    if not active[n]:continue
+    for o in range(limits[n]):
+        row=memoryview(rows[n])[o*88:(o+1)*88]
+        if i32(row,16)>=67108864:continue
+        if o<primary and n<=prefix and not continuation(row,n):continue
+        if o<primary:
+            for k in range(2):
+                if i32(pools[n],(o*2+k)*40)>=67108864:break
+                pn,po,pa=n,o,k
+                while pn>=0 and po<primary:
+                    at=(po*2+pa)*40;b=pools[pn]
+                    if b[at+27]&128:break
+                    b[at+27]|=128
+                    if b[at+31]&32:break
+                    po,pn,pa=u16(b,at+24),pn-s8(b,at+26)-1,b[at+27]&127
+        pn,po=n,o
+        while pn>=0:
+            at=po*88;b=rows[pn]
+            if po<primary:
+                if b[at+6]&2:break
+            else:active[pn]=True
+            b[at+6]|=2;po,pn=u16(b,at+30),pn-s8(b,at+32)-1
+
 weights=[]
 for group in c['scores']:
     scale=struct.unpack('<f',struct.pack('<I',group['scaleBits']))[0]

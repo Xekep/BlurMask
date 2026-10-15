@@ -7,5 +7,6 @@
     <ProjectReference Include="../../src/InkRecognition/InkRecognition.csproj" />
     <Compile Include="../LegacyCaseMainSpan.Probe/MainFixture.cs" Link="MainFixture.cs" />
     <Compile Include="../LegacyCaseCorpusIngress.Probe/TrackedCaseInput.cs" Link="TrackedCaseInput.cs" />
+    <Compile Include="../LegacyMainDirectWordPass.Probe/MainLineWordFixture.cs" Link="MainLineWordFixture.cs" />
   </ItemGroup>
 </Project>

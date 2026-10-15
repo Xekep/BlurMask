@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Security.Cryptography;
 using InkRecognition;
 
-if (args.Length is not (7 or 11)) throw new ArgumentException("AK LK engine separation case-data publication-data capture [line30 line50 recorded-manifest word-index]");
+if (args.Length is not (7 or 10 or 11)) throw new ArgumentException("AK LK engine separation case-data publication-data capture [line30 line50 physical-count | line30 line50 recorded-manifest word-index]");
 byte[] ak = File.ReadAllBytes(args[0]), lk = File.ReadAllBytes(args[1]), engine = File.ReadAllBytes(args[2]);
 var model = LegacyRussianModelBundle.Load(ak, lk, engine);
 var table = LegacyCursiveSeparationTable.Load(File.ReadAllBytes(args[3]));
@@ -19,6 +19,14 @@ if (args.Length == 7)
     var sampled = MainFixture.Create(ak, engine, table);
     dictionary = LegacyFreshCaseRussianDictionaryPreparation.Prepare(ak, lk, model, sampled, cases, publication);
     owner = new LegacyOwnedMainWordSpanPreparation(ak, dictionary, sampled, table);
+}
+else if (args.Length == 10)
+{
+    var input = MainLineWordFixture.Create(ak, engine, File.ReadAllBytes(args[3]),
+        File.ReadAllBytes(args[7]), File.ReadAllBytes(args[8]), cases, publication, int.Parse(args[9]));
+    dictionary = LegacyFreshCaseRussianDictionaryPreparation.Prepare(ak, lk, model, input.Source, cases, publication);
+    owner = new LegacyOwnedMainWordSpanPreparation(ak, dictionary, input.Source, input.Context, table);
+    lineContext = input.Context;
 }
 else
 {
@@ -71,9 +79,10 @@ for (int ordinal = 0; ordinal < final.SourceEnd23f0; ordinal++)
     int cost = BinaryPrimitives.ReadInt32LittleEndian(row[16..]);
     if (cost < best) { best = cost; expectedOrdinal = ordinal; }
 }
-if (expectedOrdinal < 0 || !terminal.Winner.HasWinner || terminal.Winner.Ordinal != expectedOrdinal ||
+if (result.NodeCount <= controller.MaximumParentDistance54 &&
+    (expectedOrdinal < 0 || !terminal.Winner.HasWinner || terminal.Winner.Ordinal != expectedOrdinal ||
     terminal.Winner.RelativeCost != best || terminal.Winner.TotalCost != unchecked(best + final.CumulativePathCost2520) ||
-    !terminal.CopySelectedRecord().AsSpan().SequenceEqual(final.Records.Span.Slice(expectedOrdinal * 88, 88)))
+    !terminal.CopySelectedRecord().AsSpan().SequenceEqual(final.Records.Span.Slice(expectedOrdinal * 88, 88))))
     throw new InvalidDataException("Actual case owned rows and literal2257C0 numeric selection disagree.");
 var sources = invocation.CopySources(); sources[1] = default;
 if (invocation.CopySources()[1].Header != dictionary.Descriptor.Flags ||
@@ -88,7 +97,8 @@ var equivalentPolicy = LegacyFreshCaseMainSourcePolicy.Prepare(ak, lk, controlle
 Reject(() => LegacyOwnedFreshCaseMainTerminalInvocation.Prepare(equivalentPolicy).SelectOwnedPass(result));
 var confidence = lineContext is null ? LegacyOwnedRussianMainGlyphConfidence.Prepare(ak, dictionary) :
     LegacyOwnedRussianMainGlyphConfidence.Prepare(ak, dictionary, lineContext);
-byte[] residue = Enumerable.Repeat((byte)0xa7, 4096 * 40).ToArray();
+//Explicit test budget, not an inferred native allocator/ring growth policy.
+byte[] residue = Enumerable.Repeat((byte)0xa7, Math.Max(4096, result.NodeCount * 512) * 40).ToArray();
 Reject(() => LegacyOwnedMainCompactWordReachability.Prepare(ak, terminal));
 Reject(() => LegacyOwnedMainCompactWordMaterialization.Materialize(ak, terminal, confidence, residue));
 Reject(() => LegacyOwnedMainCaseCompactWordMaterialization.Materialize(ak, null!, terminal, confidence, residue));
@@ -100,23 +110,23 @@ var foreignConfidence = lineContext is null
     ? LegacyOwnedRussianMainGlyphConfidence.Prepare(ak, foreignDictionary)
     : LegacyOwnedRussianMainGlyphConfidence.Prepare(ak, foreignDictionary, lineContext);
 Reject(() => LegacyOwnedMainCaseCompactWordMaterialization.Materialize(ak, policy, terminal, foreignConfidence, residue));
-if (result.NodeCount > owner.SourceGraph.MaximumAtoms)
+if (result.NodeCount > controller.MaximumParentDistance54)
 {
     try
     {
         _ = LegacyOwnedMainCaseCompactWordMaterialization.Materialize(ak, policy, terminal, confidence, residue);
-        throw new InvalidDataException("Older finalized-prefix publication was silently accepted.");
+        throw new InvalidDataException("Missing intermediate-publication lifecycle was silently accepted.");
     }
-    catch (NotSupportedException error) when (error.Message.Contains("complete lookahead suffix", StringComparison.Ordinal))
+    catch (NotSupportedException error) when (error.Message.Contains("intermediate-publication boundary", StringComparison.Ordinal))
     {
         using var refusedFile = File.Create(args[6]);
         using var refusedWriter = new Utf8JsonWriter(refusedFile);
         refusedWriter.WriteStartObject(); refusedWriter.WriteNumber("nodeCount", result.NodeCount);
-        refusedWriter.WriteNumber("maximumAtoms", owner.SourceGraph.MaximumAtoms);
-        refusedWriter.WriteString("stage", "numeric terminal before older-prefix publication");
+        refusedWriter.WriteNumber("intermediatePublicationDistance", controller.MaximumParentDistance54);
+        refusedWriter.WriteString("stage", "prepared pass refused before intermediate-publication lifecycle");
         refusedWriter.WriteString("refusal", error.Message); refusedWriter.WriteBoolean("noTextClaim", true);
         refusedWriter.WriteEndObject(); refusedWriter.Flush();
-        Console.WriteLine($"PASS explicit older-prefix refusal for actual CASE {result.NodeCount} nodes/cap{owner.SourceGraph.MaximumAtoms}; no filtered query or fabricated compact result.");
+        Console.WriteLine($"PASS explicit native intermediate-publication refusal for actual CASE {result.NodeCount} nodes/bound{controller.MaximumParentDistance54}; no filtered query or fabricated compact result.");
         return;
     }
 }
@@ -129,6 +139,7 @@ using var file = File.Create(args[6]);
 using var writer = new Utf8JsonWriter(file);
 writer.WriteStartObject(); writer.WriteNumber("nodeCount", result.NodeCount);
 writer.WriteNumber("factory", 0x292); writer.WriteNumber("maximumAtoms", owner.SourceGraph.MaximumAtoms);
+writer.WriteNumber("intermediatePublicationDistance", controller.MaximumParentDistance54);
 writer.WriteNumber("winner", terminal.Winner.Ordinal); writer.WriteNumber("relative", terminal.Winner.RelativeCost);
 writer.WriteNumber("total", terminal.Winner.TotalCost); writer.WriteNumber("cumulative", final.CumulativePathCost2520);
 writer.WriteNumber("sourceEnd", final.SourceEnd23f0); writer.WriteNumber("primary", controller.Configuration.PrimaryArcLimit230a);
