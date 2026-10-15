@@ -67,6 +67,14 @@ checked for its supplied rows and owned options; equivalence to the complete
 result route still requires the missing materialization stage and its effects
 on every field used by selection to be checked.
 
+Individual prepared pieces now include the [ordinary frame producer](legacy-prepared-compact-word-frame.md),
+[compact record writer](legacy-compact-word-records.md) and
+[predecessor/alternative cursor](legacy-compact-word-predecessor.md).
+They consume explicit prepared buffers and do not construct the complete native
+materialization schedule, rewrite this pass's beam22 indices or publish its final
+glyph/text result. `SelectOwnedPass` still has the pre-materialization contract
+above; the availability of these helpers does not change that contract.
+
 ## Reproduce
 
 Run the probe with `AK LK engine separation`, optionally followed by
