@@ -95,11 +95,14 @@ dependencies; the reusable C# runtime does not require them or a vendor PE.
 
 ## Remaining boundaries
 
-Multiple descriptors, prior-recognized/reused source state, closed physical
-category-limit production, optional297/v107 scope networks, external property
+Multiple descriptors, prior-recognized/reused source state, nonnull optional
+closed category-limit objects, optional297/v107 scope networks, external property
 events and source extensions are outside this endpoint. They are refused or
 unrepresentable by the required owned fresh input. This fixture has no new cut
 point insertion, so post-insertion context phase is established statically and
 through the owned cut-buffer API, rather than claimed as a numeric insertion
 regression. Automatic controller selection, full scheduler/winner production,
 Russian word accuracy and production font x-height remain separate work.
+
+Closed physical ink for the actual absent optional-limit branch is now supported
+by [the owned main marker policy](legacy-main-closed-physical-marker-policy.md).

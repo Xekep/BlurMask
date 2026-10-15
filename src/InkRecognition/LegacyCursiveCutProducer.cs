@@ -4,6 +4,10 @@ namespace InkRecognition;
 public sealed record LegacyCursiveCutResult(LegacyCursivePreparedInk PreparedInk,
     IReadOnlyList<LegacyCursiveCutMarker> Markers,IReadOnlyList<LegacyCursiveInkAtom> Atoms);
 
+/// <summary>Owned pre-limit coordinates, tags, scalar settings and final result.</summary>
+public sealed record LegacyCursiveMarkerLimitTrace(IReadOnlyList<InkStroke> PhysicalSource,float LineHeight,
+    LegacyCursiveMarkerLimitOptions Options,LegacyCursivePreparedInk BeforeLimit,LegacyCursiveCutResult Result);
+
 /// <summary>Confirmed old Russian297 whole-buffer191950 controller with explicit runtime metrics.</summary>
 public static class LegacyCursiveCutProducer
 {
@@ -20,6 +24,24 @@ public static class LegacyCursiveCutProducer
     public static LegacyCursiveCutResult GenerateRussianVersion106(IReadOnlyList<InkStroke> source,
         float? baseline,float lineHeight,IReadOnlyList<float> baselineConfidences,bool wholeStrokeOnly=false,
         int? closedStrokeCategoryLimit=null,CancellationToken cancellationToken=default)
+        => GenerateCore(source,baseline,lineHeight,baselineConfidences,wholeStrokeOnly,closedStrokeCategoryLimit,cancellationToken).Result;
+
+    /// <summary>Exact same cut path with immutable owned inputs to the final
+    ///191430 limiter and its result. No tags, category limit or output is
+    ///reconstructed from a recognized label.</summary>
+    public static LegacyCursiveMarkerLimitTrace GenerateRussianVersion106WithLimitTrace(IReadOnlyList<InkStroke> source,
+        float? baseline,float lineHeight,IReadOnlyList<float> baselineConfidences,bool wholeStrokeOnly=false,
+        int? closedStrokeCategoryLimit=null,CancellationToken cancellationToken=default)
+    {
+        var prepared=GenerateCore(source,baseline,lineHeight,baselineConfidences,wholeStrokeOnly,closedStrokeCategoryLimit,cancellationToken);
+        var copy=source.Select(s=>new InkStroke(Array.AsReadOnly(s.Points.ToArray()))).ToArray();
+        return new(Array.AsReadOnly(copy),lineHeight,LegacyCursiveMarkerLimitOptions.RussianVersion106(closedStrokeCategoryLimit),
+            prepared.BeforeLimit,prepared.Result);
+    }
+
+    private static (LegacyCursivePreparedInk BeforeLimit,LegacyCursiveCutResult Result) GenerateCore(IReadOnlyList<InkStroke> source,
+        float? baseline,float lineHeight,IReadOnlyList<float> baselineConfidences,bool wholeStrokeOnly,
+        int? closedStrokeCategoryLimit,CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(source);ArgumentNullException.ThrowIfNull(baselineConfidences);
         if(baselineConfidences.Count!=source.Count || baselineConfidences.Any(c=>!float.IsFinite(c)))throw new ArgumentException("Each physical stroke requires an explicit finite native service confidence.");
@@ -70,9 +92,10 @@ public static class LegacyCursiveCutProducer
         }
         var records=ink.Points.ToArray();
         var pruned=LegacyCursiveMarkerGeometry.PruneNearPenLifts(ink.StrokePointCounts.Span,records.Select(p=>p.SegmentLength).ToArray(),records.Select(p=>p.Tag).ToArray(),lineHeight,.5f,cancellationToken);
-        ink=LegacyCursiveMarkerLimit.Apply(ink.WithTags(pruned),source,lineHeight,LegacyCursiveMarkerLimitOptions.RussianVersion106(closedStrokeCategoryLimit),cancellationToken);
+        var beforeLimit=ink.WithTags(pruned);
+        ink=LegacyCursiveMarkerLimit.Apply(beforeLimit,source,lineHeight,LegacyCursiveMarkerLimitOptions.RussianVersion106(closedStrokeCategoryLimit),cancellationToken);
         var markers=LegacyCursiveMarkerGeometry.ProjectMarkers(ink.StrokePointCounts.Span,ink.Points.ToArray().Select(p=>p.Tag).ToArray(),cancellationToken);
         var atoms=LegacyCursiveInkAtoms.Build(ink.StrokePointCounts.Span,markers,cancellationToken);
-        return new(ink,Array.AsReadOnly(markers),Array.AsReadOnly(atoms));
+        return (beforeLimit,new(ink,Array.AsReadOnly(markers),Array.AsReadOnly(atoms)));
     }
 }

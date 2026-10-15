@@ -4,9 +4,9 @@ using System.Security.Cryptography;
 namespace InkRecognition;
 
 /// <summary>Actual fresh main source with one assigned descriptor and any
-/// bounded number of open physical strokes, after24B/24D/29B/265. Keeps actual
+/// bounded number of physical strokes, after24B/24D/29B/265. Keeps actual
 /// main ownership, guides, source720 and original metadata. Multiple descriptors
-/// and the closed-physical category-limit producer are deliberately excluded.</summary>
+/// and nonnull optional category-limit objects are deliberately excluded.</summary>
 public sealed class LegacyFreshMainSingleLineSampler
 {
     private readonly byte[] resource,descriptor;
@@ -66,23 +66,15 @@ public sealed class LegacyFreshMainSingleLineSampler
     public LegacyFreshMainSingleLineSampled Sample(LegacyCursiveSeparationTable table,CancellationToken cancellationToken=default)
     {
         ArgumentNullException.ThrowIfNull(table);cancellationToken.ThrowIfCancellationRequested();
-        foreach(var stroke in Preparation.Strokes)
-        {
-            var points=stroke.Points;float dx=points[0].X-points[^1].X,dy=points[0].Y-points[^1].Y,square=dy*dy+dx*dx;
-            if(!float.IsFinite(square)||Math.Sqrt((double)square)<(double)(SourceHeight*.8f))
-                throw new NotSupportedException("Closed physical source requires the actual category-limit producer.");
-        }
-        var original=Preparation.Input.Input.Input.Owner.Controller.Source;
-        //Real retained physical+C enclosure probabilities survive all geometric
-        //postpasses; do not recompute2AD from interpolated coordinates.
-        var cuts=LegacyCursiveCutProducer.GenerateRussianVersion106(Preparation.Strokes,SourceBaseline,SourceHeight,
-            original.SourceStrokeProbabilities.ToArray(),false,null,cancellationToken);
+        var markerPolicy=LegacyFreshMainMarkerLimitPolicy.Prepare(resource,this,cancellationToken);
+        var cuts=markerPolicy.GenerateCuts(cancellationToken);
         var chronology=Preparation.Chronology.WithInsertedPreparedInk(cuts.PreparedInk,cancellationToken);
         int count=Preparation.Strokes.Count;
         var profile=LegacyOrdinaryCursiveSeedProfile.ReadV10aResourceNode(resource,GraphOffset);
         var seeds=LegacyOrdinaryCursiveSeedProducer.GenerateLeftToRight(cuts,SourceHeight,profile,new byte[count],
             Enumerable.Repeat(-1,count).ToArray(),cancellationToken);
-        var ranges=LegacyOrdinaryGraphSourceRanges.Prepare(seeds,chronology,original,SpanProfile.MaximumAtoms,cancellationToken:cancellationToken);
+        var currentSource=Preparation.Input.Input.Input.Owner.Controller.Source;
+        var ranges=LegacyOrdinaryGraphSourceRanges.Prepare(seeds,chronology,currentSource,SpanProfile.MaximumAtoms,cancellationToken:cancellationToken);
         var pruning=LegacyOrdinarySamplerGroupPruning.Prepare(ranges.Graph,cuts.PreparedInk,SourceHeight,
             LegacyOrdinarySamplerGroupPruningProfile.ReadV106Node(resource,CategoryOwner.SamplerNodeOffset),table,cancellationToken);
         ranges=ranges.WithSamplerPruning(pruning,cancellationToken);
@@ -141,7 +133,7 @@ public sealed class LegacyFreshMainSingleLineSampled
 
     /// <summary>Prepared ordinary240 geometry over this exact source: descriptor
     /// ID/line/flags are actual; fresh physical endpoint nibbles/boundary fields
-    /// and ordinary19F850/1A3B30 group metadata retain their native zero/−1 state.
+    /// and ordinary19F850/1A3B30 group metadata retain their native zero/minus-one state.
     /// Controller240 construction/selection remains outside this method.</summary>
     public LegacyMainWordTransitionGeometry CreatePrepared240TransitionGeometry(LegacyCursiveSeparationTable table,
         CancellationToken cancellationToken=default)
