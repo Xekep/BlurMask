@@ -588,6 +588,8 @@ jobs:
           python tools/LegacyMainGlyphBacktrackRows.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-glyph-backtrack-managed.json
           dotnet run --project tools/LegacyDirectGlyphProduction.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-direct-glyph-production-managed.json
           python tools/LegacyDirectGlyphProduction.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-separation-profile.json .artifacts/legacy-direct-glyph-production-managed.json
+          dotnet run --project tools/LegacyResidualGlyphAssociation.Probe -c Release -- .artifacts/legacy-residual-association-managed.json
+          python tools/LegacyResidualGlyphAssociation.Probe/audit_output.py .artifacts/legacy-residual-association-managed.json
           dotnet run --project tools/LegacyCaseResultQuery.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-case-result-query-managed.json
           dotnet run --project tools/LegacyCaseMainPass.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-case-main-pass-managed.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res 15
           python tools/LegacyCaseMainPass.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-case-preparation-controls.json .artifacts/legacy-case-main-pass-managed.json
@@ -1037,6 +1039,7 @@ jobs:
             @{ Name = 'LegacyMainCompactMaterialization'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-compact-materialization-native.json') },
             @{ Name = 'LegacyMainGlyphBacktrackRows'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-glyph-backtrack-native.json') },
             @{ Name = 'LegacyDirectGlyphProduction'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-direct-glyph-production-native.json') },
+            @{ Name = 'LegacyResidualGlyphAssociation'; Args = @('.artifacts/legacy-residual-association-native.json') },
             @{ Name = 'LegacyCaseResultQuery'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-case-result-query-native.json') },
             @{ Name = 'LegacyCaseMainPass'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-case-main-pass-native.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '15') },
             @{ Name = 'LegacyCaseLaterWordCompletion'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-case-later-word-native.json') },
@@ -1257,6 +1260,10 @@ jobs:
             if ($name -eq 'LegacyDirectGlyphProduction') {
               python tools/LegacyDirectGlyphProduction.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-separation-profile.json .artifacts/legacy-direct-glyph-production-native.json
               if ($LASTEXITCODE -ne 0) { throw 'Owned main result audit failed' }
+            }
+            if ($name -eq 'LegacyResidualGlyphAssociation') {
+              python tools/LegacyResidualGlyphAssociation.Probe/audit_output.py .artifacts/legacy-residual-association-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'Residual association audit failed' }
             }
             if ($name -eq 'LegacyCaseMainPass') {
               python tools/LegacyCaseMainPass.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-case-preparation-controls.json .artifacts/legacy-case-main-pass-native.json
