@@ -26,14 +26,14 @@ public sealed class LegacyOwnedMainWordSpan
 /// <summary>
 /// Owned ordinary main frontend98/D0 preparation, including real NN/cache
 /// lifecycle, source68 dictionary permission refresh and frontend110 union.
-/// The dictionary is explicitly prepared directly; this does not resolve
-/// outer290/292 decorator factories or the complete2144F0 search scheduler.
+/// DIRECT constructors retain their original dictionary behavior. Additive
+/// case constructors use an owning fresh292 session; complete2144F0 scheduling
+/// and the outer290 search layer remain separate.
 /// </summary>
 public sealed class LegacyOwnedMainWordSpanPreparation
 {
     private readonly LegacyNativeWordSymbolPreparationSession session;
-    private readonly LegacyPreparedDictionaryQuerySource dictionary;
-    private readonly LegacyPreparedAggregateDictionaryQuerySource aggregate;
+    private readonly LegacyOwnedMainDictionaryBinding dictionaryBinding;
     private readonly LegacyCursiveSeparationProfile separation;
     private readonly LegacyCursiveSeparationTable table;
     private readonly Dictionary<int, LegacyNativeWordAcousticGroupCosts> costs = [];
@@ -41,7 +41,16 @@ public sealed class LegacyOwnedMainWordSpanPreparation
     private bool valid = true;
     private int active;
 
-    public LegacyOwnedRussianDictionaryPreparation DictionaryOwner { get; }
+    /// <summary>Original DIRECT API; a case source is never represented by a
+    /// fabricated parallel DIRECT owner.</summary>
+    public LegacyOwnedRussianDictionaryPreparation DictionaryOwner=>dictionaryBinding.Direct??
+        throw new InvalidOperationException("The case-aware span owns CaseDictionaryOwner; use common source services.");
+    public LegacyFreshCaseRussianDictionaryPreparation? CaseDictionaryOwner=>dictionaryBinding.Case;
+    public bool IsCaseAware=>CaseDictionaryOwner is not null;
+    public LegacyRussianModelBundle CommonModel=>dictionaryBinding.Model;
+    public LegacyPreparedDictionarySourceDescriptor CommonDescriptor=>dictionaryBinding.Descriptor;
+    public LegacyPreparedLinguisticSourceSummary CommonSourceSummary=>dictionaryBinding.SourceSummary;
+    public uint[] CopySourceHeaders()=>dictionaryBinding.CopySourceHeaders();
     private readonly LegacyPreparedFreshMain240AcousticScorer? singleAcoustic;
     private readonly LegacyPreparedFreshMainLine240AcousticScorer? lineAcoustic;
     private readonly SourceBinding source;
@@ -59,7 +68,7 @@ public sealed class LegacyOwnedMainWordSpanPreparation
     internal int OrdinaryAcousticOffset => source.Single is {} s ? s.Owner.AcousticOffset : source.Line!.Owner.AcousticOffset;
     public LegacySourceSamplerCategoryOwner SelectedSourceOwner => source.Categories;
     public LegacyPreparedFreshMain240AcousticPolicy AcousticPolicy => singleAcoustic?.Policy ?? lineAcoustic!.Policy;
-    public LegacySymbolContextFactory Contexts => DictionaryOwner.Contexts;
+    public LegacySymbolContextFactory Contexts => dictionaryBinding.Contexts;
     public int SourceRowBudget => AcousticPolicy.MaximumSourceArcs;
 
     public LegacyOwnedMainWordSpanPreparation(ReadOnlySpan<byte> acousticResource,
@@ -79,37 +88,62 @@ public sealed class LegacyOwnedMainWordSpanPreparation
         : this(acousticResource, lexicalResource, engineProfile,
             SourceBinding.FromLine(actualSource), actualContext, table, cancellationToken) { }
 
+    /// <summary>Same frontend/cache/epoch lifecycle over ONE already owned
+    /// fresh292 backend. No DIRECT backend is constructed in this branch.</summary>
+    public LegacyOwnedMainWordSpanPreparation(ReadOnlySpan<byte> acousticResource,
+        LegacyFreshCaseRussianDictionaryPreparation dictionaryOwner,LegacyFreshSingleGlyphMainSampled actualSource,
+        LegacyCursiveSeparationTable table,CancellationToken cancellationToken=default)
+        :this(acousticResource,[],[],SourceBinding.FromSingle(actualSource),null,table,cancellationToken,dictionaryOwner??throw new ArgumentNullException(nameof(dictionaryOwner))){}
+
+    public LegacyOwnedMainWordSpanPreparation(ReadOnlySpan<byte> acousticResource,
+        LegacyFreshCaseRussianDictionaryPreparation dictionaryOwner,LegacyFreshMainSingleLineSampled actualSource,
+        LegacyFreshMainSingleLineContext actualContext,LegacyCursiveSeparationTable table,
+        CancellationToken cancellationToken=default)
+        :this(acousticResource,[],[],SourceBinding.FromLine(actualSource),actualContext,table,cancellationToken,dictionaryOwner??throw new ArgumentNullException(nameof(dictionaryOwner))){}
+
     private LegacyOwnedMainWordSpanPreparation(ReadOnlySpan<byte> acousticResource,
         ReadOnlySpan<byte> lexicalResource, ReadOnlySpan<byte> engineProfile,
         SourceBinding actualSource, LegacyFreshMainSingleLineContext? actualContext,
-        LegacyCursiveSeparationTable table, CancellationToken cancellationToken)
+        LegacyCursiveSeparationTable table, CancellationToken cancellationToken,
+        LegacyFreshCaseRussianDictionaryPreparation? caseOwner=null)
     {
         ArgumentNullException.ThrowIfNull(table);
         cancellationToken.ThrowIfCancellationRequested();
         source = actualSource;
-        var model = LegacyRussianModelBundle.Load(acousticResource, lexicalResource, engineProfile);
+        var model = caseOwner?.Model??LegacyRussianModelBundle.Load(acousticResource, lexicalResource, engineProfile);
         if(actualSource.Single is {} single)
         {
-            DictionaryOwner = LegacyOwnedRussianDictionaryPreparation.Prepare(acousticResource,
-                lexicalResource, model, single, cancellationToken);
-            singleAcoustic = DictionaryOwner.CreateAcousticScorer(acousticResource, cancellationToken);
+            if(caseOwner is null)
+            {
+                var direct=LegacyOwnedRussianDictionaryPreparation.Prepare(acousticResource,lexicalResource,model,single,cancellationToken);
+                dictionaryBinding=new(direct,actualSource.Graph);singleAcoustic=direct.CreateAcousticScorer(acousticResource,cancellationToken);
+            }
+            else
+            {
+                dictionaryBinding=new(caseOwner,actualSource.Graph);singleAcoustic=caseOwner.CreateAcousticScorer(acousticResource,cancellationToken);
+                if(!ReferenceEquals(singleAcoustic.Source,single))throw new ArgumentException("Case scorer/source identity must match the supplied sampled source.");
+            }
         }
         else
         {
             ArgumentNullException.ThrowIfNull(actualContext);
             if(!ReferenceEquals(actualContext.Source,actualSource.Line))
                 throw new ArgumentException("Context must belong to the actual multi-physical sampled source.");
-            DictionaryOwner = LegacyOwnedRussianDictionaryPreparation.Prepare(acousticResource,
-                lexicalResource, model, actualSource.Line!, cancellationToken);
-            lineAcoustic = DictionaryOwner.CreateAcousticScorer(acousticResource, actualContext, cancellationToken);
+            if(caseOwner is null)
+            {
+                var direct=LegacyOwnedRussianDictionaryPreparation.Prepare(acousticResource,lexicalResource,model,actualSource.Line!,cancellationToken);
+                dictionaryBinding=new(direct,actualSource.Graph);lineAcoustic=direct.CreateAcousticScorer(acousticResource,actualContext,cancellationToken);
+            }
+            else
+            {
+                dictionaryBinding=new(caseOwner,actualSource.Graph);lineAcoustic=caseOwner.CreateAcousticScorer(acousticResource,actualContext,cancellationToken);
+                if(!ReferenceEquals(lineAcoustic.Source,actualSource.Line))throw new ArgumentException("Case scorer/source identity must match the actual sampled line.");
+            }
         }
         this.table = table;
         separation = LegacyCursiveSeparationProfile.ReadV106Node(acousticResource,
             actualSource.Categories.SamplerNodeOffset);
-        var map = DictionaryOwner.Symbols.CreateWorkingMap(DictionaryOwner.Descriptor.Flags);
-        dictionary = new(model.Lexicon, map, DictionaryOwner.Symbols.CopyInitialContexts());
-        aggregate = new([LegacyOrdinaryDictionarySourceOwner.BindDictionary(dictionary, Contexts,
-            actualSource.Graph)]);
+        var map = dictionaryBinding.CreateRawPermissionMap();
         ushort[] reserved = LegacyPreparedAcousticDictionaryPermissions.ReadReservedSlots(
             model.AcousticAlphabet, acousticResource.Slice(99, 16));
         session = new(actualSource.Graph, map, reserved, Compute);
@@ -127,6 +161,22 @@ public sealed class LegacyOwnedMainWordSpanPreparation
         return extent;
     }
 
+    /// <summary>Explicit native sourceV80 epoch, not a source68 map refresh.
+    /// 2144F0 calls with start−1 before the node loop and after each completed
+    /// node. This bounded endpoint does not infer those scheduler events from
+    /// D0/Prepare calls. Prior owned spans become invalid.</summary>
+    public void AdvanceNodeEpoch(int completedNode,CancellationToken cancellationToken=default)
+    {
+        Enter();
+        try
+        {
+            if(completedNode< -1||completedNode>=SourceGraph.NodeCount)throw new ArgumentOutOfRangeException(nameof(completedNode));
+            dictionaryBinding.AdvanceNodeEpoch(completedNode,cancellationToken);epoch=checked(epoch+1);
+        }
+        catch{valid=false;throw;}
+        finally{Volatile.Write(ref active,0);}
+    }
+
     /// <summary>2144F0 calls D0 with param5=false in ascending span order.
     /// The cache session itself decides whether an existing pool row is reused.
     /// Selected owned195 costs refresh dictionary50 before any subsequent query.</summary>
@@ -142,7 +192,11 @@ public sealed class LegacyOwnedMainWordSpanPreparation
             var result = session.Prepare(endingNode, span, false, cancellationToken);
             if (!result.PermissionPass.Succeeded || result.PermissionPass.PermissionResult.WorkingMap is null)
                 throw new InvalidOperationException("Owned main cache/source preparation failed.");
-            dictionary.SetWorkingMap(result.PermissionPass.PermissionResult.WorkingMap);
+            var actualMap=dictionaryBinding.Refresh(result.PermissionPass.PermissionResult,cancellationToken);
+            //Permissions are the acoustic pre-wrapper bytes. WorkingMap is
+            //the actual post234840 map installed in the case query backend.
+            result=result with {PermissionPass=result.PermissionPass with
+                {PermissionResult=result.PermissionPass.PermissionResult with {WorkingMap=actualMap}}};
             cancellationToken.ThrowIfCancellationRequested();
             return new(this, checked(++epoch), endingNode, span, result);
         }
@@ -178,10 +232,22 @@ public sealed class LegacyOwnedMainWordSpanPreparation
         try
         {
             Check(span, cancellationToken);
-            return aggregate.Read(tag, query, auxiliary, clearExtraCosts, cancellationToken);
+            return dictionaryBinding.Read(tag, query, auxiliary, clearExtraCosts, cancellationToken);
         }
         catch { valid = false; throw; }
         finally { Volatile.Write(ref active, 0); }
+    }
+
+    public ReadOnlyMemory<byte> ReadWordTerminal(LegacyOwnedMainWordSpan span,ulong sourceTag,ushort endingSymbol,
+        byte boundaryArgument,CancellationToken cancellationToken=default)
+    {
+        Enter();try{Check(span,cancellationToken);return dictionaryBinding.ReadTerminal(sourceTag,endingSymbol,boundaryArgument,cancellationToken);}
+        catch{valid=false;throw;}finally{Volatile.Write(ref active,0);}
+    }
+    public ulong ResolveWordRestart(LegacyOwnedMainWordSpan span,ulong sourceTag,CancellationToken cancellationToken=default)
+    {
+        Enter();try{Check(span,cancellationToken);return dictionaryBinding.ResolveRestart(sourceTag,cancellationToken);}
+        catch{valid=false;throw;}finally{Volatile.Write(ref active,0);}
     }
 
     private LegacyOrdinaryGraphAcousticRow Compute(LegacyOrdinaryCursiveCandidateInk group,
@@ -214,6 +280,7 @@ public sealed class LegacyOwnedMainWordSpanPreparation
         token.ThrowIfCancellationRequested();
         if (!valid || !ReferenceEquals(span.Owner, this) || span.Epoch != epoch)
             throw new InvalidOperationException("Span cache/query belongs to a stale or foreign D0 preparation.");
+        dictionaryBinding.ValidateCurrentMap();
     }
 
     internal void ValidateSpan(LegacyOwnedMainWordSpan span, CancellationToken token)

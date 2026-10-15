@@ -39,19 +39,19 @@ public sealed class LegacyNativeMainInitialSpecialCandidates
         //The owned source validates its pinned resource on construction. This
         //additional geometry owner check rejects a different resource here.
         var sourceOwner = LegacySourceSamplerCategoryOwner.ReadV10dSource(actualResource, 0);
-        if (sourceOwner.SourceFingerprint != owner.Source.Owner.CategoryOwner.SourceFingerprint)
+        if (sourceOwner.SourceFingerprint != owner.SelectedSourceOwner.SourceFingerprint)
             throw new ArgumentException("Initial consumer must retain its actual main resource owner.");
-        var alphabet = owner.DictionaryOwner.Model.AcousticAlphabet;
-        categories = new(owner.Source.Owner.TransitionProfile.Categories);
+        var alphabet = owner.CommonModel.AcousticAlphabet;
+        categories = new(owner.SelectedSourceOwner.Categories);
         scorer = LegacyNativeWordAcousticRequestScorer.ForAlphabet(
-            LegacyAcousticCandidateThresholds.ReadV110Node(actualResource[owner.Source.Owner.AcousticOffset..], out _), alphabet);
-        connections = new(owner.Source.SourceRanges.Graph);
+            LegacyAcousticCandidateThresholds.ReadV110Node(actualResource[owner.OrdinaryAcousticOffset..], out _), alphabet);
+        connections = new(owner.SourceGraph);
         apostrophe = Resolve("'");
         quote = Resolve("\"");
         excludedLoop = Resolve("\U000f0001");
         excludedShadda = Resolve("\u0651");
         duplicatedPrimitives = [Resolve("\U000f0002"), Resolve("\U000f0003"), Resolve("\U000f0004"), Resolve("\U000f0008")];
-        headers = owner.DictionaryOwner.CopySourceHeaders();
+        headers = owner.CopySourceHeaders();
 
         ushort Resolve(string text) => alphabet.TryGetLabel(text, out ushort symbol) ? symbol : ushort.MaxValue;
     }
@@ -86,7 +86,7 @@ public sealed class LegacyNativeMainInitialSpecialCandidates
                 visited++;
                 ushort symbol = U16(row, 20);
                 if (symbol == excludedLoop || symbol == excludedShadda) continue;
-                if (symbol >= owner.DictionaryOwner.Model.AcousticAlphabet.LabelCount)
+                if (symbol >= owner.CommonModel.AcousticAlphabet.LabelCount)
                     throw new NotSupportedException("Protocol FFE3..FFEA queries need their source58 expansion producer.");
                 byte source = row[4], flags = row[23], length = row[22];
                 if (source >= headers.Length)
@@ -117,12 +117,12 @@ public sealed class LegacyNativeMainInitialSpecialCandidates
                         int baseCost = I32(row, 16);
                         var request = LegacyNativeWordStartupRequestFactory.Create((uint)span.EndingNode, span.Span,
                             arc, symbol, category, tag, length, flags, headers[source], 0,
-                            owner.Source.Owner.TransitionProfile.Categories, cell, baseCost, residue, cancellationToken);
+                            owner.SelectedSourceOwner.Categories, cell, baseCost, residue, cancellationToken);
                         calls++;
                         if (!scorer.Score(request, (node, currentArc) => owner.GetCosts(span, node, currentArc, cancellationToken),
                             false, cancellationToken: cancellationToken)) continue;
-                        int first = unchecked((int)owner.Source.SourceRanges.Graph.GetNode(span.EndingNode)[ordinal].StartContextId);
-                        bool flagged = !suppressHeader22f7 && owner.DictionaryOwner.Model.AcousticAlphabet.IsSymbolFlagged(symbol);
+                        int first = unchecked((int)owner.SourceGraph.GetNode(span.EndingNode)[ordinal].StartContextId);
+                        bool flagged = !suppressHeader22f7 && owner.CommonModel.AcousticAlphabet.IsSymbolFlagged(symbol);
                         var fields = new LegacyInitialWordRecordFields(tag, context, cell.Value, request.ReadInt32(48),
                             symbol, checked((ushort)span.EndingNode), arc, arc, checked((byte)category), ushort.MaxValue,
                             unchecked((sbyte)span.Span), 0, flagged ? (byte)1 : (byte)0, 0, 0,
@@ -136,7 +136,7 @@ public sealed class LegacyNativeMainInitialSpecialCandidates
                         //then emits a second record for these four labels when
                         //mode22F6=false and aggregate source kinds low3>1.
                         if (LegacyNativeInitialPrimitiveExtraRecord.TryCreate(fields, baseCost, 0, false,
-                            owner.DictionaryOwner.SourceSummary.Flags, duplicatedPrimitives, out var extra))
+                            owner.CommonSourceSummary.Flags, duplicatedPrimitives, out var extra))
                         {
                             cell.Value = extra!.CandidateCost10;
                             result = router.TryInsertInitialRecord(source, false, extra, secondaryScaleEc,

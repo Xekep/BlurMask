@@ -34,6 +34,20 @@ public sealed class LegacyNativeCaseNormalQuerySource
         LegacyAggregateDictionaryReader reader,bool dutchLigatureMode,bool extraCosts)
     {Expansion=expansion;this.reader=reader;DutchLigatureMode=dutchLigatureMode;ExtraCostSideTable=extraCosts;}
 
+    //231ED0 after inner V80 succeeds;232037 also clears8378 round-robin cursor.
+    internal void ResetForControllerNode()
+    {
+        if(Interlocked.CompareExchange(ref active,1,0)!=0)throw new InvalidOperationException("Case queries must be serialized.");
+        try
+        {
+            if(!valid)throw new InvalidOperationException("Failed case query requires a fresh session.");
+            foreach(var slot in slots)
+            {slot.Tag=ulong.MaxValue;slot.BlockCursor=slot.BlockCount=slot.Offset=slot.Accepted=0;slot.Records=[];slot.Costs=[];}
+            nextSlot=0;
+        }
+        finally{Volatile.Write(ref active,0);}
+    }
+
     /// <summary>The ordinary graph proves frontend280 false. The prepared
     /// dictionary and case tables must belong to the same selected source;
     /// locale/side-table fields remain explicit until20C9D0 ownership is wired.</summary>

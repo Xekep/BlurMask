@@ -49,9 +49,9 @@ public sealed class LegacyOwnedFreshMainWordControllerPolicy
         byte format = resource[sourceProfile.ParametersOffset - 5];
         if (consecutive > 1 || format > 1)
             throw new InvalidDataException("Validated247 B8/B9 flags required.");
-        var model = owner.DictionaryOwner.Model;
+        var model = owner.CommonModel;
         bool marker = model.AcousticAlphabet.TryGetLabel("\u202b", out _);
-        var refresh = LegacyNativeWordScalarRefresh.Apply(0, owner.DictionaryOwner.SourceSummary.Flags,
+        var refresh = LegacyNativeWordScalarRefresh.Apply(0, owner.CommonSourceSummary.Flags,
             false, consecutive, 0, format, -1, 0, marker);
         var fresh = LegacyNativeWordControllerConfiguration.CreateFresh20baa0() with
         { PackedSource22e8 = refresh.PackedSource22e8 };

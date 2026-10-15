@@ -9,6 +9,7 @@ internal delegate LegacyPreparedDictionaryQueryPage LegacyTaggedDictionaryReader
 public sealed class LegacyTaggedDictionaryChild
 {
     private readonly LegacyTaggedDictionaryReader reader;
+    private readonly Action prepareControllerNode;
     internal Func<uint,bool> IsEligible {get;}
     public LegacySymbolContextFactory Contexts {get;}
     public LegacyOrdinaryCursiveCandidateGraph Graph {get;}
@@ -16,14 +17,14 @@ public sealed class LegacyTaggedDictionaryChild
     public ulong LastSourceTag {get;private set;}
     public int LastMethodOffset {get;private set;}
     private LegacyTaggedDictionaryChild(LegacyTaggedDictionaryReader reader,Func<uint,bool> eligible,
-        LegacySymbolContextFactory contexts,LegacyOrdinaryCursiveCandidateGraph graph,bool case292)
-    {this.reader=reader;IsEligible=eligible;Contexts=contexts;Graph=graph;UsesCase292=case292;}
+        LegacySymbolContextFactory contexts,LegacyOrdinaryCursiveCandidateGraph graph,bool case292,Action prepareControllerNode)
+    {this.reader=reader;IsEligible=eligible;Contexts=contexts;Graph=graph;UsesCase292=case292;this.prepareControllerNode=prepareControllerNode;}
 
     public static LegacyTaggedDictionaryChild BindOrdinaryDictionary(LegacyPreparedDictionaryQuerySource source,
         LegacySymbolContextFactory contexts,LegacyOrdinaryCursiveCandidateGraph graph)
     {
         var child=LegacyOrdinaryDictionarySourceOwner.BindDictionary(source,contexts,graph);
-        return new((tag,query,aux,extra,token)=>child.Read(query,aux,extra,token),child.IsEligible,contexts,graph,false);
+        return new((tag,query,aux,extra,token)=>child.Read(query,aux,extra,token),child.IsEligible,contexts,graph,false,source.ResetQueries);
     }
 
     /// <summary>Own both292 paths over the SAME backend/context/ordinary graph.
@@ -53,8 +54,11 @@ public sealed class LegacyTaggedDictionaryChild
             var page=normal.Read(owned,token); //V40: stateful forms/cost/context expansion.
             return new(page.ReturnedCount,page.Records,page.SlotIndex,page.BackendOffset,page.AcceptedCount,page.ExtraCosts);
         }
-        return new(Read,eligibility.IsEligible,contexts,graph,true);
+        void PrepareNode(){dictionary.ResetQueries();normal.ResetForControllerNode();}
+        return new(Read,eligibility.IsEligible,contexts,graph,true,PrepareNode);
     }
+
+    internal void PrepareControllerNode()=>prepareControllerNode();
 
     internal LegacyPreparedDictionaryQueryPage Read(ulong tag,LegacyPreparedDictionaryQuery query,
         bool auxiliary,bool extraCosts,CancellationToken token)
@@ -78,6 +82,20 @@ public sealed class LegacyTaggedAggregateDictionaryQuerySource
     private bool valid=true;
     public int CurrentSelectedOrdinal=>aggregate.CurrentSelectedOrdinal;
     public int[] CopyAcceptedCountBases()=>aggregate.CopyAcceptedCountBases();
+
+    //236DC0 forwards V80 in selected order. It does not clear aggregate bases.
+    internal void PrepareControllerNode(CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        if(Interlocked.CompareExchange(ref active,1,0)!=0)throw new InvalidOperationException("Tagged aggregate calls must be serialized.");
+        try
+        {
+            if(!valid)throw new InvalidOperationException("Failed tagged aggregate requires a fresh session.");
+            foreach(var child in children)child.PrepareControllerNode();
+        }
+        catch{valid=false;throw;}
+        finally{Volatile.Write(ref active,0);}
+    }
     public LegacyTaggedAggregateDictionaryQuerySource(IReadOnlyList<LegacyTaggedDictionaryChild> selectedChildren)
     {
         ArgumentNullException.ThrowIfNull(selectedChildren);

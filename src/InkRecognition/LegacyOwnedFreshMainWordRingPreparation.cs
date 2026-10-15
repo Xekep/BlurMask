@@ -19,6 +19,7 @@ public sealed class LegacyOwnedFreshMainWordRingPreparation
         CancellationToken cancellationToken=default)
     {
         ArgumentNullException.ThrowIfNull(owner);cancellationToken.ThrowIfCancellationRequested();
+        if(owner.Owner.IsCaseAware)throw new NotSupportedException("Owned ring preparation is proved for the fresh DIRECT branch; case-aware ring binding is separate.");
         //The policy has a private constructor and owns only the NEW00C860
         //no-property DIRECT source branch. Arbitrary prepared snapshots cannot
         //be converted into that ownership by supplying their scalar values.
