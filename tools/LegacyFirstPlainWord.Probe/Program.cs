@@ -74,6 +74,10 @@ if(args.Length==4)
  Require(!result.PublishedWord.Word.FlatReferences.Contains(result.DetachedLeadingReference)&&!result.PublishedWord.Word.FlatReferences.Contains(result.DetachedTrailingReference),"Reset did not detach endpoint references.");
  Require(result.GlyphReferences.SequenceEqual(result.PublishedWord.Word.FlatReferences),"Published word differs from selected reading order.");
  Require(ReferenceEquals(result.Graph,graph),"Materialization lost actual source graph ownership.");
+ Require(result.PublishedWord.Span==new LegacyNativeWordSourceSpan(
+  unchecked((int)graph.GetNode(cells[0].Node)[cells[0].Arc].StartContextId),
+  unchecked((int)graph.GetNode(cells[^1].Node)[cells[^1].Arc].EndContextId)),
+  "1F5D76/1F5D7B native param7=-1,param8=wordEnd must preserve first callback and override last.");
  var symbols=result.GlyphReferences.Select(reference=>BinaryPrimitives.ReadUInt16LittleEndian(result.Result.GlyphPool.CopyRecord(reference).AsSpan(8))).ToArray();Require(symbols.SequenceEqual(cells.Select(cell=>cell.Symbol)),"Literal first labels changed through materialization.");
  byte[] header=result.PublishedWord.Word.CopyStorage();Require(BinaryPrimitives.ReadSingleLittleEndian(header.AsSpan(16))==-5f*result.Selection.TotalCost/8192f&&BinaryPrimitives.ReadSingleLittleEndian(header.AsSpan(20))==1&&BinaryPrimitives.ReadSingleLittleEndian(header.AsSpan(24))==(float)result.Selection.TotalCost/(grid.NodeCount*8192)&&BinaryPrimitives.ReadSingleLittleEndian(header.AsSpan(28))==(float)result.Selection.AcousticCost/8192,"Actual unadjusted WORD scalar mapping differs.");
  Require(BinaryPrimitives.ReadSingleLittleEndian(header.AsSpan(24))!=result.Selection.Score.NormalizedCost10&&result.Selection.Score.NormalizedCost10==0,"TOP relative cost was conflated with WORD's unadjusted cost.");

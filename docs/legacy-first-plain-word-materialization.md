@@ -1,5 +1,14 @@
 # Fresh first plain word materialization
 
+The first caller's source-span overrides follow the actual Win64 stack slots:
+`1F5D76` writes native argument8=`wordEnd` at `[rsp+38]`, while `1F5D7B`
+writes argument7=`-1` at `[rsp+30]`. `1416B0` applies argument7 to the first
+scalar and argument8 to the last. The single-word materializer therefore keeps
+the first graph callback and overrides only the last boundary. A previous
+portable call reversed these overrides; the targeted correction changes its span
+metadata, while leaving the selected glyphs, scores and NN tables unchanged.
+`audit_first_word_span_override.py` pins this caller and both output owners.
+
 `LegacyFirstPlainWordMaterializer` connects actual first-source6120 model/cache groups, primary98 records and completed B8 passes to owned pool274 glyph40 records, WORD276120 storage and publisher279/275. It uses the same `LegacyFreshFirstResultOwnershipFactory` and retains `Graph` identity for the following source-range dispatcher. It does not replace the main240 language decoder or synthesize source720 ranges.
 
 The selected trace is the actual causal B8 predecessor walk. Fresh configuration6C bypasses case/alias conversion. The endpoint accepts one plain Latin/Cyrillic/digit word, one B8 column, no traits/shadda and no E0 mode. A non-root set path bit denotes a word boundary and is rejected; the actual printed fixture has root bit1 followed by two bit0 cells. Ordinary graph start/end context fields supply frontend168/170 scalars. They are **graph boundary IDs**, not source physical-stroke or document-object IDs.

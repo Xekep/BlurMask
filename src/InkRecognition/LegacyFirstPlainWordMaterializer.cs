@@ -211,11 +211,11 @@ public sealed class LegacyFirstPlainWordMaterializer
             references.Add(added.Reference);previous=added.Reference;
         }
         var scalars=LegacyFirstPlainWordScalars.ReadUnadjusted(choice.TotalCost,choice.AcousticCost,grid.NodeCount,binding.SourceKind);
-        int nativeParam7=Last(terminal.Node,terminal.Arc);
+        int nativeLastOverride=Last(terminal.Node,terminal.Arc);
         bool allocateRoot=publication.ShouldAllocate(trace[0].Symbol,cancellationToken);
         if(allocateRoot)word.SetRawScalars(scalars.LogMass10,scalars.Calibration14,scalars.NormalizedUnadjustedCost18,scalars.NormalizedAcousticCost1C,cancellationToken);
         var published=!allocateRoot||word.GetSymbolSpan(cancellationToken)==0?null:
-            result.WordPublisher.Publish(word,First,Last,nativeParam7,-1,cancellationToken);
+            result.WordPublisher.Publish(word,First,Last,-1,nativeLastOverride,cancellationToken);
         //The root publication is followed by another reset and a zero-span
         //leading endpoint; it remains in the pool and does not form a word.
         ulong? leading=null;
