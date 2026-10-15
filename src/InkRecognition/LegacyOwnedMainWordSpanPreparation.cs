@@ -286,6 +286,48 @@ public sealed class LegacyOwnedMainWordSpanPreparation
     internal void ValidateSpan(LegacyOwnedMainWordSpan span, CancellationToken token)
         => Check(span, token);
 
+    // Result reconstruction runs after the controller's final source V80.
+    // Its query source is the same backend, without another D0 or map refresh.
+    internal long CaptureResultQueryEpoch(CancellationToken token)
+    {
+        Enter();
+        try
+        {
+            token.ThrowIfCancellationRequested();
+            dictionaryBinding.CaptureResultQueryLease(token);
+            return epoch;
+        }
+        finally { Volatile.Write(ref active, 0); }
+    }
+
+    internal LegacyAggregateDictionaryQueryPage ReadResultQuery(long resultEpoch, ulong tag,
+        LegacyPreparedDictionaryQuery query, bool auxiliary, CancellationToken token)
+    {
+        Enter();
+        try
+        {
+            token.ThrowIfCancellationRequested();
+            if (resultEpoch != epoch)
+                throw new InvalidOperationException("A result query cannot use a source changed by a later D0/controller epoch.");
+            return dictionaryBinding.ReadResultQuery(tag, query, auxiliary, token);
+        }
+        catch { valid = false; throw; }
+        finally { Volatile.Write(ref active, 0); }
+    }
+
+    internal void ValidateResultQueryEpoch(long resultEpoch, CancellationToken token)
+    {
+        Enter();
+        try
+        {
+            token.ThrowIfCancellationRequested();
+            if (resultEpoch != epoch)
+                throw new InvalidOperationException("Result reconstruction requires the producing controller source epoch.");
+            dictionaryBinding.ValidateResultQueryLease(token);
+        }
+        finally { Volatile.Write(ref active, 0); }
+    }
+
     private sealed record SourceBinding(LegacyFreshSingleGlyphMainSampled? Single, LegacyFreshMainSingleLineSampled? Line)
     {
         public static SourceBinding FromSingle(LegacyFreshSingleGlyphMainSampled source)

@@ -42,7 +42,11 @@ public sealed class LegacyOrdinaryGlyphProductionScratch
 public sealed class LegacyOwnedRussianOrdinaryGlyphProducer
 {
     private readonly LegacyOwnedRussianMainGlyphConfidence confidence;
-    private readonly LegacyOwnedRussianGlyphSymbolResolver resolver;
+    private readonly LegacyOwnedRussianGlyphSymbolResolver? resolver;
+    private readonly LegacyOwnedRussianMainSourceSymbolCallbacks? sourceCallbacks;
+    private readonly LegacyOrdinaryCursiveCandidateGraph graph;
+    private readonly LegacyRussianModelBundle model;
+    private readonly LegacyFreshCaseMainSourcePolicy? casePolicy;
     private readonly LegacyCursivePreparedInk ink;
     private readonly LegacyInkRange[][] ranges;
     private readonly LegacyCursiveSeparationProfile separation;
@@ -52,23 +56,44 @@ public sealed class LegacyOwnedRussianOrdinaryGlyphProducer
     private readonly ushort blank, unitScore, closed, apostrophe, quote;
     private readonly ushort[] bypass;
     private readonly Dictionary<int,LegacyNativeGlyphScoreCache> caches=[];
-    public LegacyFreshCaseMainSourcePolicy Policy {get;}
+    public LegacyFreshCaseMainSourcePolicy Policy => casePolicy ??
+        throw new InvalidOperationException("The DIRECT producer has DirectPolicy, not an invented case policy.");
+    public LegacyOwnedFreshMainWordControllerPolicy? DirectPolicy {get;}
 
-    private LegacyOwnedRussianOrdinaryGlyphProducer(ReadOnlySpan<byte> resource,LegacyFreshCaseMainSourcePolicy policy,
-        LegacyOwnedRussianMainGlyphConfidence confidence,LegacyCursiveSeparationTable table,CancellationToken token)
+
+    private LegacyOwnedRussianOrdinaryGlyphProducer(ReadOnlySpan<byte> resource,LegacyFreshCaseMainSourcePolicy? policy,
+        LegacyOwnedFreshMainWordControllerPolicy? directPolicy,LegacyOwnedRussianMainGlyphConfidence confidence,
+        LegacyCursiveSeparationTable table,LegacyOwnedRussianMainSourceSymbolCallbacks? sourceCallbacks,
+        LegacyNativeTextPublicationData? publication,CancellationToken token)
     {
-        Policy=policy;this.confidence=confidence;
-        var owner=policy.Controller.Owner;
-        if(!ReferenceEquals(confidence.CaseDictionaryOwner,policy.DictionaryOwner)||
-            !ReferenceEquals(confidence.Graph,policy.Graph)||!ReferenceEquals(owner.SourceGraph,policy.Graph)||
+        casePolicy=policy;DirectPolicy=directPolicy;this.confidence=confidence;this.sourceCallbacks=sourceCallbacks;
+        var controller=policy?.Controller??directPolicy??throw new ArgumentException("An actual owning source policy is required.");
+        var owner=controller.Owner;graph=owner.SourceGraph;model=owner.CommonModel;
+        bool direct=policy is null;
+        if((direct? owner.IsCaseAware||!ReferenceEquals(confidence.DirectDictionaryOwner,owner.DictionaryOwner):
+            !ReferenceEquals(confidence.CaseDictionaryOwner,policy!.DictionaryOwner))||
+            !ReferenceEquals(confidence.Graph,graph)||!ReferenceEquals(confidence.Model,model)||
             confidence.OwnerScoreChannel88!=0)
-            throw new ArgumentException("One actual fresh case source, graph and confidence owner required.");
-        //The policy owns NEW00C860/no-property/direct invocation, not2458B0's
-        //temporary99 override. Its ordinary21B graph proves frontend280=false.
+            throw new ArgumentException("One actual fresh source, graph, model and confidence owner required.");
         if(resource.Length!=572763||!StringComparer.OrdinalIgnoreCase.Equals(
-            Convert.ToHexString(SHA256.HashData(resource)),policy.AcousticFingerprint))
+            Convert.ToHexString(SHA256.HashData(resource)),owner.SelectedSourceOwner.SourceFingerprint))
             throw new InvalidDataException("Same pinned acoustic source required.");
-        resolver=LegacyOwnedRussianGlyphSymbolResolver.Prepare(policy.DictionaryOwner,
+        if(direct)
+        {
+            if(sourceCallbacks is null||!ReferenceEquals(sourceCallbacks.Owner,confidence)||publication is null||
+                controller.Configuration.Trace2368!=0||controller.Configuration.Mode22f6!=0||controller.Refresh.KnowledgeOption22f8!=0)
+                throw new ArgumentException("Fresh ordinary DIRECT policy, exact source callbacks and publication data required.");
+            if(LegacyWideSymbolPairs.CreateUnrestricted(model.AcousticAlphabet,token).Length!=0)
+                throw new NotSupportedException("The DIRECT scalar branch requires its actual empty wide-pair table.");
+            for(ushort i=0;i<model.AcousticAlphabet.LabelCount;i++)
+            {
+                token.ThrowIfCancellationRequested();
+                if(model.AcousticAlphabet.TryGetText(i,out var text))foreach(var rune in text.EnumerateRunes())
+                    if(publication.ReadScript(rune.Value)==5)
+                        throw new NotSupportedException("Arabic map production is outside this ordinary scalar branch.");
+            }
+        }
+        else resolver=LegacyOwnedRussianGlyphSymbolResolver.Prepare(policy!.DictionaryOwner,
             policy.DictionaryOwner.Symbols.Preparation,token);
         var categoryOwner=LegacySourceSamplerCategoryOwner.ReadV10dSource(resource,0,token);
         if(categoryOwner.SamplerNodeOffset!=owner.SelectedSourceOwner.SamplerNodeOffset||
@@ -84,14 +109,14 @@ public sealed class LegacyOwnedRussianOrdinaryGlyphProducer
             "b23ed52a3a10808eab597a8f371a7bbb66bde2fab5fe2666431b1b192abc1baf")))
             throw new InvalidDataException("Actual engine separation table required.");
         ink=owner.SourceInk.WithTags(owner.SourceInk.Points.Span.ToArray().Select(p=>p.Tag).ToArray());
-        ranges=policy.Graph.Groups.Select(group=>group.Ranges.ToArray()).ToArray();height=owner.SourceHeight;
+        ranges=graph.Groups.Select(group=>group.Ranges.ToArray()).ToArray();height=owner.SourceHeight;
         _=LegacyOrdinaryAcousticCacheProfile.ReadV110Node(resource[189734..],token);
         powerScale=LegacyPreparedAcousticDictionaryPermissions.ReadDisabledPowerScale(resource[189734..],token);
         if(powerScale!=1)throw new NotSupportedException("Actual disabled main group power branch required.");
         //Engine053F20 writes the seven stored headers to8,A,C,E,10,12,14;
         //ALcount is separately1A. In particular headerE is178, not192.
         blank=U16(resource,99);unitScore=U16(resource,105);
-        var alphabet=policy.Model.AcousticAlphabet;
+        var alphabet=model.AcousticAlphabet;
         ushort Label(string text)=>alphabet.TryGetLabel(text,out ushort symbol)?symbol:ushort.MaxValue;
         closed=Label("\U000f0001");apostrophe=Label("'");quote=Label("\"");
         bypass=[closed,Label("\U000f0004"),Label("\U000f0008"),Label("\U000f0002"),Label("\U000f0003"),
@@ -105,7 +130,22 @@ public sealed class LegacyOwnedRussianOrdinaryGlyphProducer
     {
         ArgumentNullException.ThrowIfNull(policy);ArgumentNullException.ThrowIfNull(confidence);
         ArgumentNullException.ThrowIfNull(actualTable);token.ThrowIfCancellationRequested();
-        return new(resource,policy,confidence,actualTable,token);
+        return new(resource,policy,null,confidence,actualTable,null,null,token);
+    }
+
+    /// <summary>The same ordinary scalar producer bound to a genuine DIRECT
+    /// source. Publication data proves absent Arabic mapping; actual empty wide
+    /// pairs and same-confidence callbacks close the replacement branch. No
+    /// case wrapper or prepared boolean substitutes for these owners.</summary>
+    public static LegacyOwnedRussianOrdinaryGlyphProducer Prepare(ReadOnlySpan<byte> resource,
+        LegacyOwnedFreshMainWordControllerPolicy directPolicy,LegacyOwnedRussianMainGlyphConfidence confidence,
+        LegacyCursiveSeparationTable actualTable,LegacyOwnedRussianMainSourceSymbolCallbacks sourceCallbacks,
+        LegacyNativeTextPublicationData publication,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(directPolicy);ArgumentNullException.ThrowIfNull(confidence);
+        ArgumentNullException.ThrowIfNull(actualTable);ArgumentNullException.ThrowIfNull(sourceCallbacks);
+        ArgumentNullException.ThrowIfNull(publication);token.ThrowIfCancellationRequested();
+        return new(resource,null,directPolicy,confidence,actualTable,sourceCallbacks,publication,token);
     }
 
     /// <summary>Normal216BC0 success returns the existing2173E0 input snapshot.
@@ -121,7 +161,7 @@ public sealed class LegacyOwnedRussianOrdinaryGlyphProducer
         if(preparedRow72.Length!=72)throw new ArgumentException("Complete prepared backtrack row72 required.");
         if(preparedRow72[0x3c]!=0)throw new NotSupportedException("Only ordinary subtype0 is restored.");
         int node=BinaryPrimitives.ReadInt32LittleEndian(preparedRow72);ushort arc=U16(preparedRow72,4);
-        var arcs=Policy.Graph.GetNode(node);
+        var arcs=graph.GetNode(node);
         if(arc>=arcs.Count)throw new ArgumentException("Prepared row arc escapes the actual owned graph node.");
         int compact=BinaryPrimitives.ReadInt32LittleEndian(preparedRow72[0x20..]);
         //21709C..2170BC resolves this neighbor before216860, even though
@@ -133,21 +173,30 @@ public sealed class LegacyOwnedRussianOrdinaryGlyphProducer
         ushort symbol=U16(preparedRow72,0x3a);
         if(unchecked((ushort)(symbol+6))<3)
             throw new NotSupportedException("FFFA/FFFB/FFFC require the native delimiter/multi-output callback.");
-        if(symbol>=Policy.Model.AcousticAlphabet.LabelCount+3&&unchecked((ushort)(symbol+9))>2)
+        if(symbol>=model.AcousticAlphabet.LabelCount+3&&unchecked((ushort)(symbol+9))>2)
             throw new NotSupportedException("This portable ordinary scope excludes other unchecked synthetic labels.");
         scratch.ComponentFlag=0;scratch.ExternalVariant=0;
         scratch.RemainingCursor=unchecked(scratch.RemainingCursor-1);
         token.ThrowIfCancellationRequested();
-        var resolved=resolver.Resolve(symbol,conversionArgument,false,token);
-        scratch.Write(resolved.EmittedSymbol);
+        ushort emitted;
+        if(resolver is not null)emitted=resolver.Resolve(symbol,conversionArgument,false,token).EmittedSymbol;
+        else if(unchecked((byte)conversionArgument)!=0&&symbol==model.AcousticAlphabet.LabelCount+1)emitted=apostrophe;
+        else if(unchecked((byte)conversionArgument)!=0&&symbol==model.AcousticAlphabet.LabelCount+2)emitted=quote;
+        else if(model.AcousticAlphabet.TryGetLabel("\ufffd",out ushort replacement)&&symbol==replacement)
+        {
+            var result=sourceCallbacks!.ResolveReplacement(node,arc,token);
+            emitted=result.EmittedSymbol;scratch.ExternalVariant=result.ExternalVariant;
+        }
+        else emitted=symbol;
+        scratch.Write(emitted);
         token.ThrowIfCancellationRequested();
         if(symbol==unitScore||unchecked((ushort)(symbol+9))<=5)
         {scratch.Score0CBits=0x3f800000;scratch.Score10Bits=0x3f800000;scratch.Cost14=0;}
         else
         {
             scratch.Score0CBits=BitConverter.SingleToUInt32Bits(preparedRow72[0x3e]/255f);
-            ushort scoreSymbol=symbol==resolver.SyntheticApostrophe?apostrophe:
-                symbol==resolver.SyntheticQuote?quote:symbol;
+            ushort scoreSymbol=symbol==model.AcousticAlphabet.LabelCount+1?apostrophe:
+                symbol==model.AcousticAlphabet.LabelCount+2?quote:symbol;
             var cache=ScoreCache(arcs[arc].GroupId,token);
             scratch.Score10Bits=BitConverter.SingleToUInt32Bits(cache.ReadSymbolScore(scoreSymbol,0,token));
             var request=CreateRequest(preparedRow72,node,arc,scoreSymbol);

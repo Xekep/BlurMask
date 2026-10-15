@@ -578,6 +578,16 @@ jobs:
           python tools/LegacyMainSourceSymbolCallbacks.Probe/audit_output.py .artifacts/legacy-main-source-symbol-managed.json
           dotnet run --project tools/LegacyWordQuoteNormalization.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-scalar-managed.bin .artifacts/legacy-word-quotes-managed.json
           python tools/LegacyWordQuoteNormalization.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-scalar-managed.bin .artifacts/legacy-word-quotes-managed.json
+          dotnet run --project tools/LegacyMainCandidateWeight.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-candidate-weight-managed.json
+          python tools/LegacyMainCandidateWeight.Probe/audit_output.py .artifacts/legacy-candidate-weight-managed.json
+          dotnet run --project tools/LegacyCompactWordReachability.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-compact-reachability-managed.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json
+          python tools/LegacyCompactWordReachability.Probe/audit_output.py .artifacts/legacy-compact-reachability-managed.json
+          dotnet run --project tools/LegacyMainCompactMaterialization.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-compact-materialization-managed.json
+          python tools/LegacyMainCompactMaterialization.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-compact-materialization-managed.json
+          dotnet run --project tools/LegacyMainGlyphBacktrackRows.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-glyph-backtrack-managed.json
+          python tools/LegacyMainGlyphBacktrackRows.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-glyph-backtrack-managed.json
+          dotnet run --project tools/LegacyDirectGlyphProduction.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-direct-glyph-production-managed.json
+          python tools/LegacyDirectGlyphProduction.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-separation-profile.json .artifacts/legacy-direct-glyph-production-managed.json
           dotnet run --project tools/LegacyCaseResultQuery.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-case-result-query-managed.json
           dotnet run --project tools/LegacyCaseMainPass.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-case-main-pass-managed.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res 15
           python tools/LegacyCaseMainPass.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-case-preparation-controls.json .artifacts/legacy-case-main-pass-managed.json
@@ -1022,6 +1032,11 @@ jobs:
             @{ Name = 'LegacyCaseFirstWordCompletion'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-case-first-word-native.json') },
             @{ Name = 'LegacyMainSourceSymbolCallbacks'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-main-source-symbol-native.json') },
             @{ Name = 'LegacyWordQuoteNormalization'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', '.artifacts/legacy-scalar-native.bin', '.artifacts/legacy-word-quotes-native.json') },
+            @{ Name = 'LegacyMainCandidateWeight'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-candidate-weight-native.json') },
+            @{ Name = 'LegacyCompactWordReachability'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-compact-reachability-native.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json') },
+            @{ Name = 'LegacyMainCompactMaterialization'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-compact-materialization-native.json') },
+            @{ Name = 'LegacyMainGlyphBacktrackRows'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-glyph-backtrack-native.json') },
+            @{ Name = 'LegacyDirectGlyphProduction'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-direct-glyph-production-native.json') },
             @{ Name = 'LegacyCaseResultQuery'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-case-result-query-native.json') },
             @{ Name = 'LegacyCaseMainPass'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-case-main-pass-native.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '15') },
             @{ Name = 'LegacyCaseLaterWordCompletion'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-case-later-word-native.json') },
@@ -1222,6 +1237,26 @@ jobs:
             if ($name -eq 'LegacyWordQuoteNormalization') {
               python tools/LegacyWordQuoteNormalization.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-scalar-native.bin .artifacts/legacy-word-quotes-native.json
               if ($LASTEXITCODE -ne 0) { throw 'Scalar and word quotes audit failed' }
+            }
+            if ($name -eq 'LegacyMainCandidateWeight') {
+              python tools/LegacyMainCandidateWeight.Probe/audit_output.py .artifacts/legacy-candidate-weight-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'Owned main result audit failed' }
+            }
+            if ($name -eq 'LegacyCompactWordReachability') {
+              python tools/LegacyCompactWordReachability.Probe/audit_output.py .artifacts/legacy-compact-reachability-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'Owned main result audit failed' }
+            }
+            if ($name -eq 'LegacyMainCompactMaterialization') {
+              python tools/LegacyMainCompactMaterialization.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-compact-materialization-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'Owned main result audit failed' }
+            }
+            if ($name -eq 'LegacyMainGlyphBacktrackRows') {
+              python tools/LegacyMainGlyphBacktrackRows.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-glyph-backtrack-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'Owned main result audit failed' }
+            }
+            if ($name -eq 'LegacyDirectGlyphProduction') {
+              python tools/LegacyDirectGlyphProduction.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-separation-profile.json .artifacts/legacy-direct-glyph-production-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'Owned main result audit failed' }
             }
             if ($name -eq 'LegacyCaseMainPass') {
               python tools/LegacyCaseMainPass.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-case-preparation-controls.json .artifacts/legacy-case-main-pass-native.json

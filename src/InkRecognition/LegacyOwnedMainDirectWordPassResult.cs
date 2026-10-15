@@ -5,12 +5,14 @@ namespace InkRecognition;
 public sealed class LegacyOwnedMainDirectWordPassResult
 {
     private readonly LegacyMainDirectWordNodeResult[] nodes;
+    private readonly long resultQueryEpoch;
+    private int compactPublicationStarted;
     internal LegacyOwnedFreshMainWordControllerPolicy ControllerOwner { get; }
     public int NodeCount => nodes.Length;
 
     private LegacyOwnedMainDirectWordPassResult(LegacyOwnedFreshMainWordControllerPolicy owner,
-        LegacyMainDirectWordNodeResult[] nodes)
-    { ControllerOwner = owner; this.nodes = nodes; }
+        LegacyMainDirectWordNodeResult[] nodes, long resultQueryEpoch)
+    { ControllerOwner = owner; this.nodes = nodes; this.resultQueryEpoch = resultQueryEpoch; }
 
     internal static LegacyOwnedMainDirectWordPassResult Create(
         LegacyOwnedFreshMainWordControllerPolicy owner, IReadOnlyList<LegacyMainDirectWordNodeResult> completed,
@@ -28,7 +30,7 @@ public sealed class LegacyOwnedMainDirectWordPassResult
             owned[node] = Copy(completed[node]);
         }
         cancellationToken.ThrowIfCancellationRequested();
-        return new(owner, owned);
+        return new(owner, owned, owner.Owner.CaptureResultQueryEpoch(cancellationToken));
     }
 
     public LegacyMainDirectWordNodeResult GetNodeSnapshot(int endingNode)
@@ -44,6 +46,21 @@ public sealed class LegacyOwnedMainDirectWordPassResult
     internal ReadOnlySpan<byte> FinalRecords => nodes[^1].Records.Span;
     internal ushort FinalSourceEnd => nodes[^1].SourceEnd23f0;
     internal int FinalCumulativeCost => nodes[^1].CumulativePathCost2520;
+
+    internal LegacyAggregateDictionaryQueryPage ReadResultQuery(ulong tag,
+        LegacyPreparedDictionaryQuery query, bool auxiliary, CancellationToken token)
+        => ControllerOwner.Owner.ReadResultQuery(resultQueryEpoch, tag, query, auxiliary, token);
+
+    internal void ValidateResultQueryEpoch(CancellationToken token)
+        => ControllerOwner.Owner.ValidateResultQueryEpoch(resultQueryEpoch, token);
+
+    internal void BeginCompactWordPublication(CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        ValidateResultQueryEpoch(token);
+        if (Interlocked.Exchange(ref compactPublicationStarted, 1) != 0)
+            throw new InvalidOperationException("Compact publication is single-use, including failed/canceled reconstruction.");
+    }
 
     private static LegacyMainDirectWordNodeResult Copy(LegacyMainDirectWordNodeResult node)
         => node with { Records = node.Records.ToArray(), PrimaryAlternatives = node.PrimaryAlternatives.ToArray() };
