@@ -6,6 +6,17 @@ already produce real selected glyph references. They do not yet constitute
 the final text-source wrapper. No runtime, recognition policy or measured
 transcription was changed for this investigation.
 
+## Current integrated boundary
+
+The following investigation is historical. The owning
+[actual text-choice adapter](legacy-main-text-choices.md) now joins ordinary
+and fresh negative source refresh,13A830,full273.V50 and213A0/021000, with
+05AFA0 positions in an immutable original raw document. FullV50 uses distinct
+control2A/alternate owners; it does not substitute the acoustic alphabet for
+control lookup. Ink C21.V80=07FA50 is ordered append, not interval union.
+024F30 source-node interning/reuse/metadata and0283B0 final document assembly
+remain separate. None of these component joins enables accepted app OCR.
+
 ## Subsequent ordinary refresh adapter
 
 The standalone13A830 kernel and owning nonnegative ordinary CASE217670
