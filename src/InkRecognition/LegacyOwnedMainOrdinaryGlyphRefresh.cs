@@ -1,5 +1,6 @@
 using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 
 namespace InkRecognition;
 
@@ -57,15 +58,10 @@ public sealed class LegacyOwnedMainOrdinaryGlyphRefresh
         CancellationToken token)
     {
         RawResult = raw;
+        ValidateResult(raw);
         var session = raw.Session;
         var materialization = session.Ownership.Materialization;
         var policy = session.Plan.SourcePolicy;
-        if (!session.IsComplete || session.IsStopped || !raw.PublicationCompleted ||
-            !ReferenceEquals(materialization.CaseSourcePolicy, policy) ||
-            !ReferenceEquals(raw.Terminal, materialization.TerminalResult) ||
-            !ReferenceEquals(raw.Sampled.SourceRanges.Graph, policy.Graph) ||
-            policy.Controller.Configuration.Trace2368 != 0)
-            throw new ArgumentException("An actual completed fresh CASE publication and its unchanged source owner are required.");
         SourceMetadata = LegacyOwnedMainGlyphSourceMetadata.Prepare(session.Ownership,
             session.SourceOverlay, raw.Sampled.SourceRanges, token);
         Scoring = LegacyOwnedRussianMainGlyphScoring.Prepare(resource, SourceMetadata, table, token);
@@ -78,14 +74,42 @@ public sealed class LegacyOwnedMainOrdinaryGlyphRefresh
         compact = materialization.CopyCompactStorage(); starts = materialization.CopyNodeStarts2478();
     }
 
+    private static void ValidateResult(LegacyFreshMainSingleLinePlainRecognitionResult raw)
+    {
+        var session=raw.Session;var materialization=session.Ownership.Materialization;
+        var policy=session.Plan.SourcePolicy;
+        if (!session.IsComplete || session.IsStopped || !raw.PublicationCompleted ||
+            !ReferenceEquals(materialization.CaseSourcePolicy, policy) ||
+            !ReferenceEquals(raw.Terminal, materialization.TerminalResult) ||
+            !ReferenceEquals(raw.Sampled.SourceRanges.Graph, policy.Graph) ||
+            policy.Controller.Configuration.Trace2368 != 0)
+            throw new ArgumentException("An actual completed fresh CASE publication and its unchanged source owner are required.");
+    }
+
     public static LegacyOwnedMainOrdinaryGlyphRefresh Prepare(ReadOnlySpan<byte> resource,
         LegacyFreshMainSingleLinePlainRecognitionResult actualResult, LegacyCursiveSeparationTable table,
         CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(actualResult); ArgumentNullException.ThrowIfNull(table);
         token.ThrowIfCancellationRequested();
-        //Validate resources even when returning an already-bound owner. A second
-        //Prepare call must not create a new refresh epoch for the same result.
+        //Returning an existing epoch still validates the caller's resources.
+        //Do not reconstruct source keys, geometry and compact buffers merely
+        //to discard the newly allocated owner on a weak-table cache hit.
+        ValidateResult(actualResult);
+        if(owners.TryGetValue(actualResult,out var existing))
+        {
+            if(resource.Length!=572763||!StringComparer.OrdinalIgnoreCase.Equals(
+                Convert.ToHexString(SHA256.HashData(resource)),actualResult.Session.Plan.SourcePolicy.Controller.Owner.SelectedSourceOwner.SourceFingerprint))
+                throw new InvalidDataException("Same pinned main acoustic source required.");
+            var values=table.Values.Span;
+            if(values.Length!=256)throw new InvalidDataException("Actual engine separation table required.");
+            Span<byte> bytes=stackalloc byte[1024];
+            for(int i=0;i<values.Length;i++)BinaryPrimitives.WriteSingleLittleEndian(bytes[(i*4)..],values[i]);
+            if(!SHA256.HashData(bytes).AsSpan().SequenceEqual(Convert.FromHexString(
+                "b23ed52a3a10808eab597a8f371a7bbb66bde2fab5fe2666431b1b192abc1baf")))
+                throw new InvalidDataException("Actual engine separation table required.");
+            token.ThrowIfCancellationRequested();return existing;
+        }
         var prepared = new LegacyOwnedMainOrdinaryGlyphRefresh(resource, actualResult, table, token);
         token.ThrowIfCancellationRequested();
         return owners.GetValue(actualResult, _ => prepared);

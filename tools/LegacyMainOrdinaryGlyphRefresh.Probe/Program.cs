@@ -1,6 +1,7 @@
 using InkRecognition;
 using System.Buffers.Binary;
 using System.Text.Json;
+using System.Runtime.InteropServices;
 
 if (args.Length != 9) throw new ArgumentException("AK LK engine separation case publication line30 line50 capture");
 byte[] ak = File.ReadAllBytes(args[0]), lk = File.ReadAllBytes(args[1]), engine = File.ReadAllBytes(args[2]);
@@ -23,6 +24,25 @@ for (int input = 0; input < samples.Length; input++)
     guards++;
     byte[] bad = ak.ToArray(); bad[^1] ^= 1;
     Reject(() => LegacyOwnedMainOrdinaryGlyphRefresh.Prepare(bad, raw, table));
+    //Even a cache hit must check actual table contents and cancellation.
+    //The public read-only memory can be unwrapped by a hostile caller.
+    if(!MemoryMarshal.TryGetArray(table.Values,out ArraySegment<float> values))
+        throw new Exception("Expected owned separation snapshot.");
+    float original=values.Array![values.Offset];bool rejected=false;
+    try
+    {
+        values.Array[values.Offset]=BitConverter.Int32BitsToSingle(BitConverter.SingleToInt32Bits(original)^1);
+        try{LegacyOwnedMainOrdinaryGlyphRefresh.Prepare(ak,raw,table);}
+        catch(InvalidDataException){rejected=true;}
+        if(!rejected)throw new Exception("Cached refresh accepted altered separation values.");
+    }
+    finally{values.Array[values.Offset]=original;}
+    try
+    {
+        LegacyOwnedMainOrdinaryGlyphRefresh.Prepare(ak,raw,table,new CancellationToken(true));
+        throw new Exception("Cached refresh ignored cancellation.");
+    }
+    catch(OperationCanceledException){}
     var pool = raw.Session.Ownership.GlyphPool;
     var nodes = pool.CopyOwnerNodes().ToList(); byte[] compact = raw.Session.Ownership.Materialization.CopyCompactStorage();
     //Explicit diagnostic control AFTER inference: use real overlay ranges to

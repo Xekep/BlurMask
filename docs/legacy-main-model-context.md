@@ -26,3 +26,11 @@ Recorded input remains a small diagnostic with missing pen-up metadata; model
 reuse neither improves its recognition accuracy nor establishes Russian cursive
 readiness. The new context is a library API, not the application's recognition
 switch or a complete native text document acceptance implementation.
+
+Repeated ordinary glyph-refresh preparation also reuses its existing weakly
+owned epoch without constructing and discarding another source-key, geometry
+and compact-storage snapshot. Cache hits still check completed-result ownership,
+the full acoustic fingerprint and all 256 separation values; cancellation and
+an altered table are refused. Five raw inputs retain byte-identical captures
+against the pre-change clean checkout, in Managed and Native AOT builds:
+`9e5ff593e7edee49161fa302ea55d21e32bace3dcd809cd856db8ff2913aa4fc`.
