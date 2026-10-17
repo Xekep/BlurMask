@@ -14,11 +14,13 @@ public sealed class LegacyOrdinaryCursiveSeedGraph
 {
     private readonly LegacyOrdinaryCursiveSeedArc[][] nodes;
     private readonly byte[] references;
+    internal readonly record struct Allocation(int Node,int Ordinal);
+    internal IReadOnlyList<Allocation> AllocationOrder {get;}
     public int NodeCount => nodes.Length;
     public int ArcCount { get; }
     public ReadOnlyMemory<byte> SeedReferenceCounts => references;
-    private LegacyOrdinaryCursiveSeedGraph(LegacyOrdinaryCursiveSeedArc[][] nodes, byte[] references)
-    { this.nodes = nodes; this.references = references; ArcCount = nodes.Sum(n => n.Length); }
+    private LegacyOrdinaryCursiveSeedGraph(LegacyOrdinaryCursiveSeedArc[][] nodes, byte[] references,Allocation[] allocations)
+    { this.nodes = nodes; this.references = references; ArcCount = nodes.Sum(n => n.Length); AllocationOrder=Array.AsReadOnly(allocations); }
     public IReadOnlyList<LegacyOrdinaryCursiveSeedArc> GetNode(int nodeIndex)
     {
         if ((uint)nodeIndex >= (uint)nodes.Length) throw new ArgumentOutOfRangeException(nameof(nodeIndex));
@@ -72,7 +74,7 @@ public sealed class LegacyOrdinaryCursiveSeedGraph
             nodes[node]=[new(node,0,overlap?(byte)0:(byte)4,new[]{node==0?-1:0},
                 node+1<nodes.Length?new[]{0}:Array.Empty<int>(),checked((uint)node*128),checked((uint)node*128+3))];
         }
-        return new(nodes,Enumerable.Repeat((byte)1,seeds.Length).ToArray());
+        return new(nodes,Enumerable.Repeat((byte)1,seeds.Length).ToArray(),Enumerable.Range(0,seeds.Length).Select(n=>new Allocation(n,0)).ToArray());
     }
 
     private static LegacyOrdinaryCursiveSeedGraph Create(LegacyOrdinaryCursiveSeedResult source,
@@ -89,9 +91,11 @@ public sealed class LegacyOrdinaryCursiveSeedGraph
             throw new ArgumentException("Invalid checked ordinary seed placement.");
         var mutable = Enumerable.Range(0, seeds.Length).Select(_ => new List<Arc>()).ToArray();
         var referenceCounts = new byte[seeds.Length];
+        var allocations=new List<Allocation>();
         Arc Add(int node, int group, sbyte offset, byte flags)
         {
             var arc = new Arc(group, offset, flags);
+            allocations.Add(new(node,mutable[node].Count));
             mutable[node].Add(arc);
             if (referenceCounts[group] < 200) referenceCounts[group]++;
             return arc;
@@ -182,7 +186,7 @@ public sealed class LegacyOrdinaryCursiveSeedGraph
             for (int ordinal = 0; ordinal < mutable[node].Count; ordinal++)
                 if (before[node][ordinal].Overlaps(after[node][ordinal])) mutable[node][ordinal].Flags &= 0xfb;
         return new(mutable.Select(n => n.Select(a => new LegacyOrdinaryCursiveSeedArc(a.Group, a.Offset, a.Flags,
-            a.Predecessors.ToArray(), a.Successors.ToArray(), a.StartId, a.EndId)).ToArray()).ToArray(), referenceCounts);
+            a.Predecessors.ToArray(), a.Successors.ToArray(), a.StartId, a.EndId)).ToArray()).ToArray(), referenceCounts,allocations.ToArray());
     }
     private static int SameSet(List<Arc> arcs,int ordinal,bool predecessor)
     {

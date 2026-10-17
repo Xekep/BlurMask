@@ -34,6 +34,11 @@ public sealed class LegacyOrdinaryCursiveCandidateGraph
     public static LegacyOrdinaryCursiveCandidateGraph Generate(LegacyOrdinaryCursiveSeedResult source,
         LegacyOrdinaryCursiveSeedGraph seedGraph, int maximumAtoms, int maximumCandidates = 131072,
         CancellationToken cancellationToken = default)
+        => GenerateWithAllocations(source,seedGraph,maximumAtoms,maximumCandidates,null,cancellationToken);
+
+    internal static LegacyOrdinaryCursiveCandidateGraph GenerateWithAllocations(LegacyOrdinaryCursiveSeedResult source,
+        LegacyOrdinaryCursiveSeedGraph seedGraph,int maximumAtoms,int maximumCandidates,
+        ILegacyOrdinaryGraphAllocations? allocations,CancellationToken cancellationToken=default)
     {
         ArgumentNullException.ThrowIfNull(source); ArgumentNullException.ThrowIfNull(seedGraph);
         cancellationToken.ThrowIfCancellationRequested();
@@ -55,6 +60,9 @@ public sealed class LegacyOrdinaryCursiveCandidateGraph
                 arc.Successors.Add(1, seed.SuccessorArcIndices.ToArray().ToList()); mutable[node].Add(arc);
             }
         }
+        if(allocations is not null)
+            foreach(var entry in seedGraph.AllocationOrder)
+                allocations.SeedArc(entry.Node,entry.Ordinal,seedGraph.GetNode(entry.Node)[entry.Ordinal]);
         // Native per-physical merge hints skip initial singleton records. Only
         // newly composed groups participate in this range-identity interning.
         var mergedIds = new Dictionary<string, int>();
@@ -83,6 +91,7 @@ public sealed class LegacyOrdinaryCursiveCandidateGraph
                     {
                         groupId = inkGroups.Count; mergedIds.Add(key, groupId);
                         inkGroups.Add(new(groupId, ownedSeeds, ranges));
+                        allocations?.MergedGroup(groupId,left.Group,right.Group);
                     }
                     var rightSuccessors = right.Successors.GetValueOrDefault(1) ?? [];
                     Arc? existing = null;
@@ -100,6 +109,7 @@ public sealed class LegacyOrdinaryCursiveCandidateGraph
                     var merged = new Arc(groupId, checked((byte)(left.Span + 1)), flags, left.StartId, right.EndId);
                     merged.Predecessors.AddRange(left.Predecessors); merged.Successors.Add(1, rightSuccessors.ToList());
                     int mergedOrdinal = mutable[rightNode].Count; mutable[rightNode].Add(merged);
+                    allocations?.MergedArc(rightNode,mergedOrdinal,groupId,leftNode,leftOrdinal);
                     if (rightNode + 1 < mutable.Length)
                         foreach (int next in rightSuccessors) mutable[rightNode + 1][next].Predecessors.Add(mergedOrdinal);
                     int precedingNode = leftNode - left.Span - 1;
