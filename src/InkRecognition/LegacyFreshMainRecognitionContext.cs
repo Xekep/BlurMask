@@ -44,6 +44,14 @@ public sealed class LegacyFreshMainRecognitionContext
         LegacyFreshMainSingleLinePlainRecognition.PrepareOwnedModel(acoustic,linguistic,model,activations,
             spatial30,physical50,raw,resolution,table,caseData,publication,token);
 
+    /// <summary>Prepare a separate bounded shared-global main invocation.
+    /// Its raw WORD output is not accepted transcription or app replacement.</summary>
+    public LegacyFreshMainGlobalPlainRecognition PrepareGlobal(IReadOnlyList<InkStroke> raw,float resolution,
+        LegacyCursiveSeparationTable table,LegacyNativeCaseData caseData,
+        LegacyNativeTextPublicationData publication,CancellationToken token=default) =>
+        LegacyFreshMainGlobalPlainRecognition.PrepareOwnedModel(acoustic,linguistic,model,activations,
+            spatial30,physical50,raw,resolution,table,caseData,publication,token);
+
     public LegacyFreshMainTextGlyphChoices PrepareTextChoices(LegacyFreshMainCompletedFirstCandidate candidate,
         LegacyCursiveSeparationTable table,LegacyNativeTextPublicationData publication,
         LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,
