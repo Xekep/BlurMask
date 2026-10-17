@@ -53,10 +53,16 @@ public sealed class LegacyNativePublishedWordNode
 /// explicitly disabled. Source-span callbacks remain actual caller data.</summary>
 public sealed class LegacyNativePlainWordPublisher
 {
+    private sealed class InterningState
+    {
+        internal readonly Dictionary<LegacyNativeWordSourceSpan,List<LegacyNativePlainWordRecord>> Spans=[];
+        internal int WordCount;
+    }
     private readonly LegacyNativeGlyphRecordPool pool;
     private readonly bool ownerC4;
-    private readonly Dictionary<LegacyNativeWordSourceSpan,List<LegacyNativePlainWordRecord>> spans=[];
-    private int wordCount,nodeCount;
+    private readonly InterningState interning;
+    private int nodeCount;
+    private bool released;
     public LegacyNativePublishedWordNode? Head {get;private set;}
 
     public LegacyNativePlainWordPublisher(LegacyNativeGlyphRecordPool actualPool,
@@ -65,7 +71,26 @@ public sealed class LegacyNativePlainWordPublisher
         ArgumentNullException.ThrowIfNull(actualPool);
         if(actualFinalizeWordGeometry||actualSortByGeometry)
             throw new NotSupportedException("Native word geometry-finalization/order branches require their actual source/option producers.");
-        pool=actualPool;ownerC4=actualOwnerC4;
+        pool=actualPool;ownerC4=actualOwnerC4;interning=new();
+    }
+
+    private LegacyNativePlainWordPublisher(LegacyNativePlainWordPublisher original)
+    {pool=original.pool;ownerC4=original.ownerC4;interning=original.interning;}
+
+    /// <summary>Independent279 head/node budget with the identical TOP's275
+    /// span interning, WordIndex identities, glyph pool and private policies.</summary>
+    public LegacyNativePlainWordPublisher ForkAlternative()
+    {
+        if(released)throw new InvalidOperationException("A released279 list cannot fork another alternative.");
+        return new(this);
+    }
+
+    //1415B0 releases only279 list nodes and their auxiliary node vectors.
+    //The shared TOP's275 words/span indexes and274 pool remain owned.
+    internal void ReleaseAlternativeList()
+    {
+        if(released)throw new InvalidOperationException("The279 list was already released.");
+        Head=null;nodeCount=0;released=true;
     }
 
     public LegacyNativePublishedWordNode Publish(LegacyNativeWordBuilder actualWord,
@@ -81,13 +106,14 @@ public sealed class LegacyNativePlainWordPublisher
         int actualFirstOverride,int actualLastOverride,CancellationToken cancellationToken=default)
     {
         ArgumentNullException.ThrowIfNull(actualWord);cancellationToken.ThrowIfCancellationRequested();
+        if(released)throw new InvalidOperationException("A released279 list cannot publish another word.");
         if(!ReferenceEquals(actualWord.Pool,pool))throw new ArgumentException("Word and publisher must use the same TOP273 glyph pool.");
         if(nodeCount==4096)throw new ArgumentException("Published word nodes exceed the portable4096-node budget.");
         var span=actualWord.GetSourceSpan(actualFirstBoundary,actualLastBoundary,cancellationToken);
         if(actualFirstOverride!=-1)span=span with {First=actualFirstOverride};
         if(actualLastOverride!=-1)span=span with {Last=actualLastOverride};
         var chain=actualWord.CopyChain(cancellationToken);
-        spans.TryGetValue(span,out var words);
+        interning.Spans.TryGetValue(span,out var words);
         int index=-1;
         if(words is not null)
             for(int i=0;i<words.Count;i++)if(words[i].HeadReference==actualWord.HeadReference){index=i;break;}
@@ -95,7 +121,7 @@ public sealed class LegacyNativePlainWordPublisher
         if(index>=0)record=words![index]; //Native exact64-bit head identity, not labels/costs.
         else
         {
-            if(wordCount==4096)throw new ArgumentException("Stored words exceed the portable4096-word budget.");
+            if(interning.WordCount==4096)throw new ArgumentException("Stored words exceed the portable4096-word budget.");
             byte[] data=actualWord.CopyStorage(cancellationToken);
             int capacity=0;
             for(int count=1;count<=chain.Length;count++)if(capacity<count)capacity=Math.Max(count,(int)(capacity*1.5));
@@ -112,7 +138,7 @@ public sealed class LegacyNativePlainWordPublisher
             ulong[] flat=chain.Reverse().ToArray(); //Native prepends every chain reference, including zero-span rows.
             record=new(pool,data,flat);index=words?.Count??0;
             cancellationToken.ThrowIfCancellationRequested();
-            if(words is null){words=[];spans.Add(span,words);}words.Add(record);wordCount++;
+            if(words is null){words=[];interning.Spans.Add(span,words);}words.Add(record);interning.WordCount++;
         }
         cancellationToken.ThrowIfCancellationRequested();
         var node=new LegacyNativePublishedWordNode(span,index,record,Head);

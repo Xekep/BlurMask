@@ -6,6 +6,9 @@ namespace InkRecognition;
 /// result factory policies, not accepted alternatives or full2271F0 output.</summary>
 public sealed class LegacyFreshMainPlainResultOwnership
 {
+    private readonly LegacyFreshMainPlainResultOwnership? originalTop;
+    /// <summary>The identical TOP273 pool owner across independent279 lists.</summary>
+    public LegacyFreshMainPlainResultOwnership TopOwner=>originalTop??this;
     public LegacyOwnedMainCompactWordMaterialization Materialization {get;}
     public LegacyOwnedRussianMainSourceGeometry Geometry {get;}
     public LegacyOwnedFreshMainWordControllerPolicy Controller=>Materialization.TerminalResult.PassResult.ControllerOwner;
@@ -14,8 +17,19 @@ public sealed class LegacyFreshMainPlainResultOwnership
     public bool CaptureGlyphGeometry=>false;
     public bool OwnerC4=>false;
     private LegacyFreshMainPlainResultOwnership(LegacyOwnedMainCompactWordMaterialization materialization,
-        LegacyOwnedRussianMainSourceGeometry geometry,LegacyNativeGlyphRecordPool pool,LegacyNativePlainWordPublisher publisher)
-    {Materialization=materialization;Geometry=geometry;GlyphPool=pool;WordPublisher=publisher;}
+        LegacyOwnedRussianMainSourceGeometry geometry,LegacyNativeGlyphRecordPool pool,LegacyNativePlainWordPublisher publisher,
+        LegacyFreshMainPlainResultOwnership? originalTop=null)
+    {Materialization=materialization;Geometry=geometry;GlyphPool=pool;WordPublisher=publisher;this.originalTop=originalTop;}
+
+    /// <summary>Independent fresh279 publisher over this actual TOP's pool,
+    /// materialization, source and confidence. This does not select a new
+    /// terminal or change the native fresh secondary-alternative limit.</summary>
+    public LegacyFreshMainPlainResultOwnership ForkAlternative(CancellationToken token=default)
+    {
+        token.ThrowIfCancellationRequested();
+        var publisher=WordPublisher.ForkAlternative();
+        return new(Materialization,Geometry,GlyphPool,publisher,TopOwner);
+    }
 
     public static LegacyFreshMainPlainResultOwnership Create(LegacyOwnedMainCompactWordMaterialization materialization,
         LegacyOwnedRussianMainSourceGeometry geometry,CancellationToken token=default)
