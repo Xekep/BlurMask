@@ -18,6 +18,21 @@ internal sealed class LegacyPreparedMathUnusedUnitPruning
     internal int[] CopyOldToNew() => oldToNew.ToArray();
     internal int[] CopySuppressedSegments() => suppressed.ToArray();
     internal byte[] CopyDeletionMask() => deletions.ToArray();
+    // The outer EF4 caller rejects removal where its earlier insertion mask
+    // was nonzero. A computed pruning result alone is not acceptance.
+    internal bool PreservesInsertedUnitsPrepared(ReadOnlySpan<byte> insertionMask,
+        CancellationToken token=default)
+    {
+        token.ThrowIfCancellationRequested();
+        if(insertionMask.Length!=deletions.Length)
+            throw new ArgumentException("Complete original-coordinate insertion mask required.");
+        for(int i=0;i<deletions.Length;i++)
+        {
+            token.ThrowIfCancellationRequested();
+            if(deletions[i]!=0&&insertionMask[i]!=0)return false;
+        }
+        return true;
+    }
     private LegacyPreparedMathUnusedUnitPruning(uint[] units, int[] assignments,
         int[] counts, int[] oldToNew, int[] suppressed, byte[] deletions)
     { this.units=units;this.assignments=assignments;this.counts=counts;

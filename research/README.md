@@ -35,3 +35,7 @@ The full038610 driver export and references are retained at
 `myscript/output/Math2DecoderDriverComplete/MyScriptDocument.dll/`, with
 SHA-256 provenance from the readonly headless export. Its decompiled types
 remain analysis hypotheses that must be checked against native instructions.
+
+The byte-vector reserve/append-zero helpers040130/0401B0 are preserved at
+`myscript/output/Math2MaskVectorHelpers/MyScriptDocument.dll/` with references
+and SHA-256 provenance for the correction-mask initialization analysis.

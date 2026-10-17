@@ -15,8 +15,12 @@ for(int trial=0;trial<4096;trial++)
  int[] assignments=Enumerable.Range(0,n).Select(i=>(trial%5) switch{0=>0,1=>(i/3)%count,2=>i%count,_=>(i*7+trial)%count}).ToArray();
  long[] ends=Enumerable.Range(1,n).Where(i=>(trial%4) switch{0=>false,1=>true,2=>i%3==0,_=>i%7==0}).Select(i=>(long)i).ToArray();
  var result=LegacyPreparedMathUnusedUnitPruning.EvaluatePrepared(units,assignments,ends,gate);
+ byte[][] insertionMasks=[new byte[count],Enumerable.Repeat((byte)255,count).ToArray(),
+     Enumerable.Range(0,count).Select(i=>(byte)(i%2)).ToArray(),
+     Enumerable.Range(0,count).Select(i=>(byte)(i%2==0?2:0)).ToArray()];
+ var checks=insertionMasks.Select(mask=>new InsertionCheck(mask,result.PreservesInsertedUnitsPrepared(mask))).ToArray();
  var row=new Row(units.ToArray(),assignments.ToArray(),ends.ToArray(),result.CopyUnits(),result.CopyAssignments(),
-     result.CopyUseCounts(),result.CopyOldToNew(),result.CopySuppressedSegments(),result.CopyDeletionMask());
+     result.CopyUseCounts(),result.CopyOldToNew(),result.CopySuppressedSegments(),result.CopyDeletionMask(),checks);
  rows.Add(row);Array.Fill(units,0xffffffff);Array.Fill(assignments,-1);Array.Fill(ends,-1);
  var output=result.CopyUnits();Array.Fill(output,0xffffffff);var masks=result.CopyDeletionMask();Array.Fill(masks,(byte)99);
  var copy=result.CopyAssignments();Array.Fill(copy,-999);var counts=result.CopyUseCounts();Array.Fill(counts,-999);
@@ -35,9 +39,13 @@ Reject(()=>LegacyPreparedMathUnusedUnitPruning.EvaluatePrepared([2],[1],[],gate)
 foreach(long[] ends in new long[][]{[0],[2],[1,1],[2,1]})Reject(()=>LegacyPreparedMathUnusedUnitPruning.EvaluatePrepared([2],[0],ends,gate));
 Reject(()=>LegacyPreparedMathUnusedUnitPruning.EvaluatePrepared([2],[0],[],null!));
 Reject(()=>LegacyPreparedMathUnusedUnitPruning.EvaluatePrepared([2],[0],[],gate,new CancellationToken(true)));
+var checkedResult=LegacyPreparedMathUnusedUnitPruning.EvaluatePrepared([2],[0],[],gate);
+Reject(()=>checkedResult.PreservesInsertedUnitsPrepared([]));
+Reject(()=>checkedResult.PreservesInsertedUnitsPrepared([0],new CancellationToken(true)));
 File.WriteAllText(args[1],JsonSerializer.Serialize(new Capture(Convert.ToHexStringLower(SHA256.HashData(resource)),gate.CopySlots(),rows.ToArray(),guards),CaptureJson.Default.Capture));
 Console.WriteLine($"PASS{rows.Count} prepared041660 boundary/filter/deletion controls/{guards} guards; actual gate, no EF4 record mutation.");
-record Row(uint[] Input,int[] Assignments,long[] Ends,uint[] Output,int[] Mapped,int[] Counts,int[] Map,int[] Suppressed,byte[] Deletions);
+record InsertionCheck(byte[] Mask,bool PreservesInserted);
+record Row(uint[] Input,int[] Assignments,long[] Ends,uint[] Output,int[] Mapped,int[] Counts,int[] Map,int[] Suppressed,byte[] Deletions,InsertionCheck[] InsertionChecks);
 record Capture(string Resource,ushort[] Gate,Row[] Rows,int Guards);
 [JsonSerializable(typeof(Capture))]
 internal partial class CaptureJson:JsonSerializerContext;

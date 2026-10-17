@@ -39,3 +39,19 @@ Probe arguments: `rawMath2.res capture.json`; auditor arguments are identical.
 The static audit requires local preserved research binaries. This helper still
 needs the earlier correction stages and provenance-bound output owner before
 it can participate in an actual EF4 transaction or accepted formula.
+
+The separate prepared `PreservesInsertedUnitsPrepared` predicate now models
+the outer caller's0428A6..0428BB condition: removal of an initial-mask NONZERO
+inserted unit is rejected; zero-mask original units are not protected by this
+test. The polarity is pinned as `CMP0; JNE failure`, including the failure
+target's zero return. Initial041240 mask allocation appends zero bytes; the
+score tail uses that insertion mask and original activated tensor, not the
+post-pruning deletion mask. Full coordinate assembly remains unfinished.
+
+This addition passes16,384 independent prepared insertion-mask controls and
+two more guards (15 total). All prior4096 structural projections remain
+identical. Managed/NativeAOT capture SHA-256:
+`2ae6dc82aff3d36ef4704c5321266ad06dd6b1b49de1ed3b5870557be7ba4b91`.
+`audit_math2_inserted_unit_preservation.py` checks three whole code-region
+hashes and16 instruction pins. An initially inverted reading was corrected
+before committing this predicate; neither inversion was connected to the app.
