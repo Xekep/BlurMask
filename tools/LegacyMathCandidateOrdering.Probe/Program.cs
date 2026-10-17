@@ -94,6 +94,44 @@ int guardSlot=guardHeap.TryOffer(1);
 Reject(()=>guardHeap.WritePreparedPayload(guardSlot,new byte[43]));
 guardHeap.WritePreparedPayload(guardSlot,new byte[44]);
 Reject(()=>guardHeap.WritePreparedPayload(guardSlot,new byte[44]));
+w.WriteStartArray("rawSorts");
+for(int count=0;count<=32;count++)for(int seed=0;seed<8;seed++)
+{
+ var rows=new byte[count*48];uint random=unchecked((uint)(seed*7919+17));
+ for(int i=0;i<count;i++)
+ {
+  for(int j=0;j<48;j++)rows[i*48+j]=unchecked((byte)(seed*23+i*37+j*19));
+  random^=random<<13;random^=random>>17;random^=random<<5;
+  BinaryPrimitives.WriteUInt32LittleEndian(rows.AsSpan(i*48),seed==7?0x3f800000:costs[random%costs.Length]);
+ }
+ w.WriteStartObject();w.WriteNumber("count",count);w.WriteNumber("seed",seed);
+ w.WriteBase64String("input",rows);w.WriteBase64String("output",LegacyPreparedMathRawCandidateOrdering.Sort(rows));w.WriteEndObject();
+}
+w.WriteEndArray();w.WriteStartArray("unrestricted");
+foreach(int width in new[]{1,2,4,8,16})foreach(int active in new[]{1,Math.Max(1,width/2),width})for(int seed=0;seed<8;seed++)
+{
+ const int vocabulary=297;var rows=new byte[active*vocabulary*4];var info=new byte[active*8];var conditional=new byte[active*4];
+ uint random=unchecked((uint)(seed*7919+17));
+ for(int i=0;i<active*vocabulary;i++)
+ {
+  random^=random<<13;random^=random>>17;random^=random<<5;
+  BinaryPrimitives.WriteUInt32LittleEndian(rows.AsSpan(i*4),seed==7?0x3f800000:costs[random%costs.Length]);
+ }
+ for(int j=0;j<info.Length;j++)info[j]=unchecked((byte)(seed*43+j*17));
+ for(int j=0;j<conditional.Length;j++)conditional[j]=unchecked((byte)(seed*23+j*19));
+ var result=LegacyPreparedMathUnrestrictedCandidates.Expand(rows,active,vocabulary,width,info,conditional);
+ w.WriteStartObject();w.WriteNumber("width",width);w.WriteNumber("active",active);w.WriteNumber("seed",seed);
+ w.WriteBase64String("heap",result.CopyHeapStorage());w.WriteBase64String("sorted",result.CopySortedStorage());w.WriteEndObject();
+}
+w.WriteEndArray();
+Reject(()=>LegacyPreparedMathRawCandidateOrdering.Sort(new byte[47]));
+Reject(()=>LegacyPreparedMathRawCandidateOrdering.Sort(new byte[33*48]));
+Reject(()=>LegacyPreparedMathRawCandidateOrdering.Sort(new byte[48],new(true)));
+Reject(()=>LegacyPreparedMathUnrestrictedCandidates.Expand(new byte[4],1,1,1,new byte[8],new byte[4]));
+Reject(()=>LegacyPreparedMathUnrestrictedCandidates.Expand(new byte[8],1,2,17,new byte[8],new byte[4]));
+Reject(()=>LegacyPreparedMathUnrestrictedCandidates.Expand(new byte[8],1,2,1,new byte[7],new byte[4]));
+Reject(()=>LegacyPreparedMathUnrestrictedCandidates.Expand(new byte[8],1,2,1,new byte[8],new byte[3]));
+Reject(()=>LegacyPreparedMathUnrestrictedCandidates.Expand(new byte[8],1,2,1,new byte[8],new byte[4],new(true)));
 w.WriteNumber("caseCount",cases);w.WriteNumber("guards",guards);w.WriteEndObject();
 Console.WriteLine($"PASS{cases} complete candidate-ordering controls/{guards} guards; prepared kernel only, no beam integration or accuracy claim.");
 void Reject(Action action)

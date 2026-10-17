@@ -10,7 +10,7 @@ from pathlib import Path
 if len(sys.argv)!=2:
     raise SystemExit('capture.json')
 capture=json.loads(Path(sys.argv[1]).read_bytes())
-assert capture['caseCount']==181 and len(capture['cases'])==181 and capture['guards']==18
+assert capture['caseCount']==181 and len(capture['cases'])==181 and capture['guards']==26
 costs=[0xff800000,0xff7fffff,0xbf800000,0x80000000,0,0x3c23d70a,
        0x3f000000,0x3f800000,0x7f7fffff,0x7f800000,0x7fc00000,0x7fa00001]
 
@@ -106,6 +106,7 @@ print(f'PASS4096 independent native-default completion scores/{discriminators} d
 #Independent array-index replay of the48-byte max heap. Compare the entire
 #capacity after each helper return (zeroed row) and explicit caller payload.
 assert len(capture['heaps'])==64
+assert {(c['capacity'],c['seed'])for c in capture['heaps']}=={(n,s)for n in (0,1,2,3,4,8,16,32)for s in range(8)}
 heap_offers=0
 for case in capture['heaps']:
  capacity,seed=case['capacity'],case['seed']
@@ -142,3 +143,61 @@ for case in capture['heaps']:
   for i in range(capacity):assert rows[i][4:]==bytes((seed*23+i*37+j*19)&255 for j in range(44))
 assert heap_offers==4096
 print('PASS4096 prepared48-byte heap offers/full capacity before-after payload; equal and unordered float branches; no native beam integration')
+
+def sort48(rows,lo,hi):
+ if not rows:return
+ while True:
+  i,j=lo,hi;pivot=struct.unpack_from('<f',rows[lo+(hi-lo)//2])[0]
+  while True:
+   while pivot>struct.unpack_from('<f',rows[i])[0]:i+=1
+   while struct.unpack_from('<f',rows[j])[0]>pivot:j-=1
+   if i>j:break
+   rows[i],rows[j]=rows[j],rows[i];i+=1;j-=1
+   if i>j:break
+  if lo<j:sort48(rows,lo,j)
+  lo=i
+  if lo>=hi:return
+
+assert len(capture['rawSorts'])==264
+assert {(c['count'],c['seed'])for c in capture['rawSorts']}=={(n,s)for n in range(33)for s in range(8)}
+for case in capture['rawSorts']:
+ count,seed=case['count'],case['seed'];rows=[];random=(seed*7919+17)&0xffffffff
+ for i in range(count):
+  random^=(random<<13)&0xffffffff;random^=random>>17;random^=(random<<5)&0xffffffff
+  bits=0x3f800000 if seed==7 else costs[random%len(costs)]
+  rows.append(struct.pack('<I',bits)+bytes((seed*23+i*37+j*19)&255 for j in range(4,48)))
+ assert base64.b64decode(case['input'],validate=True)==b''.join(rows)
+ before=list(rows);sort48(rows,0,len(rows)-1)
+ assert base64.b64decode(case['output'],validate=True)==b''.join(rows)
+ if seed==7 and count==2:assert rows==before[::-1]
+ if seed==7 and count==4:assert rows==before[2:]+before[:2]
+
+assert len(capture['unrestricted'])==120
+assert collections.Counter((c['width'],c['active'],c['seed'])for c in capture['unrestricted'])==collections.Counter((w,a,s)for w in (1,2,4,8,16)for a in (1,max(1,w//2),w)for s in range(8))
+for case in capture['unrestricted']:
+ width,active,seed=case['width'],case['active'],case['seed'];capacity=width*2;rows=[]
+ random=(seed*7919+17)&0xffffffff
+ info=bytes((seed*43+j*17)&255 for j in range(active*8));conditional=bytes((seed*23+j*19)&255 for j in range(active*4))
+ for beam in range(active):
+  for symbol in range(297):
+   random^=(random<<13)&0xffffffff;random^=random>>17;random^=(random<<5)&0xffffffff
+   bits=0x3f800000 if seed==7 else costs[random%len(costs)]
+   value=struct.unpack('<f',struct.pack('<I',bits))[0];cost=lambda i:struct.unpack_from('<f',rows[i])[0]
+   if len(rows)==capacity and value>=cost(0):continue
+   if len(rows)<capacity:
+    slot=len(rows);rows.append(bytes(48))
+    while slot and not(cost((slot-1)//2)>=value):rows[slot]=rows[(slot-1)//2];slot=(slot-1)//2
+   else:
+    slot=0
+    while 2*slot<len(rows)-1:
+     child=2*slot+1
+     if child+1<len(rows) and cost(child+1)>=cost(child):child+=1
+     if value>=cost(child):break
+     rows[slot]=rows[child];slot=child
+   row=bytearray(48);struct.pack_into('<I',row,0,bits);struct.pack_into('<Q',row,8,symbol)
+   row[16:24]=info[beam*8:beam*8+8];row[24:28]=conditional[beam*4:beam*4+4]
+   struct.pack_into('<Qi',row,32,0xffffffffffffffff,beam);rows[slot]=bytes(row)
+ assert len(rows)==2*width and base64.b64decode(case['heap'],validate=True)==b''.join(rows)
+ sort48(rows,0,len(rows)-1)
+ assert base64.b64decode(case['sorted'],validate=True)==b''.join(rows)
+print('PASS264 independent raw48 sort controls/tie2+4 manual vectors and120 unrestricted prepared297-class cost-row -> full heap -> sorted record joins')
