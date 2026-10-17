@@ -6,7 +6,8 @@ public enum LegacyMainDirectStorageKind
 {
     HeapRecords, PrimaryAlternativePool, NodeRecords, NodePrimaryAlternatives,
     InitialRequestResidue, ParentRequestResidue, FlagRequestResidue, AuxiliaryScratch, LexicalResidue,
-    SecondaryAlternativePool, NodeSecondaryAlternatives, PrimaryRecombinationRequestResidue
+    SecondaryAlternativePool, NodeSecondaryAlternatives, PrimaryRecombinationRequestResidue,
+    LanguageContextRequestResidue
 }
 
 public readonly record struct LegacyMainDirectStorageRequest(LegacyMainDirectStorageKind Kind,
@@ -51,6 +52,7 @@ public sealed class LegacyOwnedMainDirectWordPass
     private readonly Dictionary<int, LegacyOwnedFreshMainWordNodeBuffer> nodes = [];
     private int[] cumulative;
     private readonly byte[] lexicalResidue;
+    private readonly byte[] unusedRequestShape80 = new byte[80];
     private LegacyNativeWordHeapDescriptor descriptor;
     private LegacyOwnedMainWordSourceServices.SpanLease? currentSpan;
     private LegacyOwnedMainWordSpanPreparation.LivePublicationEpoch? livePublicationEpoch;
@@ -448,6 +450,7 @@ public sealed class LegacyOwnedMainDirectWordPass
                 currentSpan?.SameSource ?? throw new InvalidOperationException("Actual last D0 case lease required."),token)
             : new LegacyNativeFirstDictionaryWordCompletion(owner.RequireSameSource().DictionaryOwner.Model, owner.RequireSameSource().DictionaryOwner.WordMetadata,
                 owner.RequireSameSource().DictionaryOwner.LanguageRecords, owner.RequireSameSource().DictionaryOwner.RestartTags, 1, headers[1], false, 0, false, false);
+        LegacyNativeLaterDictionaryWordCompletion? laterCompletion = null;
         int queryCount = 0, allocationCount = 0;
         for (ushort ordinal = 0; ordinal < configuration.PrimaryArcLimit230a; ordinal++)
         {
@@ -462,9 +465,20 @@ public sealed class LegacyOwnedMainDirectWordPass
                     {
                         cancellationToken.ThrowIfCancellationRequested();
                         queryCount++;
-                        var completed = completion.ProcessCandidate(page.Records32.Span.Slice(offset, 32), node,
-                            parentOrdinal, parent.Span, router, false, lexicalResidue, LookupRecord, false, cancellationToken);
-                        if (completed.Allocation.Accepted) allocationCount++;
+                        var query = page.Records32.Span.Slice(offset, 32);
+                        int previous = LanguagePreviousNode(node, parent.Span, cancellationToken);
+                        if (previous == -1)
+                        {
+                            var completed = completion.ProcessCandidate(query, node, parentOrdinal,
+                                parent.Span, router, false, lexicalResidue, LookupRecord, false, cancellationToken);
+                            if (completed.Allocation.Accepted) allocationCount++;
+                        }
+                        else
+                        {
+                            laterCompletion ??= CreateLaterCompletion(cancellationToken);
+                            allocationCount += RunLaterLanguageQuery(laterCompletion, query, node,
+                                parentOrdinal, parent.Span, previous, router, cancellationToken);
+                        }
                     }
                     return true;
                 }, 100, token);
@@ -525,7 +539,7 @@ public sealed class LegacyOwnedMainDirectWordPass
         var residue = needsGeneralRequest
             ? Allocate(LegacyMainDirectStorageKind.PrimaryRecombinationRequestResidue, node,
                 80, ReadOnlyMemory<byte>.Empty, 0, token).Storage
-            : new byte[80];
+            : unusedRequestShape80;
         var produced = LegacyNativePrimaryWordRecombination.Apply(slots.Span, heap.Count,
             (uint)node, configuration, n => nodes.TryGetValue(n, out var source)
                 ? source.CopyRows() : throw new ArgumentOutOfRangeException(nameof(n), "Actual20E6A0 source node required."),
@@ -543,6 +557,95 @@ public sealed class LegacyOwnedMainDirectWordPass
 
         uint Header(byte source) => source < headers.Length ? headers[source]
             : throw new InvalidDataException("Actual primary source lies outside the owning descriptor table.");
+    }
+
+    private int LanguagePreviousNode(int endingNode, ReadOnlySpan<byte> current, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        if (current.Length != 88 || current[4] >= headers.Length ||
+            (headers[current[4]] & 0x1e00) != 0xc00 || (headers[current[4]] & 0x1c) <= 7 ||
+            (current[6] & 1) != 0)
+            throw new NotSupportedException("Ordinary owned C00 current word row required for language dispatch.");
+        int anchorNode = I32(current, 56);
+        ushort anchorOrdinal = U16(current, 60);
+        if (anchorNode < 0 || anchorNode > endingNode || anchorOrdinal == ushort.MaxValue ||
+            !nodes.TryGetValue(anchorNode, out var source) || anchorOrdinal >= source.SourceEnd23f0)
+            throw new NotSupportedException("Current38/3C must identify its actual materialized source anchor.");
+        var anchor = source.Read(anchorOrdinal).Record.Span;
+        int first = unchecked(anchorNode - (sbyte)anchor[32]);
+        if (first < 0 || first > endingNode + 1)
+            throw new NotSupportedException("Actual signed anchor20 must resolve an owned first/previous node.");
+        return first - 1;
+    }
+
+    private LegacyNativeLaterDictionaryWordCompletion CreateLaterCompletion(CancellationToken token)
+        => policy.Global is { } global
+            ? LegacyNativeLaterDictionaryWordCompletion.ForGlobalSpan(global,
+                currentSpan ?? throw new InvalidOperationException("Actual global D0 lease required."), token)
+            : caseSourcePolicy is not null
+                ? LegacyNativeLaterDictionaryWordCompletion.ForFreshCaseSpan(caseSourcePolicy,
+                    currentSpan?.SameSource ?? throw new InvalidOperationException("Actual case D0 lease required."), token)
+                : new(owner.Model, owner.RequireSameSource().DictionaryOwner.WordMetadata,
+                    owner.LanguageRecords, owner.RequireSameSource().DictionaryOwner.RestartTags,
+                    1, headers[1], false, policy.SecondaryScaleEc, false, false);
+
+    private int RunLaterLanguageQuery(LegacyNativeLaterDictionaryWordCompletion completion,
+        ReadOnlySpan<byte> actualQuery32, int endingNode, ushort currentOrdinal,
+        ReadOnlySpan<byte> actualCurrent88, int previousNode, LegacyNativeWordHeapRouter router,
+        CancellationToken token)
+    {
+        var span = currentSpan ?? throw new InvalidOperationException("Actual live D0 span must own the language query.");
+        owner.ValidateSpan(span, token);
+        //204D91 reads source70 before the203690 geometry callbacks. The
+        //registered snapshot is consumed once for the entire native context heap.
+        var terminal = completion.CaptureActualTerminal(actualQuery32, endingNode, owner.Contexts,
+            policy.KnowledgeF5, preparation.Sources.SubwordSourceIndex22ec, false, false,
+            cancellation => owner.ValidateSpan(span, cancellation), token);
+        var snapshots = new Dictionary<int, IReadOnlyList<LegacyNativeStoredWordRecord>>();
+        var previous = Rows(previousNode);
+        int capacity = LegacyNativeLanguageContextCapacity.FromHeapCapacity(
+            checked((uint)router.GetPrimaryHeap(actualCurrent88[4]).Capacity));
+        if (capacity > ushort.MaxValue)
+            throw new NotSupportedException("Native context heap exceeds the bounded portable ordinal capacity.");
+        var residue = Allocate(LegacyMainDirectStorageKind.LanguageContextRequestResidue, endingNode,
+            80, ReadOnlyMemory<byte>.Empty, 0, token).Storage;
+        var contexts = LegacyNativeLanguageContextRecombination.Collect(actualCurrent88, currentOrdinal,
+            (n, ordinal) => Rows(n)[ordinal], Rows, Header, owner.Categories.Categories, owner.Contexts,
+            primaryRecombinationSymbols,
+            new(false, 0, false, true, 0, configuration.PrimaryArcLimit230a, checked((ushort)previous.Count)),
+            primaryRecombinationOperations ??= createPrimaryRecombinationOperations(),
+            1, 2, residue.Span, capacity, token);
+        owner.ValidateSpan(span, token);
+        var results = completion.ProcessActualQueryWithPreparedTerminal(terminal, contexts, currentOrdinal,
+            owner.Graph.NodeCount, Rows, Header, ReadDescriptorLine, router, lexicalResidue, token);
+        owner.ValidateSpan(span, token);
+        return results.Count(result => result.Allocation.Accepted);
+
+        IReadOnlyList<LegacyNativeStoredWordRecord> Rows(int node)
+        {
+            token.ThrowIfCancellationRequested();
+            if (!snapshots.TryGetValue(node, out var rows))
+            {
+                if (!nodes.TryGetValue(node, out var source))
+                    throw new ArgumentOutOfRangeException(nameof(node), "Actual language source node required.");
+                rows = source.CopyRows(); //SourceEnd23F0, never RetainedEnd23F8.
+                snapshots.Add(node, rows);
+            }
+            return rows;
+        }
+        uint Header(byte source) => source < headers.Length ? headers[source]
+            : throw new InvalidDataException("Actual language source header required.");
+        int ReadDescriptorLine(int node, int ordinal)
+        {
+            token.ThrowIfCancellationRequested();
+            var arcs = owner.Graph.GetNode(node);
+            if ((uint)ordinal >= (uint)arcs.Count) throw new ArgumentOutOfRangeException(nameof(ordinal));
+            if (owner.Graph.GlobalSource is { } global)
+                return global.ResolveGroupSource(arcs[ordinal].GroupId, token).Primary.LineId;
+            var source = owner.RequireSameSource();
+            return source.MainLineSource is { } line ? line.Owner.SourceLineId
+                : source.Source.GetSourceLineIdForArc(node, ordinal);
+        }
     }
 
     private bool WithinWordLength(int currentNode, ReadOnlySpan<byte> parent)

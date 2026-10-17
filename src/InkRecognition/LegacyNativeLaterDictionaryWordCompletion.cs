@@ -78,7 +78,8 @@ public sealed partial class LegacyNativeLaterDictionaryWordCompletion
         LegacySymbolContextFactory contexts, LegacyNativeWordHeapRouter router,
         bool knowledgeF5, int subwordSourceIndex22ec, bool extendedMarkers22f8,
         ReadOnlySpan<byte> queryCacheResidue32, ReadOnlySpan<byte> temporaryLexicalResidue40,
-        bool suppressPrevious2609, CancellationToken cancellationToken, byte[]? actualQuery32 = null)
+        bool suppressPrevious2609, CancellationToken cancellationToken, byte[]? actualQuery32 = null,
+        byte[]? preparedTerminal16 = null)
     {
         ArgumentNullException.ThrowIfNull(contextResult);
         ArgumentNullException.ThrowIfNull(owningNodeRowsLookup);
@@ -154,9 +155,10 @@ public sealed partial class LegacyNativeLaterDictionaryWordCompletion
         var heap = router.GetPrimaryHeap(sourceId);
         int limit = heap.Count != 0 && heap.Count == heap.Capacity ? I32(heap.GetSlotSnapshot(0).Span, 16) : 0x4000000;
         ulong tag = U64(query, 0);
-        var token = caseSpan is null
-            ? metadata!.ReadTerminal(tag & ~(255UL << 32), 0, cancellationToken)
-            : caseSpan.ReadTerminal(tag, symbol, cancellationToken);
+        ReadOnlyMemory<byte> token = preparedTerminal16 is not null ? preparedTerminal16
+            : caseSpan is null
+                ? metadata!.ReadTerminal(tag & ~(255UL << 32), 0, cancellationToken)
+                : caseSpan.ReadTerminal(tag, symbol, cancellationToken);
         var history = LegacyNativeWordHistoryPreparation.Prepare(token.Span, sourceId, previous, previousNode,
             anchor, boundary.BoundaryDifference, subwordSourceIndex22ec, extendedMarkers22f8, knowledgeF5,
             dash, availableSourceNodes, contexts, LookupRecord, Header, Line, cancellationToken);
