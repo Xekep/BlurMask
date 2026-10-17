@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 
 [assembly: InternalsVisibleTo("LegacyMainSourceRangeUtf8.Probe")]
+[assembly: InternalsVisibleTo("LegacyMainDetachedTextDom.Probe")]
 
 namespace InkRecognition;
 
@@ -111,28 +112,36 @@ internal static class LegacyNativeSourceRangeUtf8
     }
     internal static LegacyPreparedRangeUtf8 Format(ReadOnlySpan<LegacyNativeInkPositionRange> input,
         LegacyOwnedRawInkRangeOperations operations,int failAllocation=-1,bool failFinalize=false,CancellationToken token=default)
+        =>FormatCore(input,operations,0,failAllocation,failFinalize,null,token);
+    internal static LegacyPreparedRangeUtf8 FormatIntoScratch(ReadOnlySpan<LegacyNativeInkPositionRange> input,
+        LegacyOwnedRawInkRangeOperations operations,int previousCapacity,Func<string,bool> allowAllocation,CancellationToken token=default)
+        =>FormatCore(input,operations,previousCapacity,-1,false,allowAllocation,token);
+    private static LegacyPreparedRangeUtf8 FormatCore(ReadOnlySpan<LegacyNativeInkPositionRange> input,
+        LegacyOwnedRawInkRangeOperations operations,int previousCapacity,int failAllocation,bool failFinalize,
+        Func<string,bool>? allowAllocation,CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(operations);token.ThrowIfCancellationRequested();
         if(input.Length>65536)throw new NotSupportedException("Portable source-range budget exceeded.");
         foreach(var range in input){ValidatePosition(range.First);ValidatePosition(range.Last);}
-        bool canonical=IsCanonical(input);var rows=input.ToArray();int allocations=0,capacity=0;var bytes=new List<byte>();
-        bool Allocate(int required)
+        if(previousCapacity<0)throw new ArgumentOutOfRangeException(nameof(previousCapacity));
+        bool canonical=IsCanonical(input);var rows=input.ToArray();int allocations=0,capacity=previousCapacity;var bytes=new List<byte>();
+        bool Allocate(int required,bool copy=false)
         {
-            if(allocations++==failAllocation)return false;
-            capacity=Math.Max(required,(int)(capacity*1.5));return true;
+            if(allocations++==failAllocation||allowAllocation is not null&&!allowAllocation(copy?"range-copy":"range-bytes"))return false;
+            if(!copy)capacity=Math.Max(required,(int)(capacity*1.5));return true;
         }
         LegacyPreparedRangeUtf8 Result(bool succeeded)=>new(succeeded,bytes.ToArray(),rows,canonical,allocations,capacity);
         if(!canonical)
         {
             //07F830 copies the input before any string reset/reserve. Its
             //allocation is distinct from later string growth allocations.
-            if(!Allocate(rows.Length))return Result(false);
+            if(!Allocate(rows.Length,true))return Result(false);
             var normalized=new[]{rows[0]};
             for(int i=1;i<rows.Length;i++)
             {token.ThrowIfCancellationRequested();if(rows[i].First.Mode!=4&&normalized[0].First.Mode!=4)normalized=operations.Union(normalized,[rows[i]],token);}
-            rows=normalized;capacity=0;
+            rows=normalized;
         }
-        if(!Allocate(checked(rows.Length*18+1)))return Result(false);
+        int initial=checked(rows.Length*18+1);if(capacity<initial&&!Allocate(initial))return Result(false);
         bool Reserve(int length)=>capacity>=length+1||Allocate(length+1);
         for(int i=0;i<rows.Length;i++)
         {
