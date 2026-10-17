@@ -26,9 +26,13 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
     private LegacyLibraryTextDomTransportCache? cache;
     private LegacyLibraryTextDomTransportRow? row;
     private LegacyLibraryTextDomApplyResult? applied;
+    private LegacyLibrarySelectedInputRegistryReplay? registryReplay;
     private LegacyLibraryTextPublicationDocumentSnapshot snapshot;
     public LegacyOwnedRawInkDocument Document=>scope.Document;
     public bool IsFaulted {get{lock(gate)return faulted;}}
+    /// <summary>The one library selected-registry replay retained by this
+    /// receipt. Its state is separate from historical INPUT and DOM apply.</summary>
+    public LegacyLibrarySelectedInputRegistryReplay? SelectedRegistryReplay {get{lock(gate)return registryReplay;}}
     public LegacyLibraryTextPublicationDocumentSnapshot Snapshot {get{lock(gate)return snapshot;}}
 
     private LegacyLibraryTextPublicationDocument(LegacyLibraryTextPublicationScope scope,
@@ -126,6 +130,8 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
             Validate(token);
             if(row is null||edit is null||target is null||applied is not null)
                 throw new InvalidOperationException("One successfully transported unapplied edit required.");
+            if(registryReplay is not null&&!registryReplay.State.Succeeded)
+                throw new InvalidOperationException("A claimed selected-registry replay must succeed before this library DOM apply.");
             try{applied=target.ApplyPrepared(edit,failure,cancellation,token);Record("library-target-applied");return snapshot;}
             catch{faulted=true;snapshot=Capture();throw;}
         }
@@ -144,6 +150,36 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
     internal LegacyLibraryTextDomTransportRow? ActualTransportRow=>row;
     internal LegacyLibraryTextDomTarget? ActualTarget=>target;
     internal LegacyLibraryTextDomTransfer? ActualTransfer=>transfer;
+    internal LegacyLibrarySelectedInputRegistryReplay ClaimRegistryReplay(CancellationToken token)
+    {
+        lock(gate)
+        {
+            Validate(token);
+            if(registryReplay is not null)throw new InvalidOperationException("This receipt already owns a selected-registry replay.");
+            ValidateRegistrySource(token);
+            var replay=new LegacyLibrarySelectedInputRegistryReplay(this,scope,row!,handoff!,token);
+            registryReplay=replay;return replay;
+        }
+    }
+    internal T WithRegistryReplay<T>(LegacyLibrarySelectedInputRegistryReplay actualReplay,Func<T> action,CancellationToken token)
+    {
+        lock(gate)
+        {
+            Validate(token);ValidateRegistrySource(token);
+            if(!ReferenceEquals(actualReplay,registryReplay))throw new ArgumentException("Exact receipt-owned replay required.");
+            return action();
+        }
+    }
+    private void ValidateRegistrySource(CancellationToken token)
+    {
+        if(row is null||row.IsReleased||handoff is null||applied is not null||
+            !ReferenceEquals(row.TransactionOwner,handoff.TransactionOwner)||
+            !ReferenceEquals(row.TransactionOwner,scope.Seed.PendingSelections)||
+            !ReferenceEquals(row.Owner.SelectedInputContext,scope.Seed.SelectedInputContext)||
+            !ReferenceEquals(row.DomEdit,edit))
+            throw new InvalidOperationException("Actual transferred pending C4D and unapplied same-scope selected INPUT required.");
+        LegacyFreshMainDocumentCounterHandoff.Validate(handoff.Transforms,token);
+    }
     public void Dispose()
     {lock(gate){if(disposed)return;disposed=true;transfer?.Dispose();cache?.Dispose();}}
 }
