@@ -616,6 +616,8 @@ jobs:
           python tools/LegacyMainWordPublication.Probe/audit_output.py .artifacts/legacy-main-word-publication-managed.json
           dotnet run --project tools/LegacyMainTextInput.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-text-input-managed.json
           python tools/LegacyMainTextInput.Probe/audit_output.py .artifacts/legacy-main-text-input-managed.json
+          dotnet run --project tools/LegacyMainRawPlainRecognition.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-raw-plain-managed.json
+          python tools/LegacyMainRawPlainRecognition.Probe/audit_output.py .artifacts/legacy-main-raw-plain-managed.json
           dotnet run --project tools/LegacyMainWordPacket.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-main-word-packet-managed.json
           python tools/LegacyMainWordPacket.Probe/audit_output.py .artifacts/legacy-main-word-packet-managed.json
           dotnet run --project tools/LegacyMainSourceWidth.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-main-source-width-managed.json
@@ -1085,6 +1087,7 @@ jobs:
             @{ Name = 'LegacyMainOwnedFlush'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-main-owned-flush-native.json') },
             @{ Name = 'LegacyMainWordPublication'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-main-word-publication-native.json') },
             @{ Name = 'LegacyMainTextInput'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-text-input-native.json') },
+            @{ Name = 'LegacyMainRawPlainRecognition'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-raw-plain-native.json') },
             @{ Name = 'LegacyMainWordPacket'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-main-word-packet-native.json') },
             @{ Name = 'LegacyMainSourceWidth'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-main-source-width-native.json') },
             @{ Name = 'LegacyGlyphChainProduction'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-glyph-chain-native.json') },
@@ -1364,6 +1367,10 @@ jobs:
             if ($name -eq 'LegacyMainTextInput') {
               python tools/LegacyMainTextInput.Probe/audit_output.py .artifacts/legacy-main-text-input-native.json
               if ($LASTEXITCODE -ne 0) { throw 'Main multiword input audit failed' }
+            }
+            if ($name -eq 'LegacyMainRawPlainRecognition') {
+              python tools/LegacyMainRawPlainRecognition.Probe/audit_output.py .artifacts/legacy-main-raw-plain-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'Raw main plain-word integration audit failed' }
             }
             if ($name -eq 'LegacyMainWordPacket') {
               python tools/LegacyMainWordPacket.Probe/audit_output.py .artifacts/legacy-main-word-packet-native.json
