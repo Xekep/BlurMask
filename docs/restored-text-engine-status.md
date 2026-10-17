@@ -44,7 +44,14 @@ and6143 prepared controls with independent oracles and fresh NativeAOT.
 The [cold request proof](legacy-math2-ef4-control-flow.md) establishes that a
 fresh, unmodified EEB request selects the nonzero correction branch. Prepared
 byte-zero assignment is not a substitute. Final completed ordering, loop
-attention budgeting, remaining EF4 correction and final acceptance are separate.
+remaining EF4 correction and final acceptance are separate. The new
+[owning raw attention history](legacy-math2-owned-raw-attention-history.md)
+retains one actual[S,B,1] output per step with a16MiB total retained-payload
+budget, then reconstructs only requested actual-source matrices.67 actual
+matrices and seven failure/budget prefixes pass independent checks and fresh
+NativeAOT; this budget is not process RSS. The prepared
+[unused-unit pruning](legacy-math2-unused-unit-pruning.md) also passes4096
+boundary controls and16384 inserted-unit preservation controls.
 
 The [library DOM cache transport](legacy-library-text-dom-transport-cache.md)
 now transfers actual same-source pending C4D and exported BE2 owners with
@@ -56,13 +63,20 @@ and [fresh constructor/import contract](legacy-text-processing-context-preparati
 The [owning pre-recognition context](legacy-library-text-processing-context.md)
 now creates2C1/result2DA/strings3E and the selected input-only DOM before a
 document seed.132 imports/40 failure prefixes/1348 guards pass independent
-resource and DOM oracles and NativeAOT. The complete recognition-to-publication
-adoption remains unfinished. Concurrent target
+resource and DOM oracles and NativeAOT. The
+[configured publication scope](legacy-library-text-publication-scope.md)
+now keeps that same input/document/result/strings owner through pre-NN
+preparation, configured recognition and actual shared WORD/CHAR publication.
+Three raw invocations/six alternatives/69 guards and unchanged prior captures
+pass independent checks and NativeAOT. Final document transport and SDK
+acceptance remain separate. Concurrent target
 Build/Export versus Apply is serialized and checked with deterministic barriers.
 
-The exact committed app at14b97c9 builds with0 warnings and passes headless
+The exact committed app at4dc662b builds with0 warnings and passes headless
 `--ai-pen-test`. Russian diagnostics remain4/9 exact with16/33 character edits;
-no new release or full-engine readiness is asserted.
+no new release or full-engine readiness is asserted. The new
+[recorded error evidence](russian-recorded-error-evidence.md) traces actual
+graph/cache support and language completion without target fitting.
 
 ## App and library are different stages
 
