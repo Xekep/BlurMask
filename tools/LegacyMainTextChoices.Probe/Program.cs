@@ -11,6 +11,9 @@ var normalization = LegacyNativeUnicodeNormalizationData.Load(nf);
 using var cir = File.OpenRead(args[7]); var circles = LegacyNativeCircledPayloadData.Load(cir);
 byte[] l30 = File.ReadAllBytes(args[8]), l50 = File.ReadAllBytes(args[9]);
 var samples = new[] { Word(0), Word(0).Concat(Word(230)).ToArray(), Word(0).Concat(Word(300)).ToArray(), Word(0).Concat(Word(450)).ToArray(), Word(0).Concat(Word(700)).ToArray(), Word(450).Concat(Word(0)).ToArray(), Word(0).Select(s => new InkStroke(s.Points.Concat(Enumerable.Repeat(s.Points[^1], 3)).ToArray())).ToArray() };
+var context=LegacyFreshMainRecognitionContext.Load(ak,lk,engine,l30,l50);
+Array.Fill(ak,(byte)0);Array.Fill(lk,(byte)0);Array.Fill(engine,(byte)0);Array.Fill(l30,(byte)0);Array.Fill(l50,(byte)0);
+object? previousModel=null,previousDictionaryContexts=null;
 int failedPublicationGuards = 0, foreignSourceGuards = 0;
 LegacyOwnedMainGlyphSourceMetadataResult? previousSource = null;
 LegacyOwnedMainSpanGlyphSourceResult? previousSpan = null;
@@ -20,15 +23,19 @@ w.WriteStartObject(); w.WriteStartArray("inputs");
 for (int input = 0; input < samples.Length; input++)
 {
     var mutable = samples[input].Select(s => new InkStroke(s.Points.ToList())).ToArray();
-    var recognition = LegacyFreshMainSingleLinePlainRecognition.Prepare(ak, lk, engine, l30, l50, mutable, 0, table, cases, publication);
+    var recognition = context.Prepare(mutable, 0, table, cases, publication);
     int originalCount = mutable[0].Points.Count;
     ((List<InkPoint>)mutable[0].Points).Clear();
     if (recognition.SourceDocument.Strokes[0].Points.Count != originalCount) throw new Exception("Original source document aliases caller storage.");
     guards++;
     var raw = recognition.Run(new byte[120], new byte[40], new ushort[256], new byte[64]);
+    var currentModel=raw.Session.Plan.SourcePolicy.Model;var currentDictionaryContexts=raw.Session.Plan.SourcePolicy.DictionaryOwner.Contexts;
+    if(previousModel is not null && (!ReferenceEquals(previousModel,currentModel)||ReferenceEquals(previousDictionaryContexts,currentDictionaryContexts)))
+        throw new Exception("Reusable model or isolated dictionary contexts lost.");
+    previousModel=currentModel;previousDictionaryContexts=currentDictionaryContexts;
     var completed = LegacyFreshMainFirstCandidateCompletion.Complete(raw, new byte[400], new byte[4], new byte[4]);
     byte[] residue = Enumerable.Range(0, 40).Select(n => (byte)(n * 13 + input)).ToArray();
-    using var owner = LegacyFreshMainTextGlyphChoices.Prepare(ak, completed, table, publication, normalization, circles);
+    using var owner = context.PrepareTextChoices(completed, table, publication, normalization, circles);
     Reject(() => owner.Publish(new byte[39], new byte[2040 * 4]));
     try { owner.Publish(residue, new byte[2040 * 4], new CancellationToken(true)); throw new Exception("Cancellation ignored."); }
     catch (OperationCanceledException) { guards++; }
@@ -98,7 +105,7 @@ for (int input = 0; input < samples.Length; input++)
     }
     previousSource = words[0].Glyphs[0].OrdinaryRefreshed!.RefreshedOwner.Source;
     previousSpan = owner.SpanRefresh.RefreshOwner(raw.Session.Ownership.GlyphPool.CopyOwnerNodes().First(n=>unchecked((short)(n.Key>>24))<0).Key).Source;
-    using(var failed = LegacyFreshMainTextGlyphChoices.Prepare(ak,completed,table,publication,normalization,circles))
+    using(var failed = context.PrepareTextChoices(completed,table,publication,normalization,circles))
     {
         try { failed.Publish(residue,[]); throw new Exception("Selection allocation failure ignored."); }
         catch(NotSupportedException e) when(e.Message.StartsWith("Actual refreshed glyph selection allocation refused")) { failedPublicationGuards++; }

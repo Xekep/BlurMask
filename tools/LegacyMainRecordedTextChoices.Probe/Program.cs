@@ -2,7 +2,8 @@ using InkRecognition;
 using System.Security.Cryptography;
 using System.Text.Json;
 
-if(args.Length!=12)throw new ArgumentException("AK LK engine separation case publication normalization circles line30 line50 recorded-manifest capture");
+bool reloadModel=args.Length==13 && args[12]=="--reload-model";
+if(args.Length!=12 && !reloadModel)throw new ArgumentException("AK LK engine separation case publication normalization circles line30 line50 recorded-manifest capture [--reload-model]");
 byte[] ak=File.ReadAllBytes(args[0]),lk=File.ReadAllBytes(args[1]),engine=File.ReadAllBytes(args[2]);
 var table=LegacyCursiveSeparationTable.Load(File.ReadAllBytes(args[3]));
 using var cf=File.OpenRead(args[4]);using var pf=File.OpenRead(args[5]);using var nf=File.OpenRead(args[6]);using var circlesFile=File.OpenRead(args[7]);
@@ -17,6 +18,14 @@ if(samples.Length!=9)throw new InvalidDataException("Fixed nine-word diagnostic 
 using var output=File.Create(args[11]);using var w=new Utf8JsonWriter(output);
 w.WriteStartObject();w.WriteString("manifestSha256",Convert.ToHexStringLower(SHA256.HashData(manifestBytes)));w.WriteString("inputAssumption","One continuous stroke: source has no pen-up events; expected labels never read by inference.");w.WriteStartArray("samples");
 int complete=0,refused=0;
+LegacyFreshMainRecognitionContext? shared = reloadModel ? null : LegacyFreshMainRecognitionContext.Load(ak,lk,engine,line30,line50);
+if(shared is not null)
+{
+    //Exercise owned snapshots; no modified buffer re-enters shared inference.
+    Array.Fill(ak,(byte)0);Array.Fill(lk,(byte)0);Array.Fill(engine,(byte)0);
+    Array.Fill(line30,(byte)0);Array.Fill(line50,(byte)0);
+}
+object? previousModel=null,previousContexts=null,previousDocument=null;
 foreach(var sample in samples)
 {
     string name=sample.GetProperty("file").GetString()!;
@@ -31,10 +40,21 @@ foreach(var sample in samples)
     string stage="raw first/main";
     try
     {
-        var owner=LegacyFreshMainSingleLinePlainRecognition.Prepare(ak,lk,engine,line30,line50,[new InkStroke(points)],0,table,cases,publication);
-        var raw=owner.Run(new byte[120],new byte[40],new ushort[256],new byte[64]);stage="first candidate completion";
+        var owner=shared is null
+            ? LegacyFreshMainSingleLinePlainRecognition.Prepare(ak,lk,engine,line30,line50,[new InkStroke(points)],0,table,cases,publication)
+            : shared.Prepare([new InkStroke(points)],0,table,cases,publication);
+        var raw=owner.Run(new byte[120],new byte[40],new ushort[256],new byte[64]);
+        var currentModel=raw.Session.Plan.SourcePolicy.Model;
+        var currentContexts=raw.Session.Plan.SourcePolicy.DictionaryOwner.Contexts;
+        if(previousModel is not null && (ReferenceEquals(previousModel,currentModel)!=!reloadModel ||
+            ReferenceEquals(previousContexts,currentContexts) || ReferenceEquals(previousDocument,owner.SourceDocument)))
+            throw new InvalidOperationException("Model reuse or per-invocation mutable owner isolation changed.");
+        previousModel=currentModel;previousContexts=currentContexts;previousDocument=owner.SourceDocument;
+        stage="first candidate completion";
         var first=LegacyFreshMainFirstCandidateCompletion.Complete(raw,new byte[400],new byte[4],new byte[4]);stage="glyph choice publication";
-        using var choices=LegacyFreshMainTextGlyphChoices.Prepare(ak,first,table,publication,normalization,circles);
+        using var choices=shared is null
+            ? LegacyFreshMainTextGlyphChoices.Prepare(ak,first,table,publication,normalization,circles)
+            : shared.PrepareTextChoices(first,table,publication,normalization,circles);
         var words=choices.Publish(new byte[40],new byte[2040*4]);
         w.WriteString("status","complete");w.WriteStartArray("words");
         foreach(var word in words)

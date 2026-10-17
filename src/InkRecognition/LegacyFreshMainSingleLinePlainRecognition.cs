@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace InkRecognition;
 
 /// <summary>Bounded fresh raw ink to the first CASE terminal's plain WORD list.
@@ -15,6 +13,8 @@ public sealed class LegacyFreshMainSingleLinePlainRecognition
     private readonly LegacyNativeTextPublicationData publication;
     public LegacyFreshMainOwnedTextInputPreparation Input { get; }
     public LegacyOwnedRawInkDocument SourceDocument { get; }
+    internal bool UsesOwnedModel(LegacyRussianModelBundle expected,byte[] acousticResource,byte[] linguisticResource) =>
+        ReferenceEquals(model,expected) && ReferenceEquals(acoustic,acousticResource) && ReferenceEquals(linguistic,linguisticResource);
 
     private LegacyFreshMainSingleLinePlainRecognition(byte[] acoustic, byte[] linguistic,
         LegacyRussianModelBundle model, LegacyInkActivations activations,
@@ -32,17 +32,24 @@ public sealed class LegacyFreshMainSingleLinePlainRecognition
     {
         ArgumentNullException.ThrowIfNull(table); ArgumentNullException.ThrowIfNull(caseData);
         ArgumentNullException.ThrowIfNull(publication); token.ThrowIfCancellationRequested();
-        var model=LegacyRussianModelBundle.Load(acousticResource,linguisticResource,engineProfile);
-        using var parsed=JsonDocument.Parse(engineProfile.ToArray());
-        var values=parsed.RootElement.GetProperty("activations");
-        var activations=new LegacyInkActivations(
-            values.GetProperty("hidden").EnumerateArray().Select(v=>v.GetInt32()).ToArray(),
-            values.GetProperty("output").EnumerateArray().Select(v=>v.GetInt32()).ToArray());
+        var context=LegacyFreshMainRecognitionContext.Load(acousticResource,linguisticResource,
+            engineProfile,spatial30,physical50,token);
+        return context.Prepare(raw,resolution,table,caseData,publication,token);
+    }
+
+    internal static LegacyFreshMainSingleLinePlainRecognition PrepareOwnedModel(byte[] acousticResource,
+        byte[] linguisticResource,LegacyRussianModelBundle model,LegacyInkActivations activations,
+        byte[] spatial30,byte[] physical50,IReadOnlyList<InkStroke> raw,float resolution,
+        LegacyCursiveSeparationTable table,LegacyNativeCaseData caseData,
+        LegacyNativeTextPublicationData publication,CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(table);ArgumentNullException.ThrowIfNull(caseData);
+        ArgumentNullException.ThrowIfNull(publication);token.ThrowIfCancellationRequested();
         var document=LegacyOwnedRawInkDocument.Create(raw,token);
         var input=LegacyFreshMainOwnedTextInputPreparation.Prepare(acousticResource,spatial30,
             physical50,document.Strokes,resolution,activations,table,caseData,publication,token);
         token.ThrowIfCancellationRequested();
-        return new(acousticResource.ToArray(),linguisticResource.ToArray(),model,activations,table,input,caseData,publication,document);
+        return new(acousticResource,linguisticResource,model,activations,table,input,caseData,publication,document);
     }
 
     /// <summary>Allocator and stack residues remain explicit. A completed
