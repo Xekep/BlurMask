@@ -50,10 +50,18 @@ public sealed class LegacyOrdinaryGraphSourceRanges
         var seedGraph=actualSeeds.InsertionShift==0?LegacyOrdinaryCursiveSeedGraph.CreateShiftZero(actualSeeds,cancellationToken):
             LegacyOrdinaryCursiveSeedGraph.CreateOrdinaryDeferred(actualSeeds,cancellationToken);
         var graph=LegacyOrdinaryCursiveCandidateGraph.Generate(actualSeeds,seedGraph,maximumAtoms,maximumCandidates,cancellationToken);
-        var keys=new List<LegacySourcePointKey>();
+        var keys=new LegacySourcePointKey[actualOriginalSource.Strokes.Sum(s=>s.Points.Count)];
+        var assigned=new bool[keys.Length];
         for(int s=0;s<actualOriginalSource.Strokes.Count;s++)for(int p=0;p<actualOriginalSource.Strokes[s].Points.Count;p++)
-        {cancellationToken.ThrowIfCancellationRequested();keys.Add(actualOriginalSource.Chronology.Resolve(s,p).Key);}
-        return new(actualSeeds,seedGraph,graph,actualPreparedChronology,actualOriginalSource,keys.ToArray());
+        {
+            cancellationToken.ThrowIfCancellationRequested();var identity=actualOriginalSource.Chronology.Resolve(s,p);
+            //Physical reorder retains the original F8 metadata index. Build
+            //that exact table rather than indexing a current-order sequence.
+            if((uint)identity.KeyRecordIndex>=(uint)keys.Length||assigned[identity.KeyRecordIndex])
+                throw new ArgumentException("A complete one-to-one original source key-record owner is required.");
+            assigned[identity.KeyRecordIndex]=true;keys[identity.KeyRecordIndex]=identity.Key;
+        }
+        return new(actualSeeds,seedGraph,graph,actualPreparedChronology,actualOriginalSource,keys);
     }
 
     public LegacyFirstResultSourceRange[] ResolveCandidate(int endingNode,int arcOrdinal,
