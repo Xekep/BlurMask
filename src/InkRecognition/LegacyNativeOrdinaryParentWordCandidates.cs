@@ -17,6 +17,7 @@ public sealed class LegacyNativeOrdinaryParentWordCandidates
     private readonly LegacySymbolContextFactory contexts;
     private readonly LegacyNativeHigherArcTransitionOperations geometry;
     private readonly LegacyGlobalOrdinaryWordPathGuard? globalPathGuard;
+    private readonly byte? knowledgeMarkerA0;
     private readonly LegacyNativeWordAcousticRequestScorer scorer;
     private readonly LegacyNativeWordTransitionCostCell cell;
     private readonly byte[] residue;
@@ -32,10 +33,11 @@ public sealed class LegacyNativeOrdinaryParentWordCandidates
             RequireGeometry(geometry),scorer,cell,stackResidue80,null) { }
 
     internal LegacyNativeOrdinaryParentWordCandidates(LegacyOwnedMainWordSourceServices source,
-        LegacyNativeWordAcousticRequestScorer scorer,LegacyNativeWordTransitionCostCell cell,ReadOnlySpan<byte> residue)
+        LegacyNativeWordAcousticRequestScorer scorer,LegacyNativeWordTransitionCostCell cell,ReadOnlySpan<byte> residue,
+        byte? knowledgeMarkerA0 = null)
         :this(source.Graph,source.Model.AcousticAlphabet,source.Categories.Categories,source.Contexts,
             (source.GlobalTransitions??throw new ArgumentException("Actual global transitions required.")).CreateOperations(),
-            scorer,cell,residue,new(source)) { }
+            scorer,cell,residue,new(source)) { this.knowledgeMarkerA0 = knowledgeMarkerA0; }
 
     private LegacyNativeOrdinaryParentWordCandidates(LegacyOrdinaryRecognitionGraph graph,LegacyInkAlphabet alphabet,
         LegacyCursiveCategoryProfile categories,LegacySymbolContextFactory contexts,
@@ -105,7 +107,8 @@ public sealed class LegacyNativeOrdinaryParentWordCandidates
                 throw new ArgumentException("Enabled frontend suppression needs its actual graphE8 predicate.");
             var parent = storedParent88.ToArray();
             var queryBytes = queryRecords32.ToArray();
-            if ((parent[6] & 1) != 0)
+            bool softHyphenParent = (parent[6] & 1) != 0;
+            if (softHyphenParent && (globalPathGuard is null || knowledgeMarkerA0 != 0))
                 throw new NotSupportedException("Parent header6.bit0 selects kind7 and requires its full native source/context path guard.");
             byte parentSourceId = parent[4];
             if (parentSourceId == 0 || !preparedSourceHeaders.TryGetValue(parentSourceId, out uint parentHeader))
@@ -160,9 +163,16 @@ public sealed class LegacyNativeOrdinaryParentWordCandidates
                             !scorer.Score(request, getOwnedGroupCosts, frontendSuppressionEnabled, isSuppressedE8, cancellationToken)) continue;
                         //1fcf40: for kind!=7 and low request3c==0, neither the
                         //source boundary exception nor symbolic control-root guard applies.
-                        if (request.ReadByte(28) is not (0 or 2))
-                            throw new NotSupportedException("Native ordinary path guard requires kind0/2.");
-                        if(request.ReadByte(60)!=0)
+                        if (request.ReadByte(28) == 7)
+                        {
+                            if (globalPathGuard is null || knowledgeMarkerA0 is null)
+                                throw new NotSupportedException("Owned kind7 source and actual knowledge policy required.");
+                            if (!globalPathGuard.AllowsSoftHyphenContinuation(request, context,
+                                knowledgeMarkerA0 != 0, cancellationToken)) continue;
+                        }
+                        else if (request.ReadByte(28) is not (0 or 2))
+                            throw new NotSupportedException("Native ordinary path guard requires kind0/2 or owned fresh kind7.");
+                        else if(request.ReadByte(60)!=0)
                         {
                             if(globalPathGuard is null)throw new NotSupportedException("Native ordinary path guard requires the proved unmarked kind0/2 branch.");
                             if(!globalPathGuard.AllowsMarked(request,cancellationToken))continue;
@@ -172,7 +182,7 @@ public sealed class LegacyNativeOrdinaryParentWordCandidates
                             (kind == 0 && (parent[5] & 0x80) != 0 || alphabet.IsSymbolFlagged(symbol));
                         var fields = new LegacyInitialWordRecordFields(tag, context, cell.Value, request.ReadInt32(0x30), symbol,
                             endingNode, arc, arc, checked((byte)category), previousRowOrdinal, unchecked((sbyte)sourceSpan), 0,
-                            flagged ? (byte)1 : (byte)0, 0, 0, kind, unchecked((byte)((flags >> 5 & 3) + length)),
+                            flagged ? (byte)1 : (byte)0, 0, 0, request.ReadByte(28), unchecked((byte)((flags >> 5 & 3) + length)),
                             0, 0, (flags & 8) != 0 ? start : parentAuxiliary30, kind == 2 ? start : parentAuxiliary34,
                             anchorNode, anchorArc);
                         var allocation = router.TryInsertInitialRecord(sourceId, false, fields, secondaryScale,

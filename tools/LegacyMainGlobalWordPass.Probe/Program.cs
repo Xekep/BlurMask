@@ -22,7 +22,8 @@ foreach(var raw in new[]{new[]{M(0),M(140)},new[]{M(0),M(250)},new[]{V(0),V(140)
     var graph=LegacyFreshMainCompactOrdinaryGraph.Prepare(ak,global);var source=LegacyFreshMainGlobalSourceRanges.Prepare(graph);var context=LegacyFreshMainGlobalContext.Prepare(ak,source,activations);var geometry=LegacyFreshMainGlobalGlyphGeometry.Prepare(ak,context);
     var owner=LegacyFreshMainGlobalCaseSession.Prepare(ak,lk,model,geometry,cd,pd);var cache=LegacyFreshMainGlobalTransitionCache.Prepare(ak,owner,table);var transitions=LegacyFreshMainGlobalWordTransitions.Prepare(ak,cache);var operations=transitions.CreateOperations();
     var costs=LegacyFreshMainGlobalGroupCosts.Prepare(ak,owner,table);var policy=LegacyFreshMainGlobalWordControllerPolicy.Prepare(ak,owner,costs,transitions);
-    int allocationCount=0;var pass=new LegacyFreshMainGlobalWordPass(ak,policy,Allocate);
+    var actualSoftCalls = new List<LegacyMainSoftHyphenObservedCall>();
+    int allocationCount=0;var pass=new LegacyFreshMainGlobalWordPass(ak,policy,Allocate) { SoftHyphenObserver = actualSoftCalls.Add };
     w.WriteStartObject();w.WriteNumber("owner",owners);w.WriteNumber("descriptorCount",cuts.Steps.Count(s=>!s.IsPendingSeparator));w.WriteNumber("nodes",graph.State.NodeCount);w.WriteNumber("primaryLimit",policy.Configuration.PrimaryArcLimit230a);
     try
     {
@@ -32,13 +33,34 @@ foreach(var raw in new[]{new[]{M(0),M(140)},new[]{M(0),M(250)},new[]{V(0),V(140)
         var oracleCache=LegacyFreshMainGlobalTransitionCache.Prepare(ak,oracleSession,table);
         var oracleTransitions=LegacyFreshMainGlobalWordTransitions.Prepare(ak,oracleCache);
         var oraclePolicy=LegacyFreshMainGlobalWordControllerPolicy.Prepare(ak,oracleSession,oracleCosts,oracleTransitions);
-        var expected=OriginalGlobalSchedulerOracle.Run(ak,oraclePolicy);
+        var expectedSoftCalls = new List<LegacyMainSoftHyphenObservedCall>();
+        var expected=OriginalGlobalSchedulerOracle.Run(ak,oraclePolicy,expectedSoftCalls.Add);
+        if (actualSoftCalls.Count != expectedSoftCalls.Count) throw new Exception("Actual213C00 caller frontier differs.");
+        for (int index = 0; index < actualSoftCalls.Count; index++)
+        {
+            var a = actualSoftCalls[index]; var e = expectedSoftCalls[index];
+            if ((a.EndingNode,a.Span,a.PreviousEndingNode,a.ParentOrdinal,a.BeforeCount,a.AfterCount,
+                 a.Result.Applied,a.Result.Qualified,a.Result.Successors,a.Result.GeometryCalls,a.Result.AcousticCalls,a.Result.AcceptedAllocations) !=
+                (e.EndingNode,e.Span,e.PreviousEndingNode,e.ParentOrdinal,e.BeforeCount,e.AfterCount,
+                 e.Result.Applied,e.Result.Qualified,e.Result.Successors,e.Result.GeometryCalls,e.Result.AcousticCalls,e.Result.AcceptedAllocations))
+                throw new Exception("Actual213C00 call/result/allocation counts differ.");
+            Compare(a.Parent88,e.Parent88,88,[8],owner.Contexts,oracleSession.Contexts);
+            Compare(a.BeforeHeap128,e.BeforeHeap128,128,[8],owner.Contexts,oracleSession.Contexts);
+            Compare(a.AfterHeap128,e.AfterHeap128,128,[8],owner.Contexts,oracleSession.Contexts);
+            if (!a.Result.LastRequest80.Span.SequenceEqual(e.Result.LastRequest80.Span))
+                throw new Exception("Actual213C00 final complete80 request differs.");
+            if (!Path(owner.Contexts,a.Result.ContextIdentity).SequenceEqual(Path(oracleSession.Contexts,e.Result.ContextIdentity)))
+                throw new Exception("Actual213C00 created context lineage differs.");
+        }
         if(expected.Count!=result.NodeCount)throw new Exception("Independent global scheduler node extent differs.");
         for(int n=0;n<result.NodeCount;n++)
         {
             var actual=result.GetNodeSnapshot(n);var e=expected[n];
             if((actual.EndingNode,actual.RootQueries,actual.ParentQueries,actual.FlagAllocations,actual.PrimaryCandidates,actual.LanguageRan,actual.LanguageQueries,actual.LanguageAllocations,actual.SourceEnd23f0,actual.RetainedEnd23f8,actual.CumulativePathCost2520,actual.AppliedPeriodicOffset)!=
                 (e.EndingNode,e.RootQueries,e.ParentQueries,e.FlagAllocations,e.PrimaryCandidates,e.LanguageRan,e.LanguageQueries,e.LanguageAllocations,e.SourceEnd23f0,e.RetainedEnd23f8,e.CumulativePathCost2520,e.AppliedPeriodicOffset))throw new Exception($"Independent global node{n} scheduling/state differs.");
+            if ((actual.SoftHyphenCalls,actual.SoftHyphenQualified,actual.SoftHyphenSuccessors,actual.SoftHyphenAllocations) !=
+                (e.SoftHyphenCalls,e.SoftHyphenQualified,e.SoftHyphenSuccessors,e.SoftHyphenAllocations))
+                throw new Exception("Independent213C00 node counters differ.");
             Compare(actual.Records,e.Records,88,[8],owner.Contexts,oracleSession.Contexts);
             Compare(actual.PrimaryAlternatives,e.PrimaryAlternatives,40,[8,16],owner.Contexts,oracleSession.Contexts);
         }
@@ -60,11 +82,42 @@ foreach(var raw in new[]{new[]{M(0),M(140)},new[]{M(0),M(250)},new[]{V(0),V(140)
             Reject(()=>checkPolicy.Services.Read(lease,0,new(){Capacity=1,ContextRoot=owner.Contexts.ContainerIdentity},false,default));
             checkPolicy.Services.AdvanceNodeEpoch(0,default);
             Reject(()=>LegacyNativeFirstDictionaryWordCompletion.ForGlobalSpan(checkPolicy,lease,default));Reject(()=>LegacyNativeLaterDictionaryWordCompletion.ForGlobalSpan(checkPolicy,lease,default));
+            using var canceledObserver = new CancellationTokenSource();
+            var canceledPolicy = FreshPolicy();
+            LegacyMainSoftHyphenObservedCall? lastCanceledCall = null;
+            var canceledPass = new LegacyFreshMainGlobalWordPass(ak,canceledPolicy,Allocate)
+            {
+                SoftHyphenObserver = call => { lastCanceledCall=call; canceledObserver.Cancel(); }
+            };
+            Reject(()=>canceledPass.RunOwned(canceledObserver.Token));
+            Reject(()=>canceledPass.RunOwned());
+            Reject(()=>canceledPass.SoftHyphenObserver=null);
+            if (lastCanceledCall is null || lastCanceledCall.EndingNode!=3 ||
+                lastCanceledCall.Result.Qualified || lastCanceledCall.BeforeCount!=lastCanceledCall.AfterCount ||
+                !lastCanceledCall.BeforeHeap128.Span.SequenceEqual(lastCanceledCall.AfterHeap128.Span))
+                throw new Exception("Actual observer cancellation changed the no-op heap/prefix or never reached its real gate.");
+            var changedPolicy = FreshPolicy();
+            var changedPass = new LegacyFreshMainGlobalWordPass(ak,changedPolicy,Allocate)
+            {
+                SoftHyphenObserver = call => changedPolicy.Services.AdvanceNodeEpoch(call.EndingNode,default)
+            };
+            Reject(()=>changedPass.RunOwned());
+            Reject(()=>changedPass.RunOwned());
+
+            LegacyFreshMainGlobalWordControllerPolicy FreshPolicy()
+            {
+                var s=LegacyFreshMainGlobalCaseSession.Prepare(ak,lk,model,geometry,cd,pd);
+                var c=LegacyFreshMainGlobalGroupCosts.Prepare(ak,s,table);
+                var t=LegacyFreshMainGlobalWordTransitions.Prepare(ak,LegacyFreshMainGlobalTransitionCache.Prepare(ak,s,table));
+                return LegacyFreshMainGlobalWordControllerPolicy.Prepare(ak,s,c,t);
+            }
         }
         w.WriteString("status","completed");w.WriteStartArray("rows");
         for(int n=0;n<result.NodeCount;n++)
         {
-            var r=result.GetNodeSnapshot(n);w.WriteStartObject();w.WriteNumber("node",n);w.WriteNumber("rootQueries",r.RootQueries);w.WriteNumber("parentQueries",r.ParentQueries);w.WriteNumber("flags",r.FlagAllocations);w.WriteNumber("primary",r.PrimaryCandidates);w.WriteBoolean("language",r.LanguageRan);w.WriteNumber("languageQueries",r.LanguageQueries);w.WriteNumber("languageAllocations",r.LanguageAllocations);w.WriteNumber("sourceEnd",r.SourceEnd23f0);w.WriteNumber("retainedEnd",r.RetainedEnd23f8);w.WriteString("records",Convert.ToHexString(r.Records.Span));w.WriteString("alternatives",Convert.ToHexString(r.PrimaryAlternatives.Span));w.WriteNumber("cumulative",r.CumulativePathCost2520);w.WriteEndObject();nodes++;
+            var r=result.GetNodeSnapshot(n);w.WriteStartObject();w.WriteNumber("node",n);w.WriteNumber("rootQueries",r.RootQueries);w.WriteNumber("parentQueries",r.ParentQueries);w.WriteNumber("flags",r.FlagAllocations);w.WriteNumber("primary",r.PrimaryCandidates);w.WriteBoolean("language",r.LanguageRan);w.WriteNumber("languageQueries",r.LanguageQueries);w.WriteNumber("languageAllocations",r.LanguageAllocations);w.WriteNumber("sourceEnd",r.SourceEnd23f0);w.WriteNumber("retainedEnd",r.RetainedEnd23f8);w.WriteString("records",Convert.ToHexString(r.Records.Span));w.WriteString("alternatives",Convert.ToHexString(r.PrimaryAlternatives.Span));w.WriteNumber("cumulative",r.CumulativePathCost2520);
+            w.WriteNumber("softHyphenCalls",r.SoftHyphenCalls);w.WriteNumber("softHyphenQualified",r.SoftHyphenQualified);w.WriteNumber("softHyphenSuccessors",r.SoftHyphenSuccessors);w.WriteNumber("softHyphenAllocations",r.SoftHyphenAllocations);
+            w.WriteEndObject();nodes++;
         }
         w.WriteEndArray();completed++;Console.WriteLine($"Actual global owner{owners} descriptors{cuts.Steps.Count(s=>!s.IsPendingSeparator)} nodes{result.NodeCount} PASS; NN{owner.AcousticEvaluations}.");
     }
@@ -95,7 +148,7 @@ void Compare(ReadOnlyMemory<byte> left,ReadOnlyMemory<byte> right,int stride,int
     for(int row=0;row<a.Length/stride;row++)foreach(int offset in offsets)
     {
         int at=row*stride+offset;ulong x=BinaryPrimitives.ReadUInt64LittleEndian(a.AsSpan(at)),y=BinaryPrimitives.ReadUInt64LittleEndian(b.AsSpan(at));
-        if(!Path(lc,x).SequenceEqual(Path(rc,y)))throw new Exception("Independent global symbolic lineage differs.");
+        if(!Path(lc,x).SequenceEqual(Path(rc,y)))throw new Exception($"Independent global symbolic lineage differs row{row} offset{offset}: {string.Join('/',Path(lc,x))} / {string.Join('/',Path(rc,y))}");
         a.AsSpan(at,8).Clear();b.AsSpan(at,8).Clear();comparedContexts++;
     }
     if(!a.AsSpan().SequenceEqual(b))throw new Exception("Independent global complete scalar storage differs.");comparedBytes+=a.Length;

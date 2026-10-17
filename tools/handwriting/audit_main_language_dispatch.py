@@ -72,7 +72,7 @@ owner_pins = [
     'new(false, 0, false, true, 0, configuration.PrimaryArcLimit230a, checked((ushort)previous.Count))',
     'primaryRecombinationOperations ??= createPrimaryRecombinationOperations()',
     'global.ResolveGroupSource(arcs[ordinal].GroupId, token).Primary.LineId',
-    'source.Source.GetSourceLineIdForArc(node, ordinal)', 'line.Owner.SourceLineId',
+    'owner.RequireSameSource().ReadSourceDescriptorLine(node, ordinal, token)',
     'LanguageContextRequestResidue, endingNode',
 ]
 for value in owner_pins:

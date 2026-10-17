@@ -24,8 +24,19 @@ public sealed class LegacyNativeMainWordFlagPrepass
     private readonly Dictionary<int, LegacyNativeWordAcousticGroupCosts> cache = [];
     private readonly LegacyNativeWordTransitionCostCell cell;
     private readonly byte[] residue;
+    private LegacyNativeMainWordRequestFrame? sharedCallerFrame;
     private bool valid = true;
     private int active;
+
+    //Only the owning2144F0 driver binds this frame. Standalone prepared APIs
+    //retain their existing residue behavior. The pointed value before F0 is
+    //explicit caller state, not a guessed native initializer.
+    internal LegacyNativeMainWordRequestFrame BindSharedCallerFrame()
+    {
+        if (Volatile.Read(ref active) != 0 || sharedCallerFrame is not null)
+            throw new InvalidOperationException("One idle main caller may bind its request frame once.");
+        return sharedCallerFrame = new(cell, residue);
+    }
 
     public LegacyNativeMainWordFlagPrepass(ReadOnlySpan<byte> actualResource,
         LegacyPreparedFreshMain240AcousticScorer actualAcoustic,LegacyCursiveSeparationTable table,
@@ -145,28 +156,32 @@ public sealed class LegacyNativeMainWordFlagPrepass
             ushort arc = checked((ushort)ordinal);
             var request = LegacyNativeWordFlagPrepassRequestFactory.Create(currentEndingNode, currentSpan,
                 previousEndingNode, parent, arc, headers[sourceId], categories,
-                cell, residue, token);
-            geometryCalls++;
-            bool accepted = globalGeometry is {} callbacks?callbacks.Calculate118(request,token)&&callbacks.Validate140(request,token):
-                geometry!.Calculate118(request,token)&&geometry.Validate140(request,token);
-            if (accepted)
+                cell, sharedCallerFrame?.CopyBytes() ?? residue, token);
+            try
             {
-                acousticCalls++;
-                accepted = scorer.Score(request, (node, arc) => GetCosts(node, arc, token), false, cancellationToken: token);
+                geometryCalls++;
+                bool accepted = globalGeometry is {} callbacks?callbacks.Calculate118(request,token)&&callbacks.Validate140(request,token):
+                    geometry!.Calculate118(request,token)&&geometry.Validate140(request,token);
+                if (accepted)
+                {
+                    acousticCalls++;
+                    accepted = scorer.Score(request, (node, arc) => GetCosts(node, arc, token), false, cancellationToken: token);
+                }
+                last = request.GetSnapshot();
+                if (!accepted) continue;
+                var fields = new LegacyInitialWordRecordFields(BinaryPrimitives.ReadUInt64LittleEndian(parent),
+                    BinaryPrimitives.ReadUInt64LittleEndian(parent.AsSpan(8)), cell.Value, request.ReadInt32(48),
+                    BinaryPrimitives.ReadUInt16LittleEndian(parent.AsSpan(36)), checked((ushort)request.ReadInt32(4)),
+                    request.ReadUInt16(14), arc, (byte)(parent[26] & 63), previousRowOrdinal, unchecked((sbyte)currentSpan),
+                    parent[38], 1, 0, 0, 5, 0, 0, 0,
+                    BinaryPrimitives.ReadInt32LittleEndian(parent.AsSpan(48)), BinaryPrimitives.ReadInt32LittleEndian(parent.AsSpan(52)),
+                    BinaryPrimitives.ReadInt32LittleEndian(parent.AsSpan(56)), BinaryPrimitives.ReadUInt16LittleEndian(parent.AsSpan(60)));
+                var allocation = router.TryInsertInitialRecord(sourceId, false, fields, 0, suppressPrevious2609,
+                    Lookup, token);
+                token.ThrowIfCancellationRequested();
+                if (allocation.Accepted) allocations++;
             }
-            last = request.GetSnapshot();
-            if (!accepted) continue;
-            var fields = new LegacyInitialWordRecordFields(BinaryPrimitives.ReadUInt64LittleEndian(parent),
-                BinaryPrimitives.ReadUInt64LittleEndian(parent.AsSpan(8)), cell.Value, request.ReadInt32(48),
-                BinaryPrimitives.ReadUInt16LittleEndian(parent.AsSpan(36)), checked((ushort)request.ReadInt32(4)),
-                request.ReadUInt16(14), arc, (byte)(parent[26] & 63), previousRowOrdinal, unchecked((sbyte)currentSpan),
-                parent[38], 1, 0, 0, 5, 0, 0, 0,
-                BinaryPrimitives.ReadInt32LittleEndian(parent.AsSpan(48)), BinaryPrimitives.ReadInt32LittleEndian(parent.AsSpan(52)),
-                BinaryPrimitives.ReadInt32LittleEndian(parent.AsSpan(56)), BinaryPrimitives.ReadUInt16LittleEndian(parent.AsSpan(60)));
-            var allocation = router.TryInsertInitialRecord(sourceId, false, fields, 0, suppressPrevious2609,
-                Lookup, token);
-            token.ThrowIfCancellationRequested();
-            if (allocation.Accepted) allocations++;
+            finally { sharedCallerFrame?.Commit(request); }
         }
         token.ThrowIfCancellationRequested();
         return new(true, true, geometryCalls, acousticCalls, allocations, last);

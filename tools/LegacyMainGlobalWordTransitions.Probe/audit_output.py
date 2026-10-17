@@ -37,6 +37,11 @@ for case,cache in zip(cases,caches):
             cost=wrap(cost+8192);return 3+(cost>=limit),cost
         if kind==5:
             return (0,cost)if not arc[2]&8 and aux<0 and current['descriptor']==previous['descriptor']else(4,IMP)
+        if kind==7:
+            if arc[2]&16:return 4,IMP
+            if arc[2]&8 or aux>=0:return 3,cost
+            if current['descriptor']==previous['descriptor'] and descriptors[current['descriptor']][1] in (0x2000001,0x2000002):return 4,IMP
+            return 0,cost
         if arc[2]&8 or aux>=0:return 3,cost
         if(symbol==replacement)!=(prior==replacement):return 3,cost
         if current['descriptor']==previous['descriptor']:
@@ -47,7 +52,7 @@ for case,cache in zip(cases,caches):
             elif value>=IMP:return 3+(IMP>=limit),IMP
             cost=wrap(cost+value);return 3+(cost>=limit),cost
         return(0 if descriptors[current['descriptor']][0]==descriptors[previous['descriptor']][0]else 3),cost
-    for call in case['calls']:
+    for call in case['calls']+case.get('kind7Calls',[]):
         before=bytes.fromhex(call['before']);expected=bytearray(before);u16=lambda at:struct.unpack_from('<H',before,at)[0];i32=lambda at:struct.unpack_from('<i',before,at)[0]
         node,previousSource=i32(0),i32(4);ordinal=u16(12);arc=arcs[node][ordinal];current=groups[arc[0]];kind=before[28];cost=call['costBefore'];start=cost;limit=i32(52)
         if kind==2 and not current['wholeStarts']:cost=IMP;accepted=False;clip+=1
@@ -57,6 +62,7 @@ for case,cache in zip(cases,caches):
             s,cost=status(expected,arc,current,previous,cost)
             cross+=current['descriptor']!=previous['descriptor'];pending+=arc[3]<32768
             if kind==5 and s==0:cost=wrap(cost+cache['nodes'][node][ordinal]['costs'][2]);accepted=cost<limit
+            elif kind==7:accepted=(s&~2)!=0 and s!=4
             elif kind==0 and s in(0,1)or kind==2 and s==0:
                 assert previousSource>=0
                 currentState=cache['nodes'][node][ordinal];previousState=cache['nodes'][previousSource][u16(14)]

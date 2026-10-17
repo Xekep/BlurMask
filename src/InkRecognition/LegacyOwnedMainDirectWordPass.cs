@@ -19,7 +19,13 @@ public sealed record LegacyMainDirectWordNodeResult(int EndingNode, int RootQuer
     int FlagAllocations, int PrimaryCandidates, bool LanguageRan, int LanguageQueries, int LanguageAllocations,
     ushort SourceEnd23f0, ushort RetainedEnd23f8, ReadOnlyMemory<byte> Records, ReadOnlyMemory<byte> PrimaryAlternatives,
     int CumulativePathCost2520 = 0, int AppliedPeriodicOffset = 0,
-    ReadOnlyMemory<byte> SecondaryAlternatives = default);
+    ReadOnlyMemory<byte> SecondaryAlternatives = default)
+{
+    internal int SoftHyphenCalls { get; init; }
+    internal int SoftHyphenQualified { get; init; }
+    internal int SoftHyphenSuccessors { get; init; }
+    internal int SoftHyphenAllocations { get; init; }
+}
 
 /// <summary>Owned nontracing DIRECT main240 node/span loop. This consumes the
 ///prepared main source, real dictionary permissions and actual four-family
@@ -38,6 +44,7 @@ public sealed class LegacyOwnedMainDirectWordPass
     private readonly LegacyNativeMainInitialSpecialCandidates initial;
     private readonly LegacyNativeOrdinaryParentWordCandidates parents;
     private readonly LegacyNativeMainWordFlagPrepass flagPrepass;
+    private readonly LegacyOwnedMainSoftHyphenPrepass softHyphenPrepass;
     private readonly LegacyNativeDelimiterQuerySource delimiter;
     private readonly LegacyNativeAuxiliaryDelimiterQuerySource auxiliaryDelimiter;
     private readonly LegacyNativeAuxiliaryWordQueryPages auxiliaryPages;
@@ -61,6 +68,16 @@ public sealed class LegacyOwnedMainDirectWordPass
     private byte[] secondaryPool = [];
     private ulong secondaryPoolIdentity;
     private int started;
+    private Action<LegacyMainSoftHyphenObservedCall>? softHyphenObserver;
+    internal Action<LegacyMainSoftHyphenObservedCall>? SoftHyphenObserver
+    {
+        set
+        {
+            if (Volatile.Read(ref started) != 0)
+                throw new InvalidOperationException("Diagnostic observer must be installed before the single-use pass.");
+            softHyphenObserver = value;
+        }
+    }
     public int LastPreparedEndingNode => currentSpan?.EndingNode ?? -1;
     public int LastPreparedSpan => currentSpan?.Span ?? -1;
 
@@ -155,7 +172,7 @@ public sealed class LegacyOwnedMainDirectWordPass
         if(owner.IsGlobal)
         {
             createPrimaryRecombinationOperations = owner.GlobalTransitions!.CreateOperations;
-            parents=new(owner,scorer,cell,parentResidue);
+            parents=new(owner,scorer,cell,parentResidue,policy.Refresh.KnowledgeMarkerA0);
             flagPrepass=new(actualResource,owner,(n,arc,token)=>owner.GetCosts(currentSpan??
                 throw new InvalidOperationException("D0 must precede global flag costs."),n,arc,token),cell,flagResidue,cancellationToken);
         }
@@ -169,6 +186,13 @@ public sealed class LegacyOwnedMainDirectWordPass
             flagPrepass=actualLineAcoustic is null?new(actualResource,old.Acoustic,table!,cell,flagResidue,cancellationToken):
                 new(actualResource,actualLineAcoustic,table!,cell,flagResidue,cancellationToken);
         }
+        //214535 initializes request34=IMP once. Both2136D0 and213C00 then
+        //reuse the complete same request80 and pointed caller-owned cost cell.
+        //The pointed value before F0 is explicit portable caller state; native
+        //does not initialize it here and the successor callbacks do not read it.
+        softHyphenPrepass = new(actualResource, owner, createPrimaryRecombinationOperations(),
+            scorer, flagPrepass.BindSharedCallerFrame(), policy.Refresh.KnowledgeMarkerA0 != 0,
+            cancellationToken);
         //20C1C0 copies runtime AL10/12/14 and resolves U+0003/FFFD. Runtime
         //AL08..14 correspond to serialized header words0..6 (not offsets0..6).
         byte[] alphabetHeader = owner.Model.AcousticAlphabet.CopySerializedHeader();
@@ -277,6 +301,7 @@ public sealed class LegacyOwnedMainDirectWordPass
             var heap = descriptor.GetHeapSnapshot();
             var router = Router(heap);
             int rootQueries = 0, parentQueries = 0, flagAllocations = 0;
+            int softHyphenCalls = 0, softHyphenQualified = 0, softHyphenSuccessors = 0, softHyphenAllocations = 0;
             for (int spanIndex = 0; spanIndex < owner.GetSpanExtent(node); spanIndex++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -307,6 +332,25 @@ public sealed class LegacyOwnedMainDirectWordPass
                         if (!WithinWordLength(node, parent.Span)) continue;
                         flagAllocations += flagPrepass.Process(node, span, previous, ordinal, LookupRecord,
                             headers, owner.Contexts, router, false, policy.FlagPrepassDistance58, false, cancellationToken).AcceptedAllocations;
+                        if (ShouldRunSoftHyphen(node, previous, parent.Span, cancellationToken))
+                        {
+                            var observed = softHyphenObserver;
+                            var actualHeap = observed is null ? null : router.GetPrimaryHeap(parent.Span[4]);
+                            int beforeCount = actualHeap?.Count ?? 0;
+                            var before = actualHeap?.GetSlotStorageSnapshot() ?? ReadOnlyMemory<byte>.Empty;
+                            var soft = softHyphenPrepass.Process(currentSpan, ordinal, LookupRecord, router, cancellationToken);
+                            softHyphenCalls++;
+                            if (soft.Qualified) softHyphenQualified++;
+                            softHyphenSuccessors += soft.Successors;
+                            softHyphenAllocations += soft.AcceptedAllocations;
+                            if (observed is not null)
+                            {
+                                observed(new(node, span, previous, ordinal, parent.ToArray(), beforeCount, before,
+                                    actualHeap!.Count, actualHeap.GetSlotStorageSnapshot(), soft));
+                                owner.ValidateSpan(currentSpan, cancellationToken);
+                                cancellationToken.ThrowIfCancellationRequested();
+                            }
+                        }
                         var request = new LegacyPreparedDictionaryQuery { Capacity = 128, ContextRoot = owner.Contexts.ContainerIdentity };
                         ulong? tag = LegacyOrdinaryDictionaryQueryPreparation.ApplyContinuation(request,
                             QueryPolicy(), parent.Span, (uint)node, span, 0, false);
@@ -377,7 +421,11 @@ public sealed class LegacyOwnedMainDirectWordPass
             }
             output.Add(new(node, rootQueries, parentQueries, flagAllocations, primaryHeap.Count, language,
                 languageQueries, languageAllocations, buffer.SourceEnd23f0, buffer.RetainedEnd23f8,
-                buffer.CopyRecordStorage(), buffer.CopyPrimaryStorage(), cumulative[node], periodicOffset, buffer.CopySecondaryStorage()));
+                buffer.CopyRecordStorage(), buffer.CopyPrimaryStorage(), cumulative[node], periodicOffset, buffer.CopySecondaryStorage())
+            {
+                SoftHyphenCalls = softHyphenCalls, SoftHyphenQualified = softHyphenQualified,
+                SoftHyphenSuccessors = softHyphenSuccessors, SoftHyphenAllocations = softHyphenAllocations
+            });
             //215DC0..215DDE: intermediate207CB0 follows periodic cost changes
             //and precedes the actual sourceV80. Both comparisons are signed.
             if (publication is not null && (publication.PreparedEndingNode == node ||
@@ -642,9 +690,7 @@ public sealed class LegacyOwnedMainDirectWordPass
             if ((uint)ordinal >= (uint)arcs.Count) throw new ArgumentOutOfRangeException(nameof(ordinal));
             if (owner.Graph.GlobalSource is { } global)
                 return global.ResolveGroupSource(arcs[ordinal].GroupId, token).Primary.LineId;
-            var source = owner.RequireSameSource();
-            return source.MainLineSource is { } line ? line.Owner.SourceLineId
-                : source.Source.GetSourceLineIdForArc(node, ordinal);
+            return owner.RequireSameSource().ReadSourceDescriptorLine(node, ordinal, token);
         }
     }
 
@@ -657,6 +703,34 @@ public sealed class LegacyOwnedMainDirectWordPass
         ushort anchorOrdinal = BinaryPrimitives.ReadUInt16LittleEndian(parent[60..]);
         var anchor = LookupRecord(anchorNode, anchorOrdinal).Span;
         return unchecked(currentNode + 1 + (unchecked((sbyte)anchor[32]) - anchorNode)) < policy.Refresh.MaximumWordLength68;
+    }
+
+    private bool ShouldRunSoftHyphen(int currentNode, int previousNode,
+        ReadOnlySpan<byte> parent, CancellationToken token)
+    {
+        //2144F0's E8 callback is present for both concrete ordinary owners.
+        //Fresh frontend280 is false (the same policy that admits2136D0).
+        //E8 returns descriptor+10 LINE ID, never descriptor ordinal itself.
+        if (!softHyphenPrepass.HasLabels || currentNode + 1 >= owner.Graph.NodeCount ||
+            (parent[6] & 1) != 0) return false;
+        int currentLine = ReadDescriptorLine(currentNode, 0, token);
+        if (currentLine == -1) return false;
+        int nextLine = ReadDescriptorLine(currentNode + 1, 0, token);
+        if (unchecked(nextLine - currentLine) != 1) return false;
+        int previousLine = ReadDescriptorLine(previousNode,
+            BinaryPrimitives.ReadUInt16LittleEndian(parent[28..]), token);
+        token.ThrowIfCancellationRequested();
+        return previousLine == -1 || previousLine == currentLine;
+    }
+
+    private int ReadDescriptorLine(int node, int ordinal, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        var arcs = owner.Graph.GetNode(node);
+        if ((uint)ordinal >= (uint)arcs.Count) throw new ArgumentOutOfRangeException(nameof(ordinal));
+        if (owner.Graph.GlobalSource is { } global)
+            return global.ResolveGroupSource(arcs[ordinal].GroupId, token).Primary.LineId;
+        return owner.RequireSameSource().ReadSourceDescriptorLine(node, ordinal, token);
     }
 
     private void ReadAll(LegacyNativeDelimiterQuery query, Action<LegacyNativeDelimiterQueryPage> consume, CancellationToken token)

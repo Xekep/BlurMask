@@ -72,6 +72,15 @@ public sealed class LegacyOwnedMainWordSpanPreparation
     public LegacySymbolContextFactory Contexts => dictionaryBinding.Contexts;
     public int SourceRowBudget => AcousticPolicy.MaximumSourceArcs;
 
+    internal int ReadSourceDescriptorLine(int node, int ordinal, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        var arcs = SourceGraph.GetNode(node);
+        if ((uint)ordinal >= (uint)arcs.Count) throw new ArgumentOutOfRangeException(nameof(ordinal));
+        return source.Single is { } single ? single.GetSourceLineIdForArc(node, ordinal)
+            : source.Line!.Owner.SourceLineId;
+    }
+
     public LegacyOwnedMainWordSpanPreparation(ReadOnlySpan<byte> acousticResource,
         ReadOnlySpan<byte> lexicalResource, ReadOnlySpan<byte> engineProfile,
         LegacyFreshSingleGlyphMainSampled actualSource, LegacyCursiveSeparationTable table,

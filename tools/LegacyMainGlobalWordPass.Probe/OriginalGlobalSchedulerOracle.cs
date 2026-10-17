@@ -8,7 +8,8 @@ using InkRecognition;
 internal static class OriginalGlobalSchedulerOracle
 {
     internal static IReadOnlyList<LegacyMainDirectWordNodeResult> Run(byte[] ak,
-        LegacyFreshMainGlobalWordControllerPolicy policy)
+        LegacyFreshMainGlobalWordControllerPolicy policy,
+        Action<LegacyMainSoftHyphenObservedCall>? observeSoftHyphen = null)
     {
         const int imp = 0x4000000;
         var owner=policy.Services;var binding=LegacyMainOwnedWordControllerBinding.FromGlobal(policy);
@@ -22,12 +23,16 @@ internal static class OriginalGlobalSchedulerOracle
             [new(0, 0, 1), LegacyNativeWordPreparedSource.FromDictionary(owner.Descriptor)], cfg, 0);
         var buffers = new Dictionary<int, LegacyOwnedFreshMainWordNodeBuffer>();
         var output = new List<LegacyMainDirectWordNodeResult>();
+        var retainedDescriptor = new LegacyNativeWordHeapDescriptor(
+            new byte[checked((int)heapPlan.Limits[0].PrimaryInitialCapacity20 * 128)],
+            (int)heapPlan.Limits[0].PrimaryInitialCapacity20, 0, 1, heapPlan.Limits[0]);
         var cell = new LegacyNativeWordTransitionCostCell(1, 0);
         var acoustic = LegacyNativeWordAcousticRequestScorer.ForAlphabet(
             LegacyAcousticCandidateThresholds.ReadV110Node(ak.AsSpan(189734), out _), owner.Model.AcousticAlphabet);
         var startup = new LegacyNativeMainInitialSpecialCandidates(ak, owner, cell, new byte[80]);
         byte[] flagRequest = new byte[80]; W32(flagRequest, 52, imp);
         var flags=new LegacyNativeMainWordFlagPrepass(ak,owner,(node,arc,token)=>owner.GetCosts(lastSelected!,node,arc,token),cell,flagRequest,default);
+        var sharedRequest = flags.BindSharedCallerFrame();
         var gate = new LegacyNativeWordLanguageGate(owner.Model, graph);
         byte[] pool = new byte[heapPlan.Limits[0].PrimaryInitialCapacity20 * 80];
         LegacyNativeWordHeapRouter Router(LegacyNativeWordRecordHeap heap)
@@ -47,9 +52,12 @@ internal static class OriginalGlobalSchedulerOracle
 
         for (int node = 0; node < graph.NodeCount; node++)
         {
-            var heap = new LegacyNativeWordRecordHeap((int)heapPlan.Limits[0].PrimaryInitialCapacity20);
+            if (!LegacyNativeWordPassReset.Reset([retainedDescriptor], cfg, 0, Grow))
+                throw new Exception("Oracle primary reset failed.");
+            var heap = retainedDescriptor.GetHeapSnapshot();
             var router = Router(heap);
             int roots = 0, parents = 0, flagAllocations = 0;
+            int softCalls = 0, softQualified = 0, softSuccessors = 0, softAllocations = 0;
             for (byte span = 0; span < owner.GetSpanExtent(node); span++)
             {
                 var selected = owner.Prepare(node, span,default);lastSelected=selected;
@@ -78,7 +86,7 @@ internal static class OriginalGlobalSchedulerOracle
                 }
                 else
                 {
-                    var parentConsumer=new LegacyNativeOrdinaryParentWordCandidates(owner,acoustic,cell,new byte[80]);
+                    var parentConsumer=new LegacyNativeOrdinaryParentWordCandidates(owner,acoustic,cell,new byte[80],policy.Refresh.KnowledgeMarkerA0);
                     for (ushort ordinal = 0; ordinal < cfg.PrimaryArcLimit230a; ordinal++)
                     {
                         var parent = Read(previous, ordinal);
@@ -91,6 +99,23 @@ internal static class OriginalGlobalSchedulerOracle
                         }
                         flagAllocations += flags.Process(node, span, previous, ordinal, Read, headers, owner.Contexts,
                             router, false, policy.FlagPrepassDistance58, false).AcceptedAllocations;
+                        if (node + 1 < graph.NodeCount && (parent.Span[6] & 1) == 0)
+                        {
+                            int currentLine = Line(node, 0), nextLine = Line(node + 1, 0);
+                            int priorLine = Line(previous, BinaryPrimitives.ReadUInt16LittleEndian(parent.Span[28..]));
+                            if (currentLine != -1 && unchecked(nextLine - currentLine) == 1 &&
+                                (priorLine == -1 || priorLine == currentLine))
+                            {
+                                int beforeCount = heap.Count;
+                                var before = heap.GetSlotStorageSnapshot();
+                                var soft = OriginalSoftHyphenOracle.Run(policy, selected, ordinal, parent,
+                                    Read, sharedRequest, router, acoustic);
+                                softCalls++; if (soft.Qualified) softQualified++;
+                                softSuccessors += soft.Successors; softAllocations += soft.AcceptedAllocations;
+                                observeSoftHyphen?.Invoke(new(node, span, previous, ordinal, parent.ToArray(),
+                                    beforeCount, before, heap.Count, heap.GetSlotStorageSnapshot(), soft));
+                            }
+                        }
                         var request = new LegacyPreparedDictionaryQuery { Capacity = 128, ContextRoot = owner.Contexts.ContainerIdentity };
                         ulong? tag = LegacyOrdinaryDictionaryQueryPreparation.ApplyContinuation(request,
                             new(0, 0, false, false, policy.MaximumParentDistance54), parent.Span, (uint)node, span, 0, false);
@@ -123,10 +148,10 @@ internal static class OriginalGlobalSchedulerOracle
             }
             var ordered = LegacyNativeWordAlternativeOrdering.Prepare(slots.Span, heap.Count, false, cfg, headers, false, new(2, pool), null);
             pool = ordered.PrimaryAlternativeStorage.ToArray();
-            var descriptor = new LegacyNativeWordHeapDescriptor(ordered.Heap.GetSlotStorageSnapshot().Span,
-                ordered.Heap.Capacity, ordered.Heap.Count, 1, heapPlan.Limits[0]);
+            var descriptor = CarryStorage(retainedDescriptor, ordered.Heap);
             if (!LegacyNativeWordQuotaController.Apply([descriptor], cfg, 0, 0)) throw new InvalidDataException("Oracle primary quota failed.");
             var primary = descriptor.GetHeapSnapshot();
+            retainedDescriptor = descriptor;
             int extent = cfg.PrimaryArcLimit230a + (int)(cfg.ExpansionFactor230c * cfg.PrimaryArcLimit230a);
             var buffer = new LegacyOwnedFreshMainWordNodeBuffer(binding,node,new byte[extent*88],new byte[cfg.PrimaryArcLimit230a*80],[],default);
             foreach (int index in Enumerable.Range(0, primary.Count)) buffer.WritePrimary(primary.GetSlotSnapshot(index).Span, pool);
@@ -138,7 +163,9 @@ internal static class OriginalGlobalSchedulerOracle
                 .DefaultIfEmpty(imp).Min();
             if (language)
             {
-                var languageHeap = new LegacyNativeWordRecordHeap((int)heapPlan.Limits[0].SecondaryInitialCapacity2c);
+                if (!LegacyNativeWordPassReset.Reset([retainedDescriptor], cfg, 1, Grow))
+                    throw new Exception("Oracle language reset failed.");
+                var languageHeap = retainedDescriptor.GetHeapSnapshot();
                 var completion=LegacyNativeFirstDictionaryWordCompletion.ForGlobalSpan(policy,lastSelected!,default);
                 //Independent raw aggregate292 V48 instead of the scheduler's
                 //outer290. Actual auxiliary60 has17 edges and0terminal nodes.
@@ -164,10 +191,10 @@ internal static class OriginalGlobalSchedulerOracle
                 }
                 var languageOrdered = LegacyNativeWordAlternativeOrdering.Prepare(languageHeap.GetSlotStorageSnapshot().Span,
                     languageHeap.Count, true, cfg, headers, false, null, null);
-                var languageDescriptor = new LegacyNativeWordHeapDescriptor(languageOrdered.Heap.GetSlotStorageSnapshot().Span,
-                    languageOrdered.Heap.Capacity, languageOrdered.Heap.Count, 2, heapPlan.Limits[0]);
+                var languageDescriptor = CarryStorage(retainedDescriptor, languageOrdered.Heap);
                 if (!LegacyNativeWordQuotaController.Apply([languageDescriptor], cfg, 0, 1)) throw new InvalidDataException("Oracle language quota failed.");
                 var live = languageDescriptor.GetHeapSnapshot();
+                retainedDescriptor = languageDescriptor;
                 foreach (int index in Enumerable.Range(0, live.Count)) buffer.WriteLanguage(live.GetSlotSnapshot(index).Span);
                 minimum = Math.Min(minimum, Enumerable.Range(0, live.Count).Select(index => I32(live.GetSlotSnapshot(index).Span, 16))
                     .DefaultIfEmpty(imp).Min());
@@ -191,7 +218,11 @@ internal static class OriginalGlobalSchedulerOracle
                 periodic = minimum;
             }
             output.Add(new(node, roots, parents, flagAllocations, primary.Count, language, languageQueries, languageAllocations,
-                buffer.SourceEnd23f0, buffer.RetainedEnd23f8, buffer.CopyRecordStorage(), buffer.CopyPrimaryStorage(), cumulative[node], periodic));
+                buffer.SourceEnd23f0, buffer.RetainedEnd23f8, buffer.CopyRecordStorage(), buffer.CopyPrimaryStorage(), cumulative[node], periodic)
+            {
+                SoftHyphenCalls = softCalls, SoftHyphenQualified = softQualified,
+                SoftHyphenSuccessors = softSuccessors, SoftHyphenAllocations = softAllocations
+            });
             owner.AdvanceNodeEpoch(node,default);
         }
         return output.Select(result =>
@@ -206,6 +237,23 @@ internal static class OriginalGlobalSchedulerOracle
                 }
             return result with { Records = records, CumulativePathCost2520 = cumulative[result.EndingNode] };
         }).ToList().AsReadOnly();
+
+        int Line(int node, int arc) => owner.Graph.GlobalSource!.ResolveGroupSource(
+            graph.GetNode(node)[arc].GroupId, default).Primary.LineId;
+
+        static LegacyNativeWordHeapGrowthResult? Grow(int _, LegacyNativeWordHeapGrowthRequest request)
+        {
+            byte[] storage = new byte[request.RequiredAllocatedSlots * 128];
+            request.PreviousStorage.Span.CopyTo(storage);
+            return new(storage, 1);
+        }
+        static LegacyNativeWordHeapDescriptor CarryStorage(LegacyNativeWordHeapDescriptor previous,
+            LegacyNativeWordRecordHeap changed)
+        {
+            byte[] storage = previous.GetBackingStorageSnapshot().ToArray();
+            changed.GetSlotStorageSnapshot().Span.CopyTo(storage);
+            return new(storage, changed.Capacity, changed.Count, 1, previous.Limits);
+        }
     }
 
     private static int I32(ReadOnlySpan<byte> bytes, int at) => BinaryPrimitives.ReadInt32LittleEndian(bytes[at..]);

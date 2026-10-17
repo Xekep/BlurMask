@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 namespace InkRecognition;
 
 /// <summary>Actual fresh ordinary main118/140 and compact selector callbacks
-/// for the shared global graph. Supports kinds0/2/5/6, actual fresh pending
+/// for the shared global graph. Supports kinds0/2/5/6/7, actual fresh pending
 /// separators and ordinary source descriptors. Does not infer the outer word
 /// scheduler, protocol/opaque records or custom boundary probabilities.</summary>
 public sealed class LegacyFreshMainGlobalWordTransitions
@@ -76,7 +76,7 @@ public sealed class LegacyFreshMainGlobalWordTransitions
     {
         ArgumentNullException.ThrowIfNull(request);token.ThrowIfCancellationRequested();
         var current=Current(request);byte kind=request.ReadByte(28);
-        if(kind is not (0 or 2 or 5 or 6))throw new NotSupportedException("Supported ordinary main request kinds are0/2/5/6.");
+        if(kind is not (0 or 2 or 5 or 6 or 7))throw new NotSupportedException("Supported ordinary main request kinds are0/2/5/6/7.");
         int before=request.Cost.Value;bool accepted;
         if(kind==2&&!wholeStarts[(int)current.GroupId])
         {
@@ -93,8 +93,12 @@ public sealed class LegacyFreshMainGlobalWordTransitions
         else
         {
             var prior=Previous(request);byte status=kind switch
-            {0=>Status100(request,current,prior),2=>Status118(request,current,prior),_=>Status108(request,current,prior)};
-            if(kind==5)
+            {0=>Status100(request,current,prior),2=>Status118(request,current,prior),7=>Status110(request,current,prior),_=>Status108(request,current,prior)};
+            if(kind==7)
+                //195C40 calls21B.V110. Status0/2 rejects without converting
+                //the otherwise finite cost to IMP; status3 accepts unchanged.
+                accepted = (status & ~2) != 0 && status != 4;
+            else if(kind==5)
             {
                 if(status!=0)accepted=status!=4;
                 else{request.Cost.Value=unchecked(request.Cost.Value+Cache.ReadState(request.ReadInt32(0),request.ReadUInt16(12),token).BlankCost);accepted=request.Cost.Value<request.ReadInt32(52);}
@@ -127,7 +131,7 @@ public sealed class LegacyFreshMainGlobalWordTransitions
     private bool Validate140Core(LegacyNativeWordRecombinationRequest request,CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(request);token.ThrowIfCancellationRequested();_=Current(request);
-        if(request.ReadByte(28)is not(0 or 2 or 5 or 6))throw new NotSupportedException("Supported ordinary main request kinds are0/2/5/6.");
+        if(request.ReadByte(28)is not(0 or 2 or 5 or 6 or 7))throw new NotSupportedException("Supported ordinary main request kinds are0/2/5/6/7.");
         //194170 sets graph191=1. Kind6 precedes main192=false.
         if(request.ReadByte(28)==6)return ValidatePath140(request,token);
         return true;
@@ -261,6 +265,28 @@ public sealed class LegacyFreshMainGlobalWordTransitions
     {
         if((arc.Flags&8)==0&&unchecked((short)arc.AuxiliaryContextIndex)<0&&Graph.State.Groups[(int)arc.GroupId].DescriptorOrdinal==previous.DescriptorOrdinal)return 0;
         request.Cost.Value=Impossible;return 4;
+    }
+    private byte Status110(LegacyNativeWordRecombinationRequest request,
+        LegacyMainCompactOrdinaryArc arc, LegacyMainCompactOrdinaryGroup previous)
+    {
+        //1A83C0 ordering is significant: kind7 bit10 precedes bit8/context.
+        //The constructor proves fresh descriptor.kind0, group.kind0 and
+        //endpoint nibbles0. Custom/opaque source-format branches are excluded.
+        if ((arc.Flags & 0x10) != 0) { request.Cost.Value = Impossible; return 4; }
+        if ((arc.Flags & 8) != 0) return 3;
+        if (unchecked((short)arc.AuxiliaryContextIndex) >= 0)
+        {
+            _ = contexts[arc.AuxiliaryContextIndex];
+            return 3; //The owned pending prefix's first context byte is1.
+        }
+        var current = Graph.State.Groups[(int)arc.GroupId];
+        if (current.DescriptorOrdinal == previous.DescriptorOrdinal &&
+            field20[current.DescriptorOrdinal] is 0x2000001 or 0x2000002)
+        {
+            request.Cost.Value = Impossible;
+            return 4;
+        }
+        return 0;
     }
     private byte Status118(LegacyNativeWordRecombinationRequest request,LegacyMainCompactOrdinaryArc arc,LegacyMainCompactOrdinaryGroup previous)
     {

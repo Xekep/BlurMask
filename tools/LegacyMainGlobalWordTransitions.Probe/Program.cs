@@ -12,7 +12,7 @@ InkStroke M(float y)=>new(new InkPoint[]{new(0,y+90),new(0,y+10),new(25,y+60),ne
 InkStroke V(float y)=>new(new InkPoint[]{new(0,y+10),new(0,y+90)});
 var mir=new InkStroke[]{M(0),new(new InkPoint[]{new(70,10),new(70,90),new(120,10),new(120,90)}),new(new InkPoint[]{new(140,90),new(140,10),new(180,10),new(190,20),new(190,40),new(180,50),new(140,50)})};
 var rows=new[]{V(0),new InkStroke(V(0).Points.Select(p=>new InkPoint(p.X+40,p.Y)).ToArray()),V(140),new InkStroke(V(140).Points.Select(p=>new InkPoint(p.X+40,p.Y)).ToArray())};
-int owners=0,calls=0,pathCalls=0,pending=0,guards=0,selectorChecks=0;
+int owners=0,calls=0,pathCalls=0,pending=0,guards=0,selectorChecks=0,kind7Calls=0;
 using var file=File.Create(args[7]);using var w=new Utf8JsonWriter(file);w.WriteStartArray();
 foreach(var raw in new[]{new[]{M(0),M(140)},new[]{M(0),M(250)},new[]{V(0),V(140)},new[]{V(0),V(250)},mir,mir.Concat(mir.Select(s=>new InkStroke(s.Points.Select(p=>new InkPoint(p.X,p.Y+160)).ToArray()))).ToArray(),rows,Enumerable.Range(0,14).Select(n=>new InkStroke(M(0).Points.Select(p=>new InkPoint(p.X+n*70,p.Y)).ToArray())).ToArray()})
 {
@@ -42,6 +42,33 @@ foreach(var raw in new[]{new[]{M(0),M(140)},new[]{M(0),M(250)},new[]{V(0),V(140)
             var canceled=new LegacyNativeWordRecombinationRequest(before.ToArray(),new LegacyNativeWordTransitionCostCell(cell.Identity,initial));Reject(()=>transitions.Calculate118(canceled,new(true)));if(canceled.Cost.Value!=initial||!canceled.GetSnapshot().Span.SequenceEqual(before.Span))throw new Exception("Cancellation changed prepared request.");
         }
     }w.WriteEndArray();
+    //Prepared native kind7 packets over the real source graph. These are
+    //distinct from the actual213C00-owned parent continuation observations.
+    w.WriteStartArray("kind7Calls");
+    for (int n = 0; n < graph.State.NodeCount; n++)
+    for (ushort a = 0; a < graph.State.GetNode(n).Count; a++)
+    {
+        var arc = graph.State.GetNode(n)[a]; int previous = n - arc.Span - 1;
+        if (previous < 0 || graph.State.GetNode(previous).Count == 0) continue;
+        foreach (int sourceKind in new[] { 6, 9 })
+        foreach (int initial in new[] { 0, int.MaxValue - 4096 })
+        {
+            byte[] bytes = Enumerable.Range(0,80).Select(i => (byte)(i * 11 + kind7Calls)).ToArray();
+            I(bytes,0,n); I(bytes,4,previous); I(bytes,8,previous); U(bytes,12,a); U(bytes,14,0); U(bytes,16,0);
+            I(bytes,20,0); I(bytes,24,0); bytes[28]=7; I(bytes,32,arc.Span);
+            U(bytes,36,Label("\u043c")); U(bytes,38,Label("-")); I(bytes,48,12345); I(bytes,52,0x4000000);
+            I(bytes,64,sourceKind); I(bytes,68,6);
+            var cell = new LegacyNativeWordTransitionCostCell((ulong)kind7Calls + 200000, initial);
+            BinaryPrimitives.WriteUInt64LittleEndian(bytes.AsSpan(40),cell.Identity);
+            var request = new LegacyNativeWordRecombinationRequest(bytes,cell); var before=request.GetSnapshot();
+            bool accepted=transitions.Calculate118(request); var after=request.GetSnapshot(); int cost=cell.Value;
+            if (!transitions.Validate140(request) || cell.Value!=cost || !request.GetSnapshot().Span.SequenceEqual(after.Span))
+                throw new Exception("Main kind7 graph192=false140 changed its packet/cost.");
+            w.WriteStartObject();w.WriteString("before",Convert.ToHexString(before.Span));w.WriteNumber("costBefore",initial);
+            w.WriteBoolean("accepted",accepted);w.WriteNumber("costAfter",cost);w.WriteString("after",Convert.ToHexString(after.Span));w.WriteEndObject();kind7Calls++;
+        }
+    }
+    w.WriteEndArray();
     w.WriteStartArray("pathCalls");
     for(int n=0;n<graph.State.NodeCount;n++)for(ushort a=0;a<graph.State.GetNode(n).Count;a++)
     {
@@ -65,10 +92,33 @@ foreach(var raw in new[]{new[]{M(0),M(140)},new[]{M(0),M(250)},new[]{V(0),V(140)
     {
         byte[] bytes=new byte[80];I(bytes,8,-1);I(bytes,32,s);var request=new LegacyNativeWordRecombinationRequest(bytes,new(1,0));if(!operations.SuccessorsF0F8(request,default).Span.SequenceEqual(graph.State.Root.CopySelector(s+1)))throw new Exception("Actual root selector changed.");selectorChecks++;
     }
+    var preparedPolicy = LegacyFreshMainGlobalWordControllerPolicy.Prepare(ak,owner,
+        LegacyFreshMainGlobalGroupCosts.Prepare(ak,owner,table),transitions);
+    var pathGuard = new LegacyGlobalOrdinaryWordPathGuard(preparedPolicy.Services);
+    byte[] kind7Packet = new byte[80]; kind7Packet[28]=7; I(kind7Packet,64,6); I(kind7Packet,68,6);
+    var kind7GuardRequest = new LegacyNativeWordRecombinationRequest(kind7Packet,new(1,83));
+    if (!pathGuard.AllowsSoftHyphenContinuation(kind7GuardRequest,0,false,default))
+        throw new Exception("Native null context kind7 branch rejected.");
+    foreach (ushort rootSymbol in new ushort[] {0xfff8,0xfff9,0xfffa,0xfffb,0xfffc,0xfffd,0xfffe,0xffff,0})
+    {
+        ulong root = owner.Contexts.ResolveInitial(rootSymbol).Identity;
+        var resolvedChild = owner.Contexts.ResolveChild(root,Label("\u043c"));
+        if (resolvedChild.Created) owner.Contexts.LinkCreatedContext(resolvedChild.Identity,root);
+        ulong child = resolvedChild.Identity;
+        bool expected = unchecked((ushort)(rootSymbol+7)) >= 4;
+        if (pathGuard.AllowsSoftHyphenContinuation(kind7GuardRequest,root,false,default)!=expected ||
+            pathGuard.AllowsSoftHyphenContinuation(kind7GuardRequest,child,false,default)!=expected)
+            throw new Exception("Native kind7 follows root parent links or ushort control wrap incorrectly.");
+    }
+    if (kind7GuardRequest.Cost.Value!=83 || !kind7GuardRequest.GetSnapshot().Span.SequenceEqual(kind7Packet))
+        throw new Exception("Kind7 symbolic guard changed its prepared packet/cost.");
+    Reject(()=>pathGuard.AllowsSoftHyphenContinuation(kind7GuardRequest,0,true,default));
+    Reject(()=>pathGuard.AllowsSoftHyphenContinuation(kind7GuardRequest,new LegacySymbolContextFactory().ResolveInitial(1).Identity,false,default));
+    Reject(()=>pathGuard.AllowsSoftHyphenContinuation(kind7GuardRequest,0,false,new(true)));
     var unsupportedBytes=new byte[80];unsupportedBytes[28]=1;var unsupported=new LegacyNativeWordRecombinationRequest(unsupportedBytes,new(1,0));Reject(()=>transitions.Calculate118(unsupported));Reject(()=>transitions.Validate140(unsupported));
     Reject(()=>LegacyFreshMainGlobalWordTransitions.Prepare(ak,cache,new(true)));var bad=ak.ToArray();bad[0]^=1;Reject(()=>LegacyFreshMainGlobalWordTransitions.Prepare(bad,cache));w.WriteEndObject();owners++;
 }
-w.WriteEndArray();w.Flush();if(pending==0)throw new Exception("Actual pending descriptor contexts untested.");Console.WriteLine($"PASS {owners} owned global118/140 sources/{calls} full80 prepared callbacks/{pathCalls} actual-key path140 callbacks/{pending} pending-context callbacks/{selectorChecks} actual ordered selectors/{guards} cancellation/resource guards; no controller or winner claim.");
+w.WriteEndArray();w.Flush();if(pending==0)throw new Exception("Actual pending descriptor contexts untested.");Console.WriteLine($"PASS {owners} owned global118/140 sources/{calls} full80 prepared callbacks/{kind7Calls} additional prepared kind7 callbacks/{pathCalls} actual-key path140 callbacks/{pending} pending-context callbacks/{selectorChecks} actual ordered selectors/{guards} cancellation/resource guards; no controller or winner claim.");
 void Ints(string? name,IEnumerable<int> values){if(name is not null)w.WritePropertyName(name);w.WriteStartArray();foreach(int v in values)w.WriteNumberValue(v);w.WriteEndArray();}
 void I(byte[] b,int at,int value)=>BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(at),value);
 void U(byte[] b,int at,ushort value)=>BinaryPrimitives.WriteUInt16LittleEndian(b.AsSpan(at),value);

@@ -7,6 +7,8 @@ namespace InkRecognition;
 public sealed class LegacyFreshMainGlobalWordPass
 {
     private readonly LegacyOwnedMainDirectWordPass scheduler;
+    internal Action<LegacyMainSoftHyphenObservedCall>? SoftHyphenObserver
+    { set => scheduler.SoftHyphenObserver = value; }
     public LegacyFreshMainGlobalWordControllerPolicy Policy {get;}
     public LegacyFreshMainGlobalWordPass(ReadOnlySpan<byte> resource,LegacyFreshMainGlobalWordControllerPolicy policy,
         LegacyMainDirectStorageProvider allocator,CancellationToken token=default)
