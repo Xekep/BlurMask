@@ -9,15 +9,21 @@ public sealed class LegacyNativeCaseAuxiliaryQuerySource
     private int active;
     private bool valid=true;
     public LegacySymbolContextFactory Contexts {get;}
-    public LegacyOrdinaryCursiveCandidateGraph Graph {get;}
+    private readonly LegacyOrdinaryRecognitionGraph graph;
+    public LegacyOrdinaryCursiveCandidateGraph Graph=>graph.RequireSameSource();
     private LegacyNativeCaseAuxiliaryQuerySource(LegacyAggregateDictionaryReader reader,
-        LegacySymbolContextFactory contexts,LegacyOrdinaryCursiveCandidateGraph graph)
-    {this.reader=reader;Contexts=contexts;Graph=graph;}
+        LegacySymbolContextFactory contexts,LegacyOrdinaryRecognitionGraph graph)
+    {this.reader=reader;Contexts=contexts;this.graph=graph;}
     public static LegacyNativeCaseAuxiliaryQuerySource BindOrdinaryDictionary(
         LegacyPreparedDictionaryQuerySource source,LegacySymbolContextFactory contexts,
         LegacyOrdinaryCursiveCandidateGraph graph)
+        =>BindOwnedOrdinaryDictionary(source,contexts,LegacyOrdinaryRecognitionGraph.FromSameSource(graph));
+
+    internal static LegacyNativeCaseAuxiliaryQuerySource BindOwnedOrdinaryDictionary(
+        LegacyPreparedDictionaryQuerySource source,LegacySymbolContextFactory contexts,
+        LegacyOrdinaryRecognitionGraph graph)
     {
-        var bound=LegacyOrdinaryDictionarySourceOwner.BindDictionary(source,contexts,graph);
+        var bound=LegacyOrdinaryDictionarySourceOwner.BindOwnedDictionary(source,contexts,graph);
         return new(bound.Read,contexts,graph);
     }
     /// <summary>All five transported state bits are valid here, including31;

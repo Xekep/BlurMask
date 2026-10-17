@@ -13,7 +13,7 @@ public sealed record LegacyNativeWordSymbolPreparationResult(
 /// </summary>
 public sealed class LegacyNativeWordSymbolPreparationSession
 {
-    private readonly LegacyOrdinaryCursiveCandidateGraph graph;
+    private readonly LegacyOrdinaryRecognitionGraph graph;
     private readonly LegacyOrdinaryGraphAcousticPermissionSession preparation;
     private readonly int labelCount;
     private readonly ReadOnlyMemory<byte>? wordCharacters;
@@ -24,6 +24,14 @@ public sealed class LegacyNativeWordSymbolPreparationSession
     public LegacyNativeWordSymbolPreparationSession(LegacyOrdinaryCursiveCandidateGraph graph,
         LegacyPreparedDictionaryWorkingMap source, ReadOnlySpan<ushort> reservedSlots,
         Func<LegacyOrdinaryCursiveCandidateInk, CancellationToken, LegacyOrdinaryGraphAcousticRow?> compute,
+        ReadOnlyMemory<byte>? wordCharacterBitset98 = null,
+        ReadOnlyMemory<byte>? existingEligibility88 = null, CancellationToken cancellationToken = default)
+        :this(LegacyOrdinaryRecognitionGraph.FromSameSource(graph),source,reservedSlots,AdaptCompute(graph,compute),
+            wordCharacterBitset98,existingEligibility88,cancellationToken){}
+
+    internal LegacyNativeWordSymbolPreparationSession(LegacyOrdinaryRecognitionGraph graph,
+        LegacyPreparedDictionaryWorkingMap source, ReadOnlySpan<ushort> reservedSlots,
+        Func<int, CancellationToken, LegacyOrdinaryGraphAcousticRow?> compute,
         ReadOnlyMemory<byte>? wordCharacterBitset98 = null,
         ReadOnlyMemory<byte>? existingEligibility88 = null, CancellationToken cancellationToken = default)
     {
@@ -41,6 +49,14 @@ public sealed class LegacyNativeWordSymbolPreparationSession
         preparation = new(graph, source, reservedSlots, compute);
         if (existingEligibility88 is { } initial)
             qualifier = new(labelCount, initial.Span, wordCharacters, cancellationToken);
+    }
+
+    private static Func<int,CancellationToken,LegacyOrdinaryGraphAcousticRow?> AdaptCompute(
+        LegacyOrdinaryCursiveCandidateGraph graph,
+        Func<LegacyOrdinaryCursiveCandidateInk,CancellationToken,LegacyOrdinaryGraphAcousticRow?> compute)
+    {
+        ArgumentNullException.ThrowIfNull(compute);
+        return (group,token)=>compute(graph.Groups[group],token);
     }
 
     /// <summary>

@@ -15,6 +15,14 @@ public static class LegacyNativeCaseDictionaryFactory
         LegacyNativeCaseData caseData,LegacyNativeTextPublicationData publication,LegacyNativeCasePreparation preparation,
         LegacySymbolContextFactory contexts,LegacyPreparedDictionaryQuerySource dictionary,
         LegacyOrdinaryCursiveCandidateGraph graph,bool extraCostSideTable)
+        =>BindOwned292(source,containerCaseMode90,language,sourceAlphabet,caseData,publication,preparation,
+            contexts,dictionary,LegacyOrdinaryRecognitionGraph.FromSameSource(graph),extraCostSideTable);
+
+    internal static LegacyNativeCaseNormalQuerySource BindOwned292(LegacyDictionaryResourcePrefix source,
+        uint containerCaseMode90,LegacyWordLanguageModel language,LegacyInkAlphabet sourceAlphabet,
+        LegacyNativeCaseData caseData,LegacyNativeTextPublicationData publication,LegacyNativeCasePreparation preparation,
+        LegacySymbolContextFactory contexts,LegacyPreparedDictionaryQuerySource dictionary,
+        LegacyOrdinaryRecognitionGraph graph,bool extraCostSideTable)
     {
         ArgumentNullException.ThrowIfNull(language);ArgumentNullException.ThrowIfNull(preparation);
         ArgumentNullException.ThrowIfNull(sourceAlphabet);ArgumentNullException.ThrowIfNull(caseData);
@@ -29,6 +37,6 @@ public static class LegacyNativeCaseDictionaryFactory
         var policy=LegacyNativeCasePathPolicy.Create(language.CasePathVersion);
         var expansion=new LegacyNativeCaseRecordExpansion(preparation,policy,contexts);
         bool dutch=source.Identifier.Contains("nl_",StringComparison.Ordinal);
-        return LegacyNativeCaseNormalQuerySource.BindOrdinaryDictionary(expansion,dictionary,graph,dutch,extraCostSideTable);
+        return LegacyNativeCaseNormalQuerySource.BindOwnedOrdinaryDictionary(expansion,dictionary,graph,dutch,extraCostSideTable);
     }
 }

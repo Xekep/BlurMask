@@ -12,19 +12,21 @@ public sealed class LegacyTaggedDictionaryChild
     private readonly Action prepareControllerNode;
     internal Func<uint,bool> IsEligible {get;}
     public LegacySymbolContextFactory Contexts {get;}
-    public LegacyOrdinaryCursiveCandidateGraph Graph {get;}
+    private readonly LegacyOrdinaryRecognitionGraph graph;
+    public LegacyOrdinaryCursiveCandidateGraph Graph=>graph.RequireSameSource();
+    internal object GraphIdentity=>graph.Identity;
     public bool UsesCase292 {get;}
     public ulong LastSourceTag {get;private set;}
     public int LastMethodOffset {get;private set;}
     private LegacyTaggedDictionaryChild(LegacyTaggedDictionaryReader reader,Func<uint,bool> eligible,
-        LegacySymbolContextFactory contexts,LegacyOrdinaryCursiveCandidateGraph graph,bool case292,Action prepareControllerNode)
-    {this.reader=reader;IsEligible=eligible;Contexts=contexts;Graph=graph;UsesCase292=case292;this.prepareControllerNode=prepareControllerNode;}
+        LegacySymbolContextFactory contexts,LegacyOrdinaryRecognitionGraph graph,bool case292,Action prepareControllerNode)
+    {this.reader=reader;IsEligible=eligible;Contexts=contexts;this.graph=graph;UsesCase292=case292;this.prepareControllerNode=prepareControllerNode;}
 
     public static LegacyTaggedDictionaryChild BindOrdinaryDictionary(LegacyPreparedDictionaryQuerySource source,
         LegacySymbolContextFactory contexts,LegacyOrdinaryCursiveCandidateGraph graph)
     {
         var child=LegacyOrdinaryDictionarySourceOwner.BindDictionary(source,contexts,graph);
-        return new((tag,query,aux,extra,token)=>child.Read(query,aux,extra,token),child.IsEligible,contexts,graph,false,source.ResetQueries);
+        return new((tag,query,aux,extra,token)=>child.Read(query,aux,extra,token),child.IsEligible,contexts,LegacyOrdinaryRecognitionGraph.FromSameSource(graph),false,source.ResetQueries);
     }
 
     /// <summary>Own both292 paths over the SAME backend/context/ordinary graph.
@@ -35,11 +37,19 @@ public sealed class LegacyTaggedDictionaryChild
         LegacyNativeCaseData caseData,LegacyNativeTextPublicationData publication,
         LegacyNativeCasePreparation preparation,LegacySymbolContextFactory contexts,
         LegacyPreparedDictionaryQuerySource dictionary,LegacyOrdinaryCursiveCandidateGraph graph,bool extraCostSideTable)
+        =>BindOwnedCase292(resource,containerCaseMode90,language,sourceAlphabet,caseData,publication,preparation,
+            contexts,dictionary,LegacyOrdinaryRecognitionGraph.FromSameSource(graph),extraCostSideTable);
+
+    internal static LegacyTaggedDictionaryChild BindOwnedCase292(LegacyDictionaryResourcePrefix resource,
+        uint containerCaseMode90,LegacyWordLanguageModel language,LegacyInkAlphabet sourceAlphabet,
+        LegacyNativeCaseData caseData,LegacyNativeTextPublicationData publication,
+        LegacyNativeCasePreparation preparation,LegacySymbolContextFactory contexts,
+        LegacyPreparedDictionaryQuerySource dictionary,LegacyOrdinaryRecognitionGraph graph,bool extraCostSideTable)
     {
-        var normal=LegacyNativeCaseDictionaryFactory.Bind292(resource,containerCaseMode90,language,sourceAlphabet,
+        var normal=LegacyNativeCaseDictionaryFactory.BindOwned292(resource,containerCaseMode90,language,sourceAlphabet,
             caseData,publication,preparation,contexts,dictionary,graph,extraCostSideTable);
-        var auxiliary=LegacyNativeCaseAuxiliaryQuerySource.BindOrdinaryDictionary(dictionary,contexts,graph);
-        var eligibility=LegacyOrdinaryDictionarySourceOwner.BindDictionary(dictionary,contexts,graph);
+        var auxiliary=LegacyNativeCaseAuxiliaryQuerySource.BindOwnedOrdinaryDictionary(dictionary,contexts,graph);
+        var eligibility=LegacyOrdinaryDictionarySourceOwner.BindOwnedDictionary(dictionary,contexts,graph);
         //The original request owns the native wrapper-cache pointer. Ephemeron
         //keys preserve that identity without retaining every dead controller
         //query forever; value->Request cycles do not keep dead keys alive.
@@ -102,7 +112,7 @@ public sealed class LegacyTaggedAggregateDictionaryQuerySource
         if(selectedChildren.Count>255)throw new ArgumentException("Native selected source IDs have255 slots.");
         children=selectedChildren.ToArray();
         if(children.Any(c=>c is null))throw new ArgumentException("Actual selected child bindings required.");
-        if(children.Length>0 && children.Any(c=>!ReferenceEquals(c.Contexts,children[0].Contexts)||!ReferenceEquals(c.Graph,children[0].Graph)))
+        if(children.Length>0 && children.Any(c=>!ReferenceEquals(c.Contexts,children[0].Contexts)||!ReferenceEquals(c.GraphIdentity,children[0].GraphIdentity)))
             throw new ArgumentException("Selected children require the same prepared context and ordinary graph owner.");
         aggregate=new(children.Select(child=>new LegacyAggregateDictionaryChild(
             (query,aux,extra,token)=>

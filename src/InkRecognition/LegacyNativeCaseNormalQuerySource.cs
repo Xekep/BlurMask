@@ -54,9 +54,14 @@ public sealed class LegacyNativeCaseNormalQuerySource
     public static LegacyNativeCaseNormalQuerySource BindOrdinaryDictionary(
         LegacyNativeCaseRecordExpansion expansion,LegacyPreparedDictionaryQuerySource source,
         LegacyOrdinaryCursiveCandidateGraph graph,bool dutchLigatureMode,bool extraCosts)
+        =>BindOwnedOrdinaryDictionary(expansion,source,LegacyOrdinaryRecognitionGraph.FromSameSource(graph),dutchLigatureMode,extraCosts);
+
+    internal static LegacyNativeCaseNormalQuerySource BindOwnedOrdinaryDictionary(
+        LegacyNativeCaseRecordExpansion expansion,LegacyPreparedDictionaryQuerySource source,
+        LegacyOrdinaryRecognitionGraph graph,bool dutchLigatureMode,bool extraCosts)
     {
         ArgumentNullException.ThrowIfNull(expansion);ArgumentNullException.ThrowIfNull(source);
-        var bound=LegacyOrdinaryDictionarySourceOwner.BindDictionary(source,expansion.Rewrite.Contexts,graph);
+        var bound=LegacyOrdinaryDictionarySourceOwner.BindOwnedDictionary(source,expansion.Rewrite.Contexts,graph);
         return new(expansion,bound.Read,dutchLigatureMode,extraCosts);
     }
 

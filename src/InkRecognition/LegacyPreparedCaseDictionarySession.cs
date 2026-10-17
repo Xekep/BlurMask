@@ -29,13 +29,22 @@ public sealed class LegacyPreparedCaseDictionarySession
     private bool valid=true;
     public LegacyRussianModelBundle Model {get;}
     public LegacyPreparedCaseDictionarySymbolBinding Symbols {get;}
-    public LegacyOrdinaryCursiveCandidateGraph Graph {get;}
+    private readonly LegacyOrdinaryRecognitionGraph graph;
+    public LegacyOrdinaryCursiveCandidateGraph Graph=>graph.RequireSameSource();
     public LegacySymbolContextFactory Contexts=>Symbols.Symbols.Contexts;
 
     public LegacyPreparedCaseDictionarySession(LegacyRussianModelBundle model,
         LegacyDictionaryResourcePrefix selectedResource,uint containerCaseMode90,bool ignoreCaseC4,
         LegacyNativeCaseData caseData,LegacyNativeTextPublicationData publication,
         LegacyPreparedCaseDictionarySymbolBinding symbols,LegacyOrdinaryCursiveCandidateGraph graph,
+        LegacyPreparedDictionaryRestartTags restartTags,bool extraCostSideTable)
+        :this(model,selectedResource,containerCaseMode90,ignoreCaseC4,caseData,publication,symbols,
+            LegacyOrdinaryRecognitionGraph.FromSameSource(graph),restartTags,extraCostSideTable){}
+
+    internal LegacyPreparedCaseDictionarySession(LegacyRussianModelBundle model,
+        LegacyDictionaryResourcePrefix selectedResource,uint containerCaseMode90,bool ignoreCaseC4,
+        LegacyNativeCaseData caseData,LegacyNativeTextPublicationData publication,
+        LegacyPreparedCaseDictionarySymbolBinding symbols,LegacyOrdinaryRecognitionGraph graph,
         LegacyPreparedDictionaryRestartTags restartTags,bool extraCostSideTable)
     {
         ArgumentNullException.ThrowIfNull(model);ArgumentNullException.ThrowIfNull(symbols);
@@ -44,11 +53,11 @@ public sealed class LegacyPreparedCaseDictionarySession
             !ReferenceEquals(symbols.Symbols.LexicalAlphabet,model.LexicalAlphabet)||
             !ReferenceEquals(symbols.Language,model.LanguageModel))
             throw new ArgumentException("Case symbols/language must belong to the selected model, not equal-sized substitutes.");
-        Model=model;Symbols=symbols;Graph=graph;restart=restartTags;
+        Model=model;Symbols=symbols;this.graph=graph;restart=restartTags;
         this.ignoreCaseC4=ignoreCaseC4;extraCosts=extraCostSideTable;
         installedMap=symbols.InitialWorkingMap;
         dictionary=new(model.Lexicon,installedMap,symbols.Symbols.CopyInitialContexts());
-        var child=LegacyTaggedDictionaryChild.BindCase292(selectedResource,containerCaseMode90,
+        var child=LegacyTaggedDictionaryChild.BindOwnedCase292(selectedResource,containerCaseMode90,
             model.LanguageModel,model.LexicalAlphabet,caseData,publication,symbols.Preparation,
             Contexts,dictionary,graph,extraCostSideTable);
         queries=new([child]);
@@ -112,7 +121,7 @@ public sealed class LegacyPreparedCaseDictionarySession
         Enter(cancellationToken);
         try
         {
-            if(completedNode< -1||completedNode>=Graph.NodeCount)throw new ArgumentOutOfRangeException(nameof(completedNode));
+            if(completedNode< -1||completedNode>=graph.NodeCount)throw new ArgumentOutOfRangeException(nameof(completedNode));
             queries.PrepareControllerNode(cancellationToken);
             queryMaps.Clear();queriedMap=null;controllerEpoch=checked(controllerEpoch+1);
             queryResetRevision=queryRevision;
@@ -139,8 +148,15 @@ public sealed class LegacyPreparedCaseDictionarySession
     internal LegacyPreparedDictionaryWorkingMap RefreshOwnedSpanAndGetMap(ReadOnlySpan<byte> acousticPermissions,
         LegacyOrdinaryCursiveCandidateGraph graph,int node,byte span,CancellationToken cancellationToken)
     {
-        if(!ReferenceEquals(graph,Graph))throw new ArgumentException("Span key requires this session's actual graph owner.");
-        if((uint)node>=Graph.NodeCount||span>node||!Graph.GetNode(node).Any(arc=>arc.Span>=span))
+        if(!ReferenceEquals(graph,this.graph.Identity))throw new ArgumentException("Span key requires this session's actual graph owner.");
+        return RefreshOwnedSpanAndGetMap(acousticPermissions,this.graph,node,span,cancellationToken);
+    }
+
+    internal LegacyPreparedDictionaryWorkingMap RefreshOwnedSpanAndGetMap(ReadOnlySpan<byte> acousticPermissions,
+        LegacyOrdinaryRecognitionGraph graph,int node,byte span,CancellationToken cancellationToken)
+    {
+        if(!ReferenceEquals(graph.Identity,this.graph.Identity))throw new ArgumentException("Span key requires this session's actual graph owner.");
+        if((uint)node>=graph.NodeCount||span>node||!graph.GetNode(node).Any(arc=>arc.Span>=span))
             throw new ArgumentException("An actual graph span key is required.");
         return RefreshMapCore(acousticPermissions,(node,span),cancellationToken);
     }
@@ -245,7 +261,7 @@ public sealed class LegacyPreparedCaseDictionarySession
         Enter(token);
         try
         {
-            if(nextControllerNode!=Graph.NodeCount||currentOwnedKey is not null||preparedMapEpoch>=controllerEpoch||!retainedOwnedSpanMap||
+            if(nextControllerNode!=graph.NodeCount||currentOwnedKey is not null||preparedMapEpoch>=controllerEpoch||!retainedOwnedSpanMap||
                 queryRevision!=queryResetRevision)
                 throw new InvalidOperationException("Result queries require the completed graph's final V80 and its retained prior D0 map.");
             return activeResultLease=new(this,controllerEpoch,preparedMapEpoch,installedMap,queryRevision);
@@ -307,7 +323,7 @@ public sealed class LegacyPreparedCaseDictionarySession
         try
         {
             RequireInstalledMap(expectedMap);
-            if(endingNode<0||endingNode>=Graph.NodeCount||nextControllerNode!=endingNode||
+            if(endingNode<0||endingNode>=graph.NodeCount||nextControllerNode!=endingNode||
                 !retainedOwnedSpanMap||!ownedKeyProgression||externalQuerySinceEpoch||
                 currentOwnedKey is not{} key||key.Node!=endingNode||key.Span!=lastOwnedSpan)
                 throw new InvalidOperationException("Live publication requires this active node's actual D0 map before V80.");

@@ -21,8 +21,8 @@ public sealed record LegacyOrdinaryGraphPermissionPass(bool Succeeded,
 /// </summary>
 public sealed class LegacyOrdinaryGraphAcousticPermissionSession
 {
-    private readonly LegacyOrdinaryCursiveCandidateGraph graph;
-    private readonly Func<LegacyOrdinaryCursiveCandidateInk, CancellationToken, LegacyOrdinaryGraphAcousticRow?> compute;
+    private readonly LegacyOrdinaryRecognitionGraph graph;
+    private readonly Func<int, CancellationToken, LegacyOrdinaryGraphAcousticRow?> compute;
     private readonly ushort[] reserved;
     private readonly Record[] records;
     private readonly List<PoolEntry> pool = [];
@@ -33,17 +33,30 @@ public sealed class LegacyOrdinaryGraphAcousticPermissionSession
     public LegacyOrdinaryGraphAcousticPermissionSession(LegacyOrdinaryCursiveCandidateGraph graph,
         LegacyPreparedDictionaryWorkingMap source, ReadOnlySpan<ushort> reservedSlots,
         Func<LegacyOrdinaryCursiveCandidateInk, CancellationToken, LegacyOrdinaryGraphAcousticRow?> compute)
+        :this(LegacyOrdinaryRecognitionGraph.FromSameSource(graph),source,reservedSlots,AdaptCompute(graph,compute)){}
+
+    internal LegacyOrdinaryGraphAcousticPermissionSession(LegacyOrdinaryRecognitionGraph graph,
+        LegacyPreparedDictionaryWorkingMap source, ReadOnlySpan<ushort> reservedSlots,
+        Func<int, CancellationToken, LegacyOrdinaryGraphAcousticRow?> compute)
     {
         ArgumentNullException.ThrowIfNull(graph); ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(compute);
-        if (reservedSlots.Length != 6 || graph.Groups.Count is < 1 or > 131072 ||
+        if (reservedSlots.Length != 6 || graph.GroupCount is < 1 or > 131072 ||
             source.AcousticSymbolCount > 4093)
             throw new ArgumentException("Checked ordinary graph, six retained slots and bounded group count required.");
         foreach (ushort slot in reservedSlots)
             if (slot != ushort.MaxValue && slot >= source.AcousticSymbolCount)
                 throw new ArgumentException("Retained slot outside ordinary alphabet.");
         this.graph = graph; this.source = source; this.compute = compute; reserved = reservedSlots.ToArray();
-        records = Enumerable.Range(0, graph.Groups.Count).Select(_ => new Record()).ToArray();
+        records = Enumerable.Range(0, graph.GroupCount).Select(_ => new Record()).ToArray();
+    }
+
+    private static Func<int,CancellationToken,LegacyOrdinaryGraphAcousticRow?> AdaptCompute(
+        LegacyOrdinaryCursiveCandidateGraph graph,
+        Func<LegacyOrdinaryCursiveCandidateInk,CancellationToken,LegacyOrdinaryGraphAcousticRow?> compute)
+    {
+        ArgumentNullException.ThrowIfNull(compute);
+        return (group,token)=>compute(graph.Groups[group],token);
     }
 
     /// <summary>
@@ -83,7 +96,7 @@ public sealed class LegacyOrdinaryGraphAcousticPermissionSession
                 //1520b0 ->21b.virtual70=1a7850 reads native arc+4, not flags+6 or placement+5.
                 if (arc.Span != requestedSpan) continue;
                 selected.Add(new(anchorNode, ordinal));
-                if ((uint)arc.GroupId >= records.Length || graph.Groups[arc.GroupId].GroupId != arc.GroupId)
+                if ((uint)arc.GroupId >= records.Length)
                     throw new InvalidDataException("Checked graph group identity differs.");
                 var record = records[arc.GroupId];
                 bool recompute = !(reuseComputed && record.Computed) &&
@@ -99,7 +112,7 @@ public sealed class LegacyOrdinaryGraphAcousticPermissionSession
                         entry = new(width); pool.Add(entry);
                     }
                     entry.Scope = requestedSpan; entry.GroupId = arc.GroupId; record.Entry = entry;
-                    var actual = compute(graph.Groups[arc.GroupId], cancellationToken);
+                    var actual = compute(arc.GroupId, cancellationToken);
                     record.Computed = true;
                     if (actual is null)
                     {

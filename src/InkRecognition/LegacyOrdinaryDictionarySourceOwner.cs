@@ -15,6 +15,13 @@ public static class LegacyOrdinaryDictionarySourceOwner
         LegacySymbolContextFactory contexts, LegacyOrdinaryCursiveCandidateGraph ordinaryGraph)
     {
         ArgumentNullException.ThrowIfNull(ordinaryGraph);
+        return BindOwnedDictionary(source,contexts,LegacyOrdinaryRecognitionGraph.FromSameSource(ordinaryGraph));
+    }
+
+    internal static LegacyAggregateDictionaryChild BindOwnedDictionary(LegacyPreparedDictionaryQuerySource source,
+        LegacySymbolContextFactory contexts, LegacyOrdinaryRecognitionGraph ordinaryGraph)
+    {
+        ArgumentNullException.ThrowIfNull(ordinaryGraph);
         return LegacyAggregateDictionaryChild.BindDictionary(source, contexts, static () => false);
     }
 }
