@@ -700,6 +700,8 @@ jobs:
           python tools/LegacyMainWordSpanStorage.Probe/audit_output.py .artifacts/legacy-main-word-span-storage-managed.json
           dotnet run --project tools/LegacyMainSpanScores.Probe -c Release -- .artifacts/legacy-main-span-scores-managed.json
           python tools/LegacyMainSpanScores.Probe/audit_output.py .artifacts/legacy-main-span-scores-managed.json
+          dotnet run --project tools/LegacyMainAugmentedWordCosts.Probe -c Release -- .artifacts/legacy-main-augmented-word-costs-managed.json
+          python tools/LegacyMainAugmentedWordCosts.Probe/audit_output.py .artifacts/legacy-main-augmented-word-costs-managed.json
           dotnet run --project tools/LegacyMainTextChoices.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json models/text-unicode/legacy-circled-payload-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-text-choices-managed.json
           python tools/LegacyMainTextChoices.Probe/audit_output.py .artifacts/legacy-main-text-choices-managed.json
           dotnet run --project tools/LegacyMainSpanAlternativeWalk.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json models/text-unicode/legacy-circled-payload-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-span-alternative-walk-managed.json
@@ -1253,6 +1255,7 @@ jobs:
             @{ Name = 'LegacyMainWordAugmentationScan'; Args = @('.artifacts/legacy-main-word-augmentation-scan-native.json') },
             @{ Name = 'LegacyMainWordSpanStorage'; Args = @('.artifacts/legacy-main-word-span-storage-native.json') },
             @{ Name = 'LegacyMainSpanScores'; Args = @('.artifacts/legacy-main-span-scores-native.json') },
+            @{ Name = 'LegacyMainAugmentedWordCosts'; Args = @('.artifacts/legacy-main-augmented-word-costs-native.json') },
             @{ Name = 'LegacyMainTextChoices'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-text-choices-native.json') },
             @{ Name = 'LegacyMainSpanAlternativeWalk'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-span-alternative-walk-native.json') },
             @{ Name = 'LegacyMainWordEquality'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-word-equality-native.json') },
@@ -1700,6 +1703,10 @@ jobs:
             if ($name -eq 'LegacyMainSpanScores') {
               python tools/LegacyMainSpanScores.Probe/audit_output.py .artifacts/legacy-main-span-scores-native.json
               if ($LASTEXITCODE -ne 0) { throw 'LegacyMainSpanScores independent audit failed' }
+            }
+            if ($name -eq 'LegacyMainAugmentedWordCosts') {
+              python tools/LegacyMainAugmentedWordCosts.Probe/audit_output.py .artifacts/legacy-main-augmented-word-costs-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyMainAugmentedWordCosts independent audit failed' }
             }
             if ($name -eq 'LegacyMainTextChoices') {
               python tools/LegacyMainTextChoices.Probe/audit_output.py .artifacts/legacy-main-text-choices-native.json
