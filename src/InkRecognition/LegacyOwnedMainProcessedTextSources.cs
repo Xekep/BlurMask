@@ -48,6 +48,7 @@ public sealed class LegacyOwnedMainProcessedTextWordSources
     private bool failed;
     public LegacyFreshMainTextGlyphChoices Choices {get;}
     public LegacyNativePublishedWordNode Word=>sources.Word;
+    public LegacyOwnedMainSpanWordView? SpanWord=>sources.SpanWord;
     public LegacyOwnedRawInkDocument Document=>Choices.CandidateSource?.SourceDocument??Choices.Candidate.RawResult.Owner.SourceDocument;
     public int Count=>ranges.Length;
     public int NextIndex=>next;
@@ -57,14 +58,14 @@ public sealed class LegacyOwnedMainProcessedTextWordSources
         if(!ReferenceEquals(actualSources.Owner,choices)||!actualSources.WrapperFirstPass)
             throw new ArgumentException("Actual024F30 first-pass owner required.");
         Choices=choices;sources=actualSources;operations=LegacyOwnedRawInkRangeOperations.Prepare(Document);
-        originalRanges=sources.CopyOriginalRanges();int count=Word.Word.FlatReferences.Count;
+        originalRanges=sources.CopyOriginalRanges();int count=sources.Record.FlatReferences.Count;
         ranges=new LegacyNativeInkPositionRange[count][];skipped=new bool[count];positive=new bool[count];specialJoiner=new bool[count];
         var alphabet=choices.CandidateSource?.SourcePolicy.Model.AcousticAlphabet??choices.Candidate.Snapshot.SourcePolicy.Model.AcousticAlphabet;
         bool hasJoiner=alphabet.TryGetLabel("\u200d",out ushort joiner);
         for(int i=0;i<count;i++)
         {
             var descriptor=sources.ReadDescriptor(i);skipped[i]=LegacyFreshMainTextGlyphChoices.IsWrapperSkipped(descriptor);
-            positive[i]=unchecked((short)(Word.Word.FlatReferences[i]>>24))>=0;
+            positive[i]=unchecked((short)(sources.Record.FlatReferences[i]>>24))>=0;
             specialJoiner[i]=hasJoiner&&(descriptor.KindFlags&7)==0&&descriptor.SymbolOrRunLength==joiner;
             ranges[i]=sources.CopyInitialRanges(i);
         }
@@ -78,7 +79,7 @@ public sealed class LegacyOwnedMainProcessedTextWordSources
         CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(selected);token.ThrowIfCancellationRequested();Check(selected.Index);
-        if(!ReferenceEquals(selected.Owner,Choices)||!ReferenceEquals(selected.Word,Word)||skipped[next])
+        if(!ReferenceEquals(selected.Owner,Choices)||!ReferenceEquals(selected.Sources,sources)||skipped[next])
             throw new ArgumentException("Successful selection from this same next actual WORD reference required.");
         int current=next;
         try

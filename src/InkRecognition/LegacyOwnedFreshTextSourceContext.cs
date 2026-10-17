@@ -75,6 +75,18 @@ public sealed class LegacyOwnedFreshTextSourceContext
             throw new InvalidOperationException("Fresh processed selection registration failed.");
     }
 
+    internal LegacyOwnedFreshTextSelection CreateWordSelection(LegacyOwnedMainWordSourcePayload actualSource,
+        CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(actualSource);token.ThrowIfCancellationRequested();
+        if(!ReferenceEquals(actualSource.Owner.SelectionContext,this)||!ReferenceEquals(actualSource.SourceNode.Owner.Document,Document)||
+            actualSource.SourceNode.FirstWordSource is null||(actualSource.Flags&0x200000)!=0)
+            throw new ArgumentException("Actual ordinary WORD source and its identical fresh transaction required.");
+        long output=-1;
+        return CreateCore(actualSource.CopySourceKeyRanges(),1,ref output,0,token)??
+            throw new InvalidOperationException("Fresh WORD selection registration failed.");
+    }
+
     //Explicit allocator-stage failures and arbitrary already-prepared keys
     //are numeric controls only; production accepts actual owned positions.
     internal LegacyOwnedFreshTextSelection? CreatePrepared(ReadOnlySpan<LegacyNativeInkPositionRange> ranges,

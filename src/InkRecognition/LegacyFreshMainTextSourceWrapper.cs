@@ -111,19 +111,24 @@ public sealed class LegacyFreshMainTextSourceWrapper : IDisposable
     public LegacyFreshMainNoCandidateSourceCompletion? CompletedSources {get;}
     public LegacyFreshMainConfiguredNoCandidateSourceCompletion? CompletedConfiguredSources {get;}
     public LegacyOwnedMainCandidateSource CandidateSource {get;}
-    private readonly Dictionary<int,LegacyOwnedMainTextSourcePayload> payloads=[];
+    private readonly Dictionary<int,LegacyOwnedMainTextSourcePayload> payloads;
     private bool disposed;
     public LegacyFreshMainCompletedFirstCandidate Candidate=>choices.Candidate;
     private LegacyFreshMainTextSourceWrapper(LegacyFreshMainTextGlyphChoices choices,
         LegacyNativeTextPublicationData properties,LegacyNativeUnicodeNormalizationData normalization,CancellationToken token,
         LegacyFreshMainNoCandidateSourceCompletion? completedSources=null,
         LegacyFreshMainConfiguredNoCandidateSourceCompletion? completedConfiguredSources=null,
-        LegacyOwnedMainWordSourceCollection? configuredSources=null)
+        LegacyOwnedMainWordSourceCollection? configuredSources=null,
+        LegacyMainSharedTextSourceState? sharedState=null)
     {
         this.choices=choices;this.properties=properties;this.normalization=normalization;
         CandidateSource=choices.CandidateSource??LegacyOwnedMainCandidateSource.FromFirst(choices.Candidate,token);
-        interner=LegacyOwnedMainTextSourceInterner.Prepare(CandidateSource.SourceDocument);
-        selections=LegacyOwnedFreshTextSourceContext.Prepare(interner.Document);
+        if(sharedState is not null&&(!ReferenceEquals(sharedState.Document,CandidateSource.SourceDocument)||
+            !ReferenceEquals(sharedState.TopOwner,CandidateSource.TopOwner)||!ReferenceEquals(sharedState.Strings,choices.StringPool)))
+            throw new ArgumentException("Same actual document/TOP/shared string owner required.");
+        interner=sharedState?.Characters??LegacyOwnedMainTextSourceInterner.Prepare(CandidateSource.SourceDocument);
+        selections=sharedState?.Selections??LegacyOwnedFreshTextSourceContext.Prepare(interner.Document);
+        payloads=sharedState?.Payloads??[];
         CompletedSources=completedSources;
         CompletedConfiguredSources=completedConfiguredSources;
         WordSourceCollection=configuredSources??completedSources?.Sources??LegacyOwnedMainWordSourceCollection.ExportBeforeWordAugmentation(Candidate,token);
@@ -163,6 +168,22 @@ public sealed class LegacyFreshMainTextSourceWrapper : IDisposable
             properties,normalization,token,completedConfiguredSources:actualCompletion,configuredSources:sources);
     }
 
+    internal static LegacyFreshMainTextSourceWrapper PrepareSpanWords(LegacyFreshMainTextGlyphChoices choices,
+        LegacyFreshMainConfiguredNoCandidateSourceCompletion completion,LegacyMainSharedTextSourceState state,
+        LegacyNativeTextPublicationData properties,LegacyNativeUnicodeNormalizationData normalization,CancellationToken token)
+        =>new(choices,properties,normalization,token,completedConfiguredSources:completion,configuredSources:completion.Sources,sharedState:state);
+
+    internal void BeginSpanPublication(ReadOnlySpan<byte> record40,ReadOnlySpan<byte> selection4,CancellationToken token)
+    {ObjectDisposedException.ThrowIf(disposed,this);choices.BeginPublication(record40,selection4,token);}
+
+    internal LegacyPreparedMainTextSourceWordRender RenderSpanWord(LegacyOwnedMainSpanWordView word,
+        ReadOnlySpan<byte> record40,ReadOnlySpan<byte> selection4,CancellationToken token)
+    {
+        ObjectDisposedException.ThrowIf(disposed,this);
+        var firstPass=choices.RefreshSpanWordSourcesForWrapper(word,record40,WordSourceCollection.CopyRanges(),token);
+        return RenderPrepared(firstPass,record40,selection4,token);
+    }
+
     public IReadOnlyList<LegacyOwnedMainTextSourceWord> Publish(ReadOnlySpan<byte> recordAllocation40,
         ReadOnlySpan<byte> selectionAllocation4,CancellationToken token=default)
     {
@@ -176,10 +197,19 @@ public sealed class LegacyFreshMainTextSourceWrapper : IDisposable
             referenceCount+=word.Word.FlatReferences.Count;
             if(!ReferenceEquals(WordSourceCollection.Word,word))throw new ArgumentException("Actual single WORD collection identity changed.");
             var firstPass=choices.RefreshWordSourcesForWrapper(word,recordAllocation40,WordSourceCollection.CopyRanges(),token);
+            var rendered=RenderPrepared(firstPass,recordAllocation40,selectionAllocation4,token);
+            words.Add(new(word,rendered.Glyphs,rendered.OrdinaryRanges,rendered.SourceFlags,rendered.SelectedFlags));
+        }
+        token.ThrowIfCancellationRequested();return words.AsReadOnly();
+    }
+    private LegacyPreparedMainTextSourceWordRender RenderPrepared(LegacyPreparedMainTextWordSources firstPass,
+        ReadOnlySpan<byte> recordAllocation40,ReadOnlySpan<byte> selectionAllocation4,CancellationToken token)
+    {
+            var operations=LegacyOwnedRawInkRangeOperations.Prepare(interner.Document);
             var processed=new LegacyOwnedMainProcessedTextWordSources(choices,firstPass);
             uint sourceFlags=0x200000,selectedFlags=0;LegacyNativeInkPositionRange[] ordinaryRanges=[];
             for(int i=0;i<processed.Count;i++)
-                if(!processed.IsSkipped(i)&&unchecked((short)(word.Word.FlatReferences[i]>>24))>=0)sourceFlags&=~0x200000u;
+                if(!processed.IsSkipped(i)&&unchecked((short)(firstPass.Record.FlatReferences[i]>>24))>=0)sourceFlags&=~0x200000u;
             var output=new List<LegacyOwnedMainTextSourceChoice>();
             for(int i=0;i<processed.Count;i++)
             {
@@ -205,11 +235,29 @@ public sealed class LegacyFreshMainTextSourceWrapper : IDisposable
                 selectedFlags|=rows[marker].Flags;
                 output.Add(new(selected.Reference,source,payload,marker,!key.Inserted,selected.Selection));
             }
-            words.Add(new(word,output.ToArray(),ordinaryRanges,sourceFlags,selectedFlags));
-        }
-        token.ThrowIfCancellationRequested();return words.AsReadOnly();
+        return new(output.ToArray(),ordinaryRanges,sourceFlags,selectedFlags);
     }
     public IReadOnlyList<LegacyOwnedFreshTextSelection> CopyPendingSelections()=>selections.CopyPendingSelections();
     public long NextSelectionId=>selections.NextSelectionId;
     public void Dispose(){if(disposed)return;disposed=true;choices.Dispose();}
+}
+
+internal sealed record LegacyPreparedMainTextSourceWordRender(LegacyOwnedMainTextSourceChoice[] Glyphs,
+    LegacyNativeInkPositionRange[] OrdinaryRanges,uint SourceFlags,uint SelectedFlags);
+
+//One native0283B0 invocation shares these owners across every275 WORD payload.
+//The enclosing new WORD-stage owns lifetime; individual renderers borrow Strings.
+internal sealed class LegacyMainSharedTextSourceState : IDisposable
+{
+    internal LegacyOwnedRawInkDocument Document{get;}
+    internal LegacyFreshMainPlainResultOwnership TopOwner{get;}
+    internal LegacyNativeUtf8StringPool Strings{get;}=new();
+    internal LegacyOwnedMainTextSourceInterner Characters{get;}
+    internal LegacyOwnedMainTextSourceInterner Words{get;}
+    internal LegacyOwnedFreshTextSourceContext Selections{get;}
+    internal Dictionary<int,LegacyOwnedMainTextSourcePayload> Payloads{get;}=[];
+    internal LegacyMainSharedTextSourceState(LegacyOwnedRawInkDocument document,LegacyFreshMainPlainResultOwnership top)
+    {Document=document;TopOwner=top;Characters=LegacyOwnedMainTextSourceInterner.Prepare(document);
+     Words=LegacyOwnedMainTextSourceInterner.Prepare(document);Selections=LegacyOwnedFreshTextSourceContext.Prepare(document);}
+    public void Dispose()=>Strings.Dispose();
 }
