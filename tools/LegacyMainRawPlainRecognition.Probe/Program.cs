@@ -32,7 +32,7 @@ for(int i=0;i<samples.Length;i++)
         w.WriteBoolean("multipleLinesRefused",true);w.WriteEndObject();continue;
     }
     var result=owner.Run(new byte[120],new byte[40],new ushort[256],new byte[64]);
-    if(!result.PublicationCompleted||!ReferenceEquals(result.Owner,owner)||!result.Terminal.Winner.HasWinner||
+    if(!result.PublicationCompleted||result.IntermediatePublicationCount!=0||!ReferenceEquals(result.Owner,owner)||!result.Terminal.Winner.HasWinner||
         !ReferenceEquals(result.Session.Ownership.Materialization.TerminalResult,result.Terminal)||
         !ReferenceEquals(result.Sampled.Owner.Preparation,result.Preprocessed.Smoothed)||
         result.Publications.Any(r=>!r.Succeeded||!ReferenceEquals(r.Association.Owner,result.Session)))

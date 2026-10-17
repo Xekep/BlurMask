@@ -7,7 +7,8 @@
    the source720 transfer; they are not replaced by a supplied transcription.
 2. Actual source720 rows feed24B guides and24D/29B/265 preprocessing.
 3. The one-line sampler and context network build the actual main graph. Its
-   CASE dictionary, ascending scheduler and first terminal selection share
+   CASE dictionary, ascending scheduler with native-gated LIVE publication,
+   and first terminal selection share
    that same source, model and context owner.
 4. The actual selected compact result supplies backtrack rows, native flushes,
    per-flush residual association and the owning21FE30 word callback.
@@ -29,9 +30,11 @@ successful publication.
 The existing sampler requires one genuinely assigned ordinary descriptor over
 the full physical interval. Two lines are refused rather than concatenated.
 Empty first-stage guide fallback, associated sources, unsupported glyph branches
-and native long-source publication gates retain their explicit component
-refusals. No placeholder word, synthetic guide or successful long-source
-winner is introduced by the compositor.
+retain their explicit component refusals. Native long-source gates use the
+restored live publisher and retain its prefix through final append. A nonempty
+genuine long-source winner is still not established; no successful long-source
+recognition is inferred from the empty gate fixtures. The compositor does not
+introduce a placeholder word, synthetic guide or successful long-source winner.
 
 `LegacyMainRawPlainRecognition.Probe` exercises five original coordinate inputs
 through the complete bounded chain, including inputs with multiple first-stage

@@ -71,11 +71,14 @@ public sealed class LegacyFreshMainSingleLinePlainRecognition
             var bytes=new byte[request.RequiredBytes]; request.PreviousStorage.Span.CopyTo(bytes);
             return new(bytes,identity++);
         }
-        var pass=new LegacyOwnedMainCaseWordPass(acoustic,policy,owner.MainLineAcoustic,table,Allocate).RunOwned(token);
+        var confidence=LegacyOwnedRussianMainGlyphConfidence.Prepare(acoustic,dictionary,context,token);
+        int intermediatePublications=0;
+        var pass=new LegacyOwnedMainCaseWordPass(acoustic,policy,owner.MainLineAcoustic,table,Allocate)
+            .RunOwnedWithIntermediatePublication(acoustic,confidence,new byte[4096*40],
+                _=>intermediatePublications++,token);
         var terminal=LegacyOwnedFreshCaseMainTerminalInvocation.Prepare(policy,token).SelectOwnedPass(pass,token);
         if(!terminal.Winner.HasWinner)
             throw new NotSupportedException("Actual first CASE terminal has no winner; no word or confidence can be fabricated.");
-        var confidence=LegacyOwnedRussianMainGlyphConfidence.Prepare(acoustic,dictionary,context,token);
         var compact=LegacyOwnedMainCaseCompactWordMaterialization.Materialize(acoustic,policy,terminal,
             confidence,new byte[4096*40],token);
         var callbacks=LegacyOwnedRussianMainSourceSymbolCallbacks.Prepare(acoustic,confidence,sampled,token);
@@ -96,7 +99,7 @@ public sealed class LegacyFreshMainSingleLinePlainRecognition
             if(!result.Succeeded)break;
         }
         token.ThrowIfCancellationRequested();
-        return new(this,preprocessed,sampled,terminal,session,publications.ToArray());
+        return new(this,preprocessed,sampled,terminal,session,publications.ToArray(),intermediatePublications);
     }
 }
 
@@ -109,10 +112,11 @@ public sealed class LegacyFreshMainSingleLinePlainRecognitionResult
     public LegacyOwnedMainGlyphFlushSession Session { get; }
     public IReadOnlyList<LegacyOwnedMainWordPublicationResult> Publications { get; }
     public bool PublicationCompleted=>Session.IsComplete;
+    public int IntermediatePublicationCount { get; }
     internal LegacyFreshMainSingleLinePlainRecognitionResult(LegacyFreshMainSingleLinePlainRecognition owner,
         LegacyFreshMainOwnedTextPreprocessedInput preprocessed,LegacyFreshMainSingleLineSampled sampled,
         LegacyOwnedMainTerminalResult terminal,LegacyOwnedMainGlyphFlushSession session,
-        LegacyOwnedMainWordPublicationResult[] publications)
+        LegacyOwnedMainWordPublicationResult[] publications,int intermediatePublicationCount)
     { Owner=owner; Preprocessed=preprocessed; Sampled=sampled; Terminal=terminal;
-      Session=session; Publications=Array.AsReadOnly(publications); }
+      Session=session; Publications=Array.AsReadOnly(publications); IntermediatePublicationCount=intermediatePublicationCount; }
 }
