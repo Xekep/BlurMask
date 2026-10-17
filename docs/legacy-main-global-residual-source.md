@@ -56,11 +56,14 @@ over those real graph/source owners, not claimed selected residual events.
 An independent Python implementation reconstructs native unstable sorting,
 cache/context search, base DFS, fixed-point ceiling/remainder, original key
 ordering and reverse coalescing, and checks complete source/row/vector bytes.
-The complete consumer verification is pinned to the isolated `83b3d68` partial
-controller plus exactly this package. The parallel213C00 integration reaches a
-separate kind7 parent-source guard on owner5; it is neither bypassed nor filtered
-here. These fixtures are not a complete native winner or accuracy claim. The
-main working tree is not claimed to run all eight after that independent change.
+The original Managed/Native consumer verification was pinned to the isolated
+`83b3d68` partial controller. After the actual213C00/kind7 join, the clean committed
+`8737251` pipeline completes all eight owners and passes the same independent
+source/metadata/residual oracle. Its current Managed capture is
+`c145854d0c98885d5db0df1ba67726b36c1d8034857b84075ae40816de664d11`.
+No parent is filtered to avoid kind7. The later global glyph execution stage
+also checks its actual zero-residual callbacks in Managed and Native AOT.
+These fixtures are not a complete engine or handwriting-accuracy claim.
 
 `LegacyMainGlobalResidual.Probe` takes the standard nine global arguments.
 Its `audit_output.py capture.json` checks captured source data;

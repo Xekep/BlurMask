@@ -26,7 +26,7 @@ Global sources beyond the boundary still require a persistent live publication
 owner. This stage does not implement global `21FFD0` glyph reconstruction,
 `275` WORD publication, document acceptance or application selection.
 
-The eight actual global inputs contain 110 nodes and 12,045 real compact records.
+The eight actual global inputs contain 110 nodes and 11,957 real compact records (after the actual213C00 join).
 The probe compares snapshots, validates pre-entry resource/cancellation/shape
 checks and single-use publication, and verifies unchanged acoustic evaluation
 counts. An independent Python oracle reads the packed AK/LK resources and
@@ -34,7 +34,7 @@ reconstructs all 1,310,720 compact allocator bytes and 2,610,080 beam/pool bytes
 including unused residue. It does not compare expected text or accept production
 C# output as its expected numerical result. Managed and fresh Windows Native AOT
 captures have SHA256
-`04baac6abb1c4c0136428ccea3e1addf86dc64595a2f9831975e6d333f45677a`.
+`d01b97954b761bbbcdd3001a2ab399b52443f0c4fa64ec330268dd8864cee750`.
 Existing DIRECT compact, live/final append and configured-secondary reachability
 checks pass after extraction. These checks demonstrate algorithm parity on the
 stated branches, not improved Russian recognition accuracy.

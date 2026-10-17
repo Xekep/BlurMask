@@ -24,7 +24,7 @@ Eight genuine global compact owners cover 110 nodes and 1,024 stack-residue
 controls. The independent raw compact/graph oracle reconstructs all 3,968 emitted
 rows (285,696 bytes), visited indices, residual references and padding. Managed
 and fresh Windows Native AOT captures match SHA256
-`132f6f0e865b2f465828f1d2aea3c1190790743eac50e3b3df32df763783c2c2`.
+`741fcfff09aeeab443f176fc01a6f3f6e54bdac01041dd4b72722017af0bc38f`.
 No acoustic networks are reevaluated. Existing DIRECT/CASE/configured-secondary
 Managed and freshly rebuilt Native AOT full-byte oracle checks pass unchanged.
 

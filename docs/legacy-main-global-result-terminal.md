@@ -32,9 +32,12 @@ the managed gate/lease/action order. Vendor DLLs are never executed.
 
 `LegacyMainGlobalTerminalMetadata.Probe` runs the existing eight genuine global
 input pipelines, performs the actual main pass/terminal/compact publication,
-and reads4,811 terminal tags and raw labels already present in those compact
+and reads4,754 terminal tags (after the actual213C00 join) and raw labels already present in those compact
 pools through the new post-final lease entry. An independent raw-LK preorder
-and case-classification oracle checks every complete metadata16 token. The
+and case-classification oracle checks every complete metadata16 token. It
+derives the complete expected terminal set from every compact record and the
+raw lexicon, rather than from captured metadata IDs or a fixed historical count.
+Removing all captured rows for one terminal is rejected. The
 probe checks repeated/detached results, same-backend equivalence with the old
 source70 action and96 source/cancel/foreign/replacement-lease/query-revision
 guards. It also verifies that no acoustic model is reevaluated.
