@@ -3,7 +3,9 @@
 This is a read-only inventory of pinned MyScriptText PE
 SHA256 `18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f`,
 plus a bounded typed implementation of the current fresh entry's zero-write
-return. The enabled contextual glyph-rewrite body is not implemented.
+return. The enabled contextual glyph-rewrite orchestration is not implemented;
+its leading/interior/trailing numeric decisions now have a separate checked
+internal kernel described below.
 
 ## Current first-result call and actual configuration owner
 
@@ -90,6 +92,30 @@ the21F210 cross-word iterator, exact body orchestration, owner bindings and its
 independent enabled-branch tests remain separate work.
 
 ## Bounded fresh no-op API and tests
+
+`LegacyPreparedContextualQuoteRules` restores the enabled body's scalar
+decisions separately: source arc sign and kind0 gate, ordinary quote labels,
+the exact wrapped FFF9..FFFC neighbour interval, actual-AL category1 opening,
+opening/closing replacements and low-double-quote carry. The entry guard
+deliberately excludes OpenDouble from its three replacement fields. It does
+not load a model, traverse WORDs, read/write a glyph pool or change F4 policy.
+The eventual owning driver must preserve its three already-prefetched scalar
+values across rewrites and WORD boundaries; flattening a newly reread list
+would change behaviour for repeated references.
+
+The numeric probe exhausts all 65536 neighbours for leading and trailing
+decisions and independently checks 25344 interior source/category/control/carry
+cases against a neighbour-category truth table. Managed and Native AOT captures
+are byte-identical. The static audit pins the complete21F320 PE fingerprint and
+22 source, quote, category, neighbour and write/carry instructions. This closes
+the decision primitive only; it does not establish the enabled owning body or
+improve Russian handwriting accuracy.
+
+```
+LegacyContextualQuoteRules.Probe capture.json
+python tools/LegacyContextualQuoteRules.Probe/audit_output.py capture.json
+python tools/handwriting/audit_contextual_quote_rules.py static-report.json
+```
 
 `LegacyFreshMainResultGlyphNormalization.Prepare` requires the existing exact
 fresh CASE source policy. `Apply` accepts an actual completed first-alternative
