@@ -15,6 +15,9 @@ using var output=File.Create(args[7]);using var w=new Utf8JsonWriter(output);w.W
 for(int sample=0;sample<samples.Length;sample++)
 {
     var owner=Prepare(samples[sample]);var result=owner.Run();var input=owner.Input;
+    if(!ReferenceEquals(result.Fallback.Input.Owner,input.FirstSource) || !ReferenceEquals(result.Fallback.Lines,result.Lines) ||
+        result.Fallback.CreatedLines.Count!=0 || !ReferenceEquals(result.Fallback.Input,result.Lines))
+        throw new Exception("Actual assigned main guide did not retain24A no-op ownership.");
     rows+=result.Lines.PublishedRows.Count;if(result.FirstResults.Any(r=>r.Text.Words.Count(x=>!x.IsDelimiter)>1))multiwords++;
     if(sample<4)
     {

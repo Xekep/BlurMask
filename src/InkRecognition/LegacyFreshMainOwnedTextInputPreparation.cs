@@ -1,8 +1,7 @@
-using System.Buffers.Binary;
 namespace InkRecognition;
 
 /// <summary>Owning fresh raw main input through real first TEXT, source720 and
-///24B/24D/29B/265. Does not invoke main word decoding or invent empty-first24A.</summary>
+///24B/24A/24D/29B/265. Does not invoke main word decoding or invent first glyphs.</summary>
 public sealed class LegacyFreshMainOwnedTextInputPreparation
 {
     public LegacyFreshMainOwnedInputPreparation Input {get;}
@@ -29,12 +28,12 @@ public sealed class LegacyFreshMainOwnedTextInputPreparation
             token.ThrowIfCancellationRequested();var submission=Input.FirstSubmissions[i];runs[i]=submission.Recognition.RunText(token);
             sources[i]=LegacyFirstPlainTextSourceMaterializer.MaterializeForSubmission(Input.FirstSource,submission.DescriptorOrdinal,runs[i].Text,token);
         }
-        var lines=LegacyFreshMainFirstTextResultLines.Apply(Input.FirstSource,sources,token);
-        foreach(var d in lines.CopyDescriptors())if((BinaryPrimitives.ReadUInt16LittleEndian(d)&15)==0&&BinaryPrimitives.ReadInt32LittleEndian(d.AsSpan(16))<0)
-            throw new NotSupportedException("Actual empty first TEXT requires native24A guide fallback before main postprocessing.");
+        var firstLines=LegacyFreshMainFirstTextResultLines.Apply(Input.FirstSource,sources,token);
+        var fallback=LegacyFreshMainGeometricLineFallback.Apply(resource,firstLines,token);
+        var lines=fallback.Lines;
         var shear=LegacyFreshMainShearPreparation.Prepare(resource,lines,caseData,publication,token);
         var gap=LegacyFreshMainActiveGapPreparation.Prepare(resource,shear,token);var smoothed=gap.Smooth(resource,token);
-        token.ThrowIfCancellationRequested();return new(this,runs,sources,lines,shear,gap,smoothed);
+        token.ThrowIfCancellationRequested();return new(this,runs,sources,fallback,shear,gap,smoothed);
     }
 }
 public sealed class LegacyFreshMainOwnedTextPreprocessedInput
@@ -43,11 +42,12 @@ public sealed class LegacyFreshMainOwnedTextPreprocessedInput
     public IReadOnlyList<LegacyFreshFirstOwnedTextRecognitionResult> FirstResults {get;}
     public IReadOnlyList<LegacyMainMaterializedFirstTextSource> Sources {get;}
     public LegacyFreshMainFirstResultLineSet Lines {get;}
+    public LegacyFreshMainGeometricLineFallback Fallback {get;}
     public LegacyFreshMainShearPreparation Shear {get;}
     public LegacyFreshMainActiveGapPreparation Gap {get;}
     public LegacyFreshMainActiveGapSmoothed Smoothed {get;}
     internal LegacyFreshMainOwnedTextPreprocessedInput(LegacyFreshMainOwnedTextInputPreparation owner,
         LegacyFreshFirstOwnedTextRecognitionResult[] results,LegacyMainMaterializedFirstTextSource[] sources,
-        LegacyFreshMainFirstResultLineSet lines,LegacyFreshMainShearPreparation shear,LegacyFreshMainActiveGapPreparation gap,LegacyFreshMainActiveGapSmoothed smoothed)
-    {Owner=owner;FirstResults=Array.AsReadOnly(results);Sources=Array.AsReadOnly(sources);Lines=lines;Shear=shear;Gap=gap;Smoothed=smoothed;}
+        LegacyFreshMainGeometricLineFallback fallback,LegacyFreshMainShearPreparation shear,LegacyFreshMainActiveGapPreparation gap,LegacyFreshMainActiveGapSmoothed smoothed)
+    {Owner=owner;FirstResults=Array.AsReadOnly(results);Sources=Array.AsReadOnly(sources);Fallback=fallback;Lines=fallback.Lines;Shear=shear;Gap=gap;Smoothed=smoothed;}
 }

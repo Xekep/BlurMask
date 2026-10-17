@@ -49,9 +49,14 @@ raw-input fixture where the native first stage publishes zero visible words has
 not yet been established. Point-only ink currently reaches an earlier unsupported
 temporal extent branch; manually hiding its glyphs would not close that gap.
 
-The existing TEXT wrapper keeps its empty-result refusal. This new stage does
-not enable the application recognizer, complete the multi-descriptor main sampler,
-or establish Russian/English handwriting accuracy.
+The owning TEXT wrapper now calls this stage between24B and24D, retaining its
+exact fallback owner. Its previous unconditional empty-first refusal is removed;
+this does not manufacture an empty NN result or establish that positive branch.
+Seven genuine assigned-line inputs preserve identical descriptors/guides/points
+and no-op owner identity through the joined24A stage. The remaining actual empty
+first-result producer/temporal-extent branches still need genuine fixtures.
+This join does not enable the application recognizer, complete the multi-descriptor
+main sampler, or establish Russian/English handwriting accuracy.
 
 `LegacyMainGeometricFallback.Probe` takes AK, engine profile, separation profile,
 case data, publication data, line30, line50 and capture path. Its independent

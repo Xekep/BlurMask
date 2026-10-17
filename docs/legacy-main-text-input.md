@@ -24,10 +24,12 @@ at word boundaries.
 
 The typed resulting source rows feed `LegacyFreshMainFirstTextResultLines`, which
 publishes descriptor34/38 intervals and executes the existing main24B fit/deskew
-producer. Native24B leaves an empty first result's line unassigned; the wrapper
-explicitly refuses to continue to24D/29B/265 until the genuine24A fallback is
-available. No zero-row result is replaced with a placeholder glyph or guide.
-Nonempty results continue through actual24D,29B and265 with their existing owners.
+producer. Native24B leaves an empty first result's line unassigned. The wrapper now calls
+its owned main24A geometric continuation before24D/29B/265; assigned guides
+retain identity and no zero-row result becomes a placeholder glyph. The seven
+actual inputs here exercise only that no-op branch. A genuine empty-first NN
+fixture and its remaining temporal-extent branches are still not established.
+See [main24A evidence and scope](legacy-main-geometric-line-fallback.md).
 
 ## Actual checks
 
