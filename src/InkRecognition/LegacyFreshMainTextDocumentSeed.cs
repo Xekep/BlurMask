@@ -17,6 +17,9 @@ public sealed class LegacyFreshMainTextDocumentSeed
     public long SourceTag30=>Input.RegistryId;
     public int InitialDocumentAlternativeCountD8=>0;
     public int InitialTransformCount110=>initialTransforms.Count;
+    /// <summary>Result38..47 identifier using the restored native algorithm
+    /// with an explicitly library-owned cryptographic initial state.</summary>
+    public LegacyLibraryTextResultIdentifier LibraryIdentifier38 {get;}
     internal LegacyNativeUtf8StringPool StringPool=>shared.Strings;
     internal LegacyOwnedFreshTextSourceContext PendingSelections=>shared.Selections;
     internal LegacyDocumentTransformVector InitialTransforms=>initialTransforms;
@@ -29,6 +32,9 @@ public sealed class LegacyFreshMainTextDocumentSeed
             !ReferenceEquals(actualShared.Selections.SelectedInputContext,actualSelectedInput)||actualShared.Strings.Count!=0)
             throw new ArgumentException("A new selected INPUT result seed must precede all shared string/WORD publication.");
         shared=actualShared;SelectedInputContext=actualSelectedInput;currentTransforms=initialTransforms;
+        //Native01C010 clears38..47;032550 replaces that zero identifier before
+        //WORD publication. Native process-address RNG seeding is not portable.
+        LibraryIdentifier38=LegacyLibraryUuidGenerator.Create().NextDistinct(new byte[16]);
         //05F200 reads DAF.V38 from the actual new INPUT before2DA.V18.
         //Its immutable span-child producer, not transform output, proves0.
         dafInputRows32=actualSelectedInput.Input.CopyDafInputRows32();
