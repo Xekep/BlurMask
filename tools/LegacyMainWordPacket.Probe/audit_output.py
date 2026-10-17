@@ -11,7 +11,7 @@ for row in p['rows']:
  assert row['previous']==struct.unpack_from('<H',packet,46)[0]
  assert [row['first'],row['last']]==list(struct.unpack_from('<ii',packet,48))
  assert [row['hint38'],row['hint3c']]==list(struct.unpack_from('<II',packet,56))
-assert len(p['rows'])==256 and p['guards']==2
+assert len(p['rows'])==256 and p['guards']==6
 def reset(word):
  word=bytearray(word)
  for offset,value,fmt in [(8,2**64-1,'Q'),(16,0x3f800000,'I'),(20,0x3f800000,'I'),

@@ -50,7 +50,15 @@ using(var file=File.Create(args[4]))using(var w=new Utf8JsonWriter(file))
     if(resultOwner.CaptureGlyphGeometry||resultOwner.OwnerC4||!ReferenceEquals(resultOwner.Materialization,compact)||!ReferenceEquals(resultOwner.Geometry,geometry))throw new Exception("Fresh main factory policies changed");
     Reject(()=>new LegacyPreparedMainWordPublicationPacket(new byte[63]));
     Reject(()=>new LegacyPreparedMainWordPublicationPacket(new byte[64]).CopyWordStorageWithPacketFields(new byte[119]));
+    var lookalike=LegacyOwnedRussianMainSourceGeometry.Prepare(ak,
+        LegacyOwnedRussianMainGlyphConfidence.Prepare(ak,owner.DictionaryOwner),source);
+    Reject(()=>LegacyFreshMainPlainResultOwnership.Create(compact,lookalike));
+    Reject(()=>LegacyFreshMainPlainResultOwnership.Create(compact,geometry,new CancellationToken(true)));
+    var foreign=LegacyFreshMainPlainResultOwnership.Create(compact,geometry).CreateWorkingWord(new byte[120]);
+    Reject(()=>resultOwner.WordPublisher.Publish(foreign,(_,_)=>0,(_,_)=>0));
+    var pointerResidue=new byte[120];pointerResidue[32]=1;
+    Reject(()=>resultOwner.CreateWorkingWord(pointerResidue));
     w.WriteNumber("guards",guards);w.WriteEndObject();w.Flush();
 }
 Console.WriteLine($"PASS256 prepared21FE30 field packets/{guards} guards; actual sourceFormat22F9={policy.Refresh.SourceFormat22f9}. No outer result publication claim.");
-void Reject(Action a){try{a();}catch(ArgumentException){guards++;return;}throw new Exception("Invalid extent accepted");}
+void Reject(Action a){try{a();}catch(Exception e)when(e is ArgumentException or NotSupportedException or OperationCanceledException){guards++;return;}throw new Exception("Invalid storage or ownership request accepted");}
