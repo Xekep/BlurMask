@@ -25,3 +25,8 @@ and repository documentation now use `research/myscript` paths. Existing
 historical reports may contain the original location as provenance.
 
 The readonly EF4 helper export is preserved locally at `myscript/output/Math2EF4HelpersStage4/MyScriptDocument.dll/` with function lists and SHA-256 provenance. It is analysis evidence outside build artifacts; these helpers are not yet a complete runtime EF4 implementation.
+
+The readonly completed-hypothesis caller036F20 export is preserved at
+`myscript/output/Math2CompletedPostprocessCaller/MyScriptDocument.dll/` with
+references and byte-hash provenance. It supplies analysis evidence for the
+attention reconstruction, activation and EF4 request/source argument chain.

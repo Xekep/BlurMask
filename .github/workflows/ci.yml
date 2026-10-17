@@ -2923,6 +2923,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native masked segmentation score failed.' }
           python tools/LegacyMathMaskedSegmentScore.Probe/audit_output.py .artifacts/math-masked-segment-score-native.json
           if ($LASTEXITCODE -ne 0) { throw 'Native masked segmentation score oracle failed.' }
+          dotnet run --project tools/LegacyMathSeparatorCompaction.Probe -c Release -- .artifacts/math-separator-compaction-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed separator compaction failed.' }
+          python tools/LegacyMathSeparatorCompaction.Probe/audit_output.py .artifacts/math-separator-compaction-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed separator compaction oracle failed.' }
+          dotnet publish tools/LegacyMathSeparatorCompaction.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-separator-compaction-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Separator compaction probe publish failed.' }
+          $separatorCompaction = if ($IsWindows) { '.artifacts/math-separator-compaction-probe/LegacyMathSeparatorCompaction.Probe.exe' } else { '.artifacts/math-separator-compaction-probe/LegacyMathSeparatorCompaction.Probe' }
+          & $separatorCompaction .artifacts/math-separator-compaction-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native separator compaction failed.' }
+          python tools/LegacyMathSeparatorCompaction.Probe/audit_output.py .artifacts/math-separator-compaction-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native separator compaction oracle failed.' }
           dotnet publish tools/InkRecognition.RawContent.Probe/InkRecognition.RawContent.Probe.csproj -c Release -r $rid -p:PublishAot=true -o .artifacts/raw-content-probe
           if ($LASTEXITCODE -ne 0) { throw 'Raw-content probe publish failed.' }
           $raw = if ($IsWindows) { '.artifacts/raw-content-probe/InkRecognition.RawContent.Probe.exe' } else { '.artifacts/raw-content-probe/InkRecognition.RawContent.Probe' }
