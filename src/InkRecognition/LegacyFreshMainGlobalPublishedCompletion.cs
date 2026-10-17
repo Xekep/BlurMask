@@ -13,6 +13,7 @@ public sealed class LegacyFreshMainGlobalPublishedCompletion
     public bool QuoteCleanupCompleted { get; private set; }
     public LegacyFreshMainGlobalPublishedGlyphNormalizationNoOp? GlyphNormalization { get; private set; }
     public LegacyFreshMainGlobalControlImport? Import { get; private set; }
+    public LegacyImportedResultSourceNames? SourceNames { get; private set; }
     public bool IsComplete { get; private set; }
     public IReadOnlyList<LegacyFreshMainImportedWordEmission> Words { get; private set; } =
         Array.Empty<LegacyFreshMainImportedWordEmission>();
@@ -64,6 +65,10 @@ public sealed class LegacyFreshMainGlobalPublishedCompletion
             Snapshot.SourcePolicy, token).ApplyPublished(Snapshot, token);
         Import = LegacyFreshMainGlobalControlImport.PreparePublished(Snapshot, token);
         Import.Run(token);
+        //136B40 calls successful TOP.V30 import, then V38 source-name capture,
+        //before the later detached per-glyph default-helper reads. The typed
+        //library retains its source owner rather than simulating native release.
+        SourceNames = LegacyImportedResultSourceNames.Capture(Import, token);
         var words = LegacyFreshMainImportedWordEmission.Complete(Import, normalization, payloads, token);
         ValidateSource(Source, token);
         if (Source.Selection.Publication.Policy.Owner.AcousticEvaluations != evaluations)

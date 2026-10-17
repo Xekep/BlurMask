@@ -15,7 +15,10 @@ sequence. A no-winner result cannot manufacture an empty completed result.
    glyph-rewrite body is still unported.
 4. Prepare and execute dynamic-control import from this exact published
    snapshot into a separate copied pool and WORD lifecycle.
-5. Complete the default UTF8 helper independently for each glyph, then join
+5. Capture detached source-name metadata from that successful import (native
+   TOP.V38), preserving exact imported WORD ownership and NULL names. The
+   typed library retains its source owner rather than pretending to release it.
+6. Complete the default UTF8 helper independently for each glyph, then join
    the resulting bytes within each actual WORD.
 
 No supplied labels, replacement text, old terminal/snapshot substitution or

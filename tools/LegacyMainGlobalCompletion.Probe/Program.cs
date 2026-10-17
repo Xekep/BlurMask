@@ -47,16 +47,16 @@ foreach(var raw in rawInputs)
   Reject(()=>completion.Run(new byte[399],new byte[4],new byte[4]));
   Reject(()=>completion.Run(new byte[400],new byte[4],new byte[4],new(true)));
   Reject(()=>{byte[] overlap=new byte[4];completion.Run(new byte[400],overlap,overlap);});
-  if(completion.IsComplete||completion.Snapshot is not null||completion.Import is not null||completion.Words.Count!=0)throw new Exception("Preflight mutated completion.");
+  if(completion.IsComplete||completion.Snapshot is not null||completion.Import is not null||completion.SourceNames is not null||completion.Words.Count!=0)throw new Exception("Preflight mutated completion.");
   byte[] alternative=Enumerable.Repeat((byte)(variant*43),400).ToArray();
   byte[] leading=Enumerable.Repeat((byte)0x73,4).ToArray(),trailing=Enumerable.Repeat((byte)0x91,4).ToArray();
   var words=completion.Run(alternative,leading,trailing);
   var snapshot=completion.Snapshot!;var import=completion.Import!;
-  if(!completion.IsComplete||!completion.QuoteCleanupCompleted||completion.GlyphNormalization is null||completion.GlyphNormalization.ExecutedGlyphRewriteBody||!ReferenceEquals(snapshot.Terminal,source.Selection)||!ReferenceEquals(snapshot.Session,source.Session)||!ReferenceEquals(import.PublishedSource,snapshot)||!ReferenceEquals(completion.Words,words)||!import.Succeeded||words.Count!=import.Words.Count)throw new Exception("Actual completion ownership/stage order lost.");
+  if(!completion.IsComplete||!completion.QuoteCleanupCompleted||completion.GlyphNormalization is null||completion.GlyphNormalization.ExecutedGlyphRewriteBody||!ReferenceEquals(snapshot.Terminal,source.Selection)||!ReferenceEquals(snapshot.Session,source.Session)||!ReferenceEquals(import.PublishedSource,snapshot)||!ReferenceEquals(completion.Words,words)||!import.Succeeded||words.Count!=import.Words.Count||completion.SourceNames is not {} names||!ReferenceEquals(names.Owner,import)||names.NativeSourceCount!=2)throw new Exception("Actual completion ownership/stage order lost.");
   Reject(()=>completion.Run(alternative,leading,trailing));
   var replay=LegacyFreshMainGlobalPublishedCompletion.Prepare(source,normalization,circles);
   Reject(()=>replay.Run(alternative,leading,trailing));
-  if(replay.IsComplete||replay.QuoteCleanupCompleted||replay.Import is not null||replay.Words.Count!=0||replay.Snapshot is null)throw new Exception("New owner bypassed quote claim or lost failure prefix.");
+  if(replay.IsComplete||replay.QuoteCleanupCompleted||replay.Import is not null||replay.SourceNames is not null||replay.Words.Count!=0||replay.Snapshot is null)throw new Exception("New owner bypassed quote claim or lost failure prefix.");
   w.WriteStartObject();w.WriteNumber("variant",variant);w.WriteNumber("nn",source.CachedMainGroupEvaluations);
   w.WriteBase64String("alternative",snapshot.CopyScoredStorage400());
   Nodes("original",source.Session!.Ownership.GlyphPool.CopyOwnerNodes());Nodes("imported",import.ImportedPool.CopyNodes());
@@ -65,6 +65,8 @@ foreach(var raw in rawInputs)
   foreach(var word in words)
   {
    if(!ReferenceEquals(word.Owner,import)||!ReferenceEquals(word.Normalization,normalization)||!ReferenceEquals(word.Payloads,circles))throw new Exception("WORD completion owner lost.");
+   var importedWord=import.Words.Single(v=>v.WordIndex==word.Raw.WordIndex);
+   if(!names.ReadWord(importedWord)!.AsSpan().SequenceEqual(System.Text.Encoding.UTF8.GetBytes(owner.Symbols.ResourcePrefix.Identifier)))throw new Exception("Detached source name lost its actual WORD/model owner.");
    w.WriteStartObject();w.WriteNumber("index",word.Raw.WordIndex);w.WriteBase64String("raw",word.Raw.CopyBytes());w.WriteBase64String("completed",word.CopyBytes());
    w.WriteStartArray("glyphs");foreach(var glyph in word.Glyphs){w.WriteStartObject();w.WriteNumber("reference",glyph.Raw.Reference);w.WriteBase64String("record",glyph.Raw.CopyRecord40());w.WriteBase64String("raw",glyph.Raw.CopyBytes());w.WriteBase64String("completed",glyph.CopyBytes());w.WriteEndObject();}w.WriteEndArray();w.WriteEndObject();
    byte[] copy=word.CopyBytes();if(copy.Length>0){copy[0]^=255;if(copy.AsSpan().SequenceEqual(word.CopyBytes()))throw new Exception("Output bytes escaped.");}
