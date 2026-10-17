@@ -10,7 +10,7 @@ from pathlib import Path
 if len(sys.argv)!=2:
     raise SystemExit('capture.json')
 capture=json.loads(Path(sys.argv[1]).read_bytes())
-assert capture['caseCount']==181 and len(capture['cases'])==181 and capture['guards']==11
+assert capture['caseCount']==181 and len(capture['cases'])==181 and capture['guards']==18
 costs=[0xff800000,0xff7fffff,0xbf800000,0x80000000,0,0x3c23d70a,
        0x3f000000,0x3f800000,0x7f7fffff,0x7f800000,0x7fc00000,0x7fa00001]
 
@@ -102,3 +102,43 @@ assert discriminators>100
 reorder(completed,0,len(completed)-1)
 assert base64.b64decode(capture['completedSorted'],validate=True)==b''.join(completed)
 print(f'PASS4096 independent native-default completion scores/{discriminators} double-fold discriminators and complete score-to-sort records; prepared no-LM only')
+
+#Independent array-index replay of the48-byte max heap. Compare the entire
+#capacity after each helper return (zeroed row) and explicit caller payload.
+assert len(capture['heaps'])==64
+heap_offers=0
+for case in capture['heaps']:
+ capacity,seed=case['capacity'],case['seed']
+ assert capacity in (0,1,2,3,4,8,16,32) and 0<=seed<8
+ rows=[bytes((seed*43+i*48*17+j*17)&255 for j in range(48)) for i in range(capacity)]
+ count=0;random=(seed*7919+17)&0xffffffff
+ cost_at=lambda i:struct.unpack_from('<f',rows[i])[0]
+ assert len(case['offers'])==64
+ for n,row in enumerate(case['offers']):
+  random^=(random<<13)&0xffffffff;random^=random>>17;random^=(random<<5)&0xffffffff
+  bits=0x3f800000 if seed==7 else costs[random%len(costs)]
+  value=struct.unpack('<f',struct.pack('<I',bits))[0];slot=-1
+  if capacity and not(count==capacity and value>=cost_at(0)):
+   if count<capacity:
+    slot=count;count+=1
+    while slot and not(cost_at((slot-1)//2)>=value):
+     rows[slot]=rows[(slot-1)//2];slot=(slot-1)//2
+   else:
+    slot=0
+    while slot*2<count-1:
+     left=slot*2+1;child=left
+     if left+1<count and cost_at(left+1)>=cost_at(left):child=left+1
+     if value>=cost_at(child):break
+     rows[slot]=rows[child];slot=child
+   rows[slot]=struct.pack('<I',bits)+bytes(44)
+  assert row['costBits']==bits and row['slot']==slot and row['count']==count
+  assert base64.b64decode(row['zeroed'],validate=True)==b''.join(rows)
+  if slot>=0:rows[slot]=rows[slot][:4]+bytes((seed*23+n*37+j*19)&255 for j in range(44))
+  assert base64.b64decode(row['filled'],validate=True)==b''.join(rows)
+  heap_offers+=1
+ #Stable equal insertion followed by strict full-heap rejection is manual.
+ if seed==7:
+  assert count==capacity
+  for i in range(capacity):assert rows[i][4:]==bytes((seed*23+i*37+j*19)&255 for j in range(44))
+assert heap_offers==4096
+print('PASS4096 prepared48-byte heap offers/full capacity before-after payload; equal and unordered float branches; no native beam integration')

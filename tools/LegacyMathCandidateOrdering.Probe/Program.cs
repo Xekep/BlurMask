@@ -60,6 +60,40 @@ Reject(()=>LegacyPreparedMathCompletionScore.WithoutConstraintModel(float.NaN,0)
 Reject(()=>LegacyPreparedMathCompletionScore.WithoutConstraintModel(float.PositiveInfinity,0));
 Reject(()=>LegacyPreparedMathCompletionScore.WritePreparedRecord(new byte[167],1,0));
 Reject(()=>LegacyPreparedMathCompletionScore.WithoutConstraintModel(1,0,new(true)));
+w.WriteStartArray("heaps");
+foreach(int capacity in new[]{0,1,2,3,4,8,16,32})for(int seed=0;seed<8;seed++)
+{
+ var initial=new byte[capacity*48];for(int j=0;j<initial.Length;j++)initial[j]=unchecked((byte)(seed*43+j*17));
+ var heap=new LegacyPreparedMathCandidateHeap(capacity,initial);uint random=unchecked((uint)(seed*7919+17));
+ w.WriteStartObject();w.WriteNumber("capacity",capacity);w.WriteNumber("seed",seed);w.WriteStartArray("offers");
+ for(int n=0;n<64;n++)
+ {
+  random^=random<<13;random^=random>>17;random^=random<<5;
+  uint bits=seed==7?0x3f800000:costs[random%costs.Length];
+  int slot=heap.TryOffer(BitConverter.Int32BitsToSingle(unchecked((int)bits)));
+  w.WriteStartObject();w.WriteNumber("costBits",bits);w.WriteNumber("slot",slot);w.WriteNumber("count",heap.Count);
+  w.WriteBase64String("zeroed",heap.CopyStorage());
+  if(slot>=0)
+  {
+   var payload=new byte[44];for(int j=0;j<44;j++)payload[j]=unchecked((byte)(seed*23+n*37+j*19));
+   heap.WritePreparedPayload(slot,payload);
+  }
+  w.WriteBase64String("filled",heap.CopyStorage());w.WriteEndObject();
+ }
+ w.WriteEndArray();w.WriteEndObject();
+}
+w.WriteEndArray();
+Reject(()=>new LegacyPreparedMathCandidateHeap(-1,[]));
+Reject(()=>new LegacyPreparedMathCandidateHeap(33,new byte[33*48]));
+Reject(()=>new LegacyPreparedMathCandidateHeap(1,new byte[47]));
+var guardHeap=new LegacyPreparedMathCandidateHeap(1,new byte[48]);
+Reject(()=>guardHeap.TryOffer(1,new(true)));
+if(guardHeap.Count!=0)throw new Exception("Cancelled heap mutated.");
+Reject(()=>guardHeap.WritePreparedPayload(0,new byte[44]));
+int guardSlot=guardHeap.TryOffer(1);
+Reject(()=>guardHeap.WritePreparedPayload(guardSlot,new byte[43]));
+guardHeap.WritePreparedPayload(guardSlot,new byte[44]);
+Reject(()=>guardHeap.WritePreparedPayload(guardSlot,new byte[44]));
 w.WriteNumber("caseCount",cases);w.WriteNumber("guards",guards);w.WriteEndObject();
 Console.WriteLine($"PASS{cases} complete candidate-ordering controls/{guards} guards; prepared kernel only, no beam integration or accuracy claim.");
 void Reject(Action action)
