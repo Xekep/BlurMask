@@ -11,6 +11,8 @@ internal sealed unsafe class OrtRuntime : IDisposable
     private nint _library;
     private readonly nint* _api;
     private nint _env, _memory;
+    private readonly object _lifetimeGate = new();
+    private int _mode0Owners;
     public string Version { get; }
 
     internal nint Slot(int index) => _api[index];
@@ -99,11 +101,36 @@ internal sealed unsafe class OrtRuntime : IDisposable
 
     public OrtRun CreateRun(CancellationToken token) => new(this, token);
 
+    internal IDisposable RetainMode0Owner()
+    {
+        lock (_lifetimeGate)
+        {
+            ObjectDisposedException.ThrowIf(_library == 0, this);
+            var lease = new Mode0OwnerLease(this);
+            _mode0Owners++;
+            return lease;
+        }
+    }
+
+    private sealed class Mode0OwnerLease(OrtRuntime runtime) : IDisposable
+    {
+        private OrtRuntime? owner = runtime;
+        public void Dispose()
+        {
+            var current = Interlocked.Exchange(ref owner, null);
+            if (current != null) lock (current._lifetimeGate) current._mode0Owners--;
+        }
+    }
+
     public void Dispose()
     {
-        Release(94, _memory); _memory = 0;
-        Release(92, _env); _env = 0;
-        if (_library != 0) { NativeLibrary.Free(_library); _library = 0; }
+        lock (_lifetimeGate)
+        {
+            if (_mode0Owners != 0) throw new InvalidOperationException("Dispose mode0 model owners before their ORT runtime.");
+            Release(94, _memory); _memory = 0;
+            Release(92, _env); _env = 0;
+            if (_library != 0) { NativeLibrary.Free(_library); _library = 0; }
+        }
     }
 
     internal sealed class Utf8 : IDisposable
@@ -118,7 +145,10 @@ internal sealed unsafe class OrtRun : IDisposable
 {
     private readonly OrtRuntime _runtime;
     private readonly CancellationTokenRegistration _registration;
+    private readonly object _lifetimeGate = new();
+    private int _mode0Owners;
     public nint Pointer { get; private set; }
+    internal bool IsOwnedBy(OrtRuntime runtime) => ReferenceEquals(_runtime, runtime) && Pointer != 0;
     public OrtRun(OrtRuntime runtime, CancellationToken token)
     {
         _runtime = runtime;
@@ -131,7 +161,33 @@ internal sealed unsafe class OrtRun : IDisposable
             if (status != 0) runtime.Release(93, status);
         });
     }
-    public void Dispose() { _registration.Dispose(); _runtime.Release(97, Pointer); Pointer = 0; }
+    internal IDisposable RetainMode0Owner(OrtRuntime runtime)
+    {
+        lock (_lifetimeGate)
+        {
+            if (!IsOwnedBy(runtime)) throw new ArgumentException("Same live ORT run required.");
+            var lease = new Mode0RunLease(this);
+            _mode0Owners++;
+            return lease;
+        }
+    }
+    private sealed class Mode0RunLease(OrtRun run) : IDisposable
+    {
+        private OrtRun? owner = run;
+        public void Dispose()
+        {
+            var current = Interlocked.Exchange(ref owner, null);
+            if (current != null) lock (current._lifetimeGate) current._mode0Owners--;
+        }
+    }
+    public void Dispose()
+    {
+        lock (_lifetimeGate)
+        {
+            if (_mode0Owners != 0) throw new InvalidOperationException("Dispose mode0 tensor owners before their ORT run.");
+            _registration.Dispose(); _runtime.Release(97, Pointer); Pointer = 0;
+        }
+    }
 }
 
 internal sealed unsafe class OrtSession : IDisposable
@@ -173,9 +229,11 @@ internal sealed unsafe class OrtTensor : IDisposable
     private readonly OrtRuntime _runtime;
     private GCHandle _pin;
     public nint Pointer { get; private set; }
+    internal bool IsOwnedBy(OrtRuntime runtime) => ReferenceEquals(_runtime, runtime) && Pointer != 0;
     public OrtTensor(OrtRuntime runtime, nint value, GCHandle pin = default) { _runtime = runtime; Pointer = value; _pin = pin; }
     private (int Type, long[] Shape, nint Data) Metadata()
     {
+        ObjectDisposedException.ThrowIf(Pointer == 0, this);
         nint info = 0, data = 0;
         _runtime.Check(((delegate* unmanaged<nint, nint*, nint>)_runtime.Slot(65))(Pointer, &info));
         try
@@ -205,6 +263,17 @@ internal sealed unsafe class OrtTensor : IDisposable
         var data = new ReadOnlySpan<float>((void*)pointer, Size(shape)).ToArray();
         if (data.Any(x => !float.IsFinite(x))) throw new InvalidDataException("Nonfinite model output.");
         return (data, shape);
+    }
+    internal (int Type, long[] Shape) Describe()
+    {
+        var (type, shape, _) = Metadata();
+        return (type, shape);
+    }
+    internal (long[] Values, long[] Shape) Int64s()
+    {
+        var (type, shape, pointer) = Metadata();
+        if (type != 7) throw new InvalidDataException("Expected int64 model output.");
+        return (new ReadOnlySpan<long>((void*)pointer, Size(shape)).ToArray(), shape);
     }
     public void Dispose() { _runtime.Release(96, Pointer); Pointer = 0; if (_pin.IsAllocated) _pin.Free(); }
 }
