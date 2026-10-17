@@ -104,16 +104,20 @@ fields. Only after this append succeeds does05F200 clear the local C4D and
 context20, transferring ownership. On failure the local destructors still
 release them. This append records transport; it does not apply DOM edits.
 
-05F720's single-row branch then calls sourceC20.V188 with the retained C4D,
+05F720's single-row branch then calls request+08.V188 with the retained C4D,
 zero and false, followed by original DOMreader.V218(parent,BE2result,null).
-These are separate operations with separate failure returns. C20.V188 is
-Ink06ED30 and forwards to the actual C4D/history path. DOM.V218 on a BCC is
+These are separate operations with separate failure returns. Ink C20.V188 is
+06ED30, a possible C4D/history consumer only after that receiver's actual type
+is established. DOM.V218 on a BCC is
 Engine0EFB10, which invokes BE2.V10=0E2D70; the latter resolves paths,
 recursively clones insertion nodes and executes the DOM mutations. It is
 not the earlier V50 exporter.
 
-Finally05F720 closes sourceC20.V180 and commits or rolls back the outer
-history transaction. A successful031880 subtree, V60 queue, V50 export or
+Finally05F720 closes V180 on the distinct object returned by DOMreader.V200
+and commits or rolls back the outer history transaction. This object cannot
+be identified as Ink C20 merely by its virtual slot number; its observed ABI
+contradicts that shortcut. See [the receiver/entry proof](legacy-main-cache-acceptance-owners.md).
+A successful031880 subtree, V60 queue, V50 export or
 C8F append alone proves none of those later outcomes. Current portable
 counter handoff does not stand in for native observer/history execution.
 
