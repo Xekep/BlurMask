@@ -18,12 +18,12 @@ The reusable library now has these checked stages:
 | --- | --- |
 | First-stage inference | Same-owner NN, graph, selected single or multiple plain words; unsupported traits/terminal columns remain explicit refusals. |
 | Main preprocessing | Actual selected first TEXT to source720,24B/24A geometry, deskew and smoothing.24A is joined; a genuine positive empty-first fixture/remaining temporal branches are not established. |
-| Descriptor cut source | Sequential cuts, local metadata, cross-source construction/pruning, compact selector traversal and original source-range projection are checked. Global context selection resolves actual descriptor-to-line ownership; global NN/controller integration remains separate. |
-| Main candidate | One assigned physical line through CASE, first terminal and compact backtrack. Configured count2 now has actual terminal exclusions, reachability and compact2410 publication with owned selected terminal identities. Its backtrack/WORD join is still separate. |
+| Descriptor cut source | Sequential cuts, cross-source construction/pruning, compact traversal and raw source projection are checked. Global context, four-family NN/cache, dictionary source epochs, stored-range group geometry and line-aware transition caches are joined. The global main controller remains separate. |
+| Main candidate | One assigned physical line through CASE, first terminal and compact backtrack. Configured count2 joins actual raw preprocessing, exclusions, compact2410 publication, backtracking, same-TOP WORD publication, duplicate comparison and score publication. Rescue and final document processing remain separate. |
 | Word publication | Per-segment residual association, glyph chain and same-owner plain WORD list; no supplied labels or success flags. |
 | First candidate completion | Actual selected alternative scores, published-WORD quote cleanup, fresh-configuration glyph-normalization no-op, separate raw UTF8 WORD projections. No joined/accepted transcription. |
 | Ordinary glyph alternatives | Actual positive CASE source export/scoring/compact-driven refresh and13A830 ordering are joined. Fresh one-descriptor negative spans have owned source export/refresh. Native failed-refresh retries/general protocol sources remain separate. |
-| Text projection | Fresh273.V50 ->213A0/021000 choices and05AFA0 original raw positions are joined. Separate ordered range interning, existing-glyph021760 reuse and pending selection transactions are checked; processed range operators, full024F30 and document assembly remain separate. |
+| Text projection | Fresh273.V50 ->213A0/021000 choices and05AFA0 original raw positions are joined. A bounded first-WORD driver joins the219580 source prefix, clipping, overlap processing, ordered range interning, fresh024D40 metadata,021760 reuse and pending CHAR registrations. TOP.V68 augmentation/pruning and0283B0 document assembly remain incomplete. |
 | Long-source publication | Genuine native 120-node gate and prefix/final-append transport checked; a nonempty genuine long-source winner is not established. |
 
 `LegacyFreshMainSingleLinePlainRecognition` joins raw physical strokes to the
@@ -76,17 +76,21 @@ DLL is executed by the library or these tests.
 ## Remaining joins
 
 - Main alternatives now have actual shared-TOP postcallback list comparison,
-  duplicate release and owned score storage. General terminal exclusions/rescue
-  and configured secondary winner-to-WORD publication remain separate. Native mass/rank/TOP80 fields must not become a guessed acceptance
-  probability.
-- Multiple main descriptors/lines through global compact/context/NN, remaining
+  duplicate release and owned score storage. The scoped configured count2 loop
+  is joined to raw input; rescue, general properties and final document processing
+  remain separate. Native mass/rank/TOP80 fields must not become a guessed
+  acceptance probability.
+- Multiple main descriptors/lines through the complete global controller (its
+  graph/context/NN/dictionary-source components are now joined), remaining
   genuine empty-result branches and unsupported
   source/protocol/glyph branches. Native wrapped count/allocation boundaries
   need bounded portable handling rather than fabricated empty results.
 - General protocol/source refresh and native failed-refresh retry semantics;
-  remaining024F30 source-node interning/reuse, metadata and0283B0 document
-  orchestration. Actual first-candidate glyph choices now retain an immutable
-  original raw document; sampled node/arc keys are not reused as document IDs.
+  complete TOP.V68 source augmentation, actual span WORD pruning and0283B0
+  document orchestration. The numeric13D360 ranking kernel is checked separately;
+  its same-pool comparator and real span mutation still require binding. Actual
+  first-candidate glyph choices retain an immutable original raw document;
+  sampled node/arc keys are not reused as document IDs.
 - Representative online handwriting evaluation with real pen-up events,
   Russian cursive, English, mixed text and mathematical notation before enabling
   the new path for automatic app replacement.
@@ -98,6 +102,9 @@ Details: [raw main integration](legacy-main-raw-plain-recognition.md),
 [ordinary glyph refresh](legacy-main-ordinary-glyph-refresh.md),
 [actual glyph choices and raw positions](legacy-main-text-choices.md),
 [postcallback alternatives](legacy-main-alternative-assembly.md),
+[configured raw alternatives](legacy-main-configured-raw-composition.md),
+[processed source wrapper](legacy-main-text-source-wrapper.md),
+[prepared WORD ranking](legacy-main-word-ranking.md),
 [cross-source graph](legacy-main-cross-source-graph.md),
 [configured secondary transport](legacy-main-secondary-storage.md),
 [first candidate completion](legacy-main-first-candidate-completion.md),
