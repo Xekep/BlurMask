@@ -24,6 +24,14 @@ an actual nonempty word or refuses the entire no-word result. The additive
 retains the complete selection, pool and source ownership. Its computed
 unadjusted scalar diagnostics are not written into a nonexistent WORD275.
 
+For a published word, its first span scalar comes from the first emitted
+reading-order glyph's actual StartContextId callback. Its last scalar retains the
+full selected terminal's EndContextId, including a skipped terminal cell: native
+1F5D7B supplies param7=-1 and1F5D76 supplies param8=wordEnd. The probe records
+both start/end callbacks and checks this exact policy. Its earlier reversed-span
+expectation was stale after the runtime override correction; no allocation,
+selection, likelihood, cost or hidden-root expectations were relaxed.
+
 The historical primitive-word diagnostic was wrong at this outer boundary:
 actual B8 remains labels134,191 atcost12111, but first275 contains only134.
 The selected F0001 confidence/model provenance remains available independently;

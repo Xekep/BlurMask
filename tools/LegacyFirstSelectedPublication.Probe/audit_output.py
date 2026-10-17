@@ -21,7 +21,7 @@ for c in captures:
     assert len(c['glyphs'])==len(emitted)
     unpublished_with_glyph+=bool(emitted and not c['hasWord'])
     for t,g in zip(emitted,c['glyphs']):
-        node,arc,symbol,row,column,likelihood,end=t;b=bytes.fromhex(g['record'])
+        node,arc,symbol,row,column,likelihood,end,start=t;b=bytes.fromhex(g['record'])
         assert len(b)==40 and g['key']==node|(arc<<24)
         assert i32(b,0)==row+column and u16(b,8)==symbol
         assert u16(b,4)&7==0 and u16(b,6)&0x40
@@ -37,7 +37,7 @@ for c in captures:
     assert f32(c['wordScalar18'])==f32(f32(c['selectedCost'])/f32(c['nodeCount']<<13))
     assert f32(c['wordScalar1c'])==f32(f32(c['acousticCost'])*f32(0.00012207031))
     if c['hasWord']:
-        assert c['spanFirst']==c['trace'][-1][6] and c['spanLast']==emitted[-1][6]
+        assert c['spanFirst']==emitted[0][7] and c['spanLast']==c['trace'][-1][6]
         word=bytes.fromhex(c['word']);assert fl(word,16)==f32(c['wordScalar10']) and fl(word,20)==1
         assert fl(word,24)==f32(c['wordScalar18']) and fl(word,28)==f32(c['wordScalar1c'])
 assert actual==4 and synthetic==24 and suppressed==95 and unpublished_with_glyph==4
