@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using System.Security.Cryptography;
 
 namespace InkRecognition;
 
@@ -47,6 +48,11 @@ public sealed class LegacyOwnedMainCompactWordReachability
         ArgumentNullException.ThrowIfNull(terminal);
         cancellationToken.ThrowIfCancellationRequested();
         var pass = terminal.PassResult;
+        //Reject foreign bytes before parsing coordinate mode or touching the
+        //producing query lease. Invalid resources must not consume result state.
+        if (resource.Length != 572763 || !StringComparer.OrdinalIgnoreCase.Equals(
+            Convert.ToHexString(SHA256.HashData(resource)), pass.ControllerOwner.Owner.SelectedSourceOwner.SourceFingerprint))
+            throw new ArgumentException("Reachability must use its exact selected main resource.", nameof(resource));
         pass.ValidateResultQueryEpoch(cancellationToken);
         var source = LegacyMainCompactPublicationSource.Final(resource, pass, casePolicy, 0, cancellationToken);
         return PrepareSource(resource, source, cancellationToken);
