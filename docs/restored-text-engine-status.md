@@ -4,6 +4,35 @@ The full text engine is not restored. Russian cursive and automatic replacement
 are not ready for general use. The restored main pipeline is not the app's
 default recognizer.
 
+## Latest checked additions (2026-10-18)
+
+The [owned English119 candidate stage](legacy-english-owned119-candidates.md)
+now connects actual108 cuts, original chronology, capped/pruned groups and
+219/201 features to both107 networks.124 raw owners and3241 live group
+classifications pass independent raw-resource/geometry/network oracles and
+Managed/NativeAOT.119 cache/masks/ensemble and the word controller remain
+unfinished; this is not an English quality result or app recognizer switch.
+
+The [owned Math2 completion stage](legacy-math2-owned-completed-records.md)
+now retains11 actual EOS records with same-event provenance, common-secondary
+frontier and partial-failure ownership. The new
+[event-bound attention snapshots](legacy-math2-owned-completed-attention.md)
+use the proven backward-ancestry identity to copy only the selected beam,
+without copying KV caches.11 snapshots/403 sigmoid values/110 guards pass
+independent checks and fresh NativeAOT. Final-position fallback, recording-loop
+integration, EF4 output and final formula acceptance are still separate.
+
+The [library DOM cache transport](legacy-library-text-dom-transport-cache.md)
+now transfers actual same-source pending C4D and exported BE2 owners with
+failure-safe receipts.4 actual sources/24 commands/3 rows/51 guards pass
+independent checks and Managed/NativeAOT. This is explicit library transport,
+not the unproved native SDK request/history acceptance route. Concurrent target
+Build/Export versus Apply is serialized and checked with deterministic barriers.
+
+The exact committed app at5919419 builds with0 warnings and passes headless
+`--ai-pen-test`. Russian diagnostics remain4/9 exact with16/33 character edits;
+no new release or full-engine readiness is asserted.
+
 ## App and library are different stages
 
 The optional **Experimental text engine** setting shipped in 1.2.8-rc.7 uses the
@@ -360,8 +389,8 @@ force-policy join only; it does not implement the complete search or change the 
 
 The [completed168 record ownership audit](legacy-math2-completed-record-ownership.md)
 now establishes constructor fields, untouched padding, three U16 buffer lanes,
-separate type3E ownership, and partial failure behavior. No full completed-record
-runtime or successful final formula follows from this static contract.
+separate type3E ownership, and partial failure behavior. The separately joined owned EOS runtime is described above; successful final
+formula output does not follow from this static contract.
 
 
 The [detached text-result builder](legacy-main-detached-text-dom.md) now consumes
@@ -385,11 +414,10 @@ still remains separate.
 The [owned mode0 prefix context](legacy-math2-mode0-prefix-state.md) now derives
 primary/secondary prefixes and rank/time ancestry from actual decoder steps.
 Twenty steps,118 guards and1828524 exact tensor/cache bytes match an independent
-oracle and fresh NativeAOT. It retains11 numerical EOS score facts, not owning
-completed168 records. Fixed-step prepared continuation is explicitly diagnostic;
-termination, owning common-secondary frontier, completed-record ownership,
-fallback and final accepted formula remain unjoined. The frontier's actual
-producer has a separate static proof; it cannot be replaced by constant0.
+oracle and fresh NativeAOT. Its original probe retains11 numerical EOS score facts; the separate owned
+record and frontier stages are now joined as described above. Fixed-step
+prepared continuation remains diagnostic; fallback and final accepted formula
+remain separate. The frontier cannot be replaced by constant0.
 
 The [original-input bound](legacy-math2-input-frame-bound.md) now retains the
 exact source frame count and derives `min(1000,4*N+1,nonzero encoder K)` in the

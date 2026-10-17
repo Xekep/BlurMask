@@ -23,3 +23,5 @@ The relocation preserved all7993 files and their sizes. SHA256 was checked
 before and after for all four complete `decompiled.c` exports. Local scripts
 and repository documentation now use `research/myscript` paths. Existing
 historical reports may contain the original location as provenance.
+
+The readonly EF4 helper export is preserved locally at `myscript/output/Math2EF4HelpersStage4/MyScriptDocument.dll/` with function lists and SHA-256 provenance. It is analysis evidence outside build artifacts; these helpers are not yet a complete runtime EF4 implementation.
