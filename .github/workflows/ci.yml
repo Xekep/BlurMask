@@ -774,6 +774,8 @@ jobs:
           python tools/LegacyFirstAcoustic119Wire.Probe/audit_output.py models .artifacts/legacy-first-acoustic119-wire-managed.json
           dotnet run --project tools/LegacyEnglishFirstSlant.Probe -c Release -- models .artifacts/legacy-en-slant-controls.json .artifacts/legacy-en-slant-managed.json
           python tools/LegacyEnglishFirstSlant.Probe/audit_output.py models .artifacts/legacy-en-slant-managed.json
+          dotnet run --project tools/LegacyEnglishNoInitialGlyph.Probe -c Release -- models .artifacts/legacy-en-slant-controls.json .artifacts/legacy-en-noinitial-glyph-managed.json
+          python tools/LegacyEnglishNoInitialGlyph.Probe/audit_output.py models .artifacts/legacy-en-noinitial-glyph-managed.json
           dotnet run --project tools/LegacyEnglishLiteFirstPreprocessing.Probe -c Release -- models .artifacts/legacy-en-short-controls.json .artifacts/legacy-en-short-managed.json
           python tools/LegacyEnglishLiteFirstPreprocessing.Probe/audit_output.py models .artifacts/legacy-en-short-managed.json
           dotnet run --project tools/LegacyPreparedNetwork107.Probe -c Release -- models models/ru-RU/legacy-engine-profile.json .artifacts/legacy-prepared-network107-managed.json
@@ -1426,6 +1428,7 @@ jobs:
             @{ Name = 'LegacySource247Wire'; Args = @('models', '.artifacts/legacy-source247-wire-native.json') },
             @{ Name = 'LegacyFirstAcoustic119Wire'; Args = @('models', '.artifacts/legacy-first-acoustic119-wire-native.json') },
             @{ Name = 'LegacyEnglishFirstSlant'; Args = @('models', '.artifacts/legacy-en-slant-controls.json', '.artifacts/legacy-en-slant-native.json') },
+            @{ Name = 'LegacyEnglishNoInitialGlyph'; Args = @('models', '.artifacts/legacy-en-slant-controls.json', '.artifacts/legacy-en-noinitial-glyph-native.json') },
             @{ Name = 'LegacyEnglishLiteFirstPreprocessing'; Args = @('models', '.artifacts/legacy-en-short-controls.json', '.artifacts/legacy-en-short-native.json') },
             @{ Name = 'LegacyPreparedNetwork107'; Args = @('models', 'models/ru-RU/legacy-engine-profile.json', '.artifacts/legacy-prepared-network107-native.json') },
             @{ Name = 'LegacyMainWordRanking'; Args = @('.artifacts/legacy-main-word-ranking-native.json') },
@@ -2037,6 +2040,10 @@ jobs:
             if ($name -eq 'LegacyEnglishFirstSlant') {
               python tools/LegacyEnglishFirstSlant.Probe/audit_output.py models .artifacts/legacy-en-slant-native.json
               if ($LASTEXITCODE -ne 0) { throw 'LegacyEnglishFirstSlant independent audit failed' }
+            }
+            if ($name -eq 'LegacyEnglishNoInitialGlyph') {
+              python tools/LegacyEnglishNoInitialGlyph.Probe/audit_output.py models .artifacts/legacy-en-noinitial-glyph-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyEnglishNoInitialGlyph independent audit failed' }
             }
             if ($name -eq 'LegacyEnglishLiteFirstPreprocessing') {
               python tools/LegacyEnglishLiteFirstPreprocessing.Probe/audit_output.py models .artifacts/legacy-en-short-native.json
