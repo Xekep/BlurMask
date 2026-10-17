@@ -102,43 +102,7 @@ public sealed class LegacyOwnedRussianMainGlyphConfidence
 
     internal LegacyMainGlyphConfidenceCandidate[] EvaluateCandidates(ReadOnlySpan<LegacyAcousticCacheCandidate> candidates,
         IReadOnlyList<ReadOnlyMemory<int>?> family,Func<float> actualPrimitiveProbability,CancellationToken token=default)
-    {
-        ArgumentNullException.ThrowIfNull(family);ArgumentNullException.ThrowIfNull(actualPrimitiveProbability);token.ThrowIfCancellationRequested();
-        if(candidates.Length>150)throw new InvalidDataException("Bounded actual candidate cache required.");
-        var result=new LegacyMainGlyphConfidenceCandidate[candidates.Length];
-        if(family.Count!=7||family.Take(4).Any(f=>f is null||f.Value.Length!=180)||family.Skip(4).Any(f=>f is not null))
-            throw new InvalidDataException("Actual four180-output EXP families required.");
-        for(int i=0;i<candidates.Length;i++)
-        {
-            token.ThrowIfCancellationRequested();ushort symbol=candidates[i].Symbol;float confidence=0;
-            if(i<20)
-            {
-                if(symbol==closed)
-                {
-                    //1A7970 returns stored ranges.1BCBD0 reads first physical
-                    //range ID before218.V60, not chronologically sorted ranges.
-                    confidence=actualPrimitiveProbability();token.ThrowIfCancellationRequested();
-                    if(!float.IsFinite(confidence))throw new InvalidDataException("Finite original source probability required.");
-                }
-                else
-                {
-                    if(!labels.TryResolveOutputLabel(symbol,out ushort output))
-                        throw new NotSupportedException("Actual retained symbol requires an unimplemented confidence service.");
-                    //The original symbol indexes192x4 calibration; only the
-                    //neural lookup uses3A0. Native order is family1+0+2+3+0+0+0.
-                    float a=calibration.Calibrate(symbol,0,family[0]!.Value.Span[output],token);
-                    float b=calibration.Calibrate(symbol,1,family[1]!.Value.Span[output],token);
-                    float sum=b+a;
-                    sum+=calibration.Calibrate(symbol,2,family[2]!.Value.Span[output],token);
-                    sum+=calibration.Calibrate(symbol,3,family[3]!.Value.Span[output],token);
-                    sum+=0f;sum+=0f;sum+=0f;sum+=0f;
-                    confidence=sum/4; if(confidence>=1)confidence=1;
-                }
-            }
-            result[i]=new(symbol,candidates[i].Cost,confidence);
-        }
-        token.ThrowIfCancellationRequested();return result;
-    }
+        =>LegacyMainGlyphConfidenceKernel.Evaluate(candidates,family,actualPrimitiveProbability,calibration,labels,closed,token);
 }
 
 /// <summary>Owned confidence vector snapshots for one real sampled main group.</summary>

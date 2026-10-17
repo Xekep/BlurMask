@@ -28,7 +28,7 @@ public sealed class LegacyOwnedGlobalMainWordSpan
 /// <summary>Actual global ordinary cache/source68/292 query lifecycle over one
 /// owned symbol/context/backend. Node epochs remain explicit controller events.
 /// This source adapter does not supply word geometry, main loop or final output.</summary>
-public sealed class LegacyFreshMainGlobalCaseSession
+public sealed partial class LegacyFreshMainGlobalCaseSession
 {
     private readonly LegacyOrdinaryRecognitionGraph graph;
     private readonly LegacyPreparedCaseDictionarySession dictionary;
@@ -142,7 +142,9 @@ public sealed class LegacyFreshMainGlobalCaseSession
     {
         //Only private owned copies survive the call. The public scorer result's
         //recoverable ReadOnlyMemory buffers are never retained as cache storage.
-        var result=Acoustic.Score(group,token);costs[group]=result.Cache.Costs.ToArray();AcousticEvaluations++;
+        var result=Acoustic.Score(group,token);costs[group]=result.Cache.Costs.ToArray();
+        acousticSnapshots.Add(group,new(result,Acoustic.Geometry.ReadFirstStoredRangeProbability(group,token),Acoustic.CostScale));
+        AcousticEvaluations++;
         return new(costs[group],Acoustic.CostScale);
     }
     internal void ValidateOwnedSpan(LegacyOwnedGlobalMainWordSpan span,CancellationToken token)
