@@ -141,7 +141,7 @@ assert struct.unpack_from('<I',binaries['MyScriptDocument.dll'].data,binaries['M
 assert struct.unpack_from('<f',binaries['MyScriptDocument.dll'].data,binaries['MyScriptDocument.dll'].off(0x180229cfc))[0]==5.0
 assert struct.unpack_from('<f',binaries['MyScriptDocument.dll'].data,binaries['MyScriptDocument.dll'].off(0x180229d00))[0]==6.0
 report=dict(completedDefaultScore='037430 alpha1 without C0 constraint; F32 cost / ((F32(prefix+1)+5)/6); both CPU powf paths preserve positive finite base for alpha1',regions=len(regions),pins=len(pins),bindings=len(bindings),
- route='EED168 EF1 -> EEE packet70 -> EEF packet+50/decoder+A8 -> EEF B8 clone; EEE80 is EEF, not EF1',
+ route='EED168 EF1 -> EEE packet70 -> EEF packet+50/decoder+A8 -> EEF B8 same-pointer retain; EEE80 is EEF, not EF1',
  channels='D8 retains log probabilities; E8 negates sign bits then adds per-beam F0 cost before heap selection',
  numeric='Engine54.V48 at186290 uses last time frame, batch axis1, vocabulary axis2 and float32 temperature/exp/sum/log/store operations',
  remains=['EEF full tensor and alias lifecycle','native exp/log CPU-dispatch implementations','constraint model and token-mask producers','whole beam and final structural acceptance'],

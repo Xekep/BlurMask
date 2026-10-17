@@ -12,7 +12,7 @@ callback would connect different functions and different storage owners.
 For EED's checked mode0 branch,0450C0 creates EF1 and retains it at EED168.
 It initializes EEE with the0x108-byte packet starting at EED70. EEE0359F0 then
 initializes EEF from that packet's0x50-byte offset, with a0xB8-byte packet. EEF's
-03B300 initializer clones the decoder reference at its input A8 into EEF B8.
+03B300 initializer retains the identical decoder reference at its input A8 in EEF B8 under the default Engine service; see the [concrete retention proof](legacy-math2-force-policy-producer.md).
 The offsets therefore name the same EED168 decoder:
 
 ```text
@@ -48,7 +48,7 @@ Conditional token probabilities are not calibrated handwriting confidence.
 
 `tools/handwriting/audit_math2_score_channels.py report.json` checks both whole
 PE fingerprints,8 code regions,96 exact instructions and10 table bindings.
-It includes the EED-to-EEE packet arithmetic, the EEF decoder clone, float32
+It includes the EED-to-EEE packet arithmetic, the EEF same-pointer decoder retention, float32
 temperature/exp/sum/log/store calls and the separate log/cost output channels.
 The full beam, token-mask producers and final structural acceptance remain
 separate work.

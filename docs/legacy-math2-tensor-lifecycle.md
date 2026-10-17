@@ -6,7 +6,7 @@ The checked resource SHA256 is `2dc179aadb1bce347bb1ebd57aa765d4c822d6ea12eca759
 
 ## Concrete callback owners
 
-EF1 runtime vtable `0x1801FD150` binds `+18=04A640`, `+20=04A710`, `+28=04B9E0`, and `+30=04C930`. Its model owners at `+10/+18/+20` are encoder/initializer/decoder. EEE's `owner80` is EEF; it is not EF1. EEF holds the selected/cloned EF1 at `B8`. EEF table `1EDA20` binds `V28=03BD40` and `V40=03DA20`.
+EF1 runtime vtable `0x1801FD150` binds `+18=04A640`, `+20=04A710`, `+28=04B9E0`, and `+30=04C930`. Its model owners at `+10/+18/+20` are encoder/initializer/decoder. EEE's `owner80` is EEF; it is not EF1. EEF holds the selected EF1 at `B8`, retained at the same pointer by the default Engine service; the [concrete ownership proof](legacy-math2-force-policy-producer.md) pins that service. EEF table `1EDA20` binds `V28=03BD40` and `V40=03DA20`.
 
 `03BD40` calls EF1 `V20`, creating the decoder input tuple. `03DA20` consumes the selected 48-byte candidate rows, copies their cost into EEF's prior-cost vector and calls EF1 `V30`. The actual parent ordinal is the signed I32 at candidate `+28`; the next target is the qword at `+8`. EEF subsequently records the low 16 bits of that target in its separate selected-label array. Those are related representations with different widths.
 
