@@ -283,3 +283,9 @@ the RU and English cursive-lite resources; positive134/1D0 payloads are explicit
 refusals.669 guards and an independent raw-wire oracle preserve old RU readers.
 This does not deserialize English119 acoustic weights or enable an English
 main recognizer; delegated child bounds are not executable child models.
+
+The [mode0 tensor lifecycle](legacy-math2-tensor-lifecycle.md) now has a pinned
+producer contract: default zero-filled allocation, initializer buffer moves,
+attention-time concatenation, selected-parent KV gather and a separate static
+cache map.124 instruction checks and actual graph IO shapes support the plan;
+this static proof does not run the decoder or establish its runtime integration.
