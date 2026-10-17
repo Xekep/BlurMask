@@ -26,7 +26,9 @@ publication, mode 0/primary 2/secondary 1, no trace or associated source,
 ordinary primary candidates, supported beam alternatives and no forced-boundary
 marker alternatives. The observed main graph maximum atoms is8; finalized
 prefixes are now accepted within the proved120-node one-shot boundary, described
-in `legacy-main-compact-one-shot-publication.md`. Longer sources are refused. Physical
+in `legacy-main-compact-one-shot-publication.md`. Longer one-shot sources are
+refused; the opt-in LIVE source lifetime is described separately in
+`legacy-main-live-compact-publication.md`. Physical
 ring allocation remains an explicit residue input. Getter copies, cancellation,
 foreign owner checks and the single-use result lease apply to both routes.
 

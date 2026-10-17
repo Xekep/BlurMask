@@ -65,6 +65,22 @@ byte[] leaked = observed.CopyCompactStorage(); leaked[0] ^= 255;
 if (observed.CopyCompactStorage()[0] == leaked[0]) throw new InvalidDataException("Compact capture leaked mutable storage.");
 starts[0] = -123;
 if (observed.CopyNodeStarts2478()[0] != 0) throw new InvalidDataException("2478 leaked mutable storage.");
+int guards = ControlTests.CheckNodeWriteback(controller,
+    LegacyOwnedFreshMainWordControllerPolicy.Prepare(ak, owner), observed.GetInputNodeSnapshot(0));
+LegacyOwnedMainCompactWordMaterialization? completedCompact = null;
+if (!nativeGate)
+{
+    //Finish the remaining actual node with the retained2460/2478/2490 state.
+    //This is a prepared early-publication consumer test, not a native gate.
+    completedCompact = LegacyOwnedMainCaseCompactWordMaterialization.Materialize(ak, policy, terminal, confidence, residue);
+    if (completedCompact.RecordCount != 1057 || completedCompact.SelectedRecordIndex != 1019 ||
+        !completedCompact.CopyCompactStorage().AsSpan(0, observed.RecordCount2470 * 40)
+            .SequenceEqual(observed.CopyCompactStorage().AsSpan(0, observed.RecordCount2470 * 40)))
+        throw new InvalidDataException("Final publication lost the actual intermediate compact prefix.");
+    if (result.NextUnpublishedNode2490 != boundary || result.IntermediatePublicationCount != 1)
+        throw new InvalidDataException("Final publication mutated the immutable intermediate result snapshot.");
+    guards += ControlTests.CheckObserverFailures(ak, lk, model, input, cases, publication);
+}
 using var output = File.Create(args[9]);
 using var writer = new Utf8JsonWriter(output);
 writer.WriteStartObject();
@@ -84,6 +100,19 @@ writer.WriteNumber("nextNode2490", result.NextUnpublishedNode2490);
 writer.WriteNumber("penalty", LegacyOwnedFreshCaseMainTerminalInvocation.Prepare(policy).LanguagePenalty2534);
 writer.WriteBoolean("hasTerminalWinner", terminal.Winner.HasWinner);
 writer.WriteNumber("queries", observed.QueryChecks); writer.WriteNumber("backendCalls", observed.BackendCalls);
+writer.WriteNumber("guards", guards);
+if (completedCompact is not null)
+{
+    writer.WriteNumber("finalCount", completedCompact.RecordCount);
+    writer.WriteNumber("finalSelected", completedCompact.SelectedRecordIndex);
+    writer.WriteBase64String("finalCompact", completedCompact.CopyCompactStorage());
+    WriteInts("finalStarts", completedCompact.CopyNodeStarts2478());
+    WriteInts("finalPrefixOwners2488", completedCompact.CopyPrefixOwners2488());
+    writer.WriteNumber("finalWinner", terminal.Winner.Ordinal);
+    WriteNodes("finalInputNodes", result.GetNodeSnapshot, result.NodeCount);
+    WriteNodes("finalNodes", completedCompact.GetNodeSnapshot, result.NodeCount);
+    WriteGraph("finalGraph", result.NodeCount);
+}
 writer.WriteBase64String("compact", observed.CopyCompactStorage());
 WriteInts("starts", observed.CopyNodeStarts2478());
 WriteInts("prefixOwners2488", prefixes);
@@ -92,18 +121,8 @@ foreach (ushort value in dictionary.Symbols.Symbols.CopyPrimary()) writer.WriteN
 writer.WriteEndArray();
 WriteNodes("inputNodes", observed.GetInputNodeSnapshot);
 WriteNodes("nodes", observed.GetPublishedNodeSnapshot);
-writer.WriteStartArray("graph");
-for (int node = 0; node <= observed.EndingNode; node++)
-{
-    writer.WriteStartArray();
-    foreach (var arc in owner.SourceGraph.GetNode(node))
-    {
-        writer.WriteStartArray(); writer.WriteNumberValue(arc.GroupId); writer.WriteNumberValue(arc.Span);
-        writer.WriteNumberValue(arc.EndContextId); writer.WriteEndArray();
-    }
-    writer.WriteEndArray();
-}
-writer.WriteEndArray(); writer.WriteStartArray("contexts");
+WriteGraph("graph", observed.EndingNode + 1);
+writer.WriteStartArray("contexts");
 foreach (var context in owner.Contexts.CopyNodes())
 {
     writer.WriteStartArray(); writer.WriteNumberValue(context.Identity); writer.WriteNumberValue(context.ParentLink);
@@ -124,21 +143,36 @@ for (int group = 0; group < owner.SourceGraph.Groups.Count; group++)
     writer.WriteEndArray(); writer.WriteEndObject();
 }
 writer.WriteEndArray(); writer.WriteEndObject(); writer.Flush();
-Console.WriteLine($"LIVE {result.NodeCount} nodes/{result.IntermediatePublicationCount} publications/2490={result.NextUnpublishedNode2490}; {observed.RecordCount2470} compact rows, {compared} live bytes; terminal={terminal.Winner.HasWinner}.");
+Console.WriteLine($"LIVE {result.NodeCount} nodes/{result.IntermediatePublicationCount} publications/2490={result.NextUnpublishedNode2490}; {observed.RecordCount2470} compact rows, {compared} live bytes; terminal={terminal.Winner.HasWinner}; {guards} guards.");
 
 void WriteInts(string name, int[] values)
 {
     writer.WriteStartArray(name); foreach (int value in values) writer.WriteNumberValue(value); writer.WriteEndArray();
 }
-void WriteNodes(string name, Func<int, LegacyMainDirectWordNodeResult> read)
+void WriteNodes(string name, Func<int, LegacyMainDirectWordNodeResult> read, int? count = null)
 {
     writer.WriteStartArray(name);
-    for (int node = 0; node <= observed.EndingNode; node++)
+    for (int node = 0; node < (count ?? observed.EndingNode + 1); node++)
     {
         var row = read(node);
         writer.WriteStartObject(); writer.WriteNumber("sourceEnd", row.SourceEnd23f0);
         writer.WriteBase64String("rows", row.Records.Span); writer.WriteBase64String("alternatives", row.PrimaryAlternatives.Span);
         writer.WriteEndObject();
+    }
+    writer.WriteEndArray();
+}
+void WriteGraph(string name, int count)
+{
+    writer.WriteStartArray(name);
+    for (int node = 0; node < count; node++)
+    {
+        writer.WriteStartArray();
+        foreach (var arc in owner.SourceGraph.GetNode(node))
+        {
+            writer.WriteStartArray(); writer.WriteNumberValue(arc.GroupId); writer.WriteNumberValue(arc.Span);
+            writer.WriteNumberValue(arc.EndContextId); writer.WriteEndArray();
+        }
+        writer.WriteEndArray();
     }
     writer.WriteEndArray();
 }

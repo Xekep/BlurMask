@@ -9,8 +9,9 @@ nodes. `NEW240/20BAA0` initializes `2490` to 0. The selected frontend leaf `151B
 knowledge54=120. At `215DC0..215DE3`, `2144F0` calls `207CB0` only if
 `node+1 < GraphCount && knowledge54+2490 <= node+1`, using signed comparisons.
 Consequently no earlier publication can have changed `2490` for a source of 120
-nodes or fewer. Longer sources require the real interleaved publication lifecycle
-and are refused before winner inspection. Intermediate publication is before the
+nodes or fewer. Longer sources using the original `RunOwned` route remain
+refused before winner inspection. The additive live route is documented in
+`legacy-main-live-compact-publication.md`. Intermediate publication is before the
 node's source V80, so it must retain the live D0 map and query caches; the final
 post-V80 result lease cannot be substituted. This is not a native physical ring
 allocation or arbitrary reused-controller state claim.
@@ -31,7 +32,9 @@ nor oracle reads expected text to produce a result.
 All nine recorded words now reach compact publication, covering 7–22 nodes.
 The 60-node generated source stress also passes, crossing the existing periodic
 cost normalization window while remaining below 120. A generated 124-node pass
-is explicitly refused; its missing winner is not replaced with a fabricated one.
+is explicitly refused by this one-shot entrypoint; its missing winner is not
+replaced with a fabricated one. The opt-in LIVE test executes its real native
+publication gate and preserves that missing winner.
 Managed and Windows Native AOT captures match byte for byte for these cases and
 the synthetic four-node regression. Eleven publication audits independently
 compare 4,280,320 compact bytes and 4,840,512 beam/pool bytes. These are source and

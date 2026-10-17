@@ -10,6 +10,7 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
 {
     private readonly byte[] storage;
     private readonly int[] starts;
+    private readonly int[] prefixOwners;
     private readonly LegacyMainDirectWordNodeResult[] nodes;
     public LegacyOwnedMainTerminalResult TerminalResult { get; }
     public LegacyOwnedMainCompactWordReachability Reachability { get; }
@@ -21,11 +22,12 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
 
     private LegacyOwnedMainCompactWordMaterialization(LegacyOwnedMainTerminalResult terminal,
         LegacyOwnedMainCompactWordReachability reachable, LegacyOwnedRussianMainGlyphConfidence confidence,
-        byte[] storage, int count, int[] starts, LegacyMainDirectWordNodeResult[] nodes, int selected,
+        byte[] storage, int count, int[] starts, int[] prefixOwners, LegacyMainDirectWordNodeResult[] nodes, int selected,
         LegacyFreshCaseMainSourcePolicy? caseSourcePolicy)
     {
         TerminalResult = terminal; Reachability = reachable; ConfidenceOwner = confidence;
         this.storage = storage; RecordCount = count; this.starts = starts; this.nodes = nodes;
+        this.prefixOwners = prefixOwners;
         SelectedRecordIndex = selected;
         CaseSourcePolicy = caseSourcePolicy;
     }
@@ -66,7 +68,7 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
         int selected = state.Starts[pass.NodeCount - 1] + U16(stage.Nodes[^1].Records.Span, terminal.Winner.Ordinal * 88 + 0x22);
         if ((uint)selected >= state.Count) throw new InvalidDataException("Selected native row22 does not name the published compact pool.");
         return new(terminal, stage.Reachability, confidence, state.Storage.ToArray(), state.Count,
-            state.Starts.ToArray(), stage.Nodes, selected, casePolicy);
+            state.Starts.ToArray(), state.PrefixOwners.ToArray(), stage.Nodes, selected, casePolicy);
     }
 
     internal sealed record PublicationStage(LegacyOwnedMainCompactWordReachability Reachability,
@@ -160,9 +162,10 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
                         throw new NotSupportedException("Unexpanded ordinary source1 fallback candidate required.");
                     int arc = U16(row, 0x1c);
                     ValidateArc(node, arc);
-                    //DIRECT2B7.V58=05A3F0 returns0. Fresh292 resets8FC0/count0
-                    //at finalV80, then233FC0 fetches this same empty innerV58.
-                    //Both owned routes publish209095's original fallback.
+                    //DIRECT2B7.V58=05A3F0 returns0. Fresh292's preceding V80
+                    //also resets its separate V58 cache; normal233090 query
+                    //slots never fill8FC0/8FC4. Thus LIVE and final233FC0 fetch
+                    //the same empty innerV58 and take209095's real fallback.
                     candidates.Add(new(ordinal, alternative, I32(pools[node], at), I32(pools[node], at + 4),
                         U64(row, 0), U64(pools[node], at + 0x10), I32(row, 0x34),
                         owner.SourceGraph.GetNode(node)[arc].EndContextId));
@@ -365,6 +368,7 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
 
     public byte[] CopyCompactStorage() => (byte[])storage.Clone();
     public int[] CopyNodeStarts2478() => (int[])starts.Clone();
+    public int[] CopyPrefixOwners2488() => (int[])prefixOwners.Clone();
     public LegacyMainDirectWordNodeResult GetNodeSnapshot(int node)
     {
         if ((uint)node >= nodes.Length) throw new ArgumentOutOfRangeException(nameof(node));

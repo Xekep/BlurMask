@@ -27,6 +27,11 @@ CheckSnapshots(completed, prepared);
 
 Reject(() => LegacyOwnedMainCompactWordReachability.Prepare(ak, null!));
 Reject(() => LegacyOwnedMainCompactWordReachability.Prepare(ak.AsSpan(0, 100), terminal));
+Reject(() => LegacyOwnedMainCompactWordReachability.Prepare(new byte[ak.Length], terminal));
+var afterInvalidResource = LegacyOwnedMainCompactWordReachability.Prepare(ak, terminal);
+CheckSnapshots(completed, afterInvalidResource);
+Require(afterInvalidResource.CopySelectedNodes().AsSpan().SequenceEqual(prepared.CopySelectedNodes()),
+    "Rejecting foreign resource bytes consumed or changed the producing query state.");
 Reject(() => LegacyOwnedMainCompactWordReachability.Prepare(ak, terminal, new(true)));
 Reject(() => prepared.GetNodeSnapshot(-1));
 Reject(() => prepared.GetNodeSnapshot(completed.NodeCount));
