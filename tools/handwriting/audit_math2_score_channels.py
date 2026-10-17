@@ -8,6 +8,8 @@ from inspect_text_features import Binary
 if len(sys.argv)!=2:raise SystemExit('report.json')
 digests={'MyScriptDocument.dll': '17f5236d257fe3175574ec29acf5116e375b247e02d2bc7c190ee908bd185a2f', 'MyScriptEngine.dll': 'd31abcd309cbb558bb80bf50fe1968921de515bc40fbeb0e886a5cf14dbc0a5c'}
 regions = [
+    ('MyScriptDocument.dll', 0x180037430, 0x180037790, 'a8ec00faa8c399da401ef220d771754232d4f1d684fb6c1d95a84c7a4330620d'),
+    ('MyScriptDocument.dll', 0x1801a8e00, 0x1801a9cc0, 'c3d54c70d57046d7ab151f552edd3b501c317594b4ae0b1f1e04f2deb3864aab'),
     ('MyScriptDocument.dll', 0x1800450c0, 0x180045460, '155f71ec1b5fea2831e30c94fa71dfcd3d3c8753d41bfe22dd27df8b9eb51693'),
     ('MyScriptDocument.dll', 0x1800359f0, 0x180035c50, '44a3ff6d114956fe746eb35b3d80f0e3867f6094fc8d8f0da18c353ef1ce6b48'),
     ('MyScriptDocument.dll', 0x18003b300, 0x18003b540, '78a8116a27d4cf02342618d1da2ec2af0f4ed7e1c751acf897691cc3aea4865a'),
@@ -16,6 +18,43 @@ regions = [
     ('MyScriptEngine.dll', 0x180186290, 0x180186650, 'c585efc12fd22521aad54991102319890e5d9de0e6bd1ad472de8c341d4d580e'),
 ]
 pins = [
+    ('MyScriptDocument.dll', 0x1800374c2, 'movss', 'xmm1, dword ptr [rip + 0x1f27a2]'),
+    ('MyScriptDocument.dll', 0x180037513, 'mov', 'edx, dword ptr [r13 + r12*8 + 8]'),
+    ('MyScriptDocument.dll', 0x180037520, 'inc', 'edx'),
+    ('MyScriptDocument.dll', 0x18003752c, 'cmp', 'qword ptr [rax + 0xc0], rbp'),
+    ('MyScriptDocument.dll', 0x180037535, 'cmp', 'byte ptr [rax + 0xb6], bpl'),
+    ('MyScriptDocument.dll', 0x18003753e, 'movss', 'xmm1, dword ptr [rax + 0x2c]'),
+    ('MyScriptDocument.dll', 0x180037543, 'movd', 'xmm0, edx'),
+    ('MyScriptDocument.dll', 0x180037547, 'cvtdq2ps', 'xmm0, xmm0'),
+    ('MyScriptDocument.dll', 0x18003754a, 'addss', 'xmm0, dword ptr [rip + 0x1f27aa]'),
+    ('MyScriptDocument.dll', 0x180037552, 'divss', 'xmm0, dword ptr [rip + 0x1f27a6]'),
+    ('MyScriptDocument.dll', 0x18003755a, 'call', '0x1801a8e00'),
+    ('MyScriptDocument.dll', 0x18003755f, 'divss', 'xmm6, xmm0'),
+    ('MyScriptDocument.dll', 0x180037563, 'movss', 'dword ptr [r14], xmm6'),
+    ('MyScriptDocument.dll', 0x1801a8e10, 'cmp', 'dword ptr [rip + 0xafb9d], 0'),
+    ('MyScriptDocument.dll', 0x1801a8e17, 'jne', '0x1801a95b6'),
+    ('MyScriptDocument.dll', 0x1801a8e43, 'cmp', 'eax, 0x3f800000'),
+    ('MyScriptDocument.dll', 0x1801a8e48, 'jle', '0x1801a9310'),
+    ('MyScriptDocument.dll', 0x1801a9310, 'cmp', 'eax, 0'),
+    ('MyScriptDocument.dll', 0x1801a9313, 'je', '0x1801a9380'),
+    ('MyScriptDocument.dll', 0x1801a9315, 'movd', 'edx, xmm1'),
+    ('MyScriptDocument.dll', 0x1801a9319, 'cmp', 'edx, 0x3f800000'),
+    ('MyScriptDocument.dll', 0x1801a931f, 'jne', '0x1801a8e4e'),
+    ('MyScriptDocument.dll', 0x1801a9325, 'movd', 'r9d, xmm0'),
+    ('MyScriptDocument.dll', 0x1801a932a, 'and', 'r9d, 0x7fffffff'),
+    ('MyScriptDocument.dll', 0x1801a9331, 'cmp', 'r9d, 0x7f800000'),
+    ('MyScriptDocument.dll', 0x1801a9338, 'ja', '0x1801a934b'),
+    ('MyScriptDocument.dll', 0x1801a934a, 'ret', ''),
+    ('MyScriptDocument.dll', 0x1801a95df, 'cmp', 'eax, 0x3f800000'),
+    ('MyScriptDocument.dll', 0x1801a95e4, 'jle', '0x1801a9a00'),
+    ('MyScriptDocument.dll', 0x1801a9a00, 'cmp', 'eax, 0'),
+    ('MyScriptDocument.dll', 0x1801a9a03, 'je', '0x1801a9a60'),
+    ('MyScriptDocument.dll', 0x1801a9a05, 'vmovd', 'edx, xmm1'),
+    ('MyScriptDocument.dll', 0x1801a9a09, 'cmp', 'edx, 0x3f800000'),
+    ('MyScriptDocument.dll', 0x1801a9a0f, 'jne', '0x1801a95ea'),
+    ('MyScriptDocument.dll', 0x1801a9a15, 'cmp', 'ecx, 0x7f800000'),
+    ('MyScriptDocument.dll', 0x1801a9a1b, 'ja', '0x1801a9a2e'),
+    ('MyScriptDocument.dll', 0x1801a9a2d, 'ret', ''),
     ('MyScriptDocument.dll', 0x18004523b, 'mov', 'edx, 0xef1'),
     ('MyScriptDocument.dll', 0x1800453a3, 'mov', 'qword ptr [rdi + 0x168], rcx'),
     ('MyScriptDocument.dll', 0x1800453d3, 'mov', 'edx, 0xeee'),
@@ -99,7 +138,9 @@ for name,address,target in bindings:assert binaries[name].qwords(address,1)[0]==
 #Scalar literal used by DIVSS; sign mask is checked separately by full body hash.
 import struct
 assert struct.unpack_from('<I',binaries['MyScriptDocument.dll'].data,binaries['MyScriptDocument.dll'].off(0x180229c6c))[0]==0x3f800000
-report=dict(regions=len(regions),pins=len(pins),bindings=len(bindings),
+assert struct.unpack_from('<f',binaries['MyScriptDocument.dll'].data,binaries['MyScriptDocument.dll'].off(0x180229cfc))[0]==5.0
+assert struct.unpack_from('<f',binaries['MyScriptDocument.dll'].data,binaries['MyScriptDocument.dll'].off(0x180229d00))[0]==6.0
+report=dict(completedDefaultScore='037430 alpha1 without C0 constraint; F32 cost / ((F32(prefix+1)+5)/6); both CPU powf paths preserve positive finite base for alpha1',regions=len(regions),pins=len(pins),bindings=len(bindings),
  route='EED168 EF1 -> EEE packet70 -> EEF packet+50/decoder+A8 -> EEF B8 clone; EEE80 is EEF, not EF1',
  channels='D8 retains log probabilities; E8 negates sign bits then adds per-beam F0 cost before heap selection',
  numeric='Engine54.V48 at186290 uses last time frame, batch axis1, vocabulary axis2 and float32 temperature/exp/sum/log/store operations',

@@ -10,7 +10,7 @@ from pathlib import Path
 if len(sys.argv)!=2:
     raise SystemExit('capture.json')
 capture=json.loads(Path(sys.argv[1]).read_bytes())
-assert capture['caseCount']==181 and len(capture['cases'])==181 and capture['guards']==4
+assert capture['caseCount']==181 and len(capture['cases'])==181 and capture['guards']==11
 costs=[0xff800000,0xff7fffff,0xbf800000,0x80000000,0,0x3c23d70a,
        0x3f000000,0x3f800000,0x7f7fffff,0x7f800000,0x7fc00000,0x7fa00001]
 
@@ -76,3 +76,29 @@ for case in capture['cases']:
         assert identities==expected
     verified+=len(final)
 print(f'PASS181 independent candidate-ordering controls/{verified} full bytes incl65536 records; tie20/21/42 manual goldens and NaN payloads, prepared only')
+
+#Independent algebraic no-LM score: in the portable integer domain n+6 is
+#exact in float32. The two divisions are rounded separately; using a single
+#double cost*6/(n+6) would give different output bytes on some controls.
+f32=lambda x:struct.unpack('<f',struct.pack('<f',x))[0]
+completed=[];discriminators=0
+random=0x4ed92a31
+assert len(capture['completionScores'])==4096
+for n,row in enumerate(capture['completionScores']):
+ random^=(random<<13)&0xffffffff;random^=random>>17;random^=(random<<5)&0xffffffff
+ bits=random&0x7fffffff
+ if bits&0x7f800000==0x7f800000:bits&=0x7f7fffff
+ if n<4:bits=[0x80000000,0,1,0x7f7fffff][n]
+ prefix=0 if n==0 else 1_000_000 if n==1 else random%1_000_001
+ assert row['sample']==n and row['prefix']==prefix and row['costBits']==bits
+ before=base64.b64decode(row['input'],validate=True);after=base64.b64decode(row['output'],validate=True)
+ assert before==make(1,n,False)[0]
+ cost=struct.unpack('<f',struct.pack('<I',bits))[0]
+ expected=struct.pack('<f',cost/f32((row['prefix']+6)/6))
+ assert len(before)==168 and after==expected+before[4:]
+ single=struct.pack('<f',cost*6/(row['prefix']+6));discriminators+=single!=expected
+ completed.append(after)
+assert discriminators>100
+reorder(completed,0,len(completed)-1)
+assert base64.b64decode(capture['completedSorted'],validate=True)==b''.join(completed)
+print(f'PASS4096 independent native-default completion scores/{discriminators} double-fold discriminators and complete score-to-sort records; prepared no-LM only')

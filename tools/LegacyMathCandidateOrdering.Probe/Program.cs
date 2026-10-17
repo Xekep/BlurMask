@@ -37,6 +37,29 @@ Reject(()=>LegacyPreparedMathCandidateOrdering.Sort(new byte[167]));
 Reject(()=>LegacyPreparedMathCandidateOrdering.Sort(new byte[169]));
 Reject(()=>LegacyPreparedMathCandidateOrdering.Sort(new byte[65537*168]));
 Reject(()=>LegacyPreparedMathCandidateOrdering.Sort(new byte[168],new(true)));
+w.WriteStartArray("completionScores");
+uint completionRandom=0x4ed92a31;
+using var scoredRecords=new MemoryStream();
+for(int n=0;n<4096;n++)
+{
+ completionRandom^=completionRandom<<13;completionRandom^=completionRandom>>17;completionRandom^=completionRandom<<5;
+ uint bits=(completionRandom&0x7fffffff);if((bits&0x7f800000)==0x7f800000)bits&=0x7f7fffff;
+ if(n==0)bits=0x80000000;if(n==1)bits=0;if(n==2)bits=1;if(n==3)bits=0x7f7fffff;
+ int length=n==0?0:n==1?1_000_000:(int)(completionRandom%1_000_001);
+ float cost=BitConverter.Int32BitsToSingle(unchecked((int)bits));byte[] input=Make(1,n,false),before=input.ToArray();
+ var output=LegacyPreparedMathCompletionScore.WritePreparedRecord(input,cost,length);
+ if(!input.AsSpan().SequenceEqual(before)||!output.AsSpan(4).SequenceEqual(input.AsSpan(4)))throw new Exception("Completion score changed opaque record fields.");
+ if(BinaryPrimitives.ReadSingleLittleEndian(output)!=LegacyPreparedMathCompletionScore.WithoutConstraintModel(cost,length))throw new Exception("Scalar/record completion score diverged.");
+ w.WriteStartObject();w.WriteNumber("sample",n);w.WriteNumber("costBits",bits);w.WriteNumber("prefix",length);w.WriteBase64String("input",input);w.WriteBase64String("output",output);w.WriteEndObject();scoredRecords.Write(output);
+}
+w.WriteEndArray();w.WriteBase64String("completedSorted",LegacyPreparedMathCandidateOrdering.Sort(scoredRecords.ToArray()));
+Reject(()=>LegacyPreparedMathCompletionScore.WithoutConstraintModel(1,-1));
+Reject(()=>LegacyPreparedMathCompletionScore.WithoutConstraintModel(1,1_000_001));
+Reject(()=>LegacyPreparedMathCompletionScore.WithoutConstraintModel(-1,0));
+Reject(()=>LegacyPreparedMathCompletionScore.WithoutConstraintModel(float.NaN,0));
+Reject(()=>LegacyPreparedMathCompletionScore.WithoutConstraintModel(float.PositiveInfinity,0));
+Reject(()=>LegacyPreparedMathCompletionScore.WritePreparedRecord(new byte[167],1,0));
+Reject(()=>LegacyPreparedMathCompletionScore.WithoutConstraintModel(1,0,new(true)));
 w.WriteNumber("caseCount",cases);w.WriteNumber("guards",guards);w.WriteEndObject();
 Console.WriteLine($"PASS{cases} complete candidate-ordering controls/{guards} guards; prepared kernel only, no beam integration or accuracy claim.");
 void Reject(Action action)

@@ -19,7 +19,7 @@ The offsets therefore name the same EED168 decoder:
 0x70 + 0x50 + 0xA8 = 0x168
 ```
 
-EEE's actual V30 target is EEF03CAC0. That method reads EEF B8 and invokes its
+The V30 call through EEE80 targets EEF03CAC0. That method reads EEF B8 and invokes its
 V28, which is EF1's04B9E0 network-output callback in mode0. EF1 V30=04C930
 instead prepares/reindexes state tensors. The EEF factory, primary table and
 raw initializer are distinct; the audit pins all three rather than confusing
@@ -47,8 +47,34 @@ remaining EEF tensor, alias and mask lifecycle are not restored by this audit.
 Conditional token probabilities are not calibrated handwriting confidence.
 
 `tools/handwriting/audit_math2_score_channels.py report.json` checks both whole
-PE fingerprints,6 code regions,59 exact instructions and10 table bindings.
+PE fingerprints,8 code regions,96 exact instructions and10 table bindings.
 It includes the EED-to-EEE packet arithmetic, the EEF decoder clone, float32
 temperature/exp/sum/log/store calls and the separate log/cost output channels.
 The full beam, token-mask producers and final structural acceptance remain
 separate work.
+
+## Default completed-hypothesis score
+
+037430 appends a completed candidate and writes its normalized score. Without
+an active constraint model the exponent is1. The prefix count excludes EOS;
+the cumulative candidate cost includes EOS. The native operations are:
+
+```text
+base = float32(float32(prefixCount + 1) + 5) / float32(6)
+score = float32(cumulativeCost / base)
+```
+
+Both CPU-dispatch branches of native powf return the positive finite input
+base unchanged for exponent1. The static audit checks their exact branches,
+the default exponent, optional constraint-model override and the5/6 literals.
+An arbitrary double-precision combined division does not preserve all bits.
+
+`LegacyPreparedMathCompletionScore` implements only this explicitly prepared
+no-constraint numeric kernel, with a portable count bound of one million.
+`WritePreparedRecord` changes just the first float of a caller-prepared
+168-byte snapshot; it does not construct the rest of the native record or
+claim native allocation/failure lifetimes. The ordering probe checks4096
+scores with an independent float32 oracle and then sorts the complete scored
+records through the separately restored036810 ordering kernel. The prior181
+ordering controls remain. Native tensor decoding, beam expansion, configured
+constraint exponents and acceptance are still unported.
