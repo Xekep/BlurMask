@@ -331,6 +331,7 @@ internal sealed partial class Math2Mode0CompletedRecords : IDisposable
     {
         ObjectDisposedException.ThrowIf(disposed, this);
         if (failed) throw new InvalidOperationException("A failed completed recorder cannot resume.");
+        if (initialOrderClaimed) throw new InvalidOperationException("Initial ordering seals completed-record mutation.");
         if (!ReferenceEquals(owner, candidate) || !owner.OwnsCompletedRecords(this))
             throw new ArgumentException("Foreign or unregistered prefix context/vector.");
     }

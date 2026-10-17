@@ -8,7 +8,7 @@ internal sealed record Math2Mode0RecordingIteration(ulong Position, long Previou
 /// <summary>Owning cold numerical recording loop through the exact maximum
 /// position. Stops BEFORE039A96 completed ordering, attention/EF4 and output.
 /// No host progress callback is bound or final formula acceptance inferred.</summary>
-internal sealed class Math2Mode0ColdRecordingLoop : IDisposable
+internal sealed partial class Math2Mode0ColdRecordingLoop : IDisposable
 {
     private readonly object gate = new();
     private readonly Math2Mode0PrefixContext prefix;
