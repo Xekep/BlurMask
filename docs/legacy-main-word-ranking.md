@@ -5,6 +5,9 @@
 in actual279 traversal order, the carried quota and a same-pool276.V60 comparer.
 It returns payloads, old-to-new indices, released indices and all 20-byte ranking
 rows. The class is internal; it does not declare a TOP source pass complete.
+Separate payload source ordinals follow representative swaps. An owning bridge
+can retain the actual winning WORD's flat-reference vector and release the
+correct displaced payload without reconstructing references from byte contents.
 
 The implementation preserves duplicate grouping by WORD field3C/comparison/
 special category, strict greater-score representative replacement, complete

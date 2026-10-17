@@ -27,7 +27,7 @@ def sort(rows,lo,hi,offset,descending):
 
 cases=json.loads(Path(sys.argv[1]).read_text());full_words=full_rows=duplicates=swaps=ties=category_selected_discriminators=0
 for case in cases:
-    words=list(map(lambda x:bytearray(dec(x)),case['words']));n=len(words);r=[bytearray(20)for _ in words]
+    words=list(map(lambda x:bytearray(dec(x)),case['words']));n=len(words);r=[bytearray(20)for _ in words];sources=list(range(n))
     for i in range(n):
         puti(r[i],0,i);puti(r[i],4,-2147483647);r[i][8:12]=words[i][16:20]
         r[i][14]=int(case['special']and geth(words[i],50)&64!=0 and geth(words[i],48)==65534)
@@ -47,7 +47,8 @@ for case in cases:
             selected|=r[j][13];first|=r[j][12]
             if cost==getf(r[j],8):ties+=1
             if cost<getf(r[j],8):best=j;cost=getf(r[j],8)
-        if best!=i:words[i],words[best]=words[best],words[i];putf(r[i],8,cost);swaps+=1
+        if best!=i:
+            words[i],words[best]=words[best],words[i];sources[i],sources[best]=sources[best],sources[i];putf(r[i],8,cost);swaps+=1
         r[i][12]=first
         for j in others:r[j][17]=1;putf(r[j],8,sentinel);duplicates+=1
         r[i][16]=int(bool(selected or r[i][15]))
@@ -86,18 +87,20 @@ for case in cases:
         old=geti(r[i],4)
         for row in r:
             if geti(row,4)==old:puti(row,4,i)
-    output=[]
+    output=[];output_sources=[]
     for row in r:
         if geti(row,4)==-1 or getf(row,8)==sentinel:break
         word=words[geti(row,0)].copy()
         if row[14]:putf(word,16,sentinel)
-        output.append(bytes(word))
+        output.append(bytes(word));output_sources.append(sources[geti(row,0)])
     assert len(output)==alive
     assert output==list(map(dec,case['output']))
+    assert output_sources==case['payloadSources']
     r.sort(key=lambda row:geti(row,0))
     assert list(map(bytes,r))==list(map(dec,case['rows']))
     assert [geti(row,4)for row in r]==case['map']
     assert [geti(row,0)for row in r if row[17]]==case['released']
+    assert [sources[geti(row,0)]for row in r if row[17]]==case['releasedSources']
     assert quota==case['quotaAfter']
     full_words+=len(output);full_rows+=n
 assert len(cases)==2048 and swaps>100 and ties>100 and category_selected_discriminators>1000

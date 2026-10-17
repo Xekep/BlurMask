@@ -9,7 +9,7 @@ namespace InkRecognition;
 internal static class LegacyPreparedMainWordRanking
 {
     internal sealed record Result(byte[][] Words,int[] OldToNew,int[] Released,int QuotaAfter,
-        byte[][] RankingByOriginalIndex);
+        byte[][] RankingByOriginalIndex,int[] OutputSourceOrdinals,int[] ReleasedSourceOrdinals);
     private sealed class Row
     {
         internal int Original,Group=unchecked((int)0x80000001);
@@ -37,6 +37,7 @@ internal static class LegacyPreparedMainWordRanking
         if(actualWords.Count is <1 or >4095||selectedInTraversalOrder.IsEmpty||carriedQuota<0)
             throw new ArgumentException("Bounded actual span WORDs and nonempty279 selection required.");
         int n=actualWords.Count;var words=new byte[n][];var rows=new Row[n];
+        var payloadSources=Enumerable.Range(0,n).ToArray();
         for(int i=0;i<n;i++)
         {
             if(actualWords[i] is null||actualWords[i].Length!=120)throw new ArgumentException("Full120-byte payload required.");
@@ -70,7 +71,11 @@ internal static class LegacyPreparedMainWordRanking
                 //Strict native comparison keeps the earliest payload on a tie.
                 if(bestCost<rows[j].Cost){bestCost=rows[j].Cost;best=j;}
             }
-            if(best!=i){(words[i],words[best])=(words[best],words[i]);row.Cost=bestCost;}
+            if(best!=i)
+            {
+                (words[i],words[best])=(words[best],words[i]);
+                (payloadSources[i],payloadSources[best])=(payloadSources[best],payloadSources[i]);row.Cost=bestCost;
+            }
             row.First=first;
             foreach(int j in duplicates){rows[j].Removed=true;rows[j].Cost=-float.MaxValue;}
             //The merged selected bit protects the representative; byte+D is
@@ -111,19 +116,20 @@ internal static class LegacyPreparedMainWordRanking
         }
         for(int i=1;i<n&&rows[i].Cost!=-float.MaxValue;i++)
         {int old=rows[i].Group;foreach(var row in rows)if(row.Group==old)row.Group=i;}
-        var output=new List<byte[]>();
+        var output=new List<byte[]>();var outputSources=new List<int>();
         for(int i=0;i<n&&rows[i].Group!=-1&&rows[i].Cost!=-float.MaxValue;i++)
         {
             byte[] payload=words[rows[i].Original].ToArray();
             if(rows[i].Special)BinaryPrimitives.WriteSingleLittleEndian(payload.AsSpan(16),-float.MaxValue);
-            output.Add(payload);
+            output.Add(payload);outputSources.Add(payloadSources[rows[i].Original]);
         }
         if(output.Count!=alive)throw new InvalidDataException("Prepared ranking live count escaped its payload prefix.");
         //13CE60 restores original index order before patching279 WORD ordinals.
         SortOriginal(rows,0,n-1);
         token.ThrowIfCancellationRequested();
         return new(output.ToArray(),rows.Select(r=>r.Group).ToArray(),rows.Where(r=>r.Removed).Select(r=>r.Original).ToArray(),
-            quota,rows.Select(r=>r.CopyBytes()).ToArray());
+            quota,rows.Select(r=>r.CopyBytes()).ToArray(),outputSources.ToArray(),
+            rows.Where(r=>r.Removed).Select(r=>payloadSources[r.Original]).ToArray());
     }
     private static void SortCost(Row[] rows,int low,int high)
     {

@@ -32,6 +32,8 @@ for(int trial=0;trial<2048;trial++)
     w.WriteStartArray("output");foreach(var b in result.Words)w.WriteBase64StringValue(b);w.WriteEndArray();
     w.WriteStartArray("map");foreach(int i in result.OldToNew)w.WriteNumberValue(i);w.WriteEndArray();
     w.WriteStartArray("released");foreach(int i in result.Released)w.WriteNumberValue(i);w.WriteEndArray();
+    w.WriteStartArray("payloadSources");foreach(int i in result.OutputSourceOrdinals)w.WriteNumberValue(i);w.WriteEndArray();
+    w.WriteStartArray("releasedSources");foreach(int i in result.ReleasedSourceOrdinals)w.WriteNumberValue(i);w.WriteEndArray();
     w.WriteStartArray("rows");foreach(var b in result.RankingByOriginalIndex)w.WriteBase64StringValue(b);w.WriteEndArray();w.WriteEndObject();cases++;
 }
 w.WriteEndArray();
