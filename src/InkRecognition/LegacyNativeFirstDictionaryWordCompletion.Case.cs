@@ -2,7 +2,13 @@ namespace InkRecognition;
 
 public sealed partial class LegacyNativeFirstDictionaryWordCompletion
 {
-    private readonly CaseSpanBinding? caseSpan;
+    private readonly ICaseSpanBinding? caseSpan;
+    private interface ICaseSpanBinding
+    {
+        void Validate(int endingNode,bool knowledgeF5,bool suppressPrevious2609,CancellationToken token);
+        ReadOnlyMemory<byte> ReadTerminal(ulong tag,ushort symbol,CancellationToken token);
+        ulong ResolveRestart(ulong tag,CancellationToken token);
+    }
 
     /// <summary>Bounded204290 first-word consumer over the actual fresh292
     /// source and current owned glyph-span map. This does not run the complete
@@ -49,10 +55,10 @@ public sealed partial class LegacyNativeFirstDictionaryWordCompletion
         if ((sourceHeader & 0x1e00) != 0xc00 || (sourceHeader & 0x1c) <= 7)
             throw new NotSupportedException("Actual order2/C00 source descriptor required.");
         replacement = alphabet.TryGetLabel("\ufffd", out ushort label) ? label : ushort.MaxValue;
-        caseSpan = new(policy, span);
+        caseSpan = new CaseSpanBinding(policy, span);
     }
 
-    private sealed class CaseSpanBinding(LegacyFreshCaseMainSourcePolicy policy, LegacyOwnedMainWordSpan span)
+    private sealed class CaseSpanBinding(LegacyFreshCaseMainSourcePolicy policy, LegacyOwnedMainWordSpan span):ICaseSpanBinding
     {
         private LegacyOwnedMainWordSpanPreparation Owner => policy.Controller.Owner;
 

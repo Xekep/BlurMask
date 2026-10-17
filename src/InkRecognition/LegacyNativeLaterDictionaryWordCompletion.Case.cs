@@ -2,7 +2,17 @@ namespace InkRecognition;
 
 public sealed partial class LegacyNativeLaterDictionaryWordCompletion
 {
-    private readonly CaseSpanBinding? caseSpan;
+    private readonly ICaseSpanBinding? caseSpan;
+    private interface ICaseSpanBinding
+    {
+        void Validate(int endingNode,LegacySymbolContextFactory contexts,bool knowledgeF5,int subwordSourceIndex22ec,
+            bool extendedMarkers22f8,bool suppressPrevious2609,CancellationToken token);
+        void ValidateSecondaryOrdinal(ushort ordinal);
+        void ValidateExtent(int count);
+        void ValidateHeader(byte id,uint header);
+        ReadOnlyMemory<byte> ReadTerminal(ulong tag,ushort symbol,CancellationToken token);
+        ulong ResolveRestart(ulong tag,CancellationToken token);
+    }
 
     /// <summary>Fresh one-source292 later-word consumer. The span is the live
     /// last D0 map lease; its span need not equal the current word's anchor span.
@@ -42,7 +52,7 @@ public sealed partial class LegacyNativeLaterDictionaryWordCompletion
             throw new ArgumentException("Actual order2/C00 source and its language profiles required.");
         if (!alphabet.TryGetLabel("\ufffd", out replacement) || !alphabet.TryGetLabel("-", out dash))
             throw new NotSupportedException("Actual replacement and dash source labels required.");
-        caseSpan = new(policy, span);
+        caseSpan = new CaseSpanBinding(policy, span);
     }
 
     /// <summary>Consume the actual source query32, without replacing its tag,
@@ -76,7 +86,7 @@ public sealed partial class LegacyNativeLaterDictionaryWordCompletion
         finally { Volatile.Write(ref active, 0); }
     }
 
-    private sealed class CaseSpanBinding(LegacyFreshCaseMainSourcePolicy policy, LegacyOwnedMainWordSpan span)
+    private sealed class CaseSpanBinding(LegacyFreshCaseMainSourcePolicy policy, LegacyOwnedMainWordSpan span):ICaseSpanBinding
     {
         private LegacyOwnedMainWordSpanPreparation Owner => policy.Controller.Owner;
         private readonly uint[] headers = policy.Controller.Owner.CopySourceHeaders();

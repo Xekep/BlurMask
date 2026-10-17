@@ -11,12 +11,16 @@ public sealed record LegacyNativeMainWordFlagPrepassResult(bool Applied, bool Qu
 /// remain explicit; no case-wrapper factory or native final winner is inferred.</summary>
 public sealed class LegacyNativeMainWordFlagPrepass
 {
-    private readonly AcousticBinding acoustic;
-    private readonly LegacyMainBlankTransitionGeometry geometry;
+    private readonly AcousticBinding? acoustic;
+    private readonly LegacyOrdinaryRecognitionGraph graph;
+    private readonly LegacyCursiveCategoryProfile categories;
+    private readonly int cacheWidth;
+    private readonly LegacyNativeHigherArcTransitionOperations? globalGeometry;
+    private readonly Func<int,ushort,CancellationToken,LegacyNativeWordAcousticGroupCosts>? globalCosts;
+    private readonly LegacyMainBlankTransitionGeometry? geometry;
     private readonly LegacyNativeWordAcousticRequestScorer scorer;
-    private readonly LegacyOrdinaryCandidateConnections connections;
     private readonly LegacyCursiveSeparationProfile separation;
-    private readonly LegacyCursiveSeparationTable table;
+    private readonly LegacyCursiveSeparationTable? table;
     private readonly Dictionary<int, LegacyNativeWordAcousticGroupCosts> cache = [];
     private readonly LegacyNativeWordTransitionCostCell cell;
     private readonly byte[] residue;
@@ -48,17 +52,32 @@ public sealed class LegacyNativeMainWordFlagPrepass
         if (existingRequestResidue80.Length != 80 ||
             BinaryPrimitives.ReadInt32LittleEndian(existingRequestResidue80[52..]) != 0x4000000)
             throw new ArgumentException("Actual2144F0 reused request80 with initialized limit34=IMP required.");
-        acoustic = actualAcoustic;
+        acoustic = actualAcoustic;graph=LegacyOrdinaryRecognitionGraph.FromSameSource(actualAcoustic.Graph);
+        categories=actualAcoustic.CompositeCategories;cacheWidth=actualAcoustic.CacheWidth;
         this.table = table;
         cell = ownedCostCell;
         residue = existingRequestResidue80.ToArray();
         geometry = actualAcoustic.CreateGeometry(actualResource,table,cancellationToken);
-        connections = new(actualAcoustic.Graph, cancellationToken);
         separation = LegacyCursiveSeparationProfile.ReadV106Node(actualResource,
             actualAcoustic.Categories.SamplerNodeOffset);
         scorer = LegacyNativeWordAcousticRequestScorer.ForAlphabet(
             LegacyAcousticCandidateThresholds.ReadV110Node(actualResource[actualAcoustic.AcousticOffset..], out _),
             actualAcoustic.Alphabet);
+    }
+
+    internal LegacyNativeMainWordFlagPrepass(ReadOnlySpan<byte> resource,LegacyOwnedMainWordSourceServices source,
+        Func<int,ushort,CancellationToken,LegacyNativeWordAcousticGroupCosts> getOwnedCosts,
+        LegacyNativeWordTransitionCostCell cell,ReadOnlySpan<byte> residue,CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(source);ArgumentNullException.ThrowIfNull(getOwnedCosts);ArgumentNullException.ThrowIfNull(cell);
+        token.ThrowIfCancellationRequested();
+        if(!source.IsGlobal||residue.Length!=80||BinaryPrimitives.ReadInt32LittleEndian(residue[52..])!=0x4000000||
+            LegacySourceSamplerCategoryOwner.ReadV10dSource(resource,0).SourceFingerprint!=source.Categories.SourceFingerprint)
+            throw new ArgumentException("Actual global source, current D0 costs and complete2136D0 residue required.");
+        graph=source.Graph;categories=source.Categories.Categories;cacheWidth=source.RequireGlobalSource().Acoustic.CacheWidth;
+        globalGeometry=source.GlobalTransitions!.CreateOperations();globalCosts=getOwnedCosts;this.cell=cell;this.residue=residue.ToArray();
+        scorer=LegacyNativeWordAcousticRequestScorer.ForAlphabet(
+            LegacyAcousticCandidateThresholds.ReadV110Node(resource[source.OrdinaryAcousticOffset..],out _),source.Model.AcousticAlphabet);
     }
 
     public LegacyNativeMainWordFlagPrepassResult Process(int currentEndingNode, byte currentSpan,
@@ -89,7 +108,6 @@ public sealed class LegacyNativeMainWordFlagPrepass
         ArgumentNullException.ThrowIfNull(contexts);
         ArgumentNullException.ThrowIfNull(router);
         token.ThrowIfCancellationRequested();
-        var graph = acoustic.Graph;
         if ((uint)currentEndingNode >= graph.NodeCount || previousEndingNode < 0 ||
             currentSpan > 14 || currentEndingNode - currentSpan - 1 != previousEndingNode ||
             actualSourceHeaders.Length is < 1 or > 256)
@@ -112,12 +130,12 @@ public sealed class LegacyNativeMainWordFlagPrepass
         var spanRows = graph.GetNode(currentEndingNode).Select((arc, ordinal) => (arc, ordinal))
             .Where(item => item.arc.Span == currentSpan)
             .Select(item => GetCosts(currentEndingNode, checked((ushort)item.ordinal), token)).ToArray();
-        var qualifier = new LegacyNativeWordSymbolQualifier(acoustic.CacheWidth - 3, spanRows,
+        var qualifier = new LegacyNativeWordSymbolQualifier(cacheWidth - 3, spanRows,
             cancellationToken: token);
         ushort symbol = checked((ushort)qualifier.AcousticLabelCount);
         if (!qualifier.Qualifies(symbol, 0, 0, contexts, token))
             return new(true, false, 0, 0, 0, ReadOnlyMemory<byte>.Empty);
-        var arcs = connections.GetSuccessorOrdinals(previousEndingNode,
+        var arcs = graph.GetSuccessorOrdinals(previousEndingNode,
             BinaryPrimitives.ReadUInt16LittleEndian(parent.AsSpan(28)), currentSpan, token);
         int geometryCalls = 0, acousticCalls = 0, allocations = 0;
         ReadOnlyMemory<byte> last = ReadOnlyMemory<byte>.Empty;
@@ -126,10 +144,11 @@ public sealed class LegacyNativeMainWordFlagPrepass
             token.ThrowIfCancellationRequested();
             ushort arc = checked((ushort)ordinal);
             var request = LegacyNativeWordFlagPrepassRequestFactory.Create(currentEndingNode, currentSpan,
-                previousEndingNode, parent, arc, headers[sourceId], acoustic.CompositeCategories,
+                previousEndingNode, parent, arc, headers[sourceId], categories,
                 cell, residue, token);
             geometryCalls++;
-            bool accepted = geometry.Calculate118(request, token) && geometry.Validate140(request, token);
+            bool accepted = globalGeometry is {} callbacks?callbacks.Calculate118(request,token)&&callbacks.Validate140(request,token):
+                geometry!.Calculate118(request,token)&&geometry.Validate140(request,token);
             if (accepted)
             {
                 acousticCalls++;
@@ -164,14 +183,14 @@ public sealed class LegacyNativeMainWordFlagPrepass
 
     private LegacyNativeWordAcousticGroupCosts GetCosts(int node, ushort ordinal, CancellationToken token)
     {
-        var graph = acoustic.Graph;
+        if(globalCosts is {} owned)return owned(node,ordinal,token);
         int group = graph.GetNode(node)[ordinal].GroupId;
         if (cache.TryGetValue(group, out var value)) return value;
         token.ThrowIfCancellationRequested();
-        var scores = acoustic.Score(group, token);
-        var ranges = graph.Groups[group].Ranges.Span;
+        var scores = acoustic!.Score(group, token);
+        var ranges = acoustic.Graph.Groups[group].Ranges.Span;
         int geometryCost = LegacyCursiveGroupSeparationCost.Evaluate(acoustic.Ink, ranges,
-            acoustic.Height, separation.GapOffset, separation.Slope, table.Values.Span, separation.MaximumCost,
+            acoustic.Height, separation.GapOffset, separation.Slope, table!.Values.Span, separation.MaximumCost,
             cancellationToken: token);
         value = new(scores.Cache.Costs.Span,
             Enumerable.Repeat(geometryCost, acoustic.CompositeCategories.CompositeCategories.Length).ToArray());

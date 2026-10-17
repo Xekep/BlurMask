@@ -7,11 +7,14 @@ namespace InkRecognition;
 /// select rows, construct source headers, prune the graph or run a scheduler.</summary>
 public sealed class LegacyNativeWordLanguageGate
 {
-    private readonly LegacyOrdinaryCursiveCandidateGraph graph;
+    private readonly LegacyOrdinaryRecognitionGraph graph;
     private readonly ushort replacement;
 
     public LegacyNativeWordLanguageGate(LegacyRussianModelBundle selectedModel,
         LegacyOrdinaryCursiveCandidateGraph graph)
+        :this(selectedModel,LegacyOrdinaryRecognitionGraph.FromSameSource(graph)) { }
+
+    internal LegacyNativeWordLanguageGate(LegacyRussianModelBundle selectedModel,LegacyOrdinaryRecognitionGraph graph)
     {
         ArgumentNullException.ThrowIfNull(selectedModel);
         ArgumentNullException.ThrowIfNull(graph);

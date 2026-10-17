@@ -10,13 +10,13 @@ namespace InkRecognition;
 /// </summary>
 public sealed class LegacyNativeOrdinaryParentWordCandidates
 {
-    private readonly LegacyOrdinaryCursiveCandidateGraph graph;
-    private readonly LegacyOrdinaryCandidateConnections connections;
+    private readonly LegacyOrdinaryRecognitionGraph graph;
     private readonly LegacyInkAlphabet alphabet;
     private readonly LegacyCursiveCategoryProfile categories;
     private readonly LegacyCursiveCategoryMapper categoryMap;
     private readonly LegacySymbolContextFactory contexts;
-    private readonly LegacyMainWordTransitionGeometry geometry;
+    private readonly LegacyNativeHigherArcTransitionOperations geometry;
+    private readonly LegacyGlobalOrdinaryWordPathGuard? globalPathGuard;
     private readonly LegacyNativeWordAcousticRequestScorer scorer;
     private readonly LegacyNativeWordTransitionCostCell cell;
     private readonly byte[] residue;
@@ -28,6 +28,19 @@ public sealed class LegacyNativeOrdinaryParentWordCandidates
         LegacyInkAlphabet alphabet, LegacyCursiveCategoryProfile categories, LegacySymbolContextFactory contexts,
         LegacyMainWordTransitionGeometry geometry, LegacyNativeWordAcousticRequestScorer scorer,
         LegacyNativeWordTransitionCostCell cell, ReadOnlySpan<byte> stackResidue80)
+        :this(LegacyOrdinaryRecognitionGraph.FromSameSource(graph),alphabet,categories,contexts,
+            RequireGeometry(geometry),scorer,cell,stackResidue80,null) { }
+
+    internal LegacyNativeOrdinaryParentWordCandidates(LegacyOwnedMainWordSourceServices source,
+        LegacyNativeWordAcousticRequestScorer scorer,LegacyNativeWordTransitionCostCell cell,ReadOnlySpan<byte> residue)
+        :this(source.Graph,source.Model.AcousticAlphabet,source.Categories.Categories,source.Contexts,
+            (source.GlobalTransitions??throw new ArgumentException("Actual global transitions required.")).CreateOperations(),
+            scorer,cell,residue,new(source)) { }
+
+    private LegacyNativeOrdinaryParentWordCandidates(LegacyOrdinaryRecognitionGraph graph,LegacyInkAlphabet alphabet,
+        LegacyCursiveCategoryProfile categories,LegacySymbolContextFactory contexts,
+        LegacyNativeHigherArcTransitionOperations geometry,LegacyNativeWordAcousticRequestScorer scorer,
+        LegacyNativeWordTransitionCostCell cell,ReadOnlySpan<byte> stackResidue80,LegacyGlobalOrdinaryWordPathGuard? globalPathGuard)
     {
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(alphabet);
@@ -42,14 +55,16 @@ public sealed class LegacyNativeOrdinaryParentWordCandidates
         this.alphabet = alphabet;
         this.categories = categories;
         this.contexts = contexts;
-        this.geometry = geometry;
+        this.geometry = geometry;this.globalPathGuard=globalPathGuard;
         this.scorer = scorer;
         this.cell = cell;
-        connections = new(graph);
         categoryMap = new(categories);
         residue = stackResidue80.ToArray();
         loop = alphabet.TryGetLabel("\U000f0001", out ushort label) ? label : ushort.MaxValue;
     }
+
+    private static LegacyNativeHigherArcTransitionOperations RequireGeometry(LegacyMainWordTransitionGeometry geometry)
+    {ArgumentNullException.ThrowIfNull(geometry);return geometry.CreateOperations();}
 
     /// <summary>
     /// Call only after ApplyContinuation/query preparation accepted this actual
@@ -99,7 +114,7 @@ public sealed class LegacyNativeOrdinaryParentWordCandidates
             int parentAuxiliary34 = BinaryPrimitives.ReadInt32LittleEndian(parent.AsSpan(0x34));
             int anchorNode = BinaryPrimitives.ReadInt32LittleEndian(parent.AsSpan(0x38));
             ushort anchorArc = BinaryPrimitives.ReadUInt16LittleEndian(parent.AsSpan(0x3c));
-            var arcs = connections.GetSuccessorOrdinals(previousEndingNode,
+            var arcs = graph.GetSuccessorOrdinals(previousEndingNode,
                 BinaryPrimitives.ReadUInt16LittleEndian(parent.AsSpan(0x1c)), sourceSpan).ToArray();
             int visited = 0, qualified = 0, calls = 0, accepted = 0;
             for (int offset = 0; offset < queryBytes.Length; offset += 32)
@@ -145,8 +160,13 @@ public sealed class LegacyNativeOrdinaryParentWordCandidates
                             !scorer.Score(request, getOwnedGroupCosts, frontendSuppressionEnabled, isSuppressedE8, cancellationToken)) continue;
                         //1fcf40: for kind!=7 and low request3c==0, neither the
                         //source boundary exception nor symbolic control-root guard applies.
-                        if (request.ReadByte(28) is not (0 or 2) || request.ReadByte(60) != 0)
-                            throw new NotSupportedException("Native ordinary path guard requires the proved unmarked kind0/2 branch.");
+                        if (request.ReadByte(28) is not (0 or 2))
+                            throw new NotSupportedException("Native ordinary path guard requires kind0/2.");
+                        if(request.ReadByte(60)!=0)
+                        {
+                            if(globalPathGuard is null)throw new NotSupportedException("Native ordinary path guard requires the proved unmarked kind0/2 branch.");
+                            if(!globalPathGuard.AllowsMarked(request,cancellationToken))continue;
+                        }
                         int start = unchecked((int)graph.GetNode(endingNode)[ordinal].StartContextId);
                         bool flagged = !suppressHeaderFlag22f7 &&
                             (kind == 0 && (parent[5] & 0x80) != 0 || alphabet.IsSymbolFlagged(symbol));

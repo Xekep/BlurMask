@@ -13,10 +13,10 @@ public sealed record LegacyNativeMainInitialSpecialResult(int VisitedQueries, in
 /// </summary>
 public sealed class LegacyNativeMainInitialSpecialCandidates
 {
-    private readonly LegacyOwnedMainWordSpanPreparation owner;
+    private readonly LegacyOwnedMainWordSourceServices owner;
     private readonly LegacyCursiveCategoryMapper categories;
     private readonly LegacyNativeWordAcousticRequestScorer scorer;
-    private readonly LegacyOrdinaryCandidateConnections connections;
+
     private readonly LegacyNativeWordTransitionCostCell cell;
     private readonly byte[] residue;
     private readonly ushort apostrophe, quote, excludedLoop, excludedShadda;
@@ -27,6 +27,11 @@ public sealed class LegacyNativeMainInitialSpecialCandidates
 
     public LegacyNativeMainInitialSpecialCandidates(ReadOnlySpan<byte> actualResource,
         LegacyOwnedMainWordSpanPreparation owner, LegacyNativeWordTransitionCostCell costCell,
+        ReadOnlySpan<byte> existingRequestResidue80)
+        :this(actualResource,LegacyOwnedMainWordSourceServices.FromSameSource(owner),costCell,existingRequestResidue80) { }
+
+    internal LegacyNativeMainInitialSpecialCandidates(ReadOnlySpan<byte> actualResource,
+        LegacyOwnedMainWordSourceServices owner,LegacyNativeWordTransitionCostCell costCell,
         ReadOnlySpan<byte> existingRequestResidue80)
     {
         ArgumentNullException.ThrowIfNull(owner);
@@ -39,13 +44,12 @@ public sealed class LegacyNativeMainInitialSpecialCandidates
         //The owned source validates its pinned resource on construction. This
         //additional geometry owner check rejects a different resource here.
         var sourceOwner = LegacySourceSamplerCategoryOwner.ReadV10dSource(actualResource, 0);
-        if (sourceOwner.SourceFingerprint != owner.SelectedSourceOwner.SourceFingerprint)
+        if (sourceOwner.SourceFingerprint != owner.Categories.SourceFingerprint)
             throw new ArgumentException("Initial consumer must retain its actual main resource owner.");
-        var alphabet = owner.CommonModel.AcousticAlphabet;
-        categories = new(owner.SelectedSourceOwner.Categories);
+        var alphabet = owner.Model.AcousticAlphabet;
+        categories = new(owner.Categories.Categories);
         scorer = LegacyNativeWordAcousticRequestScorer.ForAlphabet(
             LegacyAcousticCandidateThresholds.ReadV110Node(actualResource[owner.OrdinaryAcousticOffset..], out _), alphabet);
-        connections = new(owner.SourceGraph);
         apostrophe = Resolve("'");
         quote = Resolve("\"");
         excludedLoop = Resolve("\U000f0001");
@@ -63,6 +67,13 @@ public sealed class LegacyNativeMainInitialSpecialCandidates
         ReadOnlySpan<byte> actualQueries32, ushort inputFlags, LegacyNativeWordHeapRouter router,
         float secondaryScaleEc, bool suppressHeader22f7, bool suppressPrevious2609,
         CancellationToken cancellationToken = default)
+        =>ProcessOwnedPage(owner.Wrap(span,cancellationToken),actualQueries32,inputFlags,router,secondaryScaleEc,
+            suppressHeader22f7,suppressPrevious2609,cancellationToken);
+
+    internal LegacyNativeMainInitialSpecialResult ProcessOwnedPage(LegacyOwnedMainWordSourceServices.SpanLease span,
+        ReadOnlySpan<byte> actualQueries32, ushort inputFlags, LegacyNativeWordHeapRouter router,
+        float secondaryScaleEc, bool suppressHeader22f7, bool suppressPrevious2609,
+        CancellationToken cancellationToken = default)
     {
         if (Interlocked.CompareExchange(ref active, 1, 0) != 0)
             throw new InvalidOperationException("Main initial candidate calls must be serialized.");
@@ -72,12 +83,12 @@ public sealed class LegacyNativeMainInitialSpecialCandidates
             ArgumentNullException.ThrowIfNull(span);
             ArgumentNullException.ThrowIfNull(router);
             cancellationToken.ThrowIfCancellationRequested();
+            owner.ValidateSpan(span, cancellationToken);
             if (!span.IsInitial || actualQueries32.Length % 32 != 0 || actualQueries32.Length > 512 * 32 ||
                 !float.IsFinite(secondaryScaleEc))
                 throw new ArgumentException("Whole-prefix main span and complete bounded query page required.");
-            owner.ValidateSpan(span, cancellationToken);
             byte[] queries = actualQueries32.ToArray();
-            var arcs = connections.GetSuccessorOrdinals(-1, ushort.MaxValue, span.Span, cancellationToken);
+            var arcs = owner.Graph.GetSuccessorOrdinals(-1, ushort.MaxValue, span.Span, cancellationToken);
             int visited = 0, qualified = 0, calls = 0, primary = 0, extras = 0;
             foreach (int index in Enumerable.Range(0, queries.Length / 32))
             {
@@ -86,7 +97,7 @@ public sealed class LegacyNativeMainInitialSpecialCandidates
                 visited++;
                 ushort symbol = U16(row, 20);
                 if (symbol == excludedLoop || symbol == excludedShadda) continue;
-                if (symbol >= owner.CommonModel.AcousticAlphabet.LabelCount)
+                if (symbol >= owner.Model.AcousticAlphabet.LabelCount)
                     throw new NotSupportedException("Protocol FFE3..FFEA queries need their source58 expansion producer.");
                 byte source = row[4], flags = row[23], length = row[22];
                 if (source >= headers.Length)
@@ -117,12 +128,12 @@ public sealed class LegacyNativeMainInitialSpecialCandidates
                         int baseCost = I32(row, 16);
                         var request = LegacyNativeWordStartupRequestFactory.Create((uint)span.EndingNode, span.Span,
                             arc, symbol, category, tag, length, flags, headers[source], 0,
-                            owner.SelectedSourceOwner.Categories, cell, baseCost, residue, cancellationToken);
+                            owner.Categories.Categories, cell, baseCost, residue, cancellationToken);
                         calls++;
                         if (!scorer.Score(request, (node, currentArc) => owner.GetCosts(span, node, currentArc, cancellationToken),
                             false, cancellationToken: cancellationToken)) continue;
-                        int first = unchecked((int)owner.SourceGraph.GetNode(span.EndingNode)[ordinal].StartContextId);
-                        bool flagged = !suppressHeader22f7 && owner.CommonModel.AcousticAlphabet.IsSymbolFlagged(symbol);
+                        int first = unchecked((int)owner.Graph.GetNode(span.EndingNode)[ordinal].StartContextId);
+                        bool flagged = !suppressHeader22f7 && owner.Model.AcousticAlphabet.IsSymbolFlagged(symbol);
                         var fields = new LegacyInitialWordRecordFields(tag, context, cell.Value, request.ReadInt32(48),
                             symbol, checked((ushort)span.EndingNode), arc, arc, checked((byte)category), ushort.MaxValue,
                             unchecked((sbyte)span.Span), 0, flagged ? (byte)1 : (byte)0, 0, 0,
@@ -136,7 +147,7 @@ public sealed class LegacyNativeMainInitialSpecialCandidates
                         //then emits a second record for these four labels when
                         //mode22F6=false and aggregate source kinds low3>1.
                         if (LegacyNativeInitialPrimitiveExtraRecord.TryCreate(fields, baseCost, 0, false,
-                            owner.CommonSourceSummary.Flags, duplicatedPrimitives, out var extra))
+                            owner.SourceSummary.Flags, duplicatedPrimitives, out var extra))
                         {
                             cell.Value = extra!.CandidateCost10;
                             result = router.TryInsertInitialRecord(source, false, extra, secondaryScaleEc,

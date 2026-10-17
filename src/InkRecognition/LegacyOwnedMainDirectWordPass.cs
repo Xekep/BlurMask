@@ -28,9 +28,9 @@ public sealed record LegacyMainDirectWordNodeResult(int EndingNode, int RootQuer
 public sealed class LegacyOwnedMainDirectWordPass
 {
     private const int Impossible = 0x4000000;
-    private readonly LegacyOwnedFreshMainWordControllerPolicy policy;
+    private readonly LegacyMainOwnedWordControllerBinding policy;
     private readonly LegacyFreshCaseMainSourcePolicy? caseSourcePolicy;
-    private readonly LegacyOwnedMainWordSpanPreparation owner;
+    private readonly LegacyOwnedMainWordSourceServices owner;
     private readonly LegacyNativeWordControllerConfiguration configuration;
     private readonly LegacyNativeWordHeapPreparation preparation;
     private readonly LegacyMainDirectStorageProvider allocator;
@@ -47,7 +47,7 @@ public sealed class LegacyOwnedMainDirectWordPass
     private int[] cumulative;
     private readonly byte[] lexicalResidue;
     private LegacyNativeWordHeapDescriptor descriptor;
-    private LegacyOwnedMainWordSpan? currentSpan;
+    private LegacyOwnedMainWordSourceServices.SpanLease? currentSpan;
     private LegacyOwnedMainWordSpanPreparation.LivePublicationEpoch? livePublicationEpoch;
     private byte[] primaryPool;
     private ulong primaryPoolIdentity;
@@ -74,20 +74,31 @@ public sealed class LegacyOwnedMainDirectWordPass
         LegacyOwnedFreshMainWordControllerPolicy policy, LegacyPreparedFreshMainLine240AcousticScorer? actualLineAcoustic,
         LegacyCursiveSeparationTable table, LegacyMainDirectStorageProvider allocator,
         LegacyFreshCaseMainSourcePolicy? caseSourcePolicy, CancellationToken cancellationToken)
+        :this(actualResource,LegacyMainOwnedWordControllerBinding.FromSameSource(policy),actualLineAcoustic,table,
+            allocator,caseSourcePolicy,cancellationToken) { }
+
+    internal LegacyOwnedMainDirectWordPass(ReadOnlySpan<byte> actualResource,LegacyFreshMainGlobalWordControllerPolicy policy,
+        LegacyMainDirectStorageProvider allocator,CancellationToken cancellationToken)
+        :this(actualResource,LegacyMainOwnedWordControllerBinding.FromGlobal(policy),null,null,allocator,null,cancellationToken) { }
+
+    private LegacyOwnedMainDirectWordPass(ReadOnlySpan<byte> actualResource,LegacyMainOwnedWordControllerBinding policy,
+        LegacyPreparedFreshMainLine240AcousticScorer? actualLineAcoustic,LegacyCursiveSeparationTable? table,
+        LegacyMainDirectStorageProvider allocator,LegacyFreshCaseMainSourcePolicy? caseSourcePolicy,CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(policy);
-        ArgumentNullException.ThrowIfNull(table);
+        if(policy.Global is null)ArgumentNullException.ThrowIfNull(table);
         ArgumentNullException.ThrowIfNull(allocator);
         cancellationToken.ThrowIfCancellationRequested();
         this.policy = policy;
         this.caseSourcePolicy = caseSourcePolicy;
-        owner = policy.Owner;
+        owner = policy.Source;
         configuration = policy.Configuration;
         this.allocator = allocator;
-        cumulative = new int[owner.SourceGraph.NodeCount];
-        if (owner.IsCaseAware != (caseSourcePolicy is not null) ||
-            caseSourcePolicy is not null && (!ReferenceEquals(caseSourcePolicy.Controller,policy) ||
-                !ReferenceEquals(caseSourcePolicy.DictionaryOwner,owner.CaseDictionaryOwner)) ||
+        cumulative = new int[owner.Graph.NodeCount];
+        if ((!owner.IsGlobal && owner.IsCaseAware != (caseSourcePolicy is not null)) ||
+            owner.IsGlobal && caseSourcePolicy is not null ||
+            caseSourcePolicy is not null && (!ReferenceEquals(caseSourcePolicy.Controller,policy.RequireSameSource()) ||
+                !ReferenceEquals(caseSourcePolicy.DictionaryOwner,owner.RequireSameSource().CaseDictionaryOwner)) ||
             configuration.Mode22f6 != 0 || configuration.Trace2368 != 0 ||
             configuration.PrimaryAlternativeCount2402 != 2 ||
             !(configuration.SecondaryAlternativeCount2404 == 1 && policy.SecondaryCountProperty12d0003 is null ||
@@ -95,7 +106,7 @@ public sealed class LegacyOwnedMainDirectWordPass
             configuration.SuppressPreviousContext2609 != 0 || policy.SecondaryScaleEc != 0 ||
             policy.Refresh.ConsecutiveBlank22f7 != 0 || policy.KnowledgeF5)
             throw new NotSupportedException("Matching fresh DIRECT/CASE2/2/1 or named configured CASE2/2/2 without associated/trace state required.");
-        if (actualLineAcoustic is not null && !ReferenceEquals(actualLineAcoustic, owner.MainLineAcoustic))
+        if (actualLineAcoustic is not null && !ReferenceEquals(actualLineAcoustic, owner.RequireSameSource().MainLineAcoustic))
             throw new ArgumentException("Main line acoustic caches must belong to the exact supplied span owner.");
         if (actualResource.Length != 572763)
             throw new ArgumentException("Actual selected main resource/source ownership required.");
@@ -103,7 +114,7 @@ public sealed class LegacyOwnedMainDirectWordPass
         headerMap = headers.Select((header, index) => (header, index))
             .ToDictionary(item => checked((byte)item.index), item => item.header);
         preparation = LegacyNativeWordHeapPreparation.PrepareFresh(
-            [new(0, 0, 1), LegacyNativeWordPreparedSource.FromDictionary(owner.CommonDescriptor)], configuration, 0, cancellationToken);
+            [new(0, 0, 1), LegacyNativeWordPreparedSource.FromDictionary(owner.Descriptor)], configuration, 0, cancellationToken);
         if (headers.Length != 2 || preparation.Limits.Count != 1 ||
             preparation.Sources.OverrideSourceIndex22f0 != -1 || preparation.Sources.SubwordSourceIndex22ec != -1)
             throw new NotSupportedException("Fresh implicit0 plus one ordinary C00 direct source required.");
@@ -133,35 +144,49 @@ public sealed class LegacyOwnedMainDirectWordPass
         initial = new(actualResource, owner, cell, initialResidue);
         var scorer = LegacyNativeWordAcousticRequestScorer.ForAlphabet(
             LegacyAcousticCandidateThresholds.ReadV110Node(actualResource[owner.OrdinaryAcousticOffset..], out _),
-            owner.CommonModel.AcousticAlphabet);
-        var geometry = actualLineAcoustic is null ? owner.Source.CreatePrepared240TransitionGeometry(table) :
-            actualLineAcoustic.Source.CreatePrepared240TransitionGeometry(table);
-        parents = new(owner.SourceGraph, owner.CommonModel.AcousticAlphabet, owner.SelectedSourceOwner.Categories,
-            owner.Contexts, geometry, scorer, cell, parentResidue);
-        flagPrepass = actualLineAcoustic is null
-            ? new(actualResource, owner.Acoustic, table, cell, flagResidue, cancellationToken)
-            : new(actualResource, actualLineAcoustic, table, cell, flagResidue, cancellationToken);
-        delimiter = new(owner.CommonModel.AcousticAlphabet, owner.Contexts,
+            owner.Model.AcousticAlphabet);
+        if(owner.IsGlobal)
+        {
+            parents=new(owner,scorer,cell,parentResidue);
+            flagPrepass=new(actualResource,owner,(n,arc,token)=>owner.GetCosts(currentSpan??
+                throw new InvalidOperationException("D0 must precede global flag costs."),n,arc,token),cell,flagResidue,cancellationToken);
+        }
+        else
+        {
+            var old=owner.RequireSameSource();
+            var geometry=actualLineAcoustic is null?old.Source.CreatePrepared240TransitionGeometry(table!):
+                actualLineAcoustic.Source.CreatePrepared240TransitionGeometry(table!);
+            parents=new(old.SourceGraph,owner.Model.AcousticAlphabet,owner.Categories.Categories,owner.Contexts,geometry,scorer,cell,parentResidue);
+            flagPrepass=actualLineAcoustic is null?new(actualResource,old.Acoustic,table!,cell,flagResidue,cancellationToken):
+                new(actualResource,actualLineAcoustic,table!,cell,flagResidue,cancellationToken);
+        }
+        delimiter = new(owner.Model.AcousticAlphabet, owner.Contexts,
             (tag, request, token) => livePublicationEpoch is { } live
-                ? owner.ReadLivePublicationQuery(live, tag, request, false, token)
+                ? owner.RequireSameSource().ReadLivePublicationQuery(live, tag, request, false, token)
                 : owner.Read(currentSpan ?? throw new InvalidOperationException("D0 must precede290 reads."),
-                    tag, request, clearExtraCosts: false, cancellationToken: token),
+                    tag, request,false,token),
             LegacyNativeDelimiterQuerySource.ReadV10dCoordinateMode(actualResource));
-        auxiliaryDelimiter = new(owner.CommonModel.AcousticAlphabet, owner.Contexts,
+        auxiliaryDelimiter = new(owner.Model.AcousticAlphabet, owner.Contexts,
             (tag, request, token) => owner.Read(currentSpan ?? throw new InvalidOperationException("D0 must precede auxiliary reads."),
-                tag, request, auxiliary: true, clearExtraCosts: false, cancellationToken: token), owner.SourceGraph.NodeCount);
+                tag, request,true,token), owner.Graph.NodeCount);
         auxiliaryPages = new((tag, request, token) =>
         {
             var page = auxiliaryDelimiter.Read(tag, request, token);
             return new(page.ReturnedCount, page.Records, ReadOnlyMemory<byte>.Empty, -1, request.Skip, null);
         }, owner.Contexts, 128, auxiliaryScratch.Span);
-        languageGate = new(owner.CommonModel, owner.SourceGraph);
+        languageGate = new(owner.Model, owner.Graph);
+    }
+
+    internal IReadOnlyList<LegacyMainDirectWordNodeResult> RunGlobal(CancellationToken token)
+    {
+        if(policy.Global is null)throw new InvalidOperationException("Actual global controller required.");
+        return RunCore(token,null);
     }
 
     /// <summary>Run the same single-use pass and retain immutable, source-bound
     /// final row storage for the owned terminal invocation.</summary>
     public LegacyOwnedMainDirectWordPassResult RunOwned(CancellationToken cancellationToken = default)
-        => LegacyOwnedMainDirectWordPassResult.Create(policy, Run(cancellationToken), cancellationToken);
+        => LegacyOwnedMainDirectWordPassResult.Create(policy.RequireSameSource(), Run(cancellationToken), cancellationToken);
 
     /// <summary>Opt-in2144F0 intermediate207CB0 lifecycle. Uses the same live
     /// D0 map and outer290 caches, writes actual publication marks/indices back
@@ -182,8 +207,8 @@ public sealed class LegacyOwnedMainDirectWordPass
         int endingNode, Action<LegacyMainIntermediateCompactPublication>? publicationObserver = null,
         CancellationToken cancellationToken = default)
     {
-        if (endingNode < 0 || endingNode >= owner.SourceGraph.NodeCount - 1 ||
-            owner.SourceGraph.NodeCount > policy.MaximumParentDistance54)
+        if (endingNode < 0 || endingNode >= owner.Graph.NodeCount - 1 ||
+            owner.Graph.NodeCount > policy.MaximumParentDistance54)
             throw new ArgumentOutOfRangeException(nameof(endingNode));
         return RunOwnedWithPublicationCore(actualResource, candidateOwner, compactAllocatorResidue40,
             publicationObserver, endingNode, cancellationToken);
@@ -198,10 +223,10 @@ public sealed class LegacyOwnedMainDirectWordPass
         cancellationToken.ThrowIfCancellationRequested();
         if (configuration.SecondaryAlternativeCount2404 != 1)
             throw new NotSupportedException("Configured secondary2410 compact publication remains a separate owning bridge.");
-        LegacyOwnedMainCompactWordMaterialization.ValidatePublicationOwner(actualResource, policy, caseSourcePolicy, candidateOwner);
+        LegacyOwnedMainCompactWordMaterialization.ValidatePublicationOwner(actualResource, policy.RequireSameSource(), caseSourcePolicy, candidateOwner);
         var publication = new IntermediatePublication(actualResource.ToArray(), candidateOwner,
-            new(policy, compactAllocatorResidue40), publicationObserver, preparedEndingNode);
-        var result = LegacyOwnedMainDirectWordPassResult.Create(policy, RunCore(cancellationToken, publication), cancellationToken);
+            new(policy.RequireSameSource(), compactAllocatorResidue40), publicationObserver, preparedEndingNode);
+        var result = LegacyOwnedMainDirectWordPassResult.Create(policy.RequireSameSource(), RunCore(cancellationToken, publication), cancellationToken);
         result.BindIntermediatePublicationState(publication.State);
         return result;
     }
@@ -219,7 +244,7 @@ public sealed class LegacyOwnedMainDirectWordPass
         if (Interlocked.Exchange(ref started, 1) != 0)
             throw new InvalidOperationException("A main pass is single-use, including failed/canceled passes.");
         var output = new List<LegacyMainDirectWordNodeResult>();
-        var graph = owner.SourceGraph;
+        var graph = owner.Graph;
         ResetSources(-1, cancellationToken);
         for (int node = 0; node < graph.NodeCount; node++)
         {
@@ -245,7 +270,7 @@ public sealed class LegacyOwnedMainDirectWordPass
                     ReadAll(query, page =>
                     {
                         rootQueries += page.ReturnedCount;
-                        initial.ProcessPreparedPage(currentSpan, page.Records.Span, 0, router, 0, false, false, cancellationToken);
+                        initial.ProcessOwnedPage(currentSpan, page.Records.Span, 0, router, 0, false, false, cancellationToken);
                     }, cancellationToken);
                 }
                 else
@@ -359,7 +384,7 @@ public sealed class LegacyOwnedMainDirectWordPass
         var span = currentSpan ?? throw new InvalidOperationException("Intermediate publication requires the actual last D0 span.");
         if (span.EndingNode != endingNode || livePublicationEpoch is not null)
             throw new InvalidOperationException("Intermediate publication cannot replace another active node/query scope.");
-        livePublicationEpoch = owner.CaptureLivePublicationEpoch(span, token);
+        livePublicationEpoch = owner.RequireSameSource().CaptureLivePublicationEpoch(span.SameSource!, token);
         var lease = livePublicationEpoch;
         try
         {
@@ -372,18 +397,18 @@ public sealed class LegacyOwnedMainDirectWordPass
                     CumulativePathCost2520 = cumulative[node]
                 };
             }
-            var source = new LegacyMainCompactPublicationSource(policy, caseSourcePolicy, publication.State.NextNode,
-                endingNode, Snapshot, delimiter, cancellation => owner.ValidateLivePublicationEpoch(lease, cancellation));
+            var source = new LegacyMainCompactPublicationSource(policy.RequireSameSource(), caseSourcePolicy, publication.State.NextNode,
+                endingNode, Snapshot, delimiter, cancellation => owner.RequireSameSource().ValidateLivePublicationEpoch(lease, cancellation));
             int previousCount = publication.State.Count;
             var stage = LegacyOwnedMainCompactWordMaterialization.Publish(publication.Resource, source,
                 publication.Confidence, publication.State, token);
             var observed = publication.Observer is null ? null :
                 new LegacyMainIntermediateCompactPublication(source, previousCount, publication.State, stage);
             if (observed is not null) publication.Observer!(observed);
-            owner.ValidateLivePublicationEpoch(lease, token);
+            owner.RequireSameSource().ValidateLivePublicationEpoch(lease, token);
             for (int node = source.StartingNode; node <= endingNode; node++)
-                nodes[node].ApplyCompactPublication(policy, stage.Nodes[node], token);
-            owner.EndLivePublicationEpoch(lease, token);
+                nodes[node].ApplyCompactPublication(policy.RequireSameSource(), stage.Nodes[node], token);
+            owner.RequireSameSource().EndLivePublicationEpoch(lease, token);
         }
         finally { livePublicationEpoch = null; }
     }
@@ -394,11 +419,13 @@ public sealed class LegacyOwnedMainDirectWordPass
         Reset(1, node, token);
         var heap = descriptor.GetHeapSnapshot();
         var router = Router(heap);
-        var completion = caseSourcePolicy is not null
+        var completion = policy.Global is {} globalPolicy
+            ? LegacyNativeFirstDictionaryWordCompletion.ForGlobalSpan(globalPolicy,currentSpan??throw new InvalidOperationException("Actual global D0 lease required."),token)
+            : caseSourcePolicy is not null
             ? LegacyNativeFirstDictionaryWordCompletion.ForFreshCaseSpan(caseSourcePolicy,
-                currentSpan ?? throw new InvalidOperationException("Actual last D0 case lease required."),token)
-            : new LegacyNativeFirstDictionaryWordCompletion(owner.DictionaryOwner.Model, owner.DictionaryOwner.WordMetadata,
-                owner.DictionaryOwner.LanguageRecords, owner.DictionaryOwner.RestartTags, 1, headers[1], false, 0, false, false);
+                currentSpan?.SameSource ?? throw new InvalidOperationException("Actual last D0 case lease required."),token)
+            : new LegacyNativeFirstDictionaryWordCompletion(owner.RequireSameSource().DictionaryOwner.Model, owner.RequireSameSource().DictionaryOwner.WordMetadata,
+                owner.RequireSameSource().DictionaryOwner.LanguageRecords, owner.RequireSameSource().DictionaryOwner.RestartTags, 1, headers[1], false, 0, false, false);
         int queryCount = 0, allocationCount = 0;
         for (ushort ordinal = 0; ordinal < configuration.PrimaryArcLimit230a; ordinal++)
         {

@@ -145,6 +145,8 @@ public sealed class LegacyFreshMainGlobalCaseSession
         var result=Acoustic.Score(group,token);costs[group]=result.Cache.Costs.ToArray();AcousticEvaluations++;
         return new(costs[group],Acoustic.CostScale);
     }
+    internal void ValidateOwnedSpan(LegacyOwnedGlobalMainWordSpan span,CancellationToken token)
+    {Enter(token);try{Check(span,token);}finally{Exit();}}
     private void Check(LegacyOwnedGlobalMainWordSpan span,CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(span);token.ThrowIfCancellationRequested();

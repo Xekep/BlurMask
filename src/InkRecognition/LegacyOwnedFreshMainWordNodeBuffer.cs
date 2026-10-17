@@ -9,7 +9,7 @@ namespace InkRecognition;
 public sealed class LegacyOwnedFreshMainWordNodeBuffer
 {
     private readonly byte[] records, primary, secondary;
-    private readonly LegacyOwnedFreshMainWordControllerPolicy policy;
+    private readonly LegacyMainOwnedWordControllerBinding policy;
     private bool languageStarted, compacted;
     private int primaryWritten, languageWritten;
     public int EndingNode { get; }
@@ -26,6 +26,12 @@ public sealed class LegacyOwnedFreshMainWordNodeBuffer
     public LegacyOwnedFreshMainWordNodeBuffer(LegacyOwnedFreshMainWordControllerPolicy policy, int endingNode,
         ReadOnlySpan<byte> actualRecordAllocation, ReadOnlySpan<byte> actualPrimaryAlternativeAllocation,
         ReadOnlySpan<byte> actualSecondaryAlternativeAllocation, CancellationToken cancellationToken)
+        :this(LegacyMainOwnedWordControllerBinding.FromSameSource(policy),endingNode,actualRecordAllocation,
+            actualPrimaryAlternativeAllocation,actualSecondaryAlternativeAllocation,cancellationToken) { }
+
+    internal LegacyOwnedFreshMainWordNodeBuffer(LegacyMainOwnedWordControllerBinding policy,int endingNode,
+        ReadOnlySpan<byte> actualRecordAllocation,ReadOnlySpan<byte> actualPrimaryAlternativeAllocation,
+        ReadOnlySpan<byte> actualSecondaryAlternativeAllocation,CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(policy);
         cancellationToken.ThrowIfCancellationRequested();
@@ -34,7 +40,7 @@ public sealed class LegacyOwnedFreshMainWordNodeBuffer
             !(configuration.SecondaryAlternativeCount2404 == 1 && policy.SecondaryCountProperty12d0003 is null ||
               configuration.SecondaryAlternativeCount2404 == 2 && policy.SecondaryCountProperty12d0003 == 2) ||
             configuration.Trace2368 != 0 || configuration.Mode22f6 != 0 ||
-            (uint)endingNode >= (uint)policy.Owner.SourceGraph.NodeCount)
+            (uint)endingNode >= (uint)policy.NodeCount)
             throw new NotSupportedException("Fresh owned2/2/1 or named configured CASE2/2/2 node required.");
         float expansion = ((configuration.PackedSource22e8 & 0x10) != 0 ? 2f : 1f) * configuration.ExpansionFactor230c;
         expansion *= configuration.PrimaryArcLimit230a;
@@ -168,7 +174,7 @@ public sealed class LegacyOwnedFreshMainWordNodeBuffer
         cancellationToken.ThrowIfCancellationRequested();
         if (secondary.Length != 0)
             throw new NotSupportedException("Configured secondary compact publication requires its own2410 writeback bridge.");
-        if (!ReferenceEquals(producingOwner, policy) || !compacted || published.EndingNode != EndingNode ||
+        if (!ReferenceEquals(producingOwner, policy.RequireSameSource()) || !compacted || published.EndingNode != EndingNode ||
             published.SourceEnd23f0 != SourceEnd23f0 || published.RetainedEnd23f8 != RetainedEnd23f8 ||
             published.Records.Length != records.Length || published.PrimaryAlternatives.Length != primary.Length)
             throw new ArgumentException("Publication must retain the completed node's exact owner, counts and allocation extents.");
