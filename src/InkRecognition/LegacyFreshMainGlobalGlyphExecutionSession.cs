@@ -27,7 +27,7 @@ public sealed class LegacyFreshMainGlobalGlyphExecutionSession
         ReadOnlySpan<byte> emptyWordAllocatorResidue120,CancellationToken token=default)
     {
         ArgumentNullException.ThrowIfNull(ownership);ArgumentNullException.ThrowIfNull(plan);token.ThrowIfCancellationRequested();
-        if(!ReferenceEquals(plan.BacktrackRows.Materialization,ownership.Materialization)||
+        if(!plan.BacktrackRows.CompactOwner.IsSameSelection(ownership.CompactOwner)||
             !ReferenceEquals(plan.BacktrackRows.SourceCallbacks.Geometry,ownership.Geometry))
             throw new ArgumentException("One actual global compact/flush/source/pool owner required.");
         var associations=LegacyFreshMainGlobalGlyphAssociationSession.Prepare(plan,ownership.Geometry,token);
@@ -52,7 +52,7 @@ public sealed class LegacyFreshMainGlobalGlyphExecutionSession
             {
                 if(IsStopped||next!=Associations.CompletedFlushCount||next>=Associations.Plan.Flushes.Count)
                     throw new InvalidOperationException("Stopped/completed/interfered global glyph execution cannot advance.");
-                var pass=Ownership.Materialization.TerminalResult.PassResult;pass.ValidateResultQueryLease(token);
+                var pass=Ownership.CompactOwner.Pass;pass.ValidateResultQueryLease(token);
                 var flush=Associations.Plan.Flushes[next];byte[] packetBytes=flush.CopyPacketWriteTemplate();var origins=flush.CopyInitialWordSeedOrigins();
                 if(packetBytes.Length!=64||origins.Length!=64)throw new InvalidDataException("Actual complete global callback packet required.");
                 for(int i=0;i<64;i++)

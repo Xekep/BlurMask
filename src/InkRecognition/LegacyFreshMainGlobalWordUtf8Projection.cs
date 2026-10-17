@@ -22,22 +22,22 @@ public sealed class LegacyFreshMainGlobalWordUtf8Projection
     {
         ArgumentNullException.ThrowIfNull(publication);token.ThrowIfCancellationRequested();
         var association=publication.Association;var session=publication.ExecutionSession;var ownership=session.Ownership;
-        var pass=ownership.Materialization.TerminalResult.PassResult;pass.ValidateResultQueryLease(token);
+        var pass=ownership.CompactOwner.Pass;pass.ValidateResultQueryLease(token);
         if(!ReferenceEquals(association.Session,session.Associations)||
-            !ReferenceEquals(association.Flush.BacktrackRows.Materialization,ownership.Materialization))
+            !association.Flush.BacktrackRows.CompactOwner.IsSameSelection(ownership.CompactOwner))
             throw new ArgumentException("Exact actual global execution/association/materialization required.");
         if(!publication.Succeeded||!association.Succeeded)
             throw new NotSupportedException("Only an actual successful same-owner word callback can be projected.");
         var word=publication.PublishedWord?.Word;
         if(word is null)return new(publication,[],[]); //Actual successful zero-span callback.
         if(!ReferenceEquals(word.Pool,ownership.GlyphPool)||
-            !ReferenceEquals(association.Flush.BacktrackRows.Materialization,ownership.Materialization))
+            !association.Flush.BacktrackRows.CompactOwner.IsSameSelection(ownership.CompactOwner))
             throw new ArgumentException("Published word, glyph pool and compact source must retain identical ownership.");
         byte[] wordStorage=word.CopyStorage();var references=word.FlatReferences;
         if(references.Count is <1 or >4096||BinaryPrimitives.ReadInt32LittleEndian(wordStorage.AsSpan(40))!=references.Count||
             BinaryPrimitives.ReadUInt64LittleEndian(wordStorage.AsSpan(8))!=references[^1])
             throw new InvalidDataException("Actual plain275 ordered reference vector and head/count required.");
-        byte[] rows=association.CopyRows72();int[] starts=ownership.Materialization.CopyNodeStarts2478();
+        byte[] rows=association.CopyRows72();int[] starts=ownership.CompactOwner.CopyNodeStarts2478();
         var model=ownership.Geometry.Policy.Owner.Model;
         var sources=new Dictionary<(ulong Key,int Descriptor),List<int>>();
         for(int i=0;i<rows.Length/72;i++)

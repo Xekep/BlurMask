@@ -12,9 +12,9 @@ internal static class LegacyFreshMainGlobalGlyphChain
     {
         ArgumentNullException.ThrowIfNull(ownership);ArgumentNullException.ThrowIfNull(word);ArgumentNullException.ThrowIfNull(association);
         ArgumentNullException.ThrowIfNull(ordinary);ArgumentNullException.ThrowIfNull(protocol);token.ThrowIfCancellationRequested();
-        var materialization=ownership.Materialization;var source=association.Session.SourceOverlay.Geometry;
+        var materialization=ownership.CompactOwner;var source=association.Session.SourceOverlay.Geometry;
         if(!ReferenceEquals(word.Pool,ownership.GlyphPool)||!ReferenceEquals(source,ownership.Geometry)||
-            !ReferenceEquals(association.Flush.BacktrackRows.Materialization,materialization)||
+            !association.Flush.BacktrackRows.CompactOwner.IsSameSelection(materialization)||
             !ReferenceEquals(ordinary.Geometry,source)||!ReferenceEquals(protocol.Geometry,source))
             throw new ArgumentException("Same actual global glyph/pool/flush/producer source required.");
         var residual=association.CopyResidualStorage();

@@ -38,10 +38,10 @@ public sealed class LegacyFreshMainGlobalGlyphFlushPlan
         CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(backtrack); token.ThrowIfCancellationRequested();
-        var materialization = backtrack.Materialization; var pass = materialization.TerminalResult.PassResult;
+        var materialization = backtrack.CompactOwner; var pass = materialization.Pass;
         var policy = pass.Policy; uint[] headers = policy.Owner.Symbols.CopySourceHeaders();
         if (!ReferenceEquals(backtrack.SourceCallbacks.Geometry.Policy, policy) ||
-            !ReferenceEquals(backtrack.SourceCallbacks.Geometry.Confidence, materialization.ConfidenceOwner))
+            !ReferenceEquals(backtrack.SourceCallbacks.Geometry.Confidence, materialization.Confidence))
             throw new ArgumentException("One genuine global compact/backtrack/source owner required.");
         if (policy.Configuration.Trace2368 != 0 || policy.Configuration.Mode22f6 != 0 ||
             policy.Refresh.KnowledgeOption22f8 != 0 || headers.Length != 2 || headers[0] != 0 ||
@@ -51,7 +51,7 @@ public sealed class LegacyFreshMainGlobalGlyphFlushPlan
         var numeric = LegacyPreparedMainGlyphFlushPlan.Run(LegacyOrdinaryRecognitionGraph.FromGlobal(policy.Owner.Graph),
             policy.Owner.Model.AcousticAlphabet, materialization.CopyCompactStorage(), backtrack.CopyRows(),
             materialization.CopyNodeStarts2478(), backtrack.CopyVisitedCompactIndices(), pass.CopyCumulativePathCosts(),
-            materialization.RecordCount, materialization.SelectedRecordIndex, ushort.MaxValue, materialization.TerminalResult.Winner,
+            materialization.RecordCount, materialization.SelectedRecordIndex, ushort.MaxValue, materialization.Winner,
             (tag, symbol, cancellation) => pass.ReadResultTerminal(tag, symbol, 0, cancellation), token);
         pass.ValidateResultQueryLease(token);
         return new(backtrack, numeric);

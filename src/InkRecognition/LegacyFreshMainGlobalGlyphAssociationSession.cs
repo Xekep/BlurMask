@@ -25,7 +25,7 @@ public sealed class LegacyFreshMainGlobalGlyphAssociationSession
         ArgumentNullException.ThrowIfNull(plan);ArgumentNullException.ThrowIfNull(geometry);token.ThrowIfCancellationRequested();
         if(!ReferenceEquals(plan.BacktrackRows.SourceCallbacks.Geometry,geometry))
             throw new ArgumentException("Same actual flush/source geometry owner required.");
-        plan.BacktrackRows.Materialization.TerminalResult.PassResult.ValidateResultQueryLease(token);
+        plan.BacktrackRows.CompactOwner.Pass.ValidateResultQueryLease(token);
         var overlay=LegacyFreshMainGlobalResidualSource.Prepare(geometry,token);
         return new(plan,overlay,LegacyFreshMainGlobalGlyphSourceMetadata.Prepare(overlay,token));
     }
@@ -36,7 +36,7 @@ public sealed class LegacyFreshMainGlobalGlyphAssociationSession
             token.ThrowIfCancellationRequested();
             if(stopped||current is not null||next>=Plan.Flushes.Count)
                 throw new InvalidOperationException("Stopped/completed/awaiting-callback association session cannot advance.");
-            var pass=Plan.BacktrackRows.Materialization.TerminalResult.PassResult;pass.ValidateResultQueryLease(token);
+            var pass=Plan.BacktrackRows.CompactOwner.Pass;pass.ValidateResultQueryLease(token);
             var flush=Plan.Flushes[next];var additions=flush.CopyResidualAdditions();
             if(remaining<0||remaining>residual.Length||additions.Length>65536-remaining)
                 throw new NotSupportedException("Actual residual carry prefix exceeds its portable source-vector budget.");
@@ -55,7 +55,7 @@ public sealed class LegacyFreshMainGlobalGlyphAssociationSession
         lock(gate)
         {
             if(stopped||!ReferenceEquals(current,association))throw new InvalidOperationException("Current live same-session association required.");
-            Plan.BacktrackRows.Materialization.TerminalResult.PassResult.ValidateResultQueryLease(token);
+            Plan.BacktrackRows.CompactOwner.Pass.ValidateResultQueryLease(token);
             if(callbackSucceeded&&!association.Succeeded)throw new InvalidOperationException("Failed217DB0 prefix cannot be acknowledged as published.");
             if(!callbackSucceeded){stopped=true;return;}next++;current=null;
         }
@@ -66,7 +66,7 @@ public sealed class LegacyFreshMainGlobalGlyphAssociationSession
         lock(gate)
         {
             if(stopped||!ReferenceEquals(current,association))throw new InvalidOperationException("Current live global association required.");
-            Plan.BacktrackRows.Materialization.TerminalResult.PassResult.ValidateResultQueryLease(token);
+            Plan.BacktrackRows.CompactOwner.Pass.ValidateResultQueryLease(token);
         }
     }
     internal void CompleteExecuted(LegacyFreshMainGlobalGlyphExecutionResult result,CancellationToken token)

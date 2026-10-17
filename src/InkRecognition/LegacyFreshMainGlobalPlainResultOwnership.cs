@@ -5,21 +5,29 @@ namespace InkRecognition;
 /// or manufacture WORD allocator bytes.</summary>
 public sealed class LegacyFreshMainGlobalPlainResultOwnership
 {
-    public LegacyFreshMainGlobalCompactWordMaterialization Materialization{get;}
+    internal LegacyGlobalSelectedCompactOwner CompactOwner {get;}
+    public LegacyFreshMainGlobalCompactWordMaterialization Materialization=>CompactOwner.RequireOld();
+    public LegacyFreshMainGlobalPublishedTerminalResult PublishedTerminal=>CompactOwner.RequirePublished();
     public LegacyFreshMainGlobalSourceGeometry Geometry{get;}
     public LegacyNativeGlyphRecordPool GlyphPool{get;}
     public LegacyNativePlainWordPublisher WordPublisher{get;}
     public bool CaptureGlyphGeometry=>false;
     public bool OwnerC4=>false;
-    private LegacyFreshMainGlobalPlainResultOwnership(LegacyFreshMainGlobalCompactWordMaterialization materialization,
+    private LegacyFreshMainGlobalPlainResultOwnership(LegacyGlobalSelectedCompactOwner materialization,
         LegacyFreshMainGlobalSourceGeometry geometry,LegacyNativeGlyphRecordPool pool,LegacyNativePlainWordPublisher publisher)
-    {Materialization=materialization;Geometry=geometry;GlyphPool=pool;WordPublisher=publisher;}
+    {CompactOwner=materialization;Geometry=geometry;GlyphPool=pool;WordPublisher=publisher;}
     public static LegacyFreshMainGlobalPlainResultOwnership Create(LegacyFreshMainGlobalCompactWordMaterialization materialization,
         LegacyFreshMainGlobalSourceGeometry geometry,CancellationToken token=default)
+        => CreateCore(LegacyGlobalSelectedCompactOwner.FromOld(materialization),geometry,token);
+    public static LegacyFreshMainGlobalPlainResultOwnership CreatePublished(LegacyFreshMainGlobalPublishedTerminalResult selected,
+        LegacyFreshMainGlobalSourceGeometry geometry,CancellationToken token=default)
+        => CreateCore(LegacyGlobalSelectedCompactOwner.FromPublished(selected,token),geometry,token);
+    private static LegacyFreshMainGlobalPlainResultOwnership CreateCore(LegacyGlobalSelectedCompactOwner materialization,
+        LegacyFreshMainGlobalSourceGeometry geometry,CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(materialization);ArgumentNullException.ThrowIfNull(geometry);token.ThrowIfCancellationRequested();
-        var pass=materialization.TerminalResult.PassResult;var policy=pass.Policy;
-        if(!ReferenceEquals(materialization.ConfidenceOwner,geometry.Confidence)||!ReferenceEquals(policy,geometry.Policy)||
+        var pass=materialization.Pass;var policy=pass.Policy;
+        if(!ReferenceEquals(materialization.Confidence,geometry.Confidence)||!ReferenceEquals(policy,geometry.Policy)||
             !ReferenceEquals(policy.Owner.Graph,geometry.Graph))
             throw new ArgumentException("Same actual global compact/source geometry/controller/confidence owner required.");
         if(policy.Owner.Model.SourceKind!=0x135||policy.HasAssociatedSource||policy.Configuration.Trace2368!=0||
@@ -37,7 +45,7 @@ public sealed class LegacyFreshMainGlobalPlainResultOwnership
     }
     public LegacyNativeWordBuilder CreateWorkingWord(ReadOnlySpan<byte> emptyAllocatorResidue120,CancellationToken token=default)
     {
-        Materialization.TerminalResult.PassResult.ValidateResultQueryLease(token);
+        CompactOwner.Validate(token);
         return LegacyNativeWordBuilder.CreateEmpty(GlyphPool,emptyAllocatorResidue120,token);
     }
 }

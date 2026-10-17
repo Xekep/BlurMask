@@ -18,10 +18,10 @@ public sealed class LegacyFreshMainGlobalSourceWidthStatistics
         LegacyFreshMainGlobalSourceGeometry geometry,CancellationToken token=default)
     {
         ArgumentNullException.ThrowIfNull(plan);ArgumentNullException.ThrowIfNull(geometry);token.ThrowIfCancellationRequested();
-        var backtrack=plan.BacktrackRows;var materialization=backtrack.Materialization;
-        var pass=materialization.TerminalResult.PassResult;var policy=pass.Policy;
+        var backtrack=plan.BacktrackRows;var materialization=backtrack.CompactOwner;
+        var pass=materialization.Pass;var policy=pass.Policy;
         if(!ReferenceEquals(backtrack.SourceCallbacks.Geometry,geometry)||!ReferenceEquals(geometry.Policy,policy)||
-            !ReferenceEquals(geometry.Confidence,materialization.ConfidenceOwner))
+            !ReferenceEquals(geometry.Confidence,materialization.Confidence))
             throw new ArgumentException("Actual global compact/flush/source geometry owner identity required.");
         if(policy.HasAssociatedSource||policy.Owner.Model.SourceKind!=0x135||policy.Configuration.Trace2368!=0||
             policy.Configuration.Mode22f6!=0||policy.Refresh.KnowledgeOption22f8!=0)

@@ -7,23 +7,35 @@ namespace InkRecognition;
 public sealed class LegacyFreshMainGlobalGlyphBacktrackRows
 {
     private readonly LegacyPreparedMainGlyphBacktrackRows.Result result;
-    public LegacyFreshMainGlobalCompactWordMaterialization Materialization { get; }
+    internal LegacyGlobalSelectedCompactOwner CompactOwner { get; }
+    public LegacyFreshMainGlobalCompactWordMaterialization Materialization => CompactOwner.RequireOld();
+    public LegacyFreshMainGlobalPublishedTerminalResult PublishedTerminal => CompactOwner.RequirePublished();
     public LegacyFreshMainGlobalSourceSymbolCallbacks SourceCallbacks { get; }
     public int Count => result.Rows.Length / 72;
-    private LegacyFreshMainGlobalGlyphBacktrackRows(LegacyFreshMainGlobalCompactWordMaterialization materialization,
+    private LegacyFreshMainGlobalGlyphBacktrackRows(LegacyGlobalSelectedCompactOwner materialization,
         LegacyFreshMainGlobalSourceSymbolCallbacks callbacks, LegacyPreparedMainGlyphBacktrackRows.Result result)
-    { Materialization = materialization; SourceCallbacks = callbacks; this.result = result; }
+    { CompactOwner = materialization; SourceCallbacks = callbacks; this.result = result; }
 
     public static LegacyFreshMainGlobalGlyphBacktrackRows Prepare(ReadOnlySpan<byte> resource,
         LegacyFreshMainGlobalCompactWordMaterialization materialization,
         LegacyFreshMainGlobalSourceSymbolCallbacks callbacks, ReadOnlySpan<byte> stackRowResidue72,
         CancellationToken token = default)
+        => PrepareCore(resource, LegacyGlobalSelectedCompactOwner.FromOld(materialization), callbacks, stackRowResidue72, token);
+
+    public static LegacyFreshMainGlobalGlyphBacktrackRows PreparePublished(ReadOnlySpan<byte> resource,
+        LegacyFreshMainGlobalPublishedTerminalResult selected, LegacyFreshMainGlobalSourceSymbolCallbacks callbacks,
+        ReadOnlySpan<byte> stackRowResidue72, CancellationToken token = default)
+        => PrepareCore(resource, LegacyGlobalSelectedCompactOwner.FromPublished(selected, token), callbacks, stackRowResidue72, token);
+
+    private static LegacyFreshMainGlobalGlyphBacktrackRows PrepareCore(ReadOnlySpan<byte> resource,
+        LegacyGlobalSelectedCompactOwner materialization, LegacyFreshMainGlobalSourceSymbolCallbacks callbacks,
+        ReadOnlySpan<byte> stackRowResidue72, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(materialization); ArgumentNullException.ThrowIfNull(callbacks);
         token.ThrowIfCancellationRequested();
-        var pass = materialization.TerminalResult.PassResult; var policy = pass.Policy;
+        var pass = materialization.Pass; var policy = pass.Policy;
         if (stackRowResidue72.Length != 72 || !ReferenceEquals(callbacks.Geometry.Policy, policy) ||
-            !ReferenceEquals(callbacks.Geometry.Confidence, materialization.ConfidenceOwner))
+            !ReferenceEquals(callbacks.Geometry.Confidence, materialization.Confidence))
             throw new ArgumentException("The real global compact, source callback and complete72-byte stack residue must share their owner.");
         if (resource.Length != 572763 || !Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(resource)).Equals(
             policy.Owner.Graph.Source.Source.SourceFingerprint, StringComparison.OrdinalIgnoreCase))
