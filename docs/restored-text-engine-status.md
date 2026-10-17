@@ -109,7 +109,8 @@ Details: [global compact](legacy-main-global-compact-materialization.md),
 [source line publication](legacy-main-owned-source-lines.md),
 [pending document TEXT](legacy-main-document-text-selection.md),
 [bounded document line consistency](legacy-main-document-line-consistency.md),
-[live source gates and exact WORD coverage](legacy-main-post-text-source-coverage.md).
+[live source gates and exact WORD coverage](legacy-main-post-text-source-coverage.md),
+[per-WORD character source subtraction](legacy-main-document-character-coverage.md).
 
 ## Remaining joins
 
@@ -133,7 +134,9 @@ Details: [global compact](legacy-main-global-compact-materialization.md),
   transport. Fresh source2DA.22Afalse is now derived through the actual
   frontendV250/context facet/source219 property chain, not its constructor.
   The scoped single-WORD027670 early return and exact0248D0 WORD-union/TEXT
-  equality are checked. Pending CHAR/WORD/TEXT commands, trimmed source guides
+  equality and per-WORD forward CHAR range subtraction are checked. The actual
+  empty remainders do not prove the unsupported multi-choice split branch.
+  Pending CHAR/WORD/TEXT commands, trimmed source guides
   and zero residual association do not establish accepted document content.
 - Representative online handwriting evaluation with real pen-up events,
   Russian cursive, English, mixed text and mathematical notation before enabling
