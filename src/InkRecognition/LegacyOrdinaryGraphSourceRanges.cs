@@ -50,6 +50,14 @@ public sealed class LegacyOrdinaryGraphSourceRanges
         var seedGraph=actualSeeds.InsertionShift==0?LegacyOrdinaryCursiveSeedGraph.CreateShiftZero(actualSeeds,cancellationToken):
             LegacyOrdinaryCursiveSeedGraph.CreateOrdinaryDeferred(actualSeeds,cancellationToken);
         var graph=LegacyOrdinaryCursiveCandidateGraph.Generate(actualSeeds,seedGraph,maximumAtoms,maximumCandidates,cancellationToken);
+        var keys=CopyOwnedKeyRecords(actualOriginalSource,cancellationToken);
+        return new(actualSeeds,seedGraph,graph,actualPreparedChronology,actualOriginalSource,keys);
+    }
+
+    internal static LegacySourcePointKey[] CopyOwnedKeyRecords(LegacyOrdinarySourceInk actualOriginalSource,
+        CancellationToken cancellationToken=default)
+    {
+        ArgumentNullException.ThrowIfNull(actualOriginalSource);cancellationToken.ThrowIfCancellationRequested();
         var keys=new LegacySourcePointKey[actualOriginalSource.Strokes.Sum(s=>s.Points.Count)];
         var assigned=new bool[keys.Length];
         for(int s=0;s<actualOriginalSource.Strokes.Count;s++)for(int p=0;p<actualOriginalSource.Strokes[s].Points.Count;p++)
@@ -61,7 +69,7 @@ public sealed class LegacyOrdinaryGraphSourceRanges
                 throw new ArgumentException("A complete one-to-one original source key-record owner is required.");
             assigned[identity.KeyRecordIndex]=true;keys[identity.KeyRecordIndex]=identity.Key;
         }
-        return new(actualSeeds,seedGraph,graph,actualPreparedChronology,actualOriginalSource,keys);
+        return keys;
     }
 
     public LegacyFirstResultSourceRange[] ResolveCandidate(int endingNode,int arcOrdinal,
@@ -134,11 +142,28 @@ public sealed class LegacyOrdinaryGraphSourceRanges
             }
         }
         if(!found)throw new InvalidDataException("Actual ordinary source path does not reach its requested ending context.");
+        var path=frames.Select(frame=>seeds.Seeds[seedGraph.GetNode(frame.Node)[frame.Ordinal].SeedGroupIndex].Atom.Range).ToArray();
+        return ProjectOwnedRows(prepared,original,path,keys,cancellationToken);
+    }
+
+    /// <summary>Shared1A8E60/1A9570/1A9AE0 ordinary forward projection, after
+    /// an owning graph has selected its actual ordered range path.</summary>
+    internal static LegacyOrdinaryGraphSourceReference[] ResolveOwnedRangePath(
+        LegacySourcePointChronology prepared,LegacyOrdinarySourceInk original,
+        IReadOnlyList<LegacyInkRange> path,LegacySourcePointKey[] keys,CancellationToken cancellationToken=default)
+        =>ProjectOwnedRows(prepared,original,path,keys,cancellationToken)
+            .Select(r=>new LegacyOrdinaryGraphSourceReference(r.First.Key,r.Tail?r.Last.Key:r.LastStart.Key,
+                r.First.RemainderByte,r.Tail?r.Last.RemainderByte:r.LastStart.RemainderByte)).ToArray();
+
+    private static List<Row> ProjectOwnedRows(LegacySourcePointChronology prepared,LegacyOrdinarySourceInk original,
+        IReadOnlyList<LegacyInkRange> path,LegacySourcePointKey[] keys,CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if(path.Count>4096)throw new ArgumentException("Portable ordinary source range path budget exceeded.");
         var rows=new List<Row>();
-        foreach(var frame in frames)
+        foreach(var range in path)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var range=seeds.Seeds[seedGraph.GetNode(frame.Node)[frame.Ordinal].SeedGroupIndex].Atom.Range;
             var first=prepared.Resolve(range.StrokeIndex,range.StartPoint);
             var lastStart=prepared.Resolve(range.StrokeIndex,range.EndPointExclusive-1);
             var last=original.ResolveEndingMetadata(lastStart,cancellationToken);

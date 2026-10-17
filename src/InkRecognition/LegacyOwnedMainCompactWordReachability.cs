@@ -59,7 +59,7 @@ public sealed class LegacyOwnedMainCompactWordReachability
     }
 
     internal static LegacyOwnedMainCompactWordReachability PrepareSource(ReadOnlySpan<byte> resource,
-        LegacyMainCompactPublicationSource source, CancellationToken cancellationToken)
+        LegacyMainCompactPublicationSource source, CancellationToken cancellationToken, bool configuredSecondary = false)
     {
         source.Validate(cancellationToken);
         var policy = source.Controller;
@@ -73,12 +73,19 @@ public sealed class LegacyOwnedMainCompactWordReachability
                 !ReferenceEquals(casePolicy.DictionaryOwner, owner.CaseDictionaryOwner)))
             throw new ArgumentException("The result requires its actual typed DIRECT or fresh CASE source policy.");
         if (configuration.Mode22f6 != 0 || configuration.Trace2368 != 0 ||
-            configuration.PrimaryAlternativeCount2402 != 2 || configuration.SecondaryAlternativeCount2404 != 1 ||
+            configuration.PrimaryAlternativeCount2402 != 2 ||
+            configuration.SecondaryAlternativeCount2404 != (configuredSecondary ? 2 : 1) ||
             (configuration.PackedSource22e8 & 7) <= 1 || policy.SecondaryScaleEc != 0)
-            throw new NotSupportedException("Fresh mode0/2/2/1 ordinary language reachability required.");
+            throw new NotSupportedException(configuredSecondary
+                ? "Fresh mode0/2/2/2 ordinary configured language reachability required."
+                : "Fresh mode0/2/2/1 ordinary language reachability required.");
         //The exact typed source is checked again before its coordinate-mode
         //reader can transport this resource into a result query wrapper.
-        var observed = LegacyOwnedFreshMainWordControllerPolicy.Prepare(resource, owner, cancellationToken);
+        if (configuredSecondary && (!owner.IsCaseAware || policy.SecondaryCountProperty12d0003 != 2))
+            throw new NotSupportedException("The configured CASE branch requires its actual preconstruction property2 owner.");
+        var observed = configuredSecondary
+            ? LegacyOwnedFreshMainWordControllerPolicy.PrepareWithSecondaryCountProperty(resource, owner, 2, cancellationToken)
+            : LegacyOwnedFreshMainWordControllerPolicy.Prepare(resource, owner, cancellationToken);
         if (observed.Configuration != configuration || observed.Refresh != policy.Refresh)
             throw new ArgumentException("The result's exact selected main resource is required.");
         int primaryLimit = configuration.PrimaryArcLimit230a;
@@ -97,14 +104,21 @@ public sealed class LegacyOwnedMainCompactWordReachability
                 snapshot.PrimaryAlternatives.Length != checked(primaryLimit * 2 * 40))
                 throw new InvalidDataException("Result rows must retain their full native source/pool extents.");
             byte[] records = snapshot.Records.ToArray(), alternatives = snapshot.PrimaryAlternatives.ToArray();
+            byte[] secondary = snapshot.SecondaryAlternatives.ToArray();
+            if (configuredSecondary && secondary.Length != checked(records.Length / 88 * 80))
+                throw new InvalidDataException("Configured2410 must retain the complete actual88 allocation extent.");
             if (node >= source.StartingNode)
             {
                 for (int ordinal = 0; ordinal < snapshot.SourceEnd23f0; ordinal++)
+                {
                     records[ordinal * 88 + 6] &= 0xfd;
+                    if (configuredSecondary)
+                        for (int k = 0; k < 2; k++) secondary[(ordinal * 2 + k) * 40 + 0x1b] &= 0x7f;
+                }
                 for (int ordinal = 0; ordinal < primaryLimit * 2; ordinal++)
                     alternatives[ordinal * 40 + 0x1b] &= 0x7f;
             }
-            snapshots[node] = snapshot with { Records = records, PrimaryAlternatives = alternatives };
+            snapshots[node] = snapshot with { Records = records, PrimaryAlternatives = alternatives, SecondaryAlternatives = secondary };
             activeNodes[node] = node >= source.StartingNode && node > prefixEnd ? (byte)1 : (byte)0;
         }
 
@@ -144,8 +158,11 @@ public sealed class LegacyOwnedMainCompactWordReachability
                         }
                     }
                 }
+                if (configuredSecondary)
+                    LegacyNativeSecondaryChainReachability.Mark(snapshots, activeNodes,
+                        source.StartingNode, primaryLimit, node, ordinal, cancellationToken);
                 //Packed22E8.low3>1 takes the ordinary secondary branch;
-                //2404=1 selects the literal beam-chain marking loop2084BB.
+                //Both count1 and count2 fall through to the beam-chain loop2084BB.
                 int parentNode = node, parentOrdinal = ordinal;
                 while (parentNode >= source.StartingNode)
                 {
@@ -219,7 +236,8 @@ public sealed class LegacyOwnedMainCompactWordReachability
     {
         if ((uint)endingNode >= nodes.Length) throw new ArgumentOutOfRangeException(nameof(endingNode));
         var node = nodes[endingNode];
-        return node with { Records = node.Records.ToArray(), PrimaryAlternatives = node.PrimaryAlternatives.ToArray() };
+        return node with { Records = node.Records.ToArray(), PrimaryAlternatives = node.PrimaryAlternatives.ToArray(),
+            SecondaryAlternatives = node.SecondaryAlternatives.ToArray() };
     }
     public byte[] CopySelectedNodes() => (byte[])selectedNodes.Clone();
     internal bool HasLanguageContinuation(int node, ushort primaryOrdinal, CancellationToken token)
