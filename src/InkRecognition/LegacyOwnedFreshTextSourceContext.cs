@@ -34,6 +34,7 @@ public sealed class LegacyOwnedFreshTextSourceContext
     private readonly List<LegacyOwnedFreshTextSelection> commands=[];
     private long next;
     private bool failed;
+    private bool textRegistrationEntered;
     public LegacyOwnedRawInkDocument Document { get; }
     public long NextSelectionId {get{lock(gate)return next;}}
     public bool Failed {get{lock(gate)return failed;}}
@@ -85,6 +86,24 @@ public sealed class LegacyOwnedFreshTextSourceContext
         long output=-1;
         return CreateCore(actualSource.CopySourceKeyRanges(),1,ref output,0,token)??
             throw new InvalidOperationException("Fresh WORD selection registration failed.");
+    }
+
+    internal LegacyOwnedFreshTextSelection CreateTextSelection(LegacyFreshMainDocumentTextSelection actualSource,
+        CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(actualSource);token.ThrowIfCancellationRequested();
+        if(!ReferenceEquals(actualSource.SelectionContext,this)||!ReferenceEquals(actualSource.Document,Document))
+            throw new ArgumentException("Actual same-document NULL-source projection and fresh transaction required.");
+        lock(gate)
+        {
+            if(textRegistrationEntered)throw new InvalidOperationException("This fresh transaction already entered TEXT registration.");
+            var prefix=actualSource.WordChoices.PendingSelections;
+            if(commands.Count!=prefix.Count||commands.Where((command,index)=>!ReferenceEquals(command,prefix[index])).Any())
+                throw new InvalidOperationException("The exact native CHAR/WORD registration prefix must precede TEXT.");
+            token.ThrowIfCancellationRequested();textRegistrationEntered=true;long output=-1;
+            return CreateCore(actualSource.CopyRanges(),2,ref output,0,token)??
+                throw new InvalidOperationException("Fresh TEXT selection registration failed.");
+        }
     }
 
     //Explicit allocator-stage failures and arbitrary already-prepared keys
