@@ -1,5 +1,8 @@
 using System.Security.Cryptography;
 using System.Buffers.Binary;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("LegacyMainSecondaryStorage.Probe")]
 
 namespace InkRecognition;
 
@@ -18,12 +21,16 @@ public sealed class LegacyOwnedFreshMainWordControllerPolicy
     public int FlagPrepassDistance58 { get; }
     public bool KnowledgeF5 => false;
     public float SecondaryScaleEc => 0;
+    /// <summary>Only the exact00D800 property applied before this controller's
+    /// construction, or null for the unchanged fresh00C860 knowledge.</summary>
+    public ushort? SecondaryCountProperty12d0003 { get; }
 
     private LegacyOwnedFreshMainWordControllerPolicy(LegacyOwnedMainWordSpanPreparation owner,
         LegacyNativeWordControllerConfiguration configuration, LegacyNativeWordScalarRefreshResult refresh,
-        int flagDistance)
+        int flagDistance, ushort? secondaryCountProperty = null)
     {
         Owner = owner; Configuration = configuration; Refresh = refresh; FlagPrepassDistance58 = flagDistance;
+        SecondaryCountProperty12d0003 = secondaryCountProperty;
     }
 
     public static LegacyOwnedFreshMainWordControllerPolicy Prepare(ReadOnlySpan<byte> resource,
@@ -59,6 +66,28 @@ public sealed class LegacyOwnedFreshMainWordControllerPolicy
             checked((uint)selected.MaximumSourceArcs), LegacyNativeWordKnowledgeLimits.CreateFresh00c860(), true);
         cancellationToken.ThrowIfCancellationRequested();
         return new(owner, prepared.Configuration, refresh, distance);
+    }
+
+    /// <summary>Known2B3 property012D0003/00D800 before any controller or pool
+    /// exists. This scoped path supports value2; it does not mutate a live
+    /// controller or skip its native property-change callbacks.</summary>
+    public static LegacyOwnedFreshMainWordControllerPolicy PrepareWithSecondaryCountProperty(
+        ReadOnlySpan<byte> resource, LegacyOwnedMainWordSpanPreparation owner, uint count,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (count is < 1 or > 20) throw new ArgumentOutOfRangeException(nameof(count), "Native00D800 accepts1..20.");
+        if (count != 2) throw new NotSupportedException("The owning configured secondary path currently supports exactly2.");
+        ArgumentNullException.ThrowIfNull(owner);
+        if (!owner.IsCaseAware) throw new NotSupportedException("The configured owning secondary path currently requires its actual CASE source.");
+        var fresh = Prepare(resource, owner, cancellationToken);
+        var knowledge = LegacyNativeWordKnowledgeLimits.CreateFresh00c860() with { Secondary18 = (short)count };
+        var configuration = LegacyNativeWordControllerConfiguration.CreateFresh20baa0() with
+        { PackedSource22e8 = fresh.Configuration.PackedSource22e8 };
+        var prepared = LegacyNativeWordControllerLimitPreparation.Prepare(configuration,
+            fresh.Configuration.PrimaryArcLimit230a, knowledge, true);
+        cancellationToken.ThrowIfCancellationRequested();
+        return new(owner, prepared.Configuration, fresh.Refresh, fresh.FlagPrepassDistance58, (ushort)count);
     }
 
     //The same selected metadata reader for both owned source variants. No

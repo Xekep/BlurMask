@@ -5,7 +5,8 @@ namespace InkRecognition;
 public enum LegacyMainDirectStorageKind
 {
     HeapRecords, PrimaryAlternativePool, NodeRecords, NodePrimaryAlternatives,
-    InitialRequestResidue, ParentRequestResidue, FlagRequestResidue, AuxiliaryScratch, LexicalResidue
+    InitialRequestResidue, ParentRequestResidue, FlagRequestResidue, AuxiliaryScratch, LexicalResidue,
+    SecondaryAlternativePool, NodeSecondaryAlternatives
 }
 
 public readonly record struct LegacyMainDirectStorageRequest(LegacyMainDirectStorageKind Kind,
@@ -16,7 +17,8 @@ public delegate LegacyMainDirectStorageAllocation LegacyMainDirectStorageProvide
 public sealed record LegacyMainDirectWordNodeResult(int EndingNode, int RootQueries, int ParentQueries,
     int FlagAllocations, int PrimaryCandidates, bool LanguageRan, int LanguageQueries, int LanguageAllocations,
     ushort SourceEnd23f0, ushort RetainedEnd23f8, ReadOnlyMemory<byte> Records, ReadOnlyMemory<byte> PrimaryAlternatives,
-    int CumulativePathCost2520 = 0, int AppliedPeriodicOffset = 0);
+    int CumulativePathCost2520 = 0, int AppliedPeriodicOffset = 0,
+    ReadOnlyMemory<byte> SecondaryAlternatives = default);
 
 /// <summary>Owned nontracing DIRECT main240 node/span loop. This consumes the
 ///prepared main source, real dictionary permissions and actual four-family
@@ -49,6 +51,8 @@ public sealed class LegacyOwnedMainDirectWordPass
     private LegacyOwnedMainWordSpanPreparation.LivePublicationEpoch? livePublicationEpoch;
     private byte[] primaryPool;
     private ulong primaryPoolIdentity;
+    private byte[] secondaryPool = [];
+    private ulong secondaryPoolIdentity;
     private int started;
     public int LastPreparedEndingNode => currentSpan?.EndingNode ?? -1;
     public int LastPreparedSpan => currentSpan?.Span ?? -1;
@@ -85,10 +89,12 @@ public sealed class LegacyOwnedMainDirectWordPass
             caseSourcePolicy is not null && (!ReferenceEquals(caseSourcePolicy.Controller,policy) ||
                 !ReferenceEquals(caseSourcePolicy.DictionaryOwner,owner.CaseDictionaryOwner)) ||
             configuration.Mode22f6 != 0 || configuration.Trace2368 != 0 ||
-            configuration.PrimaryAlternativeCount2402 != 2 || configuration.SecondaryAlternativeCount2404 != 1 ||
+            configuration.PrimaryAlternativeCount2402 != 2 ||
+            !(configuration.SecondaryAlternativeCount2404 == 1 && policy.SecondaryCountProperty12d0003 is null ||
+              configuration.SecondaryAlternativeCount2404 == 2 && policy.SecondaryCountProperty12d0003 == 2 && caseSourcePolicy is not null) ||
             configuration.SuppressPreviousContext2609 != 0 || policy.SecondaryScaleEc != 0 ||
             policy.Refresh.ConsecutiveBlank22f7 != 0 || policy.KnowledgeF5)
-            throw new NotSupportedException("Matching fresh DIRECT or typed case policy, mode0/2/2/1 without associated/trace state required.");
+            throw new NotSupportedException("Matching fresh DIRECT/CASE2/2/1 or named configured CASE2/2/2 without associated/trace state required.");
         if (actualLineAcoustic is not null && !ReferenceEquals(actualLineAcoustic, owner.MainLineAcoustic))
             throw new ArgumentException("Main line acoustic caches must belong to the exact supplied span owner.");
         if (actualResource.Length != 572763)
@@ -110,6 +116,13 @@ public sealed class LegacyOwnedMainDirectWordPass
         var poolAllocation = Allocate(LegacyMainDirectStorageKind.PrimaryAlternativePool, -1,
             checked(descriptor.Capacity * 80), ReadOnlyMemory<byte>.Empty, 0, cancellationToken);
         primaryPool = poolAllocation.Storage.ToArray(); primaryPoolIdentity = poolAllocation.Identity;
+        if (configuration.SecondaryAlternativeCount2404 > 1)
+        {
+            var secondaryAllocation = Allocate(LegacyMainDirectStorageKind.SecondaryAlternativePool, -1,
+                checked(descriptor.Capacity * configuration.SecondaryAlternativeCount2404 * 40),
+                ReadOnlyMemory<byte>.Empty, 0, cancellationToken);
+            secondaryPool = secondaryAllocation.Storage.ToArray(); secondaryPoolIdentity = secondaryAllocation.Identity;
+        }
         var cell = new LegacyNativeWordTransitionCostCell(1, 0);
         byte[] initialResidue = Allocate(LegacyMainDirectStorageKind.InitialRequestResidue, -1, 80, ReadOnlyMemory<byte>.Empty, 0, cancellationToken).Storage.ToArray();
         byte[] parentResidue = Allocate(LegacyMainDirectStorageKind.ParentRequestResidue, -1, 80, ReadOnlyMemory<byte>.Empty, 0, cancellationToken).Storage.ToArray();
@@ -183,6 +196,8 @@ public sealed class LegacyOwnedMainDirectWordPass
     {
         ArgumentNullException.ThrowIfNull(candidateOwner);
         cancellationToken.ThrowIfCancellationRequested();
+        if (configuration.SecondaryAlternativeCount2404 != 1)
+            throw new NotSupportedException("Configured secondary2410 compact publication remains a separate owning bridge.");
         LegacyOwnedMainCompactWordMaterialization.ValidatePublicationOwner(actualResource, policy, caseSourcePolicy, candidateOwner);
         var publication = new IntermediatePublication(actualResource.ToArray(), candidateOwner,
             new(policy, compactAllocatorResidue40), publicationObserver, preparedEndingNode);
@@ -270,9 +285,15 @@ public sealed class LegacyOwnedMainDirectWordPass
             var nodeRecords = Allocate(LegacyMainDirectStorageKind.NodeRecords, node, extent * 88, ReadOnlyMemory<byte>.Empty, 0, cancellationToken);
             var nodeAlternatives = Allocate(LegacyMainDirectStorageKind.NodePrimaryAlternatives, node,
                 configuration.PrimaryArcLimit230a * 80, ReadOnlyMemory<byte>.Empty, 0, cancellationToken);
-            var buffer = new LegacyOwnedFreshMainWordNodeBuffer(policy, node, nodeRecords.Storage.Span, nodeAlternatives.Storage.Span, cancellationToken);
+            var secondaryAlternatives = configuration.SecondaryAlternativeCount2404 > 1
+                ? Allocate(LegacyMainDirectStorageKind.NodeSecondaryAlternatives, node,
+                    extent * configuration.SecondaryAlternativeCount2404 * 40, ReadOnlyMemory<byte>.Empty, 0, cancellationToken).Storage
+                : ReadOnlyMemory<byte>.Empty;
+            var buffer = new LegacyOwnedFreshMainWordNodeBuffer(policy, node, nodeRecords.Storage.Span,
+                nodeAlternatives.Storage.Span, secondaryAlternatives.Span, cancellationToken);
             for (int ordinal = 0; ordinal < primaryHeap.Count; ordinal++)
-                buffer.WritePrimary(primaryHeap.GetSlotSnapshot(ordinal).Span, ordered.PrimaryAlternativeStorage.Span, cancellationToken);
+                buffer.WritePrimary(primaryHeap.GetSlotSnapshot(ordinal).Span, ordered.PrimaryAlternativeStorage.Span,
+                    ordered.SecondaryAlternativeStorage.Span, cancellationToken);
             buffer.BeginLanguage(cancellationToken);
             nodes.Add(node, buffer);
             bool language = node == graph.NodeCount - 1 || languageGate.ShouldRun(node, -1,
@@ -307,7 +328,7 @@ public sealed class LegacyOwnedMainDirectWordPass
             }
             output.Add(new(node, rootQueries, parentQueries, flagAllocations, primaryHeap.Count, language,
                 languageQueries, languageAllocations, buffer.SourceEnd23f0, buffer.RetainedEnd23f8,
-                buffer.CopyRecordStorage(), buffer.CopyPrimaryStorage(), cumulative[node], periodicOffset));
+                buffer.CopyRecordStorage(), buffer.CopyPrimaryStorage(), cumulative[node], periodicOffset, buffer.CopySecondaryStorage()));
             //215DC0..215DDE: intermediate207CB0 follows periodic cost changes
             //and precedes the actual sourceV80. Both comparisons are signed.
             if (publication is not null && (publication.PreparedEndingNode == node ||
@@ -323,6 +344,7 @@ public sealed class LegacyOwnedMainDirectWordPass
         {
             Records = nodes[result.EndingNode].CopyRecordStorage(),
             PrimaryAlternatives = nodes[result.EndingNode].CopyPrimaryStorage(),
+            SecondaryAlternatives = nodes[result.EndingNode].CopySecondaryStorage(),
             CumulativePathCost2520 = cumulative[result.EndingNode]
         }).ToList().AsReadOnly();
     }
@@ -399,14 +421,35 @@ public sealed class LegacyOwnedMainDirectWordPass
                 }, 100, token);
             if (!result.Completed) throw new InvalidOperationException("Native language query failed or exceeded the explicit page budget100.");
         }
-        var ordered = LegacyNativeWordAlternativeOrdering.Prepare(heap.GetSlotStorageSnapshot().Span, heap.Count,
-            true, configuration, headers, false, null, null, token);
+        ReadOnlyMemory<byte> slots = heap.GetSlotStorageSnapshot();
+        if (configuration.SecondaryAlternativeCount2404 > 1)
+        {
+            slots = LegacyNativeWordAlternativeOrdinals.AssignContinuation(slots.Span, heap.Count, cancellationToken: token).SlotStorage;
+            for (int index = 0; index < heap.Count; index++)
+            {
+                var slot = slots.Slice(index * 128, 128);
+                LegacyNativeContinuationWordAlternatives alternatives = BinaryPrimitives.ReadUInt16LittleEndian(slot.Span[0x3e..]) == ushort.MaxValue
+                    ? LegacyNativeContinuationWordAlternativeProducer.CreateUnanchored(slot.Span, 1, node, 0,
+                        descriptor.Limits.SourceIndex30, 0, configuration, (n, arc) => nodes[n].Read(arc),
+                        owner.Contexts, symbol => symbol, secondaryPool, cancellationToken: token)
+                    : LegacyNativeAnchoredWordAlternativeProducer.Create(slot.Span, 1, node, 0,
+                        descriptor.Limits.SourceIndex30, 0, configuration, (n, arc) => nodes[n].Read(arc),
+                        owner.Contexts, symbol => symbol, secondaryPool, cancellationToken: token);
+                if (!alternatives.Succeeded) throw new InvalidOperationException("Native211EB0 continuation failed.");
+                secondaryPool = alternatives.SecondaryStorage.ToArray();
+            }
+        }
+        var ordered = LegacyNativeWordAlternativeOrdering.Prepare(slots.Span, heap.Count,
+            true, configuration, headers, false, null,
+            configuration.SecondaryAlternativeCount2404 > 1 ? new(configuration.SecondaryAlternativeCount2404, secondaryPool) : null, token);
+        if (configuration.SecondaryAlternativeCount2404 > 1) secondaryPool = ordered.SecondaryAlternativeStorage.ToArray();
         ReplaceDescriptor(ordered.Heap);
         if (!LegacyNativeWordQuotaController.Apply([descriptor], configuration, 0, 1,
             (index, request) => Grow(index, request, node, token), cancellationToken: token))
             throw new InvalidOperationException("Native language quota allocation failed.");
         var live = descriptor.GetHeapSnapshot();
-        for (int ordinal = 0; ordinal < live.Count; ordinal++) buffer.WriteLanguage(live.GetSlotSnapshot(ordinal).Span, token);
+        for (int ordinal = 0; ordinal < live.Count; ordinal++)
+            buffer.WriteLanguage(live.GetSlotSnapshot(ordinal).Span, ordered.SecondaryAlternativeStorage.Span, token);
         queries = queryCount; allocations = allocationCount;
     }
 
@@ -418,15 +461,24 @@ public sealed class LegacyOwnedMainDirectWordPass
             token.ThrowIfCancellationRequested();
             var slot = slots.Slice(index * 128, 128);
             int previous = node - unchecked((sbyte)slot.Span[32]) - 1;
-            primaryPool = previous < 0
-                ? LegacyNativeRootWordAlternativeProducer.Create(slot.Span, 1, (uint)node, configuration,
-                    owner.Contexts, symbol => symbol, primaryPool, [], token).PrimaryStorage.ToArray()
-                : LegacyNativeInitialParentWordAlternativeProducer.Create(slot.Span, 1, (uint)node, configuration,
-                    (n, ordinal) => nodes[n].Read(ordinal), owner.Contexts, symbol => symbol, primaryPool, [], token).PrimaryStorage.ToArray();
+            if (previous < 0)
+            {
+                var produced = LegacyNativeRootWordAlternativeProducer.Create(slot.Span, 1, (uint)node, configuration,
+                    owner.Contexts, symbol => symbol, primaryPool, secondaryPool, token);
+                primaryPool = produced.PrimaryStorage.ToArray(); secondaryPool = produced.SecondaryStorage.ToArray();
+            }
+            else
+            {
+                var produced = LegacyNativeInitialParentWordAlternativeProducer.Create(slot.Span, 1, (uint)node, configuration,
+                    (n, ordinal) => nodes[n].Read(ordinal), owner.Contexts, symbol => symbol, primaryPool, secondaryPool, token);
+                primaryPool = produced.PrimaryStorage.ToArray(); secondaryPool = produced.SecondaryStorage.ToArray();
+            }
         }
         var ordered = LegacyNativeWordAlternativeOrdering.Prepare(slots.Span, heap.Count, false, configuration,
-            headers, false, new(2, primaryPool), null, token);
+            headers, false, new(2, primaryPool),
+            configuration.SecondaryAlternativeCount2404 > 1 ? new(configuration.SecondaryAlternativeCount2404, secondaryPool) : null, token);
         primaryPool = ordered.PrimaryAlternativeStorage.ToArray();
+        if (configuration.SecondaryAlternativeCount2404 > 1) secondaryPool = ordered.SecondaryAlternativeStorage.ToArray();
         return ordered;
     }
 
@@ -466,6 +518,13 @@ public sealed class LegacyOwnedMainDirectWordPass
             var allocation = Allocate(LegacyMainDirectStorageKind.PrimaryAlternativePool, node,
                 descriptor.Capacity * 80, primaryPool, primaryPoolIdentity, token);
             primaryPool = allocation.Storage.ToArray(); primaryPoolIdentity = allocation.Identity;
+        }
+        if (configuration.SecondaryAlternativeCount2404 > 1 &&
+            secondaryPool.Length < descriptor.Capacity * configuration.SecondaryAlternativeCount2404 * 40)
+        {
+            var allocation = Allocate(LegacyMainDirectStorageKind.SecondaryAlternativePool, node,
+                descriptor.Capacity * configuration.SecondaryAlternativeCount2404 * 40, secondaryPool, secondaryPoolIdentity, token);
+            secondaryPool = allocation.Storage.ToArray(); secondaryPoolIdentity = allocation.Identity;
         }
     }
 

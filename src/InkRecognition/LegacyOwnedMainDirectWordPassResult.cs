@@ -79,7 +79,8 @@ public sealed class LegacyOwnedMainDirectWordPassResult
     }
 
     private static LegacyMainDirectWordNodeResult Copy(LegacyMainDirectWordNodeResult node)
-        => node with { Records = node.Records.ToArray(), PrimaryAlternatives = node.PrimaryAlternatives.ToArray() };
+        => node with { Records = node.Records.ToArray(), PrimaryAlternatives = node.PrimaryAlternatives.ToArray(),
+            SecondaryAlternatives = node.SecondaryAlternatives.ToArray() };
 }
 
 /// <summary>Owned numeric terminal selection. No text reconstruction or
