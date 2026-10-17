@@ -2847,6 +2847,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native fresh segment assignment failed.' }
           python tools/LegacyMathFreshSegments.Probe/audit_output.py .artifacts/math-fresh-segments-native.json models/math2/math2-unwrapped.res .artifacts/math-prefix-native.json
           if ($LASTEXITCODE -ne 0) { throw 'Native fresh segment assignment oracle failed.' }
+          dotnet run --project tools/LegacyMathRecordingLoop.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-recording-loop-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed cold recording loop failed.' }
+          python tools/LegacyMathRecordingLoop.Probe/audit_output.py .artifacts/math-recording-loop-managed.json models/math2/math2-unwrapped.res
+          if ($LASTEXITCODE -ne 0) { throw 'Managed cold recording loop oracle failed.' }
+          dotnet publish tools/LegacyMathRecordingLoop.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-recording-loop-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Cold recording loop probe publish failed.' }
+          $recordingLoop = if ($IsWindows) { '.artifacts/math-recording-loop-probe/LegacyMathRecordingLoop.Probe.exe' } else { '.artifacts/math-recording-loop-probe/LegacyMathRecordingLoop.Probe' }
+          & $recordingLoop .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-recording-loop-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native cold recording loop failed.' }
+          python tools/LegacyMathRecordingLoop.Probe/audit_output.py .artifacts/math-recording-loop-native.json models/math2/math2-unwrapped.res
+          if ($LASTEXITCODE -ne 0) { throw 'Native cold recording loop oracle failed.' }
           dotnet run --project tools/LegacyMathSegmentation.Probe -c Release -- .artifacts/math-segmentation-managed.json
           if ($LASTEXITCODE -ne 0) { throw 'Managed segmentation sigmoid failed.' }
           python tools/LegacyMathSegmentation.Probe/audit_output.py .artifacts/math-segmentation-managed.json
