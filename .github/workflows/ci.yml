@@ -2858,6 +2858,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native cold recording loop failed.' }
           python tools/LegacyMathRecordingLoop.Probe/audit_output.py .artifacts/math-recording-loop-native.json models/math2/math2-unwrapped.res
           if ($LASTEXITCODE -ne 0) { throw 'Native cold recording loop oracle failed.' }
+          dotnet run --project tools/LegacyMathInitialCompletedOrdering.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-initial-order-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed initial completed ordering failed.' }
+          python tools/LegacyMathInitialCompletedOrdering.Probe/audit_output.py .artifacts/math-initial-order-managed.json models/math2/math2-unwrapped.res
+          if ($LASTEXITCODE -ne 0) { throw 'Managed initial completed ordering oracle failed.' }
+          dotnet publish tools/LegacyMathInitialCompletedOrdering.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-initial-order-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Initial completed ordering probe publish failed.' }
+          $initialOrder = if ($IsWindows) { '.artifacts/math-initial-order-probe/LegacyMathInitialCompletedOrdering.Probe.exe' } else { '.artifacts/math-initial-order-probe/LegacyMathInitialCompletedOrdering.Probe' }
+          & $initialOrder .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-initial-order-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native initial completed ordering failed.' }
+          python tools/LegacyMathInitialCompletedOrdering.Probe/audit_output.py .artifacts/math-initial-order-native.json models/math2/math2-unwrapped.res
+          if ($LASTEXITCODE -ne 0) { throw 'Native initial completed ordering oracle failed.' }
           dotnet run --project tools/LegacyMathSegmentation.Probe -c Release -- .artifacts/math-segmentation-managed.json
           if ($LASTEXITCODE -ne 0) { throw 'Managed segmentation sigmoid failed.' }
           python tools/LegacyMathSegmentation.Probe/audit_output.py .artifacts/math-segmentation-managed.json
