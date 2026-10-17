@@ -18,18 +18,24 @@ The reusable library now has these checked stages:
 | --- | --- |
 | First-stage inference | Same-owner NN, graph, selected single or multiple plain words; unsupported traits/terminal columns remain explicit refusals. |
 | Main preprocessing | Actual selected first TEXT to source720,24B/24A geometry, deskew and smoothing.24A is joined; a genuine positive empty-first fixture/remaining temporal branches are not established. |
-| Descriptor cut source | Sequential descriptor cuts, local allocation metadata, append/root stitching and ordinary cross-source construction/boundary pruning are checked. Global compact/context/NN integration remains separate. |
-| Main candidate | One assigned physical line through CASE, first terminal and compact backtrack. A named preconstruction count2 property path retains actual secondary2410 data; its general terminal/exclusion/publication join is separate. |
+| Descriptor cut source | Sequential cuts, local metadata, cross-source construction/pruning, compact selector traversal and original source-range projection are checked. Global context selection is under further descriptor-to-line ownership review; global NN/controller integration remains separate. |
+| Main candidate | One assigned physical line through CASE, first terminal and compact backtrack. Configured count2 now has actual terminal exclusions, reachability and compact2410 publication with owned selected terminal identities. Its backtrack/WORD join is still separate. |
 | Word publication | Per-segment residual association, glyph chain and same-owner plain WORD list; no supplied labels or success flags. |
 | First candidate completion | Actual selected alternative scores, published-WORD quote cleanup, fresh-configuration glyph-normalization no-op, separate raw UTF8 WORD projections. No joined/accepted transcription. |
 | Ordinary glyph alternatives | Actual positive CASE source export/scoring/compact-driven refresh and13A830 ordering are joined. Fresh one-descriptor negative spans have owned source export/refresh. Native failed-refresh retries/general protocol sources remain separate. |
-| Text projection | Full fresh273.V50 ->213A0/021000 choices and05AFA0 original raw document positions are joined.024F30 source-node interning/reuse and final document assembly remain separate. |
+| Text projection | Fresh273.V50 ->213A0/021000 choices and05AFA0 original raw positions are joined. Separate ordered range interning, existing-glyph021760 reuse and pending selection transactions are checked; processed range operators, full024F30 and document assembly remain separate. |
 | Long-source publication | Genuine native 120-node gate and prefix/final-append transport checked; a nonempty genuine long-source winner is not established. |
 
 `LegacyFreshMainSingleLinePlainRecognition` joins raw physical strokes to the
 bounded first main candidate's WORD list. Its `PublicationCompleted` property
 means the word callbacks completed, not that the transcription should replace
 ink. Multiple lines are currently refused. The app is not switched to this API.
+
+`LegacyFreshMainRecognitionContext` now shares owned immutable models between
+invocations while preserving separate raw documents and mutable dictionary
+contexts. Existing diagnostic output is unchanged. The local library-only
+[memory comparison](legacy-main-model-context.md) does not establish app memory
+use or recognition quality.
 
 `LegacyFreshMainFirstCandidateCompletion` now joins that actual publication to
 the first-alternative snapshot, quote cleanup, the proven fresh-configuration
