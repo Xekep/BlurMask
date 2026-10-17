@@ -10,7 +10,7 @@ from pathlib import Path
 if len(sys.argv)!=3:
     raise SystemExit('capture.json raw-math2.res')
 capture=json.loads(Path(sys.argv[1]).read_bytes())
-assert capture['caseCount']==181 and len(capture['cases'])==181 and capture['guards']==35
+assert capture['caseCount']==181 and len(capture['cases'])==181 and capture['guards']==42
 costs=[0xff800000,0xff7fffff,0xbf800000,0x80000000,0,0x3c23d70a,
        0x3f000000,0x3f800000,0x7f7fffff,0x7f800000,0x7fc00000,0x7fa00001]
 
@@ -274,3 +274,31 @@ for case in capture['eosHandoffs']:
   assert active==1 and struct.unpack_from('<Q',rows[0],8)[0]==5 and all(struct.unpack_from('<I',x)[0]==0x7f7fffff for x in rows)
 assert completed>0 and any_mixed>0
 print(f'PASS actual299-label EF3 profile/all65536 predicates;980 prepared delta/EOS handoffs/{completed} completed numeric scores/{any_mixed} mixed-prefix ANY discriminators; no beam or acceptance claim')
+
+#Portable MathF adaptation, not nativeCPU exp/log equivalence. The independent
+#oracle uses double elementary functions rounded to F32, then exact F32 order.
+#The log tolerance permits different platform libm approximations. The D8 to
+#E8 sign flip and addition must match the actual log-channel bits exactly.
+import math
+assert len(capture['portableScoreChannels'])==120
+assert {(c['beams'],c['seed'],c['temperatureBits'])for c in capture['portableScoreChannels']}=={(b,s,t)for b in(1,2,4,8,16)for s in range(8)for t in(0x3f000000,0x3f800000,0x40400000)}
+maximum_error=0.;different=0;values=0
+for case in capture['portableScoreChannels']:
+ beams,seed=case['beams'],case['seed'];temperature=struct.unpack('<f',struct.pack('<I',case['temperatureBits']))[0];inverse=f32(1/temperature)
+ log_bytes=base64.b64decode(case['logs'],validate=True);cost_bytes=base64.b64decode(case['costs'],validate=True)
+ assert len(log_bytes)==len(cost_bytes)==beams*297*4
+ for beam in range(beams):
+  logits=[f32((((2*beams*297+beam*297+i)*17+seed*29)%257-128)/16)for i in range(297)];peak=max(logits);total=0.
+  for v in logits:total=f32(total+f32(math.exp(f32(f32(v-peak)*inverse))))
+  normalizer=f32(f32(math.log(total))+f32(peak*inverse));prior=f32((beam+seed)/8)
+  actual_logs=[]
+  for i,v in enumerate(logits):
+   expected=f32(f32(v*inverse)-normalizer);at=(beam*297+i)*4
+   actual=struct.unpack_from('<f',log_bytes,at)[0];maximum_error=max(maximum_error,abs(actual-expected));different+=actual!=expected;values+=1
+   assert math.isfinite(actual)and abs(actual-expected)<=2e-5
+   bits=struct.unpack_from('<I',log_bytes,at)[0]^0x80000000
+   flipped=struct.unpack('<f',struct.pack('<I',bits))[0]
+   assert cost_bytes[at:at+4]==struct.pack('<f',f32(flipped+prior))
+   actual_logs.append(actual)
+  assert abs(sum(math.exp(v)for v in actual_logs)-1)<2e-5
+print(f'PASS120 portable score-channel cases/{values} values; independent rounded-libm maxAbs={maximum_error:.9g}, nonidentical={different}; exact sign/prior channels; NOT native CPU-dispatch equivalence')

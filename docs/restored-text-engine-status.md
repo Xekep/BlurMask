@@ -289,3 +289,10 @@ producer contract: default zero-filled allocation, initializer buffer moves,
 attention-time concatenation, selected-parent KV gather and a separate static
 cache map.124 instruction checks and actual graph IO shapes support the plan;
 this static proof does not run the decoder or establish its runtime integration.
+
+An internal [portable score-channel adaptation](legacy-portable-math-score-channels.md)
+now follows the verified float32 order on last-frame logits, preserving separate
+log and cumulative-cost arrays.120 independent scenarios cover220968 values;
+Windows Managed/Native captures agree. Its MathF exp/log are explicitly a
+portable adaptation: original vendor CPU-dispatch equivalence, confidence
+calibration and the complete EEF runtime lifecycle are still unestablished.

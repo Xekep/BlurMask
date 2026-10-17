@@ -176,6 +176,27 @@ var negativeRows=new byte[297*4];BinaryPrimitives.WriteSingleLittleEndian(negati
 var negativeSource=LegacyPreparedMathUnrestrictedCandidates.Expand(negativeRows,1,297,1,new byte[8],new byte[4]);
 Reject(()=>LegacyPreparedMathEosHandoff.Apply(negativeSource,0,gate,[[]]));
 Reject(()=>LegacyPreparedMathEosHandoff.Apply(eosSource,0,gate,[[]],new(true)));
+w.WriteStartArray("portableScoreChannels");
+foreach(int beams in new[]{1,2,4,8,16})foreach(float temperature in new[]{.5f,1f,3f})for(int seed=0;seed<8;seed++)
+{
+ const int frames=3,vocabulary=297;var logits=new float[frames*beams*vocabulary];var previous=new float[beams];
+ for(int i=0;i<logits.Length;i++)logits[i]=((i*17+seed*29)%257-128)/16f;
+ for(int i=0;i<beams;i++)previous[i]=(i+seed)/8f;
+ var before=logits.ToArray();var result=LegacyPortableMathLogProbabilities.TransformLastFrame(logits,frames,beams,vocabulary,temperature,previous);
+ if(!logits.AsSpan().SequenceEqual(before))throw new Exception("Portable score transform mutated decoder logits.");
+ w.WriteStartObject();w.WriteNumber("beams",beams);w.WriteNumber("seed",seed);w.WriteNumber("temperatureBits",BitConverter.SingleToUInt32Bits(temperature));
+ w.WriteBase64String("logs",System.Runtime.InteropServices.MemoryMarshal.AsBytes(result.CopyLogProbabilities().AsSpan()));
+ w.WriteBase64String("costs",System.Runtime.InteropServices.MemoryMarshal.AsBytes(result.CopyCumulativeCosts().AsSpan()));w.WriteEndObject();
+}
+w.WriteEndArray();
+Reject(()=>LegacyPortableMathLogProbabilities.TransformLastFrame([],0,1,297,1,[0]));
+Reject(()=>LegacyPortableMathLogProbabilities.TransformLastFrame(new float[297],1,1,297,0,[0]));
+Reject(()=>LegacyPortableMathLogProbabilities.TransformLastFrame(new float[297],1,1,297,float.NaN,[0]));
+Reject(()=>LegacyPortableMathLogProbabilities.TransformLastFrame(new float[297],1,1,297,float.Epsilon,[0]));
+Reject(()=>LegacyPortableMathLogProbabilities.TransformLastFrame(new float[297],1,1,297,1,[-1]));
+var invalidLogits=new float[297];invalidLogits[0]=float.NaN;
+Reject(()=>LegacyPortableMathLogProbabilities.TransformLastFrame(invalidLogits,1,1,297,1,[0]));
+Reject(()=>LegacyPortableMathLogProbabilities.TransformLastFrame(new float[297],1,1,297,1,[0],new(true)));
 w.WriteNumber("caseCount",cases);w.WriteNumber("guards",guards);w.WriteEndObject();
 Console.WriteLine($"PASS{cases} complete candidate-ordering controls/{guards} guards; prepared kernel only, no beam integration or accuracy claim.");
 void Reject(Action action)
