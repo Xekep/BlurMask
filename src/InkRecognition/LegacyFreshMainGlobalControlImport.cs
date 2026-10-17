@@ -102,6 +102,13 @@ public sealed class LegacyFreshMainGlobalControlImport
                 throw new InvalidOperationException("Original WORD changed after import snapshot preparation.");
         }
     }
+    internal void ValidateCompletedProjection(CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        if(!Succeeded||IsStopped||!ImportedPool.HasFinished)
+            throw new InvalidOperationException("A completed successful same-owner control import is required.");
+        ValidateSource(token);
+    }
     internal static void ValidateAuxiliaryCounts(ReadOnlySpan<byte> storage)
     {
         if(storage.Length!=120||BinaryPrimitives.ReadInt32LittleEndian(storage[96..])!=0||
