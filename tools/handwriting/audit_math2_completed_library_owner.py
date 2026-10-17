@@ -9,6 +9,7 @@ if len(sys.argv)!=2:raise SystemExit('report.json')
 b=Binary('MyScriptEngine.dll')
 assert hashlib.sha256(b.data).hexdigest()=='d31abcd309cbb558bb80bf50fe1968921de515bc40fbeb0e886a5cf14dbc0a5c'
 regions=[
+(0x18003a2d0,0x18003a330,'fecf805f0c78f01b154cb2f388fa8de8b0419aa197458a54dd051cd47e9a28b4'),
 (0x18002ea80,0x18002ea90,'be6d9d73996d45c0425ce37e03965b71f4d99230a62ab753f83345ef5d43b667'),
 (0x180034010,0x180034080,'2e866f326c5c48c178795f2a95fec133aa1101ea799f573f9f4bc6bc6fdcbca7'),
 (0x1800312c0,0x180031390,'f29603e06887dcb8b7d248dde1f04e20f108d876d177a589bc15b8be61cd6c91'),
@@ -19,6 +20,10 @@ for lo,hi,digest in regions:
  raw=b.data[b.off(lo):b.off(hi)];assert hashlib.sha256(raw).hexdigest()==digest
  ins.update((i.address,(i.mnemonic,i.op_str))for i in md.disasm(raw,lo))
 pins={
+0x18003a2da:('mov','rbx, rdx'),0x18003a2e5:('call','0x18003a100'),
+0x18003a2ec:('je','0x18003a2fc'),0x18003a2ee:('mov','rax, rbx'),
+0x18003a30e:('mov','r8, qword ptr [rax + 0x90]'),0x18003a315:('call','r8'),
+0x18003a31d:('xor','eax, eax'),
 0x18002ea80:('mov','eax, 0x18'),
 0x18003402b:('lea','rax, [rip + 0x21fb1e]'),
 0x180034032:('mov','qword ptr [rcx + 8], rax'),
@@ -54,7 +59,7 @@ pins={
 0x180031362:('mov','dword ptr [rax + 0x10], ecx'),
 0x180031379:('mov','qword ptr [rax + 0x40], rcx')}
 for address,value in pins.items():assert ins[address]==value,(hex(address),ins.get(address))
-bindings=[(0x180252038,0x1801db8f0),(0x1801db910,0x1801db830),
+bindings=[(0x180252048,0x1801dbb00),(0x1801dbb20,0x1801dbbf0),(0x1801dbc18,0x18003a2d0),(0x180252038,0x1801db8f0),(0x1801db910,0x1801db830),
 (0x1801db8b8,0x180038250),(0x18023cf80,3),
 (0x18023cf88,0x40000003e),(0x18023cf98,0x18023d000),
 (0x18023d000,0x18002ea80),(0x18023d008,0x18023cfc8),
@@ -70,6 +75,7 @@ for address,(op,args)in ins.items():
  covered.update(range(off,off+width))
 assert set(range(72))-covered==set(range(20,24))
 report=dict(regions=len(regions),instructionPins=len(pins),bindings=len(bindings),
+ adoption='default context18.V28=3A2D0 retains same input via3A100; on retain failure calls type.V90 release then returns0',
  standardTypeService='Engine34010 initializes context+8 from252038 descriptor+20; V88=38250',
  creation='38250 ->38E70 validates classkind3; primary+10 holds default/copy constructor table; objectsize fromprimary0; installprimary+8 then invoke default ctor',
  actual3E=dict(size=24,constructor='312C0',poolAllocationBytes=72,emptySemanticFields=True,unwrittenPoolPadding=[20,4]),

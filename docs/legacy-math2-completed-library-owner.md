@@ -5,8 +5,8 @@ It is not a null placeholder or a shared output-label array. This static audit
 closes the standard constructor dispatch before a future owned recorder is added.
 It adds no runtime and executes no vendor DLL.
 
-`audit_math2_completed_library_owner.py` checks five exact Engine PE regions,
-39 instruction pins and ten data/dispatch bindings. The expected Engine SHA256 is
+`audit_math2_completed_library_owner.py` checks six exact Engine PE regions,
+46 instruction pins and thirteen data/dispatch bindings. The expected Engine SHA256 is
 d31abcd309cbb558bb80bf50fe1968921de515bc40fbeb0e886a5cf14dbc0a5c.
 
 ## Concrete standard dispatch
@@ -15,8 +15,12 @@ Engine034010 installs its default context, then obtains the type service from
 pointer252038 -> descriptor1DB8F0 -> field20 table1DB830. Its slot88 is038250.
 The completed-record caller resolves registered type3E through that service,
 creates it withV88, then retains/adopts the result through context18.V28.
-The latter is the standard same-pointer ownership service described in the
-[force-policy audit](legacy-math2-force-policy-producer.md); it is not a clone.
+The latter binds to03A2D0 in default table1DBBF0. It calls03A100 and returns
+the identical input on success. On retention failure it releases the input
+through type-serviceV90, then returns null. This differs from the V20 retain
+used by EEF decoder ownership: both use the reference-count helper established
+in the [force-policy audit](legacy-math2-force-policy-producer.md), but V28 also
+handles failure cleanup. Neither operation clones the instance.
 
 038250 calls038E70 with copy=false and separate output object/constructor pointers.
 038E70 checks that the resolved descriptor has class kind3. Descriptor18 identifies
