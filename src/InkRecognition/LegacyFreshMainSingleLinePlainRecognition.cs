@@ -14,13 +14,14 @@ public sealed class LegacyFreshMainSingleLinePlainRecognition
     private readonly LegacyNativeCaseData caseData;
     private readonly LegacyNativeTextPublicationData publication;
     public LegacyFreshMainOwnedTextInputPreparation Input { get; }
+    public LegacyOwnedRawInkDocument SourceDocument { get; }
 
     private LegacyFreshMainSingleLinePlainRecognition(byte[] acoustic, byte[] linguistic,
         LegacyRussianModelBundle model, LegacyInkActivations activations,
         LegacyCursiveSeparationTable table, LegacyFreshMainOwnedTextInputPreparation input,
-        LegacyNativeCaseData caseData, LegacyNativeTextPublicationData publication)
+        LegacyNativeCaseData caseData, LegacyNativeTextPublicationData publication, LegacyOwnedRawInkDocument sourceDocument)
     { this.acoustic=acoustic; this.linguistic=linguistic; this.model=model;
-      this.activations=activations; this.table=table; Input=input; this.caseData=caseData; this.publication=publication; }
+      this.activations=activations; this.table=table; Input=input; this.caseData=caseData; this.publication=publication; SourceDocument=sourceDocument; }
 
     public static LegacyFreshMainSingleLinePlainRecognition Prepare(
         ReadOnlySpan<byte> acousticResource, ReadOnlySpan<byte> linguisticResource,
@@ -37,10 +38,11 @@ public sealed class LegacyFreshMainSingleLinePlainRecognition
         var activations=new LegacyInkActivations(
             values.GetProperty("hidden").EnumerateArray().Select(v=>v.GetInt32()).ToArray(),
             values.GetProperty("output").EnumerateArray().Select(v=>v.GetInt32()).ToArray());
+        var document=LegacyOwnedRawInkDocument.Create(raw,token);
         var input=LegacyFreshMainOwnedTextInputPreparation.Prepare(acousticResource,spatial30,
-            physical50,raw,resolution,activations,table,caseData,publication,token);
+            physical50,document.Strokes,resolution,activations,table,caseData,publication,token);
         token.ThrowIfCancellationRequested();
-        return new(acousticResource.ToArray(),linguisticResource.ToArray(),model,activations,table,input,caseData,publication);
+        return new(acousticResource.ToArray(),linguisticResource.ToArray(),model,activations,table,input,caseData,publication,document);
     }
 
     /// <summary>Allocator and stack residues remain explicit. A completed

@@ -8,6 +8,14 @@ public readonly record struct LegacyNativeInkPosition(ulong Value)
     public byte Fraction => (byte)(Value >> 8);
     public byte Mode => (byte)Value;
 
+    /// <summary>Text05A510 degenerate insertion position. Unlike closed Ink
+    /// positions, its terminal fraction is zero, including a rounded carry.</summary>
+    public static LegacyNativeInkPosition PackInsertion(uint sourceIndex, float pointPosition, int pointCount)
+    {
+        var value = Pack(sourceIndex, pointPosition, 1, pointCount);
+        return new((value.Value & ~255UL) | 4UL);
+    }
+
     /// <summary>Exact bounded00db00 packing, including float32 quantization and terminal FF fraction.</summary>
     public static LegacyNativeInkPosition Pack(uint sourceIndex, float pointPosition, byte mode, int pointCount)
     {
