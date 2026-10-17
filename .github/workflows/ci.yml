@@ -2836,6 +2836,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native completed attention failed.' }
           python tools/LegacyMathCompletedAttention.Probe/audit_output.py .artifacts/math-attention-native.json models/math2/math2-unwrapped.res .artifacts/math-prefix-native.json
           if ($LASTEXITCODE -ne 0) { throw 'Native completed attention oracle failed.' }
+          dotnet run --project tools/LegacyMathFreshSegments.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-fresh-segments-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed fresh segment assignment failed.' }
+          python tools/LegacyMathFreshSegments.Probe/audit_output.py .artifacts/math-fresh-segments-managed.json models/math2/math2-unwrapped.res .artifacts/math-prefix-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed fresh segment assignment oracle failed.' }
+          dotnet publish tools/LegacyMathFreshSegments.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-fresh-segments-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Fresh segment assignment probe publish failed.' }
+          $freshSegments = if ($IsWindows) { '.artifacts/math-fresh-segments-probe/LegacyMathFreshSegments.Probe.exe' } else { '.artifacts/math-fresh-segments-probe/LegacyMathFreshSegments.Probe' }
+          & $freshSegments .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-fresh-segments-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native fresh segment assignment failed.' }
+          python tools/LegacyMathFreshSegments.Probe/audit_output.py .artifacts/math-fresh-segments-native.json models/math2/math2-unwrapped.res .artifacts/math-prefix-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native fresh segment assignment oracle failed.' }
           dotnet run --project tools/LegacyMathSegmentation.Probe -c Release -- .artifacts/math-segmentation-managed.json
           if ($LASTEXITCODE -ne 0) { throw 'Managed segmentation sigmoid failed.' }
           python tools/LegacyMathSegmentation.Probe/audit_output.py .artifacts/math-segmentation-managed.json
