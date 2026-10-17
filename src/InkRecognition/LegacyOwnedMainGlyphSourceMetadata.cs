@@ -66,10 +66,29 @@ public sealed class LegacyOwnedMainGlyphSourceMetadata
         LegacyOwnedRussianMainResidualSource actualOverlay,LegacyOrdinaryGraphSourceRanges actualSourceRanges,
         CancellationToken token=default)
     {
+        ArgumentNullException.ThrowIfNull(ownership);
+        token.ThrowIfCancellationRequested();
+        if(ownership.SecondaryTerminal is not null)
+            throw new NotSupportedException("Configured metadata requires the named PrepareConfigured owner path.");
+        return PrepareCore(ownership,actualOverlay,actualSourceRanges,token);
+    }
+
+    public static LegacyOwnedMainGlyphSourceMetadata PrepareConfigured(LegacyOwnedMainCandidateSource candidate,
+        LegacyOwnedRussianMainResidualSource actualOverlay, CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(candidate);candidate.Validate(token);
+        if(!candidate.IsConfigured)throw new ArgumentException("A genuine configured candidate source is required.");
+        return PrepareCore(candidate.Ownership,actualOverlay,candidate.Sampled.SourceRanges,token);
+    }
+
+    private static LegacyOwnedMainGlyphSourceMetadata PrepareCore(LegacyFreshMainPlainResultOwnership ownership,
+        LegacyOwnedRussianMainResidualSource actualOverlay,LegacyOrdinaryGraphSourceRanges actualSourceRanges,
+        CancellationToken token)
+    {
         ArgumentNullException.ThrowIfNull(ownership);ArgumentNullException.ThrowIfNull(actualOverlay);
         ArgumentNullException.ThrowIfNull(actualSourceRanges);token.ThrowIfCancellationRequested();
         if(!ReferenceEquals(ownership.Geometry,actualOverlay.Geometry)||
-            !ReferenceEquals(ownership.Materialization.ConfidenceOwner,actualOverlay.ConfidenceOwner)||
+            !ReferenceEquals(ownership.SelectedOwner.ConfidenceOwner,actualOverlay.ConfidenceOwner)||
             !ReferenceEquals(ownership.Geometry.Graph,actualSourceRanges.Graph)||
             !ReferenceEquals(ownership.Controller.Owner.SourceGraph,actualSourceRanges.Graph))
             throw new ArgumentException("One actual materialization, sampled graph, geometry, source ranges and residual overlay required.");

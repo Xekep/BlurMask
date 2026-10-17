@@ -65,6 +65,30 @@ public sealed class LegacyOwnedRawInkDocument
         return new(this, actualResult, actualSource, null, projected);
     }
 
+    /// <summary>The same ordinary05AFA0 projection for a genuine completed
+    /// count1 or configured candidate. Its exact selected session, source and
+    /// original raw document remain typed owners; sampled IDs are not reused.</summary>
+    public LegacyOwnedMainGlyphDocumentPositions ProjectCandidate(LegacyOwnedMainCandidateSource actualCandidate,
+        LegacyOwnedMainGlyphSourceMetadataResult actualSource, CancellationToken token = default)
+    {
+        ArgumentNullException.ThrowIfNull(actualCandidate); ArgumentNullException.ThrowIfNull(actualSource);
+        actualCandidate.Validate(token);
+        if (!ReferenceEquals(actualCandidate.SourceDocument, this) ||
+            !ReferenceEquals(actualSource.Owner.Ownership, actualCandidate.Ownership))
+            throw new ArgumentException("The actual selected candidate/source metadata must belong to this exact raw document.");
+        var references = new LegacyNativeTextSourceReference[actualSource.ReferenceCount];
+        for (int i = 0; i < references.Length; i++)
+        {
+            token.ThrowIfCancellationRequested(); var source = actualSource.References[i];
+            if (source.First.First != 0 || source.Last.First != 0)
+                throw new NotSupportedException("This owned root supports actual ordinary ingress group0 only.");
+            references[i] = new(new(source.First.First, source.First.Second, source.First.Third),
+                new(source.Last.First, source.Last.Second, source.Last.Third), source.FirstResidual, source.LastResidual);
+        }
+        var projected = LegacyNativeTextSourcePositionPublication.Project(map, references, true, [originalRange], token);
+        return new(this, actualCandidate, actualSource, projected);
+    }
+
     /// <summary>05AFA0 negative-span insertion positions. These mode4 positions
     /// are not ordinary closed glyph ranges and have no residual tail.</summary>
     public LegacyOwnedMainGlyphDocumentPositions Project(LegacyFreshMainSingleLinePlainRecognitionResult actualResult,
@@ -90,8 +114,12 @@ public sealed class LegacyOwnedRawInkDocument
 
 public sealed class LegacyOwnedMainGlyphDocumentPositions
 {
+    private readonly LegacyFreshMainSingleLinePlainRecognitionResult? result;
     public LegacyOwnedRawInkDocument Document { get; }
-    public LegacyFreshMainSingleLinePlainRecognitionResult Result { get; }
+    public LegacyFreshMainSingleLinePlainRecognitionResult Result => result ??
+        throw new InvalidOperationException("Configured source positions have no count1 raw result.");
+    public LegacyOwnedMainCandidateSource? CandidateSource { get; }
+    public LegacyOwnedMainGlyphFlushSession SelectedSession => CandidateSource?.Session ?? Result.Session;
     public LegacyOwnedMainGlyphSourceMetadataResult? OrdinarySource { get; }
     public LegacyOwnedMainSpanGlyphSourceResult? SpanSource { get; }
     public IReadOnlyList<LegacyNativeInkPositionRange> Ranges { get; }
@@ -99,6 +127,14 @@ public sealed class LegacyOwnedMainGlyphDocumentPositions
         LegacyFreshMainSingleLinePlainRecognitionResult result, LegacyOwnedMainGlyphSourceMetadataResult? source,
         LegacyOwnedMainSpanGlyphSourceResult? spanSource,
         LegacyNativeInkPositionRange[] ranges)
-    { Document = document; Result = result; OrdinarySource = source; SpanSource = spanSource;
+    { Document = document; this.result = result; OrdinarySource = source; SpanSource = spanSource;
       Ranges = Array.AsReadOnly(ranges); }
+    internal LegacyOwnedMainGlyphDocumentPositions(LegacyOwnedRawInkDocument document,
+        LegacyOwnedMainCandidateSource candidate, LegacyOwnedMainGlyphSourceMetadataResult source,
+        LegacyNativeInkPositionRange[] ranges)
+    {
+        Document = document; CandidateSource = candidate; OrdinarySource = source;
+        result = candidate.IsConfigured ? null : candidate.RawResult;
+        Ranges = Array.AsReadOnly(ranges);
+    }
 }
