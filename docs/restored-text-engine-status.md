@@ -360,3 +360,19 @@ The [completed168 record ownership audit](legacy-math2-completed-record-ownershi
 now establishes constructor fields, untouched padding, three U16 buffer lanes,
 separate type3E ownership, and partial failure behavior. No full completed-record
 runtime or successful final formula follows from this static contract.
+
+
+The [detached text-result builder](legacy-main-detached-text-dom.md) now consumes
+actual retained CHAR40, WORD48/ref24, TEXT32 and line56 metadata in a fresh
+library-owned parameterized no-history arena. It preserves literal NUL handling,
+typed numeric attributes, real source references and the shared range scratch.
+Four actual trees/276 nodes,42 service-failure prefixes and105 guards match an
+independent raw-metadata/tree/cleanup oracle in Managed and Native AOT. The old
+2053 range controls and20 actual source strings remain byte-identical.
+This constructs a detached subtree only. Target parent ownership, BE2 batches,
+C20 application/history, result transport and accepted document text are unjoined.
+
+The [prefix-plane producer audit](legacy-math2-prefix-planes.md) also distinguishes
+the chosen primary labels, same-step D8 argmax metadata, optional detection data
+and rank/time parent history. Their actual data producer is now established;
+the owning per-step prefix runtime and complete search still remain separate.
