@@ -39,7 +39,7 @@ source2DA.B0 as the output selection ID to `0210C0`. The new typed
 previous CHAR and WORD commands. Its counter starts from the real original
 object IDs; TEXT consumes the next ID after that exact prefix. It returns
 the actual typed pending command, including name TEXT, operation4, enabled1,
-priority100 and copied root ranges. It does not apply that command to an
+category100 and copied root ranges. It does not apply that command to an
 external document or claim that a source2DA native pointer has been created.
 
 Registration is single-use per transaction. Another wrapper object cannot

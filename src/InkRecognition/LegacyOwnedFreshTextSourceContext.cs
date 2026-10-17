@@ -16,7 +16,7 @@ public sealed class LegacyOwnedFreshTextSelection
     public int CommandIdentity { get; }
     public byte OperationCode => 4;
     public byte Enabled => 1;
-    public int Priority => 100;
+    public int Category => 100;
     public int PreviousCommandIdentity => CommandIdentity - 1;
     internal LegacyOwnedFreshTextSelection(LegacyOwnedFreshTextSourceContext owner,long id,
         string name,int commandIdentity,LegacyNativeInkPositionRange[] ranges)

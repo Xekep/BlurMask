@@ -35,7 +35,7 @@ Ink07D9B0 creates that pending owner: kind7, command head/tail/count fields
 at10/18/20 zero. Text05F200 calls05F050, reads DAF input rows and constructs
 new2DA, then dispatches its V18=0283B0 with the same tuple. Native0210C0
 creates its temporary C22 and increments tuple[2], including its failure
-case, before appending the priority100 CHAR/WORD/TEXT command. It does not
+case, before appending the category100 CHAR/WORD/TEXT command. It does not
 write the retained C51 counter during this prepared publication stage.
 
 The new named `LegacyOwnedFreshTextSourceContext.PrepareSelectedInput`

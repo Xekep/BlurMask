@@ -6,7 +6,14 @@ The initial selection counter is **N**, derived from the native C51 registry pol
 
 The counter and C4D transaction are different owners. `05F050` separately creates a C4D.V48 transaction with null prior allocator. Ink `07D9B0` initializes an empty linked command list; it does not initialize the document counter. `05F200` passes that tuple to 2DA.V18=`0283B0`, which forwards its copied tuple to `024D40`/`0210C0`.
 
-In the supported no-prior branch, `0210C0` creates a temporary C22 from the exact ordered range vector, then consumes the counter **before** testing whether creation succeeded. Only successful C4D.V0 registration writes the output ID. C22 `085C90` copies `16*count` bytes when its input transfer byte is zero. C4D `07A5B0` queues operation4 with the consumed ID, name CHAR/WORD/TEXT, a separately copied C22, enabled byte1, extra field38 zero and priority100. The public method restores CHAR registrations from actual owned glyph positions. Numeric-only controls exercise the other two native names and four allocator-failure stages.
+In the supported no-prior branch, `0210C0` creates a temporary C22 from the exact ordered range vector, then consumes the counter **before** testing whether creation succeeded. Only successful C4D.V0 registration writes the output ID. C22 `085C90` copies `16*count` bytes when its input transfer byte is zero. C4D `07A5B0` queues operation4 with the consumed ID, name CHAR/WORD/TEXT, a separately copied C22, enabled byte1, extra field38 zero and category100. The public method restores CHAR registrations from actual owned glyph positions. Numeric-only controls exercise the other two native names and four allocator-failure stages.
+
+The public command getter is `Category`, without a `Priority` alias. Native
+07A6F5 reads the last category argument and07A6FC stores it at command+40.
+The operation4 executor078452 reads that exact field, passes it as the final
+argument to C20.VE0, and06BE30 forwards it to C51.Add09EE20, which stores the
+actual registry category. It is separate from C20 observer ordering priorities
+0x6E/0x78. This naming correction changes no category value, ID or record bytes.
 
 The immutable pending command objects preserve ordered range bytes, including duplicates, modes and fractional position bits. They use portable transaction identities and copy arrays defensively. No managed object is serialized as a native pointer. Repeated calls with identical ranges allocate separate selections: fresh `0210C0` does not intern source keys. The later `024F30` caller decides whether a new key needs a registration at all.
 

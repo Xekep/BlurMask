@@ -21,7 +21,7 @@ for sample in capture['samples']:
  for ordinal,command in enumerate(pending):
   assert command['id']==len(counts)+ordinal
   assert command['identity']==ordinal+1 and command['previous']==ordinal
-  assert(command['code'],command['enabled'],command['priority'])==(4,1,100)
+  assert(command['code'],command['enabled'],command['category'])==(4,1,100)
  assert pending[-1]['ranges']==ranges and sample['textId']==pending[-1]['id']
  assert sample['nextId']==pending[-1]['id']+1
  total+=len(ranges)

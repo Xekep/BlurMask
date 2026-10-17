@@ -34,7 +34,7 @@ foreach(var row in controls.RootElement.GetProperty("streams").EnumerateArray())
  var expected=row.GetProperty("pending");var actual=owner.CopyPendingSelections();
  for(int i=0;i<actual.Count;i++)
  {var c=actual[i];var e=expected[i];if(c.SelectionId!=e.GetProperty("id").GetInt64()||c.Name!=e.GetProperty("name").GetString()||
-  c.OperationCode!=4||c.Enabled!=1||c.Priority!=100||c.CommandIdentity!=i+1||c.PreviousCommandIdentity!=i||!ReferenceEquals(c.Owner,owner)||
+  c.OperationCode!=4||c.Enabled!=1||c.Category!=100||c.CommandIdentity!=i+1||c.PreviousCommandIdentity!=i||!ReferenceEquals(c.Owner,owner)||
   !c.CopyRanges().AsSpan().SequenceEqual(Key(e.GetProperty("ranges"))))throw new InvalidDataException("C4D command/selection sidecars differ.");}
  streams++;
 }

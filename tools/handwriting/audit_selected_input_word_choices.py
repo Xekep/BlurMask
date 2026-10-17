@@ -36,7 +36,7 @@ pins(t,0x18005f200,0x18005f610,[('call','0x18005f050'),('mov','edx, 0xdaf'),
  ('mov','r10, qword ptr [rax + 0x38]'),('mov','edx, 0x2da'),
  ('mov','r10, qword ptr [rcx + 0x18]'),('lea','rax, [rbp - 0x61]')])
 #0210C0 increments the tuple scratch counter, not live registry Next. The
-# actual pending command has kind-selected name CHAR/WORD/TEXT and priority100.
+# actual pending command has kind-selected name CHAR/WORD/TEXT and category100.
 pins(t,0x18002127a,0x18002133e,[('mov','edx, 0xc22'),('mov','edx, 0xc4d'),
  ('lea','rax, [rbx + 1]'),('mov','qword ptr [r12 + 0x10], rax'),('mov','dword ptr [rsp + 0x38], 0x64')])
 report=dict(regions=regions,pins=count,bindings=3,scope='same selected C20/C51.Next -> separate pending C4D -> actual CHAR/WORD/TEXT publication',
