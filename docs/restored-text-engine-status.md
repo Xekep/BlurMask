@@ -328,8 +328,9 @@ Fourteen decoder steps cover repeated parents, expansion, permutation, shrinking
 and105 ownership/lifetime guards. An independent oracle verifies1707680 exact
 cache/input bytes. Four steps additionally carry actual logits through portable
 F32 scoring, BOS masking, heap/EOS kernels and same-step tensor selection.
-The native exp/log dispatch, outer search, configuration and per-beam sidecar
-producers, completed-record ownership and final acceptance remain incomplete.
+The native exp/log dispatch, outer search, general configuration,
+completed-record ownership and final acceptance remain incomplete. The cold
+force policy and per-beam sidecars are now joined in the stages below.
 The app has not switched to this internal state API.
 
 The [document DOM roadmap](legacy-main-document-dom-roadmap.md) pins the actual
@@ -346,8 +347,9 @@ The [prepared107 evaluator](legacy-prepared-network107-evaluation.md) now execut
 all six retained English FIRST networks over complete prepared vectors, including
 the source AL's mixed sigmoid/EXP class180.192 full vectors,227 guards and163865
 rounding/threshold controls match independent oracles and Managed/Native AOT.
-Its activations and input vectors remain prepared. The real English sampler,
-24C stage, feature construction and source-driver lifecycle are not joined.
+Its activations and input vectors remain prepared. English24C preprocessing is
+now joined separately below; the real sampler/candidate graph, feature
+construction and source-driver lifecycle are not joined to these networks.
 The special-class double exponential is an explicit portable adaptation.
 
 A new [owning cold Math2 entry](legacy-math2-cold-bundle.md) binds exact raw
@@ -375,4 +377,39 @@ C20 application/history, result transport and accepted document text are unjoine
 The [prefix-plane producer audit](legacy-math2-prefix-planes.md) also distinguishes
 the chosen primary labels, same-step D8 argmax metadata, optional detection data
 and rank/time parent history. Their actual data producer is now established;
-the owning per-step prefix runtime and complete search still remain separate.
+the owning per-step prefix runtime is now joined below, while complete search
+still remains separate.
+
+The [owned mode0 prefix context](legacy-math2-mode0-prefix-state.md) now derives
+primary/secondary prefixes and rank/time ancestry from actual decoder steps.
+Twenty steps,118 guards and1828524 exact tensor/cache bytes match an independent
+oracle and fresh NativeAOT. It retains11 numerical EOS score facts, not owning
+completed168 records. Fixed-step prepared continuation is explicitly diagnostic;
+termination, owning common-secondary frontier, completed-record ownership,
+fallback and final accepted formula remain unjoined. The frontier's actual
+producer has a separate static proof; it cannot be replaced by constant0.
+
+The [original-input bound](legacy-math2-input-frame-bound.md) now retains the
+exact source frame count and derives `min(1000,4*N+1,nonzero encoder K)` in the
+same prefix owner. Managed/freshNative bounds sidecars agree; the old complete
+prefix capture remains byte-identical. This numeric bound does not implement
+outer stopping, fallback or the native host's separate3000-frame restriction.
+
+The [full English lite preprocessing](legacy-english-first-slant-preprocessing.md)
+now joins actual119/source247 ingress through24A, weighted-angle24C and265,
+preserving original chronology and line guides.121 actual inputs,28 positive
+24C cases and4204 points match independent raw-resource/geometry oracles and
+Managed/NativeAOT. The older short-only API preserves its byte-identical capture.
+Prepared angle controls are reported separately. This stage does not produce
+217/199 features, real activations, candidate graphs or an English transcription.
+
+The optional [math attention corpus controls](legacy-math2-attention-corpus-controls.md)
+measure the same14 handwritten expressions with explicit force off/on. Both
+diagnostic argmax routes remain10/14 and all raw outputs are unchanged. These
+measurements do not establish full native search or improved math recognition.
+
+The exact committed application builds without warnings and passes its headless
+`--ai-pen-test` console checks after these additions. That preserves integration
+behavior; it does not validate the unfinished recognition pipeline or Russian
+cursive accuracy. No new release or application recognizer switch accompanies
+these library stages.
