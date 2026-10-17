@@ -13,7 +13,7 @@ public static class LegacyOwnedMainSpanAlternativeCosts
     {
         ArgumentNullException.ThrowIfNull(actualChain);token.ThrowIfCancellationRequested();
         var walker=actualChain.Owner.Walker;var sources=walker.Sources;
-        var raw=sources.Candidate.RawResult;var top=raw.Session.Ownership.TopOwner;
+        var source=sources.CandidateSource;source.Validate(token);var top=source.TopOwner;
         if(!actualChain.Succeeded||!ReferenceEquals(actualChain.Walk.Owner,walker)||
             !ReferenceEquals(actualChain.Word.Pool,top.GlyphPool)||
             actualChain.Word.HeadReference!=actualChain.Chain.LastProcessedReference)
@@ -21,12 +21,7 @@ public static class LegacyOwnedMainSpanAlternativeCosts
         byte[] before=actualChain.Word.CopyStorage(token);
         if(BinaryPrimitives.ReadUInt16LittleEndian(before.AsSpan(48))!=actualChain.Walk.WordFlags)
             throw new InvalidOperationException("The actual emitted WORD flags have changed.");
-        var compact=raw.Session.Ownership.Materialization;
-        var costs=LegacyPreparedMainAugmentedWordCosts.Calculate(compact.CopyCompactStorage(),compact.RecordCount,
-            actualChain.Walk.StartingRecordIndex,actualChain.Walk.LastDirectParentIndex,
-            LegacyPreparedMainWordAugmentationCandidates.DecodeContextNode(sources.FirstContext),
-            LegacyPreparedMainWordAugmentationCandidates.DecodeContextNode(sources.LastContext),
-            raw.Session.Plan.SourcePolicy.Model.SourceKind,token);
+        var costs=walker.ReadWordCosts(actualChain.Walk,token);
         token.ThrowIfCancellationRequested();
         if(Interlocked.CompareExchange(ref claims.GetValue(actualChain,static _=>new()).Entered,1,0)!=0)
             throw new InvalidOperationException("This working-WORD cost transfer has already entered.");

@@ -714,6 +714,8 @@ jobs:
           python tools/LegacyMainConfiguredTextSourceWrapper.Probe/audit_output.py .artifacts/legacy-main-configured-text-source-wrapper-managed.json
           dotnet run --project tools/LegacyMainConfiguredSpanChain.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json models/text-unicode/legacy-circled-payload-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-configured-span-chain-managed.json
           python tools/LegacyMainConfiguredSpanChain.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-main-configured-span-chain-managed.json
+          dotnet run --project tools/LegacyMainConfiguredSpanChain.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json models/text-unicode/legacy-circled-payload-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-configured-span-costs-managed.json --costs true
+          python tools/LegacyMainConfiguredSpanChain.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-main-configured-span-costs-managed.json
           dotnet run --project tools/LegacyMainConfiguredWordSources.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json models/text-unicode/legacy-circled-payload-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-configured-word-sources-managed.json
           python tools/LegacyMainConfiguredWordSources.Probe/audit_output.py .artifacts/legacy-main-configured-word-sources-managed.json
           dotnet run --project tools/LegacyMainSpanAlternativeWalk.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json models/text-unicode/legacy-circled-payload-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-span-alternative-walk-managed.json
@@ -1762,6 +1764,13 @@ jobs:
             if ($name -eq 'LegacyMainConfiguredSpanChain') {
               python tools/LegacyMainConfiguredSpanChain.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-main-configured-span-chain-native.json
               if ($LASTEXITCODE -ne 0) { throw 'LegacyMainConfiguredSpanChain independent audit failed' }
+              $costArgs = @($case.Args)
+              $costArgs[10] = '.artifacts/legacy-main-configured-span-costs-native.json'
+              $costArgs += @('--costs', 'true')
+              & $probe @costArgs
+              if ($LASTEXITCODE -ne 0) { throw 'Actual span alternative cost transfer failed' }
+              python tools/LegacyMainConfiguredSpanChain.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-main-configured-span-costs-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'Actual span alternative cost audit failed' }
             }
             if ($name -eq 'LegacyMainConfiguredWordSources') {
               python tools/LegacyMainConfiguredWordSources.Probe/audit_output.py .artifacts/legacy-main-configured-word-sources-native.json

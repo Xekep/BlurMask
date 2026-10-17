@@ -72,6 +72,18 @@ for sample in samples:
             previous=ref;rows_checked+=1
         w64(word,8,previous)
         assert (first,previous,nc,nr)==(c['firstNew'],c['last'],c['created'],c['reused'])
+        if sample.get('costTransfer'):
+            compact=base64.b64decode(sample['compact']);candidate=c['costCandidate'];parent=c['costParent']
+            assert 0<=candidate<len(compact)//40 and -1<=parent<len(compact)//40
+            def f32(v):return struct.unpack('<f',struct.pack('<f',v))[0]
+            def wrap(v):return(v+2**31)%2**32-2**31
+            primary,secondary=struct.unpack_from('<ii',compact,candidate*40+20)
+            if parent!=-1:
+                p,s=struct.unpack_from('<ii',compact,parent*40+20);primary=wrap(primary-p);secondary=wrap(secondary-s)
+            start=sample['firstContext']>>7;end=sample['lastContext']>>7
+            cost=f32(f32(primary)/f32((end+1-start)*8192))
+            score=f32((-5.0 if sample['sourceKind']==0x135 else -1.0)*cost)
+            struct.pack_into('<f',word,16,score);struct.pack_into('<ff',word,24,cost,f32(f32(secondary)/8192))
         assert word==base64.b64decode(c['afterWord']),'WORD120 differs'
         expected=load(c['afterPool']);assert set(pool)==set(expected)
         for k in pool:assert pool[k]==expected[k],f'full40-byte owner {k:x} differs'

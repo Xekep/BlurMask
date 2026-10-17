@@ -216,6 +216,20 @@ public sealed class LegacyOwnedMainSpanAlternativeWalk
         int Last(int node,ushort arc){ValidateArc(node,arc);return unchecked((int)graph.GetNode(node)[arc].EndContextId);}
         void ValidateArc(int node,ushort arc){if((uint)node>=graph.NodeCount||arc>=graph.GetNode(node).Count)throw new NotSupportedException("Actual base ordinary graph arc required.");}
     }
+    //The walk already retains the complete immutable active compact snapshot.
+    //Read its exact two scalar rows directly rather than cloning the whole
+    //materialization capacity for each working-WORD cost transfer.
+    internal LegacyPreparedMainAugmentedWordCosts.Result ReadWordCosts(LegacyOwnedMainSpanAlternativeWalkResult result,
+        CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(result);token.ThrowIfCancellationRequested();
+        if(!ReferenceEquals(result.Owner,this))throw new ArgumentException("This exact direct-parent result owner is required.");
+        return LegacyPreparedMainAugmentedWordCosts.Calculate(compact,compactOwner.RecordCount,
+            result.StartingRecordIndex,result.LastDirectParentIndex,
+            LegacyPreparedMainWordAugmentationCandidates.DecodeContextNode(Sources.FirstContext),
+            LegacyPreparedMainWordAugmentationCandidates.DecodeContextNode(Sources.LastContext),
+            Sources.CandidateSource.SourcePolicy.Model.SourceKind,token);
+    }
     internal static bool AdvanceClosedLabel(ushort symbol,ushort closedLabel,byte initialFlags,ref int state)
     {
         if(closedLabel!=ushort.MaxValue){state&=255;if(symbol==closedLabel)state=1;}

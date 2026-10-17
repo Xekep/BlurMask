@@ -60,4 +60,3 @@ independent oracle reconstructs all120 WORD bytes, all pool rows and all three
 float32 costs from captured original compact data. These are numeric chain
 diagnostics, with zero actual bit8 candidates; no219580 eligibility,275 insertion
 or final winner is inferred. The default chain capture remains byte-identical.
-

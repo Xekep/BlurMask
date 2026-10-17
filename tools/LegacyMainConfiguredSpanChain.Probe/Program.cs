@@ -1,7 +1,8 @@
 using InkRecognition;
 using System.Buffers.Binary;
 using System.Text.Json;
-if(args.Length!=11)throw new ArgumentException("AK LK engine separation case publication normalization circles line30 line50 capture");
+if(args.Length!=11&&!(args.Length==13&&args[11]=="--costs"&&args[12]=="true"))throw new ArgumentException("AK LK engine separation case publication normalization circles line30 line50 capture [--costs true]");
+bool applyCosts=args.Length==13;
 byte[] ak=File.ReadAllBytes(args[0]),lk=File.ReadAllBytes(args[1]),engine=File.ReadAllBytes(args[2]);var table=LegacyCursiveSeparationTable.Load(File.ReadAllBytes(args[3]));
 using var cf=File.OpenRead(args[4]);using var pf=File.OpenRead(args[5]);var cases=LegacyNativeCaseData.Load(cf);var publication=LegacyNativeTextPublicationData.Load(pf);
 var context=LegacyFreshMainRecognitionContext.Load(ak,lk,engine,File.ReadAllBytes(args[8]),File.ReadAllBytes(args[9]));
@@ -34,6 +35,7 @@ foreach(var sample in samples)
  eligible=Enumerable.Range(0,compactOwner.RecordCount).Count(i=>(compact[i*40+32]&8)!=0);
  if(selected.Count==0||eligible!=0)throw new InvalidDataException("Expected scoped numeric diagnostic availability differs.");
  w.WriteStartObject();w.WriteNumber("nativeEligible",eligible);w.WriteStartArray("starts");foreach(int s in starts)w.WriteNumberValue(s);w.WriteEndArray();
+ if(applyCosts){w.WriteBoolean("costTransfer",true);w.WriteBase64String("compact",compact.AsSpan(0,compactOwner.RecordCount*40));w.WriteNumber("firstContext",sources.FirstContext);w.WriteNumber("lastContext",sources.LastContext);w.WriteNumber("sourceKind",view.SourcePolicy.Model.SourceKind);}
  w.WriteStartArray("graph");for(int node=0;node<graph.NodeCount;node++){w.WriteStartArray();foreach(var arc in graph.GetNode(node))w.WriteNumberValue(arc.GroupId);w.WriteEndArray();}w.WriteEndArray();
  var groupIds=new SortedSet<int>();foreach(var emission in selected){var rows=emission.CopyRows72();for(int i=0;i<rows.Length;i+=72)groupIds.Add(graph.GetNode(BinaryPrimitives.ReadInt32LittleEndian(rows.AsSpan(i)))[BinaryPrimitives.ReadUInt16LittleEndian(rows.AsSpan(i+4))].GroupId);}
  var separation=LegacyCursiveSeparationProfile.ReadV106Node(ak,188157);var owner=view.SourcePolicy.Controller.Owner;
@@ -52,9 +54,17 @@ foreach(var sample in samples)
   var before=executor.TopOwner.GlyphPool.CopyOwnerNodes();byte[] beforeWord=word.CopyStorage(),recordResidue=Enumerable.Range(0,40).Select(i=>(byte)(i*7+23)).ToArray();
   Reject(()=>executor.Apply(emission,word,new byte[39],new ushort[256],new byte[64]));Reject(()=>executor.Apply(emission,word,recordResidue,new ushort[256],new byte[64],new CancellationToken(true)));
   var result=executor.Apply(emission,word,recordResidue,new ushort[256],new byte[64]);if(!result.Succeeded||!ReferenceEquals(result.Word,word)||!ReferenceEquals(result.Walk,emission))throw new InvalidDataException("Owned numeric chain failed.");
+  if(applyCosts)
+  {
+   _=walker.ReadWordCosts(emission);long allocated=GC.GetAllocatedBytesForCurrentThread();
+   for(int check=0;check<1024;check++)_=walker.ReadWordCosts(emission);
+   if(GC.GetAllocatedBytesForCurrentThread()-allocated>16384)throw new InvalidDataException("Cost transfer copied compact allocation instead of retaining the exact walk snapshot.");
+   Reject(()=>LegacyOwnedMainSpanAlternativeCosts.Apply(result,new(true)));LegacyOwnedMainSpanAlternativeCosts.Apply(result);Reject(()=>LegacyOwnedMainSpanAlternativeCosts.Apply(result));
+  }
   var repeat=executor.TopOwner.CreateWorkingWord(allocator);repeat.ApplySpanAlternativeFlags30(emission.WordFlags);Reject(()=>executor.Apply(emission,repeat,recordResidue,new ushort[256],new byte[64]));
   w.WriteStartObject();w.WriteBase64String("rows",emission.CopyRows72());w.WriteBase64String("residue",recordResidue);w.WriteBase64String("beforeWord",beforeWord);WritePool("beforePool",before);w.WriteBase64String("afterWord",word.CopyStorage());WritePool("afterPool",executor.TopOwner.GlyphPool.CopyOwnerNodes());
   w.WriteNumber("firstNew",result.Chain.FirstNewReference);w.WriteNumber("last",result.Chain.LastProcessedReference);w.WriteNumber("created",result.Chain.CreatedCount);w.WriteNumber("reused",result.Chain.ReusedCount);
+  if(applyCosts){w.WriteNumber("costCandidate",emission.StartingRecordIndex);w.WriteNumber("costParent",emission.LastDirectParentIndex);}
   w.WriteEndObject();count++;created+=result.Chain.CreatedCount;reused+=result.Chain.ReusedCount;
  }w.WriteEndArray();w.WriteEndObject();previousTop=executor.TopOwner;previousEmission=selected[^1];
  }

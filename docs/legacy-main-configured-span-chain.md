@@ -36,3 +36,13 @@ Run `tools/LegacyMainConfiguredSpanChain.Probe` with the standard ten model
 arguments and capture path, then check `audit_output.py AK.res capture.json`.
 The existing private-PE `audit_main_span_alternative_chain.py` pins the unchanged
 native caller and218560 gates without executing a vendor binary.
+# Cost transfer
+
+`LegacyOwnedMainSpanAlternativeCosts.Apply` also retains the genuine configured
+candidate through the common selected owner. It reads the walk's immutable
+compact snapshot rather than cloning the whole materialization for every WORD.
+The option `--costs true` checks48 owned configured chains, all120 WORD bytes
+and all pool rows, with356 cancellation/ownership/re-entry guards. Per-chain
+1024-read allocation checks catch accidental full-buffer copies. Both ordinary
+and configured default chain captures remain unchanged. Actual bit8 eligibility
+remains zero in these diagnostics;275 insertion is not inferred.
