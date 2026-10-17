@@ -158,20 +158,7 @@ public sealed class LegacyOwnedRussianMainGlyphScoring
     }
 
     internal byte[] CreateRequest(int node,ushort arc,ushort symbol,bool useEndCategory)
-    {
-        byte geometry=255;
-        if(symbol!=closed)
-        {
-            if(symbol>=categories.StartCompositeMap.Length)throw new NotSupportedException("Requested label escapes actual category maps.");
-            int composite=categories.EndCompositeMap.Span[symbol];
-            if(!useEndCategory||composite==-1)composite=categories.StartCompositeMap.Span[symbol];
-            if((uint)composite>=(uint)categories.CompositeCategories.Length)
-                throw new NotSupportedException("Native category access lacks a supported composite owner.");
-            geometry=checked((byte)categories.CompositeCategories.Span[composite].GeometryIndex);
-        }
-        byte[] request=new byte[16];BinaryPrimitives.WriteInt32LittleEndian(request,node);
-        W16(request,4,arc);W16(request,6,ushort.MaxValue);W16(request,8,symbol);request[10]=geometry;return request;
-    }
+        =>LegacyMainGlyphScoringKernel.CreateRequest(categories,closed,node,arc,symbol,useEndCategory);
 
     internal LegacyNativeGlyphScoreCache GetCache(int group,CancellationToken token)
     {
@@ -183,14 +170,8 @@ public sealed class LegacyOwnedRussianMainGlyphScoring
             var candidates=actual.Candidates.Span;
             int geometry=LegacyCursiveGroupSeparationCost.Evaluate(ink,ranges[group],height,
                 separation.GapOffset,separation.Slope,separationTable,separation.MaximumCost,cancellationToken:token);
-            byte[] rows=new byte[candidates.Length*24];var vectors=new ReadOnlyMemory<float>[candidates.Length];
-            for(int i=0;i<candidates.Length;i++)
-            {token.ThrowIfCancellationRequested();W16(rows,i*24+8,candidates[i].Symbol);
-                BinaryPrimitives.WriteInt32LittleEndian(rows.AsSpan(i*24+4),candidates[i].Cost);
-                vectors[i]=new float[]{candidates[i].Confidence};}
-            var result=new LegacyNativeGlyphScoreCache(rows,vectors,
-                Enumerable.Repeat(geometry,categories.Prototypes.Length).ToArray(),blank,
-                scores.Cache.FallbackCost,powerScale,bypass,token);
+            var result=LegacyMainGlyphScoringKernel.CreateCache(candidates,geometry,categories.Prototypes.Length,
+                blank,scores.Cache.FallbackCost,powerScale,bypass,token);
             token.ThrowIfCancellationRequested();caches.Add(group,result);return result;
         }
     }

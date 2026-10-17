@@ -48,6 +48,7 @@ public sealed class LegacyOwnedRussianOrdinaryGlyphProducer
     private readonly LegacyRussianModelBundle model;
     private readonly LegacyFreshCaseMainSourcePolicy? casePolicy;
     private readonly LegacyOwnedRussianMainGlyphScoring scoring;
+    private readonly LegacyMainOrdinaryGlyphProductionOperations operations;
     private readonly ushort blank, unitScore, closed, apostrophe, quote;
     public LegacyFreshCaseMainSourcePolicy Policy => casePolicy ??
         throw new InvalidOperationException("The DIRECT producer has DirectPolicy, not an invented case policy.");
@@ -95,6 +96,9 @@ public sealed class LegacyOwnedRussianOrdinaryGlyphProducer
         var alphabet=model.AcousticAlphabet;
         ushort Label(string text)=>alphabet.TryGetLabel(text,out ushort symbol)?symbol:ushort.MaxValue;
         closed=Label("\U000f0001");apostrophe=Label("'");quote=Label("\"");
+        operations=new(alphabet.LabelCount,unitScore,apostrophe,quote,(node,arc,ct)=>
+        {ct.ThrowIfCancellationRequested();var rows=graph.GetNode(node);if(arc>=rows.Count)throw new ArgumentException("Prepared row arc escapes the actual owned graph node.");return rows[arc].GroupId;},
+            ResolveOwnedSymbol,scoring.GetCache,scoring.CreateRequest);
         token.ThrowIfCancellationRequested();
     }
 
@@ -130,54 +134,17 @@ public sealed class LegacyOwnedRussianOrdinaryGlyphProducer
     public LegacyPreparedGlyphFinalizationInput Produce(ReadOnlySpan<byte> preparedRow72,
         LegacyOrdinaryGlyphProductionScratch scratch,ulong conversionArgument=0,
         ReadOnlySpan<byte> preparedCompact40=default,CancellationToken token=default)
+        =>LegacyMainOrdinaryGlyphProductionKernel.Produce(operations,preparedRow72,scratch,conversionArgument,preparedCompact40,token);
+
+    private LegacyRussianMainReplacementResolution ResolveOwnedSymbol(ushort symbol,ulong conversionArgument,int node,ushort arc,CancellationToken token)
     {
-        ArgumentNullException.ThrowIfNull(scratch);token.ThrowIfCancellationRequested();
-        if(preparedRow72.Length!=72)throw new ArgumentException("Complete prepared backtrack row72 required.");
-        if(preparedRow72[0x3c]!=0)throw new NotSupportedException("Only ordinary subtype0 is restored.");
-        int node=BinaryPrimitives.ReadInt32LittleEndian(preparedRow72);ushort arc=U16(preparedRow72,4);
-        var arcs=graph.GetNode(node);
-        if(arc>=arcs.Count)throw new ArgumentException("Prepared row arc escapes the actual owned graph node.");
-        int compact=BinaryPrimitives.ReadInt32LittleEndian(preparedRow72[0x20..]);
-        //21709C..2170BC resolves this neighbor before216860, even though
-        //the bounded no-wide resolver never consumes its value. Keep the
-        //native read in bounds instead of silently accepting an invalid row.
-        if(compact!=-1&&(preparedCompact40.Length%40!=0||(uint)compact>=(uint)(preparedCompact40.Length/40)))
-            throw new ArgumentException("Prepared row requires its actual in-bounds compact40 neighbor.");
-        if(compact!=-1)_=U16(preparedCompact40,compact*40+0x1c);
-        ushort symbol=U16(preparedRow72,0x3a);
-        if(unchecked((ushort)(symbol+6))<3)
-            throw new NotSupportedException("FFFA/FFFB/FFFC require the native delimiter/multi-output callback.");
-        if(symbol>=model.AcousticAlphabet.LabelCount+3&&unchecked((ushort)(symbol+9))>2)
-            throw new NotSupportedException("This portable ordinary scope excludes other unchecked synthetic labels.");
-        scratch.ComponentFlag=0;scratch.ExternalVariant=0;
-        scratch.RemainingCursor=unchecked(scratch.RemainingCursor-1);
-        token.ThrowIfCancellationRequested();
-        ushort emitted;
-        if(resolver is not null)emitted=resolver.Resolve(symbol,conversionArgument,false,token).EmittedSymbol;
-        else if(unchecked((byte)conversionArgument)!=0&&symbol==model.AcousticAlphabet.LabelCount+1)emitted=apostrophe;
-        else if(unchecked((byte)conversionArgument)!=0&&symbol==model.AcousticAlphabet.LabelCount+2)emitted=quote;
-        else if(model.AcousticAlphabet.TryGetLabel("\ufffd",out ushort replacement)&&symbol==replacement)
-        {
-            var result=sourceCallbacks!.ResolveReplacement(node,arc,token);
-            emitted=result.EmittedSymbol;scratch.ExternalVariant=result.ExternalVariant;
-        }
-        else emitted=symbol;
-        scratch.Write(emitted);
-        token.ThrowIfCancellationRequested();
-        if(symbol==unitScore||unchecked((ushort)(symbol+9))<=5)
-        {scratch.Score0CBits=0x3f800000;scratch.Score10Bits=0x3f800000;scratch.Cost14=0;}
-        else
-        {
-            scratch.Score0CBits=BitConverter.SingleToUInt32Bits(preparedRow72[0x3e]/255f);
-            ushort scoreSymbol=symbol==model.AcousticAlphabet.LabelCount+1?apostrophe:
-                symbol==model.AcousticAlphabet.LabelCount+2?quote:symbol;
-            var cache=scoring.GetCache(arcs[arc].GroupId,token);
-            scratch.Score10Bits=BitConverter.SingleToUInt32Bits(cache.ReadSymbolScore(scoreSymbol,0,token));
-            var request=scoring.CreateRequest(node,arc,scoreSymbol,preparedRow72[0x3d]!=0);
-            scratch.Cost14=cache.ReadRequestCost(request,token);
-        }
-        token.ThrowIfCancellationRequested();scratch.PublicationFlags06=0;
-        return scratch.Snapshot();
+        if(resolver is not null)
+        {var value=resolver.Resolve(symbol,conversionArgument,false,token);return new(value.EmittedSymbol,value.NormalizedOriginal,0);}
+        if(unchecked((byte)conversionArgument)!=0&&symbol==model.AcousticAlphabet.LabelCount+1)return new(apostrophe,apostrophe,0);
+        if(unchecked((byte)conversionArgument)!=0&&symbol==model.AcousticAlphabet.LabelCount+2)return new(quote,quote,0);
+        if(model.AcousticAlphabet.TryGetLabel("\ufffd",out ushort replacement)&&symbol==replacement)
+            return sourceCallbacks!.ResolveReplacement(node,arc,token);
+        return new(symbol,symbol,0);
     }
 
     private static ushort U16(ReadOnlySpan<byte> bytes,int at)=>BinaryPrimitives.ReadUInt16LittleEndian(bytes[at..]);

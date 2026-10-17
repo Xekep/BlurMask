@@ -72,6 +72,8 @@ internal sealed class LegacyOwnedMainWordSourceServices
         if(global is {} g)g.ValidateOwnedSpan(span.GlobalSource??throw new ArgumentException("Global lease required."),token);
         else old!.ValidateSpan(span.SameSource??throw new ArgumentNullException(nameof(span)),token);
     }
+    internal int ReadGlobalGeometryCost(int group,CancellationToken token)
+        =>(globalCosts??throw new InvalidOperationException("Actual global geometry owner required.")).ReadGeometryCost(group,token);
     internal LegacyNativeWordAcousticGroupCosts GetCosts(SpanLease span,int node,ushort arc,CancellationToken token)
     {
         ValidateSpan(span,token);
