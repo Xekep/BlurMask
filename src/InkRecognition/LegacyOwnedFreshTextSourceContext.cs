@@ -30,7 +30,7 @@ public sealed class LegacyOwnedFreshTextSelection
 /// derives its cursor from an actual fresh textField INPUT registry.
 /// C4D's empty pending list is a separate owner in both routes.
 /// Existing/prior/cached document branches are not accepted.</summary>
-public sealed class LegacyOwnedFreshTextSourceContext
+public sealed partial class LegacyOwnedFreshTextSourceContext
 {
     private readonly object gate=new();
     private readonly List<LegacyOwnedFreshTextSelection> commands=[];
@@ -138,6 +138,7 @@ public sealed class LegacyOwnedFreshTextSourceContext
         lock(gate)
         {
             if(failed)throw new InvalidOperationException("Failed native prefix retained; portable retry is unsupported.");
+            if(counterHandoffEntered)throw new InvalidOperationException("The bounded postprocessing counter handoff already closed this selection append phase.");
             if(commands.Count==65536)throw new NotSupportedException("Portable transaction budget exceeded.");
             token.ThrowIfCancellationRequested();
             //0210C0 creates the temporary C22 before this point, but consumes
