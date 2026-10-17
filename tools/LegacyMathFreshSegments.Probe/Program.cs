@@ -103,6 +103,10 @@ RecordState RecordState(Math2Mode0CompletedRecords recorder)
 var recordedSteps = new List<RecordStep>();
 using var foreignOwner = Create();
 using var foreignRecorder = foreignOwner.CreateCompletedRecords();
+var scoreEvents = new List<ActualScore>();
+var scoreControls = new List<PreparedScore>();
+int scoreGuards=0;
+void RejectScore(Action a){int old=guards;Reject(a);scoreGuards++;guards=old;}
 var segmentEvents = new List<SegmentsEvent>();
 var segmentControls = new List<SegmentsControl>();
 int segmentGuards = 0;
@@ -182,6 +186,8 @@ foreach (var settings in new[] { (Width: 1, Delta: -1f), (Width: 3, Delta: 1000f
             int[] observed=mapped.CopyAssignments();mapped.CopyAssignments().AsSpan().Fill(999);
             if(!mapped.CopyAssignments().SequenceEqual(observed))throw new InvalidDataException("Segment results alias caller.");
             segmentEvents.Add(new(settings.Width,settings.Delta,lease.Offset,lease.Rank,mapped.CopyObservableIndices(),observed,mapped.CopyRuns()));
+            var scored=LegacyPreparedFreshMathSegmentScore.FromActualPreparedBranch(mapped,0.1f);
+            scoreEvents.Add(new(settings.Width,settings.Delta,lease.Offset,lease.Rank,scored));
             snapshots.Add(snapshot);
             recorder.Append(lease);
             var copiedRecords = recorder.CopyRecords();
@@ -465,6 +471,28 @@ if(LegacyPreparedFreshMathSegments.CompressPrepared([]).Length!=0)throw new Inva
 File.WriteAllText(args[3]+".segments.json",JsonSerializer.Serialize(new SegmentsCapture(segmentEvents.ToArray(),segmentControls.ToArray(),segmentGuards),CaptureJson.Default.SegmentsCapture));
 Console.WriteLine($"PASS{segmentEvents.Count} actual prepared-branch segment maps/512 controls/{segmentGuards} guards; no EF4 policy/output/score");
 
+for(int trial=0;trial<4096;trial++)
+{
+    int rows=1+trial%7, columns=1+trial%23;
+    float[] probabilities=Enumerable.Range(0,rows*columns).Select(i=>((i+trial)%7) switch{0=>0f,1=>1e-12f,2=>1e-10f,3=>1f,4=>0.5f,5=>0.9f,_=>0.01f}).ToArray();
+    int[] assignments=Enumerable.Range(0,columns).Select(i=>trial%11==0?-1:(i+trial)%(rows+1)-1).ToArray();
+    float before=(trial%997-333)/7f, alpha=(trial%5) switch{0=>0f,1=>0.1f,2=>1f,3=>-0.5f,_=>3.7f};
+    var value=LegacyPreparedFreshMathSegmentScore.EvaluatePrepared(probabilities,rows,columns,assignments,before,alpha);
+    scoreControls.Add(new(Tensor("probabilities",1,[rows,columns],probabilities,null),assignments,value));
+}
+RejectScore(()=>LegacyPreparedFreshMathSegmentScore.EvaluatePrepared([0.5f],0,1,[0],0f,0.1f));
+RejectScore(()=>LegacyPreparedFreshMathSegmentScore.EvaluatePrepared([0.5f],1,0,[0],0f,0.1f));
+RejectScore(()=>LegacyPreparedFreshMathSegmentScore.EvaluatePrepared([0.5f],1,1,[],0f,0.1f));
+RejectScore(()=>LegacyPreparedFreshMathSegmentScore.EvaluatePrepared([0.5f],1,1,[1],0f,0.1f));
+RejectScore(()=>LegacyPreparedFreshMathSegmentScore.EvaluatePrepared([0.5f],1,1,[-2],0f,0.1f));
+foreach(float invalid in new[]{float.NaN,float.PositiveInfinity,-0.1f,1.1f})RejectScore(()=>LegacyPreparedFreshMathSegmentScore.EvaluatePrepared([invalid],1,1,[0],0f,0.1f));
+RejectScore(()=>LegacyPreparedFreshMathSegmentScore.EvaluatePrepared([0.5f],1,1,[0],float.NaN,0.1f));
+RejectScore(()=>LegacyPreparedFreshMathSegmentScore.EvaluatePrepared([0.5f],1,1,[0],0f,float.NaN));
+RejectScore(()=>LegacyPreparedFreshMathSegmentScore.EvaluatePrepared([0f],1,1,[0],float.MaxValue,float.MaxValue));
+RejectScore(()=>LegacyPreparedFreshMathSegmentScore.EvaluatePrepared([0.5f],1,1,[0],0f,0.1f,new CancellationToken(true)));
+File.WriteAllText(args[3]+".scores.json",JsonSerializer.Serialize(new ScoresCapture(scoreEvents.ToArray(),scoreControls.ToArray(),scoreGuards),CaptureJson.Default.ScoresCapture));
+Console.WriteLine($"PASS{scoreEvents.Count} actual prepared-branch scores/4096 numeric controls/{scoreGuards} score guards; portableLog only");
+
 var capture = new Capture(runtime.Version, model.Graphs.Select(x => Convert.ToHexStringLower(SHA256.HashData(x.Span))).ToArray(),
     Convert.ToHexStringLower(SHA256.HashData(resource)), features.Frames, runs.ToArray(), failures.ToArray(),
     prepared.ToArray(), argmax.ToArray(), guards);
@@ -514,6 +542,10 @@ record AttentionCaptureSet(AttentionCapture[] Events, PreparedAttention[] Prepar
 record SegmentsEvent(int Width,float Delta,long Offset,int Rank,int[] ObservableIndices,int[] Assignments,MathSegmentRun[] Runs);
 record SegmentsControl(int[] Indices,TensorCapture Probabilities,int[] Assignments,MathSegmentRun[] Runs);
 record SegmentsCapture(SegmentsEvent[] Events,SegmentsControl[] Prepared,int Guards);
+record ActualScore(int Width,float Delta,long Offset,int Rank,LegacyPreparedFreshMathSegmentScore Value);
+record PreparedScore(TensorCapture Probabilities,int[] Assignments,LegacyPreparedFreshMathSegmentScore Value);
+record ScoresCapture(ActualScore[] Events,PreparedScore[] Prepared,int Guards);
+[JsonSerializable(typeof(ScoresCapture))]
 [JsonSerializable(typeof(SegmentsCapture))]
 [JsonSerializable(typeof(AttentionCaptureSet))]
 [JsonSerializable(typeof(CompletedCapture))]
