@@ -2908,6 +2908,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native shared completed provenance failed.' }
           python tools/LegacyMathCompletedProvenance.Probe/audit_output.py .artifacts/math-completed-provenance-native.json models/math2/math2-unwrapped.res .artifacts/math-initial-order-native.json
           if ($LASTEXITCODE -ne 0) { throw 'Native shared completed provenance oracle failed.' }
+          dotnet run --project tools/LegacyMathRawAttentionHistory.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-raw-attention-history-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed raw attention history failed.' }
+          python tools/LegacyMathRawAttentionHistory.Probe/audit_output.py .artifacts/math-raw-attention-history-managed.json models/math2/math2-unwrapped.res
+          if ($LASTEXITCODE -ne 0) { throw 'Managed raw attention history oracle failed.' }
+          dotnet publish tools/LegacyMathRawAttentionHistory.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-raw-attention-history-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Raw attention history probe publish failed.' }
+          $rawAttentionHistory = if ($IsWindows) { '.artifacts/math-raw-attention-history-probe/LegacyMathRawAttentionHistory.Probe.exe' } else { '.artifacts/math-raw-attention-history-probe/LegacyMathRawAttentionHistory.Probe' }
+          & $rawAttentionHistory .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-raw-attention-history-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native raw attention history failed.' }
+          python tools/LegacyMathRawAttentionHistory.Probe/audit_output.py .artifacts/math-raw-attention-history-native.json models/math2/math2-unwrapped.res
+          if ($LASTEXITCODE -ne 0) { throw 'Native raw attention history oracle failed.' }
           dotnet run --project tools/LegacyMathSegmentation.Probe -c Release -- .artifacts/math-segmentation-managed.json
           if ($LASTEXITCODE -ne 0) { throw 'Managed segmentation sigmoid failed.' }
           python tools/LegacyMathSegmentation.Probe/audit_output.py .artifacts/math-segmentation-managed.json

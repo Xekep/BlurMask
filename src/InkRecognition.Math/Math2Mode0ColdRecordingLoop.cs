@@ -141,7 +141,7 @@ internal sealed partial class Math2Mode0ColdRecordingLoop : IDisposable
         lock (gate)
         {
             if (disposed) return;
-            disposed = true; prefix.Dispose();
+            disposed = true; DisposeRawAttentionHistory(); prefix.Dispose();
         }
     }
 }
