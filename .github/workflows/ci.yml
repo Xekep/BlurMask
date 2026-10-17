@@ -856,6 +856,9 @@ jobs:
           python tools/LegacyFirstResultScore.Probe/reference_controls.py .artifacts/legacy-first-result-score-controls.json
           dotnet run --project tools/LegacyFirstResultScore.Probe -c Release -- .artifacts/legacy-first-result-score-controls.json
           python tools/LegacyWordHigherArc.Probe/reference_controls.py .artifacts/legacy-word-higherarc-controls.json
+          python tools/LegacyMainPrimaryRecombination.Probe/reference_controls.py .artifacts/legacy-main-primary-recombination-controls.json
+          dotnet run --project tools/LegacyMainPrimaryRecombination.Probe -c Release -- .artifacts/legacy-main-primary-recombination-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-main-primary-recombination-managed.json
+          python tools/LegacyMainPrimaryRecombination.Probe/audit_output.py .artifacts/legacy-main-primary-recombination-managed.json
           dotnet run --project tools/LegacyWordHigherArc.Probe -c Release -- .artifacts/legacy-word-higherarc-controls.json models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json
           python tools/LegacyFirstTerminalSelection.Probe/reference_controls.py .artifacts/legacy-first-terminal-controls.json
           dotnet run --project tools/LegacyFirstTerminalSelection.Probe -c Release -- .artifacts/legacy-first-terminal-controls.json .artifacts/legacy-first-context-pass-controls.json.actual-e0-False.json models/ru-RU/ru_RU-ak-cur.lite.res
@@ -1345,6 +1348,7 @@ jobs:
             @{ Name = 'LegacyFirstContextPass'; Args = @('.artifacts/legacy-first-context-pass-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
             @{ Name = 'LegacyFirstResultScore'; Args = @('.artifacts/legacy-first-result-score-controls.json') },
             @{ Name = 'LegacyWordHigherArc'; Args = @('.artifacts/legacy-word-higherarc-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json') },
+            @{ Name = 'LegacyMainPrimaryRecombination'; Args = @('.artifacts/legacy-main-primary-recombination-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-main-primary-recombination-native.json') },
             @{ Name = 'LegacyFirstTerminalSelection'; Args = @('.artifacts/legacy-first-terminal-controls.json', '.artifacts/legacy-first-context-pass-controls.json.actual-e0-False.json', 'models/ru-RU/ru_RU-ak-cur.lite.res') },
             @{ Name = 'LegacySourceLinePublication'; Args = @('.artifacts/legacy-source-publication-controls.json') },
             @{ Name = 'LegacyTextSourceProjection'; Args = @('.artifacts/legacy-source-projection-controls.json', 'models/line-geometry/character-line-categories.json') },
@@ -1735,6 +1739,10 @@ jobs:
             if ($name -eq 'LegacyMainSpanScores') {
               python tools/LegacyMainSpanScores.Probe/audit_output.py .artifacts/legacy-main-span-scores-native.json
               if ($LASTEXITCODE -ne 0) { throw 'LegacyMainSpanScores independent audit failed' }
+            }
+            if ($name -eq 'LegacyMainPrimaryRecombination') {
+              python tools/LegacyMainPrimaryRecombination.Probe/audit_output.py .artifacts/legacy-main-primary-recombination-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'Primary recombination independent audit failed' }
             }
             if ($name -eq 'LegacyMainAugmentedWordCosts') {
               python tools/LegacyMainAugmentedWordCosts.Probe/audit_output.py .artifacts/legacy-main-augmented-word-costs-native.json
