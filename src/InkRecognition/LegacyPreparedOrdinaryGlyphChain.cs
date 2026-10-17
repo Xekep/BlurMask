@@ -15,10 +15,34 @@ public static class LegacyPreparedOrdinaryGlyphChain
         ReadOnlySpan<byte> allocatedRecordResidue40,ReadOnlySpan<ushort> labelStackResidue256,
         ReadOnlySpan<byte> requestStackResidue64,ulong conversionArgument=0,
         CancellationToken token=default)
+        => ApplySelected(LegacyMainSelectedCompactWordOwner.FromSingle(materialization),word,preparedSegmentRows72,residualSourceReferences,ordinary,protocol,previousSymbol,
+            preparedPacketAcBits,preparedPacketB0Bits,initialForceDuplicate,allocatedRecordResidue40,
+            labelStackResidue256,requestStackResidue64,conversionArgument,token);
+
+    public static LegacyPreparedGlyphChainResult ApplyConfigured(LegacyOwnedMainSecondaryCompactTerminal terminal,
+        LegacyNativeWordBuilder word,ReadOnlySpan<byte> preparedSegmentRows72,
+        ReadOnlySpan<ulong> residualSourceReferences,LegacyOwnedRussianOrdinaryGlyphProducer ordinary,
+        LegacyOwnedRussianProtocolGlyphProducer protocol,ushort previousSymbol,
+        uint preparedPacketAcBits,uint preparedPacketB0Bits,bool initialForceDuplicate,
+        ReadOnlySpan<byte> allocatedRecordResidue40,ReadOnlySpan<ushort> labelStackResidue256,
+        ReadOnlySpan<byte> requestStackResidue64,ulong conversionArgument=0,
+        CancellationToken token=default)
+        => ApplySelected(LegacyMainSelectedCompactWordOwner.FromSecondary(terminal),word,preparedSegmentRows72,residualSourceReferences,ordinary,protocol,previousSymbol,
+            preparedPacketAcBits,preparedPacketB0Bits,initialForceDuplicate,allocatedRecordResidue40,
+            labelStackResidue256,requestStackResidue64,conversionArgument,token);
+
+    private static LegacyPreparedGlyphChainResult ApplySelected(LegacyMainSelectedCompactWordOwner materialization,
+        LegacyNativeWordBuilder word,ReadOnlySpan<byte> preparedSegmentRows72,
+        ReadOnlySpan<ulong> residualSourceReferences,LegacyOwnedRussianOrdinaryGlyphProducer ordinary,
+        LegacyOwnedRussianProtocolGlyphProducer protocol,ushort previousSymbol,
+        uint preparedPacketAcBits,uint preparedPacketB0Bits,bool initialForceDuplicate,
+        ReadOnlySpan<byte> allocatedRecordResidue40,ReadOnlySpan<ushort> labelStackResidue256,
+        ReadOnlySpan<byte> requestStackResidue64,ulong conversionArgument=0,
+        CancellationToken token=default)
     {
         ArgumentNullException.ThrowIfNull(materialization);ArgumentNullException.ThrowIfNull(word);
         ArgumentNullException.ThrowIfNull(ordinary);ArgumentNullException.ThrowIfNull(protocol);
-        token.ThrowIfCancellationRequested();var policy=materialization.TerminalResult.PassResult.ControllerOwner;
+        token.ThrowIfCancellationRequested();var policy=materialization.Controller;
         var casePolicy=materialization.CaseSourcePolicy;
         bool matchingOrdinary=casePolicy is null?ReferenceEquals(ordinary.DirectPolicy,policy):
             ordinary.DirectPolicy is null&&ReferenceEquals(ordinary.Policy,casePolicy);

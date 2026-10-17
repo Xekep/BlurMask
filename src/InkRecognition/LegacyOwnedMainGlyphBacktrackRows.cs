@@ -11,14 +11,20 @@ public sealed class LegacyOwnedMainGlyphBacktrackRows
     private readonly byte[] rows;
     private readonly int[] visited;
     private readonly ulong[] residuals;
-    public LegacyOwnedMainCompactWordMaterialization Materialization {get;}
+    internal LegacyMainSelectedCompactWordOwner SelectedOwner {get;}
+    public LegacyOwnedMainCompactWordMaterialization Materialization => SelectedOwner.Single ??
+        throw new InvalidOperationException("Configured secondary backtracking has no count1 materialization.");
+    public LegacyOwnedMainSecondaryCompactTerminal? SecondaryTerminal => SelectedOwner.Secondary;
+    public LegacyOwnedFreshMainWordControllerPolicy ControllerOwner => SelectedOwner.Controller;
+    public LegacyOwnedRussianMainGlyphConfidence ConfidenceOwner => SelectedOwner.ConfidenceOwner;
+    public LegacyFreshCaseMainSourcePolicy? CaseSourcePolicy => SelectedOwner.CaseSourcePolicy;
     public int Count=>rows.Length/72;
     public byte[] CopyRows()=>rows.ToArray();
     public int[] CopyVisitedCompactIndices()=>visited.ToArray();
     public ulong[] CopyResidualSourceReferences()=>residuals.ToArray();
-    private LegacyOwnedMainGlyphBacktrackRows(LegacyOwnedMainCompactWordMaterialization materialization,
+    private LegacyOwnedMainGlyphBacktrackRows(LegacyMainSelectedCompactWordOwner materialization,
         byte[] rows,int[] visited,ulong[] residuals)
-    {Materialization=materialization;this.rows=rows;this.visited=visited;this.residuals=residuals;}
+    {SelectedOwner=materialization;this.rows=rows;this.visited=visited;this.residuals=residuals;}
 
     /// <summary>Walk the real numeric terminal and materialized2460/2478 owners.
     /// Supported ordinary graph subtypes0..3 retain native marker skipping,
@@ -50,8 +56,25 @@ public sealed class LegacyOwnedMainGlyphBacktrackRows
         ReadOnlySpan<byte> stackRowResidue72,CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(materialization);ArgumentNullException.ThrowIfNull(sourceCallbacks);
-        token.ThrowIfCancellationRequested();
-        var terminal=materialization.TerminalResult;var policy=terminal.PassResult.ControllerOwner;
+        return PrepareSelected(acousticResource,caseSourcePolicy,LegacyMainSelectedCompactWordOwner.FromSingle(materialization),
+            sourceCallbacks,stackRowResidue72,token);
+    }
+
+    public static LegacyOwnedMainGlyphBacktrackRows PrepareConfigured(ReadOnlySpan<byte> acousticResource,
+        LegacyOwnedMainSecondaryCompactTerminal terminal,LegacyOwnedRussianMainSourceSymbolCallbacks sourceCallbacks,
+        ReadOnlySpan<byte> stackRowResidue72,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(terminal);
+        return PrepareSelected(acousticResource,terminal.Materialization.PassResult.SourcePolicy,
+            LegacyMainSelectedCompactWordOwner.FromSecondary(terminal),sourceCallbacks,stackRowResidue72,token);
+    }
+
+    private static LegacyOwnedMainGlyphBacktrackRows PrepareSelected(ReadOnlySpan<byte> acousticResource,
+        LegacyFreshCaseMainSourcePolicy? caseSourcePolicy,LegacyMainSelectedCompactWordOwner materialization,
+        LegacyOwnedRussianMainSourceSymbolCallbacks sourceCallbacks,ReadOnlySpan<byte> stackRowResidue72,CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(sourceCallbacks);token.ThrowIfCancellationRequested();
+        var policy=materialization.Controller;
         var owner=policy.Owner;var confidence=materialization.ConfidenceOwner;
         bool caseAware=caseSourcePolicy is not null;
         if(stackRowResidue72.Length!=72||!ReferenceEquals(sourceCallbacks.Owner,confidence)||

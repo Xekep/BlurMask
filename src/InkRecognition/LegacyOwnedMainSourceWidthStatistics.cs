@@ -16,11 +16,14 @@ public readonly record struct LegacyMainSourceWidthStatistics(double WidthSum,in
 public sealed class LegacyOwnedMainSourceWidthStatistics
 {
     private readonly byte[] compact;
-    public LegacyOwnedMainCompactWordMaterialization Materialization {get;}
+    private readonly LegacyMainSelectedCompactWordOwner selected;
+    public LegacyOwnedMainCompactWordMaterialization Materialization => selected.Single ??
+        throw new InvalidOperationException("Configured width statistics have no count1 materialization.");
+    public LegacyOwnedMainSecondaryCompactTerminal? SecondaryTerminal => selected.Secondary;
     public LegacyOwnedRussianMainSourceGeometry Geometry {get;}
-    private LegacyOwnedMainSourceWidthStatistics(LegacyOwnedMainCompactWordMaterialization materialization,
+    private LegacyOwnedMainSourceWidthStatistics(LegacyMainSelectedCompactWordOwner materialization,
         LegacyOwnedRussianMainSourceGeometry geometry)
-    {Materialization=materialization;Geometry=geometry;compact=materialization.CopyCompactStorage();}
+    {selected=materialization;Geometry=geometry;compact=materialization.CopyCompactStorage();}
 
     public static LegacyOwnedMainSourceWidthStatistics Prepare(LegacyOwnedMainCompactWordMaterialization materialization,
         LegacyOwnedRussianMainSourceGeometry geometry)
@@ -28,12 +31,21 @@ public sealed class LegacyOwnedMainSourceWidthStatistics
         ArgumentNullException.ThrowIfNull(materialization);ArgumentNullException.ThrowIfNull(geometry);
         if(!ReferenceEquals(materialization.ConfidenceOwner,geometry.Owner))
             throw new ArgumentException("Identical compact and actual source geometry owner required.");
-        return new(materialization,geometry);
+        return new(LegacyMainSelectedCompactWordOwner.FromSingle(materialization),geometry);
+    }
+
+    public static LegacyOwnedMainSourceWidthStatistics PrepareConfigured(LegacyOwnedMainSecondaryCompactTerminal terminal,
+        LegacyOwnedRussianMainSourceGeometry geometry)
+    {
+        ArgumentNullException.ThrowIfNull(terminal);ArgumentNullException.ThrowIfNull(geometry);
+        if(!ReferenceEquals(terminal.Materialization.ConfidenceOwner,geometry.Owner))
+            throw new ArgumentException("Identical configured compact and actual source geometry owner required.");
+        return new(LegacyMainSelectedCompactWordOwner.FromSecondary(terminal),geometry);
     }
 
     public LegacyMainSourceWidthStatistics AccumulatePreparedSegment(ReadOnlySpan<byte> rows72,
         LegacyMainSourceWidthStatistics seed,CancellationToken token=default)
-        =>Accumulate(rows72,compact,Materialization.RecordCount,seed,
+        =>Accumulate(rows72,compact,selected.RecordCount,seed,
             (node,arc)=>Geometry.ReadBounds(node,arc,token),token);
 
     internal static LegacyMainSourceWidthStatistics Accumulate(ReadOnlySpan<byte> rows72,ReadOnlySpan<byte> compact40,

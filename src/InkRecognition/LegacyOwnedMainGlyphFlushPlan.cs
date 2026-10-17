@@ -63,10 +63,28 @@ public sealed class LegacyOwnedMainGlyphFlushPlan
     public static LegacyOwnedMainGlyphFlushPlan Prepare(LegacyFreshCaseMainSourcePolicy policy,
         LegacyOwnedMainGlyphBacktrackRows backtrack,CancellationToken token=default)
     {
+        ArgumentNullException.ThrowIfNull(backtrack);
+        if(backtrack.SecondaryTerminal is not null)
+            throw new NotSupportedException("Configured flush planning requires PrepareConfigured.");
+        return PrepareSelected(policy,backtrack,token);
+    }
+
+    public static LegacyOwnedMainGlyphFlushPlan PrepareConfigured(LegacyOwnedMainGlyphBacktrackRows backtrack,
+        CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(backtrack);
+        if(backtrack.SecondaryTerminal is null||backtrack.CaseSourcePolicy is null)
+            throw new ArgumentException("Actual configured CASE selected-terminal backtracking required.");
+        return PrepareSelected(backtrack.CaseSourcePolicy,backtrack,token);
+    }
+
+    private static LegacyOwnedMainGlyphFlushPlan PrepareSelected(LegacyFreshCaseMainSourcePolicy policy,
+        LegacyOwnedMainGlyphBacktrackRows backtrack,CancellationToken token)
+    {
         ArgumentNullException.ThrowIfNull(policy);ArgumentNullException.ThrowIfNull(backtrack);
-        token.ThrowIfCancellationRequested();var materialization=backtrack.Materialization;
+        token.ThrowIfCancellationRequested();var materialization=backtrack.SelectedOwner;
         if(!ReferenceEquals(materialization.CaseSourcePolicy,policy)||
-            !ReferenceEquals(materialization.TerminalResult.PassResult.ControllerOwner,policy.Controller)||
+            !ReferenceEquals(materialization.Controller,policy.Controller)||
             !ReferenceEquals(materialization.ConfidenceOwner.CaseDictionaryOwner,policy.DictionaryOwner))
             throw new ArgumentException("One genuine CASE compact/backtrack/source owner required.");
         var controller=policy.Controller;var owner=controller.Owner;var graph=owner.SourceGraph;
@@ -80,7 +98,7 @@ public sealed class LegacyOwnedMainGlyphFlushPlan
         //cannot run. This is independent of the optional2558 enable value.
         byte[] compact=materialization.CopyCompactStorage(), allRows=backtrack.CopyRows();
         int[] starts=materialization.CopyNodeStarts2478(),visited=backtrack.CopyVisitedCompactIndices();
-        int[] cumulative=materialization.TerminalResult.PassResult.CopyCumulativePathCosts();
+        int[] cumulative=materialization.CopyCumulativePathCosts();
         var alphabet=owner.CommonModel.AcousticAlphabet;
         ushort Label(string text)=>alphabet.TryGetLabel(text,out ushort label)?label:ushort.MaxValue;
         ushort marker=Label("\u0003"),joiner=Label("\u200d");
@@ -94,7 +112,7 @@ public sealed class LegacyOwnedMainGlyphFlushPlan
         W32(packet,56,-1);W32(packet,60,-1);
         Seed(14,0x32,2);Seed(20,0x3c,4);Seed(28,0x44,16);
         int rowOrdinal=0,visitOrdinal=0,baseNode=graph.NodeCount-1;
-        int total=materialization.TerminalResult.Winner.TotalCost,field18=materialization.TerminalResult.Winner.RowCost14;
+        int total=materialization.Winner.TotalCost,field18=materialization.Winner.RowCost14;
         while(!cursor.IsEnd)
         {
             token.ThrowIfCancellationRequested();

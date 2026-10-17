@@ -59,9 +59,27 @@ public sealed class LegacyOwnedMainGlyphFlushSession
         LegacyOwnedMainGlyphFlushPlan plan,ReadOnlySpan<byte> emptyWordAllocatorResidue120,
         CancellationToken token=default)
     {
+        ArgumentNullException.ThrowIfNull(ownership);
+        if(ownership.SecondaryTerminal is not null)
+            throw new NotSupportedException("Configured sessions require PrepareConfigured.");
+        return PrepareSelected(ownership,plan,emptyWordAllocatorResidue120,token);
+    }
+
+    public static LegacyOwnedMainGlyphFlushSession PrepareConfigured(LegacyFreshMainPlainResultOwnership ownership,
+        LegacyOwnedMainGlyphFlushPlan plan,ReadOnlySpan<byte> emptyWordAllocatorResidue120,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(ownership);
+        if(ownership.SecondaryTerminal is null)
+            throw new ArgumentException("Actual configured selected-terminal publisher ownership required.");
+        return PrepareSelected(ownership,plan,emptyWordAllocatorResidue120,token);
+    }
+
+    private static LegacyOwnedMainGlyphFlushSession PrepareSelected(LegacyFreshMainPlainResultOwnership ownership,
+        LegacyOwnedMainGlyphFlushPlan plan,ReadOnlySpan<byte> emptyWordAllocatorResidue120,CancellationToken token)
+    {
         ArgumentNullException.ThrowIfNull(ownership);ArgumentNullException.ThrowIfNull(plan);
-        token.ThrowIfCancellationRequested();var materialization=plan.BacktrackRows.Materialization;
-        if(!ReferenceEquals(ownership.Materialization,materialization)||
+        token.ThrowIfCancellationRequested();var materialization=plan.BacktrackRows.SelectedOwner;
+        if(!ReferenceEquals(ownership.SelectedOwner.Identity,materialization.Identity)||
             !ReferenceEquals(ownership.Controller,plan.SourcePolicy.Controller)||
             !ReferenceEquals(ownership.Geometry.Owner,materialization.ConfidenceOwner)||
             !ReferenceEquals(ownership.Geometry.Owner.CaseDictionaryOwner,plan.SourcePolicy.DictionaryOwner))

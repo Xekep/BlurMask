@@ -21,11 +21,33 @@ public sealed class LegacyOwnedMainPlainWordPublication
         LegacyOwnedRussianMainSourceSymbolCallbacks callbacks,LegacyOwnedRussianMainInteriorDelimiter interior,
         CancellationToken token=default)
     {
+        ArgumentNullException.ThrowIfNull(session);
+        if(session.Ownership.SecondaryTerminal is not null)
+            throw new NotSupportedException("Configured callback preparation requires PrepareConfigured.");
+        return PrepareSelected(resource,session,table,callbacks,interior,token);
+    }
+
+    public static LegacyOwnedMainPlainWordPublication PrepareConfigured(ReadOnlySpan<byte> resource,
+        LegacyOwnedMainGlyphFlushSession session,LegacyCursiveSeparationTable table,
+        LegacyOwnedRussianMainSourceSymbolCallbacks callbacks,LegacyOwnedRussianMainInteriorDelimiter interior,
+        CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+        if(session.Ownership.SecondaryTerminal is null)
+            throw new ArgumentException("Actual configured selected-terminal flush session required.");
+        return PrepareSelected(resource,session,table,callbacks,interior,token);
+    }
+
+    private static LegacyOwnedMainPlainWordPublication PrepareSelected(ReadOnlySpan<byte> resource,
+        LegacyOwnedMainGlyphFlushSession session,LegacyCursiveSeparationTable table,
+        LegacyOwnedRussianMainSourceSymbolCallbacks callbacks,LegacyOwnedRussianMainInteriorDelimiter interior,
+        CancellationToken token)
+    {
         ArgumentNullException.ThrowIfNull(session);ArgumentNullException.ThrowIfNull(table);
         ArgumentNullException.ThrowIfNull(callbacks);ArgumentNullException.ThrowIfNull(interior);token.ThrowIfCancellationRequested();
         var ownership=session.Ownership;var policy=session.Plan.SourcePolicy;
         if(session.IsStopped||session.CompletedFlushCount!=0||policy.HasAssociatedSource||
-            !ReferenceEquals(callbacks.Owner,ownership.Materialization.ConfidenceOwner)||
+            !ReferenceEquals(callbacks.Owner,ownership.SelectedOwner.ConfidenceOwner)||
             !ReferenceEquals(interior.Geometry,ownership.Geometry))
             throw new ArgumentException("Fresh exact same-owned ordinary source, geometry and first flush session required.");
         var ordinary=LegacyOwnedRussianOrdinaryGlyphProducer.Prepare(resource,policy,callbacks.Owner,table,token);
@@ -34,10 +56,19 @@ public sealed class LegacyOwnedMainPlainWordPublication
         //pass has no publication callback, so2188F0 sees each unassociated
         //native flush in reverse row order. Packet seed bytes are not used by
         //this width predicate: only actual compact subtype/source/row38/3A.
-        var width=LegacyOwnedMainSourceWidthStatistics.Prepare(ownership.Materialization,ownership.Geometry);
-        LegacyMainSourceWidthStatistics sum=default;
-        foreach(var flush in session.Plan.Flushes)sum=width.AccumulatePreparedSegment(flush.CopyRows72(),sum,token);
-        token.ThrowIfCancellationRequested();return new(session,ordinary,protocol,BitConverter.SingleToUInt32Bits(sum.AverageWidth));
+        if(!ownership.TryReadTopWidthStatistics(out uint widthBits))
+        {
+            if(!ReferenceEquals(ownership,ownership.TopOwner))
+                throw new InvalidOperationException("The first alternative's genuine width pass must precede another TOP callback.");
+            var width=ownership.SecondaryTerminal is {} secondary
+                ? LegacyOwnedMainSourceWidthStatistics.PrepareConfigured(secondary,ownership.Geometry)
+                : LegacyOwnedMainSourceWidthStatistics.Prepare(ownership.Materialization,ownership.Geometry);
+            LegacyMainSourceWidthStatistics sum=default;
+            foreach(var flush in session.Plan.Flushes)sum=width.AccumulatePreparedSegment(flush.CopyRows72(),sum,token);
+            token.ThrowIfCancellationRequested();
+            widthBits=ownership.EstablishTopWidthStatistics(BitConverter.SingleToUInt32Bits(sum.AverageWidth));
+        }
+        token.ThrowIfCancellationRequested();return new(session,ordinary,protocol,widthBits);
     }
 
     public LegacyOwnedMainWordPublicationResult Publish(LegacyOwnedMainAssociatedGlyphFlush association,
@@ -57,9 +88,14 @@ public sealed class LegacyOwnedMainPlainWordPublication
                 var residual=association.CopyResidualStorage();
                 //2271F0 clears the callback's low-byte duplicate argument for
                 //this ordinary first-result branch; conversion argument is0.
-                succeeded=LegacyPreparedOrdinaryGlyphChain.Apply(Session.Ownership.Materialization,word,association.CopyRows72(),
-                    residual.AsSpan(0,association.RemainingCount),ordinary,protocol,packet.PreviousSymbol,
-                    TopAcBits,TopB0Bits,false,allocatedRecordResidue40,labelStackResidue256,requestStackResidue64,0,token).Succeeded;
+                var secondary=Session.Ownership.SecondaryTerminal;
+                succeeded=(secondary is null
+                    ? LegacyPreparedOrdinaryGlyphChain.Apply(Session.Ownership.Materialization,word,association.CopyRows72(),
+                        residual.AsSpan(0,association.RemainingCount),ordinary,protocol,packet.PreviousSymbol,
+                        TopAcBits,TopB0Bits,false,allocatedRecordResidue40,labelStackResidue256,requestStackResidue64,0,token)
+                    : LegacyPreparedOrdinaryGlyphChain.ApplyConfigured(secondary,word,association.CopyRows72(),
+                        residual.AsSpan(0,association.RemainingCount),ordinary,protocol,packet.PreviousSymbol,
+                        TopAcBits,TopB0Bits,false,allocatedRecordResidue40,labelStackResidue256,requestStackResidue64,0,token)).Succeeded;
             }
             //21FE30 asks for span even when218560 failed. Zero-span retains chain success
             //without allocating a word; positive-span requires both steps.
