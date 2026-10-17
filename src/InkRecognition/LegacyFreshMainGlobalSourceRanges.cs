@@ -27,6 +27,13 @@ public sealed class LegacyFreshMainGlobalSourceRanges
         return new(graph,chronology,original,keys);
     }
 
+    //Only an owned residual-overlay adapter calls this with its kind0 ranges.
+    //Higher ranges address the shared prepared source directly, not invented
+    //span0 arcs or a replacement DFS through the original acoustic group.
+    internal LegacyOrdinaryGraphSourceReference[] ResolveOwnedHigherRanges(LegacyInkRange[] ranges,
+        CancellationToken token=default)
+        =>LegacyMainHigherSourceMetadataProjection.Project(chronology,original,keys,ranges,token);
+
     public LegacyOrdinaryGraphSourceReference[] ResolveCandidateWithResiduals(int endingNode,int arcOrdinal,
         CancellationToken token=default)
     {

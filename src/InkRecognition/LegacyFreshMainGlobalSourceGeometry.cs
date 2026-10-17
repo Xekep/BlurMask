@@ -70,6 +70,8 @@ public sealed class LegacyFreshMainGlobalSourceGeometry
     {token.ThrowIfCancellationRequested();return Policy.Owner.Model.AcousticAlphabet.IsSymbolFlagged(symbol);}
     public LegacyInkRange[] CopyStoredGroupRanges(int node,ushort arc,CancellationToken token=default)
         =>ranges[Group(node,arc,token)].ToArray();
+    internal bool StoredGroupRangesEqual(int group,ReadOnlySpan<LegacyInkRange> other,CancellationToken token)
+    {token.ThrowIfCancellationRequested();if((uint)group>=(uint)ranges.Length)throw new ArgumentOutOfRangeException(nameof(group));return ranges[group].AsSpan().SequenceEqual(other);}
     public LegacyOrdinaryGraphSourceReference[] ResolveSourceRanges(int node,ushort arc,CancellationToken token=default)
     {_=Group(node,arc,token);return Policy.Owner.Acoustic.Geometry.Context.Source.ResolveCandidateWithResiduals(node,arc,token);}
 }
