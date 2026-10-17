@@ -24,6 +24,22 @@ public sealed class LegacyOwnedMainWordSourceCollection
         LegacyNativeInkPositionRange[] ranges)
     {CandidateSource=source;candidate=source.IsConfigured?null:source.FirstCandidate;Word=word;this.references=references;this.ranges=ranges;}
 
+    //One native275 span owns one26N allocation. A second genuine configured
+    //279 selection of that span gets an immutable view, not another count/fill.
+    internal LegacyOwnedMainWordSourceCollection BindSameSpanCandidate(LegacyOwnedMainCandidateSource source,
+        CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(source);source.Validate(token);
+        if(!CandidateSource.IsConfigured||!source.IsConfigured||
+            !ReferenceEquals(source.SourceIdentity,CandidateSource.SourceIdentity)||
+            !ReferenceEquals(source.TopOwner,CandidateSource.TopOwner)||
+            source.WordHead18 is not{} word||word.Next is not null||word.Span!=Word.Span)
+            throw new ArgumentException("A genuine same-source/TOP configured selection of the identical shared span required.");
+        return new(source,word,references,ranges);
+    }
+    internal bool SharesSourceAllocation(LegacyOwnedMainWordSourceCollection other)
+        =>ReferenceEquals(references,other.references)&&ReferenceEquals(ranges,other.ranges);
+
     /// <summary>Bounded first fresh span-owner source export before219580's
     /// alternative append. The exact one-WORD restriction avoids substituting
     /// an exact-span dictionary for native278's containing-span ownership.</summary>

@@ -27,6 +27,14 @@ public sealed class LegacyFreshMainConfiguredNoCandidateSourceCompletion
     public int InputWordCount {get;private set;}
     public int OutputWordCount {get;private set;}
     public int QuotaAfter {get;private set;}
+    internal LegacyOwnedMainWordSourceCollection SourcesFor(LegacyOwnedMainCandidateSource candidate,CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(candidate);token.ThrowIfCancellationRequested();
+        if(!IsTopV68Completed||IsFaulted||!candidates.Any(c=>ReferenceEquals(c.CandidateIdentity,candidate.CandidateIdentity)&&
+            ReferenceEquals(c.SourceIdentity,candidate.SourceIdentity)))
+            throw new ArgumentException("A selected candidate of this successful actual configured source completion required.");
+        return Sources.BindSameSpanCandidate(candidate,token);
+    }
     private LegacyFreshMainConfiguredNoCandidateSourceCompletion(LegacyOwnedMainWordSourceCollection sources,
         LegacyOwnedMainCandidateSource[] candidates,LegacyNativePublishedWordNode[] heads,
         LegacyFreshMainGlyphUtf8Emission emission,ReadOnlySpan<byte> left,ReadOnlySpan<byte> right)

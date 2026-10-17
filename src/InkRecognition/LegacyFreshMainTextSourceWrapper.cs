@@ -109,18 +109,24 @@ public sealed class LegacyFreshMainTextSourceWrapper : IDisposable
     private readonly LegacyOwnedFreshTextSourceContext selections;
     public LegacyOwnedMainWordSourceCollection WordSourceCollection {get;}
     public LegacyFreshMainNoCandidateSourceCompletion? CompletedSources {get;}
+    public LegacyFreshMainConfiguredNoCandidateSourceCompletion? CompletedConfiguredSources {get;}
+    public LegacyOwnedMainCandidateSource CandidateSource {get;}
     private readonly Dictionary<int,LegacyOwnedMainTextSourcePayload> payloads=[];
     private bool disposed;
     public LegacyFreshMainCompletedFirstCandidate Candidate=>choices.Candidate;
     private LegacyFreshMainTextSourceWrapper(LegacyFreshMainTextGlyphChoices choices,
         LegacyNativeTextPublicationData properties,LegacyNativeUnicodeNormalizationData normalization,CancellationToken token,
-        LegacyFreshMainNoCandidateSourceCompletion? completedSources=null)
+        LegacyFreshMainNoCandidateSourceCompletion? completedSources=null,
+        LegacyFreshMainConfiguredNoCandidateSourceCompletion? completedConfiguredSources=null,
+        LegacyOwnedMainWordSourceCollection? configuredSources=null)
     {
         this.choices=choices;this.properties=properties;this.normalization=normalization;
-        interner=LegacyOwnedMainTextSourceInterner.Prepare(Candidate.RawResult.Owner.SourceDocument);
+        CandidateSource=choices.CandidateSource??LegacyOwnedMainCandidateSource.FromFirst(choices.Candidate,token);
+        interner=LegacyOwnedMainTextSourceInterner.Prepare(CandidateSource.SourceDocument);
         selections=LegacyOwnedFreshTextSourceContext.Prepare(interner.Document);
         CompletedSources=completedSources;
-        WordSourceCollection=completedSources?.Sources??LegacyOwnedMainWordSourceCollection.ExportBeforeWordAugmentation(Candidate,token);
+        CompletedConfiguredSources=completedConfiguredSources;
+        WordSourceCollection=configuredSources??completedSources?.Sources??LegacyOwnedMainWordSourceCollection.ExportBeforeWordAugmentation(Candidate,token);
     }
     public static LegacyFreshMainTextSourceWrapper Prepare(ReadOnlySpan<byte> resource,
         LegacyFreshMainCompletedFirstCandidate candidate,LegacyCursiveSeparationTable table,
@@ -143,13 +149,27 @@ public sealed class LegacyFreshMainTextSourceWrapper : IDisposable
             properties,normalization,token,actualCompletion);
     }
 
+    /// <summary>Bounded024F30 projection for one actual configured candidate
+    /// after successful shared-span TOP source completion. The same26N source
+    /// allocation is retained; document acceptance/context merging is separate.</summary>
+    public static LegacyFreshMainTextSourceWrapper PrepareCompletedConfiguredSources(ReadOnlySpan<byte> resource,
+        LegacyFreshMainConfiguredNoCandidateSourceCompletion actualCompletion,LegacyOwnedMainCandidateSource actualCandidate,
+        LegacyCursiveSeparationTable table,LegacyNativeTextPublicationData properties,
+        LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(actualCompletion);ArgumentNullException.ThrowIfNull(actualCandidate);
+        var sources=actualCompletion.SourcesFor(actualCandidate,token);
+        return new(LegacyFreshMainTextGlyphChoices.PrepareConfigured(resource,actualCandidate,table,properties,normalization,circles,token),
+            properties,normalization,token,completedConfiguredSources:actualCompletion,configuredSources:sources);
+    }
+
     public IReadOnlyList<LegacyOwnedMainTextSourceWord> Publish(ReadOnlySpan<byte> recordAllocation40,
         ReadOnlySpan<byte> selectionAllocation4,CancellationToken token=default)
     {
         ObjectDisposedException.ThrowIf(disposed,this);choices.BeginPublication(recordAllocation40,selectionAllocation4,token);
         var words=new List<LegacyOwnedMainTextSourceWord>();var operations=LegacyOwnedRawInkRangeOperations.Prepare(interner.Document);
         int referenceCount=0;
-        foreach(var projected in Candidate.RawWordsInNativeHeadOrder)
+        foreach(var projected in CandidateSource.CopyRawWordsInNativeHeadOrder(token))
         {
             token.ThrowIfCancellationRequested();var word=projected.Publication.PublishedWord!;
             if(word.Word.FlatReferences.Count>4096-referenceCount)throw new NotSupportedException("Wrapper reference budget exceeded.");

@@ -2,6 +2,7 @@ using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("LegacyMainTextSourceWrapper.Probe")]
+[assembly: InternalsVisibleTo("LegacyMainConfiguredTextSourceWrapper.Probe")]
 
 namespace InkRecognition;
 
@@ -47,7 +48,7 @@ public sealed class LegacyOwnedMainProcessedTextWordSources
     private bool failed;
     public LegacyFreshMainTextGlyphChoices Choices {get;}
     public LegacyNativePublishedWordNode Word=>sources.Word;
-    public LegacyOwnedRawInkDocument Document=>Choices.Candidate.RawResult.Owner.SourceDocument;
+    public LegacyOwnedRawInkDocument Document=>Choices.CandidateSource?.SourceDocument??Choices.Candidate.RawResult.Owner.SourceDocument;
     public int Count=>ranges.Length;
     public int NextIndex=>next;
     internal LegacyOwnedMainProcessedTextWordSources(LegacyFreshMainTextGlyphChoices choices,
@@ -58,7 +59,7 @@ public sealed class LegacyOwnedMainProcessedTextWordSources
         Choices=choices;sources=actualSources;operations=LegacyOwnedRawInkRangeOperations.Prepare(Document);
         originalRanges=sources.CopyOriginalRanges();int count=Word.Word.FlatReferences.Count;
         ranges=new LegacyNativeInkPositionRange[count][];skipped=new bool[count];positive=new bool[count];specialJoiner=new bool[count];
-        var alphabet=choices.Candidate.Snapshot.SourcePolicy.Model.AcousticAlphabet;
+        var alphabet=choices.CandidateSource?.SourcePolicy.Model.AcousticAlphabet??choices.Candidate.Snapshot.SourcePolicy.Model.AcousticAlphabet;
         bool hasJoiner=alphabet.TryGetLabel("\u200d",out ushort joiner);
         for(int i=0;i<count;i++)
         {
@@ -86,10 +87,10 @@ public sealed class LegacyOwnedMainProcessedTextWordSources
                 skipped,positive,specialJoiner,current,token);
             bool ordinary=result.Ordinary;var key=result.Key;
             ranges[current]=key;next++;
-            var raw=Choices.Candidate.RawResult;
-            if(raw.Sampled.Owner.SourceDescriptorOrdinal!=0)
+            var sampled=Choices.CandidateSource?.Sampled??Choices.Candidate.RawResult.Sampled;
+            if(sampled.Owner.SourceDescriptorOrdinal!=0)
                 throw new NotSupportedException("Only actual single-descriptor raw group0 is supported.");
-            int line=positive[current]?raw.Sampled.Owner.SourceLineId:-1;
+            int line=positive[current]?sampled.Owner.SourceLineId:-1;
             return new(this,selected.SourcePositions,current,selected.Reference,ordinary,line,key.ToArray());
         }
         catch{failed=true;throw;}
