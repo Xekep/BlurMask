@@ -15,14 +15,16 @@ public sealed class LegacyOwnedMainTextSourceNode
     public LegacyOwnedMainTextSourceInterner Owner { get; }
     public int Identity { get; }
     public int RangeCount => ranges.Length;
+    public LegacyOwnedMainProcessedGlyphSource? FirstProcessedSource {get;}
     public LegacyOwnedMainGlyphDocumentPositions FirstSourcePositions => firstSource ??
         throw new InvalidOperationException("Explicitly prepared numeric node has no actual source-position producer.");
     internal LegacyOwnedMainTextSourceNode? Left,Right,Previous,Next;
     internal int Height=1;
     internal ReadOnlySpan<LegacyNativeInkPositionRange> Key=>ranges;
     internal LegacyOwnedMainTextSourceNode(LegacyOwnedMainTextSourceInterner owner,int identity,
-        LegacyNativeInkPositionRange[] key,LegacyOwnedMainGlyphDocumentPositions? source)
-    {Owner=owner;Identity=identity;ranges=key;firstSource=source;}
+        LegacyNativeInkPositionRange[] key,LegacyOwnedMainGlyphDocumentPositions? source,
+        LegacyOwnedMainProcessedGlyphSource? processed=null)
+    {Owner=owner;Identity=identity;ranges=key;firstSource=source;FirstProcessedSource=processed;}
     public byte[] CopyRanges16()
     {
         byte[] bytes=new byte[ranges.Length*16];
@@ -63,11 +65,22 @@ public sealed class LegacyOwnedMainTextSourceInterner
         return InternCore(positions.Ranges.ToArray(),positions,token);
     }
 
+    public LegacyOwnedMainTextSourceInternResult Intern(LegacyOwnedMainProcessedGlyphSource actualSource,
+        CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(actualSource);token.ThrowIfCancellationRequested();
+        if(!ReferenceEquals(actualSource.Owner.Document,Document)||
+            !ReferenceEquals(actualSource.OriginalPositions.Document,Document))
+            throw new ArgumentException("Processed source key from this identical NEW document required.");
+        return InternCore(actualSource.CopyRanges(),actualSource.OriginalPositions,token,actualSource);
+    }
+
     internal LegacyOwnedMainTextSourceInternResult InternPrepared(ReadOnlySpan<LegacyNativeInkPositionRange> key,
         CancellationToken token=default)=>InternCore(key.ToArray(),null,token);
 
     private LegacyOwnedMainTextSourceInternResult InternCore(LegacyNativeInkPositionRange[] key,
-        LegacyOwnedMainGlyphDocumentPositions? source,CancellationToken token)
+        LegacyOwnedMainGlyphDocumentPositions? source,CancellationToken token,
+        LegacyOwnedMainProcessedGlyphSource? processed=null)
     {
         token.ThrowIfCancellationRequested();
         if(key.Length>65536)throw new ArgumentOutOfRangeException(nameof(key));
@@ -85,7 +98,7 @@ public sealed class LegacyOwnedMainTextSourceInterner
             token.ThrowIfCancellationRequested();
             //No callbacks/cancellation occur once links are changed. Native
             //01B4E0 has no cancellation callback inside its AVL mutation.
-            var node=new LegacyOwnedMainTextSourceNode(this,inserted.Count+1,key,source);
+            var node=new LegacyOwnedMainTextSourceNode(this,inserted.Count+1,key,source,processed);
             if(inserted.Count!=0){node.Previous=inserted[^1];inserted[^1].Next=node;}
             root=Insert(root,node);inserted.Add(node);rangeCount+=key.Length;
             return new(node,true);

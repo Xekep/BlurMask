@@ -64,6 +64,17 @@ public sealed class LegacyOwnedFreshTextSourceContext
     public IReadOnlyList<LegacyOwnedFreshTextSelection> CopyPendingSelections()
     {lock(gate)return Array.AsReadOnly(commands.ToArray());}
 
+    public LegacyOwnedFreshTextSelection CreateCharacterSelection(LegacyOwnedMainProcessedGlyphSource actualSource,
+        CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(actualSource);token.ThrowIfCancellationRequested();
+        if(!ReferenceEquals(actualSource.Owner.Document,Document)||!actualSource.IsOrdinarySource)
+            throw new ArgumentException("Actual positive processed source from this identical NEW raw root required.");
+        long output=-1;
+        return CreateCore(actualSource.CopyRanges(),0,ref output,0,token)??
+            throw new InvalidOperationException("Fresh processed selection registration failed.");
+    }
+
     //Explicit allocator-stage failures and arbitrary already-prepared keys
     //are numeric controls only; production accepts actual owned positions.
     internal LegacyOwnedFreshTextSelection? CreatePrepared(ReadOnlySpan<LegacyNativeInkPositionRange> ranges,
