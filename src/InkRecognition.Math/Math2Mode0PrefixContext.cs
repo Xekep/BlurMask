@@ -8,7 +8,7 @@ namespace InkRecognition.Math;
 /// <summary>Cold no-import/no-detection prefix and tensor ownership. Width,
 /// temperature and delta remain prepared controller inputs; this is not the
 /// EEE search scheduler or a final-hypothesis/acceptance implementation.</summary>
-internal sealed class Math2Mode0PrefixContext : IDisposable
+internal sealed partial class Math2Mode0PrefixContext : IDisposable
 {
     private readonly object gate = new();
     private readonly Math2Mode0TensorState state;
@@ -84,6 +84,7 @@ internal sealed class Math2Mode0PrefixContext : IDisposable
             ArgumentNullException.ThrowIfNull(selected);
             Check(); token.ThrowIfCancellationRequested();
             CheckStep(selected.Step);
+            selected.Step.ValidateCompletedSelection(selected);
             selected.Rows.Check();
             if (selected.Rows.Count > BeamWidth)
                 throw new ArgumentException("Selected rows exceed this exact prefix context's width.");
@@ -137,7 +138,7 @@ internal sealed class Math2Mode0PrefixContext : IDisposable
         lock (gate)
         {
             if (disposed) return;
-            disposed = true; pending = null; state.Dispose();
+            disposed = true; pending = null; completedRecords?.Dispose(); state.Dispose();
         }
     }
 }
@@ -197,7 +198,7 @@ internal sealed class Math2Mode0PrefixGeneration
     }
 }
 
-internal sealed class Math2Mode0PrefixStep
+internal sealed partial class Math2Mode0PrefixStep
 {
     private readonly Math2Mode0PrefixContext owner;
     internal Math2Mode0DecoderStep TensorStep { get; }
@@ -248,17 +249,19 @@ internal sealed class Math2Mode0PrefixSelection
 {
     internal Math2Mode0PrefixStep Step { get; }
     internal Math2Mode0SelectedRows Rows { get; }
+    internal Math2Mode0PrefixCandidates? ActualCandidates { get; }
     internal bool IsDiagnostic => Rows.IsExplicitPreparedSelection;
-    private Math2Mode0PrefixSelection(Math2Mode0PrefixStep step, Math2Mode0SelectedRows rows)
+    private Math2Mode0PrefixSelection(Math2Mode0PrefixStep step, Math2Mode0SelectedRows rows,
+        Math2Mode0PrefixCandidates? actualCandidates = null)
     {
         if (!ReferenceEquals(step.TensorStep, rows.Step))
             throw new ArgumentException("Selected tensor rows must have this exact Step identity.");
-        Step = step; Rows = rows;
+        Step = step; Rows = rows; ActualCandidates = actualCandidates;
     }
     internal static Math2Mode0PrefixSelection FromActual(Math2Mode0PrefixCandidates candidates)
     {
         var owned = candidates.CreateSelectedRows();
-        return new(owned.Step, owned.Rows);
+        return new(owned.Step, owned.Rows, candidates);
     }
     internal static Math2Mode0PrefixSelection FromDiagnostic(Math2Mode0PrefixStep step, ReadOnlySpan<byte> records)
         => new(step, new Math2Mode0SelectedRows(step.TensorStep, records, prepared: true));
@@ -310,7 +313,7 @@ internal sealed class Math2Mode0ActualSidecars
     internal byte[] CopyConditional() => conditional.ToArray();
 }
 
-internal sealed class Math2Mode0PrefixCandidates
+internal sealed partial class Math2Mode0PrefixCandidates
 {
     private readonly Math2Mode0PrefixStep step;
     private readonly Math2Mode0ActualSidecars sidecars;
