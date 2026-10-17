@@ -310,3 +310,33 @@ and pending transaction.2053 independent controls and four real documents
 preserve raw IDs, all200 fractional bins, normalization and allocation failure
 prefixes. Native whole-fragment reservation/copy and separate U separator writes
 are verified; this does not construct DOM nodes or complete BE2 transport.
+
+
+## Checked resource and tensor stages (2026-10-18)
+
+The [FIRST119 wire reader](legacy-first-acoustic119-wire-model.md) now retains
+both actual English cursive FIRST owners and all six aligned107 networks.
+Managed and Native AOT agree over518372 acoustic bytes;181 refusal controls and
+76 coherent truncated tails are checked by an independent raw-resource reader.
+This stage reads weights. It does not execute an English first-stage recognizer
+or bypass the English24C geometry postprocessor. The existing Russian110 reader
+and inference path remain separate.
+
+The [mode0 tensor owner](legacy-math2-mode0-tensor-state.md) now executes the
+actual encoder, initializer and decoder using the official Microsoft CPU runtime.
+Fourteen decoder steps cover repeated parents, expansion, permutation, shrinking
+and105 ownership/lifetime guards. An independent oracle verifies1707680 exact
+cache/input bytes. Four steps additionally carry actual logits through portable
+F32 scoring, BOS masking, heap/EOS kernels and same-step tensor selection.
+The native exp/log dispatch, outer search, configuration and per-beam sidecar
+producers, completed-record ownership and final acceptance remain incomplete.
+The app has not switched to this internal state API.
+
+The [document DOM roadmap](legacy-main-document-dom-roadmap.md) pins the actual
+builder, literal text handling and retained CHAR/WORD/TEXT field sources.
+Detached tree construction, live document edit batches and final document
+acceptance are separate stages; the roadmap itself does not implement them.
+
+These additions do not change the recorded Russian4/9 exact diagnostic result,
+the experimental setting's scope or the released version. They do not establish
+that Russian cursive, automatic text/formula choice or the entire engine is ready.
