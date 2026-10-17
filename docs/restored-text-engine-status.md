@@ -102,12 +102,14 @@ Details: [global compact](legacy-main-global-compact-materialization.md),
 [global protocol consumers](legacy-main-global-protocol-glyph.md),
 [global flush packets](legacy-main-global-glyph-flush.md),
 [global width and packet channels](legacy-main-global-source-width.md),
+[global residual/source metadata](legacy-main-global-residual-source.md),
 [post-result metadata](legacy-main-global-result-terminal.md),
 [later history dispatch](legacy-main-language-dispatch.md),
 [shared WORD choices](legacy-main-shared-word-source-choices.md),
 [source line publication](legacy-main-owned-source-lines.md),
 [pending document TEXT](legacy-main-document-text-selection.md),
-[bounded document line consistency](legacy-main-document-line-consistency.md).
+[bounded document line consistency](legacy-main-document-line-consistency.md),
+[live source gates and exact WORD coverage](legacy-main-post-text-source-coverage.md).
 
 ## Remaining joins
 
@@ -127,11 +129,12 @@ Details: [global compact](legacy-main-global-compact-materialization.md),
   joined; general candidate expansion remains separate. Actual
   first-candidate glyph choices retain an immutable original raw document;
   sampled node/arc keys are not reused as document IDs.
-- Native C20/context source-cache ownership before026090 and the remaining
-  document postprocessors. Source2DA.22A is copied from a live facet result;
-  its constructor value does not establish the runtime branch. Pending
-  CHAR/WORD/TEXT commands and trimmed source guides are not accepted document
-  content.
+- Remaining document postprocessors and retained C20 result-cache/final
+  transport. Fresh source2DA.22Afalse is now derived through the actual
+  frontendV250/context facet/source219 property chain, not its constructor.
+  The scoped single-WORD027670 early return and exact0248D0 WORD-union/TEXT
+  equality are checked. Pending CHAR/WORD/TEXT commands, trimmed source guides
+  and zero residual association do not establish accepted document content.
 - Representative online handwriting evaluation with real pen-up events,
   Russian cursive, English, mixed text and mathematical notation before enabling
   the new path for automatic app replacement.
