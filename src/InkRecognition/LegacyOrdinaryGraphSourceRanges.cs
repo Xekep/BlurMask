@@ -64,11 +64,34 @@ public sealed class LegacyOrdinaryGraphSourceRanges
         var arc=node[arcOrdinal];return ResolveForward(arc.StartContextId,arc.EndContextId,cancellationToken);
     }
 
+    /// <summary>Same owned normal forward path as ResolveCandidate, including
+    /// actual sourceV90/VA0 endpoint remainders exported by1A9AE0.</summary>
+    public LegacyOrdinaryGraphSourceReference[] ResolveCandidateWithResiduals(int endingNode,int arcOrdinal,
+        CancellationToken cancellationToken=default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();var node=Graph.GetNode(endingNode);
+        if((uint)arcOrdinal>=(uint)node.Count)throw new ArgumentOutOfRangeException(nameof(arcOrdinal));
+        var arc=node[arcOrdinal];return ResolveForwardWithResiduals(arc.StartContextId,arc.EndContextId,cancellationToken);
+    }
+
     /// <summary>Only the successful ordinary forward mode0 branch1A9AE0 is
     /// supported. Reverse endpoint, protocol and exceptional source rows are
     /// separate native branches; this method never fabricates their membership.</summary>
     public LegacyFirstResultSourceRange[] ResolveForward(uint firstContext,uint lastContext,
         CancellationToken cancellationToken=default)
+        =>ResolveForwardRows(firstContext,lastContext,cancellationToken)
+            .Select(r=>new LegacyFirstResultSourceRange(r.First.Key,r.Tail?r.Last.Key:r.LastStart.Key)).ToArray();
+
+    /// <summary>Native temporary32-byte row exports First@00/remainder19 and
+    /// tail-selected Last@08/remainder1A or LastStart@10/remainder1B. Preserves
+    /// actual original metadata owner through prepared/current point maps.</summary>
+    public LegacyOrdinaryGraphSourceReference[] ResolveForwardWithResiduals(uint firstContext,uint lastContext,
+        CancellationToken cancellationToken=default)
+        =>ResolveForwardRows(firstContext,lastContext,cancellationToken)
+            .Select(r=>new LegacyOrdinaryGraphSourceReference(r.First.Key,r.Tail?r.Last.Key:r.LastStart.Key,
+                r.First.RemainderByte,r.Tail?r.Last.RemainderByte:r.LastStart.RemainderByte)).ToArray();
+
+    private List<Row> ResolveForwardRows(uint firstContext,uint lastContext,CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         if(firstContext>int.MaxValue||lastContext>int.MaxValue||firstContext>lastContext||
@@ -127,7 +150,7 @@ public sealed class LegacyOrdinaryGraphSourceRanges
             bool adjacent=previous.Tail&&nextIndex<keys.Length&&current.First.Key==keys[nextIndex];
             if(equal||adjacent){rows[i-1]=previous with{Last=current.Last,LastStart=current.LastStart,Tail=current.Tail};rows.RemoveAt(i);}
         }
-        return rows.Select(r=>new LegacyFirstResultSourceRange(r.First.Key,r.Tail?r.Last.Key:r.LastStart.Key)).ToArray();
+        return rows;
     }
 
     private readonly record struct Row(LegacySourcePointIdentity First,LegacySourcePointIdentity Last,

@@ -632,6 +632,9 @@ jobs:
           python tools/LegacyGlyphAlternativeSelection.Probe/reference_controls.py .artifacts/legacy-glyph-alternative-controls.json --audit .artifacts/legacy-glyph-alternative-managed.json
           dotnet run --project tools/LegacyMainFirstAlternative.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-main-first-alternative-managed.json
           python tools/LegacyMainFirstAlternative.Probe/audit_output.py .artifacts/legacy-main-first-alternative-managed.json
+          python tools/LegacyGraphSourceResiduals.Probe/reference_controls.py .artifacts/legacy-graph-source-residual-controls.json
+          dotnet run --project tools/LegacyGraphSourceResiduals.Probe -c Release -- .artifacts/legacy-graph-source-residual-controls.json models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-graph-source-residual-managed.json
+          python tools/LegacyGraphSourceResiduals.Probe/reference_controls.py .artifacts/legacy-graph-source-residual-managed.json --audit
           dotnet run --project tools/LegacyMainWordPacket.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-main-word-packet-managed.json
           python tools/LegacyMainWordPacket.Probe/audit_output.py .artifacts/legacy-main-word-packet-managed.json
           dotnet run --project tools/LegacyMainSourceWidth.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-main-source-width-managed.json
@@ -1108,6 +1111,7 @@ jobs:
             @{ Name = 'LegacyMainPostResultCounts'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-post-counts-native.json') },
             @{ Name = 'LegacyGlyphAlternativeSelection'; Args = @('.artifacts/legacy-glyph-alternative-controls.json', '.artifacts/legacy-glyph-alternative-native.json') },
             @{ Name = 'LegacyMainFirstAlternative'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-main-first-alternative-native.json') },
+            @{ Name = 'LegacyGraphSourceResiduals'; Args = @('.artifacts/legacy-graph-source-residual-controls.json', 'models/ru-RU/ru_RU-ak-cur.lite.res', '.artifacts/legacy-graph-source-residual-native.json') },
             @{ Name = 'LegacyMainWordPacket'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-main-word-packet-native.json') },
             @{ Name = 'LegacyMainSourceWidth'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-main-source-width-native.json') },
             @{ Name = 'LegacyGlyphChainProduction'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-glyph-chain-native.json') },
@@ -1415,6 +1419,10 @@ jobs:
             if ($name -eq 'LegacyMainFirstAlternative') {
               python tools/LegacyMainFirstAlternative.Probe/audit_output.py .artifacts/legacy-main-first-alternative-native.json
               if ($LASTEXITCODE -ne 0) { throw 'Main first alternative snapshot audit failed' }
+            }
+            if ($name -eq 'LegacyGraphSourceResiduals') {
+              python tools/LegacyGraphSourceResiduals.Probe/reference_controls.py .artifacts/legacy-graph-source-residual-native.json --audit
+              if ($LASTEXITCODE -ne 0) { throw 'Source residual metadata independent audit failed' }
             }
             if ($name -eq 'LegacyMainWordPacket') {
               python tools/LegacyMainWordPacket.Probe/audit_output.py .artifacts/legacy-main-word-packet-native.json
