@@ -20,6 +20,9 @@ pins=[(0x18000c92c,'mov','word ptr [rdi + 8], 0x10'),
  (0x180168ba4,'mov','eax, r8d'),(0x180168ba7,'lea','rcx, [rax + rax*4]'),
  (0x180168bab,'mov','rax, qword ptr [r9 + 0x78]'),(0x180168baf,'lea','rax, [rax + rcx*8]'),
  (0x1801abcde,'mov','r8d, dword ptr [rax + 0x10]'),(0x1801abd11,'mov','r9, qword ptr [rax + 0x40]'),
+ (0x1801aaf64,'mov','byte ptr [rcx + 0xd], al'),
+ (0x1801aaf67,'test','r15, r15'),(0x1801aaf6a,'je','0x1801ac0c1'),
+ (0x1801aaf70,'test','r13d, r13d'),(0x1801aaf73,'jle','0x1801ac0c1'),
  (0x1801abd15,'call','r9'),(0x1801a09fa,'mov','dword ptr [rsi + 0x1f0], 0'),
  (0x1801a182e,'mov','dword ptr [rsi + 0x1f0], 0')]
 for a,m,o in pins:pin(a,m,o)
