@@ -16,8 +16,13 @@ with eight ordered groups affecting3095 actual candidates. Its independent
 oracle verifies every shortlist. The [owned119 glyph confidence](legacy-english-owned119-confidence.md)
 now uses the same cached two-network outputs, source-backed primitive
 probabilities and raw label mappings without extra inference.32152 vector
-values/32769 scalar controls pass independent checks and NativeAOT. Word
-confidence and the word controller remain unfinished. These are component
+values/32769 scalar controls pass independent checks and NativeAOT. The new
+[controller cost owner](legacy-english-owned119-controller-costs.md) consumes
+the same cache and source geometry without additional inference;3241 groups
+and2207121 explicit cost requests pass independent raw-resource checks. A
+shared geometry bucket calculation now follows the native F32-to-F64 sequence,
+with233 discriminating controls and unchanged prior global captures. Word
+confidence and the primary word scheduler remain unfinished. These are component
 results, not English quality or app readiness.
 
 The [owned Math2 completion stage](legacy-math2-owned-completed-records.md)
@@ -53,6 +58,16 @@ NativeAOT; this budget is not process RSS. The prepared
 [unused-unit pruning](legacy-math2-unused-unit-pruning.md) also passes4096
 boundary controls and16384 inserted-unit preservation controls.
 
+The [raw-only EF4 owner](legacy-math2-owned-raw-only-ef4.md) now connects actual
+pen input, recording, initial ordering, historical attention, pruning and score
+updates for67 actual records, including19 failure/budget prefixes. It deliberately
+does not accept a supplied existing expression. Final ordering, truncation and
+formula output remain unfinished. Separately prepared
+[column matching](legacy-math2-column-matching.md) and
+[existing-unit correction](legacy-math2-existing-unit-correction.md) pass4100
+and2048 independent finite controls and fresh NativeAOT; they do not establish
+an actual nonempty C25 source or its full EF4 integration.
+
 The [library DOM cache transport](legacy-library-text-dom-transport-cache.md)
 now transfers actual same-source pending C4D and exported BE2 owners with
 failure-safe receipts.4 actual sources/24 commands/3 rows/51 guards pass
@@ -80,8 +95,13 @@ bounded values without retaining the recognition scope. Actual GC checks in
 Managed and NativeAOT verify this distinction; ordinary arena-backed
 snapshots still retain their owner. Concurrent target
 Build/Export versus Apply is serialized and checked with deterministic barriers.
+The [selected INPUT registry replay](legacy-library-selected-input-registry-replay.md)
+now retains an active library overlay of the exact transferred transaction,
+with24 actual selections/40 raw range records/91 guards. Once claimed, a pending
+or faulted replay blocks document apply. This overlay remains distinct from
+the original native SDK receiver and page/history acceptance.
 
-The exact committed app atb9abe8e builds with0 warnings and passes headless
+The exact committed app at4bfdc8a builds with0 warnings and passes headless
 `--ai-pen-test`. Russian diagnostics remain4/9 exact with16/33 character edits;
 no new release or full-engine readiness is asserted. The new
 [recorded error evidence](russian-recorded-error-evidence.md) traces actual
