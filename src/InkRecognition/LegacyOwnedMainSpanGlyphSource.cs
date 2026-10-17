@@ -2,6 +2,7 @@ using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
 
 [assembly:InternalsVisibleTo("LegacyMainSpanGlyphRefresh.Probe")]
+[assembly:InternalsVisibleTo("LegacyMainConfiguredSpanEmission.Probe")]
 
 namespace InkRecognition;
 
@@ -37,12 +38,16 @@ public sealed class LegacyOwnedMainSpanGlyphSource
     private readonly LegacySourcePointIdentity[][] points,ends;
     private readonly LegacyInkRange[][] ranges;
     private readonly LegacySourcePointKey[] originalKeys;
-    public LegacyFreshMainSingleLinePlainRecognitionResult RawResult {get;}
+    private readonly LegacyFreshMainSingleLinePlainRecognitionResult? rawResult;
+    public LegacyOwnedMainCandidateSource? CandidateSource {get;}
+    public LegacyFreshMainSingleLinePlainRecognitionResult RawResult=>rawResult??
+        throw new InvalidOperationException("Configured span source has no count1 raw result.");
     public LegacyOrdinaryCursiveCandidateGraph Graph=>source.Graph;
-    private LegacyOwnedMainSpanGlyphSource(LegacyFreshMainSingleLinePlainRecognitionResult raw,
+    private LegacyOwnedMainSpanGlyphSource(LegacyFreshMainSingleLinePlainRecognitionResult? raw,
+        LegacyOwnedMainCandidateSource? candidate,
         LegacyOrdinaryGraphSourceRanges source,LegacySourcePointKey[] keys,CancellationToken token)
     {
-        RawResult=raw;this.source=source;originalKeys=keys;
+        rawResult=raw;CandidateSource=candidate;this.source=source;originalKeys=keys;
         var chronology=source.PreparedChronology;var original=source.OriginalSource;
         int[] counts=chronology.StrokePointCounts.ToArray();
         points=new LegacySourcePointIdentity[counts.Length][];ends=new LegacySourcePointIdentity[counts.Length][];
@@ -59,12 +64,31 @@ public sealed class LegacyOwnedMainSpanGlyphSource
         CancellationToken token=default)
     {
         ArgumentNullException.ThrowIfNull(actualResult);token.ThrowIfCancellationRequested();
-        var sampled=actualResult.Sampled;var ownership=actualResult.Session.Ownership;
+        if(actualResult.Session.Ownership.SecondaryTerminal is not null)
+            throw new ArgumentException("Configured sources require PrepareConfigured and their actual selected candidate.");
+        return PrepareCore(actualResult,null,actualResult.Sampled,actualResult.Session.Ownership,token);
+    }
+
+    /// <summary>Same ordinary reverse export over the actual selected2410
+    /// candidate. Its source snapshot and candidate identity remain separate
+    /// from other alternatives sharing the raw input and TOP.</summary>
+    public static LegacyOwnedMainSpanGlyphSource PrepareConfigured(LegacyOwnedMainCandidateSource candidate,
+        CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(candidate);candidate.Validate(token);
+        if(!candidate.IsConfigured)throw new ArgumentException("Actual configured candidate required.");
+        return PrepareCore(null,candidate,candidate.Sampled,candidate.Ownership,token);
+    }
+
+    private static LegacyOwnedMainSpanGlyphSource PrepareCore(LegacyFreshMainSingleLinePlainRecognitionResult? raw,
+        LegacyOwnedMainCandidateSource? candidate,LegacyFreshMainSingleLineSampled sampled,
+        LegacyFreshMainPlainResultOwnership ownership,CancellationToken token)
+    {
         var controller=ownership.Controller;var span=controller.Owner;
         byte[] descriptor=sampled.Owner.CopyDescriptor().ToArray();
         if(!ReferenceEquals(span.MainLineSource,sampled)||!ReferenceEquals(span.SourceGraph,sampled.SourceRanges.Graph)||
-            !ReferenceEquals(ownership.Materialization.ConfidenceOwner.Graph,sampled.SourceRanges.Graph)||
-            ownership.Materialization.ConfidenceOwner.Model.SourceKind!=0x135||
+            !ReferenceEquals(ownership.SelectedOwner.ConfidenceOwner.Graph,sampled.SourceRanges.Graph)||
+            ownership.SelectedOwner.ConfidenceOwner.Model.SourceKind!=0x135||
             sampled.Owner.SourceDescriptorOrdinal!=0||descriptor.Length<44||
             (BinaryPrimitives.ReadUInt16LittleEndian(descriptor)&15)!=0||
             BinaryPrimitives.ReadInt32LittleEndian(descriptor.AsSpan(36))!=0||
@@ -82,7 +106,7 @@ public sealed class LegacyOwnedMainSpanGlyphSource
                 throw new ArgumentException("Complete actual originalF8 key-record owner required.");
             keys[id.KeyRecordIndex]=id.Key;assigned[id.KeyRecordIndex]=true;
         }
-        return new(actualResult,source,keys,token);
+        return new(raw,candidate,source,keys,token);
         static int chronologyCount(LegacyFreshMainSingleLineSampled sampled)=>sampled.Chronology.StrokePointCounts.Length;
     }
 
@@ -92,6 +116,7 @@ public sealed class LegacyOwnedMainSpanGlyphSource
     public LegacyOwnedMainSpanGlyphSourceResult Read(ulong canonicalSpanKey,CancellationToken token=default)
     {
         token.ThrowIfCancellationRequested();
+        CandidateSource?.Validate(token);
         if(canonicalSpanKey!=LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(canonicalSpanKey))
             throw new ArgumentException("Canonical span owner key required, without a glyph-alternative ordinal.");
         int last=(unchecked((int)canonicalSpanKey)<<8)>>8;

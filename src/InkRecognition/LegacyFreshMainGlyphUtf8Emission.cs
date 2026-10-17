@@ -11,7 +11,10 @@ public sealed class LegacyFreshMainGlyphUtf8Emission
 {
     private readonly LegacyNativeUnicodeNormalizationData normalization;
     private readonly LegacyNativeCircledPayloadData circles;
-    public LegacyFreshMainSingleLinePlainRecognitionResult RawResult { get; }
+    private readonly LegacyFreshMainSingleLinePlainRecognitionResult? rawResult;
+    public LegacyOwnedMainCandidateSource? CandidateSource { get; }
+    public LegacyFreshMainSingleLinePlainRecognitionResult RawResult => rawResult ??
+        throw new InvalidOperationException("Configured emission has no count1 raw result.");
     public LegacyFreshMainPlainResultOwnership TopOwner { get; }
     public LegacyInkAlphabet PrimaryAlphabet { get; }
     /// <summary>Engine2A050A20 creates an empty, non-inserting lookup owner.
@@ -24,9 +27,33 @@ public sealed class LegacyFreshMainGlyphUtf8Emission
     private LegacyFreshMainGlyphUtf8Emission(LegacyFreshMainSingleLinePlainRecognitionResult raw,
         LegacyNativeUnicodeNormalizationData normalization, LegacyNativeCircledPayloadData circles)
     {
-        RawResult = raw; TopOwner = raw.Session.Ownership.TopOwner;
+        rawResult = raw; TopOwner = raw.Session.Ownership.TopOwner;
         PrimaryAlphabet = raw.Session.Plan.SourcePolicy.Model.AcousticAlphabet;
         this.normalization = normalization; this.circles = circles;
+    }
+
+    private LegacyFreshMainGlyphUtf8Emission(LegacyOwnedMainCandidateSource candidate,
+        LegacyNativeUnicodeNormalizationData normalization, LegacyNativeCircledPayloadData circles)
+    {
+        CandidateSource = candidate; TopOwner = candidate.TopOwner;
+        PrimaryAlphabet = candidate.SourcePolicy.Model.AcousticAlphabet;
+        this.normalization = normalization; this.circles = circles;
+    }
+
+    /// <summary>Same273.V50 emission over the actual configured TOP. Fresh
+    /// input170..18F vectors and control2A remain the proved empty owners;
+    /// setting main short18 cannot populate either independent source vector.</summary>
+    public static LegacyFreshMainGlyphUtf8Emission PrepareConfigured(LegacyOwnedMainCandidateSource candidate,
+        LegacyNativeUnicodeNormalizationData normalization, LegacyNativeCircledPayloadData circles,
+        CancellationToken token = default)
+    {
+        ArgumentNullException.ThrowIfNull(candidate); ArgumentNullException.ThrowIfNull(normalization);
+        ArgumentNullException.ThrowIfNull(circles); candidate.Validate(token);
+        if (!candidate.IsConfigured || candidate.SourcePolicy.HasAssociatedSource ||
+            candidate.SourcePolicy.Controller.Configuration.Trace2368 != 0 ||
+            candidate.SourcePolicy.Controller.Refresh.SourceFormat22f9 != 0)
+            throw new ArgumentException("Actual completed fresh configured nontracing source/TOP required.");
+        token.ThrowIfCancellationRequested(); return new(candidate, normalization, circles);
     }
 
     public static LegacyFreshMainGlyphUtf8Emission Prepare(LegacyFreshMainSingleLinePlainRecognitionResult raw,
@@ -60,6 +87,7 @@ public sealed class LegacyFreshMainGlyphUtf8Emission
     public byte[] Emit(LegacyNativeOwnedGlyphRecord glyph, CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(glyph); token.ThrowIfCancellationRequested();
+        CandidateSource?.Validate(token);
         byte[] actual = TopOwner.GlyphPool.CopyRecord(glyph.Reference, token);
         if (!actual.AsSpan().SequenceEqual(glyph.ReadRecord()))
             throw new ArgumentException("Current identical TOP glyph reference and complete record required.");

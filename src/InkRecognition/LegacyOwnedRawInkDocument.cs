@@ -89,6 +89,35 @@ public sealed class LegacyOwnedRawInkDocument
         return new(this, actualCandidate, actualSource, projected);
     }
 
+    /// <summary>Negative-span insertion projection for the same genuine selected
+    /// candidate and original document. A negative span is an insertion source,
+    /// not an ordinary closed glyph interval and has no residual allocation.</summary>
+    public LegacyOwnedMainGlyphDocumentPositions ProjectSpanCandidate(LegacyOwnedMainCandidateSource actualCandidate,
+        LegacyOwnedMainSpanGlyphSourceResult actualSource, CancellationToken token = default)
+    {
+        ArgumentNullException.ThrowIfNull(actualCandidate); ArgumentNullException.ThrowIfNull(actualSource);
+        actualCandidate.Validate(token);
+        var sourceCandidate = actualSource.Owner.CandidateSource;
+        if (!ReferenceEquals(actualCandidate.SourceDocument, this) ||
+            (actualCandidate.IsConfigured
+                ? sourceCandidate is null || !ReferenceEquals(sourceCandidate.CandidateIdentity, actualCandidate.CandidateIdentity) ||
+                  !ReferenceEquals(sourceCandidate.Ownership, actualCandidate.Ownership) ||
+                  !ReferenceEquals(sourceCandidate.SourceOverlay, actualCandidate.SourceOverlay)
+                : sourceCandidate is not null || !ReferenceEquals(actualSource.Owner.RawResult, actualCandidate.RawResult)))
+            throw new ArgumentException("Actual selected span, candidate and original document must have the same ownership.");
+        var references = new LegacyNativeTextSourceReference[actualSource.ReferenceCount];
+        for (int i = 0; i < references.Length; i++)
+        {
+            token.ThrowIfCancellationRequested(); var source = actualSource.References[i];
+            if (source.First.First != 0 || source.Last.First != 0)
+                throw new NotSupportedException("This raw root owns ordinary ingress group0 only.");
+            references[i] = new(new(source.First.First, source.First.Second, source.First.Third),
+                new(source.Last.First, source.Last.Second, source.Last.Third));
+        }
+        var projected = LegacyNativeTextSourcePositionPublication.Project(map, references, false, [originalRange], token);
+        return new(this, actualCandidate, actualSource, projected);
+    }
+
     /// <summary>05AFA0 negative-span insertion positions. These mode4 positions
     /// are not ordinary closed glyph ranges and have no residual tail.</summary>
     public LegacyOwnedMainGlyphDocumentPositions Project(LegacyFreshMainSingleLinePlainRecognitionResult actualResult,
@@ -134,6 +163,14 @@ public sealed class LegacyOwnedMainGlyphDocumentPositions
         LegacyNativeInkPositionRange[] ranges)
     {
         Document = document; CandidateSource = candidate; OrdinarySource = source;
+        result = candidate.IsConfigured ? null : candidate.RawResult;
+        Ranges = Array.AsReadOnly(ranges);
+    }
+    internal LegacyOwnedMainGlyphDocumentPositions(LegacyOwnedRawInkDocument document,
+        LegacyOwnedMainCandidateSource candidate, LegacyOwnedMainSpanGlyphSourceResult source,
+        LegacyNativeInkPositionRange[] ranges)
+    {
+        Document = document; CandidateSource = candidate; SpanSource = source;
         result = candidate.IsConfigured ? null : candidate.RawResult;
         Ranges = Array.AsReadOnly(ranges);
     }
