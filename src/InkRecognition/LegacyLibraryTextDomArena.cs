@@ -46,8 +46,11 @@ public sealed class LegacyLibraryTextDomNamePool
 {
     private readonly Dictionary<string,int> names=new(StringComparer.Ordinal);
     private readonly object gate=new();
-    public LegacyFreshMainTextDocumentSeed Seed {get;}
-    internal LegacyLibraryTextDomNamePool(LegacyFreshMainTextDocumentSeed seed){Seed=seed;}
+    private readonly LegacyFreshMainTextDocumentSeed? seed;
+    public LegacyFreshMainTextDocumentSeed Seed=>seed??throw new InvalidOperationException("This pre-publication INPUT name owner has no result Seed.");
+    public LegacyOwnedRawInkDocument Document {get;}
+    internal LegacyLibraryTextDomNamePool(LegacyFreshMainTextDocumentSeed seed){this.seed=seed;Document=seed.Document;}
+    internal LegacyLibraryTextDomNamePool(LegacyFreshTextFieldInputContext input){Document=input.Document;}
     internal (int Identity,bool Added) Intern(string name)
     {lock(gate){if(names.TryGetValue(name,out int id))return(id,false);id=names.Count+1;names.Add(name,id);return(id,true);}}
     public IReadOnlyList<string> CopyNames(){lock(gate)return Array.AsReadOnly(names.OrderBy(n=>n.Value).Select(n=>n.Key).ToArray());}
@@ -58,8 +61,9 @@ public sealed class LegacyLibraryTextDomNamePool
 /// including native-unattached failed nodes until the arena is collected.</summary>
 public sealed class LegacyLibraryTextDomArena
 {
-    public LegacyFreshMainTextDocumentSeed Seed {get;}
-    public LegacyOwnedRawInkDocument Document=>Seed.Document;
+    private readonly LegacyFreshMainTextDocumentSeed? seed;
+    public LegacyFreshMainTextDocumentSeed Seed=>seed??throw new InvalidOperationException("This pre-publication INPUT arena has no result Seed.");
+    public LegacyOwnedRawInkDocument Document {get;}
     public bool IsParameterizedNoHistory=>true;
     public LegacyLibraryTextDomNamePool NamePool {get;}
     private readonly List<LegacyDomNode> nodes=[];
@@ -67,9 +71,11 @@ public sealed class LegacyLibraryTextDomArena
     private int failAt,cancelAt;
     private int attempts;
     internal LegacyLibraryTextDomArena(LegacyFreshMainTextDocumentSeed seed,int failAt=-1,int cancelAt=-1)
-    {Seed=seed;NamePool=new(seed);this.failAt=failAt;this.cancelAt=cancelAt;}
+    {this.seed=seed;Document=seed.Document;NamePool=new(seed);this.failAt=failAt;this.cancelAt=cancelAt;}
     internal LegacyLibraryTextDomArena(LegacyFreshMainTextDocumentSeed seed,LegacyLibraryTextDomNamePool sharedNames,int failAt=-1,int cancelAt=-1)
-    {if(!ReferenceEquals(seed,sharedNames.Seed))throw new ArgumentException("Foreign BEE name owner.");Seed=seed;NamePool=sharedNames;this.failAt=failAt;this.cancelAt=cancelAt;}
+    {if(!ReferenceEquals(seed,sharedNames.Seed))throw new ArgumentException("Foreign BEE name owner.");this.seed=seed;Document=seed.Document;NamePool=sharedNames;this.failAt=failAt;this.cancelAt=cancelAt;}
+    internal LegacyLibraryTextDomArena(LegacyFreshTextFieldInputContext input,int failAt=-1,int cancelAt=-1)
+    {Document=input.Document;NamePool=new(input);this.failAt=failAt;this.cancelAt=cancelAt;}
     internal void BeginFaultScope(int fail=-1,int cancel=-1)
     {if(fail< -1||cancel< -1)throw new ArgumentOutOfRangeException(nameof(fail));failAt=fail<0?-1:checked(attempts+fail);cancelAt=cancel<0?-1:checked(attempts+cancel);}
     internal IReadOnlyList<string> Trace=>trace.AsReadOnly();

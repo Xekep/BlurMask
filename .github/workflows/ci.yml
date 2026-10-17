@@ -764,6 +764,8 @@ jobs:
           python tools/LegacyLibraryTextDomTarget.Probe/audit_output.py .artifacts/legacy-library-text-dom-target-managed.json
           dotnet run --project tools/LegacyLibraryTextDomTransport.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json models/text-unicode/legacy-circled-payload-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-library-text-dom-transport-managed.json
           python tools/LegacyLibraryTextDomTransport.Probe/audit_output.py .artifacts/legacy-library-text-dom-transport-managed.json
+          dotnet run --project tools/LegacyTextProcessingContext.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json models/text-unicode/legacy-circled-payload-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-text-processing-context-managed.json
+          python tools/LegacyTextProcessingContext.Probe/audit_output.py .artifacts/legacy-text-processing-context-managed.json
           dotnet run --project tools/LegacyContextualQuoteRules.Probe -c Release -- .artifacts/legacy-contextual-quotes-managed.json
           python tools/LegacyContextualQuoteRules.Probe/audit_output.py .artifacts/legacy-contextual-quotes-managed.json
           dotnet run --project tools/LegacyPreparedGlyphRewrite.Probe -c Release -- models .artifacts/legacy-prepared-glyph-rewrite-managed.json
@@ -1430,6 +1432,7 @@ jobs:
             @{ Name = 'LegacyMainDetachedTextDom'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-detached-text-dom-native.json') },
             @{ Name = 'LegacyLibraryTextDomTarget'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-library-text-dom-target-native.json') },
             @{ Name = 'LegacyLibraryTextDomTransport'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-library-text-dom-transport-native.json') },
+            @{ Name = 'LegacyTextProcessingContext'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-text-processing-context-native.json') },
             @{ Name = 'LegacyContextualQuoteRules'; Args = @('.artifacts/legacy-contextual-quotes-native.json') },
             @{ Name = 'LegacyPreparedGlyphRewrite'; Args = @('models', '.artifacts/legacy-prepared-glyph-rewrite-native.json') },
             @{ Name = 'LegacySource247Wire'; Args = @('models', '.artifacts/legacy-source247-wire-native.json') },
@@ -2033,6 +2036,10 @@ jobs:
             if ($name -eq 'LegacyLibraryTextDomTransport') {
               python tools/LegacyLibraryTextDomTransport.Probe/audit_output.py .artifacts/legacy-library-text-dom-transport-native.json
               if ($LASTEXITCODE -ne 0) { throw 'LegacyLibraryTextDomTransport independent audit failed' }
+            }
+            if ($name -eq 'LegacyTextProcessingContext') {
+              python tools/LegacyTextProcessingContext.Probe/audit_output.py .artifacts/legacy-text-processing-context-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyTextProcessingContext independent audit failed' }
             }
             if ($name -eq 'LegacyContextualQuoteRules') {
               python tools/LegacyContextualQuoteRules.Probe/audit_output.py .artifacts/legacy-contextual-quotes-native.json
