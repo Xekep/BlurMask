@@ -27,7 +27,10 @@ public sealed class LegacyFreshMainGlobalControlImport
     private readonly LegacyImportedControlWord[] words;
     private int started;
     private bool complete,stopped;
-    public LegacyFreshMainGlobalFirstAlternativeSnapshot Source {get;}
+    private readonly LegacyGlobalControlImportSource source;
+    public LegacyFreshMainGlobalFirstAlternativeSnapshot Source => source.RequireOld();
+    public LegacyFreshMainGlobalPublishedFirstAlternativeSnapshot PublishedSource => source.RequirePublished();
+    internal LegacyFreshMainGlobalWordControllerPolicy CommonSourcePolicy => source.Policy;
     public LegacyNativeGlyphControlImport ImportedPool {get;}
     public IReadOnlyList<LegacyImportedControlWord> Words {get;}
     public bool Succeeded=>complete&&!stopped&&ImportedPool.Succeeded;
@@ -38,26 +41,36 @@ public sealed class LegacyFreshMainGlobalControlImport
     /// <summary>13B5A0 reserves count+1 even for empty alternate bytes. Its
     /// unused allocation byte has no modeled value; no NUL is invented.</summary>
     public int AlternateByteCapacity {get;private set;}
-    private LegacyFreshMainGlobalControlImport(LegacyFreshMainGlobalFirstAlternativeSnapshot source,
+    private LegacyFreshMainGlobalControlImport(LegacyGlobalControlImportSource source,
         LegacyNativeGlyphRecordNode[] nodes,LegacyNativePublishedWordNode[] sourceWords,LegacyImportedControlWord[] words)
     {
-        Source=source;originalNodes=nodes;this.sourceWords=sourceWords;this.words=words;Words=Array.AsReadOnly(words);
-        ImportedPool=new(nodes,source.SourcePolicy.Owner.Model.AcousticAlphabet);
+        this.source=source;originalNodes=nodes;this.sourceWords=sourceWords;this.words=words;Words=Array.AsReadOnly(words);
+        ImportedPool=new(nodes,source.Policy.Owner.Model.AcousticAlphabet);
     }
     public static LegacyFreshMainGlobalControlImport Prepare(LegacyFreshMainGlobalFirstAlternativeSnapshot source,
         CancellationToken token=default)
+        => PrepareCore(LegacyGlobalControlImportSource.FromOld(source),token);
+
+    /// <summary>Snapshot the actual published-positive WORD/pool lineage;
+    /// the old Source getter remains strict old-only. No old snapshot or
+    /// terminal is manufactured and the dynamic control2A remains separate.</summary>
+    public static LegacyFreshMainGlobalControlImport PreparePublished(LegacyFreshMainGlobalPublishedFirstAlternativeSnapshot source,
+        CancellationToken token=default)
+        => PrepareCore(LegacyGlobalControlImportSource.FromPublished(source),token);
+
+    private static LegacyFreshMainGlobalControlImport PrepareCore(LegacyGlobalControlImportSource source,CancellationToken token)
     {
-        ArgumentNullException.ThrowIfNull(source);token.ThrowIfCancellationRequested();
-        var session=source.Session;var ownership=session.Ownership;var policy=source.SourcePolicy;
-        source.Terminal.PassResult.ValidateResultQueryLease(token);
-        if(!session.IsComplete||session.IsStopped||!ReferenceEquals(source.Terminal,ownership.Materialization.TerminalResult)||
-            !ReferenceEquals(source.WordHead18,ownership.WordPublisher.Head)||source.ActiveAlternativeCount60!=1||
+        token.ThrowIfCancellationRequested();
+        var session=source.Session;var ownership=session.Ownership;var policy=source.Policy;
+        source.ValidateSelection(token);
+        if(!session.IsComplete||session.IsStopped||
+            !ReferenceEquals(source.Head,ownership.WordPublisher.Head)||source.ActiveAlternativeCount!=1||
             policy.HasAssociatedSource||policy.Configuration.Trace2368!=0||policy.Refresh.SourceFormat22f9!=0||
             policy.Owner.Model.SourceKind!=0x135)
             throw new ArgumentException("Actual completed same-owner fresh plain global first alternative required.");
         var sourceWords=new List<LegacyNativePublishedWordNode>();var words=new List<LegacyImportedControlWord>();
         var nodes=ownership.GlyphPool.CopyOwnerNodes(token).ToArray();var records=new LegacyNativeGlyphRecordOwner(nodes);
-        for(var node=source.WordHead18;node is not null;node=node.Next)
+        for(var node=source.Head;node is not null;node=node.Next)
         {
             token.ThrowIfCancellationRequested();
             if(sourceWords.Count==4096||!ReferenceEquals(node.Word.Pool,ownership.GlyphPool))
@@ -85,9 +98,9 @@ public sealed class LegacyFreshMainGlobalControlImport
     }
     private void ValidateSource(CancellationToken token)
     {
-        token.ThrowIfCancellationRequested();Source.Terminal.PassResult.ValidateResultQueryLease(token);
-        var session=Source.Session;
-        if(!session.IsComplete||session.IsStopped||!ReferenceEquals(Source.WordHead18,session.Ownership.WordPublisher.Head))
+        token.ThrowIfCancellationRequested();source.ValidateSelection(token);
+        var session=source.Session;
+        if(!session.IsComplete||session.IsStopped||!ReferenceEquals(source.Head,session.Ownership.WordPublisher.Head))
             throw new InvalidOperationException("Original result lifecycle changed after import snapshot preparation.");
         var current=session.Ownership.GlyphPool.CopyOwnerNodes(token);
         if(current.Count!=originalNodes.Length)throw new InvalidOperationException("Original glyph pool changed after snapshot preparation.");
