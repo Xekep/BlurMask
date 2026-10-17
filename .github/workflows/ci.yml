@@ -2912,6 +2912,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native segmentation sigmoid failed.' }
           python tools/LegacyMathSegmentation.Probe/audit_output.py .artifacts/math-segmentation-native.json
           if ($LASTEXITCODE -ne 0) { throw 'Native segmentation sigmoid oracle failed.' }
+          dotnet run --project tools/LegacyMathMaskedSegmentScore.Probe -c Release -- .artifacts/math-masked-segment-score-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed masked segmentation score failed.' }
+          python tools/LegacyMathMaskedSegmentScore.Probe/audit_output.py .artifacts/math-masked-segment-score-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed masked segmentation score oracle failed.' }
+          dotnet publish tools/LegacyMathMaskedSegmentScore.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-masked-segment-score-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Masked segmentation score probe publish failed.' }
+          $segmentation = if ($IsWindows) { '.artifacts/math-masked-segment-score-probe/LegacyMathMaskedSegmentScore.Probe.exe' } else { '.artifacts/math-masked-segment-score-probe/LegacyMathMaskedSegmentScore.Probe' }
+          & $segmentation .artifacts/math-masked-segment-score-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native masked segmentation score failed.' }
+          python tools/LegacyMathMaskedSegmentScore.Probe/audit_output.py .artifacts/math-masked-segment-score-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native masked segmentation score oracle failed.' }
           dotnet publish tools/InkRecognition.RawContent.Probe/InkRecognition.RawContent.Probe.csproj -c Release -r $rid -p:PublishAot=true -o .artifacts/raw-content-probe
           if ($LASTEXITCODE -ne 0) { throw 'Raw-content probe publish failed.' }
           $raw = if ($IsWindows) { '.artifacts/raw-content-probe/InkRecognition.RawContent.Probe.exe' } else { '.artifacts/raw-content-probe/InkRecognition.RawContent.Probe' }
