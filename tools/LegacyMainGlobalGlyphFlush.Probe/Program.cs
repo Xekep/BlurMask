@@ -1,0 +1,88 @@
+using InkRecognition;
+using System.Buffers.Binary;
+using System.Text.Json;
+using System.Runtime.InteropServices;
+
+if(args.Length!=9)throw new ArgumentException("AK engine separation case publication line30 line50 capture LK");
+byte[] ak=File.ReadAllBytes(args[0]),lk=File.ReadAllBytes(args[8]),engine=File.ReadAllBytes(args[1]);
+using var ed=JsonDocument.Parse(engine);var activation=ed.RootElement.GetProperty("activations");
+var activations=new LegacyInkActivations(activation.GetProperty("hidden").EnumerateArray().Select(v=>v.GetInt32()).ToArray(),activation.GetProperty("output").EnumerateArray().Select(v=>v.GetInt32()).ToArray());
+var table=LegacyCursiveSeparationTable.Load(File.ReadAllBytes(args[2]));using var cf=File.OpenRead(args[3]);using var pf=File.OpenRead(args[4]);var cd=LegacyNativeCaseData.Load(cf);var pd=LegacyNativeTextPublicationData.Load(pf);
+var model=LegacyRussianModelBundle.Load(ak,lk,engine);byte[] line30=File.ReadAllBytes(args[5]),line50=File.ReadAllBytes(args[6]);
+InkStroke M(float y)=>new(new InkPoint[]{new(0,y+90),new(0,y+10),new(25,y+60),new(50,y+10),new(50,y+90)});
+InkStroke V(float y)=>new(new InkPoint[]{new(0,y+10),new(0,y+90)});
+var mir=new InkStroke[]{M(0),new(new InkPoint[]{new(70,10),new(70,90),new(120,10),new(120,90)}),new(new InkPoint[]{new(140,90),new(140,10),new(180,10),new(190,20),new(190,40),new(180,50),new(140,50)})};
+var rows=new[]{V(0),new InkStroke(V(0).Points.Select(p=>new InkPoint(p.X+40,p.Y)).ToArray()),V(140),new InkStroke(V(140).Points.Select(p=>new InkPoint(p.X+40,p.Y)).ToArray())};
+int owners=0,guards=0;ulong identity=0x1000;
+using var file=File.Create(args[7]);using var w=new Utf8JsonWriter(file);w.WriteStartArray();
+foreach(var raw in new[]{new[]{M(0),M(140)},new[]{M(0),M(250)},new[]{V(0),V(140)},new[]{V(0),V(250)},mir,mir.Concat(mir.Select(s=>new InkStroke(s.Points.Select(p=>new InkPoint(p.X,p.Y+160)).ToArray()))).ToArray(),rows,Enumerable.Range(0,14).Select(n=>new InkStroke(M(0).Points.Select(p=>new InkPoint(p.X+n*70,p.Y)).ToArray())).ToArray()})
+{
+    var input=LegacyFreshMainOwnedTextInputPreparation.Prepare(ak,line30,line50,raw,0,activations,table,cd,pd).Run();
+    var cuts=LegacyFreshMainDescriptorCutSource.Prepare(ak,input.Smoothed);var local=LegacyFreshMainDescriptorGraphAppend.Prepare(ak,cuts,table);var global=LegacyFreshMainGlobalOrdinaryState.Prepare(ak,local,table);
+    var graph=LegacyFreshMainCompactOrdinaryGraph.Prepare(ak,global);var source=LegacyFreshMainGlobalSourceRanges.Prepare(graph);var context=LegacyFreshMainGlobalContext.Prepare(ak,source,activations);var geometry=LegacyFreshMainGlobalGlyphGeometry.Prepare(ak,context);
+    var owner=LegacyFreshMainGlobalCaseSession.Prepare(ak,lk,model,geometry,cd,pd);var cache=LegacyFreshMainGlobalTransitionCache.Prepare(ak,owner,table);var transitions=LegacyFreshMainGlobalWordTransitions.Prepare(ak,cache);
+    var costs=LegacyFreshMainGlobalGroupCosts.Prepare(ak,owner,table);var policy=LegacyFreshMainGlobalWordControllerPolicy.Prepare(ak,owner,costs,transitions);
+    var confidence=LegacyFreshMainGlobalGlyphConfidence.Prepare(ak,owner);var terminal=LegacyFreshMainGlobalTerminalInvocation.Prepare(policy);
+
+    var pass=new LegacyFreshMainGlobalWordPass(ak,policy,r=>{byte[] bytes=new byte[r.RequiredBytes];r.PreviousStorage.Span.CopyTo(bytes);return new(bytes,++identity);}).RunOwned();
+    int evaluations=owner.AcousticEvaluations;var selected=terminal.Select(pass);
+    byte[] residue=Enumerable.Repeat((byte)0xa7,4096*40).ToArray();
+    Reject(()=>LegacyFreshMainGlobalCompactWordMaterialization.Materialize(ak,selected,null!,residue));
+    Reject(()=>LegacyFreshMainGlobalCompactWordMaterialization.Materialize(ak,selected,confidence,[]));
+    Reject(()=>LegacyFreshMainGlobalCompactWordMaterialization.Materialize(ak,selected,confidence,new byte[41]));
+    Reject(()=>LegacyFreshMainGlobalCompactWordMaterialization.Materialize(new byte[ak.Length],selected,confidence,residue));
+    Reject(()=>LegacyFreshMainGlobalCompactWordMaterialization.Materialize(ak,selected,confidence,residue,new(true)));
+    var materialized=LegacyFreshMainGlobalCompactWordMaterialization.Materialize(ak,selected,confidence,residue);
+    Reject(()=>LegacyFreshMainGlobalCompactWordMaterialization.Materialize(ak,selected,confidence,residue));
+
+
+    var geometryOwner=LegacyFreshMainGlobalSourceGeometry.Prepare(ak,policy,confidence);
+    var callbacks=LegacyFreshMainGlobalSourceSymbolCallbacks.Prepare(ak,geometryOwner);
+    w.WriteStartObject();w.WriteStartArray("scalarControls");
+    for(int i=0;i<4096;i++)
+    {
+        int a=unchecked((int)(0x9e3779b9u*(uint)(i+1))),b=unchecked((int)(0x85ebca6bu*(uint)(i+3)));
+        int c=unchecked(~a+(i<<21)),d=unchecked(b-(i<<19));
+        int node=i*131071,previous=i%5==0?node:unchecked(node-(i%409+1));
+        var scalarCosts=LegacyPreparedMainGlyphFlushPlan.CalculateCosts(a,b,c,d,node,previous);
+        w.WriteStartArray();foreach(int scalarInput in new[]{a,b,c,d,node,previous})w.WriteNumberValue(scalarInput);
+        w.WriteNumberValue(scalarCosts.LogMassBits);w.WriteNumberValue(scalarCosts.RelativeCostBits);w.WriteNumberValue(scalarCosts.RawField18DeltaBits);w.WriteEndArray();
+    }
+    w.WriteEndArray();
+    w.WriteNumber("recordCount",materialized.RecordCount);w.WriteNumber("selected",materialized.SelectedRecordIndex);
+    w.WriteNumber("alternative",ushort.MaxValue);w.WriteBase64String("compact",materialized.CopyCompactStorage());
+    w.WriteNumber("totalCost",selected.Winner.TotalCost);w.WriteNumber("rowCost14",selected.Winner.RowCost14);
+    w.WriteStartArray("cumulative");foreach(int v in pass.CopyCumulativePathCosts())w.WriteNumberValue(v);w.WriteEndArray();
+    w.WriteStartArray("starts");foreach(int v in materialized.CopyNodeStarts2478())w.WriteNumberValue(v);w.WriteEndArray();
+    w.WriteStartArray("graph");for(int n=0;n<pass.NodeCount;n++){
+        w.WriteStartArray();foreach(var arc in graph.State.GetNode(n)){
+            w.WriteStartArray();w.WriteNumberValue(arc.GroupId);w.WriteNumberValue(arc.Span);w.WriteNumberValue(arc.StartContextId);w.WriteNumberValue(arc.EndContextId);w.WriteEndArray();
+        }w.WriteEndArray();}w.WriteEndArray();
+    int flushedRows=0;w.WriteStartArray("controls");
+    for(int n=0;n<64;n++){
+        byte[] residue72=Enumerable.Range(0,72).Select(i=>(byte)(n*73+i*31+11)).ToArray();
+        var walk=LegacyFreshMainGlobalGlyphBacktrackRows.Prepare(ak,materialized,callbacks,residue72);
+        var plan=LegacyFreshMainGlobalGlyphFlushPlan.Prepare(walk);
+        w.WriteStartObject();w.WriteBase64String("residue",residue72);w.WriteBase64String("allRows",walk.CopyRows());
+        w.WriteStartArray("visited");foreach(int index in walk.CopyVisitedCompactIndices())w.WriteNumberValue(index);w.WriteEndArray();
+        w.WriteStartArray("flushes");foreach(var flush in plan.Flushes){
+            flushedRows+=flush.RowCount;w.WriteStartObject();w.WriteNumber("current",flush.CurrentCompactIndex);w.WriteNumber("filtered",flush.FilteredCompactIndex);w.WriteBoolean("protocol",flush.ProtocolFlush);
+            w.WriteBase64String("rows",flush.CopyRows72());w.WriteBase64String("template",flush.CopyPacketWriteTemplate());
+            w.WriteStartArray("origins");foreach(int v in flush.CopyInitialWordSeedOrigins())w.WriteNumberValue(v);w.WriteEndArray();
+            w.WriteStartArray("residualAdditions");foreach(ulong v in flush.CopyResidualAdditions())w.WriteNumberValue(v);w.WriteEndArray();w.WriteEndObject();
+            byte[] expected=flush.CopyPacketWriteTemplate();Array.Clear(flush.CopyPacketWriteTemplate());
+            if(!flush.CopyPacketWriteTemplate().AsSpan().SequenceEqual(expected))throw new InvalidDataException("Flush snapshot escaped.");
+        }w.WriteEndArray();w.WriteStartArray("source70");foreach(var e in plan.SourceMetadataEvents){
+            w.WriteStartObject();w.WriteNumber("index",e.CompactIndex);w.WriteNumber("tag",e.FullSourceTag);w.WriteNumber("symbol",e.RawSymbol);w.WriteBase64String("metadata",e.CopyMetadata16());w.WriteEndObject();
+        }w.WriteEndArray();w.WriteEndObject();
+        if(plan.Flushes.Sum(f=>f.RowCount)!=walk.Count||plan.Flushes.Count==0)throw new InvalidDataException("Flushes failed to partition actual append events.");
+    }w.WriteEndArray();int before=guards;
+    Reject(()=>LegacyFreshMainGlobalGlyphFlushPlan.Prepare(null!));
+    var validWalk=LegacyFreshMainGlobalGlyphBacktrackRows.Prepare(ak,materialized,callbacks,new byte[72]);
+    Reject(()=>LegacyFreshMainGlobalGlyphFlushPlan.Prepare(validWalk,new(true)));
+    w.WriteNumber("guards",guards-before);w.WriteNumber("flushedRows",flushedRows);w.WriteEndObject();
+    if(owner.AcousticEvaluations!=evaluations)throw new InvalidDataException("Flush planning reran neural networks.");
+    Console.WriteLine($"PASS global flush owner{owners}/{pass.NodeCount} nodes/64 stack residues/{flushedRows} rows, NN unchanged.");owners++;
+}
+w.WriteEndArray();Console.WriteLine($"PASS{owners} global flush owners; callback success/WORD publication remain separate.");
+void Reject(Action action){try{action();}catch(Exception e)when(e is ArgumentException or InvalidOperationException or NotSupportedException or OperationCanceledException){guards++;return;}throw new InvalidDataException("Global flush guard failed.");}

@@ -130,4 +130,3 @@ void Reject(Action action)
     { guards++; return; }
     throw new Exception("Invalid global result metadata lease accepted.");
 }
-

@@ -4,7 +4,9 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 spec=importlib.util.spec_from_file_location('read_glyph_alphabet',ROOT/'tools/LegacyRussianGlyphSymbol.Probe/audit_output.py')
 module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
-if len(sys.argv)!=3:raise SystemExit('AK.res capture.json')
+if len(sys.argv) not in (3,4):raise SystemExit('AK.res capture.json [--global]')
+global_mode=len(sys.argv)==4
+if global_mode:assert sys.argv[3]=='--global'
 ak=Path(sys.argv[1]).read_bytes();p=json.loads(Path(sys.argv[2]).read_bytes())
 assert hashlib.sha256(ak).hexdigest()=='7a5f08809e81fb4a2d4c78b3efd251d0986503b0d30d21de3695dab1f8a89978'
 texts=module.read_alphabet(ak);labels={v:k for k,v in texts.items()}
@@ -155,5 +157,5 @@ for n,c in enumerate(p['controls']):
     # Protocol-only flush never silently absorbs preceding ordinary glyphs.
     for flush in out:
         if flush['protocol']:assert len(flush['rows'])==72
-assert p['guards']==4 and p['flushedRows']==count
+assert p['guards']==(2 if global_mode else 4) and p['flushedRows']==count
 print(f'PASS independent64 real CASE paths/{count} full72 rows, flush boundaries, all64 control bytes/seed dependencies; source70 calls0.')
