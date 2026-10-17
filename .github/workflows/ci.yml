@@ -682,6 +682,8 @@ jobs:
           python tools/LegacyContextualQuoteRules.Probe/audit_output.py .artifacts/legacy-contextual-quotes-managed.json
           dotnet run --project tools/LegacyMainWordRanking.Probe -c Release -- .artifacts/legacy-main-word-ranking-managed.json
           python tools/LegacyMainWordRanking.Probe/audit_output.py .artifacts/legacy-main-word-ranking-managed.json
+          dotnet run --project tools/LegacyMainSpanScores.Probe -c Release -- .artifacts/legacy-main-span-scores-managed.json
+          python tools/LegacyMainSpanScores.Probe/audit_output.py .artifacts/legacy-main-span-scores-managed.json
           dotnet run --project tools/LegacyMainTextChoices.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json models/text-unicode/legacy-circled-payload-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-text-choices-managed.json
           python tools/LegacyMainTextChoices.Probe/audit_output.py .artifacts/legacy-main-text-choices-managed.json
           dotnet run --project tools/LegacyMainWordEquality.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json models/text-unicode/legacy-circled-payload-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-word-equality-managed.json
@@ -1222,6 +1224,7 @@ jobs:
             @{ Name = 'LegacyFreshTextSourceContext'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-fresh-text-source-controls.json', '.artifacts/legacy-fresh-text-source-context-native.json') },
             @{ Name = 'LegacyContextualQuoteRules'; Args = @('.artifacts/legacy-contextual-quotes-native.json') },
             @{ Name = 'LegacyMainWordRanking'; Args = @('.artifacts/legacy-main-word-ranking-native.json') },
+            @{ Name = 'LegacyMainSpanScores'; Args = @('.artifacts/legacy-main-span-scores-native.json') },
             @{ Name = 'LegacyMainTextChoices'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-text-choices-native.json') },
             @{ Name = 'LegacyMainWordEquality'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-word-equality-native.json') },
             @{ Name = 'LegacyMainTextSourceWrapper'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-text-source-wrapper-native.json', '--controls', '.artifacts/legacy-main-text-source-wrapper-controls.json') },
@@ -1632,6 +1635,10 @@ jobs:
             if ($name -eq 'LegacyMainWordRanking') {
               python tools/LegacyMainWordRanking.Probe/audit_output.py .artifacts/legacy-main-word-ranking-native.json
               if ($LASTEXITCODE -ne 0) { throw 'LegacyMainWordRanking independent audit failed' }
+            }
+            if ($name -eq 'LegacyMainSpanScores') {
+              python tools/LegacyMainSpanScores.Probe/audit_output.py .artifacts/legacy-main-span-scores-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyMainSpanScores independent audit failed' }
             }
             if ($name -eq 'LegacyMainTextChoices') {
               python tools/LegacyMainTextChoices.Probe/audit_output.py .artifacts/legacy-main-text-choices-native.json
