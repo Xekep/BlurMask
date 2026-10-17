@@ -18,8 +18,10 @@ The reusable library now has these checked stages:
 | --- | --- |
 | First-stage inference | Same-owner NN, graph, selected single or multiple plain words; unsupported traits/terminal columns remain explicit refusals. |
 | Main preprocessing | Actual selected glyph records to source720, line fitting, deskew and smoothing; empty first-result continuation remains incomplete. |
+| Descriptor cut source | Sequential ordinary and pending-separator steps share one XY/source chronology; global graph stitching and cross-source merges remain incomplete. |
 | Main candidate | One assigned physical line through the CASE dictionary, scheduler, first terminal and actual compact backtrack. |
 | Word publication | Per-segment residual association, glyph chain and same-owner plain WORD list; no supplied labels or success flags. |
+| First candidate completion | Actual selected alternative scores, published-WORD quote cleanup, fresh-configuration glyph-normalization no-op, separate raw UTF8 WORD projections. No joined/accepted transcription. |
 | Text projection | Raw ordinary glyph UTF8 and sampled source keys; document wrapper/lazy alternative refresh remain separate. |
 | Long-source publication | Genuine native 120-node gate and prefix/final-append transport checked; a nonempty genuine long-source winner is not established. |
 
@@ -27,6 +29,12 @@ The reusable library now has these checked stages:
 bounded first main candidate's WORD list. Its `PublicationCompleted` property
 means the word callbacks completed, not that the transcription should replace
 ink. Multiple lines are currently refused. The app is not switched to this API.
+
+`LegacyFreshMainFirstCandidateCompletion` now joins that actual publication to
+the first-alternative snapshot, quote cleanup, the proven fresh-configuration
+normalization no-op and per-WORD raw UTF8 projection. Completion is single-use
+once mutation starts; failed prefixes are retained. It does not manufacture
+spaces between WORDs or expose accepted replacement text.
 
 ## Quality evidence
 
@@ -62,6 +70,8 @@ DLL is executed by the library or these tests.
 
 Details: [raw main integration](legacy-main-raw-plain-recognition.md),
 [first multiword preprocessing](legacy-main-text-input.md),
+[shared descriptor cuts](legacy-main-descriptor-cut-source.md),
+[first candidate completion](legacy-main-first-candidate-completion.md),
 [word publication](legacy-main-owned-word-publication.md),
 [UTF8 projection](legacy-main-word-utf8-projection.md),
 [result assembly gaps](legacy-main-result-assembly-roadmap.md), and
