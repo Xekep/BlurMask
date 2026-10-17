@@ -64,10 +64,14 @@ public sealed class LegacyLibraryTextDomArena
     public LegacyLibraryTextDomNamePool NamePool {get;}
     private readonly List<LegacyDomNode> nodes=[];
     private readonly List<string> trace=[];
-    private readonly int failAt,cancelAt;
+    private int failAt,cancelAt;
     private int attempts;
     internal LegacyLibraryTextDomArena(LegacyFreshMainTextDocumentSeed seed,int failAt=-1,int cancelAt=-1)
     {Seed=seed;NamePool=new(seed);this.failAt=failAt;this.cancelAt=cancelAt;}
+    internal LegacyLibraryTextDomArena(LegacyFreshMainTextDocumentSeed seed,LegacyLibraryTextDomNamePool sharedNames,int failAt=-1,int cancelAt=-1)
+    {if(!ReferenceEquals(seed,sharedNames.Seed))throw new ArgumentException("Foreign BEE name owner.");Seed=seed;NamePool=sharedNames;this.failAt=failAt;this.cancelAt=cancelAt;}
+    internal void BeginFaultScope(int fail=-1,int cancel=-1)
+    {if(fail< -1||cancel< -1)throw new ArgumentOutOfRangeException(nameof(fail));failAt=fail<0?-1:checked(attempts+fail);cancelAt=cancel<0?-1:checked(attempts+cancel);}
     internal IReadOnlyList<string> Trace=>trace.AsReadOnly();
     internal int Attempts=>attempts;
     internal bool Allow(string operation)
@@ -83,6 +87,7 @@ public sealed class LegacyLibraryTextDomArena
         var node=new LegacyDomNode(nodes.Count+1,kind,name,named);nodes.Add(node);trace.Add("new:"+node.Identity+":"+kind+":"+name);return node;
     }
     internal LegacyDomNode? Element(string name)=>Allocate(3,name);
+    internal LegacyDomNode ConstructorRoot()=>Allocate(4)??throw new InvalidOperationException("Fresh BCC root allocation failed.");
     internal LegacyDomNode? Text(ReadOnlySpan<byte> raw)
     {
         var node=Allocate(1);if(node is null)return null;
@@ -120,9 +125,31 @@ public sealed class LegacyLibraryTextDomArena
     internal bool Byte(LegacyDomNode n,string name,byte value)=>NumericAttribute(n,name,6,[value]);
     internal void Append(LegacyDomNode parent,LegacyDomNode child)
     {
-        ValidateElement(parent);Validate(child);if(child.Kind==0||child.Parent is not null||ReferenceEquals(parent,child))throw new ArgumentException("An unattached same-arena child is required.");
+        Validate(parent);if(parent.Kind is not(3 or 4))throw new ArgumentException("A native container required.");Validate(child);if(child.Kind==0||child.Parent is not null||ReferenceEquals(parent,child))throw new ArgumentException("An unattached same-arena child is required.");
         for(var current=parent.Parent;current is not null;current=current.Parent)if(ReferenceEquals(current,child))throw new ArgumentException("Cyclic DOM append.");
         child.Parent=parent;parent.Children.Add(child);trace.Add("append:"+parent.Identity+":"+child.Identity);
+    }
+    internal void DetachAndRelease(LegacyDomNode parent,LegacyDomNode child)
+    {Validate(parent);Validate(child);if(!ReferenceEquals(child.Parent,parent)||!parent.Children.Remove(child))throw new ArgumentException("Exact attached target child required.");child.Parent=null;trace.Add("remove:"+parent.Identity+":"+child.Identity);Release(child);}
+    internal LegacyDomNode? CloneFrom(LegacyLibraryTextDomArena sourceArena,LegacyDomNode source,CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();sourceArena.Validate(source);
+        if(source.Kind==1)return Text(source.Value);
+        if(source.Kind!=3)throw new NotSupportedException("Recursive ordinary element/text payload required.");
+        var copy=Element(source.Name);if(copy is null)return null;
+        foreach(var attribute in source.Attributes)
+        {
+            token.ThrowIfCancellationRequested();var a=Allocate(0,attribute.Name);if(a is null){Release(copy);return null;}
+            bool ok=true;
+            if(attribute.Tag is 1 or 2 or 3)ok=SetString(a,attribute.Value);
+            else if(attribute.Tag is 4 or 5 or 6 or 7 or 8){a.Tag=attribute.Tag;a.Value=attribute.Value.ToArray();trace.Add("value:"+a.Identity+":"+a.Tag+":"+Convert.ToBase64String(a.Value));}
+            else throw new NotSupportedException("Unsupported native attribute lane.");
+            if(!ok){a.Released=true;trace.Add("release-bare:"+a.Identity);Release(copy);return null;}
+            a.Parent=copy;copy.Attributes.Add(a);trace.Add("attr:"+copy.Identity+":"+a.Identity);
+        }
+        foreach(var child in source.Children)
+        {var cloned=CloneFrom(sourceArena,child,token);if(cloned is null){Release(copy);return null;}Append(copy,cloned);}
+        return copy;
     }
     internal void ClearChildren(LegacyDomNode node)
     {

@@ -13,10 +13,17 @@ public sealed class LegacyOwnedMainDetachedTextDom
     public uint NativeTextFreezeB8=>0;
     public LegacyLibraryTextDomArena Arena {get;}
     public bool Succeeded {get;}
+    public LegacyLibraryTextDomTarget? Target {get;}
+    internal long TargetEpoch {get;}
+    internal LegacyDomNode? LiveRoot {get;}
+    internal LegacyDomNode? PreviousTargetNode {get;}
+    internal LegacyDomNode? QueuedPreviousPayload {get;}
+    internal LegacyLibraryTextDomNode? BeforeTargetRoot {get;}
     private readonly LegacyLibraryTextDomNode? root;
     public LegacyLibraryTextDomNode Root=>root??throw new InvalidOperationException("The detached subtree did not complete.");
-    internal LegacyOwnedMainDetachedTextDom(LegacyFreshMainSourceRangeUtf8 sources,LegacyLibraryTextDomArena arena,LegacyDomNode? node)
-    {Sources=sources;Arena=arena;Succeeded=node is not null;root=node is null?null:arena.Snapshot(node);}
+    internal LegacyOwnedMainDetachedTextDom(LegacyFreshMainSourceRangeUtf8 sources,LegacyLibraryTextDomArena arena,LegacyDomNode? node,LegacyLibraryTextDomTarget? target=null,long epoch=0,
+        LegacyLibraryTextDomNode? before=null,LegacyDomNode? previous=null,LegacyDomNode? queuedPrevious=null)
+    {Sources=sources;Arena=arena;Target=target;TargetEpoch=epoch;LiveRoot=node;BeforeTargetRoot=before;PreviousTargetNode=previous;QueuedPreviousPayload=queuedPrevious;Succeeded=node is not null;root=node is null?null:arena.Snapshot(node);}
 }
 
 /// <summary>Bounded ordinary fresh2DA.V30 builder over real retained source
@@ -35,15 +42,23 @@ public sealed class LegacyFreshMainDetachedTextDom
     internal byte[] ScratchBytes {get;private set;}=[];
     private readonly Dictionary<LegacyOwnedMainTextSourcePayload,LegacyOwnedMainSourceRangeUtf8> characters;
     private readonly LegacyOwnedMainSourceRangeUtf8 word,text;
-    private LegacyFreshMainDetachedTextDom(LegacyFreshMainSourceRangeUtf8 source)
+    private readonly LegacyLibraryTextDomTarget? target;
+    private readonly long targetEpoch;
+    private LegacyFreshMainDetachedTextDom(LegacyFreshMainSourceRangeUtf8 source,LegacyLibraryTextDomTarget? target=null,long epoch=0)
     {
+        this.target=target;targetEpoch=epoch;
         Sources=source;characters=source.Sources.Where(s=>s.CharacterSource is not null).ToDictionary(s=>s.CharacterSource!);
         word=source.Sources.Single(s=>s.WordSource is not null);text=source.Sources.Single(s=>s.TextSource is not null);
     }
     public static LegacyFreshMainDetachedTextDom Prepare(LegacyFreshMainSourceRangeUtf8 actualSources,CancellationToken token=default)
+        =>PrepareCore(actualSources,null,token);
+    public static LegacyFreshMainDetachedTextDom PrepareForTarget(LegacyFreshMainSourceRangeUtf8 actualSources,LegacyLibraryTextDomTarget actualTarget,CancellationToken token=default)
+    {ArgumentNullException.ThrowIfNull(actualTarget);return PrepareCore(actualSources,actualTarget,token);}
+    private static LegacyFreshMainDetachedTextDom PrepareCore(LegacyFreshMainSourceRangeUtf8 actualSources,LegacyLibraryTextDomTarget? actualTarget,CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(actualSources);Validate(actualSources,token);
-        var owner=new LegacyFreshMainDetachedTextDom(actualSources);var lease=lifetime.GetValue(actualSources,_=>new());
+        long epoch=actualTarget?.CaptureEpoch(actualSources.Seed,token)??0;
+        var owner=new LegacyFreshMainDetachedTextDom(actualSources,actualTarget,epoch);var lease=lifetime.GetValue(actualSources,_=>new());
         lock(lease){token.ThrowIfCancellationRequested();if(lease.Claimed)throw new InvalidOperationException("This exact source-formatting invocation already owns a detached DOM arena.");lease.Claimed=true;}
         return owner;
     }
@@ -85,10 +100,24 @@ public sealed class LegacyFreshMainDetachedTextDom
         lock(gate)
         {
             token.ThrowIfCancellationRequested();if(entered)throw new InvalidOperationException("Detached DOM construction is single-use, including failed prefixes.");
-            Validate(Sources,token);entered=true;var arena=new LegacyLibraryTextDomArena(Sources.Seed,failAt,cancelAt);Arena=arena;
+            Validate(Sources,token);target?.ValidateEpoch(targetEpoch,token);entered=true;
+            var arena=target is null?new LegacyLibraryTextDomArena(Sources.Seed,failAt,cancelAt):new LegacyLibraryTextDomArena(Sources.Seed,target.Arena.NamePool,failAt,cancelAt);Arena=arena;
             LegacyDomNode? root=null;
+            LegacyLibraryTextDomNode? before=null;LegacyDomNode? previous=null,queuedPrevious=null;
             try
             {
+                if(target is not null)
+                {
+                    var captured=target.CaptureInsertion(targetEpoch,token);before=captured.Before;previous=captured.Previous;
+                    //061510 queues removal BEFORE source.V30. Fresh old-reader
+                    //is null, so V70 clones its old payload into the new writer.
+                    if(previous is not null)
+                    {
+                        if(!arena.Allow("queue4")){faulted=true;return new(Sources,arena,null,target,targetEpoch,before,previous);}
+                        queuedPrevious=arena.CloneFrom(target.Arena,previous,token);
+                        if(queuedPrevious is null){faulted=true;return new(Sources,arena,null,target,targetEpoch,before,previous);}
+                    }
+                }
                 root=arena.Element("textResult");if(root is null)return Failed();
                 if(!arena.StringAttribute(root,"gen",Sources.Seed.LibraryIdentifier38.CopyUtf8Storage36()))return Failed();
                 var chars=arena.Element("charSegmentList");if(chars is null)return Failed();arena.Append(root,chars);
@@ -123,12 +152,16 @@ public sealed class LegacyFreshMainDetachedTextDom
                     if(line.OwnerTag>=0)ok=ok&&arena.I64(node,"tagId",line.OwnerTag);
                     if(!ok){arena.Release(node);return Failed();}arena.Append(lines,node);
                 }
-                arena.Append(root,lines);return new(Sources,arena,root);
+                arena.Append(root,lines);
+                //Queue failure occurs AFTER031880 returned its subtree. The
+                //native caller does not run031880's normal-false root cleanup.
+                if(target is not null&&!arena.Allow("queue2")){faulted=true;return new(Sources,arena,null,target,targetEpoch,before,previous,queuedPrevious);}
+                return new(Sources,arena,root,target,targetEpoch,before,previous,queuedPrevious);
             }
             catch{faulted=true;throw;}
             LegacyOwnedMainDetachedTextDom Failed()
             {
-                faulted=true;if(root is not null){arena.ClearChildren(root);arena.Release(root);}return new(Sources,arena,null);
+                faulted=true;if(root is not null){arena.ClearChildren(root);arena.Release(root);}return new(Sources,arena,null,target,targetEpoch);
             }
             bool RangeAttribute(LegacyDomNode node,string name,LegacyOwnedMainSourceRangeUtf8 source)
             {
