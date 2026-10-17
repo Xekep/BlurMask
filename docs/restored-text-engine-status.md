@@ -303,3 +303,10 @@ missing initial-context networks, actual no-dynamic first models, different
 feature widths,107 padded/aligned matrices and the extra24C processor. These
 are real differences from RU110; widening version guards would not restore
 English recognition. Their runtime feature/controller joins remain unfinished.
+
+The [retained source-range UTF8 stage](legacy-main-source-range-utf8.md) now
+formats actual CHAR insertion order, WORD and TEXT keys from the same document
+and pending transaction.2053 independent controls and four real documents
+preserve raw IDs, all200 fractional bins, normalization and allocation failure
+prefixes. Native whole-fragment reservation/copy and separate U separator writes
+are verified; this does not construct DOM nodes or complete BE2 transport.
