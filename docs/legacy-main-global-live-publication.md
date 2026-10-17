@@ -1,5 +1,10 @@
 # Bounded global LIVE compact publication
 
+The subsequent [final-pool-before-selection adapter](legacy-main-global-final-publication.md)
+now closes the final ordering and explicit no-winner boundary described below.
+The older selected-terminal API retains its original scope; the new numeric
+result does not yet feed its downstream glyph execution adapters.
+
 `LegacyFreshMainGlobalWordPass.CreateWithIntermediatePublication` binds the actual global case session, its cached confidence owner and explicit compact40 allocator storage before constructing the pass. The original constructor still refuses sources over120 nodes. The named LIVE factory supports at most240 logical nodes, so at most one intermediate native gate. It does not reconstruct native1FA300 physical ring allocation/aliases or enable an application recognizer.
 
 ## Source and native order
