@@ -37,6 +37,17 @@ for(int i=0;i<samples.Length;i++)
         !ReferenceEquals(result.Sampled.Owner.Preparation,result.Preprocessed.Smoothed)||
         result.Publications.Any(r=>!r.Succeeded||!ReferenceEquals(r.Association.Owner,result.Session)))
         throw new Exception("Raw-to-WORD pipeline lost its actual source/session/result ownership");
+    var poolBefore=new Dictionary<ulong,byte[]>();
+    foreach(var ownerNode in result.Session.Ownership.GlyphPool.CopyOwnerNodes())
+        for(int j=0;j<ownerNode.Records.Length/40;j++)poolBefore[ownerNode.Key|((ulong)j<<40)]=ownerNode.Records.Span.Slice(j*40,40).ToArray();
+    byte[] leading=[0xc1,0x4e,0xa5,0x73],trailing=[0xd2,0x5f,0xb6,0x84];
+    Reject(()=>LegacyOwnedMainPublishedQuoteNormalization.Apply(result,new byte[3],trailing));
+    Reject(()=>LegacyOwnedMainPublishedQuoteNormalization.Apply(result,leading,new byte[3]));
+    Reject(()=>LegacyOwnedMainPublishedQuoteNormalization.Apply(result,leading,leading));
+    try{LegacyOwnedMainPublishedQuoteNormalization.Apply(result,leading,trailing,new CancellationToken(true));throw new Exception("Quote cancellation ignored");}
+    catch(OperationCanceledException){guards++;}
+    LegacyOwnedMainPublishedQuoteNormalization.Apply(result,leading,trailing);
+    w.WriteString("quoteLeading",Convert.ToHexString(leading));w.WriteString("quoteTrailing",Convert.ToHexString(trailing));
     completed++;w.WriteNumber("firstWords",result.Preprocessed.FirstResults.Sum(r=>r.Text.Words.Count(x=>!x.IsDelimiter)));
     w.WriteNumber("source720",result.Preprocessed.Lines.PublishedRows.Count);
     w.WriteNumber("selectedCost",result.Terminal.Winner.TotalCost);
@@ -51,13 +62,21 @@ for(int i=0;i<samples.Length;i++)
         w.WriteString("packet",Convert.ToHexString(associated.Packet.CopyStorage()));
         w.WriteStartArray("span");w.WriteNumberValue(node.Span.First);w.WriteNumberValue(node.Span.Last);w.WriteEndArray();
         w.WriteStartArray("glyphs");foreach(ulong reference in node.Word.FlatReferences)
-        {w.WriteStartObject();w.WriteNumber("reference",reference);w.WriteString("record",Convert.ToHexString(node.Word.Pool.CopyRecord(reference)));w.WriteEndObject();}w.WriteEndArray();
+        {w.WriteStartObject();w.WriteNumber("reference",reference);w.WriteString("record",Convert.ToHexString(node.Word.Pool.CopyRecord(reference)));w.WriteString("recordBeforeQuotes",Convert.ToHexString(poolBefore[reference]));w.WriteEndObject();}w.WriteEndArray();
         w.WriteEndObject();
     }
-    w.WriteEndArray();w.WriteEndObject();
+    w.WriteEndArray();
+    //Explicitly PREPARED unrelated publisher append tests the owner guard;
+    //it is performed only after the actual inference capture above.
+    var extra=LegacyNativeWordBuilder.CreateEmpty(result.Session.Ownership.GlyphPool,new byte[120]);
+    extra.AppendGlyph(0x7f0000,0,true,new byte[40]);extra.SetLastOrdinarySymbol(0);
+    if(result.Session.Ownership.WordPublisher.Publish(extra,(_,_)=>0,(_,_)=>0) is null)
+        throw new Exception("Prepared unrelated publisher guard fixture failed");
+    Reject(()=>LegacyOwnedMainPublishedQuoteNormalization.Apply(result,leading,trailing));
+    w.WriteBoolean("unrelatedWordRefused",true);w.WriteEndObject();
 }
-w.WriteEndArray();w.WriteNumber("completed",completed);w.WriteNumber("rejectedLines",rejectedLines);w.WriteNumber("guards",guards);w.WriteNumber("words",words);w.WriteEndObject();w.Flush();
-if(completed!=5||rejectedLines!=1||guards!=30||words<5)throw new Exception("Raw integration scope or guard count changed");
+w.WriteEndArray();guards+=PreparedPublishedQuoteControls.Write(w,ak);w.WriteNumber("completed",completed);w.WriteNumber("rejectedLines",rejectedLines);w.WriteNumber("guards",guards);w.WriteNumber("words",words);w.WriteEndObject();w.Flush();
+if(completed!=5||rejectedLines!=1||guards!=57||words<5)throw new Exception("Raw integration scope or guard count changed");
 Console.WriteLine($"PASS {completed} actual raw-to-first-CASE WORD pipelines/{words} words/{guards} guards; genuine two-line refusal. No full alternatives or text-accuracy assertion.");
 
 LegacyFreshMainSingleLinePlainRecognition Prepare(InkStroke[] raw)=>LegacyFreshMainSingleLinePlainRecognition.Prepare(ak,lk,engine,l30,l50,raw,0,table,cases,publication);

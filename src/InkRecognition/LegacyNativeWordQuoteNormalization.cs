@@ -40,26 +40,58 @@ public sealed class LegacyNativeWordQuoteNormalization
         {
             token.ThrowIfCancellationRequested();ArgumentNullException.ThrowIfNull(word);
             if(!ReferenceEquals(word.Pool,actualPool))throw new ArgumentException("Words must share the actual TOP273 glyph pool.");
-            ulong[] chain=word.CopyChain(token);
-            if(chain.Length==0)throw new NotSupportedException("Native empty-word glyph dereference has no owned record.");
-            foreach(ulong reference in chain)
-            {
-                byte[] row=actualPool.CopyRecord(reference,token);
-                Read(row,leadingCallerStorage4,actualControlLabelLookup,token);
-                ushort label=BinaryPrimitives.ReadUInt16LittleEndian(leadingCallerStorage4);
-                if(leadingCallerStorage4[2]==0&&label==headerE)continue;
-                if(leadingCallerStorage4[2]==0)
-                {
-                    if(label==syntheticApostrophe)Write(reference,row,apostrophe);
-                    else if(label==syntheticQuote)Write(reference,row,quote);
-                }
-                break;
-            }
-            byte[] last=actualPool.CopyRecord(chain[^1],token);
-            Read(last,trailingCallerStorage4,actualControlLabelLookup,token);
-            if(trailingCallerStorage4[2]==0&&BinaryPrimitives.ReadUInt16LittleEndian(trailingCallerStorage4)==syntheticApostrophe)
-                Write(chain[^1],last,apostrophe);
+            NormalizeChain(actualPool,word.CopyChain(token),leadingCallerStorage4,trailingCallerStorage4,actualControlLabelLookup,token);
         }
+        token.ThrowIfCancellationRequested();
+    }
+
+    /// <summary>Same21FBF0 operation on the actual published275 WORD list.
+    /// Its native head/last-reference access does not require a new276 builder.
+    /// The caller supplies the native279.Next order and the two retained slots.</summary>
+    public void NormalizePublished(LegacyNativeGlyphRecordPool actualPool,
+        IReadOnlyList<LegacyNativePlainWordRecord> actualWords,Span<byte> leadingCallerStorage4,
+        Span<byte> trailingCallerStorage4,Func<string,ushort>? actualControlLabelLookup=null,
+        CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(actualPool);ArgumentNullException.ThrowIfNull(actualWords);
+        token.ThrowIfCancellationRequested();
+        if(leadingCallerStorage4.Length!=4||trailingCallerStorage4.Length!=4||
+            leadingCallerStorage4.Overlaps(trailingCallerStorage4)||actualWords.Count>4096)
+            throw new ArgumentException("Two explicit four-byte scratch slots and bounded actual word list required.");
+        foreach(var word in actualWords)
+        {
+            token.ThrowIfCancellationRequested();ArgumentNullException.ThrowIfNull(word);
+            if(!ReferenceEquals(word.Pool,actualPool))throw new ArgumentException("Published words must share the actual TOP273 glyph pool.");
+            var chain=LegacyNativeWordBuilder.CopyChain(actualPool,word.HeadReference,token);
+            if(chain.Length!=word.FlatReferences.Count||!chain.Reverse().SequenceEqual(word.FlatReferences))
+                throw new ArgumentException("Actual published head and reading-order references required.");
+            NormalizeChain(actualPool,chain,leadingCallerStorage4,trailingCallerStorage4,actualControlLabelLookup,token);
+        }
+        token.ThrowIfCancellationRequested();
+    }
+
+    private void NormalizeChain(LegacyNativeGlyphRecordPool actualPool,ulong[] chain,
+        Span<byte> leadingCallerStorage4,Span<byte> trailingCallerStorage4,
+        Func<string,ushort>? actualControlLabelLookup,CancellationToken token)
+    {
+        if(chain.Length==0)throw new NotSupportedException("Native empty-word glyph dereference has no owned record.");
+        foreach(ulong reference in chain)
+        {
+            byte[] row=actualPool.CopyRecord(reference,token);
+            Read(row,leadingCallerStorage4,actualControlLabelLookup,token);
+            ushort label=BinaryPrimitives.ReadUInt16LittleEndian(leadingCallerStorage4);
+            if(leadingCallerStorage4[2]==0&&label==headerE)continue;
+            if(leadingCallerStorage4[2]==0)
+            {
+                if(label==syntheticApostrophe)Write(reference,row,apostrophe);
+                else if(label==syntheticQuote)Write(reference,row,quote);
+            }
+            break;
+        }
+        byte[] last=actualPool.CopyRecord(chain[^1],token);
+        Read(last,trailingCallerStorage4,actualControlLabelLookup,token);
+        if(trailingCallerStorage4[2]==0&&BinaryPrimitives.ReadUInt16LittleEndian(trailingCallerStorage4)==syntheticApostrophe)
+            Write(chain[^1],last,apostrophe);
         void Write(ulong reference,byte[] row,ushort label)
         {
             BinaryPrimitives.WriteUInt16LittleEndian(row.AsSpan(8),label);

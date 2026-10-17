@@ -35,8 +35,8 @@ winner is introduced by the compositor.
 
 `LegacyMainRawPlainRecognition.Probe` exercises five original coordinate inputs
 through the complete bounded chain, including inputs with multiple first-stage
-words. A genuine two-line input is rejected at the single-line boundary. Thirty
-scratch/cancellation guards are checked. The output oracle independently
+words. A genuine two-line input is rejected at the single-line boundary. Fifty-seven
+scratch, cancellation, published-list and quote callback guards are checked. The output oracle independently
 checks WORD linked references, reading order, source graph spans, packet
 boundary overrides, flags and vector count/capacity. It does not infer expected
 text from these geometric fixtures or measure handwriting accuracy.
@@ -44,7 +44,10 @@ text from these geometric fixtures or measure handwriting accuracy.
 Managed and Native AOT captures must match byte for byte. The component proofs
 remain in `legacy-main-text-input.md`, `legacy-main-owned-glyph-flush.md` and
 `legacy-main-owned-word-publication.md`; this integration check does not replace
-their independent numerical and byte-level oracles.
+their independent numerical and byte-level oracles. The probe additionally calls
+the explicit [published quote stage](legacy-main-published-quote-normalization.md);
+the compositor itself returns its pre-quote word list. Prepared positive quote
+controls remain separate from actual coordinate inference.
 
 The probe takes AK, LK, engine profile, separation profile, case data,
 publication data, line30, line50 and capture path. Its `audit_output.py` takes
