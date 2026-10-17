@@ -92,7 +92,7 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
 
     internal static PublicationStage Publish(ReadOnlySpan<byte> resource, LegacyMainCompactPublicationSource source,
         LegacyOwnedRussianMainGlyphConfidence confidence, LegacyMainCompactPublicationState state,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, LegacyOwnedMainSecondaryTerminalCursor? configuredSecondary = null)
     {
         source.Validate(cancellationToken);
         var owner = source.Owner;
@@ -114,19 +114,23 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
                 !ReferenceEquals(owner.CaseDictionaryOwner, casePolicy.DictionaryOwner) ||
                 !ReferenceEquals(confidence.CaseDictionaryOwner, casePolicy.DictionaryOwner))
                 throw new ArgumentException("One actual fresh CASE source/controller/candidate owner required.");
-            caseInvocation = LegacyOwnedFreshCaseMainTerminalInvocation.Prepare(casePolicy, cancellationToken);
+            if (configuredSecondary is null)
+                caseInvocation = LegacyOwnedFreshCaseMainTerminalInvocation.Prepare(casePolicy, cancellationToken);
+            else if (!ReferenceEquals(configuredSecondary.PassResult.Storage, source.FinalPass) ||
+                !ReferenceEquals(configuredSecondary.SourcePolicy, casePolicy))
+                throw new ArgumentException("Configured publication requires the same actual terminal cursor/pass/source.");
         }
         if (configuration.HeaderCount2400 != 2)
             throw new NotSupportedException("The actual fresh two-header publication policy is required.");
         if (resource.Length != 572763 || !StringComparer.OrdinalIgnoreCase.Equals(
             Convert.ToHexString(SHA256.HashData(resource)), owner.SelectedSourceOwner.SourceFingerprint))
             throw new ArgumentException("Compact publication must use its exact selected main resource.");
-        var reachable = LegacyOwnedMainCompactWordReachability.PrepareSource(resource, source, cancellationToken);
+        var reachable = LegacyOwnedMainCompactWordReachability.PrepareSource(resource, source, cancellationToken, configuredSecondary is not null);
         int primary = configuration.PrimaryArcLimit230a;
         var alphabet = owner.CommonModel.AcousticAlphabet;
         var categories = new LegacyCursiveCategoryMapper(owner.SelectedSourceOwner.Categories);
         var policy = LegacyPreparedCompactWordContextPolicy.FromAlphabet(alphabet, false, false,
-            caseInvocation?.Options.ContextSentinels24b8 ??
+            configuredSecondary?.Options.ContextSentinels24b8 ?? caseInvocation?.Options.ContextSentinels24b8 ??
             LegacyOwnedFreshMainTerminalInvocation.Prepare(source.Controller).Options.ContextSentinels24b8);
         ushort specialMarker = Label("\u0003");
         ushort shadda = Label("\u0651"), closed = Label("\U000f0001");
@@ -135,13 +139,18 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
         var snapshots = Enumerable.Range(0, source.EndingNode + 1).Select(reachable.GetNodeSnapshot).ToArray();
         var rows = snapshots.Select(s => s.Records.ToArray()).ToArray();
         var pools = snapshots.Select(s => s.PrimaryAlternatives.ToArray()).ToArray();
+        var secondary = snapshots.Select(s => s.SecondaryAlternatives.ToArray()).ToArray();
         byte[] storage = state.Storage.ToArray();
         var nodeStarts = state.Starts.ToArray();
         var prefixOwners = state.PrefixOwners.ToArray();
         var scores = new Dictionary<int, LegacyOwnedRussianMainGlyphConfidenceGroup>();
         int count = state.Count;
-        float penalty = (caseInvocation?.LanguagePenalty2534 ??
-            LegacyOwnedRussianTerminalSources.Prepare(owner.DictionaryOwner, cancellationToken).LanguagePenalty2534) * .8f;
+        int languagePenalty = configuredSecondary is null
+            ? caseInvocation?.LanguagePenalty2534 ?? LegacyOwnedRussianTerminalSources.Prepare(owner.DictionaryOwner, cancellationToken).LanguagePenalty2534
+            : LegacyOwnedRussianTerminalSources.PreparePositiveScalePenalty(owner.CommonModel.LanguageModel,
+                owner.CommonModel.LanguageProfiles[owner.CommonModel.ResourceLanguageProfileIndex],
+                casePolicy!.DictionaryOwner.Descriptor.RuntimeLanguageScale, cancellationToken);
+        float penalty = languagePenalty * .8f;
         int forcedPenalty = (int)(penalty <= 0 ? penalty - .5f : penalty + .5f);
 
         for (int node = source.StartingNode; node <= source.EndingNode; node++)
@@ -209,9 +218,11 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
                 usedArcs[U16(row, 0x1c)] = true;
             }
 
-            //2404=1 selects the ordinary beam publication after primary pools.
+            //Native207CB0 publishes marked2410 slots before EACH matching88 row;
+            //the88 path remains active for configured2, too.
             for (int ordinal = 0; ordinal < snapshots[node].SourceEnd23f0; ordinal++)
             {
+                if (configuredSecondary is not null) PublishSecondary(node, ordinal, usedArcs);
                 var row = rows[node].AsSpan(ordinal * 88, 88);
                 if ((row[6] & 2) == 0) continue;
                 cancellationToken.ThrowIfCancellationRequested();
@@ -288,10 +299,94 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
         prefixOwners[source.EndingNode + 1] = source.EndingNode;
         source.Validate(cancellationToken);
         for (int node = 0; node < snapshots.Length; node++)
-            snapshots[node] = snapshots[node] with { Records = rows[node], PrimaryAlternatives = pools[node] };
+            snapshots[node] = snapshots[node] with { Records = rows[node], PrimaryAlternatives = pools[node], SecondaryAlternatives = secondary[node] };
         state.Commit(source, storage, count, nodeStarts, prefixOwners, cancellationToken);
         return new(reachable, snapshots);
 
+        void PublishSecondary(int node, int ordinal, bool[] usedArcs)
+        {
+            for (int k = 0; k < 2; k++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var entry = secondary[node].AsSpan((ordinal * 2 + k) * 40, 40);
+                if ((sbyte)entry[0x1b] >= 0) continue;
+                var row = rows[node].AsSpan(ordinal * 88, 88);
+                if ((row[7] & 1) != 0)
+                    throw new NotSupportedException("Associated configured secondary publication remains separate.");
+                int arc = U16(row, 0x1c); ValidateArc(node, arc); usedArcs[arc] = true;
+                int previousNode = unchecked(node - (sbyte)entry[0x1a] - 1);
+                int previousOrdinal = U16(entry, 0x18), previousAlternative = entry[0x1b] & 0x7f;
+                if (previousNode > node)
+                    throw new InvalidDataException("Native secondary predecessor cannot point beyond its current node.");
+                ushort alternative = ushort.MaxValue;
+                if (ordinal >= primary)
+                {
+                    if (U16(entry, 0x20) != ushort.MaxValue || I32(row, 0x50) != -1)
+                        throw new NotSupportedException("Anchored/auxiliary configured secondary publication remains separate.");
+                    alternative = 0xfffe;
+                }
+                ReadOnlySpan<byte> parentEntry = previousNode < 0 ? default : Secondary(previousNode, previousOrdinal, previousAlternative);
+                int parent = previousNode < 0 ? -1 : CompactParent(previousNode, U16(parentEntry, 0x1c));
+                ulong currentContext = U64(entry, 0x10), previousContext = previousNode < 0 ? 0 : U64(parentEntry, 0x10);
+                int terminalIndex;
+                if (previousNode == node)
+                {
+                    //20A2xx counts the literal raw context chain up to the
+                    //actual predecessor context; control tokens are not mapped away.
+                    var symbols = new List<ushort>();
+                    ulong context = currentContext;
+                    while (context != previousContext)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        if (context == 0 || symbols.Count == 65536)
+                            throw new InvalidDataException("Secondary current context must descend from its exact predecessor context.");
+                        var item = owner.Contexts.ReadNode(context);
+                        symbols.Add(item.Symbol); context = item.ParentLink;
+                    }
+                    if (symbols.Count == 0)
+                    {
+                        terminalIndex = parent;
+                        if (alternative != ushort.MaxValue)
+                        {
+                            EnsureCapacity(1); terminalIndex = count++;
+                            Write(storage.AsSpan(terminalIndex * 40, 40), U64(row, 0), Pack(node, arc), parent,
+                                I32(entry, 0), I32(entry, 4), ushort.MaxValue, alternative, 5, 255, -1);
+                        }
+                    }
+                    else
+                    {
+                        symbols.Reverse(); terminalIndex = parent;
+                        for (int index = 0; index < symbols.Count; index++)
+                        {
+                            ushort symbol = symbols[index];
+                            byte type = symbol > 0xffea && symbol < 0xfffe || symbol == policy.Special24de ? (byte)5 : (byte)6;
+                            EnsureCapacity(1); int current = count++;
+                            Write(storage.AsSpan(current * 40, 40), U64(row, 0), Pack(node, arc), terminalIndex,
+                                I32(entry, 0), I32(entry, 4), symbol, index == 0 ? alternative : ushort.MaxValue,
+                                type, ScoreByte(node, row), -1);
+                            terminalIndex = current;
+                        }
+                    }
+                }
+                else
+                {
+                    byte difference = (byte)(entry[0x1f] & 0x1f);
+                    if (previousOrdinal >= primary)
+                        difference = unchecked((byte)(difference - (previousNode < 0 ? 0 : parentEntry[0x1f] & 0x1f)));
+                    var frame = LegacyPreparedCompactWordFrameProducer.CreateOrdinary(owner.Contexts, currentContext,
+                        previousContext, row, (uint)node, difference, policy, Category, cancellationToken).CopyFrame();
+                    terminalIndex = AppendFrame(frame, row, U64(row, 0), parent, I32(entry, 0), I32(entry, 4),
+                        alternative, -1, false, false, ScoreByte(node, row), node);
+                }
+                BinaryPrimitives.WriteUInt16LittleEndian(entry[0x1c..], terminalIndex < 0 ? ushort.MaxValue : Relative(node, terminalIndex));
+            }
+        }
+        ReadOnlySpan<byte> Secondary(int node, int ordinal, int alternative)
+        {
+            if ((uint)node >= rows.Length || (uint)ordinal >= snapshots[node].SourceEnd23f0 || (uint)alternative >= 2)
+                throw new InvalidDataException("Configured predecessor must name an actual owned2410 slot.");
+            return secondary[node].AsSpan((ordinal * 2 + alternative) * 40, 40);
+        }
         ushort Label(string text) => alphabet.TryGetLabel(text, out ushort value) ? value : ushort.MaxValue;
         byte Category(ushort symbol) => unchecked((byte)categories.GetSymbolCompositeCategory(symbol));
         ReadOnlySpan<byte> Row(int node, int ordinal)
