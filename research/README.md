@@ -7,6 +7,8 @@ build artifacts. The entire directory remains excluded from Git and releases.
 - `myscript/output/MyScriptEngine.dll/decompiled.c`: common engine export.
 - `myscript/output/MyScriptMLOrt.dll/decompiled.c`: inference integration export.
 - `myscript/output/Math2FeaturesStage4/MyScriptInk.dll/decompiled.c`: ink export.
+- `myscript/output/Math2PostprocessingStage4/MyScriptDocument.dll/focused.c`:
+  EF4 and segmentation activation exports with references and hash provenance.
 - `myscript/sdk/`: original SDK files used for static inspection.
 - `myscript/ghidra-projects/`: retained analysis projects.
 - `myscript/scripts/`: local inspection and reference scripts.
