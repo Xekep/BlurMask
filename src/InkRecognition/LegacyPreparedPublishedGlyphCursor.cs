@@ -15,15 +15,21 @@ internal sealed class LegacyPreparedPublishedGlyphCursor
 {
     private readonly LegacyNativeGlyphRecordPool pool;
     private readonly LegacyNativePlainWordRecord[] words;
+    private readonly Action<LegacyNativeGlyphSymbolDescriptor>? validateScalar;
     private int word,ordinal;
     private bool failed;
     internal LegacyPreparedPublishedGlyphCursor(LegacyNativeGlyphRecordPool actualPool,
         IReadOnlyList<LegacyNativePlainWordRecord> nativeWordOrder,CancellationToken token=default)
+        :this(actualPool,nativeWordOrder,null,token) { }
+
+    internal LegacyPreparedPublishedGlyphCursor(LegacyNativeGlyphRecordPool actualPool,
+        IReadOnlyList<LegacyNativePlainWordRecord> nativeWordOrder,
+        Action<LegacyNativeGlyphSymbolDescriptor>? validateScalar,CancellationToken token=default)
     {
         ArgumentNullException.ThrowIfNull(actualPool);ArgumentNullException.ThrowIfNull(nativeWordOrder);
         token.ThrowIfCancellationRequested();
         if(nativeWordOrder.Count>4096)throw new ArgumentException("Bounded native WORD list required.");
-        pool=actualPool;words=nativeWordOrder.ToArray();int references=0;
+        pool=actualPool;words=nativeWordOrder.ToArray();this.validateScalar=validateScalar;int references=0;
         foreach(var item in words)
         {
             token.ThrowIfCancellationRequested();ArgumentNullException.ThrowIfNull(item);
@@ -49,8 +55,11 @@ internal sealed class LegacyPreparedPublishedGlyphCursor
         {
             //21F210 increments the vector cursor before either virtual read.
             byte[] row=pool.CopyRecord(reference,token);
-            LegacyNativeGlyphUtf8Tokens.ReadScalar(new(BinaryPrimitives.ReadUInt16LittleEndian(row.AsSpan(4)),
-                BinaryPrimitives.ReadUInt16LittleEndian(row.AsSpan(8))),actualCallerScalarStorage4,actualControlLabelLookup,token);
+            var descriptor=new LegacyNativeGlyphSymbolDescriptor(BinaryPrimitives.ReadUInt16LittleEndian(row.AsSpan(4)),
+                BinaryPrimitives.ReadUInt16LittleEndian(row.AsSpan(8)));
+            validateScalar?.Invoke(descriptor);
+            token.ThrowIfCancellationRequested();
+            LegacyNativeGlyphUtf8Tokens.ReadScalar(descriptor,actualCallerScalarStorage4,actualControlLabelLookup,token);
             return new(BinaryPrimitives.ReadUInt16LittleEndian(actualCallerScalarStorage4),reference,true,word,consumed);
         }
         catch{failed=true;throw;}
