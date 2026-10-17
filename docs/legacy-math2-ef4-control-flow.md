@@ -7,8 +7,14 @@ not establish which internal EF4 correction branch is selected.
 packet40..4F to EEE50..5F; since the packet begins at EED70, this preserves the
 byte at EEE51.036F20 supplies that byte as EF4's ninth argument.042100 tests it
 at042406. A three-graph model, no fourth constraint model, or a forced-attention
-flag does not prove this request byte is zero. Its actual caller default is
-not established by this checkpoint.
+flag does not prove this request byte is zero. The separate cold-request audit
+now establishes byte1 for the concrete fresh, unmodified EEB caller:027830
+stores word0101 at EEB3C, while the request starts at EEB38.027970 passes that
+request to045460. With a cold source and no retained decoder,0450C0 therefore
+selects the nonzero correction branch. This excludes external request mutations
+and warm/copied/raw-initialized prepared decoders; it is not a universal host
+default. See `audit_math2_cold_correction_request.py` (three producer regions,
+13 pins/eight bindings plus this consumer proof).
 
 With the byte zero, EF4 invokes041020 with its final argument true, then the
 shared041A30 and041CF0 tail. With the byte nonzero, the source sequence matters:
@@ -32,3 +38,8 @@ tests do not execute these helpers. Required next work is to connect actual
 request policy, preserve both branches and failure prefixes, independently
 verify their numeric and structural transformations, then join final ordering
 and output. No full-engine or handwriting-quality claim follows here.
+
+The finite prepared041CF0 fresh and masked score kernels are verified
+separately. They do not execute the preceding correction helpers or select an
+actual request policy. Prepared byte-zero controls cannot stand in for the
+fresh EEB byte-one route.
