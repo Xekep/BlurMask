@@ -19,11 +19,11 @@ The reusable library now has these checked stages:
 | First-stage inference | Same-owner NN, graph, selected single or multiple plain words; unsupported traits/terminal columns remain explicit refusals. |
 | Main preprocessing | Actual selected first TEXT to source720,24B/24A geometry, deskew and smoothing.24A is joined; a genuine positive empty-first fixture/remaining temporal branches are not established. |
 | Descriptor cut source | Sequential cuts, cross-source construction/pruning, compact traversal and raw source projection are checked. Global context, four-family NN/cache, dictionary source epochs, stored-range group geometry and line-aware transition caches are joined. The shared global controller now joins logical word rows, terminal selection, compact publication and numeric glyph backtracking; global glyph chains and plain WORD publication are joined; final document publication remains separate. |
-| Global main numeric result | Same owned graph/context/NN/cache and source epochs through first/later language dispatch, exact primary recombination, terminal selection, ordinary compact207CB0 publication and numeric21FFD0 rows. The eight-input compact/backtrack checks preserve cached NN counts. Actual213C00 soft-hyphen allocations and bounded kind7 continuations are joined. The named LIVE factory retains the same query lease and compact pool for at most240 logical nodes and one intermediate gate. Final publication now precedes selection and explicitly represents no-winner; its new positive owner is not yet joined to downstream glyph execution. |
+| Global main numeric result | Same owned graph/context/NN/cache and source epochs through first/later language dispatch, exact primary recombination, terminal selection, ordinary compact207CB0 publication and numeric21FFD0 rows. The eight-input compact/backtrack checks preserve cached NN counts. Actual213C00 soft-hyphen allocations and bounded kind7 continuations are joined. The named LIVE factory retains the same query lease and compact pool for at most240 logical nodes and one intermediate gate. Final publication precedes selection, explicitly represents no-winner and now feeds actual glyph execution/raw WORD projections through a distinct positive owner. |
 | Main candidate | One assigned physical line through CASE, first terminal and compact backtrack. Configured count2 joins actual raw preprocessing, exclusions, compact2410 publication, backtracking, same-TOP WORD publication, duplicate comparison and score publication. Rescue and final document processing remain separate. |
 | Word publication | Per-segment residual association, glyph chain and same-owner plain WORD list; no supplied labels or success flags. The actual global route now joins packet writes,217DB0,218560 and21FE30 typed callback acknowledgement, including preserved failure prefixes. |
 | Global first alternative | Complete successful global callback tokens, actual selected final beam, explicit400-byte allocation and shared numerical score publication. The completed global WORD list now feeds the shared quote-cleanup kernel with retained scratch; the actual inputs contain no synthetic quotes. Enabled glyph normalization, multiple alternatives and document acceptance remain separate. |
-| Dynamic control import | Fresh byte-exact2A interning and13BE80 all-pool conversion now consume the actual completed global result through a separate copied lifecycle. Imported IDs remain distinct from acoustic labels; the postimport emission caller is still being traced. |
+| Dynamic control import | Fresh byte-exact2A interning and13BE80 all-pool conversion consume the actual completed global result through a separate copied lifecycle. The proven postimport caller selects dynamicTOP18 as primary. Raw pre-canonical byte projection is joined with aggregate byte/reference caps; full codec/circled completion remains separate. |
 | First candidate completion | Actual selected alternative scores, published-WORD quote cleanup, fresh-configuration glyph-normalization no-op, separate raw UTF8 WORD projections. No joined/accepted transcription. |
 | Ordinary glyph alternatives | Actual positive CASE source export/scoring/compact-driven refresh and13A830 ordering are joined. Fresh one-descriptor negative spans have owned source export/refresh. Native failed-refresh retries/general protocol sources remain separate. |
 | Text projection | Fresh273.V50 ->213A0/021000 choices and05AFA0 original raw positions are joined. A bounded first-WORD driver joins the219580 source prefix, clipping, overlap processing, ordered range interning, fresh024D40 metadata,021760 reuse and pending CHAR registrations. Bounded ordinary/configured no-bit8 TOP.V68 completion and actual shared275 WORD-array choices are joined, including genuine CHAR-key reuse, one shared UTF8/selection owner and pending CHAR+WORD commands. Actual NULL-reference raw-source projection now feeds pending kind2 TEXT registration. Actual021AB0 source-line publication retains separate append/write offsets; bounded025E40 validates every WORD/CHAR line and trims the unused guide tail after pending TEXT. Bounded per-WORD CHAR coverage and immutable01FD40/020000 selected flags/indices are joined. Fresh020920 interval/vector indices retain actual membership and whole-key owners. General augmentation and0283B0 document acceptance remain incomplete. |
@@ -39,6 +39,13 @@ invocations while preserving separate raw documents and mutable dictionary
 contexts. Existing diagnostic output is unchanged. The local library-only
 [memory comparison](legacy-main-model-context.md) does not establish app memory
 use or recognition quality.
+
+Its new `PrepareGlobal` entry joins the actual shared-global route through final
+publication, postpublication selection and raw WORD callbacks.32 independent
+invocations over eight source fixtures retain the same model object and match
+the raw-resource byte/range oracle in Managed/Native AOT. A separate124-node
+input returns an explicit no-winner with no glyph session. This does not enable
+app replacement or establish improved Russian accuracy.
 
 `LegacyFreshMainFirstCandidateCompletion` now joins that actual publication to
 the first-alternative snapshot, quote cleanup, the proven fresh-configuration
@@ -123,6 +130,9 @@ Details: [global compact](legacy-main-global-compact-materialization.md),
 [global glyph execution and WORD publication](legacy-main-global-glyph-execution.md),
 [global first alternative snapshot](legacy-main-global-first-alternative.md),
 [global raw WORD UTF8](legacy-main-global-word-utf8.md),
+[reusable context to raw global results](legacy-main-global-raw-recognition.md),
+[postpublication selection to glyph execution](legacy-main-global-published-glyphs.md),
+[published first-alternative snapshot](legacy-main-global-published-first-alternative.md),
 [actual global published quote cleanup](legacy-main-global-published-quotes.md),
 [recorded global Russian diagnostic](legacy-main-global-recorded-diagnostic.md),
 [soft-hyphen prepass and kind7 continuation](legacy-main-soft-hyphen-prepass.md),
@@ -139,7 +149,9 @@ Details: [global compact](legacy-main-global-compact-materialization.md),
 [bounded document control cleanup](legacy-main-document-control-cleanup.md),
 [retained global LIVE publication](legacy-main-global-live-publication.md),
 [final pool before selection](legacy-main-global-final-publication.md),
-[dynamic control alphabet and import](legacy-dynamic-control-alphabet-import.md).
+[dynamic control alphabet and import](legacy-dynamic-control-alphabet-import.md),
+[imported raw pre-canonical bytes](legacy-imported-word-bytes.md),
+[remaining native Math2 beam route](legacy-math2-beam-route.md).
 
 ## Remaining joins
 
