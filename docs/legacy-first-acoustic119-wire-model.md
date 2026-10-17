@@ -1,0 +1,21 @@
+# Actual first acoustic119/107 immutable model
+
+`LegacyFirstAcoustic119WireModel.ReadSelectedFirst(resource, actualParent247, actual249)` reads the actual first source selected by an owned249/100 processor. It retains the exact parent/processor, a separately owned nested247/110, its140 acoustic119 child, the source score exponent, prefix scalars/lists, all supported cache fields and positive groups, and immutable107 network snapshots. The caller's parent hash must match the supplied raw resource; a byte-identical foreign processor is still rejected.
+
+This is a wire model, not a processor or recognizer. It does not run24C, invent initial context channels, prepare features, apply EXP activations, map output classes to final text, or enter a controller. In particular, the English first source has24A→24C→265 and cannot use the Russian24A→265 preprocessing. The [static inventory](legacy-english-acoustic119-plan.md) documents the remaining24C and feature dependencies.
+
+The supported actual resources are `en_US-ak-cur.lite` and `en_US-ak-cur`: both selected first sources are kind135, initial-network absent, dynamic block absent, one non-grid profile, and second-only mode2 EXP slots. Lite has219/201 inputs; full adds276/276 slots. All six networks have182 outputs. Superimposed first sources are kind134 and remain explicitly refused. Russian first110 stays on its existing reader; no old guard or math was widened.
+
+`LegacyInkNetwork107Wire` preserves the original absolute stream origin, two padded matrix descriptions, all original envelope bytes including alignment padding, signed weight copies and row-scale copies. A107 matrix is aligned to16 in the original resource stream and its input stride is rounded to16. Copying the envelope and assuming offset0 is incorrect. There is no evaluator on this type. `Source` is the exact same nested247 owner, and every public byte/weight/scale accessor returns a copy.
+
+`Fields` retains every consumed envelope/prefix/cache wire field with its native destination and original offset. This includes raw selector bytes08/09 and profile88/89, which are not Boolean fields, positiveC8 boundaries/labels/weights, and all119 scalar tail fields through exact child end. A network's named field retains its full bytes as well as the separate network snapshot. Unsupported positive initial/dynamic/grid/conversion/calibration/correction/optional-child branches throw rather than skipping opaque bytes or creating defaults. `RawNormalizationTarget` remains the raw signed wire value; this type does not perform the runtime target0→100 policy.
+
+Portable bounds are explicit:64MiB input/parent,16MiB per network, widths2..4096, one profile/seven slots,512 positive groups and1024 entries per prefix list. Nonfinite float scalars, non-monotonic group boundaries, labels outside the actual AL, malformed scale vectors and incomplete child ends are rejected. These are portable supported-domain checks, not claims about every native malformed-input outcome.
+
+## Verification
+
+Run the new probe with `models-directory capture.json`, then its `audit_output.py` with the same arguments. The Python oracle uses only the standard library and raw model bytes: it independently walks parent249/nested247 ownership, parses the full119 prefix and cache, checks all fields/offsets, reconstructs both107 padded matrices and every weight/scale hash, and verifies exact acoustic ends.
+
+Actual coverage is two owners/six networks/518372 complete acoustic bytes. The probe also checks181 refusals, including76 coherent-tail truncations whose enclosing sizes remain valid, foreign equal-resource child identity, cancellation, invalid flags/scalars/networks/scales/group boundaries/labels, positive unsupported payloads, caller-copy isolation,16-byte rebasing parity and a deliberately incompatible one-byte rebase. Superimposed134 and the oldRU reader's English/107 refusals are retained. Existing `LegacyFirstAcoustic.Probe` remains a separate oldRU regression.
+
+`tools/handwriting/audit_first_acoustic119_wire.py` composes the pinned119/107/24C inventory with native field-order checks from1C2940. No SDK is loaded. Managed and NativeAOT captures must match exactly before this block is frozen. There is no English recognition or accuracy claim.
