@@ -2,7 +2,7 @@ namespace InkRecognition;
 
 /// <summary>Actual fresh global one292/no-associated terminal invocation.
 /// It selects numeric prepublication rows; row22 is not a compact record ID.</summary>
-public sealed class LegacyFreshMainGlobalTerminalInvocation
+public sealed partial class LegacyFreshMainGlobalTerminalInvocation
 {
     private readonly LegacyPreparedTerminalSource[] sources;
     public LegacyFreshMainGlobalWordControllerPolicy Policy{get;}
