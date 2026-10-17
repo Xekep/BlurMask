@@ -7,6 +7,10 @@ rasterize handwriting, load MyScript DLLs, run Python, or contact a cloud servic
 The previous symbol/PARSeq recognizers, weights, training tools and fixtures have
 been removed. There is no fallback to them.
 
+The optional **Experimental text engine** setting uses the bundled restored
+first-stage decoder. The newer main CASE pipeline remains library-only;
+Russian cursive is not ready. See the [restoration status and measured limits](restored-text-engine-status.md).
+
 This first integration supports an experimental English acoustic model. It uses
 a bounding-box normalization heuristic, a three-layer bidirectional LSTM and
 standard CTC collapse. It has no recovered lexical dictionary. English examples
