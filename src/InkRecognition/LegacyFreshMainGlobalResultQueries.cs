@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 [assembly:InternalsVisibleTo("LegacyMainGlobalResult.Probe")]
+[assembly:InternalsVisibleTo("LegacyMainGlobalTerminalMetadata.Probe")]
 namespace InkRecognition;
 
 public sealed partial class LegacyFreshMainGlobalCaseSession
@@ -29,6 +30,17 @@ public sealed partial class LegacyFreshMainGlobalCaseSession
     }
     internal void ValidateResultQueryLease(ResultQueryLease lease,CancellationToken token)
     {Enter(token);try{CheckResultQueryLease(lease,token);}finally{Exit();}}
+    internal ReadOnlyMemory<byte> ReadResultTerminal(ResultQueryLease lease,ulong tag,
+        ushort endingSymbol,byte boundaryArgument,CancellationToken token)
+    {
+        Enter(token);
+        try
+        {
+            CheckResultQueryLease(lease,token);
+            return dictionary.ReadResultTerminal(lease.DictionaryLease,tag,endingSymbol,boundaryArgument,token);
+        }
+        finally{Exit();}
+    }
     internal LegacyAggregateDictionaryQueryPage ReadResultQuery(ResultQueryLease lease,ulong tag,
         LegacyPreparedDictionaryQuery query,bool auxiliary,CancellationToken token)
     {

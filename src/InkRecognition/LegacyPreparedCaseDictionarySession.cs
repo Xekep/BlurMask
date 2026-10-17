@@ -228,13 +228,19 @@ public sealed class LegacyPreparedCaseDictionarySession
         try
         {
             RequireInstalledMap(expectedMap);
-            RequireSelectedSource(selectedSourceTag);
-            byte[] result=metadata.ReadTerminal(selectedSourceTag,endingSymbol,boundaryArgument,
-                ignoreCaseC4,cancellationToken).ToArray();
-            BinaryPrimitives.WriteUInt32LittleEndian(result,1);
-            return result;
+            return ReadTerminalAction(selectedSourceTag,endingSymbol,boundaryArgument,cancellationToken);
         }
         finally{Exit();}
+    }
+
+    private ReadOnlyMemory<byte> ReadTerminalAction(ulong selectedSourceTag,ushort endingSymbol,
+        byte boundaryArgument,CancellationToken cancellationToken)
+    {
+        RequireSelectedSource(selectedSourceTag);
+        byte[] result=metadata.ReadTerminal(selectedSourceTag,endingSymbol,boundaryArgument,
+            ignoreCaseC4,cancellationToken).ToArray();
+        BinaryPrimitives.WriteUInt32LittleEndian(result,1);
+        return result;
     }
 
     private static void RequireSelectedSource(ulong tag)
@@ -272,6 +278,22 @@ public sealed class LegacyPreparedCaseDictionarySession
     internal void ValidateResultQueryLease(ResultQueryLease lease,CancellationToken token)
     {
         Enter(token);try{RequireResultQueryLease(lease);}finally{Exit();}
+    }
+
+    //Source70 metadata reads no query slots. After finalV80 use the same
+    //retained-map result lease, without a fake D0 refresh or query revision.
+    internal ReadOnlyMemory<byte> ReadResultTerminal(ResultQueryLease lease,ulong selectedSourceTag,
+        ushort endingSymbol,byte boundaryArgument,CancellationToken token)
+    {
+        Enter(token);
+        try
+        {
+            RequireResultQueryLease(lease);
+            var result=ReadTerminalAction(selectedSourceTag,endingSymbol,boundaryArgument,token);
+            token.ThrowIfCancellationRequested();
+            return result;
+        }
+        finally{Exit();}
     }
 
     internal LegacyAggregateDictionaryQueryPage ReadResultQuery(ResultQueryLease lease,ulong tag,

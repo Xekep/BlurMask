@@ -18,12 +18,13 @@ The reusable library now has these checked stages:
 | --- | --- |
 | First-stage inference | Same-owner NN, graph, selected single or multiple plain words; unsupported traits/terminal columns remain explicit refusals. |
 | Main preprocessing | Actual selected first TEXT to source720,24B/24A geometry, deskew and smoothing.24A is joined; a genuine positive empty-first fixture/remaining temporal branches are not established. |
-| Descriptor cut source | Sequential cuts, cross-source construction/pruning, compact traversal and raw source projection are checked. Global context, four-family NN/cache, dictionary source epochs, stored-range group geometry and line-aware transition caches are joined. The global main controller remains separate. |
+| Descriptor cut source | Sequential cuts, cross-source construction/pruning, compact traversal and raw source projection are checked. Global context, four-family NN/cache, dictionary source epochs, stored-range group geometry and line-aware transition caches are joined. The shared global controller now joins logical word rows, terminal selection, compact publication and numeric glyph backtracking; global WORD/document publication remains separate. |
+| Global main numeric result | Same owned graph/context/NN/cache and source epochs through first/later language dispatch, exact primary recombination, terminal selection, ordinary compact207CB0 publication and numeric21FFD0 rows. The eight-input compact/backtrack checks preserve cached NN counts. Intermediate global publication and the213C00 line-increment guard are not closed. |
 | Main candidate | One assigned physical line through CASE, first terminal and compact backtrack. Configured count2 joins actual raw preprocessing, exclusions, compact2410 publication, backtracking, same-TOP WORD publication, duplicate comparison and score publication. Rescue and final document processing remain separate. |
 | Word publication | Per-segment residual association, glyph chain and same-owner plain WORD list; no supplied labels or success flags. |
 | First candidate completion | Actual selected alternative scores, published-WORD quote cleanup, fresh-configuration glyph-normalization no-op, separate raw UTF8 WORD projections. No joined/accepted transcription. |
 | Ordinary glyph alternatives | Actual positive CASE source export/scoring/compact-driven refresh and13A830 ordering are joined. Fresh one-descriptor negative spans have owned source export/refresh. Native failed-refresh retries/general protocol sources remain separate. |
-| Text projection | Fresh273.V50 ->213A0/021000 choices and05AFA0 original raw positions are joined. A bounded first-WORD driver joins the219580 source prefix, clipping, overlap processing, ordered range interning, fresh024D40 metadata,021760 reuse and pending CHAR registrations. TOP.V68 augmentation/pruning and0283B0 document assembly remain incomplete. |
+| Text projection | Fresh273.V50 ->213A0/021000 choices and05AFA0 original raw positions are joined. A bounded first-WORD driver joins the219580 source prefix, clipping, overlap processing, ordered range interning, fresh024D40 metadata,021760 reuse and pending CHAR registrations. Bounded ordinary/configured no-bit8 TOP.V68 completion and actual shared275 WORD-array choices are joined, including genuine CHAR-key reuse, one shared UTF8/selection owner and pending CHAR+WORD commands. Actual021AB0 source-line publication retains separate append/write offsets. General augmentation and0283B0 document acceptance remain incomplete. |
 | Long-source publication | Genuine native 120-node gate and prefix/final-append transport checked; a nonempty genuine long-source winner is not established. |
 
 `LegacyFreshMainSingleLinePlainRecognition` joins raw physical strokes to the
@@ -73,6 +74,38 @@ instruction checks establish the stated component behavior. They do not prove
 handwriting accuracy or equivalence to the whole original engine. No vendor
 DLL is executed by the library or these tests.
 
+## Latest integration evidence (2026-10-17)
+
+The global compact publisher and the old DIRECT/CASE/configured/live adapters
+share one numerical207CB0 kernel. The actual global selected compact pool now
+feeds a shared21FFD0 predecessor/row kernel. Ordinary global glyph scoring is
+bound to the same cached acoustic/category/geometry owners; its consumer rows
+remain explicitly prepared, and this is not yet accepted global text.
+
+A separate nine-track global diagnostic reads coordinates and track hashes,
+without expected labels: 140 nodes,868 groups,362 language queries/allocations
+and16,557 finite ordinary anchors. Every anchor resolves to the first-word
+branch; there are no observed later anchors. These are the same limited
+single-path word recordings described above, not a larger accuracy benchmark.
+
+The newly connected later-history branch has independent prepared history,
+source70 token/epoch and unsigned heap-capacity checks. The current real inputs
+do not establish later-history recognition. The line-increment213C00 native
+branch is a newly identified remaining condition: some adjacent rows satisfy
+its line/flag guard, but frontend110 soft-hyphen qualification and its actual
+insertion still require examination. Candidate guard matches are not native
+invocation counts.
+
+Details: [global compact](legacy-main-global-compact-materialization.md),
+[global numeric backtracking](legacy-main-global-glyph-backtrack.md),
+[global ordinary consumers](legacy-main-global-ordinary-glyph.md),
+[global protocol consumers](legacy-main-global-protocol-glyph.md),
+[global flush packets](legacy-main-global-glyph-flush.md),
+[post-result metadata](legacy-main-global-result-terminal.md),
+[later history dispatch](legacy-main-language-dispatch.md),
+[shared WORD choices](legacy-main-shared-word-source-choices.md),
+[source line publication](legacy-main-owned-source-lines.md).
+
 ## Remaining joins
 
 - Main alternatives now have actual shared-TOP postcallback list comparison,
@@ -87,8 +120,8 @@ DLL is executed by the library or these tests.
   need bounded portable handling rather than fabricated empty results.
 - General protocol/source refresh and native failed-refresh retry semantics;
   complete TOP.V68 source augmentation, actual span WORD pruning and0283B0
-  document orchestration. The numeric13D360 ranking kernel is checked separately;
-  its same-pool comparator and real span mutation still require binding. Actual
+  document orchestration. The bounded same-pool13D360 ranking, comparer and real span mutation are
+  joined; general candidate expansion remains separate. Actual
   first-candidate glyph choices retain an immutable original raw document;
   sampled node/arc keys are not reused as document IDs.
 - Representative online handwriting evaluation with real pen-up events,

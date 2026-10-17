@@ -48,6 +48,8 @@ public sealed class LegacyFreshMainGlobalWordPassResult
     internal ushort FinalSourceEnd=>nodes[^1].SourceEnd23f0;
     internal int FinalCumulativeCost=>nodes[^1].CumulativePathCost2520;
     internal void ValidateResultQueryLease(CancellationToken token)=>Policy.Owner.ValidateResultQueryLease(resultQueries,token);
+    internal ReadOnlyMemory<byte> ReadResultTerminal(ulong tag,ushort endingSymbol,byte boundaryArgument,CancellationToken token)
+        =>Policy.Owner.ReadResultTerminal(resultQueries,tag,endingSymbol,boundaryArgument,token);
     internal LegacyAggregateDictionaryQueryPage ReadResultQuery(ulong tag,LegacyPreparedDictionaryQuery query,bool auxiliary,CancellationToken token)
         =>Policy.Owner.ReadResultQuery(resultQueries,tag,query,auxiliary,token);
     internal void BeginCompactPublication(CancellationToken token)
