@@ -2693,6 +2693,11 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 11.0.100-preview.7.26381.103
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install independent tensor-state oracle
+        run: python -m pip install numpy
       - uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.artifact }}
@@ -2711,6 +2716,20 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Math formatter/model guards failed.' }
           & $exe --runtime-native ".artifacts/formula-app/runtimes/$rid/native/$lib"
           if ($LASTEXITCODE -ne 0) { throw 'Native formula ABI/inference/cancellation failed.' }
+          python tools/export-ink-math-model.py models/math2/math2-unwrapped.res --output .artifacts/math-mode0.ikrmath
+          if ($LASTEXITCODE -ne 0) { throw 'Bounded Math2 model export failed.' }
+          $runtime = ".artifacts/formula-app/runtimes/$rid/native/$lib"
+          dotnet run --project tools/LegacyMathTensorState.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-mode0-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed mode0 tensor lifecycle failed.' }
+          python tools/LegacyMathTensorState.Probe/audit_output.py .artifacts/math-mode0-managed.json models/math2/math2-unwrapped.res
+          if ($LASTEXITCODE -ne 0) { throw 'Managed mode0 tensor oracle failed.' }
+          dotnet publish tools/LegacyMathTensorState.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-mode0-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Mode0 tensor probe publish failed.' }
+          $state = if ($IsWindows) { '.artifacts/math-mode0-probe/LegacyMathTensorState.Probe.exe' } else { '.artifacts/math-mode0-probe/LegacyMathTensorState.Probe' }
+          & $state .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-mode0-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native mode0 tensor lifecycle failed.' }
+          python tools/LegacyMathTensorState.Probe/audit_output.py .artifacts/math-mode0-native.json models/math2/math2-unwrapped.res
+          if ($LASTEXITCODE -ne 0) { throw 'Native mode0 tensor oracle failed.' }
           dotnet publish tools/InkRecognition.RawContent.Probe/InkRecognition.RawContent.Probe.csproj -c Release -r $rid -p:PublishAot=true -o .artifacts/raw-content-probe
           if ($LASTEXITCODE -ne 0) { throw 'Raw-content probe publish failed.' }
           $raw = if ($IsWindows) { '.artifacts/raw-content-probe/InkRecognition.RawContent.Probe.exe' } else { '.artifacts/raw-content-probe/InkRecognition.RawContent.Probe' }
