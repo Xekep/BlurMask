@@ -18,11 +18,12 @@ The reusable library now has these checked stages:
 | --- | --- |
 | First-stage inference | Same-owner NN, graph, selected single or multiple plain words; unsupported traits/terminal columns remain explicit refusals. |
 | Main preprocessing | Actual selected glyph records to source720, line fitting, deskew and smoothing; empty first-result continuation remains incomplete. |
-| Descriptor cut source | Sequential ordinary and pending-separator steps share one XY/source chronology; global graph stitching and cross-source merges remain incomplete. |
+| Descriptor cut source | Sequential ordinary and pending-separator steps share one XY/source chronology. Append/remap/root stitching is checked, with an actual adapter limited to whole-physical single-atom descriptors; cross-source construction/pruning remain incomplete. |
 | Main candidate | One assigned physical line through the CASE dictionary, scheduler, first terminal and actual compact backtrack. |
 | Word publication | Per-segment residual association, glyph chain and same-owner plain WORD list; no supplied labels or success flags. |
 | First candidate completion | Actual selected alternative scores, published-WORD quote cleanup, fresh-configuration glyph-normalization no-op, separate raw UTF8 WORD projections. No joined/accepted transcription. |
-| Text projection | Raw ordinary glyph UTF8 and sampled source keys; document wrapper/lazy alternative refresh remain separate. |
+| Ordinary glyph alternatives | Actual nonnegative CASE source export, original-group scoring, compact-driven pool refresh and13A830 ordering are joined. Negative/span sources and native failed-refresh retry remain separate. |
+| Text projection | Raw ordinary glyph UTF8 and sampled source keys; final document/string wrapper remains separate. |
 | Long-source publication | Genuine native 120-node gate and prefix/final-append transport checked; a nonempty genuine long-source winner is not established. |
 
 `LegacyFreshMainSingleLinePlainRecognition` joins raw physical strokes to the
@@ -62,8 +63,10 @@ DLL is executed by the library or these tests.
 - Multiple main descriptors/lines, empty-result continuation and unsupported
   source/protocol/glyph branches. Native wrapped count/allocation boundaries
   need bounded portable handling rather than fabricated empty results.
-- Lazy additional glyph alternatives and their selection before the final
-  UTF8/document-source wrapper. Sampled node/arc keys are not document point IDs.
+- Negative/span source metadata and remaining glyph-refresh branches, native
+  failed-refresh retry semantics, and final UTF8/document-source wrapper
+  orchestration. Ordinary positive CASE refresh/selection now has an owning
+  adapter; sampled node/arc keys are still not document point IDs.
 - Representative online handwriting evaluation with real pen-up events,
   Russian cursive, English, mixed text and mathematical notation before enabling
   the new path for automatic app replacement.
@@ -71,6 +74,8 @@ DLL is executed by the library or these tests.
 Details: [raw main integration](legacy-main-raw-plain-recognition.md),
 [first multiword preprocessing](legacy-main-text-input.md),
 [shared descriptor cuts](legacy-main-descriptor-cut-source.md),
+[bounded graph append](legacy-main-graph-append-stage.md),
+[ordinary glyph refresh](legacy-main-ordinary-glyph-refresh.md),
 [first candidate completion](legacy-main-first-candidate-completion.md),
 [word publication](legacy-main-owned-word-publication.md),
 [UTF8 projection](legacy-main-word-utf8-projection.md),

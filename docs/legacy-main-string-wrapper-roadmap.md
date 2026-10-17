@@ -6,6 +6,16 @@ already produce real selected glyph references. They do not yet constitute
 the final text-source wrapper. No runtime, recognition policy or measured
 transcription was changed for this investigation.
 
+## Subsequent ordinary refresh adapter
+
+The standalone13A830 kernel and owning nonnegative ordinary CASE217670
+refresh have since been joined in `LegacyOwnedMainOrdinaryGlyphRefresh`. Its
+source exports and score channels come from the actual completed main result.
+This closes the positive ordinary callback dependency described below; the
+complete024F30/0213A0/021000 source-document wrapper, span sources and native
+failed-refresh retry semantics are still separate. See
+[the current adapter and checks](legacy-main-ordinary-glyph-refresh.md).
+
 ## The actual input is an owner selection, not one flat word string
 
 `0283B0` takes result wrappers whose `+10` points to TOP273. Each actual

@@ -5,6 +5,18 @@ callback used by273.V40=13C6E0 before alternative selection. It identifies
 an owning next-stage contract; it does not execute a vendor binary, change
 the runtime or declare the final string wrapper complete.
 
+## Subsequent scoped implementation
+
+The dependency map below records the investigation boundary. The ordinary
+positive CASE source-export and scoring joins have since been implemented,
+along with actual compact-driven pool refresh and alternative ordering. See
+[owning ordinary refresh](legacy-main-ordinary-glyph-refresh.md),
+[source metadata](legacy-main-glyph-source-metadata.md) and
+[shared scoring](legacy-main-glyph-refresh-scoring.md). Negative/span sources,
+native failed-refresh retries and complete string-wrapper integration remain
+separate. The older statements about missing public joins below describe the
+investigation snapshot rather than the current positive adapter.
+
 ## Owners at entry
 
 Native parameters are engine, main240 controller, TOP273 result, and the
