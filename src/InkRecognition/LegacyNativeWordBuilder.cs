@@ -59,6 +59,14 @@ public sealed class LegacyNativeWordBuilder
         W64(data,8,reference);
     }
 
+    //219580 passes WORD+30 directly to218A30. Its returned flags belong to
+    //the same working WORD before218560; no other packet field is rewritten.
+    internal void ApplySpanAlternativeFlags30(ushort flags,CancellationToken token=default)
+    {
+        token.ThrowIfCancellationRequested();
+        W16(data,48,flags);
+    }
+
     //21FE30 writes packet metadata before218560 constructs the chain.
     internal void ApplyMainPublicationPacket(LegacyPreparedMainWordPublicationPacket packet,CancellationToken token=default)
     {
