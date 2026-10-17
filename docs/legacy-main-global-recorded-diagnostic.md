@@ -43,3 +43,15 @@ the raw projection with the pinned manifest and track index. The retained local
 analysis artifacts are in `global-recorded-execution` and
 `global-recorded-projection` under the external build-artifact directory. This
 diagnostic does not enable the new path in the application.
+
+To reproduce all nine raw-resource checks before evaluating expected text, use
+the standalone evaluator with a built Managed DLL or Native AOT probe:
+
+```powershell
+python tools/handwriting/evaluate_global_recorded_words.py --probe <LegacyMainGlobalWordUtf8.Probe.exe-or-dll> --manifest <recorded-corpus/manifest.json> --output <external-output-directory>
+```
+
+The evaluator retains each capture and writes `report.json` with track and
+capture hashes. It requires identical bytes for all32 caller-residue variants
+of each recording and completes every independent AK-resource audit before
+computing exact-word accuracy and raw Unicode edit distance.
