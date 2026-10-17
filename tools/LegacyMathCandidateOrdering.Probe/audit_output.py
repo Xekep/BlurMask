@@ -7,10 +7,10 @@ import struct
 import sys
 from pathlib import Path
 
-if len(sys.argv)!=2:
-    raise SystemExit('capture.json')
+if len(sys.argv)!=3:
+    raise SystemExit('capture.json raw-math2.res')
 capture=json.loads(Path(sys.argv[1]).read_bytes())
-assert capture['caseCount']==181 and len(capture['cases'])==181 and capture['guards']==26
+assert capture['caseCount']==181 and len(capture['cases'])==181 and capture['guards']==35
 costs=[0xff800000,0xff7fffff,0xbf800000,0x80000000,0,0x3c23d70a,
        0x3f000000,0x3f800000,0x7f7fffff,0x7f800000,0x7fc00000,0x7fa00001]
 
@@ -201,3 +201,76 @@ for case in capture['unrestricted']:
  sort48(rows,0,len(rows)-1)
  assert base64.b64decode(case['sorted'],validate=True)==b''.join(rows)
 print('PASS264 independent raw48 sort controls/tie2+4 manual vectors and120 unrestricted prepared297-class cost-row -> full heap -> sorted record joins')
+
+#Data-only raw AL reader independently derives the source profile predicate.
+import runpy
+reader=runpy.run_path(str(Path(__file__).resolve().parents[1]/'export-ink-math-model.py'))
+raw=Path(sys.argv[2]).read_bytes();assert hashlib.sha256(raw).hexdigest()=='2dc179aadb1bce347bb1ebd57aa765d4c822d6ea12eca7593a8b9f1b89d53e8a'
+_,_,_,end=reader['header'](raw,90);rr=reader['Reader'](raw,106,end);header=rr.read('H',8);n=rr.read('H')
+for inc in (32,64,1):
+ table=rr.read('H',n);n=next(v+inc for v in reversed(table)if v!=65535)
+spans=rr.read('H',n+1);entries=[rr.read('II')for _ in range(spans[-1]+1)];text=rr.bytes(entries[-1][0])
+labels={label&65535:text[offset:entries[j+1][0]].decode('utf8')for j,(offset,label)in enumerate(entries[:-1])}
+inv={s:i for i,s in labels.items()};whitespace=set(range(9,14))|{32,160,8232,8233}
+ordinary=[i for i,s in labels.items()if len(s)==1 and ord(s)not in whitespace and i not in(inv['\u2402'],inv['\u2403'])]
+slots=[min(ordinary),inv['\u221a'],max(ordinary),inv['<fracbar>'],inv['<slantedfracbar>'],65535,inv['\u22c5'],inv['<vopbar>']]
+assert header==[65535]*7+[299] and slots==capture['observableSlots']==[2,190,261,268,276,65535,242,296]
+observable=lambda i:i!=slots[5]and(slots[0]<=i<=slots[2]or i in[slots[k]for k in(3,4,6,7)if slots[k]!=65535])
+mask=bytearray(8192)
+for i in range(65536):
+ if observable(i):mask[i//8]|=1<<(i%8)
+assert base64.b64decode(capture['observableBits'],validate=True)==mask
+
+patterns=[[],[262,263],[262,2,263],[268],[190],[296],[1,0]]
+delta_bits=[0xbf800000,0,0x3f000000,0x447a0000,0x7fc00000,0x7f800000,0xff800000]
+assert len(capture['eosHandoffs'])==980
+assert {(c['width'],c['seed'],c['pattern'],c['deltaBits'])for c in capture['eosHandoffs']}=={(w,s,p,d)for w in(1,2,4,8,16)for s in range(4)for p in range(7)for d in delta_bits}
+completed=0;any_mixed=0
+for case in capture['eosHandoffs']:
+ width,seed,pattern=case['width'],case['seed'],case['pattern'];rows=[];capacity=width*2
+ #Reconstruct actual raw caller records through independent heap replay.
+ for beam in range(width):
+  for symbol in range(297):
+   value=f32(1+((symbol*17+beam*29+seed*13)%100)/16)
+   if symbol==1:value=f32(beam*.125+seed*.25)
+   if symbol==5:value=f32(.5+beam*.25)
+   at=lambda i:struct.unpack_from('<f',rows[i])[0]
+   if len(rows)==capacity and value>=at(0):continue
+   if len(rows)<capacity:
+    slot=len(rows);rows.append(bytes(48))
+    while slot and not(at((slot-1)//2)>=value):rows[slot]=rows[(slot-1)//2];slot=(slot-1)//2
+   else:
+    slot=0
+    while slot*2<len(rows)-1:
+     child=slot*2+1
+     if child+1<len(rows)and at(child+1)>=at(child):child+=1
+     if value>=at(child):break
+     rows[slot]=rows[child];slot=child
+   row=bytearray(48);struct.pack_into('<f',row,0,value);struct.pack_into('<Q',row,8,symbol);struct.pack_into('<Qi',row,32,0xffffffffffffffff,beam);rows[slot]=bytes(row)
+ sort48(rows,0,len(rows)-1);delta=struct.unpack('<f',struct.pack('<I',case['deltaBits']))[0]
+ if delta<1000:
+  threshold=f32(struct.unpack_from('<f',rows[0])[0]+delta)
+  for i in range(1,len(rows)):
+   if struct.unpack_from('<f',rows[i])[0]>=threshold:rows[i]=struct.pack('<I',0x7f7fffff)+rows[i][4:]
+ assert base64.b64decode(case['pruned'],validate=True)==b''.join(rows)
+ expected=[]
+ for rank,row in enumerate(rows):
+  bits=struct.unpack_from('<I',row)[0]
+  if struct.unpack_from('<Q',row,8)[0]!=1 or bits==0x7f7fffff:continue
+  beam=struct.unpack_from('<i',row,40)[0];prefix=patterns[(pattern+beam)%7]
+  if rank<width and any(map(observable,prefix)):
+   cost=struct.unpack_from('<f',row)[0];score=f32(cost/f32((len(prefix)+6)/6))
+   expected.append(dict(rank=rank,beam=beam,costBits=bits,scoreBits=struct.unpack('<I',struct.pack('<f',score))[0],prefix=prefix));completed+=1
+   any_mixed+=not all(map(observable,prefix))
+  rows[rank]=struct.pack('<I',0x7f7fffff)+row[4:]
+ assert case['scores']==expected
+ assert base64.b64decode(case['eos'],validate=True)==b''.join(rows)
+ sort48(rows,0,len(rows)-1)
+ assert base64.b64decode(case['resorted'],validate=True)==b''.join(rows)
+ active=1
+ while active<width and struct.unpack_from('<I',rows[active])[0]!=0x7f7fffff:active+=1
+ assert case['active']==active
+ if width==1 and seed==0 and case['deltaBits']==0xbf800000:
+  assert active==1 and struct.unpack_from('<Q',rows[0],8)[0]==5 and all(struct.unpack_from('<I',x)[0]==0x7f7fffff for x in rows)
+assert completed>0 and any_mixed>0
+print(f'PASS actual299-label EF3 profile/all65536 predicates;980 prepared delta/EOS handoffs/{completed} completed numeric scores/{any_mixed} mixed-prefix ANY discriminators; no beam or acceptance claim')

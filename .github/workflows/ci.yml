@@ -837,8 +837,8 @@ jobs:
           python tools/LegacyMainResultScore.Probe/reference_controls.py .artifacts/legacy-main-result-score-controls.json
           dotnet run --project tools/LegacyMainResultScore.Probe -c Release -- .artifacts/legacy-main-result-score-controls.json .artifacts/legacy-main-result-score-managed.json
           python tools/LegacyMainResultScore.Probe/audit_output.py .artifacts/legacy-main-result-score-controls.json .artifacts/legacy-main-result-score-managed.json
-          dotnet run --project tools/LegacyMathCandidateOrdering.Probe -c Release -- .artifacts/legacy-math-candidate-ordering-managed.json
-          python tools/LegacyMathCandidateOrdering.Probe/audit_output.py .artifacts/legacy-math-candidate-ordering-managed.json
+          dotnet run --project tools/LegacyMathCandidateOrdering.Probe -c Release -- .artifacts/legacy-math-candidate-ordering-managed.json models/math2/math2-unwrapped.res
+          python tools/LegacyMathCandidateOrdering.Probe/audit_output.py .artifacts/legacy-math-candidate-ordering-managed.json models/math2/math2-unwrapped.res
           dotnet run --project tools/LegacyMainPostResultCounts.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-post-counts-managed.json
           python tools/LegacyMainPostResultCounts.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-main-post-counts-managed.json
           python tools/LegacyGlyphAlternativeSelection.Probe/reference_controls.py .artifacts/legacy-glyph-alternative-controls.json
@@ -1428,7 +1428,7 @@ jobs:
             @{ Name = 'LegacyMainGlyphRefreshScoring'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-main-refresh-scoring-native.json') },
             @{ Name = 'LegacyMainGeometricFallback'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-geometric-fallback-native.json') },
             @{ Name = 'LegacyMainResultScore'; Args = @('.artifacts/legacy-main-result-score-controls.json', '.artifacts/legacy-main-result-score-native.json') },
-            @{ Name = 'LegacyMathCandidateOrdering'; Args = @('.artifacts/legacy-math-candidate-ordering-native.json') },
+            @{ Name = 'LegacyMathCandidateOrdering'; Args = @('.artifacts/legacy-math-candidate-ordering-native.json', 'models/math2/math2-unwrapped.res') },
             @{ Name = 'LegacyMainPostResultCounts'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-post-counts-native.json') },
             @{ Name = 'LegacyGlyphAlternativeSelection'; Args = @('.artifacts/legacy-glyph-alternative-controls.json', '.artifacts/legacy-glyph-alternative-native.json') },
             @{ Name = 'LegacyMainFirstAlternative'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-main-first-alternative-native.json') },
@@ -2153,7 +2153,7 @@ jobs:
               if ($LASTEXITCODE -ne 0) { throw 'LegacyMainResultScore independent audit failed' }
             }
             if ($name -eq 'LegacyMathCandidateOrdering') {
-              python tools/LegacyMathCandidateOrdering.Probe/audit_output.py .artifacts/legacy-math-candidate-ordering-native.json
+              python tools/LegacyMathCandidateOrdering.Probe/audit_output.py .artifacts/legacy-math-candidate-ordering-native.json models/math2/math2-unwrapped.res
               if ($LASTEXITCODE -ne 0) { throw 'LegacyMathCandidateOrdering independent audit failed' }
             }
             if ($name -eq 'LegacyMainPostResultCounts') {

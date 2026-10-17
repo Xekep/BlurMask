@@ -8,9 +8,13 @@ namespace InkRecognition.Math;
 internal sealed class LegacyPreparedMathUnrestrictedCandidates
 {
     private readonly LegacyPreparedMathCandidateHeap heap;
+    internal int ActiveBeams {get;}
+    internal int BeamWidth {get;}
+    internal int VocabularyCount {get;}
     internal byte[] CopyHeapStorage()=>heap.CopyStorage();
     internal byte[] CopySortedStorage()=>LegacyPreparedMathRawCandidateOrdering.Sort(heap.CopyStorage());
-    private LegacyPreparedMathUnrestrictedCandidates(LegacyPreparedMathCandidateHeap actualHeap)=>heap=actualHeap;
+    private LegacyPreparedMathUnrestrictedCandidates(LegacyPreparedMathCandidateHeap actualHeap,int active,int width,int vocabulary)
+    {heap=actualHeap;ActiveBeams=active;BeamWidth=width;VocabularyCount=vocabulary;}
     internal static LegacyPreparedMathUnrestrictedCandidates Expand(
         ReadOnlySpan<byte> cumulativeCostsF32,int activeBeams,int vocabularyCount,int requestedBeamWidth,
         ReadOnlySpan<byte> preparedSourceInformation64,ReadOnlySpan<byte> preparedConditional32,
@@ -44,6 +48,6 @@ internal sealed class LegacyPreparedMathUnrestrictedCandidates
             }
         }
         if(heap.Count!=capacity)throw new InvalidOperationException("Prepared native sort range is not fully initialized.");
-        return new(heap);
+        return new(heap,activeBeams,requestedBeamWidth,vocabularyCount);
     }
 }

@@ -2,7 +2,7 @@ using InkRecognition.Math;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text.Json;
-if(args.Length!=1)throw new ArgumentException("capture.json");
+if(args.Length!=2)throw new ArgumentException("capture.json raw-math2.res");
 uint[] costs=[0xff800000,0xff7fffff,0xbf800000,0x80000000,0,0x3c23d70a,0x3f000000,0x3f800000,0x7f7fffff,0x7f800000,0x7fc00000,0x7fa00001];
 using var file=File.Create(args[0]);using var w=new Utf8JsonWriter(file);w.WriteStartObject();w.WriteStartArray("cases");int guards=0,cases=0;
 byte[] Make(int count,int seed,bool equal)
@@ -132,7 +132,51 @@ Reject(()=>LegacyPreparedMathUnrestrictedCandidates.Expand(new byte[8],1,2,17,ne
 Reject(()=>LegacyPreparedMathUnrestrictedCandidates.Expand(new byte[8],1,2,1,new byte[7],new byte[4]));
 Reject(()=>LegacyPreparedMathUnrestrictedCandidates.Expand(new byte[8],1,2,1,new byte[8],new byte[3]));
 Reject(()=>LegacyPreparedMathUnrestrictedCandidates.Expand(new byte[8],1,2,1,new byte[8],new byte[4],new(true)));
+var rawMath=File.ReadAllBytes(args[1]);var gate=LegacyMath2ObservableTokens.BindBundledResource(rawMath);
+w.WriteStartArray("observableSlots");foreach(ushort field in gate.CopySlots())w.WriteNumberValue(field);w.WriteEndArray();
+byte[] observable=new byte[8192];for(int i=0;i<=ushort.MaxValue;i++)if(gate.IsObservable((ushort)i))observable[i/8]|=(byte)(1<<(i%8));
+w.WriteBase64String("observableBits",observable);
+ushort[][] prefixPatterns=[[],[262,263],[262,2,263],[268],[190],[296],[1,0]];
+uint[] deltas=[0xbf800000,0,0x3f000000,0x447a0000,0x7fc00000,0x7f800000,0xff800000];
+w.WriteStartArray("eosHandoffs");
+foreach(int width in new[]{1,2,4,8,16})for(int seed=0;seed<4;seed++)for(int pattern=0;pattern<7;pattern++)foreach(uint deltaBits in deltas)
+{
+ var rows=new byte[width*297*4];
+ for(int beam=0;beam<width;beam++)for(int symbol=0;symbol<297;symbol++)
+ {
+  float cost=1f+((symbol*17+beam*29+seed*13)%100)/16f;
+  if(symbol==1)cost=beam*.125f+seed*.25f;if(symbol==5)cost=.5f+beam*.25f;
+  BinaryPrimitives.WriteSingleLittleEndian(rows.AsSpan((beam*297+symbol)*4),cost);
+ }
+ var source=LegacyPreparedMathUnrestrictedCandidates.Expand(rows,width,297,width,new byte[width*8],new byte[width*4]);
+ var prefixes=Enumerable.Range(0,width).Select(beam=>prefixPatterns[(pattern+beam)%7]).ToArray();
+ var step=LegacyPreparedMathEosHandoff.Apply(source,BitConverter.Int32BitsToSingle(unchecked((int)deltaBits)),gate,prefixes);
+ if(!ReferenceEquals(step.Source,source))throw new Exception("Prepared EOS source ownership changed.");
+ w.WriteStartObject();w.WriteNumber("width",width);w.WriteNumber("seed",seed);w.WriteNumber("pattern",pattern);w.WriteNumber("deltaBits",deltaBits);
+ w.WriteBase64String("pruned",step.CopyAfterPruning());w.WriteBase64String("eos",step.CopyAfterEos());w.WriteBase64String("resorted",step.CopyAfterResort());w.WriteNumber("active",step.ActiveCount);
+ w.WriteStartArray("scores");foreach(var score in step.Scores)
+ {
+  w.WriteStartObject();w.WriteNumber("rank",score.Rank);w.WriteNumber("beam",score.SourceBeam);
+  w.WriteNumber("costBits",BitConverter.SingleToUInt32Bits(score.CandidateCost));w.WriteNumber("scoreBits",BitConverter.SingleToUInt32Bits(score.CompletedScore));
+  w.WriteStartArray("prefix");foreach(ushort symbol in score.Prefix)w.WriteNumberValue(symbol);w.WriteEndArray();w.WriteEndObject();
+ }
+ w.WriteEndArray();w.WriteEndObject();
+}
+w.WriteEndArray();
+Reject(()=>LegacyMath2ObservableTokens.BindBundledResource([]));
+Reject(()=>LegacyMath2ObservableTokens.BindBundledResource(rawMath,new(true)));
+var eosSource=LegacyPreparedMathUnrestrictedCandidates.Expand(new byte[297*4],1,297,1,new byte[8],new byte[4]);
+var otherVocabulary=LegacyPreparedMathUnrestrictedCandidates.Expand(new byte[2*4],1,2,1,new byte[8],new byte[4]);
+Reject(()=>LegacyPreparedMathEosHandoff.Apply(otherVocabulary,0,gate,[[]]));
+Reject(()=>LegacyPreparedMathEosHandoff.Apply(eosSource,0,gate,[]));
+Reject(()=>LegacyPreparedMathEosHandoff.Apply(eosSource,0,gate,[null!]));
+Reject(()=>LegacyPreparedMathEosHandoff.Apply(eosSource,0,gate,[new ushort[1_000_001]]));
+Reject(()=>LegacyPreparedMathEosHandoff.Apply(eosSource,0,gate,[[297]]));
+var negativeRows=new byte[297*4];BinaryPrimitives.WriteSingleLittleEndian(negativeRows,-1);
+var negativeSource=LegacyPreparedMathUnrestrictedCandidates.Expand(negativeRows,1,297,1,new byte[8],new byte[4]);
+Reject(()=>LegacyPreparedMathEosHandoff.Apply(negativeSource,0,gate,[[]]));
+Reject(()=>LegacyPreparedMathEosHandoff.Apply(eosSource,0,gate,[[]],new(true)));
 w.WriteNumber("caseCount",cases);w.WriteNumber("guards",guards);w.WriteEndObject();
 Console.WriteLine($"PASS{cases} complete candidate-ordering controls/{guards} guards; prepared kernel only, no beam integration or accuracy claim.");
 void Reject(Action action)
-{try{action();}catch(Exception e)when(e is ArgumentException or OperationCanceledException){guards++;return;}throw new Exception("Expected candidate ordering boundary refusal.");}
+{try{action();}catch(Exception e)when(e is ArgumentException or OperationCanceledException or NotSupportedException){guards++;return;}throw new Exception("Expected candidate ordering boundary refusal.");}

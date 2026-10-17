@@ -71,8 +71,11 @@ zero-before-payload ordering and native equal/unordered float branches over
 4096 independently checked offers. Its prepared unrestricted expansion now
 joins explicit297-class cost rows and beam sidecars to the same owned heap
 and raw48-byte sorting in120 cases, with264 separate raw-sort controls. The
-actual EEF producer, configured aliases, EOS continuation and reusable network
-state loop remain separate; this does not enable app beam recognition.
+actual EEF producer, configured aliases and reusable network state loop remain
+separate. The prepared numerical EOS handoff now joins the fingerprinted actual
+299-label observable-prefix gate, negative-delta pruning, completed scores and
+capacity re-sort in980 controls. It has no native allocation/failure completion
+record or max-step fallback and does not enable app beam recognition.
 
 ## Quality evidence
 
@@ -188,7 +191,8 @@ Details: [global compact](legacy-main-global-compact-materialization.md),
 [score channels and prepared default completion score](legacy-math2-score-channels.md),
 [prepared candidate heap](legacy-math2-candidate-heap.md),
 [prepared unrestricted expansion](legacy-math2-unrestricted-candidates.md),
-[native pruning and EOS handoff](legacy-math2-pruning-handoff.md), and
+[native pruning and EOS handoff](legacy-math2-pruning-handoff.md),
+[prepared observable-prefix/EOS composition](legacy-math2-eos-handoff.md), and
 [step-limit and temperature producers](legacy-math2-step-temperature-producers.md).
 
 ## Remaining joins
