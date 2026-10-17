@@ -18,7 +18,7 @@ The reusable library now has these checked stages:
 | --- | --- |
 | First-stage inference | Same-owner NN, graph, selected single or multiple plain words; unsupported traits/terminal columns remain explicit refusals. |
 | Main preprocessing | Actual selected first TEXT to source720,24B/24A geometry, deskew and smoothing.24A is joined; a genuine positive empty-first fixture/remaining temporal branches are not established. |
-| Descriptor cut source | Sequential cuts, local metadata, cross-source construction/pruning, compact selector traversal and original source-range projection are checked. Global context selection is under further descriptor-to-line ownership review; global NN/controller integration remains separate. |
+| Descriptor cut source | Sequential cuts, local metadata, cross-source construction/pruning, compact selector traversal and original source-range projection are checked. Global context selection resolves actual descriptor-to-line ownership; global NN/controller integration remains separate. |
 | Main candidate | One assigned physical line through CASE, first terminal and compact backtrack. Configured count2 now has actual terminal exclusions, reachability and compact2410 publication with owned selected terminal identities. Its backtrack/WORD join is still separate. |
 | Word publication | Per-segment residual association, glyph chain and same-owner plain WORD list; no supplied labels or success flags. |
 | First candidate completion | Actual selected alternative scores, published-WORD quote cleanup, fresh-configuration glyph-normalization no-op, separate raw UTF8 WORD projections. No joined/accepted transcription. |

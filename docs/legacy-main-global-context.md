@@ -16,11 +16,13 @@ copied-prefix50, unassigned guides and custom context scopes remain separate.
 Custom scope is disabled by actual297 version106 via clone/runtime ownership,
 as independently pinned in the existing main-ingress audit.
 
-`GetContext(groupID)` selects accepted windows for the group's primary descriptor,
+`GetContext(groupID)` resolves each stored descriptor to its actual line ID and
+selects accepted windows on the group's primary line,
 computes mean X from its actual shared physical ranges, and weights using that
-primary guide's height and actual variance/offset profile. A cross-source group
-keeps its secondary source identity in the graph; it does not gain windows from
-another descriptor merely because both cover related physical points. Public
+primary guide's height and actual variance/offset profile. Distinct descriptors
+which share that line may both contribute. A cross-source group keeps its
+secondary identity; its context weighting uses primary height, while the later
+`1B4E40` normalizer combines both guides' vertical intervals. Public
 diagnostic windows/groups are defensive copies and cannot change later results.
 
 The probe uses eight actual raw owning inputs, including two physical rows and
@@ -29,11 +31,16 @@ a fourteen-physical single-line source. It evaluates47 real context windows,
 On true single-descriptor domains472 arc comparisons match the existing owning
 single-line producer, and complete geometry/fixed/network outputs match too.
 Thirty-two guards exercise foreign resources, invalid IDs and cancellation.
+The genuine two-physical-row input has a nonneutral cross-source context which
+distinguishes primary height40 from normalization-union height180. Additionally,
+128 explicitly prepared nonzero-probability controls distinguish descriptor IDs
+from aliased line IDs. These controls do not claim a native raw descriptor alias
+was observed in the eight inputs.
 
 Python independently recomputes per-descriptor window enumeration, binary32
 geometry, actual network probabilities, acceptance, centers and all28 weighted
 fixed channels. This is a model-execution/context regression, not OCR accuracy.
-The static audit pins21 instructions, one exact PE block, resource configuration
+The static audit pins31 instructions, two exact PE blocks, resource configuration
 and the per-descriptor negative-X reference constant. No vendor DLL is executed.
 
 The graph's global120 source references and227 context are now callable owners.

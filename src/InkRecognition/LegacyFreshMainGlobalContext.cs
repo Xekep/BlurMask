@@ -1,5 +1,8 @@
 using System.Buffers.Binary;
 using System.Security.Cryptography;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("LegacyMainGlobalContext.Probe")]
 
 namespace InkRecognition;
 
@@ -13,6 +16,7 @@ public sealed record LegacyMainDescriptorContextWindow(int DescriptorOrdinal,int
 public sealed class LegacyFreshMainGlobalContext
 {
     private readonly LegacyPriorContextGroup[] groups;
+    private readonly LegacyPriorContextGroup[] selectionGroups;
     private readonly LegacyMainDescriptorContextWindow[] windows;
     private readonly InkStroke[] strokes;
     private readonly Profile profile;
@@ -22,7 +26,11 @@ public sealed class LegacyFreshMainGlobalContext
     public int ConfigurationOffset=>195746;
     private LegacyFreshMainGlobalContext(LegacyFreshMainGlobalSourceRanges source,Profile profile,
         InkStroke[] strokes,LegacyPriorContextGroup[] groups,LegacyMainDescriptorContextWindow[] windows)
-    {Source=source;this.profile=profile;this.strokes=strokes;this.groups=groups;this.windows=windows;}
+    {
+        Source=source;this.profile=profile;this.strokes=strokes;this.groups=groups;this.windows=windows;
+        var lines=source.Graph.Source.Source.Steps.Where(s=>!s.IsPendingSeparator).ToDictionary(s=>s.DescriptorOrdinal,s=>s.LineId);
+        selectionGroups=ResolveContextLineOwners(groups,lines);
+    }
     public LegacyPriorContextGroup[] CopyGroups()=>groups.Select(g=>g with{Probabilities=g.Probabilities.ToArray()}).ToArray();
     public LegacyMainDescriptorContextWindow[] CopyWindows()=>windows.Select(g=>g with{
         Features=g.Features.ToArray(),FixedInput=g.FixedInput.ToArray(),Probability32768=g.Probability32768.ToArray()}).ToArray();
@@ -87,9 +95,20 @@ public sealed class LegacyFreshMainGlobalContext
             {token.ThrowIfCancellationRequested();if(count>=1_048_576)throw new ArgumentException("Portable context point work budget exceeded.");sum+=strokes[r.StrokeIndex].Points[p].X;count++;}
         }
         if(count==0)throw new InvalidDataException("Actual context target has no points.");
-        var selected=LegacyPriorContextSelection.SelectNative(groups,owner.DescriptorOrdinal,ranges.Select(r=>r.StrokeIndex).ToArray(),LegacyNativePriorContextMode.SameLineAll,cancellationToken:token);
+        var selected=LegacyPriorContextSelection.SelectNative(selectionGroups,owner.LineId,ranges.Select(r=>r.StrokeIndex).ToArray(),LegacyNativePriorContextMode.SameLineAll,cancellationToken:token);
         return LegacyFloatInputQuantization.Quantize(LegacyContextWeighting.Combine(selected,sum/count,owner.Height,
             profile.LeftGapOffset,profile.LeftVariance,profile.RightVariance,token),cancellationToken:token);
+    }
+    //1C9870 stores descriptor ordinal. CA5F0 resolves each such descriptor,
+    //then compares its guide/line ID to the target's primary line. Keep the
+    //native records unchanged and cache a separate selection projection.
+    internal static LegacyPriorContextGroup[] ResolveContextLineOwners(IReadOnlyList<LegacyPriorContextGroup> nativeGroups,
+        IReadOnlyDictionary<int,int> descriptorLines)
+    {
+        ArgumentNullException.ThrowIfNull(nativeGroups);ArgumentNullException.ThrowIfNull(descriptorLines);
+        if(nativeGroups.Count>1024)throw new ArgumentException("Portable context group budget exceeded.");
+        return nativeGroups.Select(g=>descriptorLines.TryGetValue(g.LineId,out int line)&&line>=0
+            ?g with{LineId=line}:throw new InvalidDataException("Context descriptor has no assigned line owner.")).ToArray();
     }
     private static float F(ReadOnlySpan<byte>b,int at)=>BinaryPrimitives.ReadSingleLittleEndian(b[at..]);
     private static int I(ReadOnlySpan<byte>b,int at)=>BinaryPrimitives.ReadInt32LittleEndian(b[at..]);
