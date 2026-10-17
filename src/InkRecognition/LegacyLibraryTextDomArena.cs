@@ -8,6 +8,7 @@ public sealed class LegacyLibraryTextDomValue
 {
     private readonly byte[] bytes;
     public byte NativeTag {get;}
+    public int ByteLength=>bytes.Length;
     internal LegacyLibraryTextDomValue(byte tag,ReadOnlySpan<byte> data){NativeTag=tag;bytes=data.ToArray();}
     public byte[] CopyBytes()=>bytes.ToArray();
 }
