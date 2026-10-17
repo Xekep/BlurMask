@@ -43,6 +43,22 @@ public static class LegacyOrdinarySamplerGroupPruning
         LegacyOrdinaryCursiveCandidateGraph graph, LegacyCursivePreparedInk preparedInk,
         float actualLineHeight, LegacyOrdinarySamplerGroupPruningProfile profile,
         LegacyCursiveSeparationTable table, CancellationToken cancellationToken = default)
+        => PrepareCore(graph,preparedInk,actualLineHeight,profile,table,false,cancellationToken);
+
+    /// <summary>One ordinary descriptor's complete1A61C0→19E8B0 eligibility
+    /// pass: local mode0 nodes0..N−2, no-op global mode1 for secondaryFFFF,
+    /// then final-node mode0. Keeps the supplied group allocation IDs and
+    /// original arc provenance; does not claim native group compaction.</summary>
+    public static LegacyOrdinarySamplerGroupPruningResult PrepareSingleDescriptor(
+        LegacyOrdinaryCursiveCandidateGraph graph,LegacyCursivePreparedInk preparedInk,
+        float actualLineHeight,LegacyOrdinarySamplerGroupPruningProfile profile,
+        LegacyCursiveSeparationTable table,CancellationToken cancellationToken=default)
+        => PrepareCore(graph,preparedInk,actualLineHeight,profile,table,true,cancellationToken);
+
+    private static LegacyOrdinarySamplerGroupPruningResult PrepareCore(
+        LegacyOrdinaryCursiveCandidateGraph graph,LegacyCursivePreparedInk preparedInk,
+        float actualLineHeight,LegacyOrdinarySamplerGroupPruningProfile profile,
+        LegacyCursiveSeparationTable table,bool includeFinalNode,CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(preparedInk);
@@ -64,7 +80,12 @@ public static class LegacyOrdinarySamplerGroupPruning
             var arcs = graph.GetNode(node);
             keep[node] = Enumerable.Repeat(true, arcs.Count).ToArray();
             remap[node] = Enumerable.Repeat(-1, arcs.Count).ToArray();
-            if (node + 1 < graph.NodeCount)
+            //The complete native pass decrements an unsigned16 count and
+            //tests signed16 at1A5BE6. Preserve the legacy prepared local API
+            //outside that new complete-pass contract.
+            bool visit=includeFinalNode||node+1<graph.NodeCount;
+            if(includeFinalNode&&arcs.Count>32768)visit=false;
+            if (visit)
                 for (int ordinal = arcs.Count - 1; ordinal >= 0; ordinal--)
                 {
                     cancellationToken.ThrowIfCancellationRequested();

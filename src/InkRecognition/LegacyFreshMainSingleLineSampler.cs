@@ -75,7 +75,7 @@ public sealed class LegacyFreshMainSingleLineSampler
             Enumerable.Repeat(-1,count).ToArray(),cancellationToken);
         var currentSource=Preparation.Input.Input.Input.Owner.Controller.Source;
         var ranges=LegacyOrdinaryGraphSourceRanges.Prepare(seeds,chronology,currentSource,SpanProfile.MaximumAtoms,cancellationToken:cancellationToken);
-        var pruning=LegacyOrdinarySamplerGroupPruning.Prepare(ranges.Graph,cuts.PreparedInk,SourceHeight,
+        var pruning=LegacyOrdinarySamplerGroupPruning.PrepareSingleDescriptor(ranges.Graph,cuts.PreparedInk,SourceHeight,
             LegacyOrdinarySamplerGroupPruningProfile.ReadV106Node(resource,CategoryOwner.SamplerNodeOffset),table,cancellationToken);
         ranges=ranges.WithSamplerPruning(pruning,cancellationToken);
         return new(this,cuts,chronology,ranges,pruning);
