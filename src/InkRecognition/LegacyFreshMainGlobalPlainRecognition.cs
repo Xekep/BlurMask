@@ -47,6 +47,28 @@ public sealed class LegacyFreshMainGlobalPlainRecognition
         ReadOnlySpan<byte> wordAllocatorResidue120, ReadOnlySpan<byte> recordAllocatorResidue40,
         ReadOnlySpan<ushort> labelStackResidue256, ReadOnlySpan<byte> requestStackResidue64,
         ReadOnlySpan<byte> backtrackStackResidue72, CancellationToken token=default)
+        => RunCore(compactAllocatorStorage, wordAllocatorResidue120, recordAllocatorResidue40,
+            labelStackResidue256, requestStackResidue64, backtrackStackResidue72, null, token);
+
+    /// <summary>Explicit budgeted repeated native LIVE route. The same source,
+    /// dictionary and compact pool survive all cycles. Allocation bounds count
+    /// requested payload, not process RSS or native physical ring memory.</summary>
+    public LegacyFreshMainGlobalPlainRecognitionResult RunWithRepeatedPublication(
+        ReadOnlySpan<byte> compactAllocatorStorage, ReadOnlySpan<byte> wordAllocatorResidue120,
+        ReadOnlySpan<byte> recordAllocatorResidue40, ReadOnlySpan<ushort> labelStackResidue256,
+        ReadOnlySpan<byte> requestStackResidue64, ReadOnlySpan<byte> backtrackStackResidue72,
+        LegacyMainGlobalRepeatedPublicationBudget budget, CancellationToken token = default)
+    {
+        ArgumentNullException.ThrowIfNull(budget);
+        return RunCore(compactAllocatorStorage, wordAllocatorResidue120, recordAllocatorResidue40,
+            labelStackResidue256, requestStackResidue64, backtrackStackResidue72, budget, token);
+    }
+
+    private LegacyFreshMainGlobalPlainRecognitionResult RunCore(ReadOnlySpan<byte> compactAllocatorStorage,
+        ReadOnlySpan<byte> wordAllocatorResidue120, ReadOnlySpan<byte> recordAllocatorResidue40,
+        ReadOnlySpan<ushort> labelStackResidue256, ReadOnlySpan<byte> requestStackResidue64,
+        ReadOnlySpan<byte> backtrackStackResidue72, LegacyMainGlobalRepeatedPublicationBudget? budget,
+        CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         if (compactAllocatorStorage.IsEmpty || compactAllocatorStorage.Length%40!=0 ||
@@ -54,6 +76,8 @@ public sealed class LegacyFreshMainGlobalPlainRecognition
             recordAllocatorResidue40.Length!=40 || labelStackResidue256.Length!=256 ||
             requestStackResidue64.Length!=64 || backtrackStackResidue72.Length!=72)
             throw new ArgumentException("Complete bounded compact40 storage, WORD120, record40, labels256, request64 and row72 required.");
+        if (budget is not null && compactAllocatorStorage.Length > budget.MaximumCompactStorageBytes)
+            throw new NotSupportedException("Compact payload exceeds the explicit repeated LIVE budget.");
         if (Interlocked.CompareExchange(ref started,1,0)!=0)
             throw new InvalidOperationException("This actual global source invocation already started, including failed prefixes.");
         var preprocessed=Input.Run(token);
@@ -61,6 +85,8 @@ public sealed class LegacyFreshMainGlobalPlainRecognition
         var local=LegacyFreshMainDescriptorGraphAppend.Prepare(acoustic,cuts,table,token);
         var global=LegacyFreshMainGlobalOrdinaryState.Prepare(acoustic,local,table,token);
         var graph=LegacyFreshMainCompactOrdinaryGraph.Prepare(acoustic,global,token);
+        if (budget is not null && graph.State.NodeCount > budget.MaximumLogicalNodes)
+            throw new NotSupportedException("Actual global node count exceeds the explicit repeated LIVE budget.");
         var source=LegacyFreshMainGlobalSourceRanges.Prepare(graph,token);
         var context=LegacyFreshMainGlobalContext.Prepare(acoustic,source,activations,token);
         var geometry=LegacyFreshMainGlobalGlyphGeometry.Prepare(acoustic,context,token);
@@ -78,10 +104,14 @@ public sealed class LegacyFreshMainGlobalPlainRecognition
             var bytes=new byte[request.RequiredBytes]; request.PreviousStorage.Span.CopyTo(bytes);
             return new(bytes,identity++);
         }
-        var pass=LegacyFreshMainGlobalWordPass.CreateWithIntermediatePublication(acoustic,policy,
-            Allocate,confidence,compactAllocatorStorage,token:token).RunOwned(token);
+        LegacyFreshMainGlobalRepeatedWordPassResult? repeated = budget is null ? null :
+            LegacyFreshMainGlobalRepeatedWordPass.Prepare(acoustic, policy,
+                Allocate, confidence, compactAllocatorStorage, budget, token: token).RunOwned(token);
+        var pass = repeated?.PassResult ?? LegacyFreshMainGlobalWordPass.CreateWithIntermediatePublication(acoustic, policy,
+            Allocate, confidence, compactAllocatorStorage, token: token).RunOwned(token);
         int evaluations=owner.AcousticEvaluations;
-        var final=LegacyFreshMainGlobalFinalPublication.Append(pass,confidence,acoustic,token);
+        var final = repeated is null ? LegacyFreshMainGlobalFinalPublication.Append(pass, confidence, acoustic, token) :
+            LegacyFreshMainGlobalFinalPublication.AppendRepeated(repeated, confidence, acoustic, token);
         var selected=invocation.SelectPublished(final,token);
         if (!selected.Winner.HasWinner)
             return new(this,preprocessed,selected,null,[],[],evaluations);

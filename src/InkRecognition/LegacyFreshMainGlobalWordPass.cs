@@ -47,6 +47,17 @@ public sealed class LegacyFreshMainGlobalWordPass
         var state = new LegacyFreshMainGlobalCompactPublicationState(policy, compactAllocatorResidue40);
         return new(resource, policy, allocator, new(confidence, state, publicationObserver), token);
     }
+    //Only the separately budgeted owning adapter calls this repeated native
+    //gate path; the original public factory retains its one-cycle scope.
+    internal static LegacyFreshMainGlobalWordPass CreateRepeatedPublicationCore(ReadOnlySpan<byte> resource,
+        LegacyFreshMainGlobalWordControllerPolicy policy, LegacyMainDirectStorageProvider allocator,
+        LegacyFreshMainGlobalGlyphConfidence confidence, ReadOnlySpan<byte> residue,
+        Action<LegacyFreshMainGlobalIntermediatePublication>? observer, CancellationToken token)
+    {
+        LegacyFreshMainGlobalCompactPublicationState.ValidateOwner(resource, policy, confidence);
+        return new(resource, policy, allocator, new(confidence, new(policy, residue), observer), token);
+    }
+
     //Friend-only prepared consumer seam. This does not change the public native gate.
     internal static LegacyFreshMainGlobalWordPass CreateWithPreparedPublicationAtNode(ReadOnlySpan<byte> resource,
         LegacyFreshMainGlobalWordControllerPolicy policy, LegacyMainDirectStorageProvider allocator,

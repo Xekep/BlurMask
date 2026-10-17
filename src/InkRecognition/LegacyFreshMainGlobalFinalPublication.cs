@@ -38,7 +38,20 @@ public sealed class LegacyFreshMainGlobalFinalPublication
     }
     public static LegacyFreshMainGlobalFinalPublication Append(LegacyFreshMainGlobalWordPassResult actualLivePass,
         LegacyFreshMainGlobalGlyphConfidence confidence, ReadOnlySpan<byte> resource, CancellationToken token = default)
-        => AppendCore(actualLivePass, confidence, resource, null, token);
+        => AppendCore(actualLivePass, confidence, resource, null, 240, token);
+
+    /// <summary>Final207CB0 after the same budgeted repeated LIVE producer.
+    /// The old Append API retains its one-cycle supported domain.</summary>
+    public static LegacyFreshMainGlobalFinalPublication AppendRepeated(
+        LegacyFreshMainGlobalRepeatedWordPassResult actualRepeatedPass,
+        LegacyFreshMainGlobalGlyphConfidence confidence, ReadOnlySpan<byte> resource,
+        CancellationToken token = default)
+    {
+        ArgumentNullException.ThrowIfNull(actualRepeatedPass);
+        actualRepeatedPass.Validate(token);
+        return AppendCore(actualRepeatedPass.PassResult, confidence, resource, null,
+            actualRepeatedPass.Owner.Budget.MaximumLogicalNodes, token);
+    }
 
     //Prepared postnumeric failure control only. No public callback, forced gate
     //or synthetic winner is added to the native production path.
@@ -47,15 +60,15 @@ public sealed class LegacyFreshMainGlobalFinalPublication
         Action<LegacyFreshMainGlobalFinalPublication> observer, CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(observer);
-        return AppendCore(actualLivePass, confidence, resource, observer, token);
+        return AppendCore(actualLivePass, confidence, resource, observer, 240, token);
     }
     private static LegacyFreshMainGlobalFinalPublication AppendCore(LegacyFreshMainGlobalWordPassResult pass,
         LegacyFreshMainGlobalGlyphConfidence confidence, ReadOnlySpan<byte> resource,
-        Action<LegacyFreshMainGlobalFinalPublication>? observer, CancellationToken token)
+        Action<LegacyFreshMainGlobalFinalPublication>? observer, int maximumNodes, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(pass); token.ThrowIfCancellationRequested();
         LegacyFreshMainGlobalCompactPublicationState.ValidateOwner(resource, pass.Policy, confidence);
-        if (pass.NodeCount is < 1 or > 240)
+        if (pass.NodeCount < 1 || pass.NodeCount > maximumNodes)
             throw new NotSupportedException("Bounded global final publication supports at most one LIVE cycle.");
         var state = pass.IntermediatePublicationState?.Copy() ??
             throw new ArgumentException("The actual completed pass must bind the typed LIVE pool producer.");
