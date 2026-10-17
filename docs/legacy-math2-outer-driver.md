@@ -76,7 +76,7 @@ A successful038610 return is not by itself accepted text or a formatted formula.
 python tools/handwriting/audit_math2_outer_driver.py report.json
 ```
 
-The auditor pins the complete038610 region,44 instructions and all three direct
+The auditor pins the complete038610 region,45 instructions and all three direct
 recording sites. It reads PE bytes only. It executes no vendor DLL or inference
 and supplies no prepared labels, acceptance scores or simulated successful
 native search. Final output transfer through03A260 remains a separate join.
