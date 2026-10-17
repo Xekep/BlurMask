@@ -25,9 +25,11 @@ public sealed class LegacyOwnedFreshTextSelection
 }
 
 /// <summary>Fresh noncached0210C0 document-selection context. The original
-/// raw object IDs belong to this library's NEW immutable root. Native C51
-/// insertion derives Next=N from those IDs; C4D's empty command list is a
-/// separate owner. Existing/prior/cached document branches are not accepted.</summary>
+/// raw object IDs belong to this library's NEW immutable root. The original
+/// entrypoint explicitly reserves those IDs; PrepareSelectedInput instead
+/// derives its cursor from an actual fresh textField INPUT registry.
+/// C4D's empty pending list is a separate owner in both routes.
+/// Existing/prior/cached document branches are not accepted.</summary>
 public sealed class LegacyOwnedFreshTextSourceContext
 {
     private readonly object gate=new();
@@ -36,6 +38,7 @@ public sealed class LegacyOwnedFreshTextSourceContext
     private bool failed;
     private bool textRegistrationEntered;
     public LegacyOwnedRawInkDocument Document { get; }
+    public LegacyFreshTextFieldInputContext? SelectedInputContext {get;}
     public long NextSelectionId {get{lock(gate)return next;}}
     public bool Failed {get{lock(gate)return failed;}}
     private LegacyOwnedFreshTextSourceContext(LegacyOwnedRawInkDocument document)
@@ -46,9 +49,23 @@ public sealed class LegacyOwnedFreshTextSourceContext
         //rather than sampled/current physical ordinals or an assumed zero.
         for(long id=0;id<document.ObjectCount;id++)if(next<=id)next=id+1;
     }
+    private LegacyOwnedFreshTextSourceContext(LegacyFreshTextFieldInputContext selectedInput)
+    {Document=selectedInput.Document;SelectedInputContext=selectedInput;next=selectedInput.NextRegistryId;}
     public static LegacyOwnedFreshTextSourceContext Prepare(LegacyOwnedRawInkDocument actualDocument,
         CancellationToken token=default)
     {ArgumentNullException.ThrowIfNull(actualDocument);token.ThrowIfCancellationRequested();return new(actualDocument);}
+
+    /// <summary>Text05F050's current C20/C51.Next snapshot and NEW pending
+    /// C4D owner. Raw/INPUT history commands are not copied into this list.
+    /// The immutable selected INPUT/C22 remains retained for later source joins.</summary>
+    public static LegacyOwnedFreshTextSourceContext PrepareSelectedInput(
+        LegacyFreshTextFieldInputContext actualSelectedInput,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(actualSelectedInput);token.ThrowIfCancellationRequested();
+        if(actualSelectedInput.Parent is null||!ReferenceEquals(actualSelectedInput.Input.Owner,actualSelectedInput))
+            throw new ArgumentException("Actual full selected-copy textField INPUT/C22 context required.");
+        return new(actualSelectedInput);
+    }
 
     public LegacyOwnedFreshTextSelection CreateCharacterSelection(LegacyOwnedMainGlyphDocumentPositions actualPositions,
         CancellationToken token=default)

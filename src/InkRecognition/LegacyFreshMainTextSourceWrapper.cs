@@ -256,8 +256,15 @@ internal sealed class LegacyMainSharedTextSourceState : IDisposable
     internal LegacyOwnedMainTextSourceInterner Words{get;}
     internal LegacyOwnedFreshTextSourceContext Selections{get;}
     internal Dictionary<int,LegacyOwnedMainTextSourcePayload> Payloads{get;}=[];
-    internal LegacyMainSharedTextSourceState(LegacyOwnedRawInkDocument document,LegacyFreshMainPlainResultOwnership top)
-    {Document=document;TopOwner=top;Characters=LegacyOwnedMainTextSourceInterner.Prepare(document);
-     Words=LegacyOwnedMainTextSourceInterner.Prepare(document);Selections=LegacyOwnedFreshTextSourceContext.Prepare(document);}
+    internal LegacyMainSharedTextSourceState(LegacyOwnedRawInkDocument document,LegacyFreshMainPlainResultOwnership top,
+        LegacyFreshTextFieldInputContext? selectedInput=null)
+    {
+        if(selectedInput is not null&&!ReferenceEquals(selectedInput.Document,document))
+            throw new ArgumentException("The selected INPUT/C22 and shared CHAR/WORD state must belong to this exact raw document.");
+        Document=document;TopOwner=top;Characters=LegacyOwnedMainTextSourceInterner.Prepare(document);
+        Words=LegacyOwnedMainTextSourceInterner.Prepare(document);
+        Selections=selectedInput is null?LegacyOwnedFreshTextSourceContext.Prepare(document):
+            LegacyOwnedFreshTextSourceContext.PrepareSelectedInput(selectedInput);
+    }
     public void Dispose()=>Strings.Dispose();
 }

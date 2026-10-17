@@ -24,6 +24,7 @@ public sealed class LegacyFreshMainWordSourceChoices : IDisposable
     public LegacyFreshMainPlainResultOwnership TopOwner=>Sources.CandidateSource.TopOwner;
     public IReadOnlyList<LegacyOwnedMainSpanWordView> WordViews {get;}
     internal LegacyOwnedFreshTextSourceContext SelectionContext=>shared.Selections;
+    public LegacyFreshTextFieldInputContext? SelectedInputContext=>shared.Selections.SelectedInputContext;
     public long NextSelectionId=>shared.Selections.NextSelectionId;
     public IReadOnlyList<LegacyOwnedFreshTextSelection> CopyPendingSelections()=>shared.Selections.CopyPendingSelections();
 
@@ -31,13 +32,13 @@ public sealed class LegacyFreshMainWordSourceChoices : IDisposable
         LegacyOwnedMainCandidateSource[] candidates,LegacyNativePublishedWordNode[] heads,
         LegacyNativePlainWordSpanSnapshot snapshot,LegacyCursiveSeparationTable table,
         LegacyNativeTextPublicationData publication,LegacyNativeUnicodeNormalizationData normalization,
-        LegacyNativeCircledPayloadData circles,CancellationToken token)
+        LegacyNativeCircledPayloadData circles,LegacyFreshTextFieldInputContext? selectedInput,CancellationToken token)
     {
         SourceCompletion=completion;this.candidates=candidates;this.heads=heads;this.snapshot=snapshot;
         publisher=candidates[0].Ownership.WordPublisher;
         words=snapshot.Words.Select((record,index)=>new LegacyOwnedMainSpanWordView(this,index,record)).ToArray();
         WordViews=Array.AsReadOnly(words);
-        shared=new(Document,TopOwner);
+        shared=new(Document,TopOwner,selectedInput);
         try
         {
             var choices=LegacyFreshMainTextGlyphChoices.PrepareSpanWords(resource,candidates[0],words,shared.Strings,
@@ -51,6 +52,30 @@ public sealed class LegacyFreshMainWordSourceChoices : IDisposable
         LegacyFreshMainConfiguredNoCandidateSourceCompletion actualCompletedSources,LegacyCursiveSeparationTable table,
         LegacyNativeTextPublicationData publication,LegacyNativeUnicodeNormalizationData normalization,
         LegacyNativeCircledPayloadData circles,CancellationToken token=default)
+        =>PrepareCore(resource,actualCompletedSources,null,table,publication,normalization,circles,token);
+
+    /// <summary>The same actual shared275 WORD source pipeline with the
+    /// Text05F050 pending cursor derived from a retained selected INPUT/C22.
+    /// This does not complete result2DA transform or document acceptance.</summary>
+    public static LegacyFreshMainWordSourceChoices PrepareSelectedInput(ReadOnlySpan<byte> resource,
+        LegacyFreshMainConfiguredNoCandidateSourceCompletion actualCompletedSources,
+        LegacyFreshTextFieldInputContext actualSelectedInput,LegacyCursiveSeparationTable table,
+        LegacyNativeTextPublicationData publication,LegacyNativeUnicodeNormalizationData normalization,
+        LegacyNativeCircledPayloadData circles,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(actualCompletedSources);ArgumentNullException.ThrowIfNull(actualSelectedInput);
+        token.ThrowIfCancellationRequested();
+        if(actualSelectedInput.Parent is null||
+            !ReferenceEquals(actualSelectedInput.Document,actualCompletedSources.Sources.Document))
+            throw new ArgumentException("Actual selected INPUT/C22 must retain this same original recognition document.");
+        return PrepareCore(resource,actualCompletedSources,actualSelectedInput,table,publication,normalization,circles,token);
+    }
+
+    private static LegacyFreshMainWordSourceChoices PrepareCore(ReadOnlySpan<byte> resource,
+        LegacyFreshMainConfiguredNoCandidateSourceCompletion actualCompletedSources,
+        LegacyFreshTextFieldInputContext? selectedInput,LegacyCursiveSeparationTable table,
+        LegacyNativeTextPublicationData publication,LegacyNativeUnicodeNormalizationData normalization,
+        LegacyNativeCircledPayloadData circles,CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(actualCompletedSources);ArgumentNullException.ThrowIfNull(table);
         ArgumentNullException.ThrowIfNull(publication);ArgumentNullException.ThrowIfNull(normalization);
@@ -83,7 +108,7 @@ public sealed class LegacyFreshMainWordSourceChoices : IDisposable
                     throw new NotSupportedException("Only actual ordinary base sources are supported; no higher/protocol source is omitted.");
             }
         }
-        return new(resource,actualCompletedSources,candidates,heads,snapshot,table,publication,normalization,circles,token);
+        return new(resource,actualCompletedSources,candidates,heads,snapshot,table,publication,normalization,circles,selectedInput,token);
     }
 
     public LegacyOwnedMainWordSourceChoicesResult Publish(ReadOnlySpan<byte> recordResidue40,
