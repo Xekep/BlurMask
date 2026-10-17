@@ -1,0 +1,138 @@
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("LegacyMathRawOnlyEf4.Probe")]
+
+namespace InkRecognition.Math;
+
+/// <summary>Library-owned pen strokes only. C25, imported glyphs, external
+/// properties and a supplied existing-expression vector have no entry here.</summary>
+internal sealed class Math2Mode0RawOnlySource : IDisposable
+{
+    private static readonly object Factory = new();
+    private readonly object gate = new();
+    private readonly object factory = Factory;
+    private readonly long[] strokeEnds;
+    private bool disposed;
+    private Math2Mode0RawAttentionHistory? history;
+    private Math2Mode0InitiallyOrderedCompleted? ordered;
+    private Math2Mode0RawOnlyEf4? processed;
+    internal Math2Mode0ColdRecordingLoop Loop { get; }
+    internal Math2Mode0RawOnlyEf4Policy Policy { get; }
+    internal int InputFrameCount { get; }
+    internal int StrokeCount => strokeEnds.Length;
+    internal object SourceFactoryIdentity => factory;
+
+    private Math2Mode0RawOnlySource(Math2Mode0ColdRecordingLoop loop,
+        Math2Mode0RawOnlyEf4Policy policy, int frames, long[] ownedEnds)
+    { Loop = loop; Policy = policy; InputFrameCount = frames; strokeEnds = ownedEnds; }
+
+    internal static Math2Mode0RawOnlySource PrepareColdDefault(OrtRuntime runtime,
+        Math2Mode0ColdBundle bundle, OrtRun run, IReadOnlyList<InkStroke> strokes,
+        CancellationToken token = default) => PrepareCore(runtime, bundle, run, strokes, null, token);
+
+    // Explicit diagnostic search policy; no claim that a fresh EEB selected width > 1.
+    internal static Math2Mode0RawOnlySource PrepareWithPreparedSearch(OrtRuntime runtime,
+        Math2Mode0ColdBundle bundle, OrtRun run, IReadOnlyList<InkStroke> strokes,
+        int width, CancellationToken token = default)
+        => PrepareCore(runtime, bundle, run, strokes, width, token);
+
+    private static Math2Mode0RawOnlySource PrepareCore(OrtRuntime runtime,
+        Math2Mode0ColdBundle bundle, OrtRun run, IReadOnlyList<InkStroke> strokes,
+        int? width, CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(runtime); ArgumentNullException.ThrowIfNull(run);
+        ArgumentNullException.ThrowIfNull(strokes); token.ThrowIfCancellationRequested();
+        var policy = Math2Mode0RawOnlyEf4Policy.Bind(bundle);
+        if (width is < 1 or > 16) throw new ArgumentOutOfRangeException(nameof(width));
+        var features = MathPreprocessor.Process(strokes);
+        if (features.Frames < 1) throw new ArgumentException("Nonempty raw pen input required.");
+        using var source = runtime.Tensor(features.Values, features.Frames, 1, 26);
+        using var downsampling = runtime.Tensor(Enumerable.Repeat(1L, features.Frames).ToArray(), features.Frames, 1);
+        using var ends = runtime.Tensor(features.StrokeEnds, 1, features.StrokeEnds.Length);
+        token.ThrowIfCancellationRequested();
+        var loop = width.HasValue
+            ? Math2Mode0ColdRecordingLoop.PrepareWithPreparedPolicy(bundle, run, source, downsampling, ends,
+                width.Value, 1f, 1000f, token)
+            : Math2Mode0ColdRecordingLoop.PrepareColdDefault(bundle, run, source, downsampling, ends, token);
+        try { return new(loop, policy, features.Frames, features.StrokeEnds.ToArray()); }
+        catch { loop.Dispose(); throw; }
+    }
+
+    internal void RunToInitialOrder(CancellationToken token = default)
+    {
+        lock (gate)
+        {
+            Check(); token.ThrowIfCancellationRequested();
+            if (history != null || ordered != null) throw new InvalidOperationException("Raw source recording is single-use.");
+            history = Loop.RunWithRawAttentionHistory(token);
+            ordered = Loop.OrderInitialCompleted(token);
+        }
+    }
+    internal Math2Mode0RawOnlyEf4 ApplyEf4(CancellationToken token = default)
+        => ApplyCore(Math2Mode0RawOnlyEf4.DefaultPayloadBudget, null, token);
+    internal Math2Mode0RawOnlyEf4 ApplyWithPreparedPayloadBudget(long budget, CancellationToken token = default)
+        => ApplyCore(budget, null, token);
+    internal Math2Mode0RawOnlyEf4 ApplyDiagnostic(long budget,
+        Action<Math2Mode0RawOnlyEf4Stage, int, Math2Mode0RawOnlyEf4> observer,
+        CancellationToken token = default)
+    {
+        ArgumentNullException.ThrowIfNull(observer);
+        return ApplyCore(budget, observer, token);
+    }
+    private Math2Mode0RawOnlyEf4 ApplyCore(long budget,
+        Action<Math2Mode0RawOnlyEf4Stage, int, Math2Mode0RawOnlyEf4>? observer, CancellationToken token)
+    {
+        lock (gate)
+        {
+            Check(); token.ThrowIfCancellationRequested();
+            if (history == null || ordered == null) throw new InvalidOperationException("Same successful raw recording/order required.");
+            if (processed != null) throw new InvalidOperationException("Raw EF4 is single-use, including failure.");
+            if (budget < 0 || budget > Math2Mode0RawOnlyEf4.DefaultPayloadBudget)
+                throw new ArgumentOutOfRangeException(nameof(budget));
+            processed = Math2Mode0RawOnlyEf4.Prepare(this, ordered, history, strokeEnds, budget, token);
+            processed.Run(observer, token);
+            return processed;
+        }
+    }
+    internal T WithOwner<T>(Func<T> action)
+    { lock (gate) { Check(); return action(); } }
+    private void Check()
+    {
+        ObjectDisposedException.ThrowIf(disposed, this);
+        if (!ReferenceEquals(factory, Factory)) throw new ArgumentException("Foreign raw source factory.");
+    }
+    // Detached raw input metadata is inspection, not a replacement-source API.
+    internal long[] CopyStrokeEnds() => WithOwner(() => strokeEnds.ToArray());
+    internal Math2Mode0InitiallyOrderedCompleted ReadInitialForDiagnostic()
+        => WithOwner(() => ordered ?? throw new InvalidOperationException("Not recorded."));
+    internal Math2Mode0RawAttentionHistory ReadHistoryForDiagnostic()
+        => WithOwner(() => history ?? throw new InvalidOperationException("Not recorded."));
+    internal void ValidatePreparedOwners(Math2Mode0InitiallyOrderedCompleted initial,
+        Math2Mode0RawAttentionHistory attention)
+    {
+        Check();
+        if (!ReferenceEquals(initial, ordered) || !ReferenceEquals(attention, history))
+            throw new ArgumentException("The exact same raw source order and history are required.");
+    }
+    internal void ValidateProcessing(Math2Mode0RawOnlyEf4 actual)
+    {
+        Check();
+        if (!ReferenceEquals(processed, actual)) throw new ArgumentException("Foreign raw-only EF4 owner.");
+    }
+    internal void ValidateStrokeEndOwner(long[] actual)
+    {
+        Check();
+        if (!ReferenceEquals(actual, strokeEnds)) throw new ArgumentException("Same private raw stroke-end owner required.");
+    }
+    internal Math2Mode0RawOnlyEf4Statistics CopyProcessingStatistics()
+        => WithOwner(() => (processed ?? throw new InvalidOperationException("No processing owner.")).CopyStatistics());
+    public void Dispose()
+    {
+        lock (gate)
+        {
+            if (disposed) return;
+            processed?.ReleasePayload();
+            Loop.Dispose(); disposed = true;
+        }
+    }
+}

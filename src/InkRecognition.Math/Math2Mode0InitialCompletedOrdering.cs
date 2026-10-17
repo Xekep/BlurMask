@@ -61,7 +61,7 @@ internal sealed partial class Math2Mode0ColdRecordingLoop
         lock (gate)
         {
             ObjectDisposedException.ThrowIf(disposed, this);
-            if (failed || !ReferenceEquals(initialOrdering, source))
+            if (failed || rawOnlyPostprocessClaimed || !ReferenceEquals(initialOrdering, source))
                 throw new ArgumentException("The exact successful initial-order result is required.");
             return action();
         }

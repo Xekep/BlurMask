@@ -2955,6 +2955,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native raw attention history failed.' }
           python tools/LegacyMathRawAttentionHistory.Probe/audit_output.py .artifacts/math-raw-attention-history-native.json models/math2/math2-unwrapped.res
           if ($LASTEXITCODE -ne 0) { throw 'Native raw attention history oracle failed.' }
+          dotnet run --project tools/LegacyMathRawOnlyEf4.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-raw-only-ef4-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed raw-only EF4 failed.' }
+          python tools/LegacyMathRawOnlyEf4.Probe/audit_output.py .artifacts/math-raw-only-ef4-managed.json models/math2/math2-unwrapped.res
+          if ($LASTEXITCODE -ne 0) { throw 'Managed raw-only EF4 oracle failed.' }
+          dotnet publish tools/LegacyMathRawOnlyEf4.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-raw-only-ef4-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Raw-only EF4 probe publish failed.' }
+          $rawOnlyEf4 = if ($IsWindows) { '.artifacts/math-raw-only-ef4-probe/LegacyMathRawOnlyEf4.Probe.exe' } else { '.artifacts/math-raw-only-ef4-probe/LegacyMathRawOnlyEf4.Probe' }
+          & $rawOnlyEf4 .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-raw-only-ef4-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native raw-only EF4 failed.' }
+          python tools/LegacyMathRawOnlyEf4.Probe/audit_output.py .artifacts/math-raw-only-ef4-native.json models/math2/math2-unwrapped.res
+          if ($LASTEXITCODE -ne 0) { throw 'Native raw-only EF4 oracle failed.' }
           dotnet run --project tools/LegacyMathSegmentation.Probe -c Release -- .artifacts/math-segmentation-managed.json
           if ($LASTEXITCODE -ne 0) { throw 'Managed segmentation sigmoid failed.' }
           python tools/LegacyMathSegmentation.Probe/audit_output.py .artifacts/math-segmentation-managed.json
