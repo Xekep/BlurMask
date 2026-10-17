@@ -68,11 +68,20 @@ resource and DOM oracles and NativeAOT. The
 now keeps that same input/document/result/strings owner through pre-NN
 preparation, configured recognition and actual shared WORD/CHAR publication.
 Three raw invocations/six alternatives/69 guards and unchanged prior captures
-pass independent checks and NativeAOT. Final document transport and SDK
-acceptance remain separate. Concurrent target
+pass independent checks and NativeAOT. The
+[owning document publisher](legacy-library-text-publication-document.md)
+now joins source lines, TEXT registration, coverage, cleanup, detached DOM,
+pending edits and BE2/cache transfer under that same scope. Its independent
+oracle checks four ordinary and five failure/lifetime inputs, including276
+tree allocation/name identities and62 guards. Applying to the library target
+is a separate explicit operation; native SDK page/history acceptance remains
+unfinished. An additive owner-free DOM value tree copies scalar IDs and
+bounded values without retaining the recognition scope. Actual GC checks in
+Managed and NativeAOT verify this distinction; ordinary arena-backed
+snapshots still retain their owner. Concurrent target
 Build/Export versus Apply is serialized and checked with deterministic barriers.
 
-The exact committed app at4dc662b builds with0 warnings and passes headless
+The exact committed app atb9abe8e builds with0 warnings and passes headless
 `--ai-pen-test`. Russian diagnostics remain4/9 exact with16/33 character edits;
 no new release or full-engine readiness is asserted. The new
 [recorded error evidence](russian-recorded-error-evidence.md) traces actual
@@ -102,7 +111,7 @@ The reusable library now has these checked stages:
 | Ordinary glyph alternatives | Actual positive CASE source export/scoring/compact-driven refresh and13A830 ordering are joined. Fresh one-descriptor negative spans have owned source export/refresh. Native failed-refresh retries/general protocol sources remain separate. |
 | Text projection | Fresh273.V50 ->213A0/021000 choices and05AFA0 original raw positions are joined. A bounded first-WORD driver joins the219580 source prefix, clipping, overlap processing, ordered range interning, fresh024D40 metadata,021760 reuse and pending CHAR registrations. Bounded ordinary/configured no-bit8 TOP.V68 completion and actual shared275 WORD-array choices are joined, including genuine CHAR-key reuse, one shared UTF8/selection owner and pending CHAR+WORD commands. Actual NULL-reference raw-source projection now feeds pending kind2 TEXT registration. Actual021AB0 source-line publication retains separate append/write offsets; bounded025E40 validates every WORD/CHAR line and trims the unused guide tail after pending TEXT. Bounded per-WORD CHAR coverage and immutable01FD40/020000 selected flags/indices are joined. Fresh020920 interval/vector indices retain actual membership and whole-key owners. A named selected-INPUT path now retains the same C20/C22 owner and derives its pending CHAR/WORD/TEXT cursor from C51.Next, rather than raw ordinals. General augmentation and0283B0 document acceptance remain incomplete. |
 | Raw current view | A new owned XY/current-view context exports checked identity transforms for fully covered selected sources. A separate owned fresh textField now joins INPUT/C51 registration, retained C22 and full selected-copy identity, including the proven empty-span DAF return. The selected INPUT now retains its document seed before WORD publication and joins the post-cleanup037E80 identity-excluded empty transform-vector swap and empty DAF branch. Existing SDK-page/task ownership, nonidentity transforms and final transport remain unjoined; raw IDs do not substitute for native registry IDs. |
-| Long-source publication | Genuine native120-node gate, retained global outer290 and prefix/final-append transport checked. Natural124/140/240-node inputs have empty intermediate pools and no winner; a separate prepared nonempty control is not evidence of a genuine long-source winner. Physical ring aliases and multiple intermediate cycles remain separate. |
+| Long-source publication | Genuine native120-node gate, retained global outer290 and prefix/final-append transport checked. The separately named repeated-publication entry uses the same model/dictionary/source epochs through2–4 actual LIVE cycles on244/364/484-node inputs, with explicit cumulative payload and node budgets. Independent scheduling checks88605568 bytes and1430336 context paths; long actual cases still have no winner. Old entry limits remain unchanged. Physical ring aliases and a genuine long-source winner remain separate. |
 
 `LegacyFreshMainSingleLinePlainRecognition` joins raw physical strokes to the
 bounded first main candidate's WORD list. Its `PublicationCompleted` property
