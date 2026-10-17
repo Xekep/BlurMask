@@ -2,15 +2,16 @@
 This audits composition around the already ported cut arithmetic; it does not
 claim an independent full loop/horizontal/baseline cut algorithm or NN accuracy.
 """
-import base64,hashlib,json,math,pathlib,struct,sys
+import base64,hashlib,importlib.util,json,math,pathlib,struct,sys
 ak=pathlib.Path(sys.argv[1]).read_bytes();data=json.loads(pathlib.Path(sys.argv[2]).read_text())
 assert hashlib.sha256(ak).hexdigest()=='7a5f08809e81fb4a2d4c78b3efd251d0986503b0d30d21de3695dab1f8a89978'
 assert ak[188216]==6 and struct.unpack_from('<f',ak,188217)[0]==4
 assert ak[189395]==8 and list(ak[189728:189730])==[1,0]
-root=pathlib.Path(__file__).resolve().parents[2];sys.path.insert(0,str(root/'research/myscript/scripts'))
-from inspect_text_features import parse_alphabet
-alphabet=parse_alphabet(ak,99)
-assert alphabet['label_count']==192 and '\U000f0009' not in alphabet['mapping'].values()
+root=pathlib.Path(__file__).resolve().parents[2]
+spec=importlib.util.spec_from_file_location('raw_ak_alphabet',root/'tools/LegacyRussianGlyphSymbol.Probe/audit_output.py')
+module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+alphabet=module.read_alphabet(ak)
+assert struct.unpack_from('<H',ak,113)[0]==192 and '\U000f0009' not in alphabet.values()
 def f(x):return struct.unpack('<f',struct.pack('<I',x&0xffffffff))[0]
 def bits(x):return struct.unpack('<i',struct.pack('<f',x))[0]
 def i(b,o):return struct.unpack_from('<i',b,o)[0]
