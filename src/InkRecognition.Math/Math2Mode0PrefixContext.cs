@@ -92,6 +92,7 @@ internal sealed partial class Math2Mode0PrefixContext : IDisposable
             // Later failure is not rolled back to a reusable generation.
             try
             {
+                ObserveAttentionSelection(selected);
                 var next = generation.Append(selected.Rows.CopyRecords(), token);
                 generation = next; // Native prefix writes precede EF1 reindex.
                 afterPrefixWrites?.Invoke();

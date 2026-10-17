@@ -185,7 +185,7 @@ internal sealed partial class Math2Mode0PrefixCandidates
 
 /// <summary>A one-use event bound to actual prefix context, Step, candidate
 /// generation and pruned raw48 rank. Numerical EOS facts cannot create it.</summary>
-internal sealed class Math2Mode0CompletedEventLease
+internal sealed partial class Math2Mode0CompletedEventLease
 {
     private readonly Math2Mode0CompletedRecords recorder;
     private readonly Math2Mode0PrefixStep step;

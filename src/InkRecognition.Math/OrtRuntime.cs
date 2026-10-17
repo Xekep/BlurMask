@@ -224,7 +224,7 @@ internal sealed unsafe class OrtSession : IDisposable
     }
 }
 
-internal sealed unsafe class OrtTensor : IDisposable
+internal sealed unsafe partial class OrtTensor : IDisposable
 {
     private readonly OrtRuntime _runtime;
     private GCHandle _pin;

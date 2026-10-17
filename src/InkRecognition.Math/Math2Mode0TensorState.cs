@@ -172,7 +172,7 @@ internal sealed class Math2Mode0PreparedPolicy
 /// <summary>CPU-copy numerical adaptation of the checked EF1 mode0 tensor
 /// lifecycle. No EEF score producer, full beam, SDK allocation/failure order or
 /// final recognition/acceptance is implemented.</summary>
-internal sealed class Math2Mode0TensorState : IDisposable
+internal sealed partial class Math2Mode0TensorState : IDisposable
 {
     private static readonly string[] InputNames = ["tgt", "offset", "memory_seg", "prev_attn_seg",
         "proj_key_seg_in", "state_in_k", "state_in_v", "cross_k", "cross_v"];
