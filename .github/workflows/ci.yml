@@ -710,6 +710,8 @@ jobs:
           python tools/LegacyMainSpanAlternativeWalk.Probe/audit_output.py .artifacts/legacy-main-span-alternative-walk-managed.json
           dotnet run --project tools/LegacyMainSpanAlternativeChain.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json models/text-unicode/legacy-circled-payload-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-span-alternative-chain-managed.json
           python tools/LegacyMainSpanAlternativeChain.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-main-span-alternative-chain-managed.json
+          dotnet run --project tools/LegacyMainSpanAlternativeChain.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json models/text-unicode/legacy-circled-payload-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-span-alternative-costs-managed.json --costs true
+          python tools/LegacyMainSpanAlternativeChain.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-main-span-alternative-costs-managed.json
           dotnet run --project tools/LegacyMainWordEquality.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json models/text-unicode/legacy-circled-payload-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-word-equality-managed.json
           python tools/LegacyMainWordEquality.Probe/audit_output.py .artifacts/legacy-main-word-equality-managed.json
           dotnet run --project tools/LegacyMainWordEquality.Probe -c Release --no-build -- --prepared .artifacts/legacy-main-word-equality-prepared-managed.json
@@ -1729,6 +1731,13 @@ jobs:
             if ($name -eq 'LegacyMainSpanAlternativeChain') {
               python tools/LegacyMainSpanAlternativeChain.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-main-span-alternative-chain-native.json
               if ($LASTEXITCODE -ne 0) { throw 'LegacyMainSpanAlternativeChain independent audit failed' }
+              $costArgs = @($case.Args)
+              $costArgs[10] = '.artifacts/legacy-main-span-alternative-costs-native.json'
+              $costArgs += @('--costs', 'true')
+              & $probe @costArgs
+              if ($LASTEXITCODE -ne 0) { throw 'Actual span alternative cost transfer failed' }
+              python tools/LegacyMainSpanAlternativeChain.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-main-span-alternative-costs-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'Actual span alternative cost audit failed' }
             }
             if ($name -eq 'LegacyMainWordEquality') {
               python tools/LegacyMainWordEquality.Probe/audit_output.py .artifacts/legacy-main-word-equality-native.json

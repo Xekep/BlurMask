@@ -47,3 +47,17 @@ model/profile arguments followed by an output JSON path. Check that capture with
 models/ru-RU/ru_RU-ak-cur.lite.res capture.json`. The optional private-PE audit is
 `tools/handwriting/audit_main_span_alternative_chain.py output.json`; it reads
 bytes without loading or executing the vendor binary.
+# Working-WORD cost connection
+
+`LegacyOwnedMainSpanAlternativeCosts.Apply` consumes the same successful chain
+result and transfers219580's three cost fields to its actual working WORD. The
+compact starting row, direct parent, source contexts and source kind come from
+the retained owners. WORD+14 and every other byte are preserved. Cancellation
+before entry allows retry; an entered result cannot run the transfer twice.
+
+The probe option `--costs true` exercises56 owned chains and432 guards. Its
+independent oracle reconstructs all120 WORD bytes, all pool rows and all three
+float32 costs from captured original compact data. These are numeric chain
+diagnostics, with zero actual bit8 candidates; no219580 eligibility,275 insertion
+or final winner is inferred. The default chain capture remains byte-identical.
+
