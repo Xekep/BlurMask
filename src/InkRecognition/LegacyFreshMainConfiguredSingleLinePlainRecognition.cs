@@ -50,6 +50,17 @@ public sealed class LegacyFreshMainConfiguredSingleLinePlainRecognition
         return new(acoustic, linguistic, model, activations, table, caseData, publication, input);
     }
 
+    internal static LegacyFreshMainConfiguredSingleLinePlainRecognition PrepareOwnedDocument(
+        byte[] acoustic,byte[] linguistic,LegacyRussianModelBundle model,LegacyInkActivations activations,
+        byte[] spatial30,byte[] physical50,LegacyOwnedRawInkDocument document,float resolution,
+        LegacyCursiveSeparationTable table,LegacyNativeCaseData caseData,
+        LegacyNativeTextPublicationData publication,CancellationToken token)
+    {
+        var input=LegacyFreshMainSingleLinePlainRecognition.PrepareOwnedDocument(acoustic,linguistic,
+            model,activations,spatial30,physical50,document,resolution,table,caseData,publication,token);
+        return new(acoustic,linguistic,model,activations,table,caseData,publication,input);
+    }
+
     /// <summary>Apply the known property after genuine first preprocessing,
     /// before construction of this main controller. No claim is made that a
     /// top-level engine property was forwarded into every first-child factory.</summary>

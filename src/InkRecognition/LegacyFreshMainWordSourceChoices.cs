@@ -33,13 +33,16 @@ public sealed class LegacyFreshMainWordSourceChoices : IDisposable
         LegacyOwnedMainCandidateSource[] candidates,LegacyNativePublishedWordNode[] heads,
         LegacyNativePlainWordSpanSnapshot snapshot,LegacyCursiveSeparationTable table,
         LegacyNativeTextPublicationData publication,LegacyNativeUnicodeNormalizationData normalization,
-        LegacyNativeCircledPayloadData circles,LegacyFreshTextFieldInputContext? selectedInput,CancellationToken token)
+        LegacyNativeCircledPayloadData circles,LegacyFreshTextFieldInputContext? selectedInput,CancellationToken token,
+        LegacyMainSharedTextSourceState? adopted=null)
     {
         SourceCompletion=completion;this.candidates=candidates;this.heads=heads;this.snapshot=snapshot;
         publisher=candidates[0].Ownership.WordPublisher;
         words=snapshot.Words.Select((record,index)=>new LegacyOwnedMainSpanWordView(this,index,record)).ToArray();
         WordViews=Array.AsReadOnly(words);
-        shared=new(Document,TopOwner,selectedInput);
+        shared=adopted??new(Document,TopOwner,selectedInput);
+        if(!ReferenceEquals(shared.Document,Document)||!ReferenceEquals(shared.TopOwner,TopOwner))
+            throw new ArgumentException("Exact prepublication document/TOP state required.");
         try
         {
             var choices=LegacyFreshMainTextGlyphChoices.PrepareSpanWords(resource,candidates[0],words,shared.Strings,
@@ -76,7 +79,7 @@ public sealed class LegacyFreshMainWordSourceChoices : IDisposable
         LegacyFreshMainConfiguredNoCandidateSourceCompletion actualCompletedSources,
         LegacyFreshTextFieldInputContext? selectedInput,LegacyCursiveSeparationTable table,
         LegacyNativeTextPublicationData publication,LegacyNativeUnicodeNormalizationData normalization,
-        LegacyNativeCircledPayloadData circles,CancellationToken token)
+        LegacyNativeCircledPayloadData circles,CancellationToken token,LegacyMainSharedTextSourceState? adopted=null)
     {
         ArgumentNullException.ThrowIfNull(actualCompletedSources);ArgumentNullException.ThrowIfNull(table);
         ArgumentNullException.ThrowIfNull(publication);ArgumentNullException.ThrowIfNull(normalization);
@@ -109,8 +112,19 @@ public sealed class LegacyFreshMainWordSourceChoices : IDisposable
                     throw new NotSupportedException("Only actual ordinary base sources are supported; no higher/protocol source is omitted.");
             }
         }
-        return new(resource,actualCompletedSources,candidates,heads,snapshot,table,publication,normalization,circles,selectedInput,token);
+        if(adopted is not null)
+        {
+            if(!ReferenceEquals(adopted.Document,source.SourceDocument))throw new ArgumentException("Foreign adopted raw document.");
+            adopted.BindActualTop(source.TopOwner);
+        }
+        return new(resource,actualCompletedSources,candidates,heads,snapshot,table,publication,normalization,circles,selectedInput,token,adopted);
     }
+
+    internal static LegacyFreshMainWordSourceChoices PrepareAdopted(ReadOnlySpan<byte> resource,
+        LegacyFreshMainConfiguredNoCandidateSourceCompletion completion,LegacyMainSharedTextSourceState shared,
+        LegacyCursiveSeparationTable table,LegacyNativeTextPublicationData publication,
+        LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token)
+        =>PrepareCore(resource,completion,shared.Selections.SelectedInputContext,table,publication,normalization,circles,token,shared);
 
     public LegacyOwnedMainWordSourceChoicesResult Publish(ReadOnlySpan<byte> recordResidue40,
         ReadOnlySpan<byte> selectionResidue4,CancellationToken token=default)
@@ -144,6 +158,7 @@ public sealed class LegacyFreshMainWordSourceChoices : IDisposable
     internal void ValidateWord(LegacyOwnedMainSpanWordView word,CancellationToken token)
     {
         ObjectDisposedException.ThrowIf(disposed,this);token.ThrowIfCancellationRequested();
+        shared.PublicationScope?.Validate();
         if(!ReferenceEquals(word.Owner,this)||(uint)word.WordOrdinal>=(uint)words.Length||
             !ReferenceEquals(words[word.WordOrdinal],word))throw new ArgumentException("Exact actual275 WORD view required.");
         foreach(var candidate in candidates)candidate.Validate(token);

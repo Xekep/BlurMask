@@ -250,8 +250,10 @@ internal sealed record LegacyPreparedMainTextSourceWordRender(LegacyOwnedMainTex
 internal sealed class LegacyMainSharedTextSourceState : IDisposable
 {
     internal LegacyOwnedRawInkDocument Document{get;}
-    internal LegacyFreshMainPlainResultOwnership TopOwner{get;}
-    internal LegacyNativeUtf8StringPool Strings{get;}=new();
+    private LegacyFreshMainPlainResultOwnership? topOwner;
+    internal LegacyFreshMainPlainResultOwnership TopOwner=>topOwner??throw new InvalidOperationException("Actual TOP is not yet bound.");
+    internal LegacyNativeUtf8StringPool Strings{get;}
+    internal LegacyLibraryTextPublicationScope? PublicationScope{get;}
     internal LegacyOwnedMainTextSourceInterner Characters{get;}
     internal LegacyOwnedMainTextSourceInterner Words{get;}
     internal LegacyOwnedFreshTextSourceContext Selections{get;}
@@ -262,7 +264,7 @@ internal sealed class LegacyMainSharedTextSourceState : IDisposable
     {
         if(selectedInput is not null&&!ReferenceEquals(selectedInput.Document,document))
             throw new ArgumentException("The selected INPUT/C22 and shared CHAR/WORD state must belong to this exact raw document.");
-        Document=document;TopOwner=top;Characters=LegacyOwnedMainTextSourceInterner.Prepare(document);
+        Document=document;topOwner=top;Strings=new();Characters=LegacyOwnedMainTextSourceInterner.Prepare(document);
         Words=LegacyOwnedMainTextSourceInterner.Prepare(document);
         Selections=selectedInput is null?LegacyOwnedFreshTextSourceContext.Prepare(document):
             LegacyOwnedFreshTextSourceContext.PrepareSelectedInput(selectedInput);
@@ -270,5 +272,21 @@ internal sealed class LegacyMainSharedTextSourceState : IDisposable
         //publishing WORD/CHAR payloads. The old OriginalID route has no seed.
         if(selectedInput is not null)DocumentSeed=new(this,selectedInput);
     }
-    public void Dispose()=>Strings.Dispose();
+    internal LegacyMainSharedTextSourceState(LegacyLibraryTextPublicationScope scope,
+        LegacyLibraryTextProcessingContext context)
+    {
+        PublicationScope=scope;Document=context.Document;Strings=context.Strings;
+        Characters=LegacyOwnedMainTextSourceInterner.Prepare(Document);Words=LegacyOwnedMainTextSourceInterner.Prepare(Document);
+        Selections=LegacyOwnedFreshTextSourceContext.PrepareSelectedInput(context.SelectedInput);
+        DocumentSeed=new(this,context.SelectedInput,deferIdentifier:true);
+        context.Result.BindPublicationSeed(DocumentSeed);
+    }
+    internal void BindActualTop(LegacyFreshMainPlainResultOwnership top)
+    {
+        PublicationScope?.Validate();
+        if(topOwner is not null)throw new InvalidOperationException("Actual TOP binding is single-use.");
+        topOwner=top;DocumentSeed!.InitializePublicationIdentifier();
+        PublicationScope!.Context.Result.CapturePublicationIdentifier(DocumentSeed);
+    }
+    public void Dispose(){if(PublicationScope is null)Strings.Dispose();}
 }

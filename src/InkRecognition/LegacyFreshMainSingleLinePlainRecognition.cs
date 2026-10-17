@@ -46,6 +46,19 @@ public sealed class LegacyFreshMainSingleLinePlainRecognition
         ArgumentNullException.ThrowIfNull(table);ArgumentNullException.ThrowIfNull(caseData);
         ArgumentNullException.ThrowIfNull(publication);token.ThrowIfCancellationRequested();
         var document=LegacyOwnedRawInkDocument.Create(raw,token);
+        return PrepareOwnedDocument(acousticResource,linguisticResource,model,activations,spatial30,physical50,
+            document,resolution,table,caseData,publication,token);
+    }
+
+    internal static LegacyFreshMainSingleLinePlainRecognition PrepareOwnedDocument(byte[] acousticResource,
+        byte[] linguisticResource,LegacyRussianModelBundle model,LegacyInkActivations activations,
+        byte[] spatial30,byte[] physical50,LegacyOwnedRawInkDocument document,float resolution,
+        LegacyCursiveSeparationTable table,LegacyNativeCaseData caseData,
+        LegacyNativeTextPublicationData publication,CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(document);ArgumentNullException.ThrowIfNull(table);
+        ArgumentNullException.ThrowIfNull(caseData);ArgumentNullException.ThrowIfNull(publication);
+        token.ThrowIfCancellationRequested();
         var input=LegacyFreshMainOwnedTextInputPreparation.Prepare(acousticResource,spatial30,
             physical50,document.Strokes,resolution,activations,table,caseData,publication,token);
         token.ThrowIfCancellationRequested();

@@ -2,6 +2,7 @@ using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("LegacyTextProcessingContext.Probe")]
+[assembly: InternalsVisibleTo("LegacyTextPublicationScope.Probe")]
 namespace InkRecognition;
 
 /// <summary>A NEW library-owned 2C1 construction/input-import scope. Its
@@ -12,6 +13,8 @@ public sealed class LegacyLibraryTextProcessingContext : IDisposable
     private readonly object gate = new();
     private readonly LegacyLibraryTextProcessingResult result;
     private bool entered, faulted, disposed;
+    private bool publicationClaimed, resourcesReleased;
+    private int publicationLeases;
     private uint flags;
     private LegacyLibraryTextInputRequest? request;
     public LegacyFreshTextFieldInputContext SelectedInput { get; }
@@ -109,6 +112,25 @@ public sealed class LegacyLibraryTextProcessingContext : IDisposable
 
     internal LegacyLibraryTextInputRequest? PreparedRequest => request;
     internal uint PreparedState18 => flags;
+    internal bool ResourcesReleased { get { lock(gate) return resourcesReleased; } }
+    internal LegacyLibraryTextProcessingLease RetainForPublication()
+    {
+        lock(gate)
+        {
+            Check();
+            if(publicationClaimed || request is null || !request.Succeeded || flags!=1 || result.Strings.Count!=0)
+                throw new InvalidOperationException("One successfully imported, unpublished input-only context required.");
+            publicationClaimed=true;publicationLeases++;
+            return new(this);
+        }
+    }
+    internal void ReleasePublication()
+    {lock(gate){if(publicationLeases<=0)throw new InvalidOperationException("Unbalanced publication lease.");publicationLeases--;ReleaseIfClosed();}}
+    private void ReleaseIfClosed()
+    {
+        if(!disposed||publicationLeases!=0||resourcesReleased)return;
+        resourcesReleased=true;result.ReleaseBindings();result.Strings.Dispose();request?.ReleaseOwnedTree();
+    }
     internal T Read<T>(Func<T> snapshot) { lock (gate) return snapshot(); }
     private void Check() { ObjectDisposedException.ThrowIf(disposed, this); if (faulted) throw new InvalidOperationException("Faulted processing context."); }
     public void Dispose()
@@ -116,8 +138,7 @@ public sealed class LegacyLibraryTextProcessingContext : IDisposable
         lock (gate)
         {
             if (disposed) return;
-            disposed = true; result.ReleaseBindings(); result.Strings.Dispose();
-            request?.ReleaseOwnedTree();
+            disposed = true; ReleaseIfClosed();
         }
     }
 
@@ -160,6 +181,8 @@ public sealed class LegacyLibraryTextProcessingResult
     private LegacyLibraryTextInputRequest? boundRequest;
     private LegacyFreshTextFieldInputContext? boundInput;
     internal LegacyNativeUtf8StringPool Strings { get; } = new();
+    private WeakReference<LegacyFreshMainTextDocumentSeed>? publicationSeed;
+    private byte[] identifier38=new byte[16];
     public LegacyLibraryTextProcessingContext Owner { get; }
     public long SourceTag30 => Owner.Read(() => sourceTag30);
     public int RangeCount210 => Owner.Read(() => ranges.Length);
@@ -167,7 +190,27 @@ public sealed class LegacyLibraryTextProcessingResult
     public LegacyLibraryTextInputRequest? BoundRequest => Owner.Read(() => boundRequest);
     public LegacyFreshTextFieldInputContext? BoundInput28 => Owner.Read(() => boundInput);
     internal LegacyLibraryTextProcessingResult(LegacyLibraryTextProcessingContext owner) { Owner = owner; }
-    public byte[] CopyIdentifier38() => new byte[16];
+    public byte[] CopyIdentifier38() => Owner.Read(() => identifier38.ToArray());
+    public LegacyFreshMainTextDocumentSeed? PublicationSeed => Owner.Read(() =>
+        publicationSeed is not null&&publicationSeed.TryGetTarget(out var seed)?seed:null);
+    internal void BindPublicationSeed(LegacyFreshMainTextDocumentSeed seed)
+    {
+        Owner.Read(()=>
+        {
+            if(publicationSeed is not null||!ReferenceEquals(seed.Document,Owner.Document)||
+                !ReferenceEquals(seed.SelectedInputContext,boundInput)||!ReferenceEquals(seed.StringPool,Strings))
+                throw new ArgumentException("Exact imported2DA/input/shared3E seed required before publication.");
+            publicationSeed=new(seed);return 0;
+        });
+    }
+    internal void CapturePublicationIdentifier(LegacyFreshMainTextDocumentSeed seed)
+    {
+        Owner.Read(()=>
+        {
+            if(!ReferenceEquals(PublicationSeed,seed))throw new ArgumentException("Exact adopted seed required.");
+            identifier38=seed.CopyIdentifier38();return 0;
+        });
+    }
     public LegacyNativeInkPositionRange[] CopyInputRanges208() => Owner.Read(() => ranges.ToArray());
     public byte[] CopyInputRangeStorage() => Owner.Read(CopyInputRangeStorageCore);
     private byte[] CopyInputRangeStorageCore()
@@ -196,6 +239,14 @@ public sealed class LegacyLibraryTextProcessingResult
         ranges = Owner.SelectedInput.Input.CopyRanges();
     }
     internal void ReleaseBindings() { boundRequest = null; boundInput = null; }
+}
+
+internal sealed class LegacyLibraryTextProcessingLease : IDisposable
+{
+    private LegacyLibraryTextProcessingContext? owner;
+    internal LegacyLibraryTextProcessingLease(LegacyLibraryTextProcessingContext owner){this.owner=owner;}
+    internal void Validate()=>ObjectDisposedException.ThrowIf(owner is null,this);
+    public void Dispose(){Interlocked.Exchange(ref owner,null)?.ReleasePublication();}
 }
 
 /// <summary>Explicit library BCD selected-field view with its actual retained

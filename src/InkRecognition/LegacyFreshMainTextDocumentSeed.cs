@@ -14,19 +14,30 @@ public sealed class LegacyFreshMainTextDocumentSeed
     public LegacyFreshTextFieldInputContext SelectedInputContext {get;}
     public LegacyRetainedTextFieldInputSelection Input=>SelectedInputContext.Input;
     public LegacyOwnedRawInkDocument Document=>SelectedInputContext.Document;
+    /// <summary>The actual pre-NN imported2DA for the adopted route; old
+    /// independently constructed seeds have no processing-result owner.</summary>
+    public LegacyLibraryTextProcessingResult? ProcessingResult=>shared.PublicationScope?.Context.Result;
     public long SourceTag30=>Input.RegistryId;
     public int InitialDocumentAlternativeCountD8=>0;
     public int InitialTransformCount110=>initialTransforms.Count;
     /// <summary>Result38..47 identifier using the restored native algorithm
     /// with an explicitly library-owned cryptographic initial state.</summary>
-    public LegacyLibraryTextResultIdentifier LibraryIdentifier38 {get;}
+    private LegacyLibraryTextResultIdentifier? identifier;
+    public LegacyLibraryTextResultIdentifier LibraryIdentifier38
+    {get{shared.PublicationScope?.Validate();return identifier??throw new InvalidOperationException("Publication identifier has not yet been initialized.");}}
+    internal byte[] CopyIdentifier38()=>identifier?.CopyRawStorage16()??new byte[16];
+    internal void InitializePublicationIdentifier()
+    {
+        if(identifier is not null)throw new InvalidOperationException("Publication identifier is single-use.");
+        identifier=LegacyLibraryUuidGenerator.Create().NextDistinct(new byte[16]);
+    }
     internal LegacyNativeUtf8StringPool StringPool=>shared.Strings;
     internal LegacyOwnedFreshTextSourceContext PendingSelections=>shared.Selections;
     internal LegacyDocumentTransformVector InitialTransforms=>initialTransforms;
     internal LegacyDocumentTransformVector CurrentTransforms=>currentTransforms;
 
     internal LegacyFreshMainTextDocumentSeed(LegacyMainSharedTextSourceState actualShared,
-        LegacyFreshTextFieldInputContext actualSelectedInput)
+        LegacyFreshTextFieldInputContext actualSelectedInput,bool deferIdentifier=false)
     {
         if(actualSelectedInput.Parent is null||!ReferenceEquals(actualShared.Document,actualSelectedInput.Document)||
             !ReferenceEquals(actualShared.Selections.SelectedInputContext,actualSelectedInput)||actualShared.Strings.Count!=0)
@@ -34,7 +45,7 @@ public sealed class LegacyFreshMainTextDocumentSeed
         shared=actualShared;SelectedInputContext=actualSelectedInput;currentTransforms=initialTransforms;
         //Native01C010 clears38..47;032550 replaces that zero identifier before
         //WORD publication. Native process-address RNG seeding is not portable.
-        LibraryIdentifier38=LegacyLibraryUuidGenerator.Create().NextDistinct(new byte[16]);
+        if(!deferIdentifier)InitializePublicationIdentifier();
         //05F200 reads DAF.V38 from the actual new INPUT before2DA.V18.
         //Its immutable span-child producer, not transform output, proves0.
         dafInputRows32=actualSelectedInput.Input.CopyDafInputRows32();
@@ -54,6 +65,7 @@ public sealed class LegacyFreshMainTextDocumentSeed
     internal void Validate(LegacyFreshMainWordSourceChoices actualWords,CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
+        shared.PublicationScope?.Validate();
         if(!ReferenceEquals(actualWords.DocumentSeed,this)||!ReferenceEquals(actualWords.Document,Document)||
             !ReferenceEquals(actualWords.SelectionContext,PendingSelections)||
             !ReferenceEquals(actualWords.SelectedInputContext,SelectedInputContext)||

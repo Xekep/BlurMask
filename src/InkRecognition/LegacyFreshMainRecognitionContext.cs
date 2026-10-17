@@ -62,4 +62,12 @@ public sealed class LegacyFreshMainRecognitionContext
             throw new ArgumentException("Completed candidate must use this identical owned model/resource context.");
         return LegacyFreshMainTextGlyphChoices.Prepare(acoustic,candidate,table,publication,normalization,circles,token);
     }
+
+    internal LegacyFreshMainConfiguredSingleLinePlainRecognition PrepareConfiguredDocument(
+        LegacyOwnedRawInkDocument document,float resolution,LegacyCursiveSeparationTable table,
+        LegacyNativeCaseData caseData,LegacyNativeTextPublicationData publication,CancellationToken token) =>
+        LegacyFreshMainConfiguredSingleLinePlainRecognition.PrepareOwnedDocument(acoustic,linguistic,model,
+            activations,spatial30,physical50,document,resolution,table,caseData,publication,token);
+
+    internal ReadOnlySpan<byte> AcousticResource => acoustic;
 }
