@@ -628,6 +628,8 @@ jobs:
           python tools/LegacyMainWordUtf8.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-main-word-utf8-managed.json
           dotnet run --project tools/LegacyMainGlyphSourceMetadata.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-main-glyph-source-managed.json
           python tools/LegacyMainGlyphSourceMetadata.Probe/audit_output.py .artifacts/legacy-main-glyph-source-managed.json
+          dotnet run --project tools/LegacyMainGlyphRefreshScoring.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-main-refresh-scoring-managed.json
+          python tools/LegacyMainGlyphRefreshScoring.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-separation-profile.json .artifacts/legacy-main-refresh-scoring-managed.json
           dotnet run --project tools/LegacyMainGeometricFallback.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-geometric-fallback-managed.json
           python tools/LegacyMainGeometricFallback.Probe/audit_output.py .artifacts/legacy-main-geometric-fallback-managed.json
           python tools/LegacyMainResultScore.Probe/reference_controls.py .artifacts/legacy-main-result-score-controls.json
@@ -1120,6 +1122,7 @@ jobs:
             @{ Name = 'LegacyMainGlyphNormalizationNoOp'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-glyph-noop-native.json') },
             @{ Name = 'LegacyMainWordUtf8'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-main-word-utf8-native.json') },
             @{ Name = 'LegacyMainGlyphSourceMetadata'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-main-glyph-source-native.json') },
+            @{ Name = 'LegacyMainGlyphRefreshScoring'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-main-refresh-scoring-native.json') },
             @{ Name = 'LegacyMainGeometricFallback'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-geometric-fallback-native.json') },
             @{ Name = 'LegacyMainResultScore'; Args = @('.artifacts/legacy-main-result-score-controls.json', '.artifacts/legacy-main-result-score-native.json') },
             @{ Name = 'LegacyMainPostResultCounts'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-post-counts-native.json') },
@@ -1422,6 +1425,10 @@ jobs:
             if ($name -eq 'LegacyMainRawPlainRecognition') {
               python tools/LegacyMainRawPlainRecognition.Probe/audit_output.py .artifacts/legacy-main-raw-plain-native.json
               if ($LASTEXITCODE -ne 0) { throw 'Raw main plain-word integration audit failed' }
+            }
+            if ($name -eq 'LegacyMainGlyphRefreshScoring') {
+              python tools/LegacyMainGlyphRefreshScoring.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-separation-profile.json .artifacts/legacy-main-refresh-scoring-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyMainGlyphRefreshScoring independent audit failed' }
             }
             if ($name -eq 'LegacyMainGlyphSourceMetadata') {
               python tools/LegacyMainGlyphSourceMetadata.Probe/audit_output.py .artifacts/legacy-main-glyph-source-native.json

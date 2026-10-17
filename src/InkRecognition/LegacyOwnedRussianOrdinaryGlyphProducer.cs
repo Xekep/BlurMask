@@ -47,15 +47,8 @@ public sealed class LegacyOwnedRussianOrdinaryGlyphProducer
     private readonly LegacyOrdinaryCursiveCandidateGraph graph;
     private readonly LegacyRussianModelBundle model;
     private readonly LegacyFreshCaseMainSourcePolicy? casePolicy;
-    private readonly LegacyCursivePreparedInk ink;
-    private readonly LegacyInkRange[][] ranges;
-    private readonly LegacyCursiveSeparationProfile separation;
-    private readonly float[] separationTable;
-    private readonly LegacyCursiveCategoryProfile categories;
-    private readonly float height, powerScale;
+    private readonly LegacyOwnedRussianMainGlyphScoring scoring;
     private readonly ushort blank, unitScore, closed, apostrophe, quote;
-    private readonly ushort[] bypass;
-    private readonly Dictionary<int,LegacyNativeGlyphScoreCache> caches=[];
     public LegacyFreshCaseMainSourcePolicy Policy => casePolicy ??
         throw new InvalidOperationException("The DIRECT producer has DirectPolicy, not an invented case policy.");
     public LegacyOwnedFreshMainWordControllerPolicy? DirectPolicy {get;}
@@ -95,32 +88,13 @@ public sealed class LegacyOwnedRussianOrdinaryGlyphProducer
         }
         else resolver=LegacyOwnedRussianGlyphSymbolResolver.Prepare(policy!.DictionaryOwner,
             policy.DictionaryOwner.Symbols.Preparation,token);
-        var categoryOwner=LegacySourceSamplerCategoryOwner.ReadV10dSource(resource,0,token);
-        if(categoryOwner.SamplerNodeOffset!=owner.SelectedSourceOwner.SamplerNodeOffset||
-            categoryOwner.CategoryProfileOffset!=owner.SelectedSourceOwner.CategoryProfileOffset)
-            throw new ArgumentException("The actual selected main sampler category owner is required.");
-        //A private fresh parse keeps public ReadOnlyMemory snapshots from
-        //allowing a caller to replace the maps used by this producer.
-        categories=categoryOwner.Categories;
-        separation=LegacyCursiveSeparationProfile.ReadV106Node(resource,categoryOwner.SamplerNodeOffset);
-        separationTable=table.Values.ToArray();var bytes=new byte[separationTable.Length*4];
-        for(int i=0;i<separationTable.Length;i++)BinaryPrimitives.WriteSingleLittleEndian(bytes.AsSpan(i*4),separationTable[i]);
-        if(!SHA256.HashData(bytes).AsSpan().SequenceEqual(Convert.FromHexString(
-            "b23ed52a3a10808eab597a8f371a7bbb66bde2fab5fe2666431b1b192abc1baf")))
-            throw new InvalidDataException("Actual engine separation table required.");
-        ink=owner.SourceInk.WithTags(owner.SourceInk.Points.Span.ToArray().Select(p=>p.Tag).ToArray());
-        ranges=graph.Groups.Select(group=>group.Ranges.ToArray()).ToArray();height=owner.SourceHeight;
-        _=LegacyOrdinaryAcousticCacheProfile.ReadV110Node(resource[189734..],token);
-        powerScale=LegacyPreparedAcousticDictionaryPermissions.ReadDisabledPowerScale(resource[189734..],token);
-        if(powerScale!=1)throw new NotSupportedException("Actual disabled main group power branch required.");
+        scoring=new(resource,controller,confidence,table,token);
         //Engine053F20 writes the seven stored headers to8,A,C,E,10,12,14;
         //ALcount is separately1A. In particular headerE is178, not192.
         blank=U16(resource,99);unitScore=U16(resource,105);
         var alphabet=model.AcousticAlphabet;
         ushort Label(string text)=>alphabet.TryGetLabel(text,out ushort symbol)?symbol:ushort.MaxValue;
         closed=Label("\U000f0001");apostrophe=Label("'");quote=Label("\"");
-        bypass=[closed,Label("\U000f0004"),Label("\U000f0008"),Label("\U000f0002"),Label("\U000f0003"),
-            U16(resource,107),U16(resource,109),U16(resource,111)];
         token.ThrowIfCancellationRequested();
     }
 
@@ -197,49 +171,15 @@ public sealed class LegacyOwnedRussianOrdinaryGlyphProducer
             scratch.Score0CBits=BitConverter.SingleToUInt32Bits(preparedRow72[0x3e]/255f);
             ushort scoreSymbol=symbol==model.AcousticAlphabet.LabelCount+1?apostrophe:
                 symbol==model.AcousticAlphabet.LabelCount+2?quote:symbol;
-            var cache=ScoreCache(arcs[arc].GroupId,token);
+            var cache=scoring.GetCache(arcs[arc].GroupId,token);
             scratch.Score10Bits=BitConverter.SingleToUInt32Bits(cache.ReadSymbolScore(scoreSymbol,0,token));
-            var request=CreateRequest(preparedRow72,node,arc,scoreSymbol);
+            var request=scoring.CreateRequest(node,arc,scoreSymbol,preparedRow72[0x3d]!=0);
             scratch.Cost14=cache.ReadRequestCost(request,token);
         }
         token.ThrowIfCancellationRequested();scratch.PublicationFlags06=0;
         return scratch.Snapshot();
     }
 
-    private byte[] CreateRequest(ReadOnlySpan<byte> row,int node,ushort arc,ushort symbol)
-    {
-        byte geometry=255;
-        if(symbol!=closed)
-        {
-            if(symbol>=categories.StartCompositeMap.Length)throw new NotSupportedException("Requested label escapes actual category maps.");
-            int composite=categories.EndCompositeMap.Span[symbol];
-            if(row[0x3d]==0||composite==-1)composite=categories.StartCompositeMap.Span[symbol];
-            if((uint)composite>=(uint)categories.CompositeCategories.Length)
-                throw new NotSupportedException("Native category access lacks a supported composite owner.");
-            geometry=checked((byte)categories.CompositeCategories.Span[composite].GeometryIndex);
-        }
-        byte[] request=new byte[16];BinaryPrimitives.WriteInt32LittleEndian(request,node);
-        W16(request,4,arc);W16(request,6,ushort.MaxValue);W16(request,8,symbol);request[10]=geometry;
-        return request;
-    }
-
-    private LegacyNativeGlyphScoreCache ScoreCache(int group,CancellationToken token)
-    {
-        if(caches.TryGetValue(group,out var cached))return cached;
-        var actual=confidence.ScoreGroup(group,token);var scores=actual.ActualAcousticScores;
-        var candidates=actual.Candidates.Span;
-        int geometry=LegacyCursiveGroupSeparationCost.Evaluate(ink,ranges[group],height,
-            separation.GapOffset,separation.Slope,separationTable,separation.MaximumCost,cancellationToken:token);
-        byte[] rows=new byte[candidates.Length*24];var vectors=new ReadOnlyMemory<float>[candidates.Length];
-        for(int i=0;i<candidates.Length;i++)
-        {token.ThrowIfCancellationRequested();W16(rows,i*24+8,candidates[i].Symbol);
-            BinaryPrimitives.WriteInt32LittleEndian(rows.AsSpan(i*24+4),candidates[i].Cost);
-            vectors[i]=new float[]{candidates[i].Confidence};}
-        var result=new LegacyNativeGlyphScoreCache(rows,vectors,
-            Enumerable.Repeat(geometry,categories.Prototypes.Length).ToArray(),blank,
-            scores.Cache.FallbackCost,powerScale,bypass,token);
-        token.ThrowIfCancellationRequested();caches.Add(group,result);return result;
-    }
     private static ushort U16(ReadOnlySpan<byte> bytes,int at)=>BinaryPrimitives.ReadUInt16LittleEndian(bytes[at..]);
     private static void W16(Span<byte> bytes,int at,ushort value)=>BinaryPrimitives.WriteUInt16LittleEndian(bytes[at..],value);
 }
