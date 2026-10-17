@@ -1,6 +1,7 @@
 using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
 [assembly:InternalsVisibleTo("LegacyMainSpanAlternativeChain.Probe")]
+[assembly:InternalsVisibleTo("LegacyMainConfiguredSpanChain.Probe")]
 
 namespace InkRecognition;
 
@@ -27,14 +28,15 @@ public sealed class LegacyOwnedMainSpanAlternativeChain
     private sealed class Claim {internal int Entered;}
     private static readonly ConditionalWeakTable<LegacyOwnedMainSpanAlternativeWalkResult,Claim> claims=new();
     public LegacyOwnedMainSpanAlternativeWalk Walker {get;}
+    public LegacyOwnedMainCandidateSource CandidateSource=>Walker.Sources.CandidateSource;
     public LegacyFreshMainPlainResultOwnership TopOwner {get;}
     private readonly LegacyOwnedRussianOrdinaryGlyphProducer ordinary;
     private readonly LegacyOwnedRussianProtocolGlyphProducer protocol;
     private LegacyOwnedMainSpanAlternativeChain(ReadOnlySpan<byte> resource,LegacyOwnedMainSpanAlternativeWalk walker,
         LegacyCursiveSeparationTable table,CancellationToken token)
     {
-        Walker=walker;var raw=walker.Sources.Candidate.RawResult;var policy=raw.Session.Plan.SourcePolicy;
-        TopOwner=raw.Session.Ownership.TopOwner;
+        Walker=walker;var source=walker.Sources.CandidateSource;source.Validate(token);var policy=source.SourcePolicy;
+        TopOwner=source.TopOwner;
         //Create both services from the identical actual confidence/callback
         //owner. No caller-substituted score service or manufactured CASE owner.
         ordinary=LegacyOwnedRussianOrdinaryGlyphProducer.Prepare(resource,policy,walker.Callbacks.Owner,table,token);
@@ -45,6 +47,19 @@ public sealed class LegacyOwnedMainSpanAlternativeChain
         CancellationToken token=default)
     {
         ArgumentNullException.ThrowIfNull(actualWalker);ArgumentNullException.ThrowIfNull(actualTable);token.ThrowIfCancellationRequested();
+        _=actualWalker.Sources.Candidate;
+        return new(resource,actualWalker,actualTable,token);
+    }
+    /// <summary>The same bounded ordinary chain over a genuine configured
+    /// numeric walk. The actual selected2410 owner is retained, never wrapped
+    /// in a historical count1 materialization. Residual/protocol scope is unchanged.</summary>
+    public static LegacyOwnedMainSpanAlternativeChain PrepareConfigured(ReadOnlySpan<byte> resource,
+        LegacyOwnedMainSpanAlternativeWalk actualWalker,LegacyCursiveSeparationTable actualTable,
+        CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(actualWalker);ArgumentNullException.ThrowIfNull(actualTable);
+        actualWalker.Sources.CandidateSource.Validate(token);
+        if(!actualWalker.Sources.CandidateSource.IsConfigured)throw new ArgumentException("Actual configured numeric walk required.");
         return new(resource,actualWalker,actualTable,token);
     }
     public LegacyOwnedMainSpanAlternativeChainResult Apply(LegacyOwnedMainSpanAlternativeWalkResult actualEmission,
@@ -74,9 +89,14 @@ public sealed class LegacyOwnedMainSpanAlternativeChain
             throw new InvalidOperationException("An entered numeric emission cannot be retried after pool writes or failure.");
         //Native217DB0's residual-count-zero guard returns success without
         //touching rows. The existing exact218560 executor then owns all writes.
-        var chain=LegacyPreparedOrdinaryGlyphChain.Apply(Walker.Sources.Candidate.RawResult.Session.Ownership.Materialization,
-            actualEmptyWord,rows,[],ordinary,protocol,ushort.MaxValue,uint.MaxValue,uint.MaxValue,false,
-            allocatedRecordResidue40,labelStackResidue256,requestStackResidue64,conversionArgument:1,token:token);
+        var ownership=CandidateSource.Ownership;
+        var chain=ownership.SecondaryTerminal is { } terminal
+            ? LegacyPreparedOrdinaryGlyphChain.ApplyConfigured(terminal,
+                actualEmptyWord,rows,[],ordinary,protocol,ushort.MaxValue,uint.MaxValue,uint.MaxValue,false,
+                allocatedRecordResidue40,labelStackResidue256,requestStackResidue64,conversionArgument:1,token:token)
+            : LegacyPreparedOrdinaryGlyphChain.Apply(ownership.Materialization,
+                actualEmptyWord,rows,[],ordinary,protocol,ushort.MaxValue,uint.MaxValue,uint.MaxValue,false,
+                allocatedRecordResidue40,labelStackResidue256,requestStackResidue64,conversionArgument:1,token:token);
         return new(this,actualEmission,actualEmptyWord,chain);
     }
 }
