@@ -16,10 +16,20 @@ internal sealed class Math2Mode0PrefixContext : IDisposable
     private Math2Mode0PrefixStep? pending;
     private bool failed, disposed;
     internal int BeamWidth { get; }
+    internal long InputFrameCount { get; }
+    internal long EncoderMaximumPredictionCount => state.MaximumPredictionCount;
+    //The exact cold numeric bound only. RunStep remains a diagnostic step API;
+    //this property does not implement outer termination or maxstep fallback.
+    internal ulong ColdMaximumPosition { get; }
 
-    private Math2Mode0PrefixContext(Math2Mode0TensorState state, int width)
+    private Math2Mode0PrefixContext(Math2Mode0TensorState state, int width, long inputFrameCount)
     {
         this.state = state; BeamWidth = width;
+        InputFrameCount = inputFrameCount;
+        ulong maximum = System.Math.Min(1000UL, checked(4UL * (ulong)inputFrameCount + 1UL));
+        if (state.MaximumPredictionCount != 0)
+            maximum = System.Math.Min(maximum, checked((ulong)state.MaximumPredictionCount));
+        ColdMaximumPosition = maximum;
         generation = Math2Mode0PrefixGeneration.Cold(width);
     }
 
@@ -32,7 +42,9 @@ internal sealed class Math2Mode0PrefixContext : IDisposable
         if (preparedBeamWidth < 1 || preparedBeamWidth > 16)
             throw new ArgumentOutOfRangeException(nameof(preparedBeamWidth));
         var state = bundle.PrepareState(run, source, downsampling, strokeEnds, token);
-        try { return new(state, preparedBeamWidth); }
+        //PrepareState already validated this same source as F32[N,1,26].
+        //Keep its original N, never the encoder memory length or stroke count.
+        try { return new(state, preparedBeamWidth, source.Describe().Shape[0]); }
         catch { state.Dispose(); throw; }
     }
 

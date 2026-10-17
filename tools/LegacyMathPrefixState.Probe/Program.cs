@@ -44,8 +44,14 @@ TensorCapture[] Outputs(Math2Mode0PrefixStep step) => Enumerable.Range(0, 4).Sel
 GenerationCapture Generation(Math2Mode0PrefixGeneration generation)
     => new(generation.Offset, generation.ActiveCount, generation.CopyPrimary(),
         generation.CopySecondary(), generation.CopyAncestry());
+var searchBounds = new List<SearchBoundCapture>();
 Math2Mode0PrefixContext Create(int width = 3)
-    => Math2Mode0PrefixContext.Prepare(bundle, run, source, downsampling, ends, width);
+{
+    var owner = Math2Mode0PrefixContext.Prepare(bundle, run, source, downsampling, ends, width);
+    if (owner.InputFrameCount != features.Frames) throw new InvalidDataException("Original input N lost.");
+    searchBounds.Add(new(owner.InputFrameCount, owner.EncoderMaximumPredictionCount, owner.ColdMaximumPosition));
+    return owner;
+}
 Reject(() => Math2Mode0PrefixContext.Prepare(bundle, run, source, downsampling, ends, 0));
 Reject(() => Math2Mode0PrefixContext.Prepare(bundle, run, source, downsampling, ends, 17));
 using (var canceledPreparation = new CancellationTokenSource())
@@ -210,6 +216,7 @@ var capture = new Capture(runtime.Version, model.Graphs.Select(x => Convert.ToHe
     Convert.ToHexStringLower(SHA256.HashData(resource)), features.Frames, runs.ToArray(), failures.ToArray(),
     prepared.ToArray(), argmax.ToArray(), guards);
 File.WriteAllText(args[3], JsonSerializer.Serialize(capture, CaptureJson.Default.Capture));
+File.WriteAllText(args[3] + ".bounds.json", JsonSerializer.Serialize(searchBounds.ToArray(), CaptureJson.Default.SearchBoundCaptureArray));
 Console.WriteLine($"PASS20 actual decoder steps/derived sidecars +owned prefix/tensor generations; {guards} guards; no full search loop");
 
 record TensorCapture(string Name, int Type, long[] Shape, string Bytes);
@@ -232,5 +239,7 @@ record ArgmaxCapture(string ValuesF32, long Index);
 record EosCapture(int Rank, int SourceBeam, float CandidateCost, float CompletedScore, ushort[] Prefix);
 record Capture(string Runtime, string[] Models, string Resource, int Frames, RunCapture[] Runs,
     FailureCapture[] Failures, PreparedCapture[] PreparedPlanes, ArgmaxCapture[] PreparedArgmax, int Guards);
+record SearchBoundCapture(long OriginalInputFrames, long EncoderMaximumPredictionCount, ulong ColdMaximumPosition);
 [JsonSerializable(typeof(Capture))]
+[JsonSerializable(typeof(SearchBoundCapture[]))]
 partial class CaptureJson : JsonSerializerContext;

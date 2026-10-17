@@ -22,6 +22,13 @@ assert hashlib.sha256(raw).hexdigest() == r['Resource'] == '2dc179aadb1bce347bb1
 _, blobs = runpy.run_path(str(ROOT / 'tools/export-ink-math-model.py'))['parse'](raw)
 assert [hashlib.sha256(x).hexdigest() for x in blobs] == r['Models']
 assert r['Runtime'] == '1.23.2' and r['Guards'] == 118
+budgets = json.loads(Path(sys.argv[1] + '.bounds.json').read_bytes())
+assert len(budgets) >= 3
+for budget in budgets:
+    n, k = budget['OriginalInputFrames'], budget['EncoderMaximumPredictionCount']
+    assert n == r['Frames'] and 1 <= n <= 6000 and k >= 0
+    base = min(1000, 4 * n + 1)
+    assert budget['ColdMaximumPosition'] == (min(base, k) if k else base)
 
 # Extract only pure independent oracle functions. The old probe's command-line
 # entry and fixed capture assertions do not run or get weakened.
