@@ -19,14 +19,23 @@ frontier and partial-failure ownership. The new
 [event-bound attention snapshots](legacy-math2-owned-completed-attention.md)
 use the proven backward-ancestry identity to copy only the selected beam,
 without copying KV caches.11 snapshots/403 sigmoid values/110 guards pass
-independent checks and fresh NativeAOT. Final-position fallback, recording-loop
-integration, EF4 output and final formula acceptance are still separate.
+independent checks and fresh NativeAOT. The [owning recording loop](legacy-math2-owned-recording-loop.md) now completes
+72 actual NN steps across10 runs with24 EOS records and431 guards, including
+the exact maximum-position counter and typed fallback ownership. No positive
+actual fallback was observed;1024 prepared eligibility controls cover it.
+The separate [prepared fresh assignment](legacy-math2-fresh-segment-assignment.md)
+checks11 actual attention maps and512 numeric controls. Initial/final completed
+ordering, loop attention budgeting, request-policy/EF4 correction and final
+formula acceptance are still separate.
 
 The [library DOM cache transport](legacy-library-text-dom-transport-cache.md)
 now transfers actual same-source pending C4D and exported BE2 owners with
 failure-safe receipts.4 actual sources/24 commands/3 rows/51 guards pass
 independent checks and Managed/NativeAOT. This is explicit library transport,
-not the unproved native SDK request/history acceptance route. Concurrent target
+not native SDK request/history acceptance. The registered text worker now has
+a [proven request/context chain](legacy-registered-text-request-dispatch.md)
+and [fresh constructor/import contract](legacy-text-processing-context-preparation.md);
+the corresponding runtime preparation remains unfinished. Concurrent target
 Build/Export versus Apply is serialized and checked with deterministic barriers.
 
 The exact committed app at5919419 builds with0 warnings and passes headless
