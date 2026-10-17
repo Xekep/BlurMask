@@ -34,3 +34,7 @@ all20 ranking bytes. An independent byte-addressed Python oracle checks
 duplicate groups, representative swaps, quota, pruning, equal-score ordering,
 special ordering, releases and selected-index remapping. A static audit pins
 four full PE regions, including the category15 count and the three sort calls.
+A separate512-word control checks130816 comparisons and caps managed allocation
+at2MB. The comparer receives read-only spans over one owned input snapshot;
+it does not copy two120-byte records for every pair. Cancellation is checked
+inside the pair loop as well as at each representative.

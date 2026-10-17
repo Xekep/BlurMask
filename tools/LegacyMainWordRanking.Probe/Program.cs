@@ -19,7 +19,7 @@ for(int trial=0;trial<2048;trial++)
     }
     var selected=Enumerable.Range(0,1+random.Next(n)).Select(_=>random.Next(n)).ToArray();
     var before=words.Select(x=>x.ToArray()).ToArray();
-    bool Equal(byte[] a,byte[] b)=>BinaryPrimitives.ReadInt32LittleEndian(a)==BinaryPrimitives.ReadInt32LittleEndian(b);
+    bool Equal(ReadOnlySpan<byte> a,ReadOnlySpan<byte> b)=>BinaryPrimitives.ReadInt32LittleEndian(a)==BinaryPrimitives.ReadInt32LittleEndian(b);
     var result=LegacyPreparedMainWordRanking.Rank(words,selected,quota,special,Equal);
     for(int i=0;i<n;i++)Check(words[i].AsSpan().SequenceEqual(before[i]));
     Check(result.OldToNew[selected[0]]==0);
@@ -40,5 +40,19 @@ w.WriteEndArray();
 foreach(ushort a in new ushort[]{0,1,2,10,65535})foreach(ushort b in new ushort[]{0,1,2,10,65535})foreach(bool mode in new[]{false,true})
     Check(LegacyPreparedMainWordRanking.InitialQuota(a,b,mode)==Math.Max(a==65535?2:a,b==65535?2:b)+(mode?1:0));
 Check(changed>1500&&quotaChanges>1500);
+//A native quadratic comparison pass must not allocate two120-byte snapshots
+//per pair. This exercises130816 comparisons, outside the captured oracle data.
+var large=Enumerable.Range(0,512).Select(i=>
+{
+    var b=new byte[120];BinaryPrimitives.WriteInt32LittleEndian(b,i);return b;
+}).ToArray();
+int comparisons=0;
+bool Distinct(ReadOnlySpan<byte> a,ReadOnlySpan<byte> b){comparisons++;return false;}
+LegacyPreparedMainWordRanking.WordEquality comparer=Distinct;
+long allocatedBefore=GC.GetAllocatedBytesForCurrentThread();
+var largeResult=LegacyPreparedMainWordRanking.Rank(large,[0],512,false,comparer);
+long rankingAllocation=GC.GetAllocatedBytesForCurrentThread()-allocatedBefore;
+Check(comparisons==130816&&largeResult.Words.Length==512);
+Check(rankingAllocation<2_000_000);
 Console.WriteLine($"PASS {cases} prepared ranking cases/{changed} pruned/{quotaChanges} quota changes/{guards} guards; numeric kernel only.");
 void Check(bool condition){if(!condition)throw new InvalidDataException("Ranking guard failed.");guards++;}

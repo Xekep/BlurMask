@@ -8,6 +8,7 @@ namespace InkRecognition;
 /// This does not export sources, mutate a275 owner or complete TOP.V68.</summary>
 internal static class LegacyPreparedMainWordRanking
 {
+    internal delegate bool WordEquality(ReadOnlySpan<byte> left,ReadOnlySpan<byte> right);
     internal sealed record Result(byte[][] Words,int[] OldToNew,int[] Released,int QuotaAfter,
         byte[][] RankingByOriginalIndex,int[] OutputSourceOrdinals,int[] ReleasedSourceOrdinals);
     private sealed class Row
@@ -28,7 +29,7 @@ internal static class LegacyPreparedMainWordRanking
         =>Math.Max(property18==65535?2:property18,property16==65535?2:property16)+(specialMode?1:0);
 
     internal static Result Rank(IReadOnlyList<byte[]> actualWords,ReadOnlySpan<int> selectedInTraversalOrder,
-        int carriedQuota,bool specialMode,Func<byte[],byte[],bool> samePoolWordEquals,CancellationToken token=default)
+        int carriedQuota,bool specialMode,WordEquality samePoolWordEquals,CancellationToken token=default)
     {
         ArgumentNullException.ThrowIfNull(actualWords);ArgumentNullException.ThrowIfNull(samePoolWordEquals);
         token.ThrowIfCancellationRequested();
@@ -60,10 +61,13 @@ internal static class LegacyPreparedMainWordRanking
             row.Group=++group;row.Flags=(BinaryPrimitives.ReadUInt16LittleEndian(words[i].AsSpan(50))&0x300)!=0;
             var duplicates=new List<int>();
             for(int j=i+1;j<n;j++)
+            {
+                token.ThrowIfCancellationRequested();
                 if(!rows[j].Removed&&BinaryPrimitives.ReadInt32LittleEndian(words[i].AsSpan(60))==
                     BinaryPrimitives.ReadInt32LittleEndian(words[j].AsSpan(60))&&
-                    samePoolWordEquals(words[i].ToArray(),words[j].ToArray())&&row.Special==rows[j].Special)
+                    samePoolWordEquals(words[i],words[j])&&row.Special==rows[j].Special)
                 {rows[j].Group=row.Group;duplicates.Add(j);}
+            }
             bool selected=row.Selected,first=row.First;int best=i;float bestCost=row.Cost;
             foreach(int j in duplicates)
             {
