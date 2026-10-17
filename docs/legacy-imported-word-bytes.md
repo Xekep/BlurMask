@@ -44,6 +44,8 @@ arrays and records are copied on output. Portable bounds are 1 MiB per glyph,
 and 1,048,576 expanded tokens per projection. The checked aggregate is tested
 before retaining a copied glyph or writing it into a WORD. These are portable
 caps, rather than claims about native allocation capacity.
+The public entry checks the aggregate reference count before copying any WORD
+reference vectors. The interval core independently rechecks that same cap.
 An additional aggregate cap of 65,536 references is checked before any glyph
 projection. It bounds retained zero-token glyph objects as well as nonempty
 ones; its scale matches the existing pool-record budget, not a native WORD limit.

@@ -22,6 +22,14 @@ public sealed class LegacyFreshMainImportedWordBytes
         CancellationToken token=default)
     {
         ArgumentNullException.ThrowIfNull(owner);owner.ValidateCompletedProjection(token);
+        //Reject excess reference work before copying the actual WORD vectors.
+        //The interval core independently checks the same budget at its boundary.
+        int referenceCount=0;
+        foreach(var word in owner.Words)
+        {
+            token.ThrowIfCancellationRequested();referenceCount=checked(referenceCount+word.ReferenceCount);
+            if(referenceCount>65536)throw new NotSupportedException("Portable aggregate imported reference budget exceeded.");
+        }
         var intervals=CopyWordIntervals(owner.ImportedPool,owner.Words.Select(word=>word.CopyReferences()).ToArray(),token);
         owner.ValidateCompletedProjection(token);
         var words=new LegacyFreshMainImportedWordBytes[intervals.Length];

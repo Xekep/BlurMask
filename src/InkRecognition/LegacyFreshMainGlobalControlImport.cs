@@ -13,6 +13,7 @@ public sealed class LegacyImportedControlWord
     internal LegacyImportedControlWord(LegacyNativePublishedWordNode node)
     {storage=node.Word.CopyStorage();references=node.Word.FlatReferences.ToArray();SourceSpan=node.Span;WordIndex=node.WordIndex;}
     public byte[] CopyStorage120()=>storage.ToArray();
+    internal int ReferenceCount=>references.Length;
     public ulong[] CopyReferences()=>references.ToArray();
 }
 
