@@ -138,7 +138,7 @@ internal sealed partial class Math2Mode0PrefixCandidates
 {
     private readonly Dictionary<int, Math2Mode0CompletedEventLease> completedLeases = new();
     internal sealed record CompletedData(Math2Mode0PrefixStep Step, int Rank, byte[] Row,
-        ushort[] Primary, ushort[] Secondary, int[][] Ancestry,
+        Math2Mode0PrefixGeneration Generation,
         Math2Mode0CommonSecondaryFrontier Frontier);
 
     internal void ValidateCompletedConsumption()
@@ -173,8 +173,7 @@ internal sealed partial class Math2Mode0PrefixCandidates
                 BinaryPrimitives.ReadSingleLittleEndian(row) == float.MaxValue)
                 throw new InvalidDataException("The actual pruned-before-EOS row lost its owner.");
             var data = new CompletedData(step, fact.Rank, row,
-                step.Generation.CopyPrimary()[parent], step.Generation.CopySecondary()[parent],
-                step.Generation.CopyAncestry(), step.ReadCompletedFrontier(token));
+                step.Generation, step.ReadCompletedFrontier(token));
             var lease = create(data);
             lease.ValidateCapture(recorder, step, this, fact.Rank);
             token.ThrowIfCancellationRequested();
@@ -192,8 +191,8 @@ internal sealed partial class Math2Mode0CompletedEventLease
     private readonly Math2Mode0PrefixStep step;
     private readonly Math2Mode0PrefixCandidates candidates;
     private readonly byte[] row;
-    private readonly ushort[] primary, secondary;
-    private readonly int[][] ancestry;
+    private readonly Math2Mode0PrefixGeneration generation;
+    private readonly int sourceParent;
     private bool consumed;
     internal bool IsConsumed => consumed;
     internal int Rank { get; }
@@ -201,18 +200,20 @@ internal sealed partial class Math2Mode0CompletedEventLease
     internal Math2Mode0CommonSecondaryFrontier Frontier { get; }
     private Math2Mode0CompletedEventLease(Math2Mode0CompletedRecords recorder,
         Math2Mode0PrefixStep step, Math2Mode0PrefixCandidates candidates, int rank,
-        byte[] row, ushort[] primary, ushort[] secondary, int[][] ancestry,
+        byte[] row, Math2Mode0PrefixGeneration generation,
         Math2Mode0CommonSecondaryFrontier frontier)
     {
         this.recorder = recorder; this.step = step; this.candidates = candidates; Rank = rank;
-        this.row = row; this.primary = primary; this.secondary = secondary; this.ancestry = ancestry;
+        this.row = row;
+        sourceParent = BinaryPrimitives.ReadInt32LittleEndian(row.AsSpan(40));
+        this.generation = step.BindCompletedGeneration(generation, sourceParent);
         Frontier = frontier;
     }
     internal static Math2Mode0CompletedEventLease FromActual(Math2Mode0CompletedRecords recorder,
         Math2Mode0PrefixCandidates candidates, int eventOrdinal, CancellationToken token)
         => candidates.RegisterCompletedEvent(recorder, eventOrdinal, data =>
             new(recorder, data.Step, candidates, data.Rank, data.Row,
-                data.Primary, data.Secondary, data.Ancestry, data.Frontier), token);
+                data.Generation, data.Frontier), token);
     internal void ValidateCapture(Math2Mode0CompletedRecords target, Math2Mode0PrefixStep source,
         Math2Mode0PrefixCandidates actualCandidates, int rank)
     {
@@ -221,9 +222,9 @@ internal sealed partial class Math2Mode0CompletedEventLease
             throw new ArgumentException("The exact newly created event owner is required.");
     }
     internal byte[] CopyRawRecord() => row.ToArray();
-    internal ushort[] CopyPrimary() => primary.ToArray();
-    internal ushort[] CopySecondary() => secondary.ToArray();
-    internal int[][] CopyAncestry() => ancestry.Select(values => values.ToArray()).ToArray();
+    internal ushort[] CopyPrimary() => generation.CopyCompletedPrimary(sourceParent);
+    internal ushort[] CopySecondary() => generation.CopyCompletedSecondary(sourceParent);
+    internal int[][] CopyAncestry() => generation.CopyAncestry();
 
     internal void Consume(Math2Mode0CompletedRecords target, Action action, CancellationToken token)
         => step.WithActive(() =>

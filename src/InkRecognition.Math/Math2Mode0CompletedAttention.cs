@@ -50,7 +50,7 @@ internal sealed partial class Math2Mode0CompletedEventLease
             step.PrefixOwner.RequireActualAttentionHistory(step);
             if (attentionSnapshot is not null) return attentionSnapshot;
             int parent = BinaryPrimitives.ReadInt32LittleEndian(row.AsSpan(40));
-            int symbols = primary.Length;
+            int symbols = generation.CompletedParentLength(sourceParent);
             if (symbols < 1 || symbols != step.Generation.Offset ||
                 parent < 0 || parent >= step.Generation.ActiveCount)
                 throw new NotSupportedException("Nonempty actual old-prefix attention required.");

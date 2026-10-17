@@ -146,7 +146,7 @@ internal sealed partial class Math2Mode0PrefixContext : IDisposable
 
 /// <summary>Immutable owned copies. The rank/time ancestry is intentionally
 /// separate from the parent-gathered U16 primary/secondary histories.</summary>
-internal sealed class Math2Mode0PrefixGeneration
+internal sealed partial class Math2Mode0PrefixGeneration
 {
     private readonly ushort[][] primary, secondary;
     private readonly int[][] ancestry;

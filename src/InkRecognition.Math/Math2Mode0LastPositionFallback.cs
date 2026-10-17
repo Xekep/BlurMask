@@ -98,8 +98,8 @@ internal sealed class Math2Mode0LastPositionFallback
         this.records = records; this.ranks = ranks; Outcome = outcome; Position = position; Maximum = maximum;
     }
     internal sealed record Data(Math2Mode0CompletedRecords Recorder, Math2Mode0PrefixStep Step,
-        Math2Mode0PrefixCandidates Candidates, int Rank, byte[] Row, ushort[] Primary,
-        ushort[] Secondary, int[][] Ancestry, Math2Mode0CommonSecondaryFrontier Frontier);
+        Math2Mode0PrefixCandidates Candidates, int Rank, byte[] Row,
+        Math2Mode0PrefixGeneration Generation, Math2Mode0CommonSecondaryFrontier Frontier);
     internal Math2Mode0LastPositionFallbackLease? CaptureNext(CancellationToken token = default)
         => Math2Mode0CompletedEventLease.CaptureFallback(this, token);
     internal Math2Mode0LastPositionFallbackLease? CaptureCanonical(
@@ -118,9 +118,9 @@ internal sealed class Math2Mode0LastPositionFallback
             int rank = ranks[cursor];
             var row = records.AsSpan(rank * 48, 48).ToArray();
             int parent = BinaryPrimitives.ReadInt32LittleEndian(row.AsSpan(40));
+            step.Generation.CompletedParentLength(parent);
             var data = new Data(recorder, step, candidates, rank, row,
-                step.Generation.CopyPrimary()[parent], step.Generation.CopySecondary()[parent],
-                step.Generation.CopyAncestry(), step.ReadCompletedFrontier(token));
+                step.Generation, step.ReadCompletedFrontier(token));
             var lease = create(data);
             lease.ValidateCapture(this, data);
             token.ThrowIfCancellationRequested();
@@ -178,7 +178,7 @@ internal sealed partial class Math2Mode0CompletedEventLease
         return batch.CaptureCanonical(data =>
         {
             var content = new Math2Mode0CompletedEventLease(data.Recorder, data.Step, data.Candidates,
-                data.Rank, data.Row, data.Primary, data.Secondary, data.Ancestry, data.Frontier);
+                data.Rank, data.Row, data.Generation, data.Frontier);
             var source = new Math2Mode0LastPositionFallbackLease(batch, content);
             content.fallbackSource = source;
             return source;
