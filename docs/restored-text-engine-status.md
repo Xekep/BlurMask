@@ -24,7 +24,7 @@ The reusable library now has these checked stages:
 | Word publication | Per-segment residual association, glyph chain and same-owner plain WORD list; no supplied labels or success flags. |
 | First candidate completion | Actual selected alternative scores, published-WORD quote cleanup, fresh-configuration glyph-normalization no-op, separate raw UTF8 WORD projections. No joined/accepted transcription. |
 | Ordinary glyph alternatives | Actual positive CASE source export/scoring/compact-driven refresh and13A830 ordering are joined. Fresh one-descriptor negative spans have owned source export/refresh. Native failed-refresh retries/general protocol sources remain separate. |
-| Text projection | Fresh273.V50 ->213A0/021000 choices and05AFA0 original raw positions are joined. A bounded first-WORD driver joins the219580 source prefix, clipping, overlap processing, ordered range interning, fresh024D40 metadata,021760 reuse and pending CHAR registrations. Bounded ordinary/configured no-bit8 TOP.V68 completion and actual shared275 WORD-array choices are joined, including genuine CHAR-key reuse, one shared UTF8/selection owner and pending CHAR+WORD commands. Actual NULL-reference raw-source projection now feeds pending kind2 TEXT registration. Actual021AB0 source-line publication retains separate append/write offsets. General augmentation and0283B0 document acceptance remain incomplete. |
+| Text projection | Fresh273.V50 ->213A0/021000 choices and05AFA0 original raw positions are joined. A bounded first-WORD driver joins the219580 source prefix, clipping, overlap processing, ordered range interning, fresh024D40 metadata,021760 reuse and pending CHAR registrations. Bounded ordinary/configured no-bit8 TOP.V68 completion and actual shared275 WORD-array choices are joined, including genuine CHAR-key reuse, one shared UTF8/selection owner and pending CHAR+WORD commands. Actual NULL-reference raw-source projection now feeds pending kind2 TEXT registration. Actual021AB0 source-line publication retains separate append/write offsets; bounded025E40 validates every WORD/CHAR line and trims the unused guide tail after pending TEXT. General augmentation and0283B0 document acceptance remain incomplete. |
 | Long-source publication | Genuine native 120-node gate and prefix/final-append transport checked; a nonempty genuine long-source winner is not established. |
 
 `LegacyFreshMainSingleLinePlainRecognition` joins raw physical strokes to the
@@ -106,7 +106,8 @@ Details: [global compact](legacy-main-global-compact-materialization.md),
 [later history dispatch](legacy-main-language-dispatch.md),
 [shared WORD choices](legacy-main-shared-word-source-choices.md),
 [source line publication](legacy-main-owned-source-lines.md),
-[pending document TEXT](legacy-main-document-text-selection.md).
+[pending document TEXT](legacy-main-document-text-selection.md),
+[bounded document line consistency](legacy-main-document-line-consistency.md).
 
 ## Remaining joins
 
@@ -126,6 +127,11 @@ Details: [global compact](legacy-main-global-compact-materialization.md),
   joined; general candidate expansion remains separate. Actual
   first-candidate glyph choices retain an immutable original raw document;
   sampled node/arc keys are not reused as document IDs.
+- Native C20/context source-cache ownership before026090 and the remaining
+  document postprocessors. Source2DA.22A is copied from a live facet result;
+  its constructor value does not establish the runtime branch. Pending
+  CHAR/WORD/TEXT commands and trimmed source guides are not accepted document
+  content.
 - Representative online handwriting evaluation with real pen-up events,
   Russian cursive, English, mixed text and mathematical notation before enabling
   the new path for automatic app replacement.
