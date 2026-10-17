@@ -371,8 +371,10 @@ typed numeric attributes, real source references and the shared range scratch.
 Four actual trees/276 nodes,42 service-failure prefixes and105 guards match an
 independent raw-metadata/tree/cleanup oracle in Managed and Native AOT. The old
 2053 range controls and20 actual source strings remain byte-identical.
-This constructs a detached subtree only. Target parent ownership, BE2 batches,
-C20 application/history, result transport and accepted document text are unjoined.
+This original API constructs a detached subtree only. The separate library
+target API below now joins its own root and BE2 edit operations. SDK parent
+ownership, C20 application/history, result transport and accepted document text
+remain unjoined.
 
 The [prefix-plane producer audit](legacy-math2-prefix-planes.md) also distinguishes
 the chosen primary labels, same-step D8 argmax metadata, optional detection data
@@ -413,3 +415,13 @@ The exact committed application builds without warnings and passes its headless
 behavior; it does not validate the unfinished recognition pipeline or Russian
 cursive accuracy. No new release or application recognizer switch accompanies
 these library stages.
+
+The [library DOM insertion route](legacy-library-text-dom-insertion.md) now
+creates its own kind4 root and shared name owner, builds the exact same-source
+text subtree, exports opcode2 or ordered replacement4/2, then recursively copies
+and applies those edits. Four actual targets, eight edits,24 copy stages,
+90 fault prefixes and182 guards match independent raw-metadata/tree oracles in
+Managed and NativeAOT. Stable parity normalizes only generated UUID values.
+The old detached-tree and range captures are unchanged. This does not establish
+an SDK request reader, C8F result-cache transfer, C20 acceptance or a completed
+end-to-end application recognizer.
