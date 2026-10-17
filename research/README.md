@@ -30,3 +30,8 @@ The readonly completed-hypothesis caller036F20 export is preserved at
 `myscript/output/Math2CompletedPostprocessCaller/MyScriptDocument.dll/` with
 references and byte-hash provenance. It supplies analysis evidence for the
 attention reconstruction, activation and EF4 request/source argument chain.
+
+The full038610 driver export and references are retained at
+`myscript/output/Math2DecoderDriverComplete/MyScriptDocument.dll/`, with
+SHA-256 provenance from the readonly headless export. Its decompiled types
+remain analysis hypotheses that must be checked against native instructions.

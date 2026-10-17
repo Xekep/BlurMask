@@ -2941,6 +2941,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native separator compaction failed.' }
           python tools/LegacyMathSeparatorCompaction.Probe/audit_output.py .artifacts/math-separator-compaction-native.json
           if ($LASTEXITCODE -ne 0) { throw 'Native separator compaction oracle failed.' }
+          dotnet run --project tools/LegacyMathUnusedUnitPruning.Probe -c Release -- models/math2/math2-unwrapped.res .artifacts/math-unused-unit-pruning-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed unused unit pruning failed.' }
+          python tools/LegacyMathUnusedUnitPruning.Probe/audit_output.py models/math2/math2-unwrapped.res .artifacts/math-unused-unit-pruning-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed unused unit pruning oracle failed.' }
+          dotnet publish tools/LegacyMathUnusedUnitPruning.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-unused-unit-pruning-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Unused unit pruning probe publish failed.' }
+          $unusedPruning = if ($IsWindows) { '.artifacts/math-unused-unit-pruning-probe/LegacyMathUnusedUnitPruning.Probe.exe' } else { '.artifacts/math-unused-unit-pruning-probe/LegacyMathUnusedUnitPruning.Probe' }
+          & $unusedPruning models/math2/math2-unwrapped.res .artifacts/math-unused-unit-pruning-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native unused unit pruning failed.' }
+          python tools/LegacyMathUnusedUnitPruning.Probe/audit_output.py models/math2/math2-unwrapped.res .artifacts/math-unused-unit-pruning-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native unused unit pruning oracle failed.' }
           dotnet publish tools/InkRecognition.RawContent.Probe/InkRecognition.RawContent.Probe.csproj -c Release -r $rid -p:PublishAot=true -o .artifacts/raw-content-probe
           if ($LASTEXITCODE -ne 0) { throw 'Raw-content probe publish failed.' }
           $raw = if ($IsWindows) { '.artifacts/raw-content-probe/InkRecognition.RawContent.Probe.exe' } else { '.artifacts/raw-content-probe/InkRecognition.RawContent.Probe' }
