@@ -6,7 +6,7 @@ public enum LegacyMainDirectStorageKind
 {
     HeapRecords, PrimaryAlternativePool, NodeRecords, NodePrimaryAlternatives,
     InitialRequestResidue, ParentRequestResidue, FlagRequestResidue, AuxiliaryScratch, LexicalResidue,
-    SecondaryAlternativePool, NodeSecondaryAlternatives
+    SecondaryAlternativePool, NodeSecondaryAlternatives, PrimaryRecombinationRequestResidue
 }
 
 public readonly record struct LegacyMainDirectStorageRequest(LegacyMainDirectStorageKind Kind,
@@ -41,6 +41,11 @@ public sealed class LegacyOwnedMainDirectWordPass
     private readonly LegacyNativeAuxiliaryDelimiterQuerySource auxiliaryDelimiter;
     private readonly LegacyNativeAuxiliaryWordQueryPages auxiliaryPages;
     private readonly LegacyNativeWordLanguageGate languageGate;
+    private readonly Func<LegacyNativeHigherArcTransitionOperations> createPrimaryRecombinationOperations;
+    private LegacyNativeHigherArcTransitionOperations? primaryRecombinationOperations;
+    private readonly LegacyNativeHigherArcResetParameters primaryReset;
+    private readonly LegacyNativeHigherArcRecombinationPolicy primaryRecombinationPolicy;
+    private readonly LegacyNativeWordRecombinationSymbols primaryRecombinationSymbols;
     private readonly uint[] headers;
     private readonly Dictionary<byte, uint> headerMap;
     private readonly Dictionary<int, LegacyOwnedFreshMainWordNodeBuffer> nodes = [];
@@ -147,6 +152,7 @@ public sealed class LegacyOwnedMainDirectWordPass
             owner.Model.AcousticAlphabet);
         if(owner.IsGlobal)
         {
+            createPrimaryRecombinationOperations = owner.GlobalTransitions!.CreateOperations;
             parents=new(owner,scorer,cell,parentResidue);
             flagPrepass=new(actualResource,owner,(n,arc,token)=>owner.GetCosts(currentSpan??
                 throw new InvalidOperationException("D0 must precede global flag costs."),n,arc,token),cell,flagResidue,cancellationToken);
@@ -156,10 +162,23 @@ public sealed class LegacyOwnedMainDirectWordPass
             var old=owner.RequireSameSource();
             var geometry=actualLineAcoustic is null?old.Source.CreatePrepared240TransitionGeometry(table!):
                 actualLineAcoustic.Source.CreatePrepared240TransitionGeometry(table!);
+            createPrimaryRecombinationOperations = geometry.CreateOperations;
             parents=new(old.SourceGraph,owner.Model.AcousticAlphabet,owner.Categories.Categories,owner.Contexts,geometry,scorer,cell,parentResidue);
             flagPrepass=actualLineAcoustic is null?new(actualResource,old.Acoustic,table!,cell,flagResidue,cancellationToken):
                 new(actualResource,actualLineAcoustic,table!,cell,flagResidue,cancellationToken);
         }
+        //20C1C0 copies runtime AL10/12/14 and resolves U+0003/FFFD. Runtime
+        //AL08..14 correspond to serialized header words0..6 (not offsets0..6).
+        byte[] alphabetHeader = owner.Model.AcousticAlphabet.CopySerializedHeader();
+        ushort special = Label("\u0003");
+        primaryReset = new(special, unchecked((uint)preparation.Sources.SubwordSourceIndex22ec));
+        primaryRecombinationSymbols = new(U16(alphabetHeader, 8), U16(alphabetHeader, 10),
+            U16(alphabetHeader, 12), Label("\ufffd"));
+        //The sealed fresh controller retains NEW20BAA0 count-cap2601/2602
+        //and permission2309 zero. Its existing query/startup paths use the
+        //same policy; no associated/property mutation is accepted above.
+        primaryRecombinationPolicy = new(special, policy.MaximumParentDistance54,
+            false, 0, 0);
         delimiter = new(owner.Model.AcousticAlphabet, owner.Contexts,
             (tag, request, token) => livePublicationEpoch is { } live
                 ? owner.RequireSameSource().ReadLivePublicationQuery(live, tag, request, false, token)
@@ -175,6 +194,9 @@ public sealed class LegacyOwnedMainDirectWordPass
             return new(page.ReturnedCount, page.Records, ReadOnlyMemory<byte>.Empty, -1, request.Skip, null);
         }, owner.Contexts, 128, auxiliaryScratch.Span);
         languageGate = new(owner.Model, owner.Graph);
+
+        ushort Label(string text) => owner.Model.AcousticAlphabet.TryGetLabel(text, out ushort value)
+            ? value : ushort.MaxValue;
     }
 
     internal IReadOnlyList<LegacyMainDirectWordNodeResult> RunGlobal(CancellationToken token)
@@ -483,30 +505,44 @@ public sealed class LegacyOwnedMainDirectWordPass
     private LegacyNativeWordAlternativeOrderingResult OrderPrimary(LegacyNativeWordRecordHeap heap, int node, CancellationToken token)
     {
         var slots = LegacyNativeWordAlternativeOrdinals.AssignInitial(heap.GetSlotStorageSnapshot().Span, heap.Count, cancellationToken: token).SlotStorage;
+        bool needsGeneralRequest = false;
         for (int index = 0; index < heap.Count; index++)
         {
             token.ThrowIfCancellationRequested();
-            var slot = slots.Slice(index * 128, 128);
-            int previous = node - unchecked((sbyte)slot.Span[32]) - 1;
-            if (previous < 0)
+            var slot = slots.Span.Slice(index * 128, 128);
+            uint previous = unchecked((uint)(node - (sbyte)slot[32] - 1));
+            if (previous != uint.MaxValue && U16(slot, 30) >= configuration.PrimaryArcLimit230a &&
+                !LegacyNativeHigherArcResetAlternativeProducer.IsResetSource(configuration.Mode22f6,
+                    Header(slot[4]), U16(slot, 36), primaryReset.SpecialLabel24ea))
             {
-                var produced = LegacyNativeRootWordAlternativeProducer.Create(slot.Span, 1, (uint)node, configuration,
-                    owner.Contexts, symbol => symbol, primaryPool, secondaryPool, token);
-                primaryPool = produced.PrimaryStorage.ToArray(); secondaryPool = produced.SecondaryStorage.ToArray();
-            }
-            else
-            {
-                var produced = LegacyNativeInitialParentWordAlternativeProducer.Create(slot.Span, 1, (uint)node, configuration,
-                    (n, ordinal) => nodes[n].Read(ordinal), owner.Contexts, symbol => symbol, primaryPool, secondaryPool, token);
-                primaryPool = produced.PrimaryStorage.ToArray(); secondaryPool = produced.SecondaryStorage.ToArray();
+                needsGeneralRequest = true;
+                break;
             }
         }
-        var ordered = LegacyNativeWordAlternativeOrdering.Prepare(slots.Span, heap.Count, false, configuration,
+        //Only a genuine general-higher row observes native local80 residue.
+        //Keep default root/primary allocator order byte-identical; unused
+        //portable zeros are shape storage, not a claim about native stack bytes.
+        var residue = needsGeneralRequest
+            ? Allocate(LegacyMainDirectStorageKind.PrimaryRecombinationRequestResidue, node,
+                80, ReadOnlyMemory<byte>.Empty, 0, token).Storage
+            : new byte[80];
+        var produced = LegacyNativePrimaryWordRecombination.Apply(slots.Span, heap.Count,
+            (uint)node, configuration, n => nodes.TryGetValue(n, out var source)
+                ? source.CopyRows() : throw new ArgumentOutOfRangeException(nameof(n), "Actual20E6A0 source node required."),
+            Header, owner.Categories.Categories, owner.Contexts, static symbol => symbol,
+            primaryReset, primaryRecombinationPolicy, primaryRecombinationSymbols,
+            needsGeneralRequest ? primaryRecombinationOperations ??= createPrimaryRecombinationOperations() : null,
+            1, residue.Span, primaryPool, secondaryPool, token);
+        primaryPool = produced.PrimaryStorage40.ToArray(); secondaryPool = produced.SecondaryStorage40.ToArray();
+        var ordered = LegacyNativeWordAlternativeOrdering.Prepare(produced.HeapStorage128.Span, heap.Count, false, configuration,
             headers, false, new(2, primaryPool),
             configuration.SecondaryAlternativeCount2404 > 1 ? new(configuration.SecondaryAlternativeCount2404, secondaryPool) : null, token);
         primaryPool = ordered.PrimaryAlternativeStorage.ToArray();
         if (configuration.SecondaryAlternativeCount2404 > 1) secondaryPool = ordered.SecondaryAlternativeStorage.ToArray();
         return ordered;
+
+        uint Header(byte source) => source < headers.Length ? headers[source]
+            : throw new InvalidDataException("Actual primary source lies outside the owning descriptor table.");
     }
 
     private bool WithinWordLength(int currentNode, ReadOnlySpan<byte> parent)
@@ -599,4 +635,5 @@ public sealed class LegacyOwnedMainDirectWordPass
     private int NodeExtent() => configuration.PrimaryArcLimit230a + checked((int)(
         ((configuration.PackedSource22e8 & 0x10) != 0 ? 2f : 1f) * configuration.ExpansionFactor230c * configuration.PrimaryArcLimit230a));
     private static int I32(ReadOnlySpan<byte> bytes, int at) => BinaryPrimitives.ReadInt32LittleEndian(bytes[at..]);
+    private static ushort U16(ReadOnlySpan<byte> bytes, int at) => BinaryPrimitives.ReadUInt16LittleEndian(bytes[at..]);
 }
