@@ -170,11 +170,20 @@ public sealed class LegacyOwnedFreshMainWordNodeBuffer
     //writing anything: future2144F0 parents still own every other byte.
     internal void ApplyCompactPublication(LegacyOwnedFreshMainWordControllerPolicy producingOwner,
         LegacyMainDirectWordNodeResult published, CancellationToken cancellationToken)
+        => ApplyCompactPublicationCore(ReferenceEquals(producingOwner, policy.RequireSameSource()), published, cancellationToken);
+
+    internal void ApplyCompactPublication(LegacyFreshMainGlobalWordControllerPolicy producingOwner,
+        LegacyMainDirectWordNodeResult published, CancellationToken cancellationToken)
+        => ApplyCompactPublicationCore(producingOwner is not null && policy.Global is {} global &&
+            ReferenceEquals(producingOwner, global), published, cancellationToken);
+
+    private void ApplyCompactPublicationCore(bool sameOwner, LegacyMainDirectWordNodeResult published,
+        CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (secondary.Length != 0)
             throw new NotSupportedException("Configured secondary compact publication requires its own2410 writeback bridge.");
-        if (!ReferenceEquals(producingOwner, policy.RequireSameSource()) || !compacted || published.EndingNode != EndingNode ||
+        if (!sameOwner || !compacted || published.EndingNode != EndingNode ||
             published.SourceEnd23f0 != SourceEnd23f0 || published.RetainedEnd23f8 != RetainedEnd23f8 ||
             published.Records.Length != records.Length || published.PrimaryAlternatives.Length != primary.Length)
             throw new ArgumentException("Publication must retain the completed node's exact owner, counts and allocation extents.");

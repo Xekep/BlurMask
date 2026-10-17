@@ -32,6 +32,8 @@ public sealed class LegacyFreshMainGlobalCompactReachability
         if(c.Mode22f6!=0||c.Trace2368!=0||c.PrimaryAlternativeCount2402!=2||c.SecondaryAlternativeCount2404!=1||
             (c.PackedSource22e8&7)<=1||policy.SecondaryScaleEc!=0||policy.HasAssociatedSource)
             throw new NotSupportedException("Fresh global mode0/2/2/1 ordinary reachability required.");
+        if (pass.IntermediatePublicationState is not null)
+            throw new NotSupportedException("LIVE global publication requires its owning append path, not one-shot reachability.");
         pass.ValidateResultQueryLease(token);
         var reader=new LegacyNativeDelimiterQuerySource(policy.Owner.Model.AcousticAlphabet,policy.Owner.Contexts,
             (tag,query,cancellation)=>pass.ReadResultQuery(tag,query,false,cancellation),

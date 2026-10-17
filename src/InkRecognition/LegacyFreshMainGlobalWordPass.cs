@@ -7,6 +7,7 @@ namespace InkRecognition;
 public sealed class LegacyFreshMainGlobalWordPass
 {
     private readonly LegacyOwnedMainDirectWordPass scheduler;
+    private readonly LegacyOwnedMainDirectWordPass.GlobalIntermediatePublication? publication;
     internal Action<LegacyMainSoftHyphenObservedCall>? SoftHyphenObserver
     { set => scheduler.SoftHyphenObserver = value; }
     public LegacyFreshMainGlobalWordControllerPolicy Policy {get;}
@@ -21,8 +22,51 @@ public sealed class LegacyFreshMainGlobalWordPass
         Policy=policy;
         scheduler=new(resource,policy,allocator,token);
     }
+    private LegacyFreshMainGlobalWordPass(ReadOnlySpan<byte> resource, LegacyFreshMainGlobalWordControllerPolicy policy,
+        LegacyMainDirectStorageProvider allocator, LegacyOwnedMainDirectWordPass.GlobalIntermediatePublication publication,
+        CancellationToken token)
+    {
+        Policy = policy; this.publication = publication;
+        scheduler = new(resource, policy, allocator, token);
+    }
+    /// <summary>Opt-in actual signed120-node207CB0 gate beforeV80. Retains the
+    /// same source/backend and persistent compact pool. Logical row ownership
+    /// does not reconstruct native physical ring allocation or acceptance.</summary>
+    public static LegacyFreshMainGlobalWordPass CreateWithIntermediatePublication(ReadOnlySpan<byte> resource,
+        LegacyFreshMainGlobalWordControllerPolicy policy, LegacyMainDirectStorageProvider allocator,
+        LegacyFreshMainGlobalGlyphConfidence confidence, ReadOnlySpan<byte> compactAllocatorResidue40,
+        Action<LegacyFreshMainGlobalIntermediatePublication>? publicationObserver = null,
+        CancellationToken token = default)
+    {
+        ArgumentNullException.ThrowIfNull(allocator); token.ThrowIfCancellationRequested();
+        LegacyFreshMainGlobalCompactPublicationState.ValidateOwner(resource, policy, confidence);
+        //215DC2 excludes the final node. Thus count240 has only gate119;
+        //count241 would reach a second gate239 and remains unverified here.
+        if (policy.Owner.Graph.State.NodeCount > 240)
+            throw new NotSupportedException("This explicit global LIVE producer supports at most one intermediate120-node cycle (up to240 logical nodes).");
+        var state = new LegacyFreshMainGlobalCompactPublicationState(policy, compactAllocatorResidue40);
+        return new(resource, policy, allocator, new(confidence, state, publicationObserver), token);
+    }
+    //Friend-only prepared consumer seam. This does not change the public native gate.
+    internal static LegacyFreshMainGlobalWordPass CreateWithPreparedPublicationAtNode(ReadOnlySpan<byte> resource,
+        LegacyFreshMainGlobalWordControllerPolicy policy, LegacyMainDirectStorageProvider allocator,
+        LegacyFreshMainGlobalGlyphConfidence confidence, ReadOnlySpan<byte> residue, int endingNode,
+        Action<LegacyFreshMainGlobalIntermediatePublication>? observer = null, CancellationToken token = default)
+    {
+        ArgumentNullException.ThrowIfNull(allocator); token.ThrowIfCancellationRequested();
+        LegacyFreshMainGlobalCompactPublicationState.ValidateOwner(resource, policy, confidence);
+        if (endingNode < 0 || endingNode >= policy.Owner.Graph.State.NodeCount - 1 ||
+            policy.Owner.Graph.State.NodeCount > policy.MaximumParentDistance54)
+            throw new ArgumentOutOfRangeException(nameof(endingNode));
+        return new(resource, policy, allocator, new(confidence, new(policy, residue), observer, endingNode), token);
+    }
     public LegacyFreshMainGlobalWordPassResult RunOwned(CancellationToken token=default)
-        =>new(Policy,scheduler.RunGlobal(token),token);
+    {
+        var rows = publication is null ? scheduler.RunGlobal(token) : scheduler.RunGlobalWithIntermediatePublication(publication, token);
+        var result = new LegacyFreshMainGlobalWordPassResult(Policy, rows, token, publication?.State);
+        if (publication is not null) result.BindPublicationReader(scheduler.BindGlobalResultPublicationReader(result, token));
+        return result;
+    }
 }
 
 /// <summary>Owned logical global-node rows. It is not a same-source pass result,
@@ -32,15 +76,40 @@ public sealed class LegacyFreshMainGlobalWordPassResult
     private readonly LegacyMainDirectWordNodeResult[] nodes;
     private readonly LegacyFreshMainGlobalCaseSession.ResultQueryLease resultQueries;
     private int publicationStarted;
+    private LegacyNativeDelimiterQuerySource? publicationReader;
+    internal void BindPublicationReader(LegacyNativeDelimiterQuerySource reader)
+    {
+        ArgumentNullException.ThrowIfNull(reader);
+        if (publicationReader is not null || IntermediatePublicationState is null)
+            throw new InvalidOperationException("Only the producing LIVE pass can bind its retained outer290 once.");
+        publicationReader = reader;
+    }
+    internal LegacyNativeDelimiterQuerySource RequirePublicationReader(CancellationToken token)
+    {
+        ValidateResultQueryLease(token);
+        return publicationReader ?? throw new InvalidOperationException("Actual retained global LIVE/final outer290 required.");
+    }
+    internal LegacyFreshMainGlobalCompactPublicationState? IntermediatePublicationState { get; }
+    public int IntermediatePublicationCount => IntermediatePublicationState?.PublicationCount ?? 0;
+    public int NextCompactPublicationNode2490 => IntermediatePublicationState?.NextNode ?? 0;
+    public int IntermediateCompactRecordCount2470 => IntermediatePublicationState?.Count ?? 0;
+    public byte[] CopyIntermediateCompactStorage() => IntermediatePublicationState?.Storage.ToArray() ?? [];
+    public int[] CopyIntermediateNodeStarts2478() => IntermediatePublicationState is { NextNode: > 0 } state
+        ? state.Starts.AsSpan(0, state.NextNode + 1).ToArray() : [];
+    public int[] CopyIntermediatePrefixOwners2488() => IntermediatePublicationState is { NextNode: > 0 } state
+        ? state.PrefixOwners.AsSpan(0, state.NextNode + 1).ToArray() : [];
     public LegacyFreshMainGlobalWordControllerPolicy Policy {get;}
     public LegacyFreshMainCompactOrdinaryGraph Graph=>Policy.Owner.Graph;
     public int NodeCount=>nodes.Length;
     internal LegacyFreshMainGlobalWordPassResult(LegacyFreshMainGlobalWordControllerPolicy policy,
-        IReadOnlyList<LegacyMainDirectWordNodeResult> source,CancellationToken token)
+        IReadOnlyList<LegacyMainDirectWordNodeResult> source,CancellationToken token,
+        LegacyFreshMainGlobalCompactPublicationState? intermediateState = null)
     {
         token.ThrowIfCancellationRequested();
         if(source.Count!=policy.Owner.Graph.State.NodeCount)throw new ArgumentException("Actual global source/node extent required.");
-        Policy=policy;nodes=source.Select(Copy).ToArray();
+        if (intermediateState is not null && !ReferenceEquals(intermediateState.Policy, policy))
+            throw new ArgumentException("Actual global intermediate pool/controller identity required.");
+        Policy=policy;nodes=source.Select(Copy).ToArray(); IntermediatePublicationState=intermediateState?.Copy();
         resultQueries=policy.Owner.CaptureResultQueryLease(token);
     }
     public LegacyMainDirectWordNodeResult GetNodeSnapshot(int node)

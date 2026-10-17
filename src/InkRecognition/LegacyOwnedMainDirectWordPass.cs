@@ -32,7 +32,7 @@ public sealed record LegacyMainDirectWordNodeResult(int EndingNode, int RootQuer
 ///caches. Public constructors retain the DIRECT scope; the typed case facade
 ///provides an internal verified fresh292 source policy. Grouped
 ///1FA300 row-pointer allocation or native final winner/acceptance.</summary>
-public sealed class LegacyOwnedMainDirectWordPass
+public sealed partial class LegacyOwnedMainDirectWordPass
 {
     private const int Impossible = 0x4000000;
     private readonly LegacyMainOwnedWordControllerBinding policy;
@@ -206,7 +206,11 @@ public sealed class LegacyOwnedMainDirectWordPass
         primaryRecombinationPolicy = new(special, policy.MaximumParentDistance54,
             false, 0, 0);
         delimiter = new(owner.Model.AcousticAlphabet, owner.Contexts,
-            (tag, request, token) => livePublicationEpoch is { } live
+            (tag, request, token) => globalLivePublicationEpoch is { } globalLive
+                ? owner.RequireGlobalSource().ReadLiveQuery(globalLive, tag, request, false, token)
+                : globalCompletedPublicationResult is { } globalResult
+                ? globalResult.ReadResultQuery(tag, request, false, token)
+                : livePublicationEpoch is { } live
                 ? owner.RequireSameSource().ReadLivePublicationQuery(live, tag, request, false, token)
                 : owner.Read(currentSpan ?? throw new InvalidOperationException("D0 must precede290 reads."),
                     tag, request,false,token),
@@ -286,7 +290,7 @@ public sealed class LegacyOwnedMainDirectWordPass
         => RunCore(cancellationToken, null);
 
     private IReadOnlyList<LegacyMainDirectWordNodeResult> RunCore(CancellationToken cancellationToken,
-        IntermediatePublication? publication)
+        IntermediatePublication? publication, GlobalIntermediatePublication? globalPublication = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (Interlocked.Exchange(ref started, 1) != 0)
@@ -432,6 +436,10 @@ public sealed class LegacyOwnedMainDirectWordPass
                 publication.PreparedEndingNode is null && node + 1 < graph.NodeCount &&
                 unchecked(policy.MaximumParentDistance54 + publication.State.NextNode) <= node + 1))
                 PublishIntermediate(publication, node, output, cancellationToken);
+            if (globalPublication is not null && (globalPublication.PreparedEndingNode == node ||
+                globalPublication.PreparedEndingNode is null && node + 1 < graph.NodeCount &&
+                unchecked(policy.MaximumParentDistance54 + globalPublication.State.NextNode) <= node + 1))
+                PublishGlobalIntermediate(globalPublication, node, output, cancellationToken);
             ResetSources(node, cancellationToken);
         }
         cancellationToken.ThrowIfCancellationRequested();
