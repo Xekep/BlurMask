@@ -296,3 +296,10 @@ log and cumulative-cost arrays.120 independent scenarios cover220968 values;
 Windows Managed/Native captures agree. Its MathF exp/log are explicitly a
 portable adaptation: original vendor CPU-dispatch equivalence, confidence
 calibration and the complete EEF runtime lifecycle are still unestablished.
+
+The [English119 dependency audit](legacy-english-acoustic119-plan.md) reaches
+the exact ends of five main and five first acoustic nodes. It establishes
+missing initial-context networks, actual no-dynamic first models, different
+feature widths,107 padded/aligned matrices and the extra24C processor. These
+are real differences from RU110; widening version guards would not restore
+English recognition. Their runtime feature/controller joins remain unfinished.
