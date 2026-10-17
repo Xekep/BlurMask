@@ -686,6 +686,8 @@ jobs:
           python tools/LegacyContextualQuoteRules.Probe/audit_output.py .artifacts/legacy-contextual-quotes-managed.json
           dotnet run --project tools/LegacyMainWordRanking.Probe -c Release -- .artifacts/legacy-main-word-ranking-managed.json
           python tools/LegacyMainWordRanking.Probe/audit_output.py .artifacts/legacy-main-word-ranking-managed.json
+          dotnet run --project tools/LegacyMainGlyphChainCleanup.Probe -c Release -- .artifacts/legacy-main-glyph-chain-cleanup-managed.json
+          python tools/LegacyMainGlyphChainCleanup.Probe/audit_output.py .artifacts/legacy-main-glyph-chain-cleanup-managed.json
           dotnet run --project tools/LegacyMainWordAugmentationScan.Probe -c Release -- .artifacts/legacy-main-word-augmentation-scan-managed.json
           python tools/LegacyMainWordAugmentationScan.Probe/audit_output.py .artifacts/legacy-main-word-augmentation-scan-managed.json
           dotnet run --project tools/LegacyMainWordSpanStorage.Probe -c Release -- .artifacts/legacy-main-word-span-storage-managed.json
@@ -1234,6 +1236,7 @@ jobs:
             @{ Name = 'LegacyFreshTextSourceContext'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-fresh-text-source-controls.json', '.artifacts/legacy-fresh-text-source-context-native.json') },
             @{ Name = 'LegacyContextualQuoteRules'; Args = @('.artifacts/legacy-contextual-quotes-native.json') },
             @{ Name = 'LegacyMainWordRanking'; Args = @('.artifacts/legacy-main-word-ranking-native.json') },
+            @{ Name = 'LegacyMainGlyphChainCleanup'; Args = @('.artifacts/legacy-main-glyph-chain-cleanup-native.json') },
             @{ Name = 'LegacyMainWordAugmentationScan'; Args = @('.artifacts/legacy-main-word-augmentation-scan-native.json') },
             @{ Name = 'LegacyMainWordSpanStorage'; Args = @('.artifacts/legacy-main-word-span-storage-native.json') },
             @{ Name = 'LegacyMainSpanScores'; Args = @('.artifacts/legacy-main-span-scores-native.json') },
@@ -1655,6 +1658,10 @@ jobs:
             if ($name -eq 'LegacyMainWordRanking') {
               python tools/LegacyMainWordRanking.Probe/audit_output.py .artifacts/legacy-main-word-ranking-native.json
               if ($LASTEXITCODE -ne 0) { throw 'LegacyMainWordRanking independent audit failed' }
+            }
+            if ($name -eq 'LegacyMainGlyphChainCleanup') {
+              python tools/LegacyMainGlyphChainCleanup.Probe/audit_output.py .artifacts/legacy-main-glyph-chain-cleanup-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyMainGlyphChainCleanup independent audit failed' }
             }
             if ($name -eq 'LegacyMainWordAugmentationScan') {
               python tools/LegacyMainWordAugmentationScan.Probe/audit_output.py .artifacts/legacy-main-word-augmentation-scan-native.json

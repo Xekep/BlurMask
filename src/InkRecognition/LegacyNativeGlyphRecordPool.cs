@@ -8,7 +8,7 @@ public readonly record struct LegacyNativeGlyphRecordInsertion(ulong Reference, 
 /// normal symbol update13af30. Portable key storage replaces native AVL
 /// pointers/rotations; native balance bits are not reconstructed. Owned
 /// snapshots retain lookup-relevant count/duplicate flags and complete rows.</summary>
-public sealed class LegacyNativeGlyphRecordPool
+public sealed partial class LegacyNativeGlyphRecordPool
 {
     private const int MaximumOwners = 4096;
     private const int MaximumTotalRecords = 65536;
