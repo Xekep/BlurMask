@@ -19,9 +19,12 @@ public static class LegacyPreparedOrdinaryGlyphChain
         ArgumentNullException.ThrowIfNull(materialization);ArgumentNullException.ThrowIfNull(word);
         ArgumentNullException.ThrowIfNull(ordinary);ArgumentNullException.ThrowIfNull(protocol);
         token.ThrowIfCancellationRequested();var policy=materialization.TerminalResult.PassResult.ControllerOwner;
-        if(!ReferenceEquals(ordinary.DirectPolicy,policy)||!ReferenceEquals(protocol.Policy,policy)||
+        var casePolicy=materialization.CaseSourcePolicy;
+        bool matchingOrdinary=casePolicy is null?ReferenceEquals(ordinary.DirectPolicy,policy):
+            ordinary.DirectPolicy is null&&ReferenceEquals(ordinary.Policy,casePolicy);
+        if(!matchingOrdinary||!ReferenceEquals(protocol.CasePolicy,casePolicy)||!ReferenceEquals(protocol.Policy,policy)||
             !ReferenceEquals(protocol.SourceCallbacks.Owner,materialization.ConfidenceOwner))
-            throw new ArgumentException("One actual DIRECT compact/source/score owner required.");
+            throw new ArgumentException("One actual typed compact/source/score owner required.");
         if(preparedSegmentRows72.Length%72!=0||preparedSegmentRows72.Length>4096*72||
             allocatedRecordResidue40.Length!=40||labelStackResidue256.Length!=256||requestStackResidue64.Length!=64)
             throw new ArgumentException("Bounded complete segment and explicit record/label/request storage required.");

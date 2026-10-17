@@ -606,6 +606,14 @@ jobs:
           python tools/LegacyFirstInteriorDelimiter.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-first-interior-managed.json
           dotnet run --project tools/LegacyMainOwnedInput.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-owned-input-managed.json
           python tools/LegacyMainOwnedInput.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-main-owned-input-managed.json
+          dotnet run --project tools/LegacyFirstPlainText.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-first-plain-text-managed.json
+          python tools/LegacyFirstPlainText.Probe/audit_output.py .artifacts/legacy-first-plain-text-managed.json
+          dotnet run --project tools/LegacyMainLiveCompactPublication.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res 1 .artifacts/legacy-main-live-compact-managed.json
+          python tools/LegacyMainLiveCompactPublication.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-main-live-compact-managed.json
+          dotnet run --project tools/LegacyMainOwnedFlush.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-main-owned-flush-managed.json
+          python tools/LegacyMainOwnedFlush.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-main-owned-flush-managed.json
+          dotnet run --project tools/LegacyMainWordPublication.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-main-word-publication-managed.json
+          python tools/LegacyMainWordPublication.Probe/audit_output.py .artifacts/legacy-main-word-publication-managed.json
           dotnet run --project tools/LegacyMainWordPacket.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-main-word-packet-managed.json
           python tools/LegacyMainWordPacket.Probe/audit_output.py .artifacts/legacy-main-word-packet-managed.json
           dotnet run --project tools/LegacyMainSourceWidth.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-main-source-width-managed.json
@@ -1070,6 +1078,10 @@ jobs:
             @{ Name = 'LegacyMainResidualSource'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-main-residual-source-native.json') },
             @{ Name = 'LegacyFirstInteriorDelimiter'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-first-interior-native.json') },
             @{ Name = 'LegacyMainOwnedInput'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-owned-input-native.json') },
+            @{ Name = 'LegacyFirstPlainText'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-first-plain-text-native.json') },
+            @{ Name = 'LegacyMainLiveCompactPublication'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '1', '.artifacts/legacy-main-live-compact-native.json') },
+            @{ Name = 'LegacyMainOwnedFlush'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-main-owned-flush-native.json') },
+            @{ Name = 'LegacyMainWordPublication'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-main-word-publication-native.json') },
             @{ Name = 'LegacyMainWordPacket'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-main-word-packet-native.json') },
             @{ Name = 'LegacyMainSourceWidth'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-main-source-width-native.json') },
             @{ Name = 'LegacyGlyphChainProduction'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-glyph-chain-native.json') },
@@ -1329,6 +1341,22 @@ jobs:
             if ($name -eq 'LegacyMainOwnedInput') {
               python tools/LegacyMainOwnedInput.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-main-owned-input-native.json
               if ($LASTEXITCODE -ne 0) { throw 'Main input/publication metadata audit failed' }
+            }
+            if ($name -eq 'LegacyFirstPlainText') {
+              python tools/LegacyFirstPlainText.Probe/audit_output.py .artifacts/legacy-first-plain-text-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyFirstPlainText independent audit failed' }
+            }
+            if ($name -eq 'LegacyMainLiveCompactPublication') {
+              python tools/LegacyMainLiveCompactPublication.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-main-live-compact-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyMainLiveCompactPublication independent audit failed' }
+            }
+            if ($name -eq 'LegacyMainOwnedFlush') {
+              python tools/LegacyMainOwnedFlush.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-main-owned-flush-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyMainOwnedFlush independent audit failed' }
+            }
+            if ($name -eq 'LegacyMainWordPublication') {
+              python tools/LegacyMainWordPublication.Probe/audit_output.py .artifacts/legacy-main-word-publication-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyMainWordPublication independent audit failed' }
             }
             if ($name -eq 'LegacyMainWordPacket') {
               python tools/LegacyMainWordPacket.Probe/audit_output.py .artifacts/legacy-main-word-packet-native.json
