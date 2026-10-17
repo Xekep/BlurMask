@@ -159,6 +159,53 @@ fresh single-word case, or that they can be omitted. Their actual branch
 guards and owning producers need separate closure before final accepted
 text/document positions can be reported.
 
+### Actual WORD caller boundary
+
+Further static inspection distinguishes the64-byte275 span owner from its
+120-byte WORD alternatives. Native279 list-node field00 refers to the span
+owner; a portable `PublishedWordNode.Word` directly exposes the selected
+120-byte record instead. Span-owner source vector28/count30/residual38 still
+needs its producing lifecycle. It cannot be replaced by a union of already
+projected glyph ranges.
+
+0283B0 first collects source vectors for the actual span owners, applies
+WORD-level overlap operations, and interns the resulting key in the separate
+WORD tree at result+78 (call028E25). Fresh024F30 gets `wordNode+18`, whose
+field20 is the WORD clipping range vector. This is distinct from the original
+document range retained in024F30's local78 for degenerate containment.
+Using the whole raw document for both inputs does not establish the caller.
+
+For a new WORD node,028F9D loads its flags (`node+30`),028FA0 clears bit23,
+028FA7 sets bit21, and028FAD stores them. The fresh024F30 call is02901D;
+the other alternative path calls it at0292B1. Selected payload flags are
+combined at029080/02908C/02909A. WORD0210C0 registration at0290DA is conditional
+on bit21 being clear. TEXT registration is a later kind2 call at02962A.
+These are caller-provided seeds and separate selection levels, not flags
+invented inside024F30.
+
+### Postprocessing is not just concatenation
+
+The direct call order after TEXT registration includes the following still
+separate owners. Static hashes identify their bodies but do not prove an
+applicable no-op for a new portable document:
+
+| Callsite | Callee | Observed boundary |
+| --- | --- | --- |
+|029647|025E40|Returns early only when result field100 is zero; otherwise inspects selected WORD/glyph alternatives and their line identities. |
+|029680|026090|Conditional on multiple input results, field22A and a retained nonnull source cache. |
+|029693|027670|Also gated by field100; can extend selected glyph lists between WORDs. |
+|0296AE|0248D0|Unions WORD source ranges; uncovered TEXT ranges require238B0 processing. |
+|0297D7|01FD40|Traverses source nodes and resolves selected alternatives and original document object kinds. |
+|0297DF|020000|Marks the selected WORD/character hierarchy with08000000 and retains chosen alternative ordinals. |
+|0297EA|020920|Processes ordinary character and WORD source nodes; sets result1F0 only after both traversals succeed. |
+|029801|023260|Further owning result/source processing, not an inferred confidence threshold. |
+|02985C|037E80|Builds actual source transforms throughDAF; optional document-tree serialization is a distinct flag. |
+|029876|026EF0|Matches retained external span input against the selected WORD hierarchy; its empty-input return needs actual input provenance. |
+
+None of these calls licenses changing `PublicationCompleted` into final
+accepted-text readiness, guessing calibrated confidence from TOP80, or omitting
+source metadata merely because a raw UTF8 string is available.
+
 ## Static provenance
 
 Only pinned PE bytes/decompiler output were read. No vendor binary was loaded
