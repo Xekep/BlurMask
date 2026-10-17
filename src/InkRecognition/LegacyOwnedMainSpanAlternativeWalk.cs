@@ -2,6 +2,7 @@ using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Runtime.CompilerServices;
 [assembly:InternalsVisibleTo("LegacyMainSpanAlternativeWalk.Probe")]
+[assembly:InternalsVisibleTo("LegacyMainConfiguredWordSources.Probe")]
 
 namespace InkRecognition;
 
@@ -47,7 +48,7 @@ public sealed class LegacyOwnedMainSpanAlternativeWalk
         LegacyOwnedRussianMainSourceSymbolCallbacks callbacks,ReadOnlySpan<byte> requestResidue64)
     {
         Sources=source;Callbacks=callbacks;requestResidue=requestResidue64.ToArray();
-        compactOwner=source.Candidate.RawResult.Session.Ownership.SelectedOwner;
+        compactOwner=source.CandidateSource.Ownership.SelectedOwner;
         compact=compactOwner.CopyCompactStorage().AsSpan(0,checked(compactOwner.RecordCount*40)).ToArray();
         starts=compactOwner.CopyNodeStarts2478();graph=callbacks.Graph;
         var alphabet=callbacks.Owner.Model.AcousticAlphabet;
@@ -61,10 +62,33 @@ public sealed class LegacyOwnedMainSpanAlternativeWalk
         ReadOnlySpan<byte> delimiterCallerResidue64,CancellationToken token=default)
     {
         ArgumentNullException.ThrowIfNull(actualSources);ArgumentNullException.ThrowIfNull(actualCallbacks);token.ThrowIfCancellationRequested();
-        var raw=actualSources.Candidate.RawResult;var owner=raw.Session.Ownership.SelectedOwner;var policy=owner.Controller;
+        var raw=actualSources.Candidate.RawResult;
+        if(!raw.PublicationCompleted)throw new ArgumentException("The actual first-candidate publication must be complete.");
+        return PrepareCore(resource,actualSources,actualCallbacks,delimiterCallerResidue64,token);
+    }
+
+    /// <summary>The same numeric218A30 algorithm over an actual configured
+    /// selected2410 compact owner. No count1 candidate or source is fabricated.
+    /// Unsupported compact subtypes remain explicit path-level refusals.</summary>
+    public static LegacyOwnedMainSpanAlternativeWalk PrepareConfigured(ReadOnlySpan<byte> resource,
+        LegacyOwnedMainWordSourceCollection actualSources,LegacyOwnedRussianMainSourceSymbolCallbacks actualCallbacks,
+        ReadOnlySpan<byte> delimiterCallerResidue64,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(actualSources);ArgumentNullException.ThrowIfNull(actualCallbacks);
+        actualSources.CandidateSource.Validate(token);
+        if(!actualSources.CandidateSource.IsConfigured)throw new ArgumentException("Actual configured source collection required.");
+        return PrepareCore(resource,actualSources,actualCallbacks,delimiterCallerResidue64,token);
+    }
+
+    private static LegacyOwnedMainSpanAlternativeWalk PrepareCore(ReadOnlySpan<byte> resource,
+        LegacyOwnedMainWordSourceCollection actualSources,LegacyOwnedRussianMainSourceSymbolCallbacks actualCallbacks,
+        ReadOnlySpan<byte> delimiterCallerResidue64,CancellationToken token)
+    {
+        var source=actualSources.CandidateSource;source.Validate(token);
+        var owner=source.Ownership.SelectedOwner;var policy=owner.Controller;
         if(delimiterCallerResidue64.Length!=64||!ReferenceEquals(actualCallbacks.Owner,owner.ConfidenceOwner)||
-            !ReferenceEquals(actualCallbacks.Graph,raw.Sampled.SourceRanges.Graph)||!raw.PublicationCompleted||
-            !raw.Session.IsComplete||raw.Session.IsStopped||!ReferenceEquals(owner.CaseSourcePolicy,raw.Session.Plan.SourcePolicy)||
+            !ReferenceEquals(actualCallbacks.Graph,source.Sampled.SourceRanges.Graph)||
+            !source.Session.IsComplete||source.Session.IsStopped||!ReferenceEquals(owner.CaseSourcePolicy,source.SourcePolicy)||
             owner.CaseSourcePolicy is null||owner.CaseSourcePolicy.HasAssociatedSource)
             throw new ArgumentException("Completed identical fresh one-WORD CASE/compact/source callback owner and full delimiter scratch required.");
         if(resource.Length!=572763||!StringComparer.OrdinalIgnoreCase.Equals(Convert.ToHexString(SHA256.HashData(resource)),

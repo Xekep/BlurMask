@@ -9,17 +9,20 @@ public sealed class LegacyOwnedMainWordSourceCollection
 {
     private readonly LegacyOrdinaryGraphSourceReference[] references;
     private readonly LegacyNativeInkPositionRange[] ranges;
-    public LegacyFreshMainCompletedFirstCandidate Candidate {get;}
+    private readonly LegacyFreshMainCompletedFirstCandidate? candidate;
+    public LegacyFreshMainCompletedFirstCandidate Candidate=>candidate??
+        throw new InvalidOperationException("Configured source collection has no historical first-candidate object.");
+    public LegacyOwnedMainCandidateSource CandidateSource {get;}
     public LegacyNativePublishedWordNode Word {get;}
-    public LegacyOwnedRawInkDocument Document=>Candidate.RawResult.Owner.SourceDocument;
+    public LegacyOwnedRawInkDocument Document=>CandidateSource.SourceDocument;
     public int FirstContext=>Word.Span.First;
     public int LastContext=>Word.Span.Last;
     public int ReferenceCount=>references.Length;
     public bool IsTopV68Completed=>false;
-    private LegacyOwnedMainWordSourceCollection(LegacyFreshMainCompletedFirstCandidate candidate,
+    private LegacyOwnedMainWordSourceCollection(LegacyOwnedMainCandidateSource source,
         LegacyNativePublishedWordNode word,LegacyOrdinaryGraphSourceReference[] references,
         LegacyNativeInkPositionRange[] ranges)
-    {Candidate=candidate;Word=word;this.references=references;this.ranges=ranges;}
+    {CandidateSource=source;candidate=source.IsConfigured?null:source.FirstCandidate;Word=word;this.references=references;this.ranges=ranges;}
 
     /// <summary>Bounded first fresh span-owner source export before219580's
     /// alternative append. The exact one-WORD restriction avoids substituting
@@ -32,16 +35,38 @@ public sealed class LegacyOwnedMainWordSourceCollection
         if(actualCandidate.RawWordsInNativeHeadOrder.Count!=1||
             !ReferenceEquals(actualCandidate.Snapshot.WordHead18,raw.Session.Ownership.WordPublisher.Head))
             throw new NotSupportedException("The source prefix currently owns exactly one fresh first-alternative WORD/span owner.");
-        var word=actualCandidate.RawWordsInNativeHeadOrder[0].Publication.PublishedWord!;
+        return ExportCore(LegacyOwnedMainCandidateSource.FromFirst(actualCandidate,token),token);
+    }
+
+    /// <summary>Source-count/fill prefix for one actual selected configured
+    /// candidate. Alternatives may share275 ownership; this does not complete
+    /// that shared owner's lazy export/augmentation/ranking or mark TOP.V68.</summary>
+    public static LegacyOwnedMainWordSourceCollection PrepareConfigured(
+        LegacyOwnedMainCandidateSource actualCandidate,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(actualCandidate);actualCandidate.Validate(token);
+        if(!actualCandidate.IsConfigured)throw new ArgumentException("Actual configured candidate source required.");
+        return ExportCore(actualCandidate,token);
+    }
+
+    private static LegacyOwnedMainWordSourceCollection ExportCore(LegacyOwnedMainCandidateSource actualCandidate,
+        CancellationToken token)
+    {
+        actualCandidate.Validate(token);
+        var words=actualCandidate.CopyRawWordsInNativeHeadOrder(token);
+        if(words.Length!=1||!ReferenceEquals(actualCandidate.WordHead18,actualCandidate.Ownership.WordPublisher.Head))
+            throw new NotSupportedException("The source prefix owns exactly one actual WORD/span per selected candidate.");
+        var word=words[0].Publication.PublishedWord!;
         if(word.Next is not null||word.Span.First<0||word.Span.Last<word.Span.First)
             throw new NotSupportedException("A genuine forward ordinary first span is required.");
         //The existing typed factory closes fresh21B no-protocol construction,
         //registration, original F8 metadata and the single descriptor lifecycle.
         //In1A9AE0's successful forward branch mode2 differs from mode0 only
         //when the final-node pending protocol vector exists; this owner has none.
-        var scope=LegacyOwnedMainSpanGlyphSource.Prepare(raw,token);
-        var source=raw.Sampled.SourceRanges;
-        if(!ReferenceEquals(scope.Graph,source.Graph)||!ReferenceEquals(source.Graph,actualCandidate.Snapshot.SourcePolicy.DictionaryOwner.Graph))
+        var scope=actualCandidate.IsConfigured?LegacyOwnedMainSpanGlyphSource.PrepareConfigured(actualCandidate,token):
+            LegacyOwnedMainSpanGlyphSource.Prepare(actualCandidate.RawResult,token);
+        var source=actualCandidate.Sampled.SourceRanges;
+        if(!ReferenceEquals(scope.Graph,source.Graph)||!ReferenceEquals(source.Graph,actualCandidate.SourcePolicy.DictionaryOwner.Graph))
             throw new ArgumentException("Identical actual fresh source graph required.");
         var count=source.ResolveForwardWithResiduals((uint)word.Span.First,(uint)word.Span.Last,token);
         var fill=source.ResolveForwardWithResiduals((uint)word.Span.First,(uint)word.Span.Last,token);
@@ -53,7 +78,7 @@ public sealed class LegacyOwnedMainWordSourceCollection
             if(r.First.First!=0||r.Last.First!=0)throw new NotSupportedException("Actual raw document ingress group0 required.");
             projection[i]=new(new(r.First.First,r.First.Second,r.First.Third),new(r.Last.First,r.Last.Second,r.Last.Third),r.FirstResidual,r.LastResidual);
         }
-        var doc=raw.Owner.SourceDocument;
+        var doc=actualCandidate.SourceDocument;
         var map=new LegacyNativeTextSourceInputMap(doc.CopySelectedInputs(),[],0);
         LegacyNativeInkPositionRange[] original=[new(LegacyNativeInkPosition.Pack(0,0,3,doc.Strokes[0].Points.Count),
             LegacyNativeInkPosition.Pack((uint)doc.ObjectCount-1,doc.Strokes[^1].Points.Count-1,5,doc.Strokes[^1].Points.Count))];
