@@ -124,3 +124,15 @@ NativeAOT: SHA256
 Its26 real glyphs/64 alternatives/52 selected bytes, seven genuine independent
 span-source projections and592 prepared fractional-position checks still
 pass. Static auditors read pinned PE bytes only; no vendor DLL is executed.
+
+`PrepareCompletedSources` also accepts the actual successful bounded
+`LegacyFreshMainNoCandidateSourceCompletion`. It retains that owner's existing
+26N source collection rather than exporting another prefix. An unrun or failed
+completion is rejected. The historical `Prepare` path remains available for
+prefix diagnostics; neither factory claims0283B0 document acceptance.
+
+The probe option `--complete-sources true` runs this composed path. Seven
+control inputs and nine recorded tracks pass both Managed and Windows Native
+AOT with byte-identical captures. All published sample payloads match the
+historical wrapper; its default capture SHA256 remains
+`3a3e0aacfe1565454b95edf33a400459f4963291bd68c8ae9eb23feb81af87f7`.

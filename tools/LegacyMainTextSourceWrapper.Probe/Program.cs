@@ -1,10 +1,11 @@
 using InkRecognition;
 using System.Buffers.Binary;
 using System.Text.Json;
-if(args.Length<11||args.Length>15||args.Length%2!=1)throw new ArgumentException("AK LK engine separation case publication normalization circles line30 line50 capture [--controls prepared-json] [--recorded pinned-manifest]");
+if(args.Length<11||args.Length>17||args.Length%2!=1)throw new ArgumentException("AK LK engine separation case publication normalization circles line30 line50 capture [--controls prepared-json] [--recorded pinned-manifest] [--complete-sources true]");
 string? recorded=null;
+bool completeSources=false;
 for(int option=11;option<args.Length;option+=2)
-{if(args[option]=="--controls")PreparedControls.Run(args[option+1]);else if(args[option]=="--recorded")recorded=args[option+1];else throw new ArgumentException("Unknown option.");}
+{if(args[option]=="--controls")PreparedControls.Run(args[option+1]);else if(args[option]=="--recorded")recorded=args[option+1];else if(args[option]=="--complete-sources"&&args[option+1]=="true")completeSources=true;else throw new ArgumentException("Unknown option.");}
 byte[] ak=File.ReadAllBytes(args[0]),lk=File.ReadAllBytes(args[1]),engine=File.ReadAllBytes(args[2]);
 var table=LegacyCursiveSeparationTable.Load(File.ReadAllBytes(args[3]));using var cf=File.OpenRead(args[4]);using var pf=File.OpenRead(args[5]);using var nf=File.OpenRead(args[6]);using var cr=File.OpenRead(args[7]);
 var cases=LegacyNativeCaseData.Load(cf);var publication=LegacyNativeTextPublicationData.Load(pf);var norm=LegacyNativeUnicodeNormalizationData.Load(nf);var circles=LegacyNativeCircledPayloadData.Load(cr);
@@ -18,7 +19,17 @@ for(int sample=0;sample<samples.Length;sample++)
  var rawOwner=context.Prepare(samples[sample],0,table,cases,publication);var raw=rawOwner.Run(new byte[120],new byte[40],new ushort[256],new byte[64]);
  var candidate=LegacyFreshMainFirstCandidateCompletion.Complete(raw,new byte[400],new byte[4],new byte[4]);
  var original=candidate.RawWordsInNativeHeadOrder.Select(p=>p.Publication.PublishedWord!.Word.FlatReferences.Select(r=>(Reference:r,Record:raw.Session.Ownership.GlyphPool.CopyRecord(r))).ToArray()).ToArray();
- using var owner=LegacyFreshMainTextSourceWrapper.Prepare(ak,candidate,table,publication,norm,circles);
+ LegacyFreshMainNoCandidateSourceCompletion? completion=null;
+ if(completeSources)
+ {
+  completion=LegacyFreshMainNoCandidateSourceCompletion.Prepare(ak,LegacyOwnedMainWordSourceCollection.ExportBeforeWordAugmentation(candidate));
+  Reject(()=>LegacyFreshMainTextSourceWrapper.PrepareCompletedSources(ak,completion,table,publication,norm,circles));
+  completion.Run();
+ }
+ using var owner=completion is null?LegacyFreshMainTextSourceWrapper.Prepare(ak,candidate,table,publication,norm,circles):
+  LegacyFreshMainTextSourceWrapper.PrepareCompletedSources(ak,completion,table,publication,norm,circles);
+ if(completion is not null&&(!ReferenceEquals(owner.CompletedSources,completion)||!ReferenceEquals(owner.WordSourceCollection,completion.Sources)))
+  throw new InvalidDataException("Completed source wrapper duplicated or replaced the actual26N word source owner.");
  Reject(()=>owner.Publish(new byte[39],new byte[2040*4]));Reject(()=>owner.Publish(new byte[40],new byte[2040*4],new CancellationToken(true)));
  var words=owner.Publish(new byte[40],new byte[2040*4]);Reject(()=>owner.Publish(new byte[40],new byte[2040*4]));
  var prefix=owner.WordSourceCollection;byte[] prefixBytes=prefix.CopySourceStorage26();
@@ -65,7 +76,7 @@ for(int sample=0;sample<samples.Length;sample++)
  {w.WriteStartObject();w.WriteNumber("id",pending.SelectionId);w.WriteString("name",pending.Name);WriteRanges("ranges",pending.CopyRanges());w.WriteEndObject();sourceCount++;}
  w.WriteEndArray();w.WriteEndObject();
 }
-w.WriteEndArray();if(recorded is not null)w.WriteString("inputAssumption","Pinned recorded coordinates; pen-up metadata absent; one continuous stroke, expected labels never read.");w.WriteEndObject();w.Flush();Console.WriteLine($"PASS{samples.Length} actual candidates/{glyphs} processed glyph sources/{reused} reused keys/{sourceCount} pending CHAR registrations/{guards} guards; no0283B0 acceptance claim.");
+w.WriteEndArray();if(completeSources)w.WriteBoolean("completedSources",true);if(recorded is not null)w.WriteString("inputAssumption","Pinned recorded coordinates; pen-up metadata absent; one continuous stroke, expected labels never read.");w.WriteEndObject();w.Flush();Console.WriteLine($"PASS{samples.Length} actual candidates/{glyphs} processed glyph sources/{reused} reused keys/{sourceCount} pending CHAR registrations/{guards} guards; completed-source mode:{completeSources}; no0283B0 acceptance claim.");
 void Reject(Action a){try{a();}catch(Exception e)when(e is ArgumentException or OperationCanceledException or InvalidOperationException){guards++;return;}throw new InvalidDataException("Required publication guard missing.");}
 void WriteRanges(string name,LegacyNativeInkPositionRange[] ranges){w.WriteStartArray(name);foreach(var r in ranges){w.WriteStartArray();w.WriteNumberValue(r.First.Value);w.WriteNumberValue(r.Last.Value);w.WriteEndArray();}w.WriteEndArray();}
 InkStroke[] Word(float x)=>[Draw((x,80),(x,0),(x+30,45),(x+60,0),(x+60,80)),Draw((x+85,80),(x+85,0),(x+135,0),(x+135,80)),Draw((x+165,80),(x+165,0),(x+215,0),(x+215,40),(x+165,40))];

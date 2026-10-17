@@ -31,7 +31,7 @@ public sealed class LegacyOwnedMainTextWordChoices
     { Word = word; Glyphs = Array.AsReadOnly(glyphs); }
 }
 
-/// <summary>Actual first-candidate source refresh ->273.V50 ->213A0 ->21000 join.
+/// <summary>Actual selected-candidate source refresh ->273.V50 ->213A0 ->21000 join.
 /// This owns the fresh string pool and proves wrapperHeaderEFilter=false from
 /// the private fresh no-properties lifecycle. It does not implement024F30's
 /// source-node geometry/dedup,021760 reuse,0283B0 postprocessing or acceptance.</summary>
@@ -43,7 +43,11 @@ public sealed class LegacyFreshMainTextGlyphChoices : IDisposable
     private readonly byte[] header;
     private int started;
     private bool disposed;
-    public LegacyFreshMainCompletedFirstCandidate Candidate { get; }
+    private readonly LegacyFreshMainCompletedFirstCandidate? candidate;
+    private readonly LegacyOwnedMainWordUtf8Projection[] actualWords;
+    public LegacyFreshMainCompletedFirstCandidate Candidate => candidate ??
+        throw new InvalidOperationException("Configured choices have no count1 first candidate.");
+    public LegacyOwnedMainCandidateSource? CandidateSource { get; }
     public LegacyOwnedMainOrdinaryGlyphRefresh Refresh { get; }
     public LegacyOwnedMainSpanGlyphRefresh SpanRefresh { get; }
     public LegacyFreshMainGlyphUtf8Emission Emitter { get; }
@@ -52,7 +56,8 @@ public sealed class LegacyFreshMainTextGlyphChoices : IDisposable
         LegacyCursiveSeparationTable table, LegacyNativeTextPublicationData publication,
         LegacyNativeUnicodeNormalizationData normalization, LegacyNativeCircledPayloadData circles, CancellationToken token)
     {
-        Candidate = candidate; this.publication = publication; this.normalization = normalization;
+        this.candidate = candidate; this.publication = publication; this.normalization = normalization;
+        actualWords = candidate.RawWordsInNativeHeadOrder.ToArray();
         var source = candidate.Snapshot.SourcePolicy; var raw = candidate.RawResult;
         if (!ReferenceEquals(candidate.GlyphNormalization.Snapshot, candidate.Snapshot) ||
             !ReferenceEquals(candidate.GlyphNormalization.Policy.SourcePolicy, source) ||
@@ -64,6 +69,34 @@ public sealed class LegacyFreshMainTextGlyphChoices : IDisposable
         SpanRefresh = LegacyOwnedMainSpanGlyphRefresh.Prepare(raw, token);
         Emitter = LegacyFreshMainGlyphUtf8Emission.Prepare(raw, normalization, circles, token);
         header = resource.Slice(99, 16).ToArray();
+    }
+
+    private LegacyFreshMainTextGlyphChoices(ReadOnlySpan<byte> resource, LegacyOwnedMainCandidateSource candidate,
+        LegacyCursiveSeparationTable table, LegacyNativeTextPublicationData publication,
+        LegacyNativeUnicodeNormalizationData normalization, LegacyNativeCircledPayloadData circles, CancellationToken token)
+    {
+        CandidateSource = candidate; this.publication = publication; this.normalization = normalization;
+        candidate.Validate(token);
+        if (!candidate.IsConfigured) throw new ArgumentException("An actual configured candidate is required.");
+        actualWords = candidate.CopyRawWordsInNativeHeadOrder(token);
+        Refresh = LegacyOwnedMainOrdinaryGlyphRefresh.PrepareConfigured(resource, candidate, table, token);
+        SpanRefresh = LegacyOwnedMainSpanGlyphRefresh.PrepareConfigured(candidate, token);
+        Emitter = LegacyFreshMainGlyphUtf8Emission.PrepareConfigured(candidate, normalization, circles, token);
+        header = resource.Slice(99, 16).ToArray();
+    }
+
+    /// <summary>Same refresh/selection/TOP.V50/0213A0 publication over a genuine
+    /// configured alternative. The actual candidate/session and shared TOP are
+    /// retained; this does not run024F30 word/source interning or acceptance.</summary>
+    public static LegacyFreshMainTextGlyphChoices PrepareConfigured(ReadOnlySpan<byte> resource,
+        LegacyOwnedMainCandidateSource candidate, LegacyCursiveSeparationTable table,
+        LegacyNativeTextPublicationData publication, LegacyNativeUnicodeNormalizationData normalization,
+        LegacyNativeCircledPayloadData circles, CancellationToken token = default)
+    {
+        ArgumentNullException.ThrowIfNull(candidate); ArgumentNullException.ThrowIfNull(table);
+        ArgumentNullException.ThrowIfNull(publication); ArgumentNullException.ThrowIfNull(normalization);
+        ArgumentNullException.ThrowIfNull(circles); token.ThrowIfCancellationRequested();
+        return new(resource, candidate, table, publication, normalization, circles, token);
     }
 
     public static LegacyFreshMainTextGlyphChoices Prepare(ReadOnlySpan<byte> resource,
@@ -85,6 +118,7 @@ public sealed class LegacyFreshMainTextGlyphChoices : IDisposable
         ReadOnlySpan<byte> selectionAllocation4,CancellationToken token)
     {
         ObjectDisposedException.ThrowIf(disposed,this);token.ThrowIfCancellationRequested();
+        CandidateSource?.Validate(token);
         if(allocatedRecordStorage40.Length!=40||selectionAllocation4.Length%4!=0||selectionAllocation4.Length>65536*4)
             throw new ArgumentException("Explicit complete row and bounded whole selection allocation required.");
         if(Interlocked.CompareExchange(ref started,1,0)!=0)
@@ -94,7 +128,7 @@ public sealed class LegacyFreshMainTextGlyphChoices : IDisposable
     private void CheckWord(LegacyNativePublishedWordNode word)
     {
         ObjectDisposedException.ThrowIf(disposed,this);
-        if(started!=1||!Candidate.RawWordsInNativeHeadOrder.Any(p=>ReferenceEquals(p.Publication.PublishedWord,word)))
+        if(started!=1||!actualWords.Any(p=>ReferenceEquals(p.Publication.PublishedWord,word)))
             throw new ArgumentException("Publication must have started for an actual WORD of this identical candidate.");
     }
 
@@ -111,11 +145,12 @@ public sealed class LegacyFreshMainTextGlyphChoices : IDisposable
         ReadOnlySpan<LegacyNativeInkPositionRange> actualWordClip,CancellationToken token)
     {
         CheckWord(word);token.ThrowIfCancellationRequested();
-        var raw=Candidate.RawResult;var pool=raw.Session.Ownership.GlyphPool;
+        CandidateSource?.Validate(token);
+        var pool=Emitter.TopOwner.GlyphPool;
         var positions=new Dictionary<ulong,LegacyOwnedMainGlyphDocumentPositions>();
         var descriptors=new LegacyNativeGlyphSymbolDescriptor[word.Word.FlatReferences.Count];int descriptorIndex=0;
         var initialRanges=new LegacyNativeInkPositionRange[word.Word.FlatReferences.Count][];
-        var document=raw.Owner.SourceDocument;var rangeOperations=LegacyOwnedRawInkRangeOperations.Prepare(document);
+        var document=CandidateSource?.SourceDocument??Candidate.RawResult.Owner.SourceDocument;var rangeOperations=LegacyOwnedRawInkRangeOperations.Prepare(document);
         LegacyNativeInkPositionRange[] originalRanges=[new(LegacyNativeInkPosition.Pack(0,0,3,document.Strokes[0].Points.Count),
             LegacyNativeInkPosition.Pack((uint)document.ObjectCount-1,document.Strokes[^1].Points.Count-1,5,document.Strokes[^1].Points.Count))];
         //Every actual WORD reference is refreshed before any of its ordered
@@ -131,12 +166,16 @@ public sealed class LegacyFreshMainTextGlyphChoices : IDisposable
             if(unchecked((short)(key>>24))>=0)
             {
                 var refreshed=Refresh.RefreshOwner(key,allocatedRecordStorage40,token);
-                if(!positions.ContainsKey(key))positions.Add(key,raw.Owner.SourceDocument.Project(raw,refreshed.Source,token));
+                if(!positions.ContainsKey(key))positions.Add(key,CandidateSource is { } selected
+                    ?document.ProjectCandidate(selected,refreshed.Source,token)
+                    :document.Project(Candidate.RawResult,refreshed.Source,token));
             }
             else
             {
                 var refreshed=SpanRefresh.RefreshOwner(key,token);
-                if(!positions.ContainsKey(key))positions.Add(key,raw.Owner.SourceDocument.Project(raw,refreshed.Source,token));
+                if(!positions.ContainsKey(key))positions.Add(key,CandidateSource is { } selected
+                    ?document.ProjectSpanCandidate(selected,refreshed.Source,token)
+                    :document.Project(Candidate.RawResult,refreshed.Source,token));
             }
             var range=positions[key].Ranges.ToArray();
             initialRanges[descriptorIndex-1]=wrapperFirstPass&&unchecked((short)(key>>24))>=0
@@ -155,7 +194,7 @@ public sealed class LegacyFreshMainTextGlyphChoices : IDisposable
             throw new InvalidOperationException("Native024F30 skipped source has no glyph-selection request.");
         ulong reference=sources.Word.Word.FlatReferences[index];
         ulong key=LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(reference);
-        var pool=Candidate.RawResult.Session.Ownership.GlyphPool;
+        var pool=Emitter.TopOwner.GlyphPool;
         LegacyOwnedMainRefreshedGlyphAlternatives? ordinary=null;LegacyOwnedMainRefreshedSpanGlyphOwner? span=null;
         LegacyPreparedGlyphAlternativeSelection selection;
         if(unchecked((short)(key>>24))>=0)
@@ -179,8 +218,8 @@ public sealed class LegacyFreshMainTextGlyphChoices : IDisposable
         ArgumentNullException.ThrowIfNull(input);CheckWord(input.Word);token.ThrowIfCancellationRequested();
         if(!ReferenceEquals(input.Owner,this))throw new ArgumentException("Same publication selection owner required.");
         //00C860 clears99.0283B0's HeaderE filter is therefore false in this
-        //fresh no-properties owner, independently of the selected glyph.
-        return LegacyNativeTextGlyphCaller.Produce(input.GlyphOwner,Candidate.Snapshot.SourcePolicy.Model.AcousticAlphabet,
+        //fresh owner (only short18 may be configured), independently of the selected glyph.
+        return LegacyNativeTextGlyphCaller.Produce(input.GlyphOwner,Emitter.PrimaryAlphabet,
             header,input.Selection.CopySelectionRows4(),LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(input.Reference),false,
             unchecked((int)input.Selection.SelectedMarker!.Value),strings,publication,normalization,
             actualControlLabelLookup:text=>Emitter.ReadControlLabel(text,token),
@@ -192,7 +231,7 @@ public sealed class LegacyFreshMainTextGlyphChoices : IDisposable
     {
         BeginPublication(allocatedRecordStorage40,selectionAllocation4,token);
         var words=new List<LegacyOwnedMainTextWordChoices>();int referenceCount=0,recordCount=0,byteCount=0;
-        foreach(var projected in Candidate.RawWordsInNativeHeadOrder)
+        foreach(var projected in actualWords)
         {
             token.ThrowIfCancellationRequested();var word=projected.Publication.PublishedWord!;var refs=word.Word.FlatReferences;
             if(refs.Count>4096-referenceCount)throw new NotSupportedException("Total text-choice source-reference budget exceeded.");

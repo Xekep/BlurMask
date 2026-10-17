@@ -108,22 +108,40 @@ public sealed class LegacyFreshMainTextSourceWrapper : IDisposable
     private readonly LegacyOwnedMainTextSourceInterner interner;
     private readonly LegacyOwnedFreshTextSourceContext selections;
     public LegacyOwnedMainWordSourceCollection WordSourceCollection {get;}
+    public LegacyFreshMainNoCandidateSourceCompletion? CompletedSources {get;}
     private readonly Dictionary<int,LegacyOwnedMainTextSourcePayload> payloads=[];
     private bool disposed;
     public LegacyFreshMainCompletedFirstCandidate Candidate=>choices.Candidate;
     private LegacyFreshMainTextSourceWrapper(LegacyFreshMainTextGlyphChoices choices,
-        LegacyNativeTextPublicationData properties,LegacyNativeUnicodeNormalizationData normalization,CancellationToken token)
+        LegacyNativeTextPublicationData properties,LegacyNativeUnicodeNormalizationData normalization,CancellationToken token,
+        LegacyFreshMainNoCandidateSourceCompletion? completedSources=null)
     {
         this.choices=choices;this.properties=properties;this.normalization=normalization;
         interner=LegacyOwnedMainTextSourceInterner.Prepare(Candidate.RawResult.Owner.SourceDocument);
         selections=LegacyOwnedFreshTextSourceContext.Prepare(interner.Document);
-        WordSourceCollection=LegacyOwnedMainWordSourceCollection.ExportBeforeWordAugmentation(Candidate,token);
+        CompletedSources=completedSources;
+        WordSourceCollection=completedSources?.Sources??LegacyOwnedMainWordSourceCollection.ExportBeforeWordAugmentation(Candidate,token);
     }
     public static LegacyFreshMainTextSourceWrapper Prepare(ReadOnlySpan<byte> resource,
         LegacyFreshMainCompletedFirstCandidate candidate,LegacyCursiveSeparationTable table,
         LegacyNativeTextPublicationData properties,LegacyNativeUnicodeNormalizationData normalization,
         LegacyNativeCircledPayloadData circles,CancellationToken token=default)
         =>new(LegacyFreshMainTextGlyphChoices.Prepare(resource,candidate,table,properties,normalization,circles,token),properties,normalization,token);
+
+    /// <summary>Actual bounded completed TOP source stage to024F30. Reuses
+    /// the owned26N word source vector instead of running its count/fill again.
+    /// This still does not implement0283B0 document acceptance.</summary>
+    public static LegacyFreshMainTextSourceWrapper PrepareCompletedSources(ReadOnlySpan<byte> resource,
+        LegacyFreshMainNoCandidateSourceCompletion actualCompletion,LegacyCursiveSeparationTable table,
+        LegacyNativeTextPublicationData properties,LegacyNativeUnicodeNormalizationData normalization,
+        LegacyNativeCircledPayloadData circles,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(actualCompletion);token.ThrowIfCancellationRequested();
+        if(!actualCompletion.IsTopV68Completed||actualCompletion.IsFaulted)
+            throw new ArgumentException("Successfully completed actual bounded TOP source owner required.");
+        return new(LegacyFreshMainTextGlyphChoices.Prepare(resource,actualCompletion.Candidate,table,properties,normalization,circles,token),
+            properties,normalization,token,actualCompletion);
+    }
 
     public IReadOnlyList<LegacyOwnedMainTextSourceWord> Publish(ReadOnlySpan<byte> recordAllocation40,
         ReadOnlySpan<byte> selectionAllocation4,CancellationToken token=default)
