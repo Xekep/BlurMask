@@ -10,8 +10,11 @@ The [owned English119 candidate stage](legacy-english-owned119-candidates.md)
 now connects actual108 cuts, original chronology, capped/pruned groups and
 219/201 features to both107 networks.124 raw owners and3241 live group
 classifications pass independent raw-resource/geometry/network oracles and
-Managed/NativeAOT.119 cache/masks/ensemble and the word controller remain
-unfinished; this is not an English quality result or app recognizer switch.
+Managed/NativeAOT. The [owned119 cache](legacy-english-owned119-cache.md) now
+adds the source-derived masks, two-family ensemble and all220 integer channels,
+with eight ordered groups affecting3095 actual candidates. Its independent
+oracle verifies every shortlist; confidence and the word controller remain
+unfinished. These are component results, not English quality or app readiness.
 
 The [owned Math2 completion stage](legacy-math2-owned-completed-records.md)
 now retains11 actual EOS records with same-event provenance, common-secondary
@@ -24,9 +27,12 @@ independent checks and fresh NativeAOT. The [owning recording loop](legacy-math2
 the exact maximum-position counter and typed fallback ownership. No positive
 actual fallback was observed;1024 prepared eligibility controls cover it.
 The separate [prepared fresh assignment](legacy-math2-fresh-segment-assignment.md)
-checks11 actual attention maps and512 numeric controls. Initial/final completed
-ordering, loop attention budgeting, request-policy/EF4 correction and final
-formula acceptance are still separate.
+checks11 actual attention maps and512 numeric controls. The [initial owner ordering](legacy-math2-owned-initial-completed-ordering.md)
+preserves67 actual records across41 swaps without premature truncation. The
+[prepared fresh segmentation score](legacy-math2-fresh-segment-score.md) also
+passes4096 numeric controls, including278 separate-rounding discriminators.
+Final completed ordering, loop attention budgeting, request-policy/EF4
+correction and final formula acceptance are still separate.
 
 The [library DOM cache transport](legacy-library-text-dom-transport-cache.md)
 now transfers actual same-source pending C4D and exported BE2 owners with
