@@ -2,7 +2,7 @@
 
 For the pinned three-model Math2 bundle, a successful **cold mode0** preparation sets the active EF1 `need_force_nonobs_positions` byte to **true**. This follows the model metadata and factory packet, rather than the resource mode or a prepared caller flag. The standard Engine service retains the **same EF1 pointer** in EEF `B8`; it does not clone the decoder at that handoff.
 
-This is a static producer proof. It adds no runtime policy factory, search loop, native execution, or acceptance behavior. `Math2Mode0PreparedPolicy` remains an explicitly prepared policy until a separate owning bundle factory consumes this contract.
+This is a static producer proof. It adds no runtime policy factory, search loop, native execution, or acceptance behavior. The explicit `Math2Mode0PreparedPolicy` remains a diagnostic API. A separate [owning cold bundle](legacy-math2-cold-bundle.md) now consumes this contract for the exact validated resource and fresh sessions.
 
 ## Provenance and precedence
 
