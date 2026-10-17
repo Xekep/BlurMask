@@ -39,7 +39,19 @@ starts = array('I', [1])
 for node in range(count):
     starts.append(starts[-1] + bits(children, child_width, node))
 assert starts[-1] == count
-needed = {row['tag'] & 0xffffffff for c in captures for row in c['metadata']}
+#Discover every potential terminal from the actual compact storage, including
+#ones omitted from a malformed metadata list. The source records change when
+#an upstream native branch is restored; a historical fixed count is not an
+#independent completeness oracle.
+needed = set()
+for owner, c in enumerate(captures):
+    assert c['owner'] == owner
+    compact = base64.b64decode(c['compact'], validate=True)
+    assert 0 < c['compactCount'] <= len(compact)//40 and len(compact) % 40 == 0
+    assert 0 <= c['selected'] < c['compactCount']
+    needed.update(u32(compact, i*40) for i in range(c['compactCount'])
+                  if compact[i*40+4] == 1 and u32(compact, i*40) < count)
+terminal_needed = {n for n in needed if bits(labels, width, n) & (1 << (width-1))}
 word_ids, ordinal = {}, 0
 stack = [(starts[0], starts[1])]
 while stack:
@@ -54,14 +66,16 @@ while stack:
         ordinal += 1
     if starts[begin] != starts[begin + 1]:
         stack.append((starts[begin], starts[begin + 1]))
-assert ordinal == 439826 and set(word_ids) == needed
+assert ordinal == 439826 and set(word_ids) == terminal_needed
 categories = bytes.fromhex('090b0104040404040505050a010c040606060505050202020303030500000000')
-checked = 0
+checked = expected_total = 0
 for c in captures:
     compact = base64.b64decode(c['compact'])
     assert c['nativeMetadataMarkers36'] == sum(i32(compact, index * 40 + 36) != -1 for index in range(c['compactCount'])) == 0
     expected_indices = [index for index in range(c['compactCount'])
                         if compact[index * 40 + 4] == 1 and u32(compact, index * 40) in word_ids]
+    assert expected_indices
+    expected_total += len(expected_indices)
     assert [r['index'] for r in c['metadata']] == expected_indices
     for row in c['metadata']:
         actual = compact[row['index'] * 40:row['index'] * 40 + 40]
@@ -75,5 +89,5 @@ for c in captures:
         token[13] = tag >> 42 & 1
         assert token == bytes.fromhex(row['token']), (c['owner'], row['index'], tag, symbol)
         checked += 1
-assert checked == 4811 and captures[-1]['guards'] == 96
+assert checked == expected_total and captures[-1]['guards'] == 96
 print(f'PASS independent rawLK/case metadata16 on {checked} actual compact terminal tags/8 owners; native marker36 events0; prepared consumer scope only')
