@@ -41,11 +41,24 @@ public sealed class LegacyOrdinaryAcousticClassCache
         IReadOnlyList<LegacyInkStroke> normalizedGlyph,ReadOnlySpan<byte> enabledSymbols,
         LegacyOrdinaryAcousticCacheContext context,ReadOnlySpan<LegacyAcousticCachePair> nativePairs,
         CancellationToken cancellationToken=default)
+        =>BuildCore(neuralCosts,normalizedGlyph,enabledSymbols,context,nativePairs,Array.Empty<LegacySymbolMaskKnowledgeGroup>(),cancellationToken);
+
+    internal LegacyOrdinaryAcousticClassCacheResult BuildWithGroups(ReadOnlySpan<int> neuralCosts,
+        IReadOnlyList<LegacyInkStroke> normalizedGlyph,ReadOnlySpan<byte> enabledSymbols,
+        LegacyOrdinaryAcousticCacheContext context,ReadOnlySpan<LegacyAcousticCachePair> nativePairs,
+        IReadOnlyList<LegacySymbolMaskKnowledgeGroup> orderedGroups,CancellationToken cancellationToken=default)
+        =>BuildCore(neuralCosts,normalizedGlyph,enabledSymbols,context,nativePairs,orderedGroups,cancellationToken);
+
+    private LegacyOrdinaryAcousticClassCacheResult BuildCore(ReadOnlySpan<int> neuralCosts,
+        IReadOnlyList<LegacyInkStroke> normalizedGlyph,ReadOnlySpan<byte> enabledSymbols,
+        LegacyOrdinaryAcousticCacheContext context,ReadOnlySpan<LegacyAcousticCachePair> nativePairs,
+        IReadOnlyList<LegacySymbolMaskKnowledgeGroup> orderedGroups,CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(normalizedGlyph);ArgumentNullException.ThrowIfNull(context);cancellationToken.ThrowIfCancellationRequested();
         if(neuralCosts.Length<1||neuralCosts.Length>alphabet.LabelCount||enabledSymbols.Length!=alphabet.LabelCount||normalizedGlyph.Count is <1 or >256||nativePairs.Length>4096||context.ScopePenaltyLabels.Length>4096)
             throw new ArgumentException("Matching bounded neural costs, alphabet mask, glyph and explicit pair list required.");
         foreach(byte flag in enabledSymbols)if(flag>1)throw new ArgumentException("Symbol mask requires0/1.");
+        LegacyAcousticPositiveGroupSmoothing.Validate(orderedGroups,alphabet.LabelCount,cancellationToken);
         foreach(int cost in neuralCosts)if(cost is <0 or >Impossible)throw new ArgumentException("Expected raw nonnegative ensemble costs.");
         int pointCount=0;foreach(var stroke in normalizedGlyph){ArgumentNullException.ThrowIfNull(stroke);pointCount+=stroke.Points.Length;if(stroke.Points.Length==0||pointCount>4096)throw new ArgumentException("Empty/oversized normalized glyph.");}
         var costs=Enumerable.Repeat(Impossible,CacheWidth).ToArray();neuralCosts.CopyTo(costs);
@@ -117,6 +130,7 @@ public sealed class LegacyOrdinaryAcousticClassCache
             }
             if(context.ShareRelatedFormMinimum)
                 throw new NotSupportedException("Native flagged related-form minimum requires its explicit derived relationship policy; it is not inferred here.");
+            LegacyAcousticPositiveGroupSmoothing.ApplyInPlace(costs,enabledSymbolsCopy,orderedGroups,cancellationToken);
         }
         if(labels.TryGetValue("\'",out ushort apostrophe))costs[alphabet.LabelCount+1]=costs[apostrophe];
         if(labels.TryGetValue("\"",out ushort quote))costs[alphabet.LabelCount+2]=costs[quote];
