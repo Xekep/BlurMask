@@ -766,8 +766,14 @@ jobs:
           python tools/LegacyPreparedGlyphRewrite.Probe/audit_output.py models .artifacts/legacy-prepared-glyph-rewrite-managed.json
           dotnet run --project tools/LegacySource247Wire.Probe -c Release -- models .artifacts/legacy-source247-wire-managed.json
           python tools/LegacySource247Wire.Probe/audit_output.py models .artifacts/legacy-source247-wire-managed.json
+          python tools/LegacyEnglishLiteFirstPreprocessing.Probe/reference_controls.py .artifacts/legacy-en-short-controls.json
+          python tools/LegacyEnglishFirstSlant.Probe/reference_controls.py .artifacts/legacy-en-short-controls.json .artifacts/legacy-en-slant-controls.json
           dotnet run --project tools/LegacyFirstAcoustic119Wire.Probe -c Release -- models .artifacts/legacy-first-acoustic119-wire-managed.json
           python tools/LegacyFirstAcoustic119Wire.Probe/audit_output.py models .artifacts/legacy-first-acoustic119-wire-managed.json
+          dotnet run --project tools/LegacyEnglishFirstSlant.Probe -c Release -- models .artifacts/legacy-en-slant-controls.json .artifacts/legacy-en-slant-managed.json
+          python tools/LegacyEnglishFirstSlant.Probe/audit_output.py models .artifacts/legacy-en-slant-managed.json
+          dotnet run --project tools/LegacyEnglishLiteFirstPreprocessing.Probe -c Release -- models .artifacts/legacy-en-short-controls.json .artifacts/legacy-en-short-managed.json
+          python tools/LegacyEnglishLiteFirstPreprocessing.Probe/audit_output.py models .artifacts/legacy-en-short-managed.json
           dotnet run --project tools/LegacyPreparedNetwork107.Probe -c Release -- models models/ru-RU/legacy-engine-profile.json .artifacts/legacy-prepared-network107-managed.json
           python tools/LegacyPreparedNetwork107.Probe/audit_output.py models .artifacts/legacy-prepared-network107-managed.json
           dotnet run --project tools/LegacyMainWordRanking.Probe -c Release -- .artifacts/legacy-main-word-ranking-managed.json
@@ -1147,6 +1153,10 @@ jobs:
       - name: Verify raw line features, cursive geometry and word totals as Native AOT
         shell: pwsh
         run: |
+          python tools/LegacyEnglishLiteFirstPreprocessing.Probe/reference_controls.py .artifacts/legacy-en-short-controls.json
+          if ($LASTEXITCODE -ne 0) { throw 'English preprocessing control generation failed' }
+          python tools/LegacyEnglishFirstSlant.Probe/reference_controls.py .artifacts/legacy-en-short-controls.json .artifacts/legacy-en-slant-controls.json
+          if ($LASTEXITCODE -ne 0) { throw 'English preprocessing control generation failed' }
           $cases = @(
             @{ Name = 'LegacyLinePairFeatures'; Args = @('.artifacts/line-pair-controls.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res') },
             @{ Name = 'LegacyCursiveGeometry'; Args = @('.artifacts/cursive-geometry-controls.json') },
@@ -1412,6 +1422,8 @@ jobs:
             @{ Name = 'LegacyPreparedGlyphRewrite'; Args = @('models', '.artifacts/legacy-prepared-glyph-rewrite-native.json') },
             @{ Name = 'LegacySource247Wire'; Args = @('models', '.artifacts/legacy-source247-wire-native.json') },
             @{ Name = 'LegacyFirstAcoustic119Wire'; Args = @('models', '.artifacts/legacy-first-acoustic119-wire-native.json') },
+            @{ Name = 'LegacyEnglishFirstSlant'; Args = @('models', '.artifacts/legacy-en-slant-controls.json', '.artifacts/legacy-en-slant-native.json') },
+            @{ Name = 'LegacyEnglishLiteFirstPreprocessing'; Args = @('models', '.artifacts/legacy-en-short-controls.json', '.artifacts/legacy-en-short-native.json') },
             @{ Name = 'LegacyPreparedNetwork107'; Args = @('models', 'models/ru-RU/legacy-engine-profile.json', '.artifacts/legacy-prepared-network107-native.json') },
             @{ Name = 'LegacyMainWordRanking'; Args = @('.artifacts/legacy-main-word-ranking-native.json') },
             @{ Name = 'LegacyMainGlyphChainCleanup'; Args = @('.artifacts/legacy-main-glyph-chain-cleanup-native.json') },
@@ -2014,6 +2026,14 @@ jobs:
             if ($name -eq 'LegacyFirstAcoustic119Wire') {
               python tools/LegacyFirstAcoustic119Wire.Probe/audit_output.py models .artifacts/legacy-first-acoustic119-wire-native.json
               if ($LASTEXITCODE -ne 0) { throw 'LegacyFirstAcoustic119Wire independent audit failed' }
+            }
+            if ($name -eq 'LegacyEnglishFirstSlant') {
+              python tools/LegacyEnglishFirstSlant.Probe/audit_output.py models .artifacts/legacy-en-slant-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyEnglishFirstSlant independent audit failed' }
+            }
+            if ($name -eq 'LegacyEnglishLiteFirstPreprocessing') {
+              python tools/LegacyEnglishLiteFirstPreprocessing.Probe/audit_output.py models .artifacts/legacy-en-short-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyEnglishLiteFirstPreprocessing independent audit failed' }
             }
             if ($name -eq 'LegacyPreparedNetwork107') {
               python tools/LegacyPreparedNetwork107.Probe/audit_output.py models .artifacts/legacy-prepared-network107-native.json
@@ -2755,6 +2775,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native cold bundle ownership failed.' }
           python tools/LegacyMathColdBundle.Probe/audit_output.py .artifacts/math-cold-native.json models/math2/math2-unwrapped.res
           if ($LASTEXITCODE -ne 0) { throw 'Native cold bundle oracle failed.' }
+          dotnet run --project tools/LegacyMathPrefixState.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-prefix-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed prefix generation failed.' }
+          python tools/LegacyMathPrefixState.Probe/audit_output.py .artifacts/math-prefix-managed.json models/math2/math2-unwrapped.res
+          if ($LASTEXITCODE -ne 0) { throw 'Managed prefix ownership oracle failed.' }
+          dotnet publish tools/LegacyMathPrefixState.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-prefix-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Prefix ownership probe publish failed.' }
+          $prefix = if ($IsWindows) { '.artifacts/math-prefix-probe/LegacyMathPrefixState.Probe.exe' } else { '.artifacts/math-prefix-probe/LegacyMathPrefixState.Probe' }
+          & $prefix .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-prefix-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native prefix generation failed.' }
+          python tools/LegacyMathPrefixState.Probe/audit_output.py .artifacts/math-prefix-native.json models/math2/math2-unwrapped.res
+          if ($LASTEXITCODE -ne 0) { throw 'Native prefix ownership oracle failed.' }
           dotnet publish tools/InkRecognition.RawContent.Probe/InkRecognition.RawContent.Probe.csproj -c Release -r $rid -p:PublishAot=true -o .artifacts/raw-content-probe
           if ($LASTEXITCODE -ne 0) { throw 'Raw-content probe publish failed.' }
           $raw = if ($IsWindows) { '.artifacts/raw-content-probe/InkRecognition.RawContent.Probe.exe' } else { '.artifacts/raw-content-probe/InkRecognition.RawContent.Probe' }
