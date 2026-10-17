@@ -340,3 +340,23 @@ acceptance are separate stages; the roadmap itself does not implement them.
 These additions do not change the recorded Russian4/9 exact diagnostic result,
 the experimental setting's scope or the released version. They do not establish
 that Russian cursive, automatic text/formula choice or the entire engine is ready.
+
+
+The [prepared107 evaluator](legacy-prepared-network107-evaluation.md) now executes
+all six retained English FIRST networks over complete prepared vectors, including
+the source AL's mixed sigmoid/EXP class180.192 full vectors,227 guards and163865
+rounding/threshold controls match independent oracles and Managed/Native AOT.
+Its activations and input vectors remain prepared. The real English sampler,
+24C stage, feature construction and source-driver lifecycle are not joined.
+The special-class double exponential is an explicit portable adaptation.
+
+A new [owning cold Math2 entry](legacy-math2-cold-bundle.md) binds exact raw
+resource, graph and vocabulary identities and privately derives the force flag.
+It creates fresh owned tensor states instead of taking a force boolean at this
+entry. The older prepared-policy API remains diagnostic. This closes the cold
+force-policy join only; it does not implement the complete search or change the app.
+
+The [completed168 record ownership audit](legacy-math2-completed-record-ownership.md)
+now establishes constructor fields, untouched padding, three U16 buffer lanes,
+separate type3E ownership, and partial failure behavior. No full completed-record
+runtime or successful final formula follows from this static contract.
