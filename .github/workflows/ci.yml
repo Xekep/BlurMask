@@ -2737,6 +2737,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native mode0 tensor lifecycle failed.' }
           python tools/LegacyMathTensorState.Probe/audit_output.py .artifacts/math-mode0-native.json models/math2/math2-unwrapped.res
           if ($LASTEXITCODE -ne 0) { throw 'Native mode0 tensor oracle failed.' }
+          dotnet run --project tools/LegacyMathColdBundle.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-cold-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed cold bundle ownership failed.' }
+          python tools/LegacyMathColdBundle.Probe/audit_output.py .artifacts/math-cold-managed.json models/math2/math2-unwrapped.res
+          if ($LASTEXITCODE -ne 0) { throw 'Managed cold bundle oracle failed.' }
+          dotnet publish tools/LegacyMathColdBundle.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-cold-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Cold bundle probe publish failed.' }
+          $cold = if ($IsWindows) { '.artifacts/math-cold-probe/LegacyMathColdBundle.Probe.exe' } else { '.artifacts/math-cold-probe/LegacyMathColdBundle.Probe' }
+          & $cold .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-cold-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native cold bundle ownership failed.' }
+          python tools/LegacyMathColdBundle.Probe/audit_output.py .artifacts/math-cold-native.json models/math2/math2-unwrapped.res
+          if ($LASTEXITCODE -ne 0) { throw 'Native cold bundle oracle failed.' }
           dotnet publish tools/InkRecognition.RawContent.Probe/InkRecognition.RawContent.Probe.csproj -c Release -r $rid -p:PublishAot=true -o .artifacts/raw-content-probe
           if ($LASTEXITCODE -ne 0) { throw 'Raw-content probe publish failed.' }
           $raw = if ($IsWindows) { '.artifacts/raw-content-probe/InkRecognition.RawContent.Probe.exe' } else { '.artifacts/raw-content-probe/InkRecognition.RawContent.Probe' }
