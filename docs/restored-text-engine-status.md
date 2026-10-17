@@ -275,3 +275,11 @@ cross-platform cryptographic bytes; native process-address/time seeding is an
 explicit portability adaptation. Numeric sequences and live entropy-derived
 identifiers are independently checked. This does not create the final DOM or
 execute BE2 edit-result transport.
+
+The [versioned source layout](legacy-source247-versioned-wire-layout.md)
+retains complete247/10D and110 parent fields and delegated child envelopes
+from all five actual RU/EN resources. Known106/108 samplers are fully read for
+the RU and English cursive-lite resources; positive134/1D0 payloads are explicit
+refusals.669 guards and an independent raw-wire oracle preserve old RU readers.
+This does not deserialize English119 acoustic weights or enable an English
+main recognizer; delegated child bounds are not executable child models.

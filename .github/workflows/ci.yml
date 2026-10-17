@@ -759,6 +759,8 @@ jobs:
           python tools/LegacyContextualQuoteRules.Probe/audit_output.py .artifacts/legacy-contextual-quotes-managed.json
           dotnet run --project tools/LegacyPreparedGlyphRewrite.Probe -c Release -- models .artifacts/legacy-prepared-glyph-rewrite-managed.json
           python tools/LegacyPreparedGlyphRewrite.Probe/audit_output.py models .artifacts/legacy-prepared-glyph-rewrite-managed.json
+          dotnet run --project tools/LegacySource247Wire.Probe -c Release -- models .artifacts/legacy-source247-wire-managed.json
+          python tools/LegacySource247Wire.Probe/audit_output.py models .artifacts/legacy-source247-wire-managed.json
           dotnet run --project tools/LegacyMainWordRanking.Probe -c Release -- .artifacts/legacy-main-word-ranking-managed.json
           python tools/LegacyMainWordRanking.Probe/audit_output.py .artifacts/legacy-main-word-ranking-managed.json
           dotnet run --project tools/LegacyMainGlyphChainCleanup.Probe -c Release -- .artifacts/legacy-main-glyph-chain-cleanup-managed.json
@@ -1397,6 +1399,7 @@ jobs:
             @{ Name = 'LegacyTextResultIdentifier'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-text-result-identifier-controls.json', '.artifacts/legacy-text-result-identifier-native.json') },
             @{ Name = 'LegacyContextualQuoteRules'; Args = @('.artifacts/legacy-contextual-quotes-native.json') },
             @{ Name = 'LegacyPreparedGlyphRewrite'; Args = @('models', '.artifacts/legacy-prepared-glyph-rewrite-native.json') },
+            @{ Name = 'LegacySource247Wire'; Args = @('models', '.artifacts/legacy-source247-wire-native.json') },
             @{ Name = 'LegacyMainWordRanking'; Args = @('.artifacts/legacy-main-word-ranking-native.json') },
             @{ Name = 'LegacyMainGlyphChainCleanup'; Args = @('.artifacts/legacy-main-glyph-chain-cleanup-native.json') },
             @{ Name = 'LegacyMainWordAugmentationScan'; Args = @('.artifacts/legacy-main-word-augmentation-scan-native.json') },
@@ -1982,6 +1985,10 @@ jobs:
             if ($name -eq 'LegacyPreparedGlyphRewrite') {
               python tools/LegacyPreparedGlyphRewrite.Probe/audit_output.py models .artifacts/legacy-prepared-glyph-rewrite-native.json
               if ($LASTEXITCODE -ne 0) { throw 'LegacyPreparedGlyphRewrite independent audit failed' }
+            }
+            if ($name -eq 'LegacySource247Wire') {
+              python tools/LegacySource247Wire.Probe/audit_output.py models .artifacts/legacy-source247-wire-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacySource247Wire independent audit failed' }
             }
             if ($name -eq 'LegacyMainWordRanking') {
               python tools/LegacyMainWordRanking.Probe/audit_output.py .artifacts/legacy-main-word-ranking-native.json
