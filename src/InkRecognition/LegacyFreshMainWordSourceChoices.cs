@@ -25,6 +25,7 @@ public sealed class LegacyFreshMainWordSourceChoices : IDisposable
     public IReadOnlyList<LegacyOwnedMainSpanWordView> WordViews {get;}
     internal LegacyOwnedFreshTextSourceContext SelectionContext=>shared.Selections;
     public LegacyFreshTextFieldInputContext? SelectedInputContext=>shared.Selections.SelectedInputContext;
+    public LegacyFreshMainTextDocumentSeed? DocumentSeed=>shared.DocumentSeed;
     public long NextSelectionId=>shared.Selections.NextSelectionId;
     public IReadOnlyList<LegacyOwnedFreshTextSelection> CopyPendingSelections()=>shared.Selections.CopyPendingSelections();
 

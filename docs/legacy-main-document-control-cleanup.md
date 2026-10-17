@@ -65,10 +65,13 @@ contains raw ink and no caller text.
   owner at `param3+10`, then copies it to the new result at028763. Near02980E
   a non-minus-one value requests the actual C20.V128 owner and its range
   vector. The new2DA constructor's minus-one default alone proves nothing
-  about this live copied value. An empty actual transform vector takes the
- 037E80 cleanup branch; otherwise Document serviceDAF.V30 processes it.
-  The native call has its final low-byte flag false. A genuine typed prior
-  source/transform producer is required before joining this stage.
+  about this live copied value. Empty retained source ranges or documentD8=0
+  take the cleanup branch; otherwise Document serviceDAF.V30 exports a new
+  vector. The native call has its final low-byte flag false. The bounded
+  [selected INPUT seed and transform handoff](legacy-main-document-input-transforms.md)
+  now joins the genuine private fresh textField owner, including failed-export
+  swap semantics. The old OriginalID route and imported/prior results do not
+  obtain that seed.
 * **026EF0 input spans:**05F200 calls DAF.V38 before invoking0283B0. The actual
   Document service is descriptor1ED7E0, table1ED790, V38=030FB0. It walks the
   document's `input`/`span` nodes, preserving their order. Each32-byte row
@@ -77,12 +80,19 @@ contains raw ink and no caller text.
   the actual C20.V128 owner and copies its source ranges with byte1=0.
   `LegacyOwnedRawInkDocument` currently has immutable original ink objects and
   point counts, not this Document node tree or its source-ID registry. It
-  cannot justify an empty span vector.026EF0's count-zero return is therefore
-  still unavailable as an owning fresh shortcut.
+  cannot by itself justify an empty span vector. The selected INPUT seed now
+  retains DAF32 output from the actual private addItems INPUT before WORD
+  publication: that input has no span children. Only this proved fresh branch
+  reaches026EF0's count-zero return. Imported or setInputSpans ownership is
+  still unsupported.
 * **Prior/cache and transaction replacement:**0283B0 next conditionally calls
  027B60 or02BBF0/02BE60/02D440 from the actual prior result and its D8 count.
-  Changed C4D transaction ownership invokes its V10 replacement. These require
-  their actual owners; no null pointer is inferred from raw stroke input.
+  These require their actual owners; no null pointer is inferred from raw
+  stroke input. In the selected INPUT seed branch, its actual initialD8=0
+  bypasses nonempty-prior processing. The later0298AA comparison is between
+  saved and current pending counters, not C4D pointers. C4D.V10=07AAF0 queues
+  operation7 with old/new counters; it does not itself apply the selections or
+  replace the transaction. That ordered counter handoff remains separate.
 * **Final2E7 handoff:**Text descriptor276C20/table276C68 selects0658E0. Null
   prior result or priorD8=0 reaches061510 before BE2.V50. The nonempty-prior
   branch additionally uses061820/062E60/0633E0/064BB0/064D40/065650. This is

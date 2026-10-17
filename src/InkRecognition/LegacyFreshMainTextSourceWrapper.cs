@@ -255,6 +255,7 @@ internal sealed class LegacyMainSharedTextSourceState : IDisposable
     internal LegacyOwnedMainTextSourceInterner Characters{get;}
     internal LegacyOwnedMainTextSourceInterner Words{get;}
     internal LegacyOwnedFreshTextSourceContext Selections{get;}
+    internal LegacyFreshMainTextDocumentSeed? DocumentSeed{get;}
     internal Dictionary<int,LegacyOwnedMainTextSourcePayload> Payloads{get;}=[];
     internal LegacyMainSharedTextSourceState(LegacyOwnedRawInkDocument document,LegacyFreshMainPlainResultOwnership top,
         LegacyFreshTextFieldInputContext? selectedInput=null)
@@ -265,6 +266,9 @@ internal sealed class LegacyMainSharedTextSourceState : IDisposable
         Words=LegacyOwnedMainTextSourceInterner.Prepare(document);
         Selections=selectedInput is null?LegacyOwnedFreshTextSourceContext.Prepare(document):
             LegacyOwnedFreshTextSourceContext.PrepareSelectedInput(selectedInput);
+        //NEW2DA owns fresh108/110 and this exact new3E before0283B0 starts
+        //publishing WORD/CHAR payloads. The old OriginalID route has no seed.
+        if(selectedInput is not null)DocumentSeed=new(this,selectedInput);
     }
     public void Dispose()=>Strings.Dispose();
 }
