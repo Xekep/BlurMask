@@ -31,6 +31,12 @@ var words = bundle.CreateIntegerWordDecoder(runtimeScale: 1);
 // history/category flags, additional path costs, heap budget and beam width.
 ```
 
+`LegacyFreshMainRecognitionContext.PrepareGlobal` also exposes a bounded raw
+stroke-to-WORD pipeline with shared immutable models and separate invocation
+state. Its raw WORD results are diagnostic, not accepted replacement text. The
+small nine-track Russian diagnostic remains4/9 exact; see the repository status
+report for tested boundaries and explicit refusals.
+
 Russian connected handwriting is still experimental. Automatic continuous cuts,
 complete group search, native context/default policies and a validated end-to-end
 GUI recognizer remain unfinished. Prepared geometry APIs do not infer missing
