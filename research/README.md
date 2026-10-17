@@ -39,3 +39,11 @@ remain analysis hypotheses that must be checked against native instructions.
 The byte-vector reserve/append-zero helpers040130/0401B0 are preserved at
 `myscript/output/Math2MaskVectorHelpers/MyScriptDocument.dll/` with references
 and SHA-256 provenance for the correction-mask initialization analysis.
+
+The readonly nonempty-source correction and matching helpers040CD0/0409F0,
+0403E0/040670 and040270 are preserved under
+`myscript/output/math2-existing-source-correction-20261018/`,
+`myscript/output/math2-existing-source-matching-complete-20261018/` and
+`myscript/output/math2-existing-source-column-20261018/`. Each contains the
+complete focused export, references and root SHA-256 provenance. These local
+analysis files remain excluded from Git and releases.
