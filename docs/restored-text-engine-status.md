@@ -13,8 +13,12 @@ classifications pass independent raw-resource/geometry/network oracles and
 Managed/NativeAOT. The [owned119 cache](legacy-english-owned119-cache.md) now
 adds the source-derived masks, two-family ensemble and all220 integer channels,
 with eight ordered groups affecting3095 actual candidates. Its independent
-oracle verifies every shortlist; confidence and the word controller remain
-unfinished. These are component results, not English quality or app readiness.
+oracle verifies every shortlist. The [owned119 glyph confidence](legacy-english-owned119-confidence.md)
+now uses the same cached two-network outputs, source-backed primitive
+probabilities and raw label mappings without extra inference.32152 vector
+values/32769 scalar controls pass independent checks and NativeAOT. Word
+confidence and the word controller remain unfinished. These are component
+results, not English quality or app readiness.
 
 The [owned Math2 completion stage](legacy-math2-owned-completed-records.md)
 now retains11 actual EOS records with same-event provenance, common-secondary
@@ -31,8 +35,16 @@ checks11 actual attention maps and512 numeric controls. The [initial owner order
 preserves67 actual records across41 swaps without premature truncation. The
 [prepared fresh segmentation score](legacy-math2-fresh-segment-score.md) also
 passes4096 numeric controls, including278 separate-rounding discriminators.
-Final completed ordering, loop attention budgeting, request-policy/EF4
-correction and final formula acceptance are still separate.
+The [shared event provenance](legacy-math2-shared-completed-provenance.md)
+also preserves all67 events while removing17480 duplicated data-element bytes
+on the fixture; this is not a process-memory measurement. Separate
+[masked score](legacy-math2-masked-segment-score.md) and
+[separator compaction](legacy-math2-separator-compaction.md) kernels pass4096
+and6143 prepared controls with independent oracles and fresh NativeAOT.
+The [cold request proof](legacy-math2-ef4-control-flow.md) establishes that a
+fresh, unmodified EEB request selects the nonzero correction branch. Prepared
+byte-zero assignment is not a substitute. Final completed ordering, loop
+attention budgeting, remaining EF4 correction and final acceptance are separate.
 
 The [library DOM cache transport](legacy-library-text-dom-transport-cache.md)
 now transfers actual same-source pending C4D and exported BE2 owners with
@@ -40,11 +52,15 @@ failure-safe receipts.4 actual sources/24 commands/3 rows/51 guards pass
 independent checks and Managed/NativeAOT. This is explicit library transport,
 not native SDK request/history acceptance. The registered text worker now has
 a [proven request/context chain](legacy-registered-text-request-dispatch.md)
-and [fresh constructor/import contract](legacy-text-processing-context-preparation.md);
-the corresponding runtime preparation remains unfinished. Concurrent target
+and [fresh constructor/import contract](legacy-text-processing-context-preparation.md).
+The [owning pre-recognition context](legacy-library-text-processing-context.md)
+now creates2C1/result2DA/strings3E and the selected input-only DOM before a
+document seed.132 imports/40 failure prefixes/1348 guards pass independent
+resource and DOM oracles and NativeAOT. The complete recognition-to-publication
+adoption remains unfinished. Concurrent target
 Build/Export versus Apply is serialized and checked with deterministic barriers.
 
-The exact committed app at5919419 builds with0 warnings and passes headless
+The exact committed app at14b97c9 builds with0 warnings and passes headless
 `--ai-pen-test`. Russian diagnostics remain4/9 exact with16/33 character edits;
 no new release or full-engine readiness is asserted.
 
