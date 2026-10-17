@@ -60,6 +60,29 @@ public sealed class LegacyFreshMainGlobalGlyphAssociationSession
             if(!callbackSucceeded){stopped=true;return;}next++;current=null;
         }
     }
+    internal void ValidateCurrent(LegacyFreshMainGlobalAssociatedGlyphFlush association,CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(association);token.ThrowIfCancellationRequested();
+        lock(gate)
+        {
+            if(stopped||!ReferenceEquals(current,association))throw new InvalidOperationException("Current live global association required.");
+            Plan.BacktrackRows.Materialization.TerminalResult.PassResult.ValidateResultQueryLease(token);
+        }
+    }
+    internal void CompleteExecuted(LegacyFreshMainGlobalGlyphExecutionResult result,CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(result);
+        if(!ReferenceEquals(result.ExecutionSession.Associations,this))throw new ArgumentException("Actual executor result belongs to another association session.");
+        CompleteCurrent(result.Association,result.Succeeded,token);
+    }
+    internal void AbortExecution(LegacyFreshMainGlobalAssociatedGlyphFlush? association)
+    {
+        lock(gate)
+        {
+            if(association is not null&&!ReferenceEquals(current,association))throw new ArgumentException("Cannot abort a foreign global flush.");
+            stopped=true;
+        }
+    }
 }
 
 public sealed class LegacyFreshMainGlobalAssociatedGlyphFlush
