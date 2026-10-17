@@ -71,4 +71,8 @@ public sealed class LegacyOwnedEnglishLiteFullPreprocessing
     public int[] CopyPointKeys200()=>keys.ToArray();
     public int[] CopyPhysicalPointCounts()=>counts.ToArray();
     public LegacySourcePointIdentity ResolvePreparedPoint(int physical,int point)=>chronology.Resolve(physical,point);
+    // Same-source sampler replacement must retain the original metadata owner;
+    // recreating an equal raw source would lose this lifecycle identity.
+    internal LegacyOrdinarySourceInk OriginalSource=>original;
+    internal LegacySourcePointChronology PreparedChronology=>chronology;
 }

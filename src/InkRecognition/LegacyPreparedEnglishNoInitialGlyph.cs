@@ -26,6 +26,18 @@ public sealed class LegacyPreparedEnglishNoInitialGlyph
     public static LegacyPreparedEnglishNoInitialGlyph Prepare(LegacyOwnedEnglishLiteFullPreprocessing owner,
         ReadOnlySpan<LegacyInkRange> preparedRanges,CancellationToken token=default)
     {
+        ArgumentNullException.ThrowIfNull(owner);token.ThrowIfCancellationRequested();
+        return PrepareCore(owner,preparedRanges,owner.CopyPreparedStrokes(),owner.CopyPhysicalPointCounts(),owner.ResolvePreparedPoint,token);
+    }
+
+    internal static LegacyPreparedEnglishNoInitialGlyph PrepareOwnedCuts(LegacyOwnedEnglishLiteFullPreprocessing owner,
+        LegacyCursiveCutResult cuts,LegacySourcePointChronology chronology,ReadOnlySpan<LegacyInkRange> ranges,CancellationToken token)
+        =>PrepareCore(owner,ranges,cuts.PreparedInk.ToStrokes(),cuts.PreparedInk.StrokePointCounts.ToArray(),chronology.Resolve,token);
+
+    private static LegacyPreparedEnglishNoInitialGlyph PrepareCore(LegacyOwnedEnglishLiteFullPreprocessing owner,
+        ReadOnlySpan<LegacyInkRange> preparedRanges,IReadOnlyList<InkStroke> physical,int[] counts,
+        Func<int,int,LegacySourcePointIdentity> resolve,CancellationToken token)
+    {
         ArgumentNullException.ThrowIfNull(owner);token.ThrowIfCancellationRequested();var model=owner.Model;
         byte[] Field(string scope,string name)=>model.Fields.Single(f=>f.Owner==scope&&f.Destination==name).CopyBytes();
         ushort U16(string scope,string name)=>BinaryPrimitives.ReadUInt16LittleEndian(Field(scope,name));
@@ -40,14 +52,14 @@ public sealed class LegacyPreparedEnglishNoInitialGlyph
             throw new NotSupportedException("Actual no-initial219/201 network slots required.");
         //Portable prepared-range cap. It is not a manufactured native graph.
         if(preparedRanges.Length is <1 or >15)throw new ArgumentException("Prepared glyph requires1..15 ranges.",nameof(preparedRanges));
-        var stored=preparedRanges.ToArray();var physical=owner.CopyPreparedStrokes();int[] counts=owner.CopyPhysicalPointCounts();
+        var stored=preparedRanges.ToArray();
         var keys=new LegacySourcePointKey[stored.Length];float minimumX=float.MaxValue;
         for(int i=0;i<stored.Length;i++)
         {
             var r=stored[i];
             if((uint)r.StrokeIndex>=(uint)counts.Length||r.StartPoint<0||r.EndPointExclusive<=r.StartPoint||r.EndPointExclusive>counts[r.StrokeIndex])
                 throw new ArgumentException("Range is outside this preprocessing owner.",nameof(preparedRanges));
-            keys[i]=owner.ResolvePreparedPoint(r.StrokeIndex,r.StartPoint).Key;
+            keys[i]=resolve(r.StrokeIndex,r.StartPoint).Key;
             for(int p=r.StartPoint;p<r.EndPointExclusive;p++){token.ThrowIfCancellationRequested();minimumX=MathF.Min(minimumX,physical[r.StrokeIndex].Points[p].X);}
         }
         //1B7F70 consumes the STORED vector.1B4E40's source-key quicksort is a
