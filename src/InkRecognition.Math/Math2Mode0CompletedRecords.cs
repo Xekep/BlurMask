@@ -143,6 +143,7 @@ internal sealed partial class Math2Mode0PrefixCandidates
 
     internal void ValidateCompletedConsumption()
     {
+        ValidateFallbackConsumption();
         if (completedLeases.Values.Any(lease => !lease.IsConsumed))
             throw new InvalidOperationException("Captured EOS events must be recorded before selection.");
     }
@@ -232,6 +233,7 @@ internal sealed partial class Math2Mode0CompletedEventLease
             target.CheckOwner(step.PrefixOwner);
             if (consumed) throw new InvalidOperationException("EOS event was already consumed.");
             step.BindCompletedCandidates(candidates);
+            ValidateFallbackConsumer(target);
             consumed = true;
             try { action(); }
             catch { step.PrefixOwner.FailCompletedRecording(); throw; }
@@ -289,7 +291,7 @@ internal sealed record Math2Mode0CompletedRecordSnapshot(float Score, long Front
 
 /// <summary>Ordinary037430 logical record owner. No diagnostics, optional
 /// sidecars, constraint model, ABI pointer/padding capture or final search.</summary>
-internal sealed class Math2Mode0CompletedRecords : IDisposable
+internal sealed partial class Math2Mode0CompletedRecords : IDisposable
 {
     private sealed class Record
     {
@@ -317,7 +319,12 @@ internal sealed class Math2Mode0CompletedRecords : IDisposable
     internal bool IsFailed => owner.WithCompletedStorage(() => failed);
     // Provenance is out of band, not a new native168 field or saved attention tensor.
     internal Math2Mode0CompletedEventLease ReadSourceEvent(int ordinal)
-        => owner.WithCompletedStorage(() => records[ordinal].Source);
+        => owner.WithCompletedStorage(() =>
+        {
+            var source = records[ordinal].Source;
+            if (source.IsFallback) throw new InvalidOperationException("This record has a typed last-position fallback source.");
+            return source;
+        });
     internal Math2Mode0CompletedRecordSnapshot[] CopyRecords()
         => owner.WithCompletedStorage(() => records.Select(record => record.Copy()).ToArray());
     internal void CheckOwner(Math2Mode0PrefixContext candidate)
@@ -344,9 +351,11 @@ internal sealed class Math2Mode0CompletedRecords : IDisposable
         AppendCore(lease, observer, token);
     }
     private void AppendCore(Math2Mode0CompletedEventLease lease,
-        Action<Math2Mode0CompletedStage, int>? observer, CancellationToken token)
+        Action<Math2Mode0CompletedStage, int>? observer, CancellationToken token, bool allowFallback = false)
     {
         ArgumentNullException.ThrowIfNull(lease);
+        if (lease.IsFallback != allowFallback)
+            throw new ArgumentException("Use the matching ordinary-EOS or typed fallback append entry.");
         lease.Consume(this, () =>
         {
             Record? counted = null;

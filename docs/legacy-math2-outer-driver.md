@@ -26,7 +26,11 @@ first-EOS stopping or an unproven score-based early exit.
 incremented position equals the maximum, and the completed vector was empty
 at the entry test. It scans ranks0..width-1 of the already re-sorted pool.
 For each rank it requires cost different from FMAX and completedCount<width,
-then looks up that row's old parent at raw48+28.
+then looks up that row's old parent at raw48+28. There is a distinct unordered
+path: `0393E4 JP 0393EC` precedes the equality skip.
+NaN therefore enters the parent/prefix checks; only ordered equality with finite
+FMAX skips the row. This prepared IEEE case does not assert that the supported
+actual finite-cost producer emits NaN.
 
 As with ordinary EOS, eligibility requires **any observable symbol in the old
 primary prefix**. The current selected label alone cannot make an empty old
