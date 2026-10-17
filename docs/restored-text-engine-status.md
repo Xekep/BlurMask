@@ -19,14 +19,14 @@ The reusable library now has these checked stages:
 | First-stage inference | Same-owner NN, graph, selected single or multiple plain words; unsupported traits/terminal columns remain explicit refusals. |
 | Main preprocessing | Actual selected first TEXT to source720,24B/24A geometry, deskew and smoothing.24A is joined; a genuine positive empty-first fixture/remaining temporal branches are not established. |
 | Descriptor cut source | Sequential cuts, cross-source construction/pruning, compact traversal and raw source projection are checked. Global context, four-family NN/cache, dictionary source epochs, stored-range group geometry and line-aware transition caches are joined. The shared global controller now joins logical word rows, terminal selection, compact publication and numeric glyph backtracking; global glyph chains and plain WORD publication are joined; final document publication remains separate. |
-| Global main numeric result | Same owned graph/context/NN/cache and source epochs through first/later language dispatch, exact primary recombination, terminal selection, ordinary compact207CB0 publication and numeric21FFD0 rows. The eight-input compact/backtrack checks preserve cached NN counts. Actual213C00 soft-hyphen allocations and bounded kind7 continuations are joined. Intermediate global publication beyond120 nodes remains separate. |
+| Global main numeric result | Same owned graph/context/NN/cache and source epochs through first/later language dispatch, exact primary recombination, terminal selection, ordinary compact207CB0 publication and numeric21FFD0 rows. The eight-input compact/backtrack checks preserve cached NN counts. Actual213C00 soft-hyphen allocations and bounded kind7 continuations are joined. The named LIVE factory now retains the same query lease and compact pool for at most240 logical nodes and one intermediate gate. Final publication before no-winner selection remains separate. |
 | Main candidate | One assigned physical line through CASE, first terminal and compact backtrack. Configured count2 joins actual raw preprocessing, exclusions, compact2410 publication, backtracking, same-TOP WORD publication, duplicate comparison and score publication. Rescue and final document processing remain separate. |
 | Word publication | Per-segment residual association, glyph chain and same-owner plain WORD list; no supplied labels or success flags. The actual global route now joins packet writes,217DB0,218560 and21FE30 typed callback acknowledgement, including preserved failure prefixes. |
 | Global first alternative | Complete successful global callback tokens, actual selected final beam, explicit400-byte allocation and shared numerical score publication. This is a postcallback snapshot; quote cleanup, multiple alternatives and document acceptance remain separate. |
 | First candidate completion | Actual selected alternative scores, published-WORD quote cleanup, fresh-configuration glyph-normalization no-op, separate raw UTF8 WORD projections. No joined/accepted transcription. |
 | Ordinary glyph alternatives | Actual positive CASE source export/scoring/compact-driven refresh and13A830 ordering are joined. Fresh one-descriptor negative spans have owned source export/refresh. Native failed-refresh retries/general protocol sources remain separate. |
 | Text projection | Fresh273.V50 ->213A0/021000 choices and05AFA0 original raw positions are joined. A bounded first-WORD driver joins the219580 source prefix, clipping, overlap processing, ordered range interning, fresh024D40 metadata,021760 reuse and pending CHAR registrations. Bounded ordinary/configured no-bit8 TOP.V68 completion and actual shared275 WORD-array choices are joined, including genuine CHAR-key reuse, one shared UTF8/selection owner and pending CHAR+WORD commands. Actual NULL-reference raw-source projection now feeds pending kind2 TEXT registration. Actual021AB0 source-line publication retains separate append/write offsets; bounded025E40 validates every WORD/CHAR line and trims the unused guide tail after pending TEXT. Bounded per-WORD CHAR coverage and immutable01FD40/020000 selected flags/indices are joined. Fresh020920 interval/vector indices retain actual membership and whole-key owners. General augmentation and0283B0 document acceptance remain incomplete. |
-| Long-source publication | Genuine native 120-node gate and prefix/final-append transport checked; a nonempty genuine long-source winner is not established. |
+| Long-source publication | Genuine native120-node gate, retained global outer290 and prefix/final-append transport checked. Natural124/140/240-node inputs have empty intermediate pools and no winner; a separate prepared nonempty control is not evidence of a genuine long-source winner. Physical ring aliases and multiple intermediate cycles remain separate. |
 
 `LegacyFreshMainSingleLinePlainRecognition` joins raw physical strokes to the
 bounded first main candidate's WORD list. Its `PublicationCompleted` property
@@ -133,7 +133,9 @@ Details: [global compact](legacy-main-global-compact-materialization.md),
 [live source gates and exact WORD coverage](legacy-main-post-text-source-coverage.md),
 [per-WORD character source subtraction](legacy-main-document-character-coverage.md),
 [immutable selected document sources](legacy-main-document-selected-sources.md),
-[fresh source interval/vector indices](legacy-main-document-source-indices.md).
+[fresh source interval/vector indices](legacy-main-document-source-indices.md),
+[bounded document control cleanup](legacy-main-document-control-cleanup.md),
+[retained global LIVE publication](legacy-main-global-live-publication.md).
 
 ## Remaining joins
 
@@ -163,8 +165,10 @@ Details: [global compact](legacy-main-global-compact-materialization.md),
   and zero residual association do not establish accepted document content.
   Actual01FD40/020000 overlays retain all CHAR sources, selected flags and raw
   choice indices. Fresh020920 indices now retain insertion-order membership,
-  exact-vector lookup and creation page/slot identity; final source transforms
-  and document acceptance remain unjoined.
+  exact-vector lookup and creation page/slot identity. Actual023260 ordering now
+  clears inactive WORD control flags before checking CHAR controls, retaining
+  failure prefixes. Active control deletion, final source transforms, actual
+  C20 selection-registry ingress and document acceptance remain unjoined.
 - Representative online handwriting evaluation with real pen-up events,
   Russian cursive, English, mixed text and mathematical notation before enabling
   the new path for automatic app replacement.
