@@ -25,7 +25,7 @@ The reusable library now has these checked stages:
 | Global first alternative | Complete successful global callback tokens, actual selected final beam, explicit400-byte allocation and shared numerical score publication. This is a postcallback snapshot; quote cleanup, multiple alternatives and document acceptance remain separate. |
 | First candidate completion | Actual selected alternative scores, published-WORD quote cleanup, fresh-configuration glyph-normalization no-op, separate raw UTF8 WORD projections. No joined/accepted transcription. |
 | Ordinary glyph alternatives | Actual positive CASE source export/scoring/compact-driven refresh and13A830 ordering are joined. Fresh one-descriptor negative spans have owned source export/refresh. Native failed-refresh retries/general protocol sources remain separate. |
-| Text projection | Fresh273.V50 ->213A0/021000 choices and05AFA0 original raw positions are joined. A bounded first-WORD driver joins the219580 source prefix, clipping, overlap processing, ordered range interning, fresh024D40 metadata,021760 reuse and pending CHAR registrations. Bounded ordinary/configured no-bit8 TOP.V68 completion and actual shared275 WORD-array choices are joined, including genuine CHAR-key reuse, one shared UTF8/selection owner and pending CHAR+WORD commands. Actual NULL-reference raw-source projection now feeds pending kind2 TEXT registration. Actual021AB0 source-line publication retains separate append/write offsets; bounded025E40 validates every WORD/CHAR line and trims the unused guide tail after pending TEXT. Bounded per-WORD CHAR coverage and immutable01FD40/020000 selected flags/indices are joined. General augmentation,020920 index construction and0283B0 document acceptance remain incomplete. |
+| Text projection | Fresh273.V50 ->213A0/021000 choices and05AFA0 original raw positions are joined. A bounded first-WORD driver joins the219580 source prefix, clipping, overlap processing, ordered range interning, fresh024D40 metadata,021760 reuse and pending CHAR registrations. Bounded ordinary/configured no-bit8 TOP.V68 completion and actual shared275 WORD-array choices are joined, including genuine CHAR-key reuse, one shared UTF8/selection owner and pending CHAR+WORD commands. Actual NULL-reference raw-source projection now feeds pending kind2 TEXT registration. Actual021AB0 source-line publication retains separate append/write offsets; bounded025E40 validates every WORD/CHAR line and trims the unused guide tail after pending TEXT. Bounded per-WORD CHAR coverage and immutable01FD40/020000 selected flags/indices are joined. Fresh020920 interval/vector indices retain actual membership and whole-key owners. General augmentation and0283B0 document acceptance remain incomplete. |
 | Long-source publication | Genuine native 120-node gate and prefix/final-append transport checked; a nonempty genuine long-source winner is not established. |
 
 `LegacyFreshMainSingleLinePlainRecognition` joins raw physical strokes to the
@@ -101,6 +101,16 @@ heap bytes, matches its independent transcription over102,971,888 bytes and
 tuples and selected glyph tuples remain unchanged; this is not a measured
 handwriting improvement.
 
+
+The actual global route also completes all nine recorded word tracks through
+plain WORD275 publication and raw UTF8. It produces4/9 exact words and16/33
+character edits (48.48% CER), exactly the same raw strings as the previous CASE
+main WORD diagnostic. Managed/Native results and an independent raw-AK oracle
+agree. The records lack pen-up events and are supplied as one continuous
+stroke each; that information limit is not a demonstrated cause of the errors.
+This is a small diagnostic, not representative Russian cursive accuracy or
+accepted document text. The new app path remains disabled by default.
+
 Details: [global compact](legacy-main-global-compact-materialization.md),
 [global numeric backtracking](legacy-main-global-glyph-backtrack.md),
 [global ordinary consumers](legacy-main-global-ordinary-glyph.md),
@@ -111,6 +121,8 @@ Details: [global compact](legacy-main-global-compact-materialization.md),
 [actual global result ownership](legacy-main-global-result-ownership.md),
 [global glyph execution and WORD publication](legacy-main-global-glyph-execution.md),
 [global first alternative snapshot](legacy-main-global-first-alternative.md),
+[global raw WORD UTF8](legacy-main-global-word-utf8.md),
+[recorded global Russian diagnostic](legacy-main-global-recorded-diagnostic.md),
 [soft-hyphen prepass and kind7 continuation](legacy-main-soft-hyphen-prepass.md),
 [post-result metadata](legacy-main-global-result-terminal.md),
 [later history dispatch](legacy-main-language-dispatch.md),
@@ -120,7 +132,8 @@ Details: [global compact](legacy-main-global-compact-materialization.md),
 [bounded document line consistency](legacy-main-document-line-consistency.md),
 [live source gates and exact WORD coverage](legacy-main-post-text-source-coverage.md),
 [per-WORD character source subtraction](legacy-main-document-character-coverage.md),
-[immutable selected document sources](legacy-main-document-selected-sources.md).
+[immutable selected document sources](legacy-main-document-selected-sources.md),
+[fresh source interval/vector indices](legacy-main-document-source-indices.md).
 
 ## Remaining joins
 
@@ -149,7 +162,9 @@ Details: [global compact](legacy-main-global-compact-materialization.md),
   Pending CHAR/WORD/TEXT commands, trimmed source guides
   and zero residual association do not establish accepted document content.
   Actual01FD40/020000 overlays retain all CHAR sources, selected flags and raw
-  choice indices;020920 indices and final source transforms remain unjoined.
+  choice indices. Fresh020920 indices now retain insertion-order membership,
+  exact-vector lookup and creation page/slot identity; final source transforms
+  and document acceptance remain unjoined.
 - Representative online handwriting evaluation with real pen-up events,
   Russian cursive, English, mixed text and mathematical notation before enabling
   the new path for automatic app replacement.
