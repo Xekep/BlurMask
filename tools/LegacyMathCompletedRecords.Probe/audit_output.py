@@ -11,14 +11,16 @@ import subprocess
 import sys
 from pathlib import Path
 
-if len(sys.argv) != 3:
-    raise SystemExit('prefix-capture.json rawMath2.res')
+if len(sys.argv) not in (3, 4):
+    raise SystemExit('prefix-capture.json rawMath2.res [same-platform-prefix-baseline.json]')
 ROOT = Path(__file__).resolve().parents[2]
 capture = Path(sys.argv[1])
 subprocess.run([sys.executable, str(ROOT / 'tools/LegacyMathPrefixState.Probe/audit_output.py'),
                 str(capture), sys.argv[2]], check=True)
-assert hashlib.sha256(capture.read_bytes()).hexdigest() == \
-    'd350e2ca63956bc524936c40c60664c173130d4c1216c1850ed930c3ca5b3d08'
+# ORT numerical results can differ across platforms. Preserve the old capture
+# against the old probe running on the same platform, never a Windows golden.
+if len(sys.argv) == 4:
+    assert capture.read_bytes() == Path(sys.argv[3]).read_bytes(), 'prefix regression'
 source = json.loads(capture.read_bytes())
 actual = json.loads(Path(str(capture) + '.records.json').read_bytes())
 assert actual['Guards'] == 327
