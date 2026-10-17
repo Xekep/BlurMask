@@ -68,7 +68,11 @@ kernel is connected to the native beam driver, tensor states or app recognition;
 the14-expression accuracy result in the Math2 route report is unchanged.
 An additional internal48-byte candidate heap preserves complete slot moves,
 zero-before-payload ordering and native equal/unordered float branches over
-4096 independently checked offers; it also remains separate from beam execution.
+4096 independently checked offers. Its prepared unrestricted expansion now
+joins explicit297-class cost rows and beam sidecars to the same owned heap
+and raw48-byte sorting in120 cases, with264 separate raw-sort controls. The
+actual EEF producer, configured aliases, EOS continuation and reusable network
+state loop remain separate; this does not enable app beam recognition.
 
 ## Quality evidence
 
@@ -182,7 +186,9 @@ Details: [global compact](legacy-main-global-compact-materialization.md),
 [observable token gate](legacy-math2-observable-token-gate.md),
 [restriction-map ownership](legacy-math2-restriction-map.md), and
 [score channels and prepared default completion score](legacy-math2-score-channels.md),
-[prepared candidate heap](legacy-math2-candidate-heap.md), and
+[prepared candidate heap](legacy-math2-candidate-heap.md),
+[prepared unrestricted expansion](legacy-math2-unrestricted-candidates.md),
+[native pruning and EOS handoff](legacy-math2-pruning-handoff.md), and
 [step-limit and temperature producers](legacy-math2-step-temperature-producers.md).
 
 ## Remaining joins
@@ -249,3 +255,11 @@ checks1555 cases against actual AL/category slices, including ordered double
 stores and stopped prefixes. Managed/Native output agrees with a portable raw
 resource oracle. This does not enable the real controller's F4 property or
 change the fresh no-op/main recognition path.
+
+The [postprocessing counter handoff](legacy-main-document-counter-handoff.md)
+now appends operation7 to the same retained pending C4D owner after the actual
+successful transform/empty-DAF stage. It preserves original selection objects
+and failure prefixes; it does not execute the transaction or publish2E7/BE2.
+The [live contextual-quote property owner](legacy-contextual-quote-configuration-owner.md)
+is statically mapped; the current runtime path still uses the freshF4zero
+configuration. Property wiring proof is separate from a configured recognizer.
