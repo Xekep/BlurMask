@@ -161,6 +161,22 @@ text/document positions can be reported.
 
 ### Actual WORD caller boundary
 
+The normal container getter00F460 calls controller.V80=2271F0 at00F65B and,
+after success, unconditionally calls TOP273.V68=13E7F0 at00F6A5. Thus the null
+external argument only skips the earlier2271F0 augmentation path; it does not
+prove empty WORD source vectors at the subsequent document wrapper boundary.
+13E7F0 visits all alternative WORD span owners, invokes controller.V88=219580
+when span-owner packed10 bit2000 is clear, and sets that bit even when the
+callback failed. It then requires13D360 and13D000 in that order. A portable
+source-export prefix must not be reported as completion of this whole stage.
+
+13D000's three literals are U+2610/U+2611/U+2612 (checkbox states), all absent
+from the pinned Russian acoustic alphabet. Its actual alphabet lookup and
+single-scalar WORD predicates still need their owning bridge before a scoped
+no-op can replace the call.13D360 is a separate candidate aggregation/pruning
+stage; neither the absent checkbox labels nor null external arguments justify
+skipping it.
+
 Further static inspection distinguishes the64-byte275 span owner from its
 120-byte WORD alternatives. Native279 list-node field00 refers to the span
 owner; a portable `PublishedWordNode.Word` directly exposes the selected
