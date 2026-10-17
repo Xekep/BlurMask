@@ -29,8 +29,9 @@ public sealed class LegacyOwnedMainCandidateSource
     public LegacyOwnedRussianMainGlyphConfidence ConfidenceOwner => Ownership.Geometry.Owner;
     public LegacyOwnedRussianMainResidualSource SourceOverlay => Session.SourceOverlay;
     public LegacyNativePublishedWordNode? WordHead18 { get; }
-    /// <summary>Stable source-invocation cache key shared by configured
-    /// alternatives, distinct from each selected279 candidate identity.</summary>
+    /// <summary>Stable raw-source invocation identity shared by configured
+    /// alternatives. This alone is not a cache key for a selected session's
+    /// higher-source overlay or mutable glyph refresh state.</summary>
     public object SourceIdentity => (object?)first?.RawResult ?? configured!;
     public object CandidateIdentity => (object?)first ?? alternative!;
 

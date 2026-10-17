@@ -10,6 +10,9 @@ SourceIdentity is shared by the alternatives from one actual raw invocation;
 CandidateIdentity and selected Session remain different per279 list. InputOwner,
 SourceDocument, Preprocessed, Sampled, SourcePolicy, ConfidenceOwner, actual
 SourceOverlay and native WordHead18 are available through the common view.
+SourceIdentity alone is not a refresh-cache key: each selected session retains
+its actual overlay, and cross-alternative native higher-source sharing is not
+proved by the current residual-zero observations.
 Validation checks original input/preprocessing lineage, graph/dictionary/pool
 ownership, successful callback order and the unchanged selected WORD head.
 Historical RawResult/FirstCandidate getters explicitly refuse the configured

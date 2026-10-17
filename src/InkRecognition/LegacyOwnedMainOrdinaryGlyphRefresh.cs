@@ -42,6 +42,8 @@ public sealed class LegacyOwnedMainOrdinaryGlyphRefresh
     }
     private static readonly ConditionalWeakTable<LegacyFreshMainSingleLinePlainRecognitionResult,
         LegacyOwnedMainOrdinaryGlyphRefresh> owners = new();
+    private static readonly ConditionalWeakTable<LegacyOwnedMainConfiguredAlternative,
+        LegacyOwnedMainOrdinaryGlyphRefresh> configuredOwners = new();
     private readonly Dictionary<ulong, Progress> progress = [];
     private readonly object gate = new();
     private readonly byte[] compact;
@@ -49,7 +51,11 @@ public sealed class LegacyOwnedMainOrdinaryGlyphRefresh
     private readonly LegacyOwnedRussianGlyphSymbolResolver resolver;
     private readonly LegacyOwnedRussianMainSourceSymbolCallbacks callbacks;
     private readonly ushort replacement;
-    public LegacyFreshMainSingleLinePlainRecognitionResult RawResult { get; }
+    private readonly LegacyFreshMainSingleLinePlainRecognitionResult? rawResult;
+    private readonly LegacyNativeGlyphRecordPool pool;
+    public LegacyOwnedMainCandidateSource? CandidateSource { get; }
+    public LegacyFreshMainSingleLinePlainRecognitionResult RawResult => rawResult ??
+        throw new InvalidOperationException("Configured refresh has no count1 raw result.");
     public LegacyOwnedMainGlyphSourceMetadata SourceMetadata { get; }
     public LegacyOwnedRussianMainGlyphScoring Scoring { get; }
 
@@ -57,7 +63,7 @@ public sealed class LegacyOwnedMainOrdinaryGlyphRefresh
         LegacyFreshMainSingleLinePlainRecognitionResult raw, LegacyCursiveSeparationTable table,
         CancellationToken token)
     {
-        RawResult = raw;
+        rawResult = raw; pool = raw.Session.Ownership.GlyphPool;
         ValidateResult(raw);
         var session = raw.Session;
         var materialization = session.Ownership.Materialization;
@@ -72,6 +78,53 @@ public sealed class LegacyOwnedMainOrdinaryGlyphRefresh
         if (!policy.Model.AcousticAlphabet.TryGetLabel("\ufffd", out replacement))
             throw new InvalidDataException("Actual source replacement label is required.");
         compact = materialization.CopyCompactStorage(); starts = materialization.CopyNodeStarts2478();
+    }
+
+    private LegacyOwnedMainOrdinaryGlyphRefresh(ReadOnlySpan<byte> resource,
+        LegacyOwnedMainCandidateSource candidate, LegacyCursiveSeparationTable table, CancellationToken token)
+    {
+        candidate.Validate(token);CandidateSource=candidate;
+        var materialization=candidate.ConfiguredAlternative.Terminal.Materialization;
+        var policy=candidate.SourcePolicy;pool=candidate.Ownership.GlyphPool;
+        SourceMetadata=LegacyOwnedMainGlyphSourceMetadata.PrepareConfigured(candidate,candidate.SourceOverlay,token);
+        Scoring=LegacyOwnedRussianMainGlyphScoring.PrepareConfigured(resource,candidate,SourceMetadata,table,token);
+        resolver=LegacyOwnedRussianGlyphSymbolResolver.Prepare(policy.DictionaryOwner,
+            policy.DictionaryOwner.Symbols.Preparation,token);
+        callbacks=LegacyOwnedRussianMainSourceSymbolCallbacks.Prepare(resource,candidate.ConfidenceOwner,candidate.Sampled,token);
+        if(!policy.Model.AcousticAlphabet.TryGetLabel("\ufffd",out replacement))
+            throw new InvalidDataException("Actual source replacement label required.");
+        compact=materialization.CopyCompactStorage();starts=materialization.CopyNodeStarts2478();
+    }
+
+    /// <summary>Candidate-local ordinary refresh, retaining its exact actual
+    /// source overlay. SourceIdentity alone cannot own higher-source cache data.
+    /// Configured higher-source refresh remains explicitly outside this scope.</summary>
+    public static LegacyOwnedMainOrdinaryGlyphRefresh PrepareConfigured(ReadOnlySpan<byte> resource,
+        LegacyOwnedMainCandidateSource candidate, LegacyCursiveSeparationTable table, CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(candidate);ArgumentNullException.ThrowIfNull(table);candidate.Validate(token);
+        if(!candidate.IsConfigured)throw new ArgumentException("Actual configured source candidate required.");
+        //Validate resources even on a cache hit, before returning mutable state.
+        if(resource.Length!=572763||!StringComparer.OrdinalIgnoreCase.Equals(Convert.ToHexString(SHA256.HashData(resource)),
+            candidate.SourcePolicy.Controller.Owner.SelectedSourceOwner.SourceFingerprint))
+            throw new InvalidDataException("Same pinned main acoustic source required.");
+        var values=table.Values.Span;
+        if(values.Length!=256)throw new InvalidDataException("Actual engine separation table required.");
+        Span<byte> bytes=stackalloc byte[1024];
+        for(int i=0;i<values.Length;i++)BinaryPrimitives.WriteSingleLittleEndian(bytes[(i*4)..],values[i]);
+        if(!SHA256.HashData(bytes).AsSpan().SequenceEqual(Convert.FromHexString(
+            "b23ed52a3a10808eab597a8f371a7bbb66bde2fab5fe2666431b1b192abc1baf")))
+            throw new InvalidDataException("Actual engine separation table required.");
+        if(configuredOwners.TryGetValue(candidate.ConfiguredAlternative,out var existing))
+        {
+            if(!ReferenceEquals(existing.CandidateSource!.SourceOverlay,candidate.SourceOverlay)||
+                !ReferenceEquals(existing.CandidateSource.Ownership,candidate.Ownership))
+                throw new ArgumentException("The cached selected candidate must retain its identical actual overlay.");
+            token.ThrowIfCancellationRequested();return existing;
+        }
+        var prepared=new LegacyOwnedMainOrdinaryGlyphRefresh(resource,candidate,table,token);
+        token.ThrowIfCancellationRequested();
+        return configuredOwners.GetValue(candidate.ConfiguredAlternative,_=>prepared);
     }
 
     private static void ValidateResult(LegacyFreshMainSingleLinePlainRecognitionResult raw)
@@ -125,12 +178,24 @@ public sealed class LegacyOwnedMainOrdinaryGlyphRefresh
         lock (gate)
         {
             token.ThrowIfCancellationRequested();
-            var pool = RawResult.Session.Ownership.GlyphPool;
+            CandidateSource?.Validate(token);
             _ = pool.CopyOwnerNode(canonicalOwnerKey, token);
             if (progress.TryGetValue(canonicalOwnerKey, out var previous))
                 return previous.Completed ?? throw new InvalidOperationException("This owner retains a failed refresh prefix; retry is unsupported.");
-            var state = new Progress(); progress.Add(canonicalOwnerKey, state);
-            state.Source = SourceMetadata.Read(canonicalOwnerKey, token);
+            var state = new Progress();
+            if(CandidateSource is null)
+            {
+                //Keep the historical interrupted-prefix claim before export.
+                progress.Add(canonicalOwnerKey, state);
+                state.Source = SourceMetadata.Read(canonicalOwnerKey, token);
+            }
+            else
+            {
+                var source=SourceMetadata.Read(canonicalOwnerKey,token);
+                if(source.IsHigherSource)
+                    throw new NotSupportedException("Configured higher-source refresh requires native shared-overlay ownership.");
+                state.Source=source;progress.Add(canonicalOwnerKey,state);
+            }
             state.SourceAllocation26 = state.Source.CopySourceAllocation26();
             state.SourceScoreBits = Scoring.ReadFirstCandidateScoreBits(state.Source, token);
             int first = starts[state.Source.BaseNode], end = starts[state.Source.BaseNode + 1], visited = 0;
@@ -178,7 +243,7 @@ public sealed class LegacyOwnedMainOrdinaryGlyphRefresh
         ulong key = LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(actualGlyphReference);
         uint marker = unchecked((uint)(int)(short)(actualGlyphReference >> 40));
         var refreshed = RefreshOwner(key, allocatedRecordStorage40, token);
-        var node = RawResult.Session.Ownership.GlyphPool.CopyOwnerNode(key, token);
+        var node = pool.CopyOwnerNode(key, token);
         var selection = LegacyPreparedGlyphAlternativeSelection.Select(node, marker,
             selectionAllocation4, initialSelectionCapacity, token);
         return new(refreshed, selection);

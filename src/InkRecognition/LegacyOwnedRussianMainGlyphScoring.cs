@@ -92,7 +92,24 @@ public sealed class LegacyOwnedRussianMainGlyphScoring
         CancellationToken token=default)
     {
         ArgumentNullException.ThrowIfNull(metadata);token.ThrowIfCancellationRequested();
+        if(metadata.Ownership.SecondaryTerminal is not null)
+            throw new NotSupportedException("Configured scoring requires PrepareConfigured with its selected source view.");
         return new(resource,metadata.Ownership.Controller,metadata.Ownership.Materialization.ConfidenceOwner,table,token,metadata);
+    }
+
+    /// <summary>Same numerical cache for the actual selected configured source.
+    /// The exporter and session overlay must be identical; a count1 owner is
+    /// not fabricated to access its acoustic costs.</summary>
+    public static LegacyOwnedRussianMainGlyphScoring PrepareConfigured(ReadOnlySpan<byte> resource,
+        LegacyOwnedMainCandidateSource candidate, LegacyOwnedMainGlyphSourceMetadata metadata,
+        LegacyCursiveSeparationTable table, CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(candidate);ArgumentNullException.ThrowIfNull(metadata);
+        candidate.Validate(token);
+        if(!candidate.IsConfigured||!ReferenceEquals(candidate.Ownership,metadata.Ownership)||
+            !ReferenceEquals(candidate.SourceOverlay,metadata.SourceOverlay))
+            throw new ArgumentException("An exact configured selected-session source/exporter required.");
+        return new(resource,candidate.Ownership.Controller,candidate.ConfidenceOwner,table,token,metadata);
     }
 
     /// <summary>Scores one prepared normalized216860 symbol for actual ordinary
