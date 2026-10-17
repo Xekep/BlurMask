@@ -34,6 +34,15 @@ for (int input = 0; input < samples.Length; input++)
         throw new Exception("Reusable model or isolated dictionary contexts lost.");
     previousModel=currentModel;previousDictionaryContexts=currentDictionaryContexts;
     var completed = LegacyFreshMainFirstCandidateCompletion.Complete(raw, new byte[400], new byte[4], new byte[4]);
+    var cursorWords=completed.RawWordsInNativeHeadOrder.Select(v=>v.Publication.PublishedWord!.Word).ToArray();
+    var glyphCursor=new LegacyPreparedPublishedGlyphCursor(raw.Session.Ownership.GlyphPool,cursorWords);
+    byte[] scalarScratch=new byte[4];
+    foreach(ulong expected in cursorWords.SelectMany(v=>v.FlatReferences))
+    {
+        var read=glyphCursor.Next(scalarScratch);
+        if(!read.HasReference||read.Reference!=expected)throw new Exception("Native WORD reference traversal changed.");
+    }
+    if(glyphCursor.Next(scalarScratch).HasReference)throw new Exception("Native WORD cursor did not terminate.");
     byte[] residue = Enumerable.Range(0, 40).Select(n => (byte)(n * 13 + input)).ToArray();
     using var owner = context.PrepareTextChoices(completed, table, publication, normalization, circles);
     Reject(() => owner.Publish(new byte[39], new byte[2040 * 4]));

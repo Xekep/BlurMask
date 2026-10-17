@@ -88,7 +88,7 @@ The existing published quote bridge restores21FBF0's leading synthetic193/194
 and trailing apostrophe conversion. It does not restore these contextual curly
 quotation rules. The generic139C90 scalar reader, owned WORD/pool publication,
 source geometry/group-kind helpers and category mapper are useful primitives;
-the21F210 cross-word iterator, exact body orchestration, owner bindings and its
+the exact enabled-body orchestration, source/category owner bindings and its
 independent enabled-branch tests remain separate work.
 
 ## Bounded fresh no-op API and tests
@@ -110,6 +110,15 @@ are byte-identical. The static audit pins the complete21F320 PE fingerprint and
 22 source, quote, category, neighbour and write/carry instructions. This closes
 the decision primitive only; it does not establish the enabled owning body or
 improve Russian handwriting accuracy.
+
+The separate internal `LegacyPreparedPublishedGlyphCursor` now traverses actual
+WORD275 flat vectors in the supplied279 list order and skips exhausted or empty
+WORDs. Scalar scratch is explicit and unchanged on end-of-list; vector position
+advances before reading the glyph/scalar. A failed read retains its prefix and
+portable retry is refused. The cursor is checked on seven actual main-result
+inputs without changing their capture bytes, plus64 prepared vector lists with
+empty WORD boundaries. It does not reconstruct opaque native stack padding or
+replace the still-required three-value lookahead driver.
 
 ```
 LegacyContextualQuoteRules.Probe capture.json

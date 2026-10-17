@@ -1,5 +1,6 @@
 using InkRecognition;
 using System.Text.Json;
+using System.Buffers.Binary;
 
 if(args.Length!=1)throw new ArgumentException("capture.json");
 var labels=new LegacyContextualQuoteLabels(10,11,20,21,22,23,24);
@@ -34,6 +35,54 @@ w.WriteEndArray();
 Check(!new LegacyContextualQuoteLabels(10,11,20,65535,65535,65535,24).HasEnabledReplacement);
 Check(labels.HasEnabledReplacement);
 Check(!new LegacyContextualQuoteLabels(10,11,65535,65535,65535,65535,24).HasEnabledReplacement);
+w.WriteStartArray("cursorCases");
+for(int test=0;test<64;test++)
+{
+    var pool=LegacyNativeGlyphRecordPool.CreateWithoutGeometryCapture(false);
+    var words=new List<LegacyNativePlainWordRecord>();
+    var inputs=new List<ulong[]>();int identity=1;
+    foreach(int count in new[]{0,test%5,0,1+(test/5)%4,0})
+    {
+        var refs=new List<ulong>();
+        for(int index=0;index<count;index++)
+        {
+            var inserted=pool.AppendDescriptor((ulong)identity,identity,false,new byte[40]);identity++;
+            byte[] row=pool.CopyRecord(inserted.Reference);
+            BinaryPrimitives.WriteUInt16LittleEndian(row.AsSpan(4),0);
+            BinaryPrimitives.WriteUInt16LittleEndian(row.AsSpan(8),(ushort)(test*8+index));
+            pool.ReplaceRecord(inserted.Reference,row);refs.Add(inserted.Reference);
+        }
+        //Explicit prepared WORD/vector controls; no recognized word is claimed.
+        ulong[] vector=refs.ToArray();words.Add(new(pool,new byte[120],vector));inputs.Add(vector);
+    }
+    var cursor=new LegacyPreparedPublishedGlyphCursor(pool,words);
+    byte[] scratch=[0xc1,0x4e,0xa5,0x73];
+    w.WriteStartObject();w.WriteStartArray("words");
+    foreach(var vector in inputs){w.WriteStartArray();foreach(ulong reference in vector)w.WriteNumberValue(reference);w.WriteEndArray();}w.WriteEndArray();
+    w.WriteStartArray("reads");
+    foreach(ulong expected in inputs.SelectMany(v=>v))
+    {
+        var read=cursor.Next(scratch);Check(read.HasReference&&read.Reference==expected);
+        w.WriteStartArray();w.WriteNumberValue(read.Reference);w.WriteNumberValue(read.WordOrdinal);w.WriteNumberValue(read.ReferenceOrdinal);w.WriteNumberValue(read.Label);w.WriteEndArray();
+    }
+    w.WriteEndArray();byte[] before=scratch.ToArray();
+    for(int retry=0;retry<2;retry++)
+    {
+        var end=cursor.Next(scratch);Check(!end.HasReference&&end.Reference==0&&end.Label==65535&&scratch.SequenceEqual(before));
+    }
+    w.WriteEndObject();
+}
+w.WriteEndArray();
+//An unsupported scalar read consumes its reference before failure. The
+//portable cursor retains that prefix and refuses an implicit retry.
+{
+    var pool=LegacyNativeGlyphRecordPool.CreateWithoutGeometryCapture(false);
+    var inserted=pool.AppendDescriptor(1,1,false,new byte[40]);byte[] row=pool.CopyRecord(inserted.Reference);
+    BinaryPrimitives.WriteUInt16LittleEndian(row.AsSpan(4),3);BinaryPrimitives.WriteUInt16LittleEndian(row.AsSpan(8),4);pool.ReplaceRecord(inserted.Reference,row);
+    var cursor=new LegacyPreparedPublishedGlyphCursor(pool,[new(pool,new byte[120],[inserted.Reference])]);
+    bool failed=false;try{cursor.Next(new byte[4]);}catch(ArgumentException){failed=true;}Check(failed);
+    failed=false;try{cursor.Next(new byte[4]);}catch(InvalidOperationException){failed=true;}Check(failed);
+}
 w.WriteNumber("checks",checks);w.WriteEndObject();w.Flush();
 Console.WriteLine($"PASS {checks} contextual quote wrap/source/entry guards; enabled-body numeric decisions only, no app policy change.");
 void Check(bool ok){if(!ok)throw new Exception("Contextual quote numeric rule changed.");checks++;}

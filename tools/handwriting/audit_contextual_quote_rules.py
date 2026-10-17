@@ -25,6 +25,16 @@ pins={
 0x18021f8ff:('mov','word ptr [rax + 8], si'),
 }
 for address,expected in pins.items():assert instructions[address]==expected,(hex(address),instructions.get(address))
+cursor_start,cursor_end=0x18021f210,0x18021f320
+cursor_raw=b.data[b.off(cursor_start):b.off(cursor_end)]
+assert hashlib.sha256(cursor_raw).hexdigest()=='7f77864c48059eea26486fe94e310f63695229d8651564a8781406050a4f1494'
+cursor_instructions={i.address:(i.mnemonic,i.op_str)for i in Cs(CS_ARCH_X86,CS_MODE_64).disasm(cursor_raw,cursor_start)}
+cursor_pins={0x18021f24c:('cmp','edx, dword ptr [rax + r11 + 0x28]'),
+ 0x18021f253:('mov','rax, qword ptr [rcx + 0x20]'),0x18021f28b:('call','0x18021f210'),
+ 0x18021f295:('mov','rax, qword ptr [rax + r11 + 0x20]'),
+ 0x18021f29d:('mov','rbx, qword ptr [rax + rdx*8]'),0x18021f2a1:('lea','eax, [rdx + 1]'),
+ 0x18021f2ab:('mov','dword ptr [r10], eax'),0x18021f2be:('call','r9'),0x18021f2e6:('call','r10')}
+for address,expected in cursor_pins.items():assert cursor_instructions[address]==expected,(hex(address),cursor_instructions.get(address))
 Path(sys.argv[1]).write_text(json.dumps(dict(start=hex(a),endExclusive=hex(z),sha256=digest,
- pins=len(pins),scope='Prepared numeric decisions only; no WORD iterator/source/category binding or changed F4 policy',vendorExecution=False),indent=2)+'\n')
-print('PASS complete21F320 PE fingerprint and',len(pins),'numeric source/quote/category/control/carry pins')
+ pins=len(pins),cursorPins=len(cursor_pins),scope='Prepared numeric decisions and WORD cursor; no enabled owning source/category binding or changed F4 policy',vendorExecution=False),indent=2)+'\n')
+print('PASS21F320/21F210 PE fingerprints and',len(pins)+len(cursor_pins),'quote and cursor pins')

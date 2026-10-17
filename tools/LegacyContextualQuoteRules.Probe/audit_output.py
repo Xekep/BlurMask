@@ -23,4 +23,9 @@ for previous,current,nxt,category,carry,arc,kind,label,after in d['cases']:
     count+=1
 assert count==25344,count
 assert d['checks']>=196608
+assert len(d['cursorCases'])==64
+for case in d['cursorCases']:
+    expected=[(reference,word,index)for word,refs in enumerate(case['words'])for index,reference in enumerate(refs)]
+    assert [tuple(read[:3])for read in case['reads']]==expected
 print('PASS independent contextual-quote truth table',count,'cases; full ushort leading/trailing wrap guards')
+print('PASS64 prepared cross-WORD cursor/vector traversals with empty-word boundaries')
