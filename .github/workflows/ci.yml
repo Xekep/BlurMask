@@ -644,6 +644,7 @@ jobs:
           dotnet run --project tools/LegacyMainTextGlyphReuse.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res models/text-unicode/legacy-normalization-data.json models/text-unicode/legacy-circled-payload-data.json .artifacts/legacy-main-text-reuse-controls.json .artifacts/legacy-main-text-reuse-managed.json
           python tools/LegacyMainTextGlyphReuse.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-main-text-reuse-managed.json
           python tools/LegacyFreshTextSourceContext.Probe/reference_controls.py .artifacts/legacy-fresh-text-source-controls.json
+          python tools/LegacyMainDocumentInputTransforms.Probe/reference_controls.py .artifacts/legacy-main-document-input-transform-controls.json
           dotnet run --project tools/LegacyMainCompactGraph.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-compact-graph-managed.json
           python tools/LegacyMainCompactGraph.Probe/audit_output.py .artifacts/legacy-main-compact-graph-managed.json
           dotnet run --project tools/LegacyMainGlobalSourceRanges.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-global-source-managed.json
@@ -746,8 +747,12 @@ jobs:
           python tools/LegacyRawInkRangeOperations.Probe/audit_output.py .artifacts/legacy-raw-ink-range-controls.json .artifacts/legacy-raw-ink-range-managed.json
           dotnet run --project tools/LegacyFreshTextSourceContext.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json models/text-unicode/legacy-circled-payload-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-fresh-text-source-controls.json .artifacts/legacy-fresh-text-source-context-managed.json
           python tools/LegacyFreshTextSourceContext.Probe/audit_output.py .artifacts/legacy-fresh-text-source-context-managed.json
+          dotnet run --project tools/LegacyMainDocumentInputTransforms.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json models/text-unicode/legacy-circled-payload-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-document-input-transform-controls.json .artifacts/legacy-main-document-input-transforms-managed.json
+          python tools/LegacyMainDocumentInputTransforms.Probe/audit_output.py .artifacts/legacy-main-document-input-transforms-managed.json .artifacts/legacy-main-document-input-transform-controls.json
           dotnet run --project tools/LegacyContextualQuoteRules.Probe -c Release -- .artifacts/legacy-contextual-quotes-managed.json
           python tools/LegacyContextualQuoteRules.Probe/audit_output.py .artifacts/legacy-contextual-quotes-managed.json
+          dotnet run --project tools/LegacyPreparedGlyphRewrite.Probe -c Release -- models .artifacts/legacy-prepared-glyph-rewrite-managed.json
+          python tools/LegacyPreparedGlyphRewrite.Probe/audit_output.py models .artifacts/legacy-prepared-glyph-rewrite-managed.json
           dotnet run --project tools/LegacyMainWordRanking.Probe -c Release -- .artifacts/legacy-main-word-ranking-managed.json
           python tools/LegacyMainWordRanking.Probe/audit_output.py .artifacts/legacy-main-word-ranking-managed.json
           dotnet run --project tools/LegacyMainGlyphChainCleanup.Probe -c Release -- .artifacts/legacy-main-glyph-chain-cleanup-managed.json
@@ -1381,7 +1386,9 @@ jobs:
             @{ Name = 'LegacyMainSecondaryReachability'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-main-secondary-reachability-native.json') },
             @{ Name = 'LegacyRawInkRangeOperations'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-raw-ink-range-controls.json', '.artifacts/legacy-raw-ink-range-native.json') },
             @{ Name = 'LegacyFreshTextSourceContext'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-fresh-text-source-controls.json', '.artifacts/legacy-fresh-text-source-context-native.json') },
+            @{ Name = 'LegacyMainDocumentInputTransforms'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-document-input-transform-controls.json', '.artifacts/legacy-main-document-input-transforms-native.json') },
             @{ Name = 'LegacyContextualQuoteRules'; Args = @('.artifacts/legacy-contextual-quotes-native.json') },
+            @{ Name = 'LegacyPreparedGlyphRewrite'; Args = @('models', '.artifacts/legacy-prepared-glyph-rewrite-native.json') },
             @{ Name = 'LegacyMainWordRanking'; Args = @('.artifacts/legacy-main-word-ranking-native.json') },
             @{ Name = 'LegacyMainGlyphChainCleanup'; Args = @('.artifacts/legacy-main-glyph-chain-cleanup-native.json') },
             @{ Name = 'LegacyMainWordAugmentationScan'; Args = @('.artifacts/legacy-main-word-augmentation-scan-native.json') },
@@ -1948,9 +1955,17 @@ jobs:
               python tools/LegacyFreshTextSourceContext.Probe/audit_output.py .artifacts/legacy-fresh-text-source-context-native.json
               if ($LASTEXITCODE -ne 0) { throw 'LegacyFreshTextSourceContext independent audit failed' }
             }
+            if ($name -eq 'LegacyMainDocumentInputTransforms') {
+              python tools/LegacyMainDocumentInputTransforms.Probe/audit_output.py .artifacts/legacy-main-document-input-transforms-native.json .artifacts/legacy-main-document-input-transform-controls.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyMainDocumentInputTransforms independent audit failed' }
+            }
             if ($name -eq 'LegacyContextualQuoteRules') {
               python tools/LegacyContextualQuoteRules.Probe/audit_output.py .artifacts/legacy-contextual-quotes-native.json
               if ($LASTEXITCODE -ne 0) { throw 'LegacyContextualQuoteRules independent audit failed' }
+            }
+            if ($name -eq 'LegacyPreparedGlyphRewrite') {
+              python tools/LegacyPreparedGlyphRewrite.Probe/audit_output.py models .artifacts/legacy-prepared-glyph-rewrite-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyPreparedGlyphRewrite independent audit failed' }
             }
             if ($name -eq 'LegacyMainWordRanking') {
               python tools/LegacyMainWordRanking.Probe/audit_output.py .artifacts/legacy-main-word-ranking-native.json

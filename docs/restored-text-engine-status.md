@@ -22,12 +22,12 @@ The reusable library now has these checked stages:
 | Global main numeric result | Same owned graph/context/NN/cache and source epochs through first/later language dispatch, exact primary recombination, terminal selection, ordinary compact207CB0 publication and numeric21FFD0 rows. The eight-input compact/backtrack checks preserve cached NN counts. Actual213C00 soft-hyphen allocations and bounded kind7 continuations are joined. The named LIVE factory retains the same query lease and compact pool for at most240 logical nodes and one intermediate gate. Final publication precedes selection, explicitly represents no-winner and now feeds actual glyph execution/raw WORD projections through a distinct positive owner. |
 | Main candidate | One assigned physical line through CASE, first terminal and compact backtrack. Configured count2 joins actual raw preprocessing, exclusions, compact2410 publication, backtracking, same-TOP WORD publication, duplicate comparison and score publication. Rescue and final document processing remain separate. |
 | Word publication | Per-segment residual association, glyph chain and same-owner plain WORD list; no supplied labels or success flags. The actual global route now joins packet writes,217DB0,218560 and21FE30 typed callback acknowledgement, including preserved failure prefixes. |
-| Global first alternative | Complete successful global callback tokens, actual selected final beam, explicit400-byte allocation and shared numerical score publication. The completed global WORD list now feeds the shared quote-cleanup kernel with retained scratch; the actual inputs contain no synthetic quotes. The postpublication owner now joins the same cleanup and the proven fresh-F4 zero-write normalization return. Enabled glyph normalization, multiple alternatives and document acceptance remain separate. |
+| Global first alternative | Complete successful global callback tokens, actual selected final beam, explicit400-byte allocation and shared numerical score publication. The completed global WORD list now feeds the shared quote-cleanup kernel with retained scratch; the actual inputs contain no synthetic quotes. The postpublication owner now joins the same cleanup and the proven fresh-F4 zero-write normalization return. An internal prepared enabled-glyph rewrite is verified separately; its actual configuration owner, multiple alternatives and document acceptance remain separate. |
 | Dynamic control import | Fresh byte-exact2A interning and13BE80 all-pool conversion consume the actual completed global result through a separate copied lifecycle. The proven postimport caller selects dynamicTOP18 as primary. Raw pre-canonical byte projection and the default UTF8/circled helper are joined with aggregate byte/reference caps. Completion runs once per glyph, before WORD concatenation; the native invalid one-byte C2 unit literal is explicitly refused by the codec. General codec configuration and document acceptance remain separate. |
 | First candidate completion | Actual selected alternative scores, published-WORD quote cleanup, fresh-configuration glyph-normalization no-op, separate raw UTF8 WORD projections. No joined/accepted transcription. |
 | Ordinary glyph alternatives | Actual positive CASE source export/scoring/compact-driven refresh and13A830 ordering are joined. Fresh one-descriptor negative spans have owned source export/refresh. Native failed-refresh retries/general protocol sources remain separate. |
 | Text projection | Fresh273.V50 ->213A0/021000 choices and05AFA0 original raw positions are joined. A bounded first-WORD driver joins the219580 source prefix, clipping, overlap processing, ordered range interning, fresh024D40 metadata,021760 reuse and pending CHAR registrations. Bounded ordinary/configured no-bit8 TOP.V68 completion and actual shared275 WORD-array choices are joined, including genuine CHAR-key reuse, one shared UTF8/selection owner and pending CHAR+WORD commands. Actual NULL-reference raw-source projection now feeds pending kind2 TEXT registration. Actual021AB0 source-line publication retains separate append/write offsets; bounded025E40 validates every WORD/CHAR line and trims the unused guide tail after pending TEXT. Bounded per-WORD CHAR coverage and immutable01FD40/020000 selected flags/indices are joined. Fresh020920 interval/vector indices retain actual membership and whole-key owners. A named selected-INPUT path now retains the same C20/C22 owner and derives its pending CHAR/WORD/TEXT cursor from C51.Next, rather than raw ordinals. General augmentation and0283B0 document acceptance remain incomplete. |
-| Raw current view | A new owned XY/current-view context exports checked identity transforms for fully covered selected sources. A separate owned fresh textField now joins INPUT/C51 registration, retained C22 and full selected-copy identity, including the proven empty-span DAF return. Existing SDK-page/task ownership and the actual037E80 result caller remain unjoined; raw IDs do not substitute for native registry IDs. |
+| Raw current view | A new owned XY/current-view context exports checked identity transforms for fully covered selected sources. A separate owned fresh textField now joins INPUT/C51 registration, retained C22 and full selected-copy identity, including the proven empty-span DAF return. The selected INPUT now retains its document seed before WORD publication and joins the post-cleanup037E80 identity-excluded empty transform-vector swap and empty DAF branch. Existing SDK-page/task ownership, nonidentity transforms and final transport remain unjoined; raw IDs do not substitute for native registry IDs. |
 | Long-source publication | Genuine native120-node gate, retained global outer290 and prefix/final-append transport checked. Natural124/140/240-node inputs have empty intermediate pools and no winner; a separate prepared nonempty control is not evidence of a genuine long-source winner. Physical ring aliases and multiple intermediate cycles remain separate. |
 
 `LegacyFreshMainSingleLinePlainRecognition` joins raw physical strokes to the
@@ -61,9 +61,14 @@ spaces between WORDs or expose accepted replacement text.
 The Math2 candidate-ordering kernel now preserves complete168-byte records,
 including native equal-score and unordered float behavior on both sides of the
 20-record sorting threshold. Managed/Native AOT and an independent byte oracle
-agree on181 prepared controls. This kernel is not connected to the native beam
-driver, tensor states or app recognition, and does not improve the14-expression
-accuracy result described in the Math2 route report.
+agree on181 prepared controls. The default no-constraint completed-score kernel
+adds4096 independent float32 score-to-sort cases, including901 controls that
+distinguish native rounding from a combined double-precision formula. Neither
+kernel is connected to the native beam driver, tensor states or app recognition;
+the14-expression accuracy result in the Math2 route report is unchanged.
+An additional internal48-byte candidate heap preserves complete slot moves,
+zero-before-payload ordering and native equal/unordered float branches over
+4096 independently checked offers; it also remains separate from beam execution.
 
 ## Quality evidence
 
@@ -172,7 +177,13 @@ Details: [global compact](legacy-main-global-compact-materialization.md),
 [fresh textField INPUT registry and selected copy](legacy-fresh-textfield-input-context.md),
 [selected INPUT to shared WORD/CHAR/pending TEXT](legacy-main-selected-input-word-choices.md),
 [prepared Math2 candidate ordering](legacy-math-candidate-ordering.md),
-[remaining native Math2 beam route](legacy-math2-beam-route.md).
+[remaining native Math2 beam route](legacy-math2-beam-route.md),
+[beam width producers](legacy-math2-beam-width-producers.md),
+[observable token gate](legacy-math2-observable-token-gate.md),
+[restriction-map ownership](legacy-math2-restriction-map.md), and
+[score channels and prepared default completion score](legacy-math2-score-channels.md),
+[prepared candidate heap](legacy-math2-candidate-heap.md), and
+[step-limit and temperature producers](legacy-math2-step-temperature-producers.md).
 
 ## Remaining joins
 
@@ -204,8 +215,10 @@ Details: [global compact](legacy-main-global-compact-materialization.md),
   choice indices. Fresh020920 indices now retain insertion-order membership,
   exact-vector lookup and creation page/slot identity. Actual023260 ordering now
   clears inactive WORD control flags before checking CHAR controls, retaining
-  failure prefixes. Active control deletion, final source transforms, actual
-  C20 selection-registry ingress and document acceptance remain unjoined.
+  failure prefixes. The fresh selected INPUT result seed and identity-excluded
+  post-cleanup transform swap now retain the same vector owners, including
+  failed-export prefixes. Active control deletion, nonidentity source transforms,
+  imported SDK-page ingress and document acceptance remain unjoined.
 - Representative online handwriting evaluation with real pen-up events,
   Russian cursive, English, mixed text and mathematical notation before enabling
   the new path for automatic app replacement.
@@ -227,3 +240,12 @@ Details: [raw main integration](legacy-main-raw-plain-recognition.md),
 [UTF8 projection](legacy-main-word-utf8-projection.md),
 [result assembly gaps](legacy-main-result-assembly-roadmap.md), and
 [string wrapper gaps](legacy-main-string-wrapper-roadmap.md).
+
+The selected INPUT post-cleanup boundary and its vector ownership/failure
+checks are detailed in [document input transforms](legacy-main-document-input-transforms.md).
+
+The internal [prepared linked-glyph rewrite](legacy-prepared-published-glyph-rewrite.md)
+checks1555 cases against actual AL/category slices, including ordered double
+stores and stopped prefixes. Managed/Native output agrees with a portable raw
+resource oracle. This does not enable the real controller's F4 property or
+change the fresh no-op/main recognition path.
