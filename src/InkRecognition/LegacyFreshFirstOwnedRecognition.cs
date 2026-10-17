@@ -119,8 +119,22 @@ public sealed class LegacyFreshFirstOwnedRecognition
             Cuts,Prepared.SourceRanges.Graph,primary,contexts,scores,cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();return new(this,primary,contexts,materialized);
     }
+
+    /// <summary>Produce the selected literal first TEXT with native internal
+    /// word-boundary publication. The existing Run endpoint stays strict1word.</summary>
+    public LegacyFreshFirstOwnedTextRecognitionResult RunText(CancellationToken cancellationToken=default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();var primary=primaryProducer.Run(cancellationToken);
+        var contexts=LegacyFirstBlankContextPasses.Run(resource,Factory,Cuts,Prepared,primaryProducer,table,cancellationToken);
+        var text=LegacyFirstPlainTextMaterializer.Materialize(resource,this,table,primary,contexts,cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();return new(this,primary,contexts,text);
+    }
 }
 
 public sealed record LegacyFreshFirstOwnedRecognitionResult(LegacyFreshFirstOwnedRecognition Owner,
     LegacyFirstOrdinaryAcousticRecurrence Primary,LegacyFirstOrdinaryContextPasses Contexts,
     LegacyFirstMaterializedPlainResult Materialized);
+
+public sealed record LegacyFreshFirstOwnedTextRecognitionResult(LegacyFreshFirstOwnedRecognition Owner,
+    LegacyFirstOrdinaryAcousticRecurrence Primary,LegacyFirstOrdinaryContextPasses Contexts,
+    LegacyFirstMaterializedPlainText Text);
