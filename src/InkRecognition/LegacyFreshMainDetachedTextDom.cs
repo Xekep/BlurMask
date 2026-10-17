@@ -35,6 +35,7 @@ public sealed class LegacyFreshMainDetachedTextDom
     private static readonly ConditionalWeakTable<LegacyFreshMainSourceRangeUtf8,Lease> lifetime=new();
     private readonly object gate=new();
     private bool entered,faulted;
+    internal bool HasEnteredPrepared=>Volatile.Read(ref entered);
     public LegacyFreshMainSourceRangeUtf8 Sources {get;}
     public LegacyLibraryTextDomArena? Arena {get;private set;}
     public bool IsFaulted=>Volatile.Read(ref faulted);
@@ -93,10 +94,11 @@ public sealed class LegacyFreshMainDetachedTextDom
     public LegacyOwnedMainDetachedTextDom Build(CancellationToken token=default)=>BuildCore(-1,-1,token);
     //Prepared fault outcomes exercise fallible native services, not OS-page
     //allocator addresses or a public success/acceptance flag.
-    internal LegacyOwnedMainDetachedTextDom BuildPrepared(int failAt=-1,int cancelAt=-1,CancellationToken token=default)
-        =>BuildCore(failAt,cancelAt,token);
-    private LegacyOwnedMainDetachedTextDom BuildCore(int failAt,int cancelAt,CancellationToken token)
+    internal LegacyOwnedMainDetachedTextDom BuildPrepared(int failAt=-1,int cancelAt=-1,CancellationToken token=default,Action? afterCapture=null)
+        =>BuildCore(failAt,cancelAt,token,afterCapture);
+    private LegacyOwnedMainDetachedTextDom BuildCore(int failAt,int cancelAt,CancellationToken token,Action? afterCapture=null)
     {
+        using var operation=target?.EnterOperation(targetEpoch,token);
         lock(gate)
         {
             token.ThrowIfCancellationRequested();if(entered)throw new InvalidOperationException("Detached DOM construction is single-use, including failed prefixes.");
@@ -109,6 +111,7 @@ public sealed class LegacyFreshMainDetachedTextDom
                 if(target is not null)
                 {
                     var captured=target.CaptureInsertion(targetEpoch,token);before=captured.Before;previous=captured.Previous;
+                    afterCapture?.Invoke();
                     //061510 queues removal BEFORE source.V30. Fresh old-reader
                     //is null, so V70 clones its old payload into the new writer.
                     if(previous is not null)

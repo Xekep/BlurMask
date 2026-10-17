@@ -24,6 +24,7 @@ for(int index=0;index<samples.Length;index++)
  var state=LegacyFreshMainDocumentSelectedSources.Prepare(LegacyFreshMainDocumentCharacterCoverage.Prepare(LegacyFreshMainDocumentSourceCoverage.Prepare(LegacyFreshMainDocumentLineConsistency.Apply(text))));
  var indices=LegacyFreshMainDocumentSourceIndices.Prepare(state);indices.Run();var cleanup=LegacyFreshMainDocumentControlCleanup.Prepare(indices);cleanup.Run();
  var handoff=LegacyFreshMainDocumentCounterHandoff.Apply(LegacyFreshMainDocumentInputTransforms.Apply(cleanup));var source=LegacyFreshMainSourceRangeUtf8.Prepare(handoff);
+ if(index==0)ConcurrencyControls.Run(handoff);
  var registry=selected.CopyRegistryCounterStorage();var pending=handoff.Commands.Select(c=>c.CommandIdentity).ToArray();
  Reject(()=>LegacyFreshMainDetachedTextDom.Prepare(source,new(true)));
  var target=LegacyLibraryTextDomTarget.CreateFresh(source.Seed);var builder=LegacyFreshMainDetachedTextDom.PrepareForTarget(source,target);Reject(()=>builder.Build(new(true)));var result=builder.Build();

@@ -26,6 +26,21 @@ public sealed class LegacyLibraryTextDomTarget
     {lock(gate){token.ThrowIfCancellationRequested();if(!ReferenceEquals(Seed,seed)||!ReferenceEquals(Document,seed.Document))throw new ArgumentException("Exact seed/document target required.");ValidateEpoch(epoch,token);return epoch;}}
     internal void ValidateEpoch(long expected,CancellationToken token)
     {lock(gate){token.ThrowIfCancellationRequested();if(faulted||epoch!=expected)throw new InvalidOperationException("Faulted or stale library DOM target.");}}
+    //Target first, then builder-local gate. Holding this reentrant scope also
+    //protects a captured live child until its writer copy is complete.
+    internal IDisposable EnterOperation(long expected,CancellationToken token)
+    {
+        Monitor.Enter(gate);
+        try{ValidateEpoch(expected,token);return new OperationScope(gate);}
+        catch{Monitor.Exit(gate);throw;}
+    }
+    private sealed class OperationScope(object gate):IDisposable
+    {
+        private object? held=gate;
+        public void Dispose(){var value=Interlocked.Exchange(ref held,null);if(value is not null)Monitor.Exit(value);}
+    }
+    internal bool CanEnterOperationPrepared()
+    {if(!Monitor.TryEnter(gate))return false;Monitor.Exit(gate);return true;}
     internal (LegacyLibraryTextDomNode Before,LegacyDomNode? Previous) CaptureInsertion(long expected,CancellationToken token)
     {lock(gate){ValidateEpoch(expected,token);if(root.Children.Count>1||root.Children.Any(n=>n.Kind!=3||n.Name!="textResult"))throw new NotSupportedException("Only a fresh root or its one previously inserted textResult is supported.");return(Arena.Snapshot(root),root.Children.SingleOrDefault());}}
     public LegacyLibraryTextDomApplyResult Apply(LegacyLibraryTextDomEditResult actualEdit,CancellationToken token=default)
@@ -105,6 +120,7 @@ public sealed class LegacyLibraryTextDomInsertion
     private sealed class Lease {internal bool Claimed;}
     private static readonly ConditionalWeakTable<LegacyOwnedMainDetachedTextDom,Lease> lifetime=new();
     private int entered;
+    internal bool HasEnteredPrepared=>Volatile.Read(ref entered)!=0;
     public LegacyOwnedMainDetachedTextDom Source {get;}
     private LegacyLibraryTextDomInsertion(LegacyOwnedMainDetachedTextDom source){Source=source;}
     public static LegacyLibraryTextDomInsertion Prepare(LegacyOwnedMainDetachedTextDom actualSource,CancellationToken token=default)
@@ -117,10 +133,11 @@ public sealed class LegacyLibraryTextDomInsertion
         return new(actualSource);
     }
     public LegacyLibraryTextDomEditResult Export(CancellationToken token=default)=>ExportCore(-1,-1,token);
-    internal LegacyLibraryTextDomEditResult ExportPrepared(int fail=-1,int cancel=-1,CancellationToken token=default)=>ExportCore(fail,cancel,token);
-    private LegacyLibraryTextDomEditResult ExportCore(int fail,int cancel,CancellationToken token)
+    internal LegacyLibraryTextDomEditResult ExportPrepared(int fail=-1,int cancel=-1,CancellationToken token=default,Action? afterValidation=null)=>ExportCore(fail,cancel,token,afterValidation);
+    private LegacyLibraryTextDomEditResult ExportCore(int fail,int cancel,CancellationToken token,Action? afterValidation=null)
     {
-        token.ThrowIfCancellationRequested();var target=Source.Target!;target.ValidateEpoch(Source.TargetEpoch,token);
+        token.ThrowIfCancellationRequested();var target=Source.Target!;using var operation=target.EnterOperation(Source.TargetEpoch,token);
+        afterValidation?.Invoke();
         if(Interlocked.CompareExchange(ref entered,1,0)!=0)throw new InvalidOperationException("Export is single-use, including failed prefixes.");
         Source.Arena.BeginFaultScope(fail,cancel);var rows=new List<LegacyLibraryTextDomEditRow>();
         if(!Source.Arena.Allow("export-header")||!Source.Arena.Allow("export-array"))return new(Source,Source.BeforeTargetRoot!,Source.PreviousTargetNode,false,rows.ToArray());
