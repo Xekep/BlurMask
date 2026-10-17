@@ -210,6 +210,16 @@ public sealed class LegacyFreshMainGlobalWordTransitions
         path.RemoveRange(saved,path.Count-saved);return false;
     }
     internal LegacyMainGraphAppendBounds[] CopyGeometryState()=>mutableBounds.ToArray();
+    internal LegacyMainGraphAppendBounds ReadOwnedGeometryState(int group,CancellationToken token)
+    {
+        Enter(token);
+        try
+        {
+            if((uint)group>=(uint)mutableBounds.Length)throw new ArgumentOutOfRangeException(nameof(group));
+            return mutableBounds[group];
+        }
+        finally{Volatile.Write(ref active,0);}
+    }
     private static int DecodeContextNode(uint key)=>unchecked((int)(key<<1))>>8;
     private static bool Intersects(LegacyMainGraphAppendBounds a,LegacyMainGraphAppendBounds b)=>
         (a.MinimumX<=b.MinimumX||a.MinimumX<=b.MaximumX)&&(b.MaximumX<=a.MaximumX||b.MinimumX<=a.MaximumX)&&
