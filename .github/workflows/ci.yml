@@ -766,6 +766,8 @@ jobs:
           python tools/LegacySource247Wire.Probe/audit_output.py models .artifacts/legacy-source247-wire-managed.json
           dotnet run --project tools/LegacyFirstAcoustic119Wire.Probe -c Release -- models .artifacts/legacy-first-acoustic119-wire-managed.json
           python tools/LegacyFirstAcoustic119Wire.Probe/audit_output.py models .artifacts/legacy-first-acoustic119-wire-managed.json
+          dotnet run --project tools/LegacyPreparedNetwork107.Probe -c Release -- models models/ru-RU/legacy-engine-profile.json .artifacts/legacy-prepared-network107-managed.json
+          python tools/LegacyPreparedNetwork107.Probe/audit_output.py models .artifacts/legacy-prepared-network107-managed.json
           dotnet run --project tools/LegacyMainWordRanking.Probe -c Release -- .artifacts/legacy-main-word-ranking-managed.json
           python tools/LegacyMainWordRanking.Probe/audit_output.py .artifacts/legacy-main-word-ranking-managed.json
           dotnet run --project tools/LegacyMainGlyphChainCleanup.Probe -c Release -- .artifacts/legacy-main-glyph-chain-cleanup-managed.json
@@ -1407,6 +1409,7 @@ jobs:
             @{ Name = 'LegacyPreparedGlyphRewrite'; Args = @('models', '.artifacts/legacy-prepared-glyph-rewrite-native.json') },
             @{ Name = 'LegacySource247Wire'; Args = @('models', '.artifacts/legacy-source247-wire-native.json') },
             @{ Name = 'LegacyFirstAcoustic119Wire'; Args = @('models', '.artifacts/legacy-first-acoustic119-wire-native.json') },
+            @{ Name = 'LegacyPreparedNetwork107'; Args = @('models', 'models/ru-RU/legacy-engine-profile.json', '.artifacts/legacy-prepared-network107-native.json') },
             @{ Name = 'LegacyMainWordRanking'; Args = @('.artifacts/legacy-main-word-ranking-native.json') },
             @{ Name = 'LegacyMainGlyphChainCleanup'; Args = @('.artifacts/legacy-main-glyph-chain-cleanup-native.json') },
             @{ Name = 'LegacyMainWordAugmentationScan'; Args = @('.artifacts/legacy-main-word-augmentation-scan-native.json') },
@@ -2004,6 +2007,10 @@ jobs:
             if ($name -eq 'LegacyFirstAcoustic119Wire') {
               python tools/LegacyFirstAcoustic119Wire.Probe/audit_output.py models .artifacts/legacy-first-acoustic119-wire-native.json
               if ($LASTEXITCODE -ne 0) { throw 'LegacyFirstAcoustic119Wire independent audit failed' }
+            }
+            if ($name -eq 'LegacyPreparedNetwork107') {
+              python tools/LegacyPreparedNetwork107.Probe/audit_output.py models .artifacts/legacy-prepared-network107-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyPreparedNetwork107 independent audit failed' }
             }
             if ($name -eq 'LegacyMainWordRanking') {
               python tools/LegacyMainWordRanking.Probe/audit_output.py .artifacts/legacy-main-word-ranking-native.json
