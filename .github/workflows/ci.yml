@@ -622,6 +622,9 @@ jobs:
           python tools/LegacyMainWordUtf8.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-main-word-utf8-managed.json
           dotnet run --project tools/LegacyMainGeometricFallback.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-main-geometric-fallback-managed.json
           python tools/LegacyMainGeometricFallback.Probe/audit_output.py .artifacts/legacy-main-geometric-fallback-managed.json
+          python tools/LegacyMainResultScore.Probe/reference_controls.py .artifacts/legacy-main-result-score-controls.json
+          dotnet run --project tools/LegacyMainResultScore.Probe -c Release -- .artifacts/legacy-main-result-score-controls.json .artifacts/legacy-main-result-score-managed.json
+          python tools/LegacyMainResultScore.Probe/audit_output.py .artifacts/legacy-main-result-score-controls.json .artifacts/legacy-main-result-score-managed.json
           dotnet run --project tools/LegacyMainWordPacket.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-main-word-packet-managed.json
           python tools/LegacyMainWordPacket.Probe/audit_output.py .artifacts/legacy-main-word-packet-managed.json
           dotnet run --project tools/LegacyMainSourceWidth.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-main-source-width-managed.json
@@ -1094,6 +1097,7 @@ jobs:
             @{ Name = 'LegacyMainRawPlainRecognition'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-raw-plain-native.json') },
             @{ Name = 'LegacyMainWordUtf8'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-main-word-utf8-native.json') },
             @{ Name = 'LegacyMainGeometricFallback'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-main-geometric-fallback-native.json') },
+            @{ Name = 'LegacyMainResultScore'; Args = @('.artifacts/legacy-main-result-score-controls.json', '.artifacts/legacy-main-result-score-native.json') },
             @{ Name = 'LegacyMainWordPacket'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-main-word-packet-native.json') },
             @{ Name = 'LegacyMainSourceWidth'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', '.artifacts/legacy-main-source-width-native.json') },
             @{ Name = 'LegacyGlyphChainProduction'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-text-publication-data.json', '.artifacts/legacy-glyph-chain-native.json') },
@@ -1385,6 +1389,10 @@ jobs:
             if ($name -eq 'LegacyMainGeometricFallback') {
               python tools/LegacyMainGeometricFallback.Probe/audit_output.py .artifacts/legacy-main-geometric-fallback-native.json
               if ($LASTEXITCODE -ne 0) { throw 'LegacyMainGeometricFallback independent audit failed' }
+            }
+            if ($name -eq 'LegacyMainResultScore') {
+              python tools/LegacyMainResultScore.Probe/audit_output.py .artifacts/legacy-main-result-score-controls.json .artifacts/legacy-main-result-score-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyMainResultScore independent audit failed' }
             }
             if ($name -eq 'LegacyMainWordPacket') {
               python tools/LegacyMainWordPacket.Probe/audit_output.py .artifacts/legacy-main-word-packet-native.json
