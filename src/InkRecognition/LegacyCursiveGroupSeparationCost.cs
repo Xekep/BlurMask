@@ -49,7 +49,9 @@ public static class LegacyCursiveGroupSeparationCost
             if(transformed>4)logProbability=0;
             else if(transformed>=-4)
             {
-                int index=(int)((transformed+4)*255f+.5f);
+                //193860 ADDSS, CVTSS2SD, MULSD, ADDSD, CVTTSD2SI.
+                //Keeping the multiply/add in float can select the next bucket.
+                int index=(int)((double)(transformed+4f)*255d+.5d);
                 logProbability=nativeLogSigmoid256[index>>3];
             }
             float cost=-logProbability*8192f;
