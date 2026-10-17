@@ -1,0 +1,15 @@
+# Original-document C21 range operations
+
+`LegacyOwnedRawInkRangeOperations` restores C21.VB0 append/merge, VC0 intersection, VD0 subtraction, VE8 ordered equality and V118 containment over one immutable NEW `LegacyOwnedRawInkDocument`. The public arrays are explicitly prepared position vectors until the typed024F30 caller joins them. No label, winner, source ID or document point count is inferred.
+
+Ink C21 method table1800E5AC0 binds B0=080300, C0=080B40, D0=0812D0, E8=081700 and118=081CC0. Append07FAF0 merges using native binary searches, unsigned comparisons, endpoint-mode adjacency and consecutive whole-object joins. It preserves the selected original endpoint bytes. `07F920` only shrinks storage capacity; it is not a geometry-normalization algorithm. Equality compares the complete ordered first/last64-bit pairs and count, with no fraction canonicalization.
+
+For the searches, an FF fraction compares as zero at the same source/point/mode; stored bytes remain untouched unless a native branch replaces an endpoint. Containment's final last-endpoint comparison is raw unsigned, not fraction-normalized. Intersection with a mode4 first entry on either side is empty. Union with a mode4 first entry on either side is a no-op. Subtracting a degenerate mode4/mode4 range is a no-op.
+
+Subtraction080C60 computes the exact previous-end/next-start modes1/3/5/7. At whole-object boundaries it uses the previous or next ORIGINAL object's point count. C20 descriptor1800E4FF0 ->classdescriptor1800E4EF0 ->objecttable1800E5050 binds V140=06C9A0: a null owner, index>=objectCount or zero stored point count returns8000; otherwise it reads indexed16-byte record+0C. A NEW raw root has all original ordinary objects present, so known counts come from the immutable original strokes. The end's successor may be outside the document and then uses the native8000 sentinel. Sampled/current physical order never indexes those counts.
+
+Portable operations return active range arrays and do not serialize native vector pointers/capacity. Allocator failure, stale capacity bytes and address aliasing of source/destination vectors are not modeled. Reversed supplied intervals refuse. The portable budget is65536 active ranges. Cancellation leaves caller arrays unchanged.
+
+The independent Python oracle uses linear canonical interval operations, rather than the runtime binary-search mutation implementation. It generates physically valid original-source endpoints, compares4096 cases, checks6086 containment requests, and independently audits three actual decoded-source compositions after inference and projection. An additional exact-ASM wrapping-edge control keeps native first-minus2 unsigned behavior for a noncanonical first endpoint1; that result intentionally differs from ordinary mathematical union. No vendor binary is loaded or executed. Managed and Windows NativeAOT emit the same active arrays.
+
+The later typed processed-source owner must apply these operations in native024F30 order, including its later-glyph overlap ownership and mode4 downgrade. Running this kernel alone is not the complete024F30 wrapper or an accepted-text result.
