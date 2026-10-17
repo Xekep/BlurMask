@@ -20,7 +20,7 @@ absent. The producer still strips virtual symbols and reconstructs the seven
 special header roles. EN's virtual178/180/181 are restored through the native
 rules, so both217 masks happen to be enabled throughout. They are computed,
 not supplied as a diagnostic all-one vector. Mode13 source16C/1EC fields
-produce knowledge21700 (bit16 clear) and candidate pruning.
+produce knowledge21700 (mask0x10 clear) and candidate pruning.
 
 Engine053F20 invokes0573B0 after reading the stored AL. The constructor's NULL88
 alone is therefore insufficient. The static audit scans the exact EN AL's

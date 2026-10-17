@@ -12,14 +12,14 @@ Remaining AL+3 entries are impossible and raw header+8 label181 is disabled.
 
 The fresh no-property child keeps mode13/variant2.1D60D0 updates the actual
 container48 flags through virtual20;1BB020 reads the SAME object's virtual28.
-The actual source16C[13] mask3 gives flags21700, with bit16 clear. Source1EC16
+The actual source16C[13] mask3 gives flags21700, with mask0x10 clear. Source1EC16
 also enables pruning. These are not deductions from NoAssociated or from a
 caller-supplied semantic boolean.
 
 Unlike the RU110 cache, actual119 has eight positive groups,17 labels and
-individual coefficients≈.99. Examples are U+02B0/h, U+02B3/r and U+00B2/2.
+individual coefficientsв‰€.99. Examples are U+02B0/h, U+02B3/r and U+00B2/2.
 They are native stored source data, not post-hoc script or case replacement.
-With knowledge bit16 clear,1BB020 executes them after primitive and dot handling
+With knowledge mask0x10 clear,1BB020 executes them after primitive and dot handling
 and before1BBF80. For each group it computes the maximum enabled probability,
 then reads/writes each member in stored order using the original maximum.
 Repeated members and overlapping groups therefore preserve sequential effects.
