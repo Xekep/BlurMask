@@ -267,3 +267,11 @@ and failure prefixes; it does not execute the transaction or publish2E7/BE2.
 The [live contextual-quote property owner](legacy-contextual-quote-configuration-owner.md)
 is statically mapped; the current runtime path still uses the freshF4zero
 configuration. Property wiring proof is separate from a configured recognizer.
+
+The [result identifier](legacy-library-text-result-identifier.md) now restores
+model62 SplitMix64 and raw-order UUID formatting, retaining the same result
+identity before WORD publication. The library seeds its own generator from
+cross-platform cryptographic bytes; native process-address/time seeding is an
+explicit portability adaptation. Numeric sequences and live entropy-derived
+identifiers are independently checked. This does not create the final DOM or
+execute BE2 edit-result transport.
