@@ -61,3 +61,11 @@ aggregate functions are preserved at
 functions extracted from the full Ghidra export, native disassembly and SHA-256
 provenance. Its evidence requires both new-pool string interning and copied
 source ranges; the isolated metadata/string copy is not a complete transport.
+
+The CB8 pending-tag allocator, constructor, late tag resolution, old/new tag
+collection and stale-selection removal helpers are preserved under
+`myscript/output/math2-cb8-tag-owner-20261018/`, with ten complete focused
+functions, disassembly and SHA provenance. Temporary IDs start2 and are
+separate from registered Ink IDs. This evidence does not create a native
+math-field/C23 owner or original-page acceptance. The checked source-aware
+first-copy runtime now separately owns both new-pool text and actual C79 ranges.
