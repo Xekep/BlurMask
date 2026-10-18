@@ -22,6 +22,7 @@ public sealed class LegacyOwnedEnglish119Candidates
     private readonly LegacyCursiveCutResult cuts;
     private readonly LegacySourcePointChronology chronology;
     private readonly LegacyOrdinaryGraphSourceRanges ranges;
+    internal LegacyOrdinaryGraphSourceRanges SourceRanges=>ranges;
     private readonly LegacyPreparedNetwork107Evaluator[] networks;
     private readonly int[] liveGroups;
     private LegacyOwnedEnglish119Candidates(LegacyOwnedEnglishLiteFullPreprocessing owner,LegacySampler297WireProfile sampler,
