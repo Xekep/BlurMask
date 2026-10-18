@@ -10,12 +10,15 @@ Registered CB8 metadata1ED890 points to descriptor1ED8D8, virtual table1ED830
 and constructor interface1ED910. Its parameterized constructor032C00 requires
 exactly40 bytes and non-null DOM and Ink owners. It retains those owners,
 creates a separate BCC with parameter byte0=0 and the retained DOM name owner,
-optionally clones/attaches the source subtree, then allocates its72-byte state.
+optionally creates/attaches its named root, then allocates its72-byte state.
 That state starts its temporary counter at2. Old/new tag vectors initially
 have count0; their capacities use the actual retained Ink registry size.
 
 The028070 caller supplies its temporary BCC and a clone of the actual selected
 Ink, with descriptor name `mathResult`, category102 and actual source context.
+The descriptor name creates the CB8-owned BCC's `mathResult` root; it is not
+a source-subtree pointer. This CB8-owned BCC is separate from028070's earlier
+temporary BCC containing the copied math field.
 This is another Ink clone, not the original registry and not a textField
 context inferred from similar row sizes. Source object IDs, INPUT IDs,
 temporary CB8 IDs and registered math-selection IDs remain distinct domains.
