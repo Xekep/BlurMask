@@ -47,3 +47,10 @@ The readonly nonempty-source correction and matching helpers040CD0/0409F0,
 `myscript/output/math2-existing-source-column-20261018/`. Each contains the
 complete focused export, references and root SHA-256 provenance. These local
 analysis files remain excluded from Git and releases.
+
+The readonly027E20/028070 symbol/result publisher export and references are
+preserved at `myscript/output/math2-result-transport-20261018/`. The same folder
+retains the02AF50 caller extracted from the complete local Document export,
+with source/native-region SHA provenance. Symbol40-byte input rows and the
+separate32-byte freeze rows do not establish the missing decoder-to-source
+transport join or native document acceptance.
