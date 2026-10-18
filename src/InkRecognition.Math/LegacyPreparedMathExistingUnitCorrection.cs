@@ -73,9 +73,9 @@ internal sealed class LegacyPreparedMathExistingUnitCorrection
         for (int pair = 0; pair < pairs; pair++)
         {
             int row = rowForPair[pair];
-            //040F18 uses the compressed matching row DIRECTLY in the updated
-            //output vector. Do not rebase through observableOriginalRows here.
-            uint value = row < 0 ? uint.MaxValue : output[row];
+            //040F18 uses040CD0 param7, the observable original-row map.
+            //Caller0426F0 binds it separately from param6/output units.
+            uint value = row < 0 ? uint.MaxValue : (uint)observableOriginalRows[row];
             association[pair * 2] = value; association[pair * 2 + 1] = value;
         }
         token.ThrowIfCancellationRequested();

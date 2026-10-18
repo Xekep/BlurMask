@@ -33,9 +33,9 @@ for c in capture['Rows']:
  for k in range(p):
   if k not in pairrows:value=0xffffffff;unmatched+=1
   else:
-   r=pairrows[k];value=out[r]
-   holes+=value!=out[c['Map'][r]]
+   r=pairrows[k];value=c['Map'][r]
+   holes+=value!=r
   expected.extend([value,value])
  assert expected==c['Associations']
 assert holes>100 and rewrites>1000 and unmatched>100
-print(f'PASS independent2048 corrections/{rewrites} rewrites/{holes} literal compressed-row discriminators/{unmatched} unmatched pairs/14 guards; prepared only')
+print(f'PASS independent2048 corrections/{rewrites} rewrites/{holes} original-row index discriminators/{unmatched} unmatched pairs/14 guards; prepared only')
