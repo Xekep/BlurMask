@@ -3032,6 +3032,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native inserted units failed.' }
           python tools/LegacyMathInsertedUnits.Probe/audit_output.py .artifacts/math-inserted-units-native.json
           if ($LASTEXITCODE -ne 0) { throw 'Native inserted units oracle failed.' }
+          dotnet run --project tools/LegacyMathAuxiliaryRows.Probe -c Release -- .artifacts/math-auxiliary-rows-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed auxiliary rows failed.' }
+          python tools/LegacyMathAuxiliaryRows.Probe/audit_output.py .artifacts/math-auxiliary-rows-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed auxiliary rows oracle failed.' }
+          dotnet publish tools/LegacyMathAuxiliaryRows.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-auxiliary-rows-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Auxiliary rows probe publish failed.' }
+          $auxiliaryRows = if ($IsWindows) { '.artifacts/math-auxiliary-rows-probe/LegacyMathAuxiliaryRows.Probe.exe' } else { '.artifacts/math-auxiliary-rows-probe/LegacyMathAuxiliaryRows.Probe' }
+          & $auxiliaryRows .artifacts/math-auxiliary-rows-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native auxiliary rows failed.' }
+          python tools/LegacyMathAuxiliaryRows.Probe/audit_output.py .artifacts/math-auxiliary-rows-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native auxiliary rows oracle failed.' }
           dotnet run --project tools/LegacyMathUnusedUnitPruning.Probe -c Release -- models/math2/math2-unwrapped.res .artifacts/math-unused-unit-pruning-managed.json
           if ($LASTEXITCODE -ne 0) { throw 'Managed unused unit pruning failed.' }
           python tools/LegacyMathUnusedUnitPruning.Probe/audit_output.py models/math2/math2-unwrapped.res .artifacts/math-unused-unit-pruning-managed.json
