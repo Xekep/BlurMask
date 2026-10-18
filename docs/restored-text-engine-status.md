@@ -32,8 +32,13 @@ same124 sources, with no repeated network inference. The mechanically shared
 kernel preserves the old Russian context capture. The
 [owning terminal stage](legacy-english119-owned-terminal.md) now selects124 actual
 FIRST winners and306 complete predecessor cells without further inference;
-independent raw-resource/B8 checks and fresh NativeAOT agree. Rich273/WORD
-publication and word confidence remain unfinished. These are component results,
+independent raw-resource/B8 checks and fresh NativeAOT agree. The new
+[plain rich WORD components](legacy-english119-plain-text.md) now retain that
+same terminal/source/cache through274 glyphs and276/275 WORD publication:
+124 inputs,152 ordinary words and22 real interior delimiters agree in Managed
+and fresh NativeAOT, including explicit allocator residue. The shared numeric
+loop preserves the old Russian captures. Full serialized273/TOP18 transport,
+source720 and accepted UTF8 remain unfinished. These are component results,
 not English quality or app readiness.
 
 The [owned Math2 completion stage](legacy-math2-owned-completed-records.md)
@@ -85,7 +90,11 @@ it does not choose an easier replacement candidate. The additive
 EE4 syntax rules on the same owned AL and complete retained vector.20 actual
 records, including five structural results,1614 independent syntax controls
 and18 failure prefixes agree in Managed/NativeAOT; all nine older probe
-captures remain unchanged. Full formula output remains unfinished. The
+captures remain unchanged. The [native mean-X sorter](legacy-math2-mean-x-order.md)
+also replaces the incorrect unconditional stable ordering at21 or more strokes.
+4224 independent record controls and nine actual feature inputs verify the
+20/21 threshold; all eight earlier feature fixtures retain zero error.
+Full formula output remains unfinished. The
 [first-result copy proof](legacy-math2-first-result-copy.md) establishes that
 native transport must copy both new-pool strings and source ranges. The present
 interval rows omit C79-derived source ranges, so a passing isolated string-copy
@@ -155,8 +164,15 @@ streams and1278 guards pass an independent ordered DOM/registry/history oracle
 and fresh NativeAOT. Prior INPUT and document captures remain unchanged. This
 is an explicit library history-journal adaptation; joining that original owner
 to the selected pre-NN processing context remains unfinished.
+The [selected field owner](legacy-library-original-selected-field-context.md)
+now retains the exact original/chosen entry, clones the selected PAGE field and
+copies every matching INPUT ID plus original Next.272 actual selected copies,
+350 failure/cancellation prefixes and2191 guards pass independent full DOM/raw/
+registry checks and fresh NativeAOT. The selected worker's bare reader context
+is explicitly null; it is not relabeled as the original page context. The
+additive processing-context/publication join remains under development.
 
-The exact committed app at2fa618a builds with0 warnings and passes headless
+The exact committed app at6f7fa62 builds with0 warnings and passes headless
 `--ai-pen-test`. Russian diagnostics remain4/9 exact with16/33 character edits;
 no new release or full-engine readiness is asserted. The new
 [recorded error evidence](russian-recorded-error-evidence.md) traces actual
