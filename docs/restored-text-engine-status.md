@@ -26,8 +26,12 @@ with233 discriminating controls and unchanged prior global captures. The
 same119 cache, actual source policy and ordered geometry callbacks without
 additional inference:124 sources,43267 proposals and3850 primary records pass
 independent checks and fresh NativeAOT. Old Russian primary/context captures
-remain unchanged. English context/terminal/WORD scheduling and word confidence
-remain unfinished. These are component results, not English quality or app readiness.
+remain unchanged. The [owning English context stage](legacy-english119-owned-context.md)
+now adds actual A8/B0/B8 tables:7700 records and56854 ordered callbacks on the
+same124 sources, with no repeated network inference. The mechanically shared
+kernel preserves the old Russian context capture. English terminal/WORD
+scheduling and word confidence remain unfinished. These are component results,
+not English quality or app readiness.
 
 The [owned Math2 completion stage](legacy-math2-owned-completed-records.md)
 now retains11 actual EOS records with same-event provenance, common-secondary
@@ -69,10 +73,18 @@ does not accept a supplied existing expression. The
 [final owner ordering](legacy-math2-owned-final-completed-ordering.md) now
 sorts these postprocessed records, retains20 and releases47 tail owners in
 native ascending order;18 failure prefixes and256 prepared whole-record sort
-controls pass independent checks and fresh NativeAOT. Formula output remains
+controls pass independent checks and fresh NativeAOT. The
+[ordinary output owner](legacy-math2-owned-ordinary-output.md) now writes separate
+UTF8 alternatives and maps for four actual records using their same per-record
+string pools. It refuses the entire width16 vector containing structured rules;
+it does not choose an easier replacement candidate. Full formula output remains
 unfinished; the [native formatter route](legacy-math2-completed-output-route.md)
 identifies14 structural rules, shared string ownership and publication/failure
-boundaries without claiming those algorithms are all restored. Separately prepared
+boundaries without claiming those algorithms are all restored. The complete
+[EE4 parser inventory](legacy-math2-ee4-formatter.md) and
+[symbol/source DOM transport](legacy-math2-symbol-dom-transport.md) provide
+checked static contracts for the next joins, not implemented accepted formulas.
+Separately prepared
 [column matching](legacy-math2-column-matching.md) and
 [existing-unit correction](legacy-math2-existing-unit-correction.md) pass4100
 and2048 independent finite controls and fresh NativeAOT; they do not establish
@@ -80,6 +92,12 @@ an actual nonempty C25 source or its full EF4 integration. Prepared source-aware
 assignments, inserted units and auxiliary rows also have independent numerical
 oracles; cross-helper controls preserve original output indices through
 correction and insertion. Unknown native padding remains explicitly unknown.
+The [candidate lifetime correction](legacy-math2-candidate-retention.md) releases
+old intermediate score owners after consuming Apply/failure/disposal while
+retaining exact completed-event identity. Forced GC on67 actual records reduces
+reachable candidate owners12 to2 with unchanged semantic/EF4/final payloads;
+Managed/Native lifetime checks and nine old probe captures pass. This is not a
+process RSS measurement.
 
 The [library DOM cache transport](legacy-library-text-dom-transport-cache.md)
 now transfers actual same-source pending C4D and exported BE2 owners with
@@ -122,7 +140,7 @@ library replacement and2048 prepared tree cases pass independent checks and
 fresh NativeAOT. Claimed preflights must both succeed; the target gate remains
 held across replay/apply so a stale compatibility result cannot authorize an edit.
 
-The exact committed app at22205c2 builds with0 warnings and passes headless
+The exact committed app atb2795de builds with0 warnings and passes headless
 `--ai-pen-test`. Russian diagnostics remain4/9 exact with16/33 character edits;
 no new release or full-engine readiness is asserted. The new
 [recorded error evidence](russian-recorded-error-evidence.md) traces actual
