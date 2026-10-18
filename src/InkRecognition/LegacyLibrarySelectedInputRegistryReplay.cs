@@ -21,6 +21,7 @@ public sealed class LegacyLibrarySelectedInputRegistryReplay
     public LegacyOwnedFreshTextSourceContext TransactionOwner {get;}
     public LegacyLibraryTextDomTransportRow TransportRow {get;}
     public LegacyLibrarySelectedInputRegistryState State {get{lock(gate)return state;}}
+    internal bool HasEntered {get{lock(gate)return entered;}}
 
     internal LegacyLibrarySelectedInputRegistryReplay(LegacyLibraryTextPublicationDocument document,
         LegacyLibraryTextPublicationScope scope,LegacyLibraryTextDomTransportRow row,

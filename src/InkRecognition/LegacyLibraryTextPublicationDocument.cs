@@ -27,12 +27,14 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
     private LegacyLibraryTextDomTransportRow? row;
     private LegacyLibraryTextDomApplyResult? applied;
     private LegacyLibrarySelectedInputRegistryReplay? registryReplay;
+    private LegacyLibraryOriginalInputPatchCompatibility? originalCompatibility;
     private LegacyLibraryTextPublicationDocumentSnapshot snapshot;
     public LegacyOwnedRawInkDocument Document=>scope.Document;
     public bool IsFaulted {get{lock(gate)return faulted;}}
     /// <summary>The one library selected-registry replay retained by this
     /// receipt. Its state is separate from historical INPUT and DOM apply.</summary>
     public LegacyLibrarySelectedInputRegistryReplay? SelectedRegistryReplay {get{lock(gate)return registryReplay;}}
+    public LegacyLibraryOriginalInputPatchCompatibility? OriginalPatchCompatibility {get{lock(gate)return originalCompatibility;}}
     public LegacyLibraryTextPublicationDocumentSnapshot Snapshot {get{lock(gate)return snapshot;}}
 
     private LegacyLibraryTextPublicationDocument(LegacyLibraryTextPublicationScope scope,
@@ -167,6 +169,31 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
         {
             Validate(token);ValidateRegistrySource(token);
             if(!ReferenceEquals(actualReplay,registryReplay))throw new ArgumentException("Exact receipt-owned replay required.");
+            if(originalCompatibility is not null&&!originalCompatibility.State.IsReady)
+                throw new InvalidOperationException("The claimed original-input preflight must finish successfully and report compatibility.");
+            return action();
+        }
+    }
+    internal LegacyLibraryOriginalInputPatchCompatibility ClaimOriginalCompatibility(
+        LegacyLibrarySelectedInputRegistryReplay actualReplay,CancellationToken token)
+    {
+        lock(gate)
+        {
+            Validate(token);ValidateRegistrySource(token);
+            if(!ReferenceEquals(actualReplay,registryReplay))throw new ArgumentException("Exact receipt-owned replay required.");
+            if(originalCompatibility is not null||actualReplay.HasEntered)
+                throw new InvalidOperationException("One original-input preflight must precede registry replay entry.");
+            var owner=new LegacyLibraryOriginalInputPatchCompatibility(actualReplay,token);
+            originalCompatibility=owner;return owner;
+        }
+    }
+    internal T WithOriginalCompatibility<T>(LegacyLibraryOriginalInputPatchCompatibility actual,Func<T> action,CancellationToken token)
+    {
+        lock(gate)
+        {
+            Validate(token);ValidateRegistrySource(token);
+            if(!ReferenceEquals(actual,originalCompatibility)||!ReferenceEquals(actual.Replay,registryReplay)||actual.Replay.HasEntered)
+                throw new InvalidOperationException("Exact unconsumed original-input preflight required.");
             return action();
         }
     }
