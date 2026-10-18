@@ -35,6 +35,19 @@ public sealed class LegacyFreshMainGlobalPlainRecognition
         ArgumentNullException.ThrowIfNull(table); ArgumentNullException.ThrowIfNull(caseData);
         ArgumentNullException.ThrowIfNull(publication); token.ThrowIfCancellationRequested();
         var document=LegacyOwnedRawInkDocument.Create(raw,token);
+        return PrepareOwnedDocument(acoustic,linguistic,model,activations,spatial30,physical50,
+            document,resolution,table,caseData,publication,token);
+    }
+
+    internal static LegacyFreshMainGlobalPlainRecognition PrepareOwnedDocument(byte[] acoustic,
+        byte[] linguistic, LegacyRussianModelBundle model, LegacyInkActivations activations,
+        byte[] spatial30, byte[] physical50, LegacyOwnedRawInkDocument document, float resolution,
+        LegacyCursiveSeparationTable table, LegacyNativeCaseData caseData,
+        LegacyNativeTextPublicationData publication, CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+        ArgumentNullException.ThrowIfNull(table); ArgumentNullException.ThrowIfNull(caseData);
+        ArgumentNullException.ThrowIfNull(publication); token.ThrowIfCancellationRequested();
         var input=LegacyFreshMainOwnedTextInputPreparation.Prepare(acoustic,spatial30,physical50,
             document.Strokes,resolution,activations,table,caseData,publication,token);
         return new(acoustic,linguistic,model,activations,table,caseData,publication,input,document);

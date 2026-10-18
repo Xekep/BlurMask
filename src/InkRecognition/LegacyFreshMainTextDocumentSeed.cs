@@ -18,7 +18,7 @@ public sealed class LegacyFreshMainTextDocumentSeed
     public LegacyOwnedRawInkDocument Document=>InputBinding.Document;
     /// <summary>The actual pre-NN imported2DA for the adopted route; old
     /// independently constructed seeds have no processing-result owner.</summary>
-    public LegacyLibraryTextProcessingResult? ProcessingResult=>shared.PublicationScope?.Context.Result;
+    public LegacyLibraryTextProcessingResult? ProcessingResult=>shared.ProcessingContext?.Result;
     public long SourceTag30=>InputBinding.RegistryId;
     public int InitialDocumentAlternativeCountD8=>0;
     public int InitialTransformCount110=>initialTransforms.Count;
@@ -26,7 +26,7 @@ public sealed class LegacyFreshMainTextDocumentSeed
     /// with an explicitly library-owned cryptographic initial state.</summary>
     private LegacyLibraryTextResultIdentifier? identifier;
     public LegacyLibraryTextResultIdentifier LibraryIdentifier38
-    {get{shared.PublicationScope?.Validate();return identifier??throw new InvalidOperationException("Publication identifier has not yet been initialized.");}}
+    {get{shared.ValidateLifetime();return identifier??throw new InvalidOperationException("Publication identifier has not yet been initialized.");}}
     internal byte[] CopyIdentifier38()=>identifier?.CopyRawStorage16()??new byte[16];
     internal void InitializePublicationIdentifier()
     {

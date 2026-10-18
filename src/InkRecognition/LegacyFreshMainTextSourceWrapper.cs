@@ -254,6 +254,9 @@ internal sealed class LegacyMainSharedTextSourceState : IDisposable
     internal LegacyFreshMainPlainResultOwnership TopOwner=>topOwner??throw new InvalidOperationException("Actual TOP is not yet bound.");
     internal LegacyNativeUtf8StringPool Strings{get;}
     internal LegacyLibraryTextPublicationScope? PublicationScope{get;}
+    internal LegacyLibraryGlobalTextPublicationScope? GlobalPublicationScope{get;}
+    internal LegacyLibraryTextProcessingContext? ProcessingContext=>PublicationScope?.Context??GlobalPublicationScope?.Context;
+    internal void ValidateLifetime(){PublicationScope?.Validate();GlobalPublicationScope?.Validate();}
     internal LegacyOwnedMainTextSourceInterner Characters{get;}
     internal LegacyOwnedMainTextSourceInterner Words{get;}
     internal LegacyOwnedFreshTextSourceContext Selections{get;}
@@ -288,5 +291,23 @@ internal sealed class LegacyMainSharedTextSourceState : IDisposable
         topOwner=top;DocumentSeed!.InitializePublicationIdentifier();
         PublicationScope!.Context.Result.CapturePublicationIdentifier(DocumentSeed);
     }
-    public void Dispose(){if(PublicationScope is null)Strings.Dispose();}
+    internal LegacyFreshMainGlobalPlainResultOwnership? GlobalTopOwner{get;private set;}
+    internal LegacyMainSharedTextSourceState(LegacyLibraryGlobalTextPublicationScope scope,
+        LegacyLibraryTextProcessingContext context)
+    {
+        GlobalPublicationScope=scope;Document=context.Document;Strings=context.Strings;
+        Characters=LegacyOwnedMainTextSourceInterner.Prepare(Document);Words=LegacyOwnedMainTextSourceInterner.Prepare(Document);
+        Selections=LegacyOwnedFreshTextSourceContext.PrepareSelectedBinding(context.InputBinding);
+        DocumentSeed=new(this,context.InputBinding,deferIdentifier:true);
+        context.Result.BindPublicationSeed(DocumentSeed);
+    }
+    internal void BindActualGlobalTop(LegacyFreshMainGlobalPlainResultOwnership top)
+    {
+        ValidateLifetime();
+        if(GlobalPublicationScope is null||GlobalTopOwner is not null||topOwner is not null)
+            throw new InvalidOperationException("Actual global TOP binding is single-use and source typed.");
+        GlobalTopOwner=top;DocumentSeed!.InitializePublicationIdentifier();
+        GlobalPublicationScope.Context.Result.CapturePublicationIdentifier(DocumentSeed);
+    }
+    public void Dispose(){if(GlobalPublicationScope is not null)return;if(PublicationScope is null)Strings.Dispose();}
 }

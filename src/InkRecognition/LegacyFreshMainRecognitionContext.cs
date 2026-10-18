@@ -69,5 +69,11 @@ public sealed class LegacyFreshMainRecognitionContext
         LegacyFreshMainConfiguredSingleLinePlainRecognition.PrepareOwnedDocument(acoustic,linguistic,model,
             activations,spatial30,physical50,document,resolution,table,caseData,publication,token);
 
+    internal LegacyFreshMainGlobalPlainRecognition PrepareGlobalDocument(
+        LegacyOwnedRawInkDocument document,float resolution,LegacyCursiveSeparationTable table,
+        LegacyNativeCaseData caseData,LegacyNativeTextPublicationData publication,CancellationToken token) =>
+        LegacyFreshMainGlobalPlainRecognition.PrepareOwnedDocument(acoustic,linguistic,model,
+            activations,spatial30,physical50,document,resolution,table,caseData,publication,token);
+
     internal ReadOnlySpan<byte> AcousticResource => acoustic;
 }

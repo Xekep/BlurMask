@@ -1,0 +1,3 @@
+import argparse,subprocess,sys
+from pathlib import Path
+p=argparse.ArgumentParser();p.add_argument('program',type=Path);p.add_argument('capture',type=Path);p.add_argument('--models',type=Path);a=p.parse_args();root=Path(__file__).resolve().parents[2];models=(a.models or root/'models').resolve();program=a.program.resolve();command=['dotnet',str(program)]if program.suffix=='.dll'else[str(program)];subprocess.run(command+[str(models),str(a.capture.resolve())],check=True);subprocess.run([sys.executable,'-I',str(Path(__file__).with_name('audit_output.py')),str(models/'ru-RU/ru_RU-ak-cur.lite.res'),str(a.capture.resolve())],check=True)
