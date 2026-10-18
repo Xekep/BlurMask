@@ -34,9 +34,14 @@ primary/secondary, EF4 payload and Library. This is a managed ownership/memory
 adaptation, not a native pointer image or allocator/padding equivalence.
 
 The native caller enters this tail even on earlier failure exits. The new API
-deliberately requires a **successful** EF4 token. Native failure-exit tail
-orchestration is still a separate join. Injected managed faults below demonstrate
-cleanup ownership, not native throwing-destructor behavior.
+deliberately requires a **successful** EF4 token. The later
+[external-output audit](legacy-math2-completed-output-route.md) proves that
+`047C50` discards every failed local vector without publishing or formatting it.
+For that scoped no-constraint failure outcome, keeping the poison and disposing
+all owners without sorting is an intentional portable cleanup adaptation, not
+a functional output blocker. Native intermediate ordering/allocator ABI is not
+claimed. Injected managed faults below demonstrate cleanup ownership, not native
+throwing-destructor behavior.
 
 ## Identity, budget and failure ownership
 
@@ -111,5 +116,6 @@ python tools/handwriting/audit_math2_final_completed_ordering.py <static-report.
 ```
 
 The static tool reads vendor PE bytes only. No vendor SDK execution or GUI is
-used. Remaining joins include failure-exit tail orchestration, non-raw-existing
-source policies, final output transport and application acceptance.
+used. Remaining joins include non-raw-existing source policies, full EE4 grammar,
+final output transport and application acceptance. Failure cleanup remains a
+deliberate portable adaptation with no partial published result.
