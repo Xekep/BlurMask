@@ -145,12 +145,21 @@ INPUT registry and same binding through pre-NN2C1/2DA/shared3E/Seed and actual
 WORD/CHAR/TEXT. Six invocations/12 alternatives/98 CHAR40 records/182 guards
 pass independent checks and fresh NativeAOT, with the old scope unchanged.
 Its [selected continuation proof](legacy-original-selected-document-continuation.md)
-establishes exact chosen-C22 export and full-registry replay; the corresponding
-new-route DOM continuation is still being implemented. The
+establishes exact chosen-C22 export and full-registry replay. The named
+[document continuation](legacy-library-original-selected-document.md) now
+joins these to the actual pending transaction, full tree, edit transport and
+explicit library-target application: six documents/472 nodes/222 guards and
+the old eight regression captures pass Managed/NativeAOT. Native original-page
+CBB/store/history acceptance remains unfinished. The
 [global publication plan](legacy-global-text-publication-plan.md) separately
-establishes live TOP/source completion before detached byte import. Its runtime
-V68/source-rich bridge remains unfinished; existing imported completion is not
-a substitute. The
+establishes live TOP/source completion before detached byte import. The
+[bounded global source owner](legacy-global-pre-nn-publication.md) now retains
+the same selected document before NN and completes actual forward count/fill,
+ranking and275 scores for one ordinary no-pending/no-bit8 WORD. Six actual
+scopes/126 cached NN groups/720 full WORD bytes/212 guards pass independent
+checks and NativeAOT without repeating inference. Global glyph refresh,
+source-rich CHAR/WORD/TEXT and final document publication remain unfinished;
+existing imported completion is not a substitute. The
 [owning document publisher](legacy-library-text-publication-document.md)
 now joins source lines, TEXT registration, coverage, cleanup, detached DOM,
 pending edits and BE2/cache transfer under that same scope. Its independent
