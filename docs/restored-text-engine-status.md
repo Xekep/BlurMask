@@ -21,9 +21,13 @@ values/32769 scalar controls pass independent checks and NativeAOT. The new
 the same cache and source geometry without additional inference;3241 groups
 and2207121 explicit cost requests pass independent raw-resource checks. A
 shared geometry bucket calculation now follows the native F32-to-F64 sequence,
-with233 discriminating controls and unchanged prior global captures. Word
-confidence and the primary word scheduler remain unfinished. These are component
-results, not English quality or app readiness.
+with233 discriminating controls and unchanged prior global captures. The
+[owned primary recurrence](legacy-english119-owned-primary.md) now joins that
+same119 cache, actual source policy and ordered geometry callbacks without
+additional inference:124 sources,43267 proposals and3850 primary records pass
+independent checks and fresh NativeAOT. Old Russian primary/context captures
+remain unchanged. English context/terminal/WORD scheduling and word confidence
+remain unfinished. These are component results, not English quality or app readiness.
 
 The [owned Math2 completion stage](legacy-math2-owned-completed-records.md)
 now retains11 actual EOS records with same-event provenance, common-secondary
@@ -48,8 +52,8 @@ on the fixture; this is not a process-memory measurement. Separate
 and6143 prepared controls with independent oracles and fresh NativeAOT.
 The [cold request proof](legacy-math2-ef4-control-flow.md) establishes that a
 fresh, unmodified EEB request selects the nonzero correction branch. Prepared
-byte-zero assignment is not a substitute. Final completed ordering, loop
-remaining EF4 correction and final acceptance are separate. The new
+byte-zero assignment is not a substitute. Existing-expression EF4 correction
+and final acceptance remain separate. The new
 [owning raw attention history](legacy-math2-owned-raw-attention-history.md)
 retains one actual[S,B,1] output per step with a16MiB total retained-payload
 budget, then reconstructs only requested actual-source matrices.67 actual
@@ -61,12 +65,21 @@ boundary controls and16384 inserted-unit preservation controls.
 The [raw-only EF4 owner](legacy-math2-owned-raw-only-ef4.md) now connects actual
 pen input, recording, initial ordering, historical attention, pruning and score
 updates for67 actual records, including19 failure/budget prefixes. It deliberately
-does not accept a supplied existing expression. Final ordering, truncation and
-formula output remain unfinished. Separately prepared
+does not accept a supplied existing expression. The
+[final owner ordering](legacy-math2-owned-final-completed-ordering.md) now
+sorts these postprocessed records, retains20 and releases47 tail owners in
+native ascending order;18 failure prefixes and256 prepared whole-record sort
+controls pass independent checks and fresh NativeAOT. Formula output remains
+unfinished; the [native formatter route](legacy-math2-completed-output-route.md)
+identifies14 structural rules, shared string ownership and publication/failure
+boundaries without claiming those algorithms are all restored. Separately prepared
 [column matching](legacy-math2-column-matching.md) and
 [existing-unit correction](legacy-math2-existing-unit-correction.md) pass4100
 and2048 independent finite controls and fresh NativeAOT; they do not establish
-an actual nonempty C25 source or its full EF4 integration.
+an actual nonempty C25 source or its full EF4 integration. Prepared source-aware
+assignments, inserted units and auxiliary rows also have independent numerical
+oracles; cross-helper controls preserve original output indices through
+correction and insertion. Unknown native padding remains explicitly unknown.
 
 The [library DOM cache transport](legacy-library-text-dom-transport-cache.md)
 now transfers actual same-source pending C4D and exported BE2 owners with
@@ -99,9 +112,17 @@ The [selected INPUT registry replay](legacy-library-selected-input-registry-repl
 now retains an active library overlay of the exact transferred transaction,
 with24 actual selections/40 raw range records/91 guards. Once claimed, a pending
 or faulted replay blocks document apply. This overlay remains distinct from
-the original native SDK receiver and page/history acceptance.
+the original native SDK receiver and page/history acceptance. The
+[original INPUT preflight](legacy-library-original-input-patch-compatibility.md)
+now checks the same pending command ranges before replay. The
+[DOM scratch preflight](legacy-library-dom-patch-compatibility.md) independently
+clones the library target, resolves all parent paths before editing, and
+simulates insert-before/detach operations. Four actual documents, one genuine
+library replacement and2048 prepared tree cases pass independent checks and
+fresh NativeAOT. Claimed preflights must both succeed; the target gate remains
+held across replay/apply so a stale compatibility result cannot authorize an edit.
 
-The exact committed app at4bfdc8a builds with0 warnings and passes headless
+The exact committed app at22205c2 builds with0 warnings and passes headless
 `--ai-pen-test`. Russian diagnostics remain4/9 exact with16/33 character edits;
 no new release or full-engine readiness is asserted. The new
 [recorded error evidence](russian-recorded-error-evidence.md) traces actual
