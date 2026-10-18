@@ -782,6 +782,8 @@ jobs:
           python tools/LegacyTextDomTreeValue.Probe/audit_output.py .artifacts/legacy-text-dom-tree-value-managed.json
           dotnet run --project tools/LegacyContextualQuoteRules.Probe -c Release -- .artifacts/legacy-contextual-quotes-managed.json
           python tools/LegacyContextualQuoteRules.Probe/audit_output.py .artifacts/legacy-contextual-quotes-managed.json
+          dotnet run --project tools/LegacyOriginalTextFieldBootstrap.Probe -c Release -- .artifacts/legacy-original-field-bootstrap-managed.json
+          python tools/LegacyOriginalTextFieldBootstrap.Probe/audit_output.py .artifacts/legacy-original-field-bootstrap-managed.json
           dotnet run --project tools/LegacyPreparedGlyphRewrite.Probe -c Release -- models .artifacts/legacy-prepared-glyph-rewrite-managed.json
           python tools/LegacyPreparedGlyphRewrite.Probe/audit_output.py models .artifacts/legacy-prepared-glyph-rewrite-managed.json
           dotnet run --project tools/LegacySource247Wire.Probe -c Release -- models .artifacts/legacy-source247-wire-managed.json
@@ -1467,6 +1469,7 @@ jobs:
             @{ Name = 'LegacyDomPatchCompatibility'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-dom-patch-compatibility-native.json') },
             @{ Name = 'LegacyTextDomTreeValue'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-text-dom-tree-value-native.json') },
             @{ Name = 'LegacyContextualQuoteRules'; Args = @('.artifacts/legacy-contextual-quotes-native.json') },
+            @{ Name = 'LegacyOriginalTextFieldBootstrap'; Args = @('.artifacts/legacy-original-field-bootstrap-native.json') },
             @{ Name = 'LegacyPreparedGlyphRewrite'; Args = @('models', '.artifacts/legacy-prepared-glyph-rewrite-native.json') },
             @{ Name = 'LegacySource247Wire'; Args = @('models', '.artifacts/legacy-source247-wire-native.json') },
             @{ Name = 'LegacyFirstAcoustic119Wire'; Args = @('models', '.artifacts/legacy-first-acoustic119-wire-native.json') },
@@ -2110,6 +2113,10 @@ jobs:
             if ($name -eq 'LegacyContextualQuoteRules') {
               python tools/LegacyContextualQuoteRules.Probe/audit_output.py .artifacts/legacy-contextual-quotes-native.json
               if ($LASTEXITCODE -ne 0) { throw 'LegacyContextualQuoteRules independent audit failed' }
+            }
+            if ($name -eq 'LegacyOriginalTextFieldBootstrap') {
+              python tools/LegacyOriginalTextFieldBootstrap.Probe/audit_output.py .artifacts/legacy-original-field-bootstrap-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyOriginalTextFieldBootstrap independent audit failed' }
             }
             if ($name -eq 'LegacyPreparedGlyphRewrite') {
               python tools/LegacyPreparedGlyphRewrite.Probe/audit_output.py models .artifacts/legacy-prepared-glyph-rewrite-native.json
