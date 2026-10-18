@@ -13,13 +13,27 @@ internal static class MathPreprocessor
     private readonly record struct Neighbor(float SquaredDistance, InkPoint Point);
 
     internal static MathFeatures Process(IReadOnlyList<InkStroke> strokes)
+        => ProcessCore(strokes, null, default).Features;
+
+    internal static (MathFeatures Features, Math2Mode0RawSourcePositions Positions) ProcessWithSourcePositions(
+        LegacyOwnedRawInkDocument document, CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(document); token.ThrowIfCancellationRequested();
+        var prepared = ProcessCore(document.Strokes, document, token);
+        return (prepared.Features, prepared.Positions ?? throw new InvalidOperationException("Missing actual source-position producer."));
+    }
+
+    private static (MathFeatures Features, Math2Mode0RawSourcePositions? Positions) ProcessCore(
+        IReadOnlyList<InkStroke> strokes, LegacyOwnedRawInkDocument? document, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(strokes);
-        if (strokes.Count == 0) return new([], 0, [], 1);
+        token.ThrowIfCancellationRequested();
+        if (strokes.Count == 0) return (new([], 0, [], 1), null);
         if (strokes.Count > MaxStrokes) throw new ArgumentException("Too many ink strokes.", nameof(strokes));
         var pointCount = 0;
         foreach (var stroke in strokes)
         {
+            token.ThrowIfCancellationRequested();
             if (stroke?.Points is not { Count: > 0 }) throw new ArgumentException("Empty ink stroke.", nameof(strokes));
             if (stroke.Points.Count >= 0x8000 || stroke.Points.Count > MaxPoints - pointCount)
                 throw new ArgumentException("Too many ink points.", nameof(strokes));
@@ -32,6 +46,7 @@ internal static class MathPreprocessor
         var means = strokes.Select(stroke => MeanX(stroke.Points)).ToArray();
         var order = LegacyMath2MeanXOrder.CopySourceOrder(means);
         var ordered = order.Select(index => strokes[index]).ToArray();
+        var positions = document is null ? null : new Math2Mode0RawSourcePositions.Builder(document, order, token);
         var scale = GroupExtremaScale(ordered);
         if (!float.IsFinite(scale) || scale <= 0) throw new ArgumentException("Invalid ink scale.", nameof(strokes));
         var sumX = 0f; var sumY = 0f;
@@ -45,16 +60,22 @@ internal static class MathPreprocessor
         var interpolationBudget = MaxFrames * 8;
         for (var i = 0; i < ordered.Length; i++)
         {
+            token.ThrowIfCancellationRequested();
             var normalized = ordered[i].Points.Select(p => new InkPoint((p.X - centerX) / scale, (p.Y - centerY) / scale)).ToArray();
             if (normalized.Any(p => !float.IsFinite(p.X) || !float.IsFinite(p.Y)))
                 throw new ArgumentException("Normalized ink coordinates are not finite.", nameof(strokes));
-            sampled[i] = Resample(normalized, MaxFrames - frames, ref interpolationBudget);
+            int sourceInput = i;
+            sampled[i] = Resample(normalized, MaxFrames - frames, ref interpolationBudget,
+                positions is null ? null : (point, fraction) => positions.AppendCoordinate(sourceInput, point, fraction));
+            positions?.CompleteStroke(i);
             frames += sampled[i].Count; ends[i] = frames;
         }
         var values = CreateFeatures(sampled, frames);
         if (Array.Exists(values, value => !float.IsFinite(value)))
             throw new ArgumentException("Ink features are not finite.", nameof(strokes));
-        return new(values, frames, ends, scale);
+        var features = new MathFeatures(values, frames, ends, scale);
+        token.ThrowIfCancellationRequested();
+        return (features, positions?.Finish(features, token));
     }
 
     private static float MeanX(IReadOnlyList<InkPoint> points)
@@ -107,7 +128,8 @@ internal static class MathPreprocessor
     }
 
     // Ink 180017060 v1: no interstroke points/noise; preserve centered coordinates.
-    private static List<InkPoint> Resample(IReadOnlyList<InkPoint> points, int frameBudget, ref int interpolationBudget)
+    private static List<InkPoint> Resample(IReadOnlyList<InkPoint> points, int frameBudget, ref int interpolationBudget,
+        Action<int, byte>? coordinate = null)
     {
         var length = 0f; var minimum = float.MaxValue;
         for (var i = 1; i < points.Count; i++)
@@ -122,12 +144,14 @@ internal static class MathPreprocessor
             step = length / intervals;
         }
         var sampled = new List<InkPoint>();
-        void Add(InkPoint point)
+        void Add(InkPoint point, int sourcePoint, byte fraction)
         {
             if (sampled.Count >= frameBudget) throw new ArgumentException("Resampled ink exceeds the frame limit.");
             sampled.Add(point);
+            coordinate?.Invoke(sourcePoint, fraction);
         }
-        Add(points[0]); var residual = 0f; var lastIntegral = 0; var lastFraction = points.Count == 1 ? 255 : 0;
+        Add(points[0], 0, points.Count == 1 ? (byte)255 : (byte)0);
+        var residual = 0f; var lastIntegral = 0; var lastFraction = points.Count == 1 ? 255 : 0;
         for (var i = 1; i < points.Count; i++)
         {
             var previous = points[i - 1]; var current = points[i]; var distance = Distance(previous, current);
@@ -147,7 +171,7 @@ internal static class MathPreprocessor
                     if (integral != lastIntegral || (quantized != lastFraction && quantized != 255 && lastFraction != 255))
                     {
                         Add(new(fraction * current.X + (1 - fraction) * previous.X,
-                            fraction * current.Y + (1 - fraction) * previous.Y));
+                            fraction * current.Y + (1 - fraction) * previous.Y), integral, (byte)quantized);
                         lastIntegral = integral; lastFraction = quantized;
                     }
                     var next = fraction + step / distance;
@@ -157,8 +181,8 @@ internal static class MathPreprocessor
             }
             residual = combined;
         }
-        if (step < residual + residual) Add(points[^1]);
-        if (points.Count > 1 && sampled.Count == 1) Add(points[^1]);
+        if (step < residual + residual) Add(points[^1], points.Count - 1, 255);
+        if (points.Count > 1 && sampled.Count == 1) Add(points[^1], points.Count - 1, 255);
         return sampled;
     }
 

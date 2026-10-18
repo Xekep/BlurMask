@@ -26,6 +26,44 @@ public sealed class LegacyNativeInkPositionSnapshot
         LegacyNativeInkPositionRange[] originals)
     { _positions = positions; _separators = separators; _originalRanges = originals; }
 
+    // Same fixed raw-only Math source, after its actual V20/V18 coordinate
+    // writes. C25/inherited/nonempty-cache owners have no entry here.
+    internal static LegacyNativeInkPositionSnapshot CreateProcessedForMath(
+        LegacyOwnedRawInkDocument document, ReadOnlySpan<LegacyNativeInkPosition> positions,
+        ReadOnlySpan<int> separators, ReadOnlySpan<int> sourceOrder, CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(document); token.ThrowIfCancellationRequested();
+        if (positions.Length is < 1 or > MaximumPositions || separators.Length != document.ObjectCount ||
+            sourceOrder.Length != document.ObjectCount)
+            throw new ArgumentException("The actual complete raw Math position extents are required.");
+        var seen = new bool[document.ObjectCount]; int begin = 0;
+        for (int at = 0; at < separators.Length; at++)
+        {
+            token.ThrowIfCancellationRequested(); int source = sourceOrder[at], end = separators[at];
+            if ((uint)source >= (uint)seen.Length || seen[source] || end <= begin || end > positions.Length)
+                throw new ArgumentException("Exact raw-source permutation and nonempty segments required.");
+            seen[source] = true; int count = document.Strokes[source].Points.Count; ulong previous = 0;
+            for (int point = begin; point < end; point++)
+            {
+                var position = positions[point];
+                if (position.SourceIndex != (uint)source || position.PointIndex >= count ||
+                    (position.Fraction > 200 && position.Fraction != 255) || position.Mode is not (3 or 5) ||
+                    (position.Fraction == 255 && position.PointIndex != count - 1) ||
+                    (point != begin && position.Value <= previous))
+                    throw new ArgumentException("Processed positions must retain this actual original raw source.");
+                previous = position.Value;
+            }
+            begin = end;
+        }
+        if (begin != positions.Length) throw new ArgumentException("Processed separator tail must equal the position extent.");
+        var first = LegacyNativeInkPosition.Pack(0, 0, 3, document.Strokes[0].Points.Count);
+        int last = document.ObjectCount - 1;
+        var endPosition = LegacyNativeInkPosition.Pack((uint)last, document.Strokes[last].Points.Count - 1,
+            5, document.Strokes[last].Points.Count);
+        token.ThrowIfCancellationRequested();
+        return new(positions.ToArray(), separators.ToArray(), [new(first, endPosition)]);
+    }
+
     /// <summary>Produces the fresh, empty-cache branch using explicit original source-collection ranges.</summary>
     public static LegacyNativeInkPositionSnapshot Create(ReadOnlySpan<LegacyNativeSelectedInkRange> selections,
         ReadOnlySpan<LegacyNativeInkPositionRange> originalRanges, CancellationToken cancellationToken = default)

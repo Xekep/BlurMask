@@ -16,6 +16,7 @@ internal sealed class Math2Mode0RawOnlySource : IDisposable
     private Math2Mode0RawAttentionHistory? history;
     private Math2Mode0InitiallyOrderedCompleted? ordered;
     private Math2Mode0RawOnlyEf4? processed;
+    private readonly Math2Mode0RawSourcePositions? sourcePositions;
     internal Math2Mode0ColdRecordingLoop Loop { get; }
     internal Math2Mode0RawOnlyEf4Policy Policy { get; }
     internal int InputFrameCount { get; }
@@ -23,28 +24,45 @@ internal sealed class Math2Mode0RawOnlySource : IDisposable
     internal object SourceFactoryIdentity => factory;
 
     private Math2Mode0RawOnlySource(Math2Mode0ColdRecordingLoop loop,
-        Math2Mode0RawOnlyEf4Policy policy, int frames, long[] ownedEnds)
-    { Loop = loop; Policy = policy; InputFrameCount = frames; strokeEnds = ownedEnds; }
+        Math2Mode0RawOnlyEf4Policy policy, int frames, long[] ownedEnds,
+        Math2Mode0RawSourcePositions? sourcePositions = null)
+    { Loop = loop; Policy = policy; InputFrameCount = frames; strokeEnds = ownedEnds; this.sourcePositions = sourcePositions; }
 
     internal static Math2Mode0RawOnlySource PrepareColdDefault(OrtRuntime runtime,
         Math2Mode0ColdBundle bundle, OrtRun run, IReadOnlyList<InkStroke> strokes,
-        CancellationToken token = default) => PrepareCore(runtime, bundle, run, strokes, null, token);
+        CancellationToken token = default) => PrepareCore(runtime, bundle, run, strokes, null, false, token);
+
+    internal static Math2Mode0RawOnlySource PrepareColdWithSourcePositions(OrtRuntime runtime,
+        Math2Mode0ColdBundle bundle, OrtRun run, IReadOnlyList<InkStroke> strokes,
+        CancellationToken token = default) => PrepareCore(runtime, bundle, run, strokes, null, true, token);
 
     // Explicit diagnostic search policy; no claim that a fresh EEB selected width > 1.
     internal static Math2Mode0RawOnlySource PrepareWithPreparedSearch(OrtRuntime runtime,
         Math2Mode0ColdBundle bundle, OrtRun run, IReadOnlyList<InkStroke> strokes,
         int width, CancellationToken token = default)
-        => PrepareCore(runtime, bundle, run, strokes, width, token);
+        => PrepareCore(runtime, bundle, run, strokes, width, false, token);
+
+    internal static Math2Mode0RawOnlySource PrepareWithPreparedSearchAndSourcePositions(OrtRuntime runtime,
+        Math2Mode0ColdBundle bundle, OrtRun run, IReadOnlyList<InkStroke> strokes,
+        int width, CancellationToken token = default)
+        => PrepareCore(runtime, bundle, run, strokes, width, true, token);
 
     private static Math2Mode0RawOnlySource PrepareCore(OrtRuntime runtime,
         Math2Mode0ColdBundle bundle, OrtRun run, IReadOnlyList<InkStroke> strokes,
-        int? width, CancellationToken token)
+        int? width, bool sourceBound, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(runtime); ArgumentNullException.ThrowIfNull(run);
         ArgumentNullException.ThrowIfNull(strokes); token.ThrowIfCancellationRequested();
         var policy = Math2Mode0RawOnlyEf4Policy.Bind(bundle);
         if (width is < 1 or > 16) throw new ArgumentOutOfRangeException(nameof(width));
-        var features = MathPreprocessor.Process(strokes);
+        MathFeatures features; Math2Mode0RawSourcePositions? positions = null;
+        if (sourceBound)
+        {
+            // Metadata is checked before cloning or feature/NN preparation.
+            var prepared = Math2Mode0RawSourcePositions.PrepareFeatures(strokes, token);
+            features = prepared.Features; positions = prepared.Positions; positions.ValidateFeatures(features);
+        }
+        else features = MathPreprocessor.Process(strokes);
         if (features.Frames < 1) throw new ArgumentException("Nonempty raw pen input required.");
         using var source = runtime.Tensor(features.Values, features.Frames, 1, 26);
         using var downsampling = runtime.Tensor(Enumerable.Repeat(1L, features.Frames).ToArray(), features.Frames, 1);
@@ -54,7 +72,7 @@ internal sealed class Math2Mode0RawOnlySource : IDisposable
             ? Math2Mode0ColdRecordingLoop.PrepareWithPreparedPolicy(bundle, run, source, downsampling, ends,
                 width.Value, 1f, 1000f, token)
             : Math2Mode0ColdRecordingLoop.PrepareColdDefault(bundle, run, source, downsampling, ends, token);
-        try { return new(loop, policy, features.Frames, features.StrokeEnds.ToArray()); }
+        try { return new(loop, policy, features.Frames, features.StrokeEnds.ToArray(), positions); }
         catch { loop.Dispose(); throw; }
     }
 
@@ -111,6 +129,8 @@ internal sealed class Math2Mode0RawOnlySource : IDisposable
     }
     // Detached raw input metadata is inspection, not a replacement-source API.
     internal long[] CopyStrokeEnds() => WithOwner(() => strokeEnds.ToArray());
+    internal Math2Mode0RawSourcePositions ReadSourcePositions() => WithOwner(() => sourcePositions ??
+        throw new NotSupportedException("This original source was not prepared by the named source-position factory."));
     internal Math2Mode0InitiallyOrderedCompleted ReadInitialForDiagnostic()
         => WithOwner(() => ordered ?? throw new InvalidOperationException("Not recorded."));
     internal Math2Mode0RawAttentionHistory ReadHistoryForDiagnostic()

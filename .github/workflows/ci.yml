@@ -3063,6 +3063,19 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native structured rich-record output failed.' }
           python tools/LegacyMathStructuredOutput.Probe/audit_output.py .artifacts/math-structured-output-native.json models/math2/math2-unwrapped.res
           if ($LASTEXITCODE -ne 0) { throw 'Native structured rich-record output oracle failed.' }
+          python tools/LegacyMathSourcePositions.Probe/reference_positions.py .artifacts/math-source-position-controls.json
+          if ($LASTEXITCODE -ne 0) { throw 'Source-position controls failed.' }
+          dotnet run --project tools/LegacyMathSourcePositions.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-source-position-controls.json .artifacts/math-source-positions-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed source-bound Math output failed.' }
+          python tools/LegacyMathSourcePositions.Probe/audit_output.py .artifacts/math-source-positions-managed.json models/math2/math2-unwrapped.res
+          if ($LASTEXITCODE -ne 0) { throw 'Managed source-bound Math output oracle failed.' }
+          dotnet publish tools/LegacyMathSourcePositions.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-source-positions-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Source-bound Math output probe publish failed.' }
+          $sourcePositions = if ($IsWindows) { '.artifacts/math-source-positions-probe/LegacyMathSourcePositions.Probe.exe' } else { '.artifacts/math-source-positions-probe/LegacyMathSourcePositions.Probe' }
+          & $sourcePositions .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-source-position-controls.json .artifacts/math-source-positions-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native source-bound Math output failed.' }
+          python tools/LegacyMathSourcePositions.Probe/audit_output.py .artifacts/math-source-positions-native.json models/math2/math2-unwrapped.res .artifacts/math-source-positions-managed.json .artifacts/math-structured-output-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native source-bound Math output oracle failed.' }
           dotnet run --project tools/LegacyMathCandidateRetention.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-candidate-retention-managed.json
           if ($LASTEXITCODE -ne 0) { throw 'Managed completed candidate retention failed.' }
           python tools/LegacyMathCandidateRetention.Probe/audit_output.py .artifacts/math-candidate-retention-managed.json
