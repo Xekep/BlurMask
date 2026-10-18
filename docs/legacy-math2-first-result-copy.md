@@ -1,7 +1,8 @@
 # Math2 first-result copy and lifetime contract
 
-The fresh raw-only first-result copy is implemented and checked. Outer result
-aggregation, DOM publication and formula acceptance are separate unfinished joins.
+The fresh raw-only first-result copy is implemented and checked. The single-source
+outer owner is separately checked; multi-source grouping, DOM publication and
+formula acceptance remain unfinished joins.
 `audit_math2_first_result_copy.py REPORT` checks eight complete native regions,
 79 instructions and the registered EED20 service. Vendor DLLs are read as data.
 
@@ -83,8 +84,9 @@ from the separately checked `LegacyMathSourcePositions.Probe`.
 
 The supported input is fresh raw-only, no C25/inherited cache or auxiliary
 tensor/coordinate/optional90 branch. One actual first result is copied; retained
-search alternatives are not multiple F0 source groups. The outer new-pool
-copy and math-specific source/DOM registration remain unimplemented here.
+search alternatives are not multiple F0 source groups. The separate
+`legacy-math2-owned-outer-symbols.md` describes the checked single-source new-pool
+copy. Multi-F0 grouping and math-specific source/DOM registration remain missing.
 
 Native043AC0 may fail after resetting the target or copying a prefix. Fresh
 portable target poisoning/disposal is a cleanup adaptation; it does not prove

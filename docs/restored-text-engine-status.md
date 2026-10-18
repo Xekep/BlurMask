@@ -104,8 +104,13 @@ full EE4 capture is unchanged. The
 clones those actual ranges after alternatives. Four actual sources, a repeated
 interval alias,24 failure/cancellation prefixes and84 guards pass independent
 raw-AL/position/union/budget checks and fresh NativeAOT. Detached results retain
-the immutable original document but permit decoder GC. Full formula output,
-outer F0 aggregation and source/DOM registration remain unfinished. The
+the immutable original document but permit decoder GC. The
+[single-source outer owner](legacy-math2-owned-outer-symbols.md) now clones
+actual symbols into a second independent library, retaining the same document
+and source ranges. Four actual inputs,24 failure prefixes and107 guards pass
+independent whole-field/budget/GC checks and fresh NativeAOT; first-copy and
+EE4 captures remain unchanged. Full formula output, multi-F0 grouping and
+math-specific source/DOM registration remain unfinished. The
 [symbol/source DOM transport](legacy-math2-symbol-dom-transport.md) remains a
 static contract for the next join, not an implemented accepted formula.
 Separately prepared

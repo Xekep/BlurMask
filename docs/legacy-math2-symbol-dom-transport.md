@@ -11,7 +11,9 @@ record sizes do not establish that the same producer or owner is involved.
 vector at[RBP-11]. At02B28D..02B2A8 it supplies the former as028070's fourth
 argument and the latter as its sixth argument. C23 input selection, existing
 mathResult extraction and029290 processing precede that call. The complete
-producer chain from the new raw-only decoder token is still unjoined.
+raw-only first-result and single-source outer-vector owning joins are now
+implemented separately. The native field/C23 grouping and original receiver
+remain unjoined.
 
 028070 iterates its fourth argument using an exact40-byte stride:
 02834D computes index*5,028356 multiplies that by8, and028374 calls027E20.
@@ -39,9 +41,10 @@ Text-node construction and append must then succeed. Failure destroys the
 new symbol node and returns null; a partially built symbol is not returned.
 
 These operations require the actual selected input/range source, CB8 naming
-state and original field context. The current library raw-only source retains
-pen features and stroke-end boundaries; that alone does not provide this native
-source/range/tag owner or prove its applicability to an SDK page.
+state and original field context. The named library raw-only source now retains
+original IDs, fractional processed positions and C21 range unions. Its first
+and outer copies preserve those ranges, but do not create the actual native
+field/C23/CB8 naming owner or prove applicability to an SDK page.
 
 ## Result publication is later than string output
 
@@ -71,6 +74,9 @@ The focused Ghidra export, references and SHA provenance are preserved locally
 under `research/myscript/output/math2-result-transport-20261018/`, outside build
 artifacts and excluded from Git/releases.
 
-The next runtime join needs the genuine producer of these source-bound symbol
-rows and ranges, with the same full formatted hypothesis and source owner.
-Copying unit text into a new DOM facade would leave these algorithms missing.
+The checked runtime source-bound symbol-row producer and its independent copies
+are described in `legacy-math2-owned-source-positions.md`,
+`legacy-math2-first-result-copy.md` and `legacy-math2-owned-outer-symbols.md`.
+The next runtime join needs the genuine math field/C23/CB8 owner. Its temporary
+tag/late registration contract is pinned in `legacy-math2-cb8-tag-owner.md`.
+A DOM facade without those owners would still leave required algorithms missing.
