@@ -16,7 +16,7 @@ internal sealed record Math2Mode0FinalOrderingStatistics(int OriginalCount, int 
 
 /// <summary>Same actual records after the success-only039BF2 final sort/tail
 /// release. Formula/output transport and failure-exit native tail remain separate.</summary>
-internal sealed class Math2Mode0RawOnlyFinalOrdering
+internal sealed partial class Math2Mode0RawOnlyFinalOrdering
 {
     internal const long DefaultPayloadBudget = 16L * 1024 * 1024;
     internal Math2Mode0RawOnlyEf4 Ef4 { get; }
@@ -57,13 +57,13 @@ internal sealed class Math2Mode0RawOnlyFinalOrdering
     internal Math2Mode0RawOnlyEf4RecordCopy[] CopyRecords()
         => Ef4.WithFinalOrdering(this, () =>
         {
-            if (!complete || failed) throw new InvalidOperationException("Successful final ordering required.");
+            if (!complete || failed || outputClaimed) throw new InvalidOperationException("Successful unconsumed final ordering required.");
             return retained.Select(record => Ef4.CopyFinalRecord(this, record)).ToArray();
         });
     internal int[] CopySortPermutation()
         => Ef4.WithFinalOrdering(this, () =>
         {
-            if (!complete || failed) throw new InvalidOperationException("Successful final ordering required.");
+            if (!complete || failed || outputClaimed) throw new InvalidOperationException("Successful unconsumed final ordering required.");
             return permutation.ToArray();
         });
     // Failure inspection returns detached logical counters, never accepted rows.

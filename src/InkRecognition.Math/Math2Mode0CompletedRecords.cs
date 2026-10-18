@@ -252,7 +252,7 @@ internal enum Math2Mode0CompletedStage
 
 /// <summary>Distinct typed empty Engine3E owner. Managed object/allocation
 /// lifetime is an adaptation: no native pointer bytes or pool padding claimed.</summary>
-internal sealed class Math2Mode0EmptyLibrary
+internal sealed partial class Math2Mode0EmptyLibrary
 {
     private sealed class EmptyPool
     {
@@ -282,6 +282,7 @@ internal sealed class Math2Mode0EmptyLibrary
     {
         if (IsDisposed) return;
         IsDisposed = true; ReleaseCount++;
+        ReleaseOutputPool();
         if (pool != null) pool.Released = true;
     }
 }

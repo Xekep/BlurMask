@@ -13,6 +13,8 @@ internal sealed class LegacyMath2ObservableTokens
     private LegacyMath2ObservableTokens(LegacyInkAlphabet alphabet,ushort[] slots)
     {this.alphabet=alphabet;this.slots=slots;}
     internal ushort[] CopySlots()=>slots.ToArray();
+    // Immutable reader; no backing array or replacement-alphabet seam.
+    internal LegacyInkAlphabet ReadOwnedAlphabet() => alphabet;
     internal static LegacyMath2ObservableTokens BindBundledResource(ReadOnlySpan<byte> resource,
         CancellationToken token=default)
     {
