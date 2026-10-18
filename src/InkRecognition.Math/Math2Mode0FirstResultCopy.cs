@@ -20,7 +20,7 @@ internal sealed record Math2Mode0FirstCopyStatistics(long PayloadReservation, bo
 /// owns copied intervals; disposal of the decoder does not invalidate them.
 /// Actual source ranges retain their original document domain. No C25,
 /// tensor/coordinate/auxiliary branch, ABI or outer acceptance claim.</summary>
-internal sealed class Math2Mode0FirstResultCopy : IDisposable
+internal sealed partial class Math2Mode0FirstResultCopy : IDisposable
 {
     internal const long DefaultPayloadBudget = 16L * 1024 * 1024;
     private readonly object gate = new();
