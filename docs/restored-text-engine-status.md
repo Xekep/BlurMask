@@ -94,11 +94,18 @@ captures remain unchanged. The [native mean-X sorter](legacy-math2-mean-x-order.
 also replaces the incorrect unconditional stable ordering at21 or more strokes.
 4224 independent record controls and nine actual feature inputs verify the
 20/21 threshold; all eight earlier feature fixtures retain zero error.
-Full formula output remains unfinished. The
-[first-result copy proof](legacy-math2-first-result-copy.md) establishes that
-native transport must copy both new-pool strings and source ranges. The present
-interval rows omit C79-derived source ranges, so a passing isolated string-copy
-draft is not a complete native result copy. The
+The [source-aware raw factory](legacy-math2-owned-source-positions.md) now
+retains actual original IDs through preprocessing, native ordering and C79
+position composition, then attaches C21 ranges to all20 actual formatted
+records.20 independent feature/map inputs,1280 interval queries,4097 scalar
+controls, six failure prefixes and83 guards pass Managed/NativeAOT; the old
+full EE4 capture is unchanged. The
+[first-result copy](legacy-math2-first-result-copy.md) now owns a new pool and
+clones those actual ranges after alternatives. Four actual sources, a repeated
+interval alias,22 failure/cancellation prefixes and80 guards pass independent
+raw-AL/position/union/budget checks and fresh NativeAOT. Detached results retain
+the immutable original document but permit decoder GC. Full formula output,
+outer F0 aggregation and source/DOM registration remain unfinished. The
 [symbol/source DOM transport](legacy-math2-symbol-dom-transport.md) remains a
 static contract for the next join, not an implemented accepted formula.
 Separately prepared
@@ -132,6 +139,18 @@ now keeps that same input/document/result/strings owner through pre-NN
 preparation, configured recognition and actual shared WORD/CHAR publication.
 Three raw invocations/six alternatives/69 guards and unchanged prior captures
 pass independent checks and NativeAOT. The
+[original-selected scope](legacy-library-original-selected-publication.md)
+now preserves the actual original bootstrap, chosen field, complete selected
+INPUT registry and same binding through pre-NN2C1/2DA/shared3E/Seed and actual
+WORD/CHAR/TEXT. Six invocations/12 alternatives/98 CHAR40 records/182 guards
+pass independent checks and fresh NativeAOT, with the old scope unchanged.
+Its [selected continuation proof](legacy-original-selected-document-continuation.md)
+establishes exact chosen-C22 export and full-registry replay; the corresponding
+new-route DOM continuation is still being implemented. The
+[global publication plan](legacy-global-text-publication-plan.md) separately
+establishes live TOP/source completion before detached byte import. Its runtime
+V68/source-rich bridge remains unfinished; existing imported completion is not
+a substitute. The
 [owning document publisher](legacy-library-text-publication-document.md)
 now joins source lines, TEXT registration, coverage, cleanup, detached DOM,
 pending edits and BE2/cache transfer under that same scope. Its independent
