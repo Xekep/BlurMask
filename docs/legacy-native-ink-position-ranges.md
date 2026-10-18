@@ -61,9 +61,12 @@ The port owns value snapshots and portable indices. It rejects invalid source
 owner references, nonfinite/out-of-range point positions, invalid modes and
 oversized inputs; supports cancellation; and limits selections to65536 and
 positions to1048576. Native heap allocation, pointer identities, **00f7e0**
-postmerge range-cache production and any nonempty range-cache substitution
-remain outside this API. Applying the fresh branch to an owner already
-modified by00f7e0 would be incorrect.
+InkMapping validation and any nonempty range-cache production/substitution
+remain outside this API.00f7e0 is a validator, not evidence of a cache writer.
+Applying this fresh branch to an owner with an existing nonempty range cache
+would be incorrect. The [processed Math2 source proof](legacy-math2-source-position-transport.md)
+also identifies the separate resampling/reordering position producers; this
+fresh constructor does not create their fractional processed snapshot.
 
 This stage uses no learned model or vendor DLL. Therefore a successful
 geometry probe is not a compatibility or handwriting accuracy result for

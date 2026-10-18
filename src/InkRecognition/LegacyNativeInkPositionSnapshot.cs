@@ -7,7 +7,8 @@ public readonly record struct LegacyNativeSelectedInkRange(uint SourceIndex, int
 
 /// <summary>
 /// Fresh C79 position and separator production00f130 and native010850 range segmentation.
-/// Does not implement00f7e0 postmerge cache generation, EED winner generation or global bounds178.
+/// Does not implement00f7e0 InkMapping validation, nonempty range-cache production,
+/// EED winner generation or global bounds178.
 /// </summary>
 public sealed class LegacyNativeInkPositionSnapshot
 {
