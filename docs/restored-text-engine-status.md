@@ -80,13 +80,18 @@ controls pass independent checks and fresh NativeAOT. The
 [ordinary output owner](legacy-math2-owned-ordinary-output.md) now writes separate
 UTF8 alternatives and maps for four actual records using their same per-record
 string pools. It refuses the entire width16 vector containing structured rules;
-it does not choose an easier replacement candidate. Full formula output remains
-unfinished; the [native formatter route](legacy-math2-completed-output-route.md)
-identifies14 structural rules, shared string ownership and publication/failure
-boundaries without claiming those algorithms are all restored. The complete
-[EE4 parser inventory](legacy-math2-ee4-formatter.md) and
-[symbol/source DOM transport](legacy-math2-symbol-dom-transport.md) provide
-checked static contracts for the next joins, not implemented accepted formulas.
+it does not choose an easier replacement candidate. The additive
+[full cold formatter](legacy-math2-owned-structural-output.md) now handles all14
+EE4 syntax rules on the same owned AL and complete retained vector.20 actual
+records, including five structural results,1614 independent syntax controls
+and18 failure prefixes agree in Managed/NativeAOT; all nine older probe
+captures remain unchanged. Full formula output remains unfinished. The
+[first-result copy proof](legacy-math2-first-result-copy.md) establishes that
+native transport must copy both new-pool strings and source ranges. The present
+interval rows omit C79-derived source ranges, so a passing isolated string-copy
+draft is not a complete native result copy. The
+[symbol/source DOM transport](legacy-math2-symbol-dom-transport.md) remains a
+static contract for the next join, not an implemented accepted formula.
 Separately prepared
 [column matching](legacy-math2-column-matching.md) and
 [existing-unit correction](legacy-math2-existing-unit-correction.md) pass4100
@@ -143,7 +148,15 @@ library replacement and2048 prepared tree cases pass independent checks and
 fresh NativeAOT. Claimed preflights must both succeed; the target gate remains
 held across replay/apply so a stale compatibility result cannot authorize an edit.
 
-The exact committed app atb2795de builds with0 warnings and passes headless
+The additive [original PAGE/field bootstrap](legacy-library-original-textfield-bootstrap.md)
+now creates actual library original field/INPUT owners before recognition, over
+the same immutable raw document/current view.64 raw owners,560 success/failure
+streams and1278 guards pass an independent ordered DOM/registry/history oracle
+and fresh NativeAOT. Prior INPUT and document captures remain unchanged. This
+is an explicit library history-journal adaptation; joining that original owner
+to the selected pre-NN processing context remains unfinished.
+
+The exact committed app at2fa618a builds with0 warnings and passes headless
 `--ai-pen-test`. Russian diagnostics remain4/9 exact with16/33 character edits;
 no new release or full-engine readiness is asserted. The new
 [recorded error evidence](russian-recorded-error-evidence.md) traces actual

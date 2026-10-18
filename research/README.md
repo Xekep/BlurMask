@@ -54,3 +54,10 @@ retains the02AF50 caller extracted from the complete local Document export,
 with source/native-region SHA provenance. Symbol40-byte input rows and the
 separate32-byte freeze rows do not establish the missing decoder-to-source
 transport join or native document acceptance.
+
+The complete first-result copy, row initializer, scheduled worker and outer
+aggregate functions are preserved at
+`myscript/output/math2-first-result-copy-20261018/`. The folder includes eight
+functions extracted from the full Ghidra export, native disassembly and SHA-256
+provenance. Its evidence requires both new-pool string interning and copied
+source ranges; the isolated metadata/string copy is not a complete transport.
