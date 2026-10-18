@@ -12,7 +12,7 @@ internal sealed record Math2Mode0RawOnlyEf4RecordCopy(Math2Mode0CompletedEventLe
 
 /// <summary>Same actual records after the restricted library raw-only byte1
 /// EF4 branch. No final ordering, truncation, formula or accepted output.</summary>
-internal sealed class Math2Mode0RawOnlyEf4
+internal sealed partial class Math2Mode0RawOnlyEf4
 {
     internal const long DefaultPayloadBudget = 16L * 1024 * 1024;
     private sealed class Cell(Math2Mode0CompletedRecords.RawOnlyRecord record)
@@ -213,7 +213,7 @@ internal sealed class Math2Mode0RawOnlyEf4
     internal Math2Mode0RawOnlyEf4RecordCopy[] CopyRecords()
         => Source.WithOwner(() => Source.Loop.WithRawOnlyPostprocessing(this, () =>
         {
-            if (!complete || failed || released) throw new InvalidOperationException("Complete successful EF4 stage required.");
+            if (!complete || failed || released || finalOrderingClaimed) throw new InvalidOperationException("Complete unconsumed EF4 stage required.");
             return cells.Select(cell => new Math2Mode0RawOnlyEf4RecordCopy(cell.Record.Source,
                 cell.Record.Library, cell.Record.RecordIdentity, Source.SourceFactoryIdentity,
                 cell.Record.Source.CopyPrimary(), cell.Segments, cell.Phase == "skipped-empty",

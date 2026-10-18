@@ -70,6 +70,14 @@ internal sealed class Math2Mode0RawOnlySource : IDisposable
     }
     internal Math2Mode0RawOnlyEf4 ApplyEf4(CancellationToken token = default)
         => ApplyCore(Math2Mode0RawOnlyEf4.DefaultPayloadBudget, null, token);
+    internal Math2Mode0RawOnlyFinalOrdering OrderFinal(CancellationToken token = default)
+        => WithOwner(() => (processed ?? throw new InvalidOperationException("Successful EF4 required."))
+            .OrderFinal(Math2Mode0RawOnlyFinalOrdering.DefaultPayloadBudget, null, token));
+    internal Math2Mode0RawOnlyFinalOrdering OrderFinalDiagnostic(long payloadBudget,
+        Action<Math2Mode0FinalOrderingStage, int, Math2Mode0RawOnlyFinalOrdering>? observer,
+        CancellationToken token = default)
+        => WithOwner(() => (processed ?? throw new InvalidOperationException("Successful EF4 required."))
+            .OrderFinal(payloadBudget, observer, token));
     internal Math2Mode0RawOnlyEf4 ApplyWithPreparedPayloadBudget(long budget, CancellationToken token = default)
         => ApplyCore(budget, null, token);
     internal Math2Mode0RawOnlyEf4 ApplyDiagnostic(long budget,
