@@ -33,7 +33,7 @@ internal sealed partial class Math2Mode0PrefixContext
     {
         // Called while the same reentrant context gate is held. Native outer
         // failure stops decoding; retained vector/prefix writes are not erased.
-        failed = true; pending = null;
+        failed = true; pending?.ReleaseCompletedCandidateRetention(); pending = null;
     }
 }
 
@@ -189,7 +189,7 @@ internal sealed partial class Math2Mode0CompletedEventLease
 {
     private readonly Math2Mode0CompletedRecords recorder;
     private readonly Math2Mode0PrefixStep step;
-    private readonly Math2Mode0PrefixCandidates candidates;
+    private readonly WeakReference<Math2Mode0PrefixCandidates> candidates;
     private readonly byte[] row;
     private readonly Math2Mode0PrefixGeneration generation;
     private readonly int sourceParent;
@@ -203,7 +203,7 @@ internal sealed partial class Math2Mode0CompletedEventLease
         byte[] row, Math2Mode0PrefixGeneration generation,
         Math2Mode0CommonSecondaryFrontier frontier)
     {
-        this.recorder = recorder; this.step = step; this.candidates = candidates; Rank = rank;
+        this.recorder = recorder; this.step = step; this.candidates = new(candidates); Rank = rank;
         this.row = row;
         sourceParent = BinaryPrimitives.ReadInt32LittleEndian(row.AsSpan(40));
         this.generation = step.BindCompletedGeneration(generation, sourceParent);
@@ -218,7 +218,7 @@ internal sealed partial class Math2Mode0CompletedEventLease
         Math2Mode0PrefixCandidates actualCandidates, int rank)
     {
         if (!ReferenceEquals(recorder, target) || !ReferenceEquals(step, source) ||
-            !ReferenceEquals(candidates, actualCandidates) || Rank != rank || consumed)
+            !candidates.TryGetTarget(out var boundCandidates) || !ReferenceEquals(boundCandidates, actualCandidates) || Rank != rank || consumed)
             throw new ArgumentException("The exact newly created event owner is required.");
     }
     internal byte[] CopyRawRecord() => row.ToArray();
@@ -233,7 +233,9 @@ internal sealed partial class Math2Mode0CompletedEventLease
             if (!ReferenceEquals(recorder, target)) throw new ArgumentException("Foreign completed-vector owner.");
             target.CheckOwner(step.PrefixOwner);
             if (consumed) throw new InvalidOperationException("EOS event was already consumed.");
-            step.BindCompletedCandidates(candidates);
+            if (!candidates.TryGetTarget(out var boundCandidates))
+                throw new InvalidOperationException("Active Step lost its candidate owner.");
+            step.BindCompletedCandidates(boundCandidates);
             ValidateFallbackConsumer(target);
             consumed = true;
             try { action(); }

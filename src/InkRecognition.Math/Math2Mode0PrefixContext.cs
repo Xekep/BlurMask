@@ -102,6 +102,7 @@ internal sealed partial class Math2Mode0PrefixContext : IDisposable
                 CheckStateGeneration();
             }
             catch { failed = true; pending = null; throw; }
+            finally { selected.Step.ReleaseCompletedCandidateRetention(); }
         }
     }
 
@@ -139,7 +140,8 @@ internal sealed partial class Math2Mode0PrefixContext : IDisposable
         lock (gate)
         {
             if (disposed) return;
-            disposed = true; pending = null; completedRecords?.Dispose(); state.Dispose();
+            disposed = true; pending?.ReleaseCompletedCandidateRetention(); pending = null;
+            completedRecords?.Dispose(); state.Dispose();
         }
     }
 }
