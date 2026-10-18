@@ -3076,6 +3076,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native source-bound Math output failed.' }
           python tools/LegacyMathSourcePositions.Probe/audit_output.py .artifacts/math-source-positions-native.json models/math2/math2-unwrapped.res .artifacts/math-source-positions-managed.json .artifacts/math-structured-output-native.json
           if ($LASTEXITCODE -ne 0) { throw 'Native source-bound Math output oracle failed.' }
+          dotnet run --project tools/LegacyMathFirstResultCopy.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-first-result-copy-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed source-bound Math first-result copy failed.' }
+          python tools/LegacyMathFirstResultCopy.Probe/audit_output.py .artifacts/math-first-result-copy-managed.json models/math2/math2-unwrapped.res .artifacts/math-source-positions-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed source-bound Math first-result copy oracle failed.' }
+          dotnet publish tools/LegacyMathFirstResultCopy.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-first-result-copy-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Source-bound Math first-result copy probe publish failed.' }
+          $firstResultCopy = if ($IsWindows) { '.artifacts/math-first-result-copy-probe/LegacyMathFirstResultCopy.Probe.exe' } else { '.artifacts/math-first-result-copy-probe/LegacyMathFirstResultCopy.Probe' }
+          & $firstResultCopy .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-first-result-copy-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native source-bound Math first-result copy failed.' }
+          python tools/LegacyMathFirstResultCopy.Probe/audit_output.py .artifacts/math-first-result-copy-native.json models/math2/math2-unwrapped.res .artifacts/math-source-positions-native.json .artifacts/math-first-result-copy-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native source-bound Math first-result copy oracle failed.' }
           dotnet run --project tools/LegacyMathCandidateRetention.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-candidate-retention-managed.json
           if ($LASTEXITCODE -ne 0) { throw 'Managed completed candidate retention failed.' }
           python tools/LegacyMathCandidateRetention.Probe/audit_output.py .artifacts/math-candidate-retention-managed.json

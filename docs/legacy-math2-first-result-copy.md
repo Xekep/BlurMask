@@ -1,6 +1,7 @@
 # Math2 first-result copy and lifetime contract
 
-This is a static checkpoint, not a completed runtime result transport.
+The fresh raw-only first-result copy is implemented and checked. Outer result
+aggregation, DOM publication and formula acceptance are separate unfinished joins.
 `audit_math2_first_result_copy.py REPORT` checks eight complete native regions,
 79 instructions and the registered EED20 service. Vendor DLLs are read as data.
 
@@ -36,9 +37,11 @@ copying the old text reference would retain the wrong pool lifetime.
 After copying a row's alternatives,043740 clones its source range through the
 global range service V88, using the source row00 pointer and08 count. These
 range fields are not optional padding. The fresh row initializer creates an
-empty range, but later processing can populate it. The library's current
-raw-only interval rows do not yet carry the C79 source mapping, so they cannot
-establish that the corresponding native result range remains empty.
+empty range, but later processing populates it. The named source-aware factory
+now retains the actual original document and processed C79 positions through
+the same feature preparation. Full EE4 output attaches mapped-run intervals
+through C21 union. The first-copy entry accepts only that exact completed
+attachment owner, and clones its real per-unit ranges after alternatives.
 
 028A80 subsequently reads these first-copy rows at F0+98/A0. Its026780 helper
 again uses the destination's adjacent pool and clones the source ranges.
@@ -47,18 +50,41 @@ This is a second owning transport, not concatenation of alternative strings.
 
 ## Runtime and failure boundaries
 
-An isolated draft demonstrates the metadata/string subset: three actual NN
-sources, one repeated interned interval pair,20 failure/cancellation prefixes,
-62 guards and positive/negative source-collection controls pass Managed and
-NativeAOT. That draft is deliberately **not integrated as043AC0**: it omits
-the actual symbol source ranges. Passing its lifetime tests does not close
-this producer/transport gap.
+`Math2Mode0FirstResultCopy.Create` consumes the registered source attachment's
+actual first retained result, while holding the same decoder/output gate. It
+creates an independent pool, clones primitive vectors and full row fields,
+then clones each row's typed source ranges. It retains the immutable original
+document for the range-ID domain, but no decoder, source record, model, history,
+event lease or old string pool. The result survives decoder disposal and GC.
+Its own disposal releases its pool exactly once; caller inspection cannot
+mutate retained arrays or ranges. A second copy claim is refused.
 
-The next join must carry original source indices and fractional point positions
-through the actual preprocessing and C79 mapping, then retain and clone those
-same typed ranges. A resampled segment ordinal is not an original ink-stroke
-index. No guessed empty range or whole-stroke replacement is authorized by
-the present proof.
+The combined logical payload envelope is checked before claim or payload copy:
+source attachment reservation +96 bytes for fresh record/library +4 per
+primary element for both U16 prefixes +68 per unit for U32/row/alternative/
+range-vector storage +8 per run +16 per copied range +unique UTF8 pool payload
+and peak interning work (5*length+1 retained, 5*length peak). This conservative
+16 MiB envelope excludes CLR headers and caller inspection; it is not RSS.
+
+Managed and fresh Native AOT captures agree byte-for-byte for four actual
+inputs: cold width1, explicitly prepared widths3/16 and repeated M/M ink.
+Width3 reverses physical stroke order, proving that source IDs are not mapped
+segment ordinals. Independent tracked Python functions reconstruct native
+MeanX ordering, resampling positions, C21 range unions and resource AL bytes.
+The oracle checks new-pool aliases, exact budgets,22 failure/cancellation
+prefixes and80 guards. Positive and negative GC controls discriminate a
+detached copy from a retained source-backed result. No expected text labels
+or vendor execution are used. The oracle runs with Python isolated mode.
+
+Run `LegacyMathFirstResultCopy.Probe PACK RES OFFICIAL_ORT CAPTURE`, then
+`python -I tools/LegacyMathFirstResultCopy.Probe/audit_output.py CAPTURE RES
+SOURCE_POSITION_CAPTURE [OTHER_CAPTURE]`. The source-position capture comes
+from the separately checked `LegacyMathSourcePositions.Probe`.
+
+The supported input is fresh raw-only, no C25/inherited cache or auxiliary
+tensor/coordinate/optional90 branch. One actual first result is copied; retained
+search alternatives are not multiple F0 source groups. The outer new-pool
+copy and math-specific source/DOM registration remain unimplemented here.
 
 Native043AC0 may fail after resetting the target or copying a prefix. Fresh
 portable target poisoning/disposal is a cleanup adaptation; it does not prove

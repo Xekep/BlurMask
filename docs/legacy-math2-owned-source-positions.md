@@ -127,6 +127,7 @@ exact, and the old full EE4 output capture remains unchanged. The static auditor
 34 instruction pins,5 runtime ownership chains and both preceding static
 dependency audits. Vendor files are read as data only.
 
-Remaining work includes source-aware first-result copying into a new library,
-outer aggregation/source-ID transport and DOM publication. General inherited,
+The checked source-aware first-result copy into a new library is described in
+`legacy-math2-first-result-copy.md`. Remaining work includes outer aggregation,
+source-ID transport and DOM publication. General inherited,
 C25 and nonempty-cache source paths are outside this entry.
