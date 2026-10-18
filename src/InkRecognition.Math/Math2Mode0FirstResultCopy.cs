@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 namespace InkRecognition.Math;
 
 internal enum Math2Mode0FirstCopyStage
-{ Claimed, AfterPool, AfterHeader, AfterPrimary, AfterSecondary, AfterUnits, AfterRuns, AfterIntern, AfterAlternative, AfterRow, BeforeCompletion }
+{ Claimed, AfterPool, AfterHeader, AfterPrimary, AfterSecondary, AfterFrontier, AfterUnits, AfterRuns, AfterIntern, AfterAlternative, AfterRow, BeforeCompletion }
 
 //No decoder Source, RecordIdentity, event lease, model, history or original
 //string pool is retained. The immutable original document binds copied ranges.
@@ -90,10 +90,11 @@ internal sealed class Math2Mode0FirstResultCopy : IDisposable
             {
                 Observe(Math2Mode0FirstCopyStage.Claimed);
                 target.library = new(1); target.library.InitializeEmptyPool(); Observe(Math2Mode0FirstCopyStage.AfterPool);
-                target.score = source.Score; target.frontier = source.Source.Frontier.Value;
+                target.score = source.Score;
                 target.parent = source.Source.CompletedSourceParent; Observe(Math2Mode0FirstCopyStage.AfterHeader);
                 target.primary = source.Source.CopyPrimary(); Observe(Math2Mode0FirstCopyStage.AfterPrimary);
                 target.secondary = source.Source.CopySecondary(); Observe(Math2Mode0FirstCopyStage.AfterSecondary);
+                target.frontier = source.Source.Frontier.Value; Observe(Math2Mode0FirstCopyStage.AfterFrontier);
                 target.units = source.Units.ToArray(); Observe(Math2Mode0FirstCopyStage.AfterUnits);
                 target.runs = source.Runs.ToArray(); Observe(Math2Mode0FirstCopyStage.AfterRuns);
                 target.rows = new Math2Mode0OutputUnit[source.UnitRows.Length];

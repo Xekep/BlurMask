@@ -38,7 +38,7 @@ def ranges(row,e):
  return [[dict(First=a,Last=b)for a,b in row]for row in result]
 def prefix_ranges(stats):
  return [[dict(First=r['First']['Value'],Last=r['Last']['Value'])for r in row]for row in stats['RangePrefix']]
-assert len(capture['Actual'])==4 and capture['ActualAliasPairs']==1 and capture['Guards']==80
+assert len(capture['Actual'])==4 and capture['ActualAliasPairs']==1 and capture['Guards']==84
 for index,actual in enumerate(capture['Actual']):
  before=actual['Before'];assert before==actual['After'];rows=before['Rows'];pool={}
  assert len(rows)==len(before['Units'])
@@ -63,8 +63,8 @@ for index,actual in enumerate(capture['Actual']):
  strings=sum(5*len(x)+1 for x in pool);peak=max((5*len(x)for x in pool),default=0)
  reservation=evidence['AttachmentReservation']+96+4*len(before['Primary'])+68*len(rows)+8*len(before['Runs'])+16*count+strings+peak
  assert stats['PayloadReservation']==reservation
-stages=['Claimed','AfterPool','AfterHeader','AfterPrimary','AfterSecondary','AfterUnits','AfterRuns','AfterIntern','AfterAlternative','AfterRow','BeforeCompletion']
-assert len(capture['Failures'])==22
+stages=['Claimed','AfterPool','AfterHeader','AfterPrimary','AfterSecondary','AfterFrontier','AfterUnits','AfterRuns','AfterIntern','AfterAlternative','AfterRow','BeforeCompletion']
+assert len(capture['Failures'])==24
 reference=capture['Actual'][1]['Before']
 for ordinal,stage in enumerate(stages):
  for cancel,fault in zip((False,True),capture['Failures'][2*ordinal:2*ordinal+2],strict=True):
@@ -72,16 +72,16 @@ for ordinal,stage in enumerate(stages):
   p=fault['Prefix'];assert p['Phase']==stage and not(p['Complete']or p['Failed']or p['Released'])
   assert p['PayloadReservation']==capture['Actual'][1]['Statistics']['PayloadReservation']and p['ReleaseCount']==0
   assert p['ScoreBits']==(reference['ScoreBits']if ordinal>=2 else 0)
-  assert p['Frontier']==(reference['Frontier']if ordinal>=2 else 0)
+  assert p['Frontier']==(reference['Frontier']if ordinal>=5 else 0)
   assert p['Parent']==(reference['Parent']if ordinal>=2 else -1)
-  for key,start,name in [('PrimaryCount',3,'Primary'),('SecondaryCount',4,'Secondary'),('UnitCount',5,'Units'),('RunCount',6,'Runs')]:
+  for key,start,name in [('PrimaryCount',3,'Primary'),('SecondaryCount',4,'Secondary'),('UnitCount',6,'Units'),('RunCount',7,'Runs')]:
    assert p[key]==(len(reference[name])if ordinal>=start else 0)
-  assert p['StringsInterned']==(len(reference['Rows'])if ordinal==10 else 1 if ordinal>=7 else 0)
-  assert p['RowsWritten']==(len(reference['Rows'])if ordinal==10 else 1 if ordinal>=8 else 0)
-  completed=len(reference['Rows'])if ordinal==10 else 1 if ordinal>=9 else 0
-  want=reference['Ranges'][:completed]+[[]for _ in reference['Ranges'][completed:]]if ordinal>=7 else []
+  assert p['StringsInterned']==(len(reference['Rows'])if ordinal==11 else 1 if ordinal>=8 else 0)
+  assert p['RowsWritten']==(len(reference['Rows'])if ordinal==11 else 1 if ordinal>=9 else 0)
+  completed=len(reference['Rows'])if ordinal==11 else 1 if ordinal>=10 else 0
+  want=reference['Ranges'][:completed]+[[]for _ in reference['Ranges'][completed:]]if ordinal>=8 else []
   assert prefix_ranges(p)==want and p['RangeRowsWritten']==completed
   assert p['RangesWritten']==sum(map(len,reference['Ranges'][:completed]))
 assert capture['Gc']==dict(DetachedAllowsSourceCollection=True,SourceBackedRetainsSource=True,Row=reference)
 if len(sys.argv)==5:assert Path(sys.argv[1]).read_bytes()==Path(sys.argv[4]).read_bytes()
-print('PASS4 actual first copies/raw AL/C79 intervals/C21 unions/new-pool aliases/budget/22 prefixes/80 guards/GC; no outer DOM acceptance')
+print('PASS4 actual first copies/raw AL/C79 intervals/C21 unions/new-pool aliases/budget/24 prefixes/84 guards/GC; no outer DOM acceptance')

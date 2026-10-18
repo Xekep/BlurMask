@@ -102,7 +102,7 @@ controls, six failure prefixes and83 guards pass Managed/NativeAOT; the old
 full EE4 capture is unchanged. The
 [first-result copy](legacy-math2-first-result-copy.md) now owns a new pool and
 clones those actual ranges after alternatives. Four actual sources, a repeated
-interval alias,22 failure/cancellation prefixes and80 guards pass independent
+interval alias,24 failure/cancellation prefixes and84 guards pass independent
 raw-AL/position/union/budget checks and fresh NativeAOT. Detached results retain
 the immutable original document but permit decoder GC. Full formula output,
 outer F0 aggregation and source/DOM registration remain unfinished. The

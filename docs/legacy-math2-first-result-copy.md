@@ -71,8 +71,8 @@ inputs: cold width1, explicitly prepared widths3/16 and repeated M/M ink.
 Width3 reverses physical stroke order, proving that source IDs are not mapped
 segment ordinals. Independent tracked Python functions reconstruct native
 MeanX ordering, resampling positions, C21 range unions and resource AL bytes.
-The oracle checks new-pool aliases, exact budgets,22 failure/cancellation
-prefixes and80 guards. Positive and negative GC controls discriminate a
+The oracle checks new-pool aliases, exact budgets,24 failure/cancellation
+prefixes and84 guards. Positive and negative GC controls discriminate a
 detached copy from a retained source-backed result. No expected text labels
 or vendor execution are used. The oracle runs with Python isolated mode.
 
