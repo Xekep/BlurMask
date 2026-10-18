@@ -29,8 +29,11 @@ independent checks and fresh NativeAOT. Old Russian primary/context captures
 remain unchanged. The [owning English context stage](legacy-english119-owned-context.md)
 now adds actual A8/B0/B8 tables:7700 records and56854 ordered callbacks on the
 same124 sources, with no repeated network inference. The mechanically shared
-kernel preserves the old Russian context capture. English terminal/WORD
-scheduling and word confidence remain unfinished. These are component results,
+kernel preserves the old Russian context capture. The
+[owning terminal stage](legacy-english119-owned-terminal.md) now selects124 actual
+FIRST winners and306 complete predecessor cells without further inference;
+independent raw-resource/B8 checks and fresh NativeAOT agree. Rich273/WORD
+publication and word confidence remain unfinished. These are component results,
 not English quality or app readiness.
 
 The [owned Math2 completion stage](legacy-math2-owned-completed-records.md)
