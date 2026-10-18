@@ -3054,6 +3054,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native auxiliary rows failed.' }
           python tools/LegacyMathAuxiliaryRows.Probe/audit_output.py .artifacts/math-auxiliary-rows-native.json
           if ($LASTEXITCODE -ne 0) { throw 'Native auxiliary rows oracle failed.' }
+          dotnet run --project tools/LegacyMathSourceAssignments.Probe -c Release -- .artifacts/math-source-assignments-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed source assignments failed.' }
+          python tools/LegacyMathSourceAssignments.Probe/audit_output.py .artifacts/math-source-assignments-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed source assignments oracle failed.' }
+          dotnet publish tools/LegacyMathSourceAssignments.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-source-assignments-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Source assignments probe publish failed.' }
+          $sourceAssignments = if ($IsWindows) { '.artifacts/math-source-assignments-probe/LegacyMathSourceAssignments.Probe.exe' } else { '.artifacts/math-source-assignments-probe/LegacyMathSourceAssignments.Probe' }
+          & $sourceAssignments .artifacts/math-source-assignments-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native source assignments failed.' }
+          python tools/LegacyMathSourceAssignments.Probe/audit_output.py .artifacts/math-source-assignments-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native source assignments oracle failed.' }
           dotnet run --project tools/LegacyMathUnusedUnitPruning.Probe -c Release -- models/math2/math2-unwrapped.res .artifacts/math-unused-unit-pruning-managed.json
           if ($LASTEXITCODE -ne 0) { throw 'Managed unused unit pruning failed.' }
           python tools/LegacyMathUnusedUnitPruning.Probe/audit_output.py models/math2/math2-unwrapped.res .artifacts/math-unused-unit-pruning-managed.json
