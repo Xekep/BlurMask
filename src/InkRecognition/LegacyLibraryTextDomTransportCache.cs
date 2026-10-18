@@ -15,7 +15,9 @@ public sealed class LegacyLibraryTextDomTransportCache:IDisposable
     private int capacity;
     public LegacyLibraryTextDomTarget Target {get;}
     public LegacyFreshMainTextDocumentSeed Seed=>Target.Seed;
+    internal LegacyLibrarySelectedInputBinding InputBinding=>Seed.InputBinding;
     public LegacyFreshTextFieldInputContext SelectedInputContext=>Seed.SelectedInputContext;
+    public LegacyLibraryOriginalSelectedFieldContext? OriginalSelectedInputContext=>InputBinding.OriginalSelected;
     public bool IsDisposed {get{lock(gate)return disposed;}}
     public int Count {get{lock(gate)return row is null?0:1;}}
     public int Capacity {get{lock(gate)return capacity;}}
@@ -32,7 +34,7 @@ public sealed class LegacyLibraryTextDomTransportCache:IDisposable
         {
             ObjectDisposedException.ThrowIf(disposed,this);
             if(!ReferenceEquals(incoming.Target,Target)||!ReferenceEquals(incoming.Seed,Seed)||
-                !ReferenceEquals(incoming.SelectedInputContext,SelectedInputContext))
+                !ReferenceEquals(incoming.InputBinding,InputBinding))
                 throw new ArgumentException("Exact library target, seed and selected INPUT/C20 source required.");
             if(row is not null)throw new NotSupportedException("This actual single-transaction source has no second pending C4D producer.");
             return incoming.MoveTo(()=>
@@ -94,7 +96,9 @@ public sealed class LegacyLibraryTextDomTransfer:IDisposable
     private bool transferred,disposed;
     public LegacyLibraryTextDomTarget Target {get;}
     public LegacyFreshMainTextDocumentSeed Seed=>Target.Seed;
+    internal LegacyLibrarySelectedInputBinding InputBinding=>Seed.InputBinding;
     public LegacyFreshTextFieldInputContext SelectedInputContext=>Seed.SelectedInputContext;
+    public LegacyLibraryOriginalSelectedFieldContext? OriginalSelectedInputContext=>InputBinding.OriginalSelected;
     public long Epoch {get;}
     public bool WasTransferred {get{lock(gate)return transferred;}}
     public bool IsDisposed {get{lock(gate)return disposed;}}
@@ -110,7 +114,7 @@ public sealed class LegacyLibraryTextDomTransfer:IDisposable
         LegacyFreshMainDocumentCounterHandoff.Validate(handoff.Transforms,token);
         if(!actualEdit.Succeeded||!ReferenceEquals(actualEdit.Source.Target,actualEdit.Target)||
             !ReferenceEquals(source.Seed,actualEdit.Target.Seed)||!ReferenceEquals(source.Document,actualEdit.Target.Document)||
-            !ReferenceEquals(transaction,source.Seed.PendingSelections)||!ReferenceEquals(transaction.SelectedInputContext,source.Seed.SelectedInputContext))
+            !ReferenceEquals(transaction,source.Seed.PendingSelections)||!ReferenceEquals(transaction.InputBinding,source.Seed.InputBinding))
             throw new ArgumentException("Successful same-target export and actual selected-source pending C4D required.");
         var current=transaction.CopyPendingCommands();
         if(current.Count!=handoff.Commands.Count||current.Where((c,i)=>!SameCommand(c,handoff.Commands[i])).Any())

@@ -46,10 +46,24 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
     public static LegacyLibraryTextPublicationDocument Prepare(LegacyLibraryTextPublicationScope actualScope,
         LegacyOwnedMainWordSourceChoicesResult actualWords,CancellationToken token=default)
     {
+        ArgumentNullException.ThrowIfNull(actualScope);
+        if(actualScope.Context.OriginalSelectedInput is not null)
+            throw new NotSupportedException("Use the named original-selected document route.");
+        return PrepareCore(actualScope,actualWords,token);
+    }
+    public static LegacyLibraryTextPublicationDocument PrepareOriginalSelected(LegacyLibraryTextPublicationScope actualScope,
+        LegacyOwnedMainWordSourceChoicesResult actualWords,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(actualScope);
+        if(actualScope.Context.OriginalSelectedInput is null)
+            throw new ArgumentException("Actual original-bootstrap selected scope required.");
+        return PrepareCore(actualScope,actualWords,token);
+    }
+    private static LegacyLibraryTextPublicationDocument PrepareCore(LegacyLibraryTextPublicationScope actualScope,
+        LegacyOwnedMainWordSourceChoicesResult actualWords,CancellationToken token)
+    {
         ArgumentNullException.ThrowIfNull(actualScope);ArgumentNullException.ThrowIfNull(actualWords);
         actualScope.Validate();token.ThrowIfCancellationRequested();
-        if(actualScope.Context.OriginalSelectedInput is not null)
-            throw new NotSupportedException("Original-bootstrap selected publication requires its separate downstream transform/transport/replay adapter.");
         actualScope.Seed.Validate(actualWords.Owner,token);
         if(!ReferenceEquals(actualWords.Owner.DocumentSeed,actualScope.Seed)||
             !ReferenceEquals(actualWords.Owner.Document,actualScope.Document)||
@@ -90,7 +104,9 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
                 var state=LegacyFreshMainDocumentSelectedSources.Prepare(characters,token);Record("coverage");
                 var indices=LegacyFreshMainDocumentSourceIndices.Prepare(state,token);indices.Run(token);Record("source-indices");
                 var cleanup=LegacyFreshMainDocumentControlCleanup.Prepare(indices,token);cleanup.Run(token);Record("control-cleanup");
-                var transforms=LegacyFreshMainDocumentInputTransforms.Apply(cleanup,token);Record("input-transforms");
+                var transforms=scope.Seed.OriginalSelectedInputContext is null?
+                    LegacyFreshMainDocumentInputTransforms.Apply(cleanup,token):
+                    LegacyFreshMainDocumentInputTransforms.ApplyOriginalSelected(cleanup,token);Record("input-transforms");
                 handoff=LegacyFreshMainDocumentCounterHandoff.Apply(transforms,token);Record("counter-handoff");
                 sources=LegacyFreshMainSourceRangeUtf8.Prepare(handoff,token);Record("source-ranges");
                 target=LegacyLibraryTextDomTarget.CreateFresh(scope.Seed);
@@ -208,7 +224,7 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
         if(row is null||row.IsReleased||handoff is null||applied is not null||
             !ReferenceEquals(row.TransactionOwner,handoff.TransactionOwner)||
             !ReferenceEquals(row.TransactionOwner,scope.Seed.PendingSelections)||
-            !ReferenceEquals(row.Owner.SelectedInputContext,scope.Seed.SelectedInputContext)||
+            !ReferenceEquals(row.Owner.InputBinding,scope.Seed.InputBinding)||
             !ReferenceEquals(row.DomEdit,edit))
             throw new InvalidOperationException("Actual transferred pending C4D and unapplied same-scope selected INPUT required.");
         LegacyFreshMainDocumentCounterHandoff.Validate(handoff.Transforms,token);

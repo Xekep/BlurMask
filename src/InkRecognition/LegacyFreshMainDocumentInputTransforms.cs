@@ -15,7 +15,11 @@ public sealed class LegacyFreshMainDocumentInputTransforms
     private readonly LegacyDocumentTransformVector transforms;
     public LegacyFreshMainDocumentControlCleanup Cleanup {get;}
     public LegacyFreshMainTextDocumentSeed Seed {get;}
-    public LegacyOwnedTextFieldInputIdentityExport SourceExport {get;}
+    private readonly LegacyLibrarySelectedInputIdentityExport sourceExport;
+    public LegacyOwnedTextFieldInputIdentityExport SourceExport=>sourceExport.Legacy??
+        throw new InvalidOperationException("This export belongs to the original-bootstrap selected source.");
+    public LegacyLibrarySelectedFieldRegistryEntry? OriginalSelectedSourceInput=>sourceExport.OriginalSelectedInput;
+    public LegacyOwnedRawInkIdentityExport SourceGeometry=>sourceExport.Geometry;
     public int DocumentAlternativeCountD8 {get;}
     public int TransformCount110=>transforms.Count;
     public int DafInputCount {get;}
@@ -25,15 +29,28 @@ public sealed class LegacyFreshMainDocumentInputTransforms
     internal LegacyDocumentTransformVector VectorOwner=>transforms;
     internal LegacyDocumentTransformVector ReleasedVectorOwner {get;}
     private LegacyFreshMainDocumentInputTransforms(LegacyFreshMainDocumentControlCleanup cleanup,
-        LegacyFreshMainTextDocumentSeed seed,LegacyOwnedTextFieldInputIdentityExport export,int alternatives,
+        LegacyFreshMainTextDocumentSeed seed,LegacyLibrarySelectedInputIdentityExport export,int alternatives,
         LegacyDocumentTransformVector transforms,int dafCount,LegacyDocumentTransformSwap swap)
-    {Cleanup=cleanup;Seed=seed;SourceExport=export;DocumentAlternativeCountD8=alternatives;
+    {Cleanup=cleanup;Seed=seed;sourceExport=export;DocumentAlternativeCountD8=alternatives;
      this.transforms=transforms;DafInputCount=dafCount;ReleasedVectorOwner=swap.Released;
      Succeeded=swap.ExportSucceeded;FollowingStage026EF0Executed=swap.ExportSucceeded;}
 
     public static LegacyFreshMainDocumentInputTransforms Apply(
         LegacyFreshMainDocumentControlCleanup actualCleanup,CancellationToken token=default)
-        =>ApplyCore(actualCleanup,null,token);
+    {
+        ArgumentNullException.ThrowIfNull(actualCleanup);actualCleanup.ValidateCurrent(token);
+        if(actualCleanup.State.Text.WordChoices.Owner.DocumentSeed?.OriginalSelectedInputContext is not null)
+            throw new NotSupportedException("Use the named original-selected transform route.");
+        return ApplyCore(actualCleanup,null,token);
+    }
+    public static LegacyFreshMainDocumentInputTransforms ApplyOriginalSelected(
+        LegacyFreshMainDocumentControlCleanup actualCleanup,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(actualCleanup);actualCleanup.ValidateCurrent(token);
+        if(actualCleanup.State.Text.WordChoices.Owner.DocumentSeed?.OriginalSelectedInputContext is null)
+            throw new ArgumentException("Actual original-bootstrap selected transform source required.");
+        return ApplyCore(actualCleanup,null,token);
+    }
 
     private sealed record PreparedExport(LegacyDocumentTransformVector Vector,bool Succeeded);
     //Fault controls enter a genuine separate seed lifetime but provide an
@@ -50,8 +67,6 @@ public sealed class LegacyFreshMainDocumentInputTransforms
         var words=actualCleanup.State.Text.WordChoices;var owner=words.Owner;
         var seed=owner.DocumentSeed??throw new NotSupportedException("The old OriginalID selection route has no native selected-input result seed.");
         seed.Validate(owner,token);
-        if(seed.OriginalSelectedInputContext is not null)
-            throw new NotSupportedException("Original-bootstrap selected transform/transport ownership is a separate adapter boundary.");
         int alternatives=words.Alternatives.Count;
         if(alternatives!=2)throw new NotSupportedException("Actual complete two-alternative document result required; source-line count is notD8.");
         var entry=lifetime.GetValue(seed,_=>new());
@@ -62,9 +77,8 @@ public sealed class LegacyFreshMainDocumentInputTransforms
             entry.Claimed=true;
             //All entered failures retain the claimed lifetime. No retry can
             //reset the native output prefix through a newly prepared object.
-            var export=seed.SelectedInputContext.ExportInputIdentityTransforms(seed.Input,token);
-            if(!ReferenceEquals(export.Owner,seed.SelectedInputContext)||!ReferenceEquals(export.Input,seed.Input)||
-                export.Geometry.NativeNonidentityTransformCount!=0)
+            var export=seed.InputBinding.ExportIdentity(token);
+            if(!ReferenceEquals(export.Binding,seed.InputBinding)||export.Geometry.NativeNonidentityTransformCount!=0)
                 throw new NotSupportedException("The actual ordinary full-current-view identity-excluded export is required; nonidentity80B codec is unsupported.");
             //The old108 owner was constructed on this exact seed before any
             //WORD publication. Replace it even if an explicit prepared fault

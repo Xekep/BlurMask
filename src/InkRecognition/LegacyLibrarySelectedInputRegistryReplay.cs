@@ -16,8 +16,12 @@ public sealed class LegacyLibrarySelectedInputRegistryReplay
     private LegacyLibrarySelectedInputRegistryState state;
     public LegacyLibraryTextPublicationDocument DocumentOwner {get;}
     public LegacyLibraryTextPublicationScope Scope {get;}
-    public LegacyFreshTextFieldInputContext InitialContext {get;}
+    internal LegacyLibrarySelectedInputBinding InputBinding {get;}
+    public LegacyFreshTextFieldInputContext InitialContext=>InputBinding.LegacyOrThrow;
     public LegacyRetainedTextFieldInputSelection Input=>InitialContext.Input;
+    public LegacyLibraryOriginalSelectedFieldContext? OriginalSelectedInitialContext=>InputBinding.OriginalSelected;
+    public LegacyLibrarySelectedFieldRegistryEntry? OriginalSelectedInput=>InputBinding.OriginalSelectedEntry;
+    public IReadOnlyList<long> InitialRegistryIds=>Array.AsReadOnly(InputBinding.CopyInitialRegistryIds());
     public LegacyOwnedFreshTextSourceContext TransactionOwner {get;}
     public LegacyLibraryTextDomTransportRow TransportRow {get;}
     public LegacyLibrarySelectedInputRegistryState State {get{lock(gate)return state;}}
@@ -27,16 +31,22 @@ public sealed class LegacyLibrarySelectedInputRegistryReplay
         LegacyLibraryTextPublicationScope scope,LegacyLibraryTextDomTransportRow row,
         LegacyFreshMainDocumentCounterHandoff handoff,CancellationToken token)
     {
-        DocumentOwner=document;Scope=scope;TransportRow=row;InitialContext=scope.Seed.SelectedInputContext;
+        DocumentOwner=document;Scope=scope;TransportRow=row;InputBinding=scope.Seed.InputBinding;
         TransactionOwner=row.TransactionOwner;commands=TransactionOwner.CopyPendingCommands().ToArray();
-        if(InitialContext.Parent is null||!ReferenceEquals(InitialContext.Input.Owner,InitialContext)||
-            !ReferenceEquals(TransactionOwner.SelectedInputContext,InitialContext)||
+        if((InputBinding.Legacy is{} legacy&&(legacy.Parent is null||!ReferenceEquals(legacy.Input.Owner,legacy)))||
+            !ReferenceEquals(TransactionOwner.InputBinding,InputBinding)||
             !ReferenceEquals(handoff.TransactionOwner,TransactionOwner)||TransactionOwner.Failed||
-            !ReferenceEquals(InitialContext.Document,document.Document))
+            !ReferenceEquals(InputBinding.Document,document.Document)||
+            !ReferenceEquals(scope.Context.InputBinding,InputBinding))
             throw new ArgumentException("Exact fresh worker-selected INPUT/C22 and closed pending C4D required.");
         // Budgets precede cloning any pending C22. Do not accept caller command lists.
         if(commands.Length>65537)throw new NotSupportedException("Selected-registry command budget exceeded.");
-        long total=Input.CopyRanges().LongLength;var ids=new HashSet<long>{Input.RegistryId};bool counter=false;
+        var initialIds=InputBinding.CopyInitialRegistryIds();
+        var initialRanges=InputBinding.CopyInitialRegistryRanges();
+        long total=initialRanges.Sum(r=>(long)r.Length);var ids=new HashSet<long>(initialIds);bool counter=false;
+        if(initialIds.Length is <1 or >65537||ids.Count!=initialIds.Length||initialIds.Any(i=>i<0||i==long.MaxValue)||
+            total>1048576||InputBinding.Next<=InputBinding.Maximum||initialIds.Max()!=InputBinding.Maximum)
+            throw new NotSupportedException("Complete bounded active initial C51 registry required.");
         for(int i=0;i<commands.Length;i++)
         {
             token.ThrowIfCancellationRequested();var c=commands[i];
@@ -50,19 +60,28 @@ public sealed class LegacyLibrarySelectedInputRegistryReplay
                     s.SelectionId<0||s.SelectionId==long.MaxValue||!ids.Add(s.SelectionId)||ranges.Length>65536)
                     throw new NotSupportedException("Only unused exact IDs/category100 ordinary selections are supported.");
             }
-            else if(c.Counter is{} end&&i==commands.Length-1&&end.OldCounter20==InitialContext.NextRegistryId&&
+            else if(c.Counter is{} end&&i==commands.Length-1&&end.OldCounter20==InputBinding.Next&&
                 end.NewCounter18==handoff.FinalPendingCounter&&end.OldCounter20>=0&&end.NewCounter18>=0)
                 counter=true;
             else throw new NotSupportedException("Only trailing actual operation7 is supported.");
             if(total>1048576)throw new NotSupportedException("Selected-registry range budget exceeded.");
         }
         if(ids.Count>65537)throw new NotSupportedException("Selected-registry selection budget exceeded.");
-        state=new(this,InitialContext.NextRegistryId,InitialContext.MaximumRegistryId,[],0,false,false);
+        state=new(this,InputBinding.Next,InputBinding.Maximum,[],0,false,false);
     }
 
     public static LegacyLibrarySelectedInputRegistryReplay Prepare(LegacyLibraryTextPublicationDocument actualDocument,
         CancellationToken token=default)
     {ArgumentNullException.ThrowIfNull(actualDocument);return actualDocument.ClaimRegistryReplay(token);}
+
+    public static LegacyLibrarySelectedInputRegistryReplay PrepareOriginalSelected(LegacyLibraryTextPublicationDocument actualDocument,
+        CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(actualDocument);
+        var row=actualDocument.ActualTransportRow??throw new InvalidOperationException("Actual transferred transaction required.");
+        if(row.Owner.OriginalSelectedInputContext is null)throw new ArgumentException("Original-selected transaction required.");
+        return actualDocument.ClaimRegistryReplay(token);
+    }
 
     public LegacyLibrarySelectedInputRegistryState Run(CancellationToken token=default)=>RunCore(-1,-1,token);
     // Model only failure of the temporary C22 clone before VE0 registration.
@@ -81,7 +100,7 @@ public sealed class LegacyLibrarySelectedInputRegistryReplay
                 if(entered)throw new InvalidOperationException("Selected-registry replay retains its entered prefix and is single-use.");
                 token.ThrowIfCancellationRequested();entered=true;
                 var selections=new List<LegacyLibrarySelectedInputRegistrySelection>();
-                long next=InitialContext.NextRegistryId,maximum=InitialContext.MaximumRegistryId;int completed=0;
+                long next=InputBinding.Next,maximum=InputBinding.Maximum;int completed=0;
                 try
                 {
                     for(int i=0;i<commands.Length;i++)
@@ -135,6 +154,9 @@ public sealed class LegacyLibrarySelectedInputRegistryState
     public LegacyLibrarySelectedInputRegistryReplay Owner {get;}
     public LegacyFreshTextFieldInputContext InitialContext=>Owner.InitialContext;
     public LegacyRetainedTextFieldInputSelection Input=>Owner.Input;
+    public LegacyLibraryOriginalSelectedFieldContext? OriginalSelectedInitialContext=>Owner.OriginalSelectedInitialContext;
+    public LegacyLibrarySelectedFieldRegistryEntry? OriginalSelectedInput=>Owner.OriginalSelectedInput;
+    public IReadOnlyList<long> InitialRegistryIds=>Owner.InitialRegistryIds;
     public long NextRegistryId {get;}
     public long MaximumRegistryId {get;}
     public int CompletedCommandCount {get;}
@@ -159,6 +181,7 @@ public sealed class LegacyLibrarySelectedInputRegistrySelection
     private readonly LegacyNativeInkPositionRange[] ranges;
     public LegacyLibrarySelectedInputRegistryReplay Owner {get;}
     public LegacyFreshTextFieldInputContext TargetContext=>Owner.InitialContext;
+    public LegacyLibraryOriginalSelectedFieldContext? OriginalSelectedTargetContext=>Owner.OriginalSelectedInitialContext;
     public LegacyOwnedFreshTextSelection SourceCommand {get;}
     public long RegistryId=>SourceCommand.SelectionId;
     public string Name=>SourceCommand.Name;

@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("LegacyOriginalSelectedPublication.Probe")]
+[assembly: InternalsVisibleTo("LegacyOriginalSelectedDocument.Probe")]
 namespace InkRecognition;
 
 // Internal discriminated ownership, never a caller-created selected C20 or
@@ -13,6 +14,29 @@ internal sealed class LegacyLibrarySelectedInputBinding
     internal LegacyOwnedRawInkDocument Document => Legacy?.Document ?? OriginalSelected!.Document;
     internal long RegistryId => Legacy?.Input.RegistryId ?? OriginalSelected!.OriginalInput.RegistryId;
     internal long Next => Legacy?.NextRegistryId ?? OriginalSelected!.State.NextRegistryId;
+    internal long Maximum => Legacy?.MaximumRegistryId ?? OriginalSelected!.State.MaximumRegistryId;
+    internal LegacyFreshRawInkCurrentView CurrentView => Legacy?.CurrentView ?? OriginalSelected!.CurrentView;
+    internal LegacyLibrarySelectedFieldRegistryEntry? OriginalSelectedEntry => OriginalSelected?.State.Registry.Single(e => e.RegistryId == RegistryId);
+    internal long[] CopyInitialRegistryIds() => Legacy is not null ? [Legacy.Input.RegistryId] :
+        OriginalSelected!.State.Registry.Select(e => e.RegistryId).ToArray();
+    internal LegacyNativeInkPositionRange[][] CopyInitialRegistryRanges() => Legacy is not null ? [Legacy.Input.CopyRanges()] :
+        OriginalSelected!.State.Registry.Select(e => e.CopyRanges()).ToArray();
+    internal LegacyLibrarySelectedInputIdentityExport ExportIdentity(CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        if (Legacy is not null)
+        {
+            var export = Legacy.ExportInputIdentityTransforms(Legacy.Input, token);
+            if (!ReferenceEquals(export.Owner, Legacy) || !ReferenceEquals(export.Input, Legacy.Input))
+                throw new ArgumentException("Exact selected legacy exporter required.");
+            return new(this, export, null, export.Geometry);
+        }
+        var selected = OriginalSelected!; var entry = OriginalSelectedEntry!;
+        if (!selected.State.Succeeded || selected.State.IsFaulted || selected.NativeHistoryEnabled ||
+            !ReferenceEquals(entry.Owner, selected) || !ReferenceEquals(entry.OriginalEntry, selected.OriginalInput))
+            throw new ArgumentException("Exact current selected source-tag/C22 required.");
+        return new(this, null, entry, selected.ExportInputGeometry(entry, token));
+    }
     internal string ElementName => Legacy?.ElementName ?? "textField";
     internal string ElementNamespace => Legacy?.ElementNamespace ?? LegacyLibraryOriginalTextFieldBootstrap.PageNamespace;
     internal int ElementKind => Legacy?.NativeElementKind ?? 0;
@@ -35,8 +59,7 @@ internal sealed class LegacyLibrarySelectedInputBinding
             throw new NotSupportedException("Complete same-original selected worker C20/BCD required.");
         return new(input);
     }
-    internal LegacyNativeInkPositionRange[] CopyRanges() => Legacy?.Input.CopyRanges() ??
-        OriginalSelected!.State.Registry.Single(e => e.RegistryId == RegistryId).CopyRanges();
+    internal LegacyNativeInkPositionRange[] CopyRanges() => Legacy?.Input.CopyRanges() ?? OriginalSelectedEntry!.CopyRanges();
     internal byte[] CopyDafInputRows32()
     {
         if (Legacy is not null) return Legacy.Input.CopyDafInputRows32();
@@ -47,3 +70,7 @@ internal sealed class LegacyLibrarySelectedInputBinding
         return [];
     }
 }
+
+internal sealed record LegacyLibrarySelectedInputIdentityExport(
+    LegacyLibrarySelectedInputBinding Binding, LegacyOwnedTextFieldInputIdentityExport? Legacy,
+    LegacyLibrarySelectedFieldRegistryEntry? OriginalSelectedInput, LegacyOwnedRawInkIdentityExport Geometry);

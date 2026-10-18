@@ -18,17 +18,36 @@ public sealed class LegacyLibraryOriginalInputPatchCompatibility
     public LegacyLibrarySelectedInputRegistryReplay Replay {get;}
     public LegacyLibraryTextPublicationDocument DocumentOwner=>Replay.DocumentOwner;
     public LegacyLibraryTextPublicationScope Scope=>Replay.Scope;
-    public LegacyFreshTextFieldInputContext OriginalContext {get;}
+    private readonly LegacyFreshTextFieldInputContext? originalContext;
+    private readonly LegacyFreshRawInkCurrentView currentView;
+    private readonly int rawObjectCount;
+    public LegacyFreshTextFieldInputContext OriginalContext=>originalContext??
+        throw new InvalidOperationException("This preflight retains the original field bootstrap, not the legacy one-INPUT context.");
     public LegacyRetainedTextFieldInputSelection OriginalInput=>OriginalContext.Input;
+    public LegacyLibraryOriginalTextFieldBootstrap? OriginalBootstrap {get;}
+    public LegacyLibraryOriginalFieldSelection? OriginalBootstrapInput {get;}
     public LegacyOwnedFreshTextSourceContext TransactionOwner=>Replay.TransactionOwner;
     public LegacyLibraryOriginalInputPatchCompatibilityState State {get{lock(gate)return state;}}
     internal LegacyLibraryOriginalInputPatchCompatibility(LegacyLibrarySelectedInputRegistryReplay replay,CancellationToken token)
     {
-        Replay=replay;OriginalContext=replay.InitialContext.Parent??throw new ArgumentException("Original INPUT parent required.");
-        ValidateOriginal(replay,OriginalContext);
-        var ranges=LegacyOwnedRawInkRangeOperations.Prepare(OriginalContext.Document);
+        Replay=replay;
+        LegacyNativeInkPositionRange[] originalRanges;
+        if(replay.InputBinding.OriginalSelected is{} selected)
+        {
+            OriginalBootstrap=selected.Original;OriginalBootstrapInput=selected.OriginalInput;
+            ValidateOriginalSelected(replay,OriginalBootstrap,OriginalBootstrapInput);
+            currentView=OriginalBootstrap.CurrentView;rawObjectCount=currentView.Curves.Count;
+            originalRanges=OriginalBootstrapInput.CopyRanges();
+        }
+        else
+        {
+            originalContext=replay.InitialContext.Parent??throw new ArgumentException("Original INPUT parent required.");
+            ValidateOriginal(replay,OriginalContext);currentView=OriginalContext.CurrentView;rawObjectCount=OriginalContext.RawObjectCount;
+            originalRanges=OriginalInput.CopyRanges();
+        }
+        var ranges=LegacyOwnedRawInkRangeOperations.Prepare(replay.DocumentOwner.Document);
         LegacyNativeInkPositionRange[] built=[];
-        foreach(var curve in OriginalContext.CurrentView.Curves)
+        foreach(var curve in currentView.Curves)
         {
             token.ThrowIfCancellationRequested();uint id=checked((uint)curve.OriginalSourceIndex);
             var first=LegacyNativeInkPosition.Pack(id,0,3,curve.PointCount);
@@ -37,8 +56,8 @@ public sealed class LegacyLibraryOriginalInputPatchCompatibility
         }
         //065940 builds C20+20 from the appended raw C49s. Only after that
         //producer do we compare to the retained INPUT C22; it is not assumed.
-        if(!built.AsSpan().SequenceEqual(OriginalInput.CopyRanges())||
-            !built.AsSpan().SequenceEqual(replay.Input.CopyRanges()))
+        if(!built.AsSpan().SequenceEqual(originalRanges)||
+            !built.AsSpan().SequenceEqual(replay.InputBinding.CopyRanges()))
             throw new NotSupportedException("Full original raw-domain/INPUT/selected-C22 identity required.");
         domain=built;commands=TransactionOwner.CopyPendingCommands().ToArray();
         if(commands.Length>65537||commands.Any(c=>!ReferenceEquals(c.Owner,TransactionOwner)||c.OperationCode is not (4 or 7)))
@@ -48,6 +67,13 @@ public sealed class LegacyLibraryOriginalInputPatchCompatibility
     public static LegacyLibraryOriginalInputPatchCompatibility Prepare(LegacyLibrarySelectedInputRegistryReplay actualReplay,
         CancellationToken token=default)
     {ArgumentNullException.ThrowIfNull(actualReplay);return actualReplay.DocumentOwner.ClaimOriginalCompatibility(actualReplay,token);}
+    public static LegacyLibraryOriginalInputPatchCompatibility PrepareOriginalSelected(LegacyLibrarySelectedInputRegistryReplay actualReplay,
+        CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(actualReplay);
+        if(actualReplay.OriginalSelectedInitialContext is null)throw new ArgumentException("Original-selected replay required.");
+        return actualReplay.DocumentOwner.ClaimOriginalCompatibility(actualReplay,token);
+    }
     internal static void ValidateOriginal(LegacyLibrarySelectedInputRegistryReplay replay,LegacyFreshTextFieldInputContext original)
     {
         if(!ReferenceEquals(original,replay.InitialContext.Parent)||original.Parent is not null||
@@ -56,6 +82,21 @@ public sealed class LegacyLibraryOriginalInputPatchCompatibility
             !ReferenceEquals(replay.Scope.Context.SelectedInput,replay.InitialContext)||
             !ReferenceEquals(original.Input.Owner,original)||original.RawObjectCount!=original.Document.ObjectCount)
             throw new ArgumentException("Exact constructor-original C20 parent/INPUT/raw domain required; selected copies are different owners.");
+    }
+    internal static void ValidateOriginalSelected(LegacyLibrarySelectedInputRegistryReplay replay,
+        LegacyLibraryOriginalTextFieldBootstrap original,LegacyLibraryOriginalFieldSelection originalInput)
+    {
+        var selected=replay.InputBinding.OriginalSelected??throw new ArgumentException("Original-selected replay required.");
+        var entry=replay.InputBinding.OriginalSelectedEntry!;
+        if(!ReferenceEquals(selected.Original,original)||!ReferenceEquals(selected.OriginalInput,originalInput)||
+            !ReferenceEquals(entry.OriginalEntry,originalInput)||!ReferenceEquals(entry.Owner,selected)||
+            !ReferenceEquals(originalInput.Owner,original)||!original.State.Succeeded||original.State.IsFaulted||
+            !original.State.Inputs.Any(i=>ReferenceEquals(i,originalInput))||
+            !ReferenceEquals(selected.CurrentView,original.CurrentView)||
+            !ReferenceEquals(original.Document,replay.DocumentOwner.Document)||
+            !ReferenceEquals(replay.Scope.Context.InputBinding,replay.InputBinding)||
+            original.CurrentView.Curves.Count!=original.Document.ObjectCount)
+            throw new ArgumentException("Exact retained original bootstrap/INPUT and selected child C22 required.");
     }
     public LegacyNativeInkPositionRange[] CopyOriginalInkDomain()=>domain.ToArray();
     public LegacyLibraryOriginalInputPatchCompatibilityState Run(CancellationToken token=default)=>RunCore(-1,-1,-1,token);
@@ -81,11 +122,11 @@ public sealed class LegacyLibraryOriginalInputPatchCompatibility
                     if(failure==0){state=new(this,true,false,1,true,inspected,presence);return state;}
                     var localDomain=domain.ToArray();
                     if(failure==1){state=new(this,true,false,1,true,inspected,presence);return state;}
-                    presence=new byte[OriginalContext.RawObjectCount];
+                    presence=new byte[rawObjectCount];
                     for(int i=0;i<presence.Length;i++)
                     {
-                        var curve=OriginalContext.CurrentView.Curves[i];
-                        if(curve.OriginalSourceIndex!=i||!ReferenceEquals(curve.Document,OriginalContext.Document))
+                        var curve=currentView.Curves[i];
+                        if(curve.OriginalSourceIndex!=i||!ReferenceEquals(curve.Document,DocumentOwner.Document))
                             throw new NotSupportedException("Complete original raw slot ownership required.");
                         presence[i]=1; //Actual retained C49, not an assumed external source slot.
                     }
@@ -99,7 +140,7 @@ public sealed class LegacyLibraryOriginalInputPatchCompatibility
                             if(i==incompatible)
                             {
                                 //Explicit PREPARED out-of-root C22 counterexample.
-                                uint outside=checked((uint)OriginalContext.RawObjectCount);
+                                uint outside=checked((uint)rawObjectCount);
                                 request=[new(LegacyNativeInkPosition.Pack(outside,0,3,1),LegacyNativeInkPosition.Pack(outside,0,5,1))];
                             }
                             compatible=CheckSelection(localDomain,request);

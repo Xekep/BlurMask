@@ -70,7 +70,7 @@ public sealed partial class LegacyOwnedFreshTextSourceContext
             if(commands.Count!=prefix.Count+1||!ReferenceEquals(commands[^1],text.Selection)||
                 commands.Take(prefix.Count).Where((command,index)=>!ReferenceEquals(command,prefix[index])).Any())
                 throw new InvalidOperationException("The exact retained CHAR/WORD/TEXT prefix changed before counter append.");
-            return AppendCounterCore(actualTransforms.Seed.SelectedInputContext.NextRegistryId,next,false,token);
+            return AppendCounterCore(actualTransforms.Seed.InputBinding.Next,next,false,token);
         }
     }
     //Explicit scalar/fault controls, not a public choice of caller counters.
@@ -107,7 +107,7 @@ public sealed class LegacyFreshMainDocumentCounterHandoff
     public LegacyOwnedFreshTextSourceContext TransactionOwner=>Transforms.Seed.PendingSelections;
     public LegacyOwnedFreshTextCounterCommand? CounterCommand {get;}
     public IReadOnlyList<LegacyOwnedFreshTextPendingCommand> Commands {get;}
-    public long InitialPendingCounter=>Transforms.Seed.SelectedInputContext.NextRegistryId;
+    public long InitialPendingCounter=>Transforms.Seed.InputBinding.Next;
     public long FinalPendingCounter {get;}
     private LegacyFreshMainDocumentCounterHandoff(LegacyFreshMainDocumentInputTransforms transforms,LegacyPendingCounterAppend append)
     {Transforms=transforms;CounterCommand=append.Command;FinalPendingCounter=TransactionOwner.NextSelectionId;Commands=TransactionOwner.CopyPendingCommands();}

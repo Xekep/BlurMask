@@ -18,7 +18,9 @@ positions=[s.index(v)for v in order];assert positions==sorted(positions)
 binding=read('LegacyLibrarySelectedInputBinding.cs')
 for value in ['internal sealed class LegacyLibrarySelectedInputBinding','internal object Identity',
  'input.State.Succeeded','input.HasNativeReaderContext','input.NativeHistoryEnabled',
- 'ReferenceEquals(e.OriginalEntry, input.OriginalInput)','OriginalSelected!.State.Registry.Single(e => e.RegistryId == RegistryId)',
+ 'ReferenceEquals(e.OriginalEntry, input.OriginalInput)',
+ 'OriginalSelectedEntry => OriginalSelected?.State.Registry.Single(e => e.RegistryId == RegistryId)',
+ 'Legacy?.Input.CopyRanges() ?? OriginalSelectedEntry!.CopyRanges()',
  'LegacyOrThrow','input.Children.Count != 0']:
  assert value in binding,value
 ctx=read('LegacyLibraryTextProcessingContext.cs')
@@ -41,8 +43,10 @@ assert 'SourceTag30=>InputBinding.RegistryId' in seed
 doc=read('LegacyLibraryTextPublicationDocument.cs')
 assert doc.index('actualScope.Context.OriginalSelectedInput is not null')<doc.index('claims.GetValue(')
 transform=read('LegacyFreshMainDocumentInputTransforms.cs')
-assert transform.index('seed.OriginalSelectedInputContext is not null')<transform.index('lifetime.GetValue(')
+old_transform=transform[transform.index('public static LegacyFreshMainDocumentInputTransforms Apply('):transform.index('public static LegacyFreshMainDocumentInputTransforms ApplyOriginalSelected(')]
+assert old_transform.index('actualCleanup.State.Text.WordChoices.Owner.DocumentSeed?.OriginalSelectedInputContext is not null')<old_transform.index('return ApplyCore(')
+assert transform.index('return ApplyCore(')<transform.index('lifetime.GetValue(')
 a.output.write_bytes((json.dumps(dict(nativePrerequisites=deps,portableOrderedSteps=order,
  portableSameOwnerAndGuardChecks=25,vendorExecution=False,
- scope='Library original-selected input2C1/import/shared3E/Seed before configured2 NN; downstream transform/transport/replay explicitly refused; no CBB acceptance'),indent=2)+'\n').encode())
+ scope='Library original-selected input2C1/import/shared3E/Seed before configured2 NN; old entrypoints retain early refusal, named downstream route is separately checked; no CBB acceptance'),indent=2)+'\n').encode())
 print('PASS2 native prerequisite audit trees +4 ordered library adoption steps/25 owner and early guard checks; no vendor execution')
