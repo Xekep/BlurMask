@@ -47,7 +47,9 @@ earlier completed symbolic allocations, but returns no partial result.
 
 Aliasfold88=0 is proven through child249 binder156630 writing owner+11=0 and
 first iteration1ef070 reloading that value. Selected child249 capsA0/A2/A4=1
-are separately proven by the binder. Native E0 is **explicit**, without an
+require the actual frontend150D00 paired-source binding before156630;
+[the pinned closure](legacy-english119-context-plan.md) distinguishes this
+route from an unbound standalone249, whoseA0 would be20. Native E0 is **explicit**, without an
 invented default. Initializer1edde0 enables it when owner.C4 is nonzero, source
 virtual58 returns137, or the acoustic alphabet contains U+F0009. The owned
 first RU source is135 and its inline alphabet lacks F0009. Constructor00c860's

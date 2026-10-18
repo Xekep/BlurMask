@@ -18,7 +18,12 @@ or Russian cursive production-ready.
    controller+18 backpointer to the same container. With fresh20e count0,
    1eb340 chooses23f and calls its initializer1edde0.
 3. Binder156630 writes only fields8,11,14,16,18 and9b in this container.
-   Selected child's A0/A2/A4 caps become1 and aliasfold source11 becomes0.
+   On the selected frontend150D00 route, the registered pair binder158DF0
+   first installs a nonnull original247 at child1D8. The conditional
+   container14 cap is then1; container16/18 are unconditionally1, yielding
+   A0/A2/A4=1. A standalone unbound249 would instead use A0=20. The
+   [paired-source proof](legacy-english119-context-plan.md) pins both routes.
+   Aliasfold source11 becomes0.
    These writes do not change C4,99 or A8.
 4. Final container.virtual28=00cb50 reaches the owned source247's
    virtual48=1d60d0. It writes40/2c/1c/28 and updates acoustic frontend flags30
