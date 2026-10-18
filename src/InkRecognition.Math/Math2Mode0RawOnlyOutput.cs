@@ -17,7 +17,7 @@ internal sealed record Math2Mode0OutputRecord(object RecordIdentity, Math2Mode0C
 
 /// <summary>Ordinary rich-record output only. UTF8 alternatives remain separate;
 /// this does not transport a formula tree or assert recognition acceptance.</summary>
-internal sealed class Math2Mode0RawOnlyOutput
+internal sealed partial class Math2Mode0RawOnlyOutput
 {
     private readonly Math2Mode0RawOnlyFinalOrdering owner;
     private readonly Math2Mode0RawOnlyOutputPolicy policy;
@@ -50,13 +50,18 @@ internal sealed class Math2Mode0RawOnlyOutput
             {
                 Observe(Math2Mode0OutputStage.BeforeFormatter, at); started++;
                 var row = owner.Ef4.CopyFinalRecord(owner, records[at]);
-                ushort[] map = policy.CopyIdentityMapPrepared(row.Units);
-                uint[] units = row.Units.ToArray();
-                owner.Ef4.StoreOutputUnits(owner, this, row.RecordIdentity, units);
+                var formatted = policy.Format(row.Units, token);
+                if (!formatted.GrammarValid || formatted.Map.Length != row.Units.Length)
+                    throw new InvalidDataException("Full EE4 normalization/final grammar failed.");
+                ushort[] map = formatted.Map; uint[] units = formatted.Units;
+                foreach (uint unit in units) policy.ValidateUnit(unit);
+                if (!policy.HasFullFormatter) owner.Ef4.StoreOutputUnits(owner, this, row.RecordIdentity, units);
                 unitPrefix[at] = units;
                 phases[at] = "units50"; Observe(Math2Mode0OutputStage.AfterUnits, at);
                 MathSegmentRun[] runs = row.Runs.Select(run => new MathSegmentRun(
                     run.PrimaryIndex < 0 ? run.PrimaryIndex : map[run.PrimaryIndex], run.EndSegmentExclusive)).ToArray();
+                if (runs.Any(run => run.PrimaryIndex >= units.Length))
+                    throw new NotSupportedException("Mapped actual run has no owned formatted unit; general dangling-map transport is not restored.");
                 owner.Ef4.StoreOutputRuns(owner, this, row.RecordIdentity, runs);
                 runPrefix[at] = runs;
                 phases[at] = "runs68"; Observe(Math2Mode0OutputStage.AfterRunMap, at);
@@ -103,13 +108,21 @@ internal sealed partial class Math2Mode0RawOnlyFinalOrdering
         => FormatOrdinaryDiagnostic(DefaultPayloadBudget, null, token);
     internal Math2Mode0RawOnlyOutput FormatOrdinaryDiagnostic(long budget,
         Action<Math2Mode0OutputStage, int, Math2Mode0RawOnlyOutput>? observer, CancellationToken token = default)
+        => FormatCore(budget, false, observer, token);
+    internal Math2Mode0RawOnlyOutput FormatFullCold(CancellationToken token = default)
+        => FormatCore(DefaultPayloadBudget, true, null, token);
+    internal Math2Mode0RawOnlyOutput FormatFullColdDiagnostic(long budget,
+        Action<Math2Mode0OutputStage, int, Math2Mode0RawOnlyOutput>? observer, CancellationToken token = default)
+        => FormatCore(budget, true, observer, token);
+    private Math2Mode0RawOnlyOutput FormatCore(long budget, bool full,
+        Action<Math2Mode0OutputStage, int, Math2Mode0RawOnlyOutput>? observer, CancellationToken token)
         => Ef4.WithFinalOrdering(this, () =>
         {
             token.ThrowIfCancellationRequested();
             if (!complete || failed || outputClaimed) throw new InvalidOperationException("Successful unconsumed final owner required.");
             if (budget < 0 || budget > DefaultPayloadBudget) throw new ArgumentOutOfRangeException(nameof(budget));
             // Metadata/immutable AL inspection only, before payload allocation.
-            var (policy, payload) = Ef4.PlanOrdinaryOutput(this, retained, reservation, token);
+            var (policy, payload) = Ef4.PlanOutput(this, retained, reservation, full, token);
             if (payload > budget) throw new NotSupportedException("Combined history/EF4/order/output payload envelope exceeds budget before claim.");
             token.ThrowIfCancellationRequested();
             outputClaimed = true;
@@ -131,13 +144,13 @@ internal sealed partial class Math2Mode0RawOnlyFinalOrdering
 
 internal sealed partial class Math2Mode0RawOnlyEf4
 {
-    internal (Math2Mode0RawOnlyOutputPolicy Policy, long Payload) PlanOrdinaryOutput(
-        Math2Mode0RawOnlyFinalOrdering final, object[] retained, long reservation, CancellationToken token)
+    internal (Math2Mode0RawOnlyOutputPolicy Policy, long Payload) PlanOutput(
+        Math2Mode0RawOnlyFinalOrdering final, object[] retained, long reservation, bool full, CancellationToken token)
         => WithFinalOrdering(final, () =>
         {
             if (retained.Length == 0) throw new NotSupportedException("Empty vector has no actual AL owner; no formula is invented.");
             var gate = FindFinalCell(retained[0]).Record.Source.ReadAttentionAlphabet();
-            var policy = Math2Mode0RawOnlyOutputPolicy.Bind(this, gate);
+            var policy = full ? Math2Mode0RawOnlyOutputPolicy.BindFull(this, gate) : Math2Mode0RawOnlyOutputPolicy.Bind(this, gate);
             long payload = reservation, peak = 0;
             foreach (object record in retained)
             {
@@ -160,9 +173,15 @@ internal sealed partial class Math2Mode0RawOnlyEf4
                     if (label == policy.Dot && labels.Add(policy.Period)) strings = checked(strings + 5L * policy.ByteCount(policy.Period) + 1);
                     peak = System.Math.Max(peak, 5L * policy.ByteCount(label));
                 }
+                if (full)
+                {
+                    var envelope = policy.FullStringEnvelope(); strings = envelope.Strings;
+                    peak = System.Math.Max(peak, envelope.Peak);
+                }
                 // Existing EF4/order envelope plus output/map, row/alternative,
                 // detached per-record workspace and temporary UTF8 conversion.
-                payload = checked(payload + strings + row.Units.LongLength * (4 + 2 + 40 + 16 + 8) + row.Runs.LongLength * 16 +
+                payload = checked(payload + strings + policy.MaximumFormattedUnits(row.Units.Length) * (4L + 2 + 40 + 16 + 8) +
+                    policy.FormatterWorkspace(row.Units.Length) + row.Runs.LongLength * 16 +
                     row.Record.PrimaryCount * 2L + row.Assignments.LongLength * 4 + row.Initial.LongLength + row.Deleted.LongLength);
             }
             return (policy, checked(payload + peak));

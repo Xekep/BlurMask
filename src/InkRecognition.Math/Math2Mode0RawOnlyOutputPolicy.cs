@@ -8,12 +8,14 @@ internal sealed class Math2Mode0RawOnlyOutputPolicy
 {
     private readonly LegacyInkAlphabet alphabet;
     private readonly HashSet<ushort> grammar;
+    private readonly LegacyMath2Ee4Formatter? formatter;
+    internal bool HasFullFormatter => formatter != null;
     internal LegacyMath2ObservableTokens Gate { get; }
     internal const int DecoderLabels = 297;
     internal ushort Dot { get; }
     internal ushort Period { get; }
     internal ushort Zero { get; }
-    private Math2Mode0RawOnlyOutputPolicy(LegacyMath2ObservableTokens gate)
+    private Math2Mode0RawOnlyOutputPolicy(LegacyMath2ObservableTokens gate, bool fullFormatter = false)
     {
         Gate = gate; alphabet = gate.ReadOwnedAlphabet();
         if (alphabet.LabelCount != 299) throw new InvalidDataException("Actual source AL required.");
@@ -29,6 +31,7 @@ internal sealed class Math2Mode0RawOnlyOutputPolicy
         for (int digit = 0; digit < 10; digit++)
             if (Find(digit.ToString(System.Globalization.CultureInfo.InvariantCulture)) != Zero + digit)
                 throw new InvalidDataException("Actual contiguous digit labels required.");
+        if (fullFormatter) formatter = LegacyMath2Ee4Formatter.Bind(gate);
     }
     internal static Math2Mode0RawOnlyOutputPolicy Bind(Math2Mode0RawOnlyEf4 source,
         LegacyMath2ObservableTokens gate)
@@ -37,6 +40,12 @@ internal sealed class Math2Mode0RawOnlyOutputPolicy
             !source.Source.Policy.Bundle.ForceNonobservablePositions)
             throw new NotSupportedException("The actual cold no-constraint/no-detection profile is required.");
         return new(gate);
+    }
+    internal static Math2Mode0RawOnlyOutputPolicy BindFull(Math2Mode0RawOnlyEf4 source,
+        LegacyMath2ObservableTokens gate)
+    {
+        _ = Bind(source, gate); // Preserve the authenticated cold/raw-only scope.
+        return new(gate, fullFormatter: true);
     }
     private ushort Find(string text) => alphabet.TryGetLabel(text, out ushort label) ? label
         : throw new InvalidDataException("Missing actual formatter symbol.");
@@ -47,9 +56,22 @@ internal sealed class Math2Mode0RawOnlyOutputPolicy
     internal void ValidateUnit(uint unit)
     {
         ushort label = (ushort)unit;
-        if ((unit & 0x00ff0000u) != 0 || label == 0 || label >= DecoderLabels || grammar.Contains(label))
+        if ((unit & 0x00ff0000u) != 0 || label == 0 || label >= DecoderLabels || formatter == null && grammar.Contains(label))
             throw new NotSupportedException("Whole-vector ordinary no-rule-hit output only; structured/existing/zero/control units remain unsupported.");
         _ = ReadText(label);
+    }
+    internal LegacyMath2Ee4Formatter.Projection Format(ReadOnlySpan<uint> units, CancellationToken token)
+        => formatter?.FormatPrepared(units, token) ?? new(units.ToArray(), CopyIdentityMapPrepared(units), true);
+    internal int MaximumFormattedUnits(int input)
+        => formatter == null ? input : System.Math.Min(65535, checked(input * input + 2 * input));
+    internal long FormatterWorkspace(int input)
+        => formatter == null ? 0 : checked(80L * input + 4L * MaximumFormattedUnits(input));
+    internal (long Strings, long Peak) FullStringEnvelope()
+    {
+        long strings = 0, peak = 0;
+        for (ushort label = 1; label < DecoderLabels; label++)
+        { int bytes = ByteCount(label); strings += 5L * bytes + 1; peak = System.Math.Max(peak, 5L * bytes); }
+        return (strings, peak);
     }
     internal ushort[] CopyIdentityMapPrepared(ReadOnlySpan<uint> units)
     {

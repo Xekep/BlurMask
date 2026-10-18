@@ -69,8 +69,8 @@ for rule in route['rules']:
         if name == '\u2403': escaped = '"\\u2403"'
         assert escaped in policy, (name, escaped)
 source = (root/'src/InkRecognition.Math/Math2Mode0RawOnlyOutput.cs').read_text(encoding='utf-8-sig')
-assert source.index('PlanOrdinaryOutput(this, retained') < source.index('outputClaimed = true')
-assert source.index('CopyIdentityMapPrepared(row.Units)') < source.index('NormalizeDecimalPrepared(units') < source.index('row.Library.InternOutput(')
+assert source.index('PlanOutput(this, retained') < source.index('outputClaimed = true')
+assert source.index('policy.Format(row.Units') < source.index('NormalizeDecimalPrepared(units') < source.index('row.Library.InternOutput(')
 assert 'new LegacyNativeUtf8StringPool' not in source
 output.write_text(json.dumps(dict(dependency=route, additionalPins=len(pins),
     scope='Whole-vector ordinary no-rule-hit EE4 identity map/full32 unit copy; decimal low16 rewrite; SAME Library88 interval interning and semantic40/16 rows',
