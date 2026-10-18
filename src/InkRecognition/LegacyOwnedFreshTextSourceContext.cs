@@ -38,7 +38,9 @@ public sealed partial class LegacyOwnedFreshTextSourceContext
     private bool failed;
     private bool textRegistrationEntered;
     public LegacyOwnedRawInkDocument Document { get; }
-    public LegacyFreshTextFieldInputContext? SelectedInputContext {get;}
+    internal LegacyLibrarySelectedInputBinding? InputBinding {get;}
+    public LegacyFreshTextFieldInputContext? SelectedInputContext=>InputBinding?.LegacyOrThrow;
+    public LegacyLibraryOriginalSelectedFieldContext? OriginalSelectedInputContext=>InputBinding?.OriginalSelected;
     public long NextSelectionId {get{lock(gate)return next;}}
     public bool Failed {get{lock(gate)return failed;}}
     private LegacyOwnedFreshTextSourceContext(LegacyOwnedRawInkDocument document)
@@ -50,7 +52,11 @@ public sealed partial class LegacyOwnedFreshTextSourceContext
         for(long id=0;id<document.ObjectCount;id++)if(next<=id)next=id+1;
     }
     private LegacyOwnedFreshTextSourceContext(LegacyFreshTextFieldInputContext selectedInput)
-    {Document=selectedInput.Document;SelectedInputContext=selectedInput;next=selectedInput.NextRegistryId;}
+        :this(LegacyLibrarySelectedInputBinding.FromLegacy(selectedInput)){}
+    private LegacyOwnedFreshTextSourceContext(LegacyLibrarySelectedInputBinding input)
+    {Document=input.Document;InputBinding=input;next=input.Next;}
+    internal static LegacyOwnedFreshTextSourceContext PrepareSelectedBinding(LegacyLibrarySelectedInputBinding input)
+        =>new(input);
     public static LegacyOwnedFreshTextSourceContext Prepare(LegacyOwnedRawInkDocument actualDocument,
         CancellationToken token=default)
     {ArgumentNullException.ThrowIfNull(actualDocument);token.ThrowIfCancellationRequested();return new(actualDocument);}

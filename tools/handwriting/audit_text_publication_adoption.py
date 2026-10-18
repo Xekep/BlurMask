@@ -24,7 +24,8 @@ ordered=['LegacyOwnedRawInkDocument.Create(raw,token)',
 positions=[s.index(v) for v in ordered];assert positions==sorted(positions)
 shared=source('LegacyFreshMainTextSourceWrapper.cs')
 assert 'Document=context.Document;Strings=context.Strings' in shared
-assert 'DocumentSeed=new(this,context.SelectedInput,deferIdentifier:true)' in shared
+assert 'DocumentSeed=new(this,context.InputBinding,deferIdentifier:true)' in shared
+assert 'Selections=LegacyOwnedFreshTextSourceContext.PrepareSelectedBinding(context.InputBinding)' in shared
 assert shared.index('topOwner=top;DocumentSeed!.InitializePublicationIdentifier()')<shared.index('CapturePublicationIdentifier(DocumentSeed)')
 assert 'if(PublicationScope is null)Strings.Dispose()' in shared
 ctx=source('LegacyLibraryTextProcessingContext.cs')

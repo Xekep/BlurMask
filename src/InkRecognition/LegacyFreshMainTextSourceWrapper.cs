@@ -277,8 +277,8 @@ internal sealed class LegacyMainSharedTextSourceState : IDisposable
     {
         PublicationScope=scope;Document=context.Document;Strings=context.Strings;
         Characters=LegacyOwnedMainTextSourceInterner.Prepare(Document);Words=LegacyOwnedMainTextSourceInterner.Prepare(Document);
-        Selections=LegacyOwnedFreshTextSourceContext.PrepareSelectedInput(context.SelectedInput);
-        DocumentSeed=new(this,context.SelectedInput,deferIdentifier:true);
+        Selections=LegacyOwnedFreshTextSourceContext.PrepareSelectedBinding(context.InputBinding);
+        DocumentSeed=new(this,context.InputBinding,deferIdentifier:true);
         context.Result.BindPublicationSeed(DocumentSeed);
     }
     internal void BindActualTop(LegacyFreshMainPlainResultOwnership top)

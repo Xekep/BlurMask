@@ -25,6 +25,8 @@ public sealed class LegacyFreshMainWordSourceChoices : IDisposable
     public IReadOnlyList<LegacyOwnedMainSpanWordView> WordViews {get;}
     internal LegacyOwnedFreshTextSourceContext SelectionContext=>shared.Selections;
     public LegacyFreshTextFieldInputContext? SelectedInputContext=>shared.Selections.SelectedInputContext;
+    public LegacyLibraryOriginalSelectedFieldContext? OriginalSelectedInputContext=>shared.Selections.OriginalSelectedInputContext;
+    internal LegacyLibrarySelectedInputBinding? InputBinding=>shared.Selections.InputBinding;
     public LegacyFreshMainTextDocumentSeed? DocumentSeed=>shared.DocumentSeed;
     public long NextSelectionId=>shared.Selections.NextSelectionId;
     public IReadOnlyList<LegacyOwnedFreshTextSelection> CopyPendingSelections()=>shared.Selections.CopyPendingSelections();
@@ -124,7 +126,7 @@ public sealed class LegacyFreshMainWordSourceChoices : IDisposable
         LegacyFreshMainConfiguredNoCandidateSourceCompletion completion,LegacyMainSharedTextSourceState shared,
         LegacyCursiveSeparationTable table,LegacyNativeTextPublicationData publication,
         LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token)
-        =>PrepareCore(resource,completion,shared.Selections.SelectedInputContext,table,publication,normalization,circles,token,shared);
+        =>PrepareCore(resource,completion,shared.Selections.InputBinding?.Legacy,table,publication,normalization,circles,token,shared);
 
     public LegacyOwnedMainWordSourceChoicesResult Publish(ReadOnlySpan<byte> recordResidue40,
         ReadOnlySpan<byte> selectionResidue4,CancellationToken token=default)

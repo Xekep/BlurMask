@@ -17,17 +17,19 @@ public sealed class LegacyLibraryTextProcessingContext : IDisposable
     private int publicationLeases;
     private uint flags;
     private LegacyLibraryTextInputRequest? request;
-    public LegacyFreshTextFieldInputContext SelectedInput { get; }
-    public LegacyOwnedRawInkDocument Document => SelectedInput.Document;
+    internal LegacyLibrarySelectedInputBinding InputBinding { get; }
+    public LegacyFreshTextFieldInputContext SelectedInput => InputBinding.LegacyOrThrow;
+    public LegacyLibraryOriginalSelectedFieldContext? OriginalSelectedInput => InputBinding.OriginalSelected;
+    public LegacyOwnedRawInkDocument Document => InputBinding.Document;
     public LegacyLibraryTextProcessingResult Result => result;
     public bool IsFaulted { get { lock (gate) return faulted; } }
     public uint State18 { get { lock (gate) { Check(); return flags; } } }
     public bool InitialComparison50 => true;
     internal LegacyNativeUtf8StringPool Strings => result.Strings;
 
-    private LegacyLibraryTextProcessingContext(LegacyFreshTextFieldInputContext input)
+    private LegacyLibraryTextProcessingContext(LegacyLibrarySelectedInputBinding input)
     {
-        SelectedInput = input;
+        InputBinding = input;
         // 053C30 creates a NEW 2DA. 01C010 creates its NEW strings3E.
         // The private result is never supplied by a caller or replaced by Seed.
         result = new(this);
@@ -42,8 +44,12 @@ public sealed class LegacyLibraryTextProcessingContext : IDisposable
             actualSelectedInput.ElementNamespace != "http://www.myscript.com/ns/myscript/page" ||
             actualSelectedInput.Input.InputSpanCount != 0 || actualSelectedInput.Input.CopyRanges().Length == 0)
             throw new NotSupportedException("Actual new full selected textField INPUT/C22 owner required.");
-        return new(actualSelectedInput);
+        return new(LegacyLibrarySelectedInputBinding.FromLegacy(actualSelectedInput));
     }
+
+    public static LegacyLibraryTextProcessingContext CreateForOriginalSelected(
+        LegacyLibraryOriginalSelectedFieldContext actualSelectedInput, CancellationToken token = default)
+    { token.ThrowIfCancellationRequested(); return new(LegacyLibrarySelectedInputBinding.FromOriginal(actualSelectedInput)); }
 
     /// <summary>Builds an explicit library selected BCD/input DOM, then the
     /// nonempty-C22/no-prior-command 054340 input-only preparation branch.
@@ -65,7 +71,7 @@ public sealed class LegacyLibraryTextProcessingContext : IDisposable
             if (preparationFailure is < -1 or > 1 || cancellationStage is < -1 or > 3)
                 throw new ArgumentOutOfRangeException(nameof(preparationFailure));
             entered = true;
-            var arena = new LegacyLibraryTextDomArena(SelectedInput, domFailure);
+            var arena = new LegacyLibraryTextDomArena(Document, domFailure);
             request = new(this, arena);
             try
             {
@@ -153,7 +159,7 @@ public sealed class LegacyLibraryTextProcessingContext : IDisposable
     // before returning. It allocates no CHAR/WORD/TEXT snapshot arrays.
     private sealed class InputOnlySnapshot(LegacyLibraryTextInputRequest request) : IDisposable
     {
-        private LegacyFreshTextFieldInputContext? input;
+        private LegacyLibrarySelectedInputBinding? input;
         private bool released;
         private readonly LegacyLibraryTextInputRequest source = Initialize(request);
         private static LegacyLibraryTextInputRequest Initialize(LegacyLibraryTextInputRequest owner)
@@ -163,8 +169,8 @@ public sealed class LegacyLibraryTextProcessingContext : IDisposable
             if (released || !ReferenceEquals(result.Owner, source.Owner) ||
                 !ReferenceEquals(result.BoundRequest, source) || result.TextCountD8 != 0)
                 throw new NotSupportedException("Only the imported input-only2DA empty TEXT snapshot is supported.");
-            input = result.BoundInput28 ?? throw new InvalidDataException("Snapshot requires the imported actual selected C20.");
-            if (!ReferenceEquals(input, source.SelectedInput)) throw new InvalidDataException("Foreign snapshot input owner.");
+            input = result.BoundInputBinding ?? throw new InvalidDataException("Snapshot requires the imported actual selected C20.");
+            if (!ReferenceEquals(input, source.Owner.InputBinding)) throw new InvalidDataException("Foreign snapshot input owner.");
             source.Record("snapshot2DB:read-empty-text");
         }
         public void Dispose()
@@ -179,7 +185,7 @@ public sealed class LegacyLibraryTextProcessingResult
     private LegacyNativeInkPositionRange[] ranges = [];
     private long sourceTag30 = -1;
     private LegacyLibraryTextInputRequest? boundRequest;
-    private LegacyFreshTextFieldInputContext? boundInput;
+    private LegacyLibrarySelectedInputBinding? boundInput;
     internal LegacyNativeUtf8StringPool Strings { get; } = new();
     private WeakReference<LegacyFreshMainTextDocumentSeed>? publicationSeed;
     private byte[] identifier38=new byte[16];
@@ -188,7 +194,9 @@ public sealed class LegacyLibraryTextProcessingResult
     public int RangeCount210 => Owner.Read(() => ranges.Length);
     public int TextCountD8 => 0;
     public LegacyLibraryTextInputRequest? BoundRequest => Owner.Read(() => boundRequest);
-    public LegacyFreshTextFieldInputContext? BoundInput28 => Owner.Read(() => boundInput);
+    public LegacyFreshTextFieldInputContext? BoundInput28 => Owner.Read(() => boundInput?.LegacyOrThrow);
+    public LegacyLibraryOriginalSelectedFieldContext? OriginalSelectedInput28 => Owner.Read(() => boundInput?.OriginalSelected);
+    internal LegacyLibrarySelectedInputBinding? BoundInputBinding => boundInput;
     internal LegacyLibraryTextProcessingResult(LegacyLibraryTextProcessingContext owner) { Owner = owner; }
     public byte[] CopyIdentifier38() => Owner.Read(() => identifier38.ToArray());
     public LegacyFreshMainTextDocumentSeed? PublicationSeed => Owner.Read(() =>
@@ -198,7 +206,7 @@ public sealed class LegacyLibraryTextProcessingResult
         Owner.Read(()=>
         {
             if(publicationSeed is not null||!ReferenceEquals(seed.Document,Owner.Document)||
-                !ReferenceEquals(seed.SelectedInputContext,boundInput)||!ReferenceEquals(seed.StringPool,Strings))
+                !ReferenceEquals(seed.InputBinding,boundInput)||!ReferenceEquals(seed.StringPool,Strings))
                 throw new ArgumentException("Exact imported2DA/input/shared3E seed required before publication.");
             publicationSeed=new(seed);return 0;
         });
@@ -227,16 +235,14 @@ public sealed class LegacyLibraryTextProcessingResult
     internal void BindRequest(LegacyLibraryTextInputRequest request)
     {
         if (!ReferenceEquals(request.Owner, Owner)) throw new ArgumentException("Exact2C1 request owner required.");
-        boundRequest = request; boundInput = Owner.SelectedInput;
+        boundRequest = request; boundInput = Owner.InputBinding;
         sourceTag30 = request.ReadInputTag();
     }
     internal void ImportInputRanges()
     {
-        if (boundRequest is null || !ReferenceEquals(boundInput, Owner.SelectedInput) ||
-            sourceTag30 != Owner.SelectedInput.Input.RegistryId ||
-            !ReferenceEquals(Owner.SelectedInput.Input.Owner, boundInput))
+        if (boundRequest is null || !ReferenceEquals(boundInput, Owner.InputBinding) || sourceTag30 != Owner.InputBinding.RegistryId)
             throw new InvalidOperationException("Actual input.tag -> selected C20.V128 -> C22 ownership required.");
-        ranges = Owner.SelectedInput.Input.CopyRanges();
+        ranges = Owner.InputBinding.CopyRanges();
     }
     internal void ReleaseBindings() { boundRequest = null; boundInput = null; }
 }
@@ -260,15 +266,23 @@ public sealed class LegacyLibraryTextInputRequest
     public LegacyLibraryTextProcessingContext Owner { get; }
     public LegacyLibraryTextDomArena Arena { get; }
     public LegacyFreshTextFieldInputContext SelectedInput => Owner.SelectedInput;
+    public LegacyLibraryOriginalSelectedFieldContext? OriginalSelectedInput => Owner.OriginalSelectedInput;
     public LegacyRetainedTextFieldInputSelection Input => SelectedInput.Input;
-    public string FieldNamespace => SelectedInput.ElementNamespace;
-    public int FieldKind => SelectedInput.NativeElementKind;
+    public string FieldNamespace => Owner.InputBinding.ElementNamespace;
+    public int FieldKind => Owner.InputBinding.ElementKind;
     public bool Succeeded => Owner.Read(() => succeeded);
     public LegacyLibraryTextDomNode Field => Owner.Read(() => !released && fieldNode is not null ? Arena.Snapshot(fieldNode) : throw new InvalidOperationException("No live selected field."));
     public LegacyLibraryTextDomNode Root => Owner.Read(() => !released && root is not null ? Arena.Snapshot(root) : throw new InvalidOperationException("No live request root."));
     internal LegacyLibraryTextInputRequest(LegacyLibraryTextProcessingContext owner, LegacyLibraryTextDomArena arena) { Owner = owner; Arena = arena; }
     internal void BuildInputDom(CancellationToken token)
     {
+        if (OriginalSelectedInput is {} selected)
+        {
+            // Read-only managed reader facade over the exact selected PAGE
+            // snapshot; no second native worker clone or replacement source.
+            var imported = Arena.ImportSelectedPage(selected, token);
+            root=imported.Root;fieldNode=imported.Field;input=imported.Input;return;
+        }
         token.ThrowIfCancellationRequested(); root = Arena.ConstructorRoot();
         fieldNode = Arena.Element(SelectedInput.ElementName) ?? throw new InvalidOperationException("Field allocation refusal.");
         Arena.Append(root, fieldNode);

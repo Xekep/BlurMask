@@ -48,6 +48,8 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
     {
         ArgumentNullException.ThrowIfNull(actualScope);ArgumentNullException.ThrowIfNull(actualWords);
         actualScope.Validate();token.ThrowIfCancellationRequested();
+        if(actualScope.Context.OriginalSelectedInput is not null)
+            throw new NotSupportedException("Original-bootstrap selected publication requires its separate downstream transform/transport/replay adapter.");
         actualScope.Seed.Validate(actualWords.Owner,token);
         if(!ReferenceEquals(actualWords.Owner.DocumentSeed,actualScope.Seed)||
             !ReferenceEquals(actualWords.Owner.Document,actualScope.Document)||

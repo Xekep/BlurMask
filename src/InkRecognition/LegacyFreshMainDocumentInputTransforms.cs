@@ -50,6 +50,8 @@ public sealed class LegacyFreshMainDocumentInputTransforms
         var words=actualCleanup.State.Text.WordChoices;var owner=words.Owner;
         var seed=owner.DocumentSeed??throw new NotSupportedException("The old OriginalID selection route has no native selected-input result seed.");
         seed.Validate(owner,token);
+        if(seed.OriginalSelectedInputContext is not null)
+            throw new NotSupportedException("Original-bootstrap selected transform/transport ownership is a separate adapter boundary.");
         int alternatives=words.Alternatives.Count;
         if(alternatives!=2)throw new NotSupportedException("Actual complete two-alternative document result required; source-line count is notD8.");
         var entry=lifetime.GetValue(seed,_=>new());

@@ -53,6 +53,29 @@ public sealed class LegacyLibraryTextPublicationScope : IDisposable
         catch{if(scope is not null)scope.Dispose();else{context.Dispose();lease?.Dispose();}throw;}
     }
 
+    /// <summary>Pre-NN publication over the exact selected C20/field copied
+    /// from a retained original bootstrap. Creates its2C1/result/shared3E
+    /// before recognition; this does not enable original CBB/page acceptance.</summary>
+    public static LegacyLibraryTextPublicationScope PrepareConfiguredOriginalSelected(
+        LegacyFreshMainRecognitionContext models,LegacyLibraryOriginalSelectedFieldContext actualSelectedInput,
+        float resolution,LegacyCursiveSeparationTable table,LegacyNativeCaseData caseData,
+        LegacyNativeTextPublicationData publication,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(models);ArgumentNullException.ThrowIfNull(table);
+        ArgumentNullException.ThrowIfNull(caseData);ArgumentNullException.ThrowIfNull(publication);
+        token.ThrowIfCancellationRequested();
+        var context=LegacyLibraryTextProcessingContext.CreateForOriginalSelected(actualSelectedInput,token);
+        LegacyLibraryTextProcessingLease? lease=null;LegacyLibraryTextPublicationScope? scope=null;
+        try
+        {
+            context.PrepareInput(token);lease=context.RetainForPublication();
+            scope=new(context,lease,models,table,publication);
+            scope.recognition=models.PrepareConfiguredDocument(context.Document,resolution,table,caseData,publication,token);
+            return scope;
+        }
+        catch{if(scope is not null)scope.Dispose();else{context.Dispose();lease?.Dispose();}throw;}
+    }
+
     public LegacyFreshMainConfiguredSingleLinePlainRecognitionResult Run(
         LegacyMainConfiguredAlternativeResidue residue,LegacyMainAlternativeStorageAllocator allocator,
         ReadOnlySpan<byte> compactResidue40,CancellationToken token=default)

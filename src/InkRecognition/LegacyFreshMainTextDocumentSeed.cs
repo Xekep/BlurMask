@@ -11,13 +11,15 @@ public sealed class LegacyFreshMainTextDocumentSeed
     private readonly byte[] dafInputRows32;
     private readonly LegacyDocumentTransformVector initialTransforms=LegacyDocumentTransformVector.Fresh();
     private LegacyDocumentTransformVector currentTransforms;
-    public LegacyFreshTextFieldInputContext SelectedInputContext {get;}
+    internal LegacyLibrarySelectedInputBinding InputBinding {get;}
+    public LegacyFreshTextFieldInputContext SelectedInputContext=>InputBinding.LegacyOrThrow;
+    public LegacyLibraryOriginalSelectedFieldContext? OriginalSelectedInputContext=>InputBinding.OriginalSelected;
     public LegacyRetainedTextFieldInputSelection Input=>SelectedInputContext.Input;
-    public LegacyOwnedRawInkDocument Document=>SelectedInputContext.Document;
+    public LegacyOwnedRawInkDocument Document=>InputBinding.Document;
     /// <summary>The actual pre-NN imported2DA for the adopted route; old
     /// independently constructed seeds have no processing-result owner.</summary>
     public LegacyLibraryTextProcessingResult? ProcessingResult=>shared.PublicationScope?.Context.Result;
-    public long SourceTag30=>Input.RegistryId;
+    public long SourceTag30=>InputBinding.RegistryId;
     public int InitialDocumentAlternativeCountD8=>0;
     public int InitialTransformCount110=>initialTransforms.Count;
     /// <summary>Result38..47 identifier using the restored native algorithm
@@ -38,17 +40,29 @@ public sealed class LegacyFreshMainTextDocumentSeed
 
     internal LegacyFreshMainTextDocumentSeed(LegacyMainSharedTextSourceState actualShared,
         LegacyFreshTextFieldInputContext actualSelectedInput,bool deferIdentifier=false)
+        :this(actualShared,RequireLegacyBinding(actualShared,actualSelectedInput),deferIdentifier){}
+
+    private static LegacyLibrarySelectedInputBinding RequireLegacyBinding(LegacyMainSharedTextSourceState shared,
+        LegacyFreshTextFieldInputContext input)
     {
-        if(actualSelectedInput.Parent is null||!ReferenceEquals(actualShared.Document,actualSelectedInput.Document)||
-            !ReferenceEquals(actualShared.Selections.SelectedInputContext,actualSelectedInput)||actualShared.Strings.Count!=0)
+        var binding=shared.Selections.InputBinding??throw new ArgumentException("Selected binding missing.");
+        if(!ReferenceEquals(binding.Legacy,input))throw new ArgumentException("Exact legacy selected input required.");
+        return binding;
+    }
+
+    internal LegacyFreshMainTextDocumentSeed(LegacyMainSharedTextSourceState actualShared,
+        LegacyLibrarySelectedInputBinding actualSelectedInput,bool deferIdentifier=false)
+    {
+        if(!ReferenceEquals(actualShared.Document,actualSelectedInput.Document)||
+            !ReferenceEquals(actualShared.Selections.InputBinding,actualSelectedInput)||actualShared.Strings.Count!=0)
             throw new ArgumentException("A new selected INPUT result seed must precede all shared string/WORD publication.");
-        shared=actualShared;SelectedInputContext=actualSelectedInput;currentTransforms=initialTransforms;
+        shared=actualShared;InputBinding=actualSelectedInput;currentTransforms=initialTransforms;
         //Native01C010 clears38..47;032550 replaces that zero identifier before
         //WORD publication. Native process-address RNG seeding is not portable.
         if(!deferIdentifier)InitializePublicationIdentifier();
         //05F200 reads DAF.V38 from the actual new INPUT before2DA.V18.
         //Its immutable span-child producer, not transform output, proves0.
-        dafInputRows32=actualSelectedInput.Input.CopyDafInputRows32();
+        dafInputRows32=actualSelectedInput.CopyDafInputRows32();
     }
 
     /// <summary>Assigned scalar fields only: source30, initialD8, initial110,
@@ -68,8 +82,7 @@ public sealed class LegacyFreshMainTextDocumentSeed
         shared.PublicationScope?.Validate();
         if(!ReferenceEquals(actualWords.DocumentSeed,this)||!ReferenceEquals(actualWords.Document,Document)||
             !ReferenceEquals(actualWords.SelectionContext,PendingSelections)||
-            !ReferenceEquals(actualWords.SelectedInputContext,SelectedInputContext)||
-            !ReferenceEquals(Input.Owner,SelectedInputContext))
+            !ReferenceEquals(actualWords.InputBinding,InputBinding))
             throw new ArgumentException("Exact seed, selected C20/C22, shared3E and pending C4D ownership required.");
         foreach(var word in actualWords.WordViews)word.Validate(token);
     }

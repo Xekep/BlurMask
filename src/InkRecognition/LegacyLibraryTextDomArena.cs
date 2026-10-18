@@ -34,6 +34,7 @@ internal sealed class LegacyDomNode(int identity,byte kind,string name,int nameI
     internal readonly string Name=name;
     internal byte Tag=kind is 0 or 1?(byte)3:(byte)0;
     internal byte[] Value=[];
+    internal string? NamespacePrefix, NamespaceUri;
     internal bool Released;
     internal LegacyDomNode? Parent;
     internal readonly List<LegacyDomNode> Attributes=[],Children=[];
@@ -52,6 +53,7 @@ public sealed class LegacyLibraryTextDomNamePool
     public LegacyOwnedRawInkDocument Document {get;}
     internal LegacyLibraryTextDomNamePool(LegacyFreshMainTextDocumentSeed seed){this.seed=seed;Document=seed.Document;}
     internal LegacyLibraryTextDomNamePool(LegacyFreshTextFieldInputContext input){Document=input.Document;}
+    internal LegacyLibraryTextDomNamePool(LegacyOwnedRawInkDocument document){Document=document;}
     internal (int Identity,bool Added) Intern(string name)
     {lock(gate){if(names.TryGetValue(name,out int id))return(id,false);id=names.Count+1;names.Add(name,id);return(id,true);}}
     public IReadOnlyList<string> CopyNames(){lock(gate)return Array.AsReadOnly(names.OrderBy(n=>n.Value).Select(n=>n.Key).ToArray());}
@@ -77,6 +79,47 @@ public sealed class LegacyLibraryTextDomArena
     {if(!ReferenceEquals(seed,sharedNames.Seed))throw new ArgumentException("Foreign BEE name owner.");this.seed=seed;Document=seed.Document;NamePool=sharedNames;this.failAt=failAt;this.cancelAt=cancelAt;}
     internal LegacyLibraryTextDomArena(LegacyFreshTextFieldInputContext input,int failAt=-1,int cancelAt=-1)
     {Document=input.Document;NamePool=new(input);this.failAt=failAt;this.cancelAt=cancelAt;}
+    internal LegacyLibraryTextDomArena(LegacyOwnedRawInkDocument document,int failAt=-1,int cancelAt=-1)
+    {Document=document;NamePool=new(document);this.failAt=failAt;this.cancelAt=cancelAt;}
+    internal IReadOnlyList<(int Identity,string Prefix,string Uri)> CopyNamespacePairs() =>
+        nodes.Where(n=>n.Kind==2).Select(n=>(n.Identity,n.NamespacePrefix!,n.NamespaceUri!)).ToArray();
+    internal (LegacyDomNode Root,LegacyDomNode Field,LegacyDomNode Input) ImportSelectedPage(
+        LegacyLibraryOriginalSelectedFieldContext source,CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        if(!ReferenceEquals(Document,source.Document)||!source.State.Succeeded||source.State.IsFaulted||nodes.Count!=0)
+            throw new ArgumentException("Exact completed selected PAGE and empty same-document reader facade required.");
+        var map=new Dictionary<int,LegacyDomNode>();var snapshot=source.State;
+        foreach(var n in snapshot.Nodes)
+        {
+            token.ThrowIfCancellationRequested();
+            if(n.Kind is not(0 or 2 or 3 or 4))throw new NotSupportedException("Ordinary selected PAGE node kinds required.");
+            var copy=Allocate(n.Kind,n.Name)??throw new InvalidOperationException("Selected reader-facade allocation refusal.");
+            map.Add(n.Identity,copy);
+            if(n.Kind==2)
+            {
+                copy.NamespacePrefix=n.NamespacePrefixName?.Text??throw new InvalidDataException("Actual namespace prefix missing.");
+                copy.NamespaceUri=n.NamespaceUri??throw new InvalidDataException("Actual namespace URI missing.");
+                NamePool.Intern(copy.NamespacePrefix);NamePool.Intern(copy.NamespaceUri);
+            }
+            else if(n.Kind==0)
+            {
+                if(n.NativeValueTag is 1 or 2 or 3)
+                {if(!SetString(copy,n.CopyValueBytes()))throw new InvalidOperationException("Selected attribute-facade copy refusal.");}
+                else if(n.NativeValueTag is 4 or 5 or 6 or 7 or 8)
+                {copy.Tag=n.NativeValueTag;copy.Value=n.CopyValueBytes();trace.Add("value:"+copy.Identity+":"+copy.Tag+":"+Convert.ToBase64String(copy.Value));}
+                else throw new NotSupportedException("Exact selected attribute lane required.");
+            }
+        }
+        foreach(var n in snapshot.Nodes)
+        {
+            var parent=map[n.Identity];
+            foreach(int id in n.Attributes)
+            {var a=map[id];if(parent.Kind!=3||a.Kind!=0||a.Parent is not null)throw new InvalidDataException("Selected attribute ownership lost.");a.Parent=parent;parent.Attributes.Add(a);trace.Add("attr:"+parent.Identity+":"+a.Identity);}
+            foreach(int id in n.Children)Append(parent,map[id]);
+        }
+        return(map[snapshot.RootIdentity],map[snapshot.SelectedFieldIdentity],map[snapshot.SelectedInputIdentity]);
+    }
     internal void BeginFaultScope(int fail=-1,int cancel=-1)
     {if(fail< -1||cancel< -1)throw new ArgumentOutOfRangeException(nameof(fail));failAt=fail<0?-1:checked(attempts+fail);cancelAt=cancel<0?-1:checked(attempts+cancel);}
     internal IReadOnlyList<string> Trace=>trace.AsReadOnly();
