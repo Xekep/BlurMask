@@ -94,7 +94,8 @@ public sealed class LegacyLibraryTextDomArena
         var node=new LegacyDomNode(nodes.Count+1,kind,name,named);nodes.Add(node);trace.Add("new:"+node.Identity+":"+kind+":"+name);return node;
     }
     internal LegacyDomNode? Element(string name)=>Allocate(3,name);
-    internal LegacyDomNode ConstructorRoot()=>Allocate(4)??throw new InvalidOperationException("Fresh BCC root allocation failed.");
+    internal LegacyDomNode? TryConstructorRoot()=>Allocate(4);
+    internal LegacyDomNode ConstructorRoot()=>TryConstructorRoot()??throw new InvalidOperationException("Fresh BCC root allocation failed.");
     internal LegacyDomNode? Text(ReadOnlySpan<byte> raw)
     {
         var node=Allocate(1);if(node is null)return null;

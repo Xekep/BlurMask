@@ -28,6 +28,7 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
     private LegacyLibraryTextDomApplyResult? applied;
     private LegacyLibrarySelectedInputRegistryReplay? registryReplay;
     private LegacyLibraryOriginalInputPatchCompatibility? originalCompatibility;
+    private LegacyLibraryTextDomPatchCompatibility? domCompatibility;
     private LegacyLibraryTextPublicationDocumentSnapshot snapshot;
     public LegacyOwnedRawInkDocument Document=>scope.Document;
     public bool IsFaulted {get{lock(gate)return faulted;}}
@@ -35,6 +36,7 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
     /// receipt. Its state is separate from historical INPUT and DOM apply.</summary>
     public LegacyLibrarySelectedInputRegistryReplay? SelectedRegistryReplay {get{lock(gate)return registryReplay;}}
     public LegacyLibraryOriginalInputPatchCompatibility? OriginalPatchCompatibility {get{lock(gate)return originalCompatibility;}}
+    public LegacyLibraryTextDomPatchCompatibility? DomPatchCompatibility {get{lock(gate)return domCompatibility;}}
     public LegacyLibraryTextPublicationDocumentSnapshot Snapshot {get{lock(gate)return snapshot;}}
 
     private LegacyLibraryTextPublicationDocument(LegacyLibraryTextPublicationScope scope,
@@ -134,6 +136,7 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
                 throw new InvalidOperationException("One successfully transported unapplied edit required.");
             if(registryReplay is not null&&!registryReplay.State.Succeeded)
                 throw new InvalidOperationException("A claimed selected-registry replay must succeed before this library DOM apply.");
+            using var domOperation=EnterDomCompatibility(token);
             try{applied=target.ApplyPrepared(edit,failure,cancellation,token);Record("library-target-applied");return snapshot;}
             catch{faulted=true;snapshot=Capture();throw;}
         }
@@ -171,6 +174,7 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
             if(!ReferenceEquals(actualReplay,registryReplay))throw new ArgumentException("Exact receipt-owned replay required.");
             if(originalCompatibility is not null&&!originalCompatibility.State.IsReady)
                 throw new InvalidOperationException("The claimed original-input preflight must finish successfully and report compatibility.");
+            using var domOperation=EnterDomCompatibility(token);
             return action();
         }
     }
@@ -206,6 +210,40 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
             !ReferenceEquals(row.DomEdit,edit))
             throw new InvalidOperationException("Actual transferred pending C4D and unapplied same-scope selected INPUT required.");
         LegacyFreshMainDocumentCounterHandoff.Validate(handoff.Transforms,token);
+    }
+    internal LegacyLibraryTextDomPatchCompatibility ClaimDomCompatibility(CancellationToken token)
+    {
+        lock(gate)
+        {
+            Validate(token);ValidateRegistrySource(token);
+            if(domCompatibility is not null||registryReplay?.HasEntered==true)
+                throw new InvalidOperationException("One DOM preflight must precede any selected-registry replay entry.");
+            var service=new LegacyLibraryTextDomPatchCompatibility(this,scope,row!,token);
+            domCompatibility=service;return service;
+        }
+    }
+    internal T WithDomCompatibility<T>(LegacyLibraryTextDomPatchCompatibility actual,Func<T> action,CancellationToken token)
+    {
+        lock(gate)
+        {
+            Validate(token);ValidateRegistrySource(token);
+            if(!ReferenceEquals(actual,domCompatibility)||registryReplay?.HasEntered==true||
+                !ReferenceEquals(actual.Edit,edit)||!ReferenceEquals(actual.Target,target)||!ReferenceEquals(actual.TransportRow,row))
+                throw new InvalidOperationException("Exact claimed unapplied DOM preflight before registry entry required.");
+            return action();
+        }
+    }
+    private IDisposable? EnterDomCompatibility(CancellationToken token)
+    {
+        if(domCompatibility is not null)
+        {
+            if(!domCompatibility.State.IsReady)
+                throw new InvalidOperationException("The claimed same-edit DOM preflight must work and report compatibility.");
+            //Readiness is a historical result. A different explicit target
+            //operation cannot authorize replay against that stale epoch.
+            return domCompatibility.Target.EnterOperation(domCompatibility.Edit.Epoch,token);
+        }
+        return null;
     }
     public void Dispose()
     {lock(gate){if(disposed)return;disposed=true;transfer?.Dispose();cache?.Dispose();}}

@@ -54,11 +54,14 @@ For a nonempty edit:
    any row. Path entries are32-bit sibling ordinals. Missing parent sets
    compatibility0; the function still returns Worked1 after cleanup.
 5. In row order, operation1/2 clones payload through V88. An existing child is
-   replaced via VB8; otherwise current child count must equal the requested
+   preceded by an insertion via VB8; otherwise current child count must equal the requested
    signed child index before VA8 append. Operation3/4 requires an existing
    child and detaches it via VE8. Missing child or invalid append index means
    compatibility0. Unknown operation codes simply advance in this function;
    the proposed production API still accepts only its actual owned2/4 rows.
+   VB8=0EADD0 is insert-before, not replace: it links new.next=old and
+   old.prev=new without unlinking the old node. A replacement is the caller's
+   explicit operation4 removal followed by operation2 insertion.
 6. Free the map and destroy scratch BCC, then write compatibility. The return
    reports whether scratch setup/map allocation worked, separately from that
    compatibility byte. Scratch-constructor, initial-existing-tree clone, or map

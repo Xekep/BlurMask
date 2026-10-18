@@ -41,6 +41,17 @@ public sealed class LegacyLibraryTextDomTarget
     }
     internal bool CanEnterOperationPrepared()
     {if(!Monitor.TryEnter(gate))return false;Monitor.Exit(gate);return true;}
+    internal T WithPatchPreflight<T>(LegacyLibraryTextDomEditResult edit,
+        Func<LegacyLibraryTextDomArena,LegacyDomNode,T> action,CancellationToken token)
+    {
+        lock(gate)
+        {
+            token.ThrowIfCancellationRequested();
+            if(!ReferenceEquals(edit.Target,this)||!edit.Succeeded)
+                throw new ArgumentException("Successful exact-target edit required.");
+            ValidateEpoch(edit.Epoch,token);return action(Arena,root);
+        }
+    }
     internal (LegacyLibraryTextDomNode Before,LegacyDomNode? Previous) CaptureInsertion(long expected,CancellationToken token)
     {lock(gate){ValidateEpoch(expected,token);if(root.Children.Count>1||root.Children.Any(n=>n.Kind!=3||n.Name!="textResult"))throw new NotSupportedException("Only a fresh root or its one previously inserted textResult is supported.");return(Arena.Snapshot(root),root.Children.SingleOrDefault());}}
     public LegacyLibraryTextDomApplyResult Apply(LegacyLibraryTextDomEditResult actualEdit,CancellationToken token=default)
