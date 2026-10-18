@@ -11,8 +11,6 @@ public sealed class LegacyFirstOwnedInteriorDelimiter
     private readonly LegacyCursiveCategoryProfile categories;
     private readonly Dictionary<int,LegacyNativeResidualBounds> bounds=[];
     private readonly ushort hyphen,slash,hash,at;
-    private static readonly int[] Policies=[0,1,4,2,4,1,0, 2,2,2,2,2,0,0, 1,1,2,1,2,0,0,
-        3,1,2,2,2,0,0, 1,1,2,1,2,0,0, 2,0,0,0,0,0,0, 0,0,0,0,0,0,0];
     private LegacyFirstOwnedInteriorDelimiter(LegacyFreshFirstOwnedRecognition owner,LegacyCursiveCategoryProfile categories)
     {
         Owner=owner;this.categories=categories;var alphabet=owner.Factory.InvocationPolicy.Binding.Alphabet;
@@ -33,7 +31,7 @@ public sealed class LegacyFirstOwnedInteriorDelimiter
         if(factory.Frame.Descriptor.CurrentLineId!=0||factory.Frame.Descriptor.Flags!=0x10||
             factory.InvocationPolicy.Binding.NativeModeE0||factory.InvocationPolicy.Binding.SourceKind!=0x135||
             owner.Prepared.SpanProfile.NativeSecondByte!=1||resource[graph+350]!=0)
-            throw new NotSupportedException("Fresh ordinary assigned first guide and native non-C4 graph policy required.");
+            throw new NotSupportedException("Fresh ordinary assigned first guide and native resource159=0 policy required.");
         //Assigned line0 excludes the unassigned1D9 geometry branch even though
         //the NEW container's +8 bit4 is set. Native graph9=1 excludes the AL
         //cased adjustment. Version106 sampler has no custom VE0 geometry.
@@ -46,24 +44,11 @@ public sealed class LegacyFirstOwnedInteriorDelimiter
         var prior=graph.GetNode(previousNode);var current=graph.GetNode(currentNode);
         if(previousArc>=prior.Count||currentArc>=current.Count)throw new ArgumentException("Actual first interior graph arcs required.");
         var a=current[currentArc];var b=prior[previousArc];
-        //This is the exact1F42 request: kind1, policy2C=0, sourceGap30=0,
-        //special34/38=0, no before/after arc. Custom metadata is absent.
-        int policy=Policies[FirstId(currentSymbol)+FirstId(previousSymbol)*7];
-        if(currentSymbol==hash||currentSymbol==at||currentSymbol==hyphen||previousSymbol==hyphen||
-            currentSymbol==slash||previousSymbol==slash)policy=5;
-        else if(policy==4)policy=2;
-        bool emit;
-        if(previousSymbol==hyphen&&b.StartContextId==0)emit=true;
-        else
-        {
-            if(policy==3)policy=b.StartContextId!=0?2:1;
-            var left=ReadBounds(b.GroupId,token);var right=ReadBounds(a.GroupId,token);
-            float gap=right.MinimumX<=left.MinimumX?left.MinimumX-right.MaximumX:right.MinimumX-left.MaximumX;
-            emit=LegacyOwnedRussianMainInteriorDelimiter.EvaluatePolicy(policy,Owner.Factory.Frame.Row.Frame.Line.Height,
-                0,gap,float.MaxValue,float.MaxValue,previousSymbol==hyphen||previousSymbol==slash,currentSymbol==hyphen||currentSymbol==slash);
-        }
-        if(!emit&&(a.Flags&8)!=0)emit=true;
-        token.ThrowIfCancellationRequested();return new(emit?(ushort)0xfffb:ushort.MaxValue,emit?1:0,0,0);
+        //Same assigned ordinary request; shared numeric policy keeps lazy
+        //left/right bbox reads in their original native order.
+        return LegacyNativeFirstInteriorDelimiterKernel.Read(currentSymbol,previousSymbol,
+            FirstId(currentSymbol),FirstId(previousSymbol),b.StartContextId,a.Flags,Owner.Factory.Frame.Row.Frame.Line.Height,
+            hyphen,slash,hash,at,()=>ReadBounds(b.GroupId,token),()=>ReadBounds(a.GroupId,token),token);
     }
     private int FirstId(ushort symbol)
     {

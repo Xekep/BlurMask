@@ -59,12 +59,6 @@ public sealed class LegacyFreshFirstGlyphSymbolPlan
         ArgumentNullException.ThrowIfNull(pool);cancellationToken.ThrowIfCancellationRequested();
         if(plan!=Create(plan.SelectedLabel,actualPrimaryCompositeCategory,cancellationToken))
             throw new ArgumentException("Literal glyph plan belongs to a different selected-source policy.");
-        _=LegacyNativeGlyphSymbolUpdate.Apply(pool,actualReference,plan.PublishedLabel,1,0,false,cancellationToken);
-        byte[] glyph=pool.CopyRecord(actualReference,cancellationToken);
-        ushort kind=BinaryPrimitives.ReadUInt16LittleEndian(glyph.AsSpan(4));
-        BinaryPrimitives.WriteUInt16LittleEndian(glyph.AsSpan(4),(ushort)((kind&0xfff7)|plan.CategoryMismatchFlag4));
-        ushort flags=BinaryPrimitives.ReadUInt16LittleEndian(glyph.AsSpan(6));
-        BinaryPrimitives.WriteUInt16LittleEndian(glyph.AsSpan(6),(ushort)(flags|plan.PublicationFlags6));
-        pool.ReplaceRecord(actualReference,glyph,cancellationToken);
+        LegacyNativeFirstLiteralGlyphKernel.Apply(pool,actualReference,plan,cancellationToken);
     }
 }
