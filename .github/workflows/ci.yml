@@ -3097,6 +3097,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native column matching failed.' }
           python tools/LegacyMathColumnMatching.Probe/audit_output.py .artifacts/math-column-matching-native.json
           if ($LASTEXITCODE -ne 0) { throw 'Native column matching oracle failed.' }
+          dotnet run --project tools/LegacyMathMeanXOrder.Probe -c Release -- .artifacts/math-mean-x-order-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed mean X ordering failed.' }
+          python tools/LegacyMathMeanXOrder.Probe/audit_output.py .artifacts/math-mean-x-order-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed mean X ordering oracle failed.' }
+          dotnet publish tools/LegacyMathMeanXOrder.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-mean-x-order-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Mean X ordering probe publish failed.' }
+          $meanXOrder = if ($IsWindows) { '.artifacts/math-mean-x-order-probe/LegacyMathMeanXOrder.Probe.exe' } else { '.artifacts/math-mean-x-order-probe/LegacyMathMeanXOrder.Probe' }
+          & $meanXOrder .artifacts/math-mean-x-order-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native mean X ordering failed.' }
+          python tools/LegacyMathMeanXOrder.Probe/audit_output.py .artifacts/math-mean-x-order-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native mean X ordering oracle failed.' }
           dotnet run --project tools/LegacyMathExistingUnitCorrection.Probe -c Release -- .artifacts/math-existing-unit-correction-managed.json
           if ($LASTEXITCODE -ne 0) { throw 'Managed existing unit correction failed.' }
           python tools/LegacyMathExistingUnitCorrection.Probe/audit_output.py .artifacts/math-existing-unit-correction-managed.json

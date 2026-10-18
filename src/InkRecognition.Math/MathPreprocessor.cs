@@ -28,9 +28,10 @@ internal static class MathPreprocessor
                 if (!float.IsFinite(p.X) || !float.IsFinite(p.Y) || MathF.Abs(p.X) > 100000 || MathF.Abs(p.Y) > 100000)
                     throw new ArgumentException("Ink coordinates must be finite and within 100000 units.", nameof(strokes));
         }
-        // Stable mean-x ordering follows Ink 18001eef0; equal means retain original stroke order.
-        var ordered = strokes.Select((s, i) => (Stroke: s, Index: i, Mean: MeanX(s.Points)))
-            .OrderBy(s => s.Mean).ThenBy(s => s.Index).Select(s => s.Stroke).ToArray();
+        // Ink01EEF0 uses01ED50: ties are stable only in partitions of at most20.
+        var means = strokes.Select(stroke => MeanX(stroke.Points)).ToArray();
+        var order = LegacyMath2MeanXOrder.CopySourceOrder(means);
+        var ordered = order.Select(index => strokes[index]).ToArray();
         var scale = GroupExtremaScale(ordered);
         if (!float.IsFinite(scale) || scale <= 0) throw new ArgumentException("Invalid ink scale.", nameof(strokes));
         var sumX = 0f; var sumY = 0f;
