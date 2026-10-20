@@ -6,6 +6,14 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [actual English packed dictionary](legacy-english-lk-packed102-boundary.md)
+now has an independent full-data reference and static native-byte audit.
+All 666547 nodes and 260074 terminals were checked, including exact packed-data
+roundtrip and the unaligned second array header. This is a format checkpoint:
+the reusable runtime loader, sparse English language model, configured source
+selection and source-bound case/mask owners remain separate unfinished work.
+
+
 The [timed raw ingress and ordinary WORD/CHAR geometry](legacy-global-timed-ordinary-geometry.md)
 now has13 numerical cases/37 CHARs/54 views, separating9 genuinely measured
 tracks from4 prepared uniform controls. Root rebuilt Managed/NativeAOT and the
