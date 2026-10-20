@@ -6,6 +6,13 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [owned selected-source overlay](legacy-global-document-selected-sources.md)
+now preserves genuine post-TEXT CHAR/WORD selection state:13 inputs yield11
+overlays,33 complete CHAR nodes and33 link-order writes, with73 guards and
+Managed/NativeAOT parity. Two unequal-coverage238B0 paths still refuse explicitly.
+Lazy prior/C25 callbacks, geometric source mutation and DOM publication remain
+outside this layer; this addition makes no recognition-quality claim.
+
 The [original global raw/cropped point views](legacy-global-ordinary-cropped-source.md)
 now derive actual C49/C4A/C4B numeric semantics from the same original raw document
 and genuine CHAR/WORD ranges.13 sources yield54 views/3014 exact XY points,
