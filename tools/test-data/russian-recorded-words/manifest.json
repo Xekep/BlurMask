@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "commit": "c6629026b1fdef51fd08e3d2fddffd82f97e60a5",
+  "archiveSha256": "2960052698884e00d8fa428295f538d52c30f47ea3f7695e5c7be610fd943edf",
+  "source": "https://codeload.github.com/Skvayzer/russian_handwritings_tracked/zip/c6629026b1fdef51fd08e3d2fddffd82f97e60a5",
+  "dataDoi": "10.17632/3h6h5d7xg2.2",
+  "license": "CC-BY-4.0",
+  "selection": "Fixed before inference; vendor training writer overlap unknown",
+  "penUpMetadata": "absent",
+  "sourceGuidelineYUp": [
+    150,
+    200,
+    250,
+    300
+  ],
+  "guidelineSemantics": "Unspecified; CLI line frame is an explicit diagnostic hypothesis",
+  "samples": [
+    {
+      "id": "w_3_1-word-00",
+      "kind": "word",
+      "expected": "да",
+      "writerId": 3,
+      "session": "w_3_1",
+      "file": "w_3_1-word-00.track.json",
+      "sourceMember": "russian_handwritings_tracked-c6629026b1fdef51fd08e3d2fddffd82f97e60a5/w_3_1/extra/да",
+      "sourceCoordinateSha256": "3a51033027b13934fc57ba725fdaf0d35eb18be018e69f7f82ed2827301135ec",
+      "sourceTimingSha256": "0262f8b3fbef50837c48698e930129a2ae35e6d32e5b28cbd21458b3c5aeabb6",
+      "trackSha256": "1d0b32db55767095dce93c8c8842ade30fe3face330c9e142e223cc129633032"
+    },
+    {
+      "id": "w_3_1-word-01",
+      "kind": "word",
+      "expected": "ещё",
+      "writerId": 3,
+      "session": "w_3_1",
+      "file": "w_3_1-word-01.track.json",
+      "sourceMember": "russian_handwritings_tracked-c6629026b1fdef51fd08e3d2fddffd82f97e60a5/w_3_1/extra/ещё",
+      "sourceCoordinateSha256": "25a22f1df0c2b9824054ba206a4e69b0ee818761d0aebac328533058bbe507cc",
+      "sourceTimingSha256": "953f186d0ff15d21a942432bc9d2583879a22a97bff9e7c54abbec60bcc903d3",
+      "trackSha256": "9186a80ee235c801bab22214a624bec05a52c996aabdde499384545a01b49bc1"
+    },
+    {
+      "id": "w_3_1-word-02",
+      "kind": "word",
+      "expected": "мягких",
+      "writerId": 3,
+      "session": "w_3_1",
+      "file": "w_3_1-word-02.track.json",
+      "sourceMember": "russian_handwritings_tracked-c6629026b1fdef51fd08e3d2fddffd82f97e60a5/w_3_1/extra/мягких",
+      "sourceCoordinateSha256": "ee0dd37f1268a403c3acc02d854ea8d97d0979f5e07303dc7cfe6ea619291ff7",
+      "sourceTimingSha256": "268f2a77e1f4400a595d41c636c9e18fd8924acac7e4de3221df7ba68edd327b",
+      "trackSha256": "02e895c871177e5483ce150a709ceb4d425c9f583bebedcbc561111bc1cf29f8"
+    },
+    {
+      "id": "w_7_1-word-00",
+      "kind": "word",
+      "expected": "да",
+      "writerId": 7,
+      "session": "w_7_1",
+      "file": "w_7_1-word-00.track.json",
+      "sourceMember": "russian_handwritings_tracked-c6629026b1fdef51fd08e3d2fddffd82f97e60a5/w_7_1/extra/да",
+      "sourceCoordinateSha256": "8acb431f6a8531c2542aa3ca6a0f0d15fa083a95df61e7a71629af24b25a9bfa",
+      "sourceTimingSha256": "90caae075c35ee754f03cfe21850cab8d2f4a1367f01186b6a642b25ea902a3b",
+      "trackSha256": "2ca1b11569c053c74363afcd4b0540cf1448866d6129bcffcba37a51b45e7327"
+    },
+    {
+      "id": "w_7_1-word-01",
+      "kind": "word",
+      "expected": "ещё",
+      "writerId": 7,
+      "session": "w_7_1",
+      "file": "w_7_1-word-01.track.json",
+      "sourceMember": "russian_handwritings_tracked-c6629026b1fdef51fd08e3d2fddffd82f97e60a5/w_7_1/extra/ещё",
+      "sourceCoordinateSha256": "d6f6657d223c3716c1047e4873b88ea3df7959c0bbb881778a18da28aeee7bdf",
+      "sourceTimingSha256": "26d87e62e7156ce908ad38c2d8290753b711f8004f0641365a1a13864bf5e853",
+      "trackSha256": "55ede3e2050ba8c560294b9e0d996e4fd32af93043b66c91ce0594ababc57a48"
+    },
+    {
+      "id": "w_7_1-word-02",
+      "kind": "word",
+      "expected": "мягких",
+      "writerId": 7,
+      "session": "w_7_1",
+      "file": "w_7_1-word-02.track.json",
+      "sourceMember": "russian_handwritings_tracked-c6629026b1fdef51fd08e3d2fddffd82f97e60a5/w_7_1/extra/мягких",
+      "sourceCoordinateSha256": "447f30bfa3161f24f654300a30a7ad0c299203858149b23a9be8025020eb09c1",
+      "sourceTimingSha256": "bf6daa6e7c78bf030f335d997ff0280d62f1d975030d649ef342391697e27e6e",
+      "trackSha256": "8d0c087294d862e84533bb694a16e6deeadeec1ccb6d922df48bf76b22dcff3b"
+    },
+    {
+      "id": "w_12_1-word-00",
+      "kind": "word",
+      "expected": "да",
+      "writerId": 12,
+      "session": "w_12_1",
+      "file": "w_12_1-word-00.track.json",
+      "sourceMember": "russian_handwritings_tracked-c6629026b1fdef51fd08e3d2fddffd82f97e60a5/w_12_1/extra/да",
+      "sourceCoordinateSha256": "0c4b8c1bc0da268c2dc7edc09f4ef8908803b5637403afefc7ec4ded12f069d3",
+      "sourceTimingSha256": "929e6c12d72c8cdc38f67003f0d7703d733af102b7c4f50c1a9fb7c69b099b5d",
+      "trackSha256": "31b4b3ab2a6264c4d2d4476341c8353fc38c54c0dc71f86673047fa74afa26bc"
+    },
+    {
+      "id": "w_12_1-word-01",
+      "kind": "word",
+      "expected": "ещё",
+      "writerId": 12,
+      "session": "w_12_1",
+      "file": "w_12_1-word-01.track.json",
+      "sourceMember": "russian_handwritings_tracked-c6629026b1fdef51fd08e3d2fddffd82f97e60a5/w_12_1/extra/ещё",
+      "sourceCoordinateSha256": "f2bdb3db8926c43056b1dc11264d14552d268e3414b21118a5a1331aa9015de1",
+      "sourceTimingSha256": "e4eb46764dcf4fe9528800a7d1c4574ea3620d7adb440408358d3e0bfccd01c1",
+      "trackSha256": "c708dbf8700608343eb8f0ce874526f724fe1b7073da877a56fa086a3966985d"
+    },
+    {
+      "id": "w_12_1-word-02",
+      "kind": "word",
+      "expected": "мягких",
+      "writerId": 12,
+      "session": "w_12_1",
+      "file": "w_12_1-word-02.track.json",
+      "sourceMember": "russian_handwritings_tracked-c6629026b1fdef51fd08e3d2fddffd82f97e60a5/w_12_1/extra/мягких",
+      "sourceCoordinateSha256": "803d17c996fb7ac905197f362e171471b13a9a3158a921b67017382673945fee",
+      "sourceTimingSha256": "6adcb85637403b0c28dd80e0ff7027a4c80aceeed3c8cc40e680bc34aed37f18",
+      "trackSha256": "94b6f93cb74e7f1b1e53a0e5603dfe0cf1d12aeeb7f3d87224bcf1cd1b5964b5"
+    }
+  ],
+  "fixtureScope": "Nine existing word tracks only; unchanged coordinate/timing JSON; character tracks omitted. No pen-up inference."
+}
