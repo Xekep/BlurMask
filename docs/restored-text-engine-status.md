@@ -6,6 +6,15 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [older Math resource codecs](legacy-math-resource-codecs.md) and
+[complete actual child serialization](legacy-math-grammar-child-codecs.md)
+now account for26 rules/53 children/18 classes,297 set entries and205 recursive
+nodes. Independent reconstruction is byte-exact across the6637-byte resource;
+214 malformed analysis controls pass. Static codec/class bindings are checked
+without loading vendor DLLs. Learned AK operators, matching/search, candidate
+production and application integration remain open; this is not a recognizer.
+
+
 The [English119 parent postprocessing](legacy-english119-parent-postprocessing.md)
 now owns actual249/24B/24A/24D/29B/EN265 processing:141 parents,152 guides,
 405 rows,6281 points and1040 guards, independently checked against the resource
