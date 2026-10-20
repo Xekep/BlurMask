@@ -3248,6 +3248,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native actual Math corpus failed.' }
           python -I tools/LegacyMathActualCorpus.Probe/audit_output.py .artifacts/math-actual-corpus-native.json models/math2/math2-unwrapped.res .artifacts/math-actual-corpus-managed.json --procedural-only
           if ($LASTEXITCODE -ne 0) { throw 'Native actual Math corpus oracle failed.' }
+          dotnet run --project tools/LegacyMathStructuralAdapter.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-structural-adapter-managed.json .artifacts/math-actual-procedural/manifest.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed structural Math adapter failed.' }
+          python -I tools/LegacyMathStructuralAdapter.Probe/audit_output.py .artifacts/math-structural-adapter-managed.json .artifacts/math-actual-corpus-managed.json models/math2/math2-unwrapped.res --procedural-only
+          if ($LASTEXITCODE -ne 0) { throw 'Managed structural Math adapter oracle failed.' }
+          dotnet publish tools/LegacyMathStructuralAdapter.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-structural-adapter-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Structural Math adapter publish failed.' }
+          $structuralMathAdapter = if ($IsWindows) { '.artifacts/math-structural-adapter-probe/LegacyMathFreshPublisher.Probe.exe' } else { '.artifacts/math-structural-adapter-probe/LegacyMathFreshPublisher.Probe' }
+          & $structuralMathAdapter .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-structural-adapter-native.json .artifacts/math-actual-procedural/manifest.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native structural Math adapter failed.' }
+          python -I tools/LegacyMathStructuralAdapter.Probe/audit_output.py .artifacts/math-structural-adapter-native.json .artifacts/math-actual-corpus-native.json models/math2/math2-unwrapped.res .artifacts/math-structural-adapter-managed.json --procedural-only
+          if ($LASTEXITCODE -ne 0) { throw 'Native structural Math adapter oracle failed.' }
           dotnet run --project tools/LegacyMathCandidateRetention.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-candidate-retention-managed.json
           if ($LASTEXITCODE -ne 0) { throw 'Managed completed candidate retention failed.' }
           python tools/LegacyMathCandidateRetention.Probe/audit_output.py .artifacts/math-candidate-retention-managed.json

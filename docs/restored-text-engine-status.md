@@ -6,6 +6,16 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [owning experimental Math structural adapter](legacy-math2-experimental-structural-adapter.md)
+now exposes a reusable public cold1 owner and detached first-record token/range
+evidence, strict bounded syntax and an explicit equals-gated calculation helper.
+31 public cold calls and93 actual detachments produce924 checked AST nodes and
+543 source ranges;44 fault/cancel prefixes,72 guards, GC and in-flight disposal
+checks pass with Managed/NativeAOT parity. CI separately checks17 procedural
+inputs/51 detachments. Confidence stays null with Uncalibrated admission;
+recognition never calls a solver. The app, its acceptance thresholds and missing
+native typed-Math bridge remain unchanged.
+
 The [genuine global post-TEXT coverage](legacy-global-document-coverage.md)
 now consumes the actual global parent through same-line consistency, exact
 WORD/TEXT comparison and forward CHAR subtraction.13 inputs produce11 bounded
