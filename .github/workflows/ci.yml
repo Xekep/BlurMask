@@ -840,6 +840,8 @@ jobs:
           python -I tools/LegacyEnglish119PlainText.Probe/audit_output.py models .artifacts/legacy-en119-candidates-managed.json .artifacts/legacy-en119-controller-managed.json .artifacts/legacy-en119-confidence-managed.json .artifacts/legacy-en119-primary-managed.json .artifacts/legacy-en119-terminal-managed.json .artifacts/legacy-en119-plain-text-managed.json
           dotnet run --project tools/LegacyEnglish119SourceRecords.Probe -c Release -- models .artifacts/legacy-en119-controller-managed.json .artifacts/legacy-en119-source-records-managed.json
           python -I tools/LegacyEnglish119SourceRecords.Probe/audit_output.py models .artifacts/legacy-en119-controller-managed.json .artifacts/legacy-en119-plain-text-managed.json .artifacts/legacy-en119-source-records-managed.json
+          dotnet run --project tools/LegacyEnglish119Parent.Probe -c Release -- models .artifacts/legacy-en119-controller-managed.json .artifacts/legacy-en119-parent-managed.json
+          python -I tools/LegacyEnglish119Parent.Probe/audit_output.py models .artifacts/legacy-en119-parent-managed.json
           dotnet run --project tools/LegacyEnglishLiteFirstPreprocessing.Probe -c Release -- models .artifacts/legacy-en-short-controls.json .artifacts/legacy-en-short-managed.json
           python tools/LegacyEnglishLiteFirstPreprocessing.Probe/audit_output.py models .artifacts/legacy-en-short-managed.json
           dotnet run --project tools/LegacyPreparedNetwork107.Probe -c Release -- models models/ru-RU/legacy-engine-profile.json .artifacts/legacy-prepared-network107-managed.json
@@ -1521,6 +1523,7 @@ jobs:
             @{ Name = 'LegacyEnglish119Terminal'; Args = @('models', '.artifacts/legacy-en119-controller-native.json', '.artifacts/legacy-en119-terminal-native.json') },
             @{ Name = 'LegacyEnglish119PlainText'; Args = @('models', '.artifacts/legacy-en119-controller-native.json', '.artifacts/legacy-en119-plain-text-native.json') },
             @{ Name = 'LegacyEnglish119SourceRecords'; Args = @('models', '.artifacts/legacy-en119-controller-native.json', '.artifacts/legacy-en119-source-records-native.json') },
+            @{ Name = 'LegacyEnglish119Parent'; Args = @('models', '.artifacts/legacy-en119-controller-native.json', '.artifacts/legacy-en119-parent-native.json') },
             @{ Name = 'LegacyEnglishLiteFirstPreprocessing'; Args = @('models', '.artifacts/legacy-en-short-controls.json', '.artifacts/legacy-en-short-native.json') },
             @{ Name = 'LegacyPreparedNetwork107'; Args = @('models', 'models/ru-RU/legacy-engine-profile.json', '.artifacts/legacy-prepared-network107-native.json') },
             @{ Name = 'LegacyMainWordRanking'; Args = @('.artifacts/legacy-main-word-ranking-native.json') },
@@ -2256,6 +2259,11 @@ jobs:
               python -I tools/LegacyEnglish119SourceRecords.Probe/audit_output.py models .artifacts/legacy-en119-controller-native.json .artifacts/legacy-en119-plain-text-native.json .artifacts/legacy-en119-source-records-native.json
               if ($LASTEXITCODE -ne 0) { throw 'LegacyEnglish119SourceRecords independent audit failed' }
               if ((Get-FileHash .artifacts/legacy-en119-source-records-native.json).Hash -ne (Get-FileHash .artifacts/legacy-en119-source-records-managed.json).Hash) { throw 'LegacyEnglish119SourceRecords Managed/Native parity failed' }
+            }
+            if ($name -eq 'LegacyEnglish119Parent') {
+              python -I tools/LegacyEnglish119Parent.Probe/audit_output.py models .artifacts/legacy-en119-parent-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyEnglish119Parent independent audit failed' }
+              if ((Get-FileHash .artifacts/legacy-en119-parent-native.json).Hash -ne (Get-FileHash .artifacts/legacy-en119-parent-managed.json).Hash) { throw 'LegacyEnglish119Parent Managed/Native parity failed' }
             }
             if ($name -eq 'LegacyEnglishLiteFirstPreprocessing') {
               python tools/LegacyEnglishLiteFirstPreprocessing.Probe/audit_output.py models .artifacts/legacy-en-short-native.json

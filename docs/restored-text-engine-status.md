@@ -6,6 +6,16 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [fresh English119 native parent](legacy-english119-parent-source-records.md)
+now owns actual EN ingress, source scale,2E3 grouping, descriptor split/physical
+order, filtered pre-NN child maps and first249 source720 publication.137 raw
+parents produce147 child inference results and345 full records, including
+multiline, filtered/nonidentity maps, sole-flat override and changed chronology.
+426 guards, independent raw-resource/geometry/2E3 checks and byte-identical
+Managed/NativeAOT pass. All six direct-child files and prior EN/RU captures
+remain unchanged. Empty-child fallback,24B+ processors, main recognition,
+quality and application/DOM integration remain absent.
+
 The [original Math source/FIELD library application](legacy-math2-original-library-application.md)
 now consumes that same completed outgoing owner, registers its actual detached
 commands in the original source, retains a separate generated inverse journal

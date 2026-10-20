@@ -43,57 +43,12 @@ public sealed class LegacyFreshMainPhysicalReordering
         ArgumentNullException.ThrowIfNull(actualSplit);cancellationToken.ThrowIfCancellationRequested();
         CheckHash(spatial30Resource,85812,"10f4b43cd02873f1995f543dece70e70c1f22cbdb7dcbf63e1c5c205966ac70e");
         CheckHash(physical50Resource,161332,"01f9fd0bf4b5c0c3c1acc170ee82938e24a132696acbfbcfb34573a9d0550c7e");
-        var owner=actualSplit.Input;var descriptors=actualSplit.CopyDescriptors();
-        using var stream30=new MemoryStream(spatial30Resource.ToArray(),false);
-        using var stream50=new MemoryStream(physical50Resource.ToArray(),false);
-        var spatial=PreparedLineBoundaryClassifier.Load(stream30);var physical=PreparedLineBoundaryClassifier.Load(stream50);
-        var order=new List<int>(actualSplit.Strokes.Count);var calls=new List<LegacyFreshMainPhysicalReceiverCall>();
-        float carry=owner.Grouping.NeuralScale;
-        for(int d=0;d<descriptors.Length;d++)
-        {
-            cancellationToken.ThrowIfCancellationRequested();var descriptor=descriptors[d];
-            int kind=BinaryPrimitives.ReadUInt16LittleEndian(descriptor)&15;
-            if(kind==3)continue;
-            if(kind!=0||BinaryPrimitives.ReadInt32LittleEndian(descriptor.AsSpan(16))!=-1||
-                BinaryPrimitives.ReadInt32LittleEndian(descriptor.AsSpan(32))!=-1||descriptor[72]!=1)
-                throw new InvalidDataException("Actual fresh unknown horizontal descriptor owner required.");
-            int first=BinaryPrimitives.ReadInt32LittleEndian(descriptor.AsSpan(36)),last=BinaryPrimitives.ReadInt32LittleEndian(descriptor.AsSpan(40));
-            if(first<0||last<first||last>=actualSplit.Strokes.Count||order.Count!=first)
-                throw new InvalidDataException("Actual contiguous split physical ranges required.");
-            var points=Enumerable.Range(first,last-first+1).Select(i=>actualSplit.Strokes[i]).ToArray();
-            if(first==last){order.Add(first);continue;}
-            //A checked numeric receiver view: its metadata/probabilities are
-            //NOT exported as the parent source. Native15F050 feeds this retained
-            //buffer to2E3, without constructing a new source219 or source keys.
-            //Reject if the reusable ingress helper would change any current point.
-            var numeric=LegacyOrdinarySourceInk.Prepare(points,owner.Packet.Source.Profile,cancellationToken);
-            for(int p=0;p<points.Length;p++)
-                if(!numeric.Strokes[p].Points.SequenceEqual(points[p].Points))
-                    throw new NotSupportedException("Current retained buffer requires a direct2E3 receiver view; secondary source filtering would change it.");
-            var scale=new LegacyOrdinaryLineScaleSnapshot(numeric,owner.Scale.Profile,ReadOnlyMemory<float>.Empty,
-                new LegacyLineScales(carry,owner.Scale.Scales.Secondary));
-            float initial=carry;
-            var groups=LegacyOrdinaryNeuralLineInferenceFactory.InferGrouping(scale,owner.PhysicalResolution,
-                new bool[points.Length],owner.QuarterVerticalWhenHalfHorizontal,owner.InternalScaleQuantile,
-                spatial,physical,owner.WindowWidthMultiplier,owner.WindowOverlap,cancellationToken);
-            carry=groups.NeuralScale;
-            //15F050 uses source+B0 primary scale for insertion tolerance,
-            //not the carried/possibly re-estimated receiver neural scale.
-            int[] local=LegacyNativeUnknownPhysicalIntervalOrder.Order(points,groups.Selected.Groups,
-                owner.Scale.Scales.Primary,owner.HorizontalOrderTolerance,cancellationToken);
-            order.AddRange(local.Select(i=>first+i));
-            calls.Add(new(d,initial,carry,points.Length,groups.Selected.Groups.Count,groups.VerticalStripCount));
-        }
-        if(order.Count!=actualSplit.Strokes.Count||order.Distinct().Count()!=order.Count)
-            throw new InvalidDataException("Native physical reorder lost/duplicated source membership.");
-        int[] original=order.Select(i=>actualSplit.OriginalPhysicalStrokeIndices.Span[i]).ToArray();
-        var strokes=order.Select(i=>new InkStroke(actualSplit.Strokes[i].Points.ToArray())).ToArray();
-        var probabilities=order.Select(i=>actualSplit.SourceStrokeProbabilities.Span[i]).ToArray();
-        int[] counts=actualSplit.Strokes.Select(s=>s.Points.Count).ToArray();int[] starts=new int[counts.Length];
-        for(int i=1;i<counts.Length;i++)starts[i]=starts[i-1]+counts[i-1];
-        uint[] incoming=order.SelectMany(i=>Enumerable.Range(starts[i],counts[i]).Select(p=>(uint)p)).ToArray();
-        var chronology=actualSplit.Chronology.RemapPreparedPoints(strokes.Select(s=>s.Points.Count).ToArray(),incoming,1,cancellationToken);
-        return new(actualSplit,strokes,original,probabilities,descriptors,chronology,calls.ToArray());
+        var owner=actualSplit.Input;
+        var input=new LegacyFreshPhysicalBuffer(actualSplit.CopyDescriptors(),actualSplit.Strokes.ToArray(),
+            actualSplit.OriginalPhysicalStrokeIndices.ToArray(),actualSplit.SourceStrokeProbabilities.ToArray(),actualSplit.Chronology);
+        var value=LegacyFreshMainPhysicalKernels.Reorder(input,owner.Scale,owner.Grouping,owner.PhysicalResolution,
+            spatial30Resource,physical50Resource,cancellationToken);var buffer=value.Buffer;
+        return new(actualSplit,buffer.Strokes,buffer.OriginalPhysical,buffer.Probabilities,buffer.Descriptors,buffer.Chronology,value.Calls);
     }
     private static void CheckHash(ReadOnlySpan<byte> data,int size,string expected)
     {
