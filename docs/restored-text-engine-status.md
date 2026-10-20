@@ -6,6 +6,13 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [raw timing constructor boundary](legacy-global-raw-timing-caller.md)
+checks12 additional complete function ranges and15 bindings. C1C has no default
+constructor: its clone preserves timing, while extended construction forwards
+explicit physical parameters. Existing XY owners still lack timing receipts;
+this does not complete geometry, select an implicit rate or change application
+input. A typed explicit-parameter ingestion API remains separate.
+
 The [typed terminal storage proof](legacy-math2-typed-terminal-storage.md)
 now traces real138D/1F44 ownership, candidate/symbol buffers and character-byte
 access:18 full bodies plus10 separately counted return leaves. These routines

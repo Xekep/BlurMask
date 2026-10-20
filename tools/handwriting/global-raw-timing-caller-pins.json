@@ -1,0 +1,4078 @@
+{
+  "scope": "STATIC native C1C constructor and explicit C1E baseTag caller boundary",
+  "dllSha256": {
+    "MyScriptInk.dll": "b553d9742c369d70e118756aa36647020f2cdab151fe00d5e4a50afd3789a02a",
+    "MyScriptEngine.dll": "d31abcd309cbb558bb80bf50fe1968921de515bc40fbeb0e886a5cf14dbc0a5c"
+  },
+  "regions": [
+    {
+      "dll": "MyScriptInk.dll",
+      "function": "180097c10",
+      "start": 6443072528,
+      "end": 6443072890,
+      "bytes": "48896c2410488974241848897c242041564883ec20488b4108488bfa4883e0feba040000004d8bf0488be9488b40084c8b482041ffd1488bd7488bcd4c8b0841ffd184c00f841c010000418b4e1033f6894f10448bc148897718ba0800000048897720488bcd418b4628894728418b462c89472c418b4630894730418b4634894734488b45084883e0fe488b004c8b481841ffd1488947184885c00f84c50000008b471048895c243085c074470f1f00498b5618488bcd8bc6488d1cc500000000488b4508488b14134883e0fe488b40104c8b401841ffd0488b4f184889040b488b471848833c030074368b4710ffc63bf072bc8bd841b801000000488b4508488bcd4883e0fe48c1e304488b00488d53044c8b0841ffd1488947204885c0752c488b07488bd7488bcd4c8b0041ffd032c0488b5c2430488b6c2438488b742440488b7c24484883c420415ec3498b5620483bc2740c4c8d4304488bc8e86eda0300b001ebcc32c0ebcd",
+      "sha256": "1851896f10c2949ff2a63533109448ceb7db9ae4709fa601103ac4b4db1637dd"
+    },
+    {
+      "dll": "MyScriptInk.dll",
+      "function": "180022bc0",
+      "start": 6442593216,
+      "end": 6442593222,
+      "bytes": "b838000000c3",
+      "sha256": "ec98abb27e45150addcd26549b7971b312b0098e9d9fc3131750bf704f4ab071"
+    },
+    {
+      "dll": "MyScriptInk.dll",
+      "function": "180090cf0",
+      "start": 6443044080,
+      "end": 6443044322,
+      "bytes": "48895c240848896c24104889742418574883ec30418bf9498be8488bf185d27571488b41084883e0fe488b5008488b5a78488b4210ba490c0000ffd0488bd0488bceffd3488bd84885c00f848b000000488b4c2460448bcf48894c24204c8bc5488bce488bd0e855d0ffff84c0751e488b4608488bd34883e0fe488bce488b40084c8b808000000041ffd0eb4e488bc3eb4b83fa047544488b442460ba250c0000488b7c2468488907488b41084883e0fe488b4808488b99a0000000488b4110488bceffd0488bd041b9680000004c8bc7488bceffd34885c0750233c0488b5c2440488b6c2448488b7424504883c4305fc3",
+      "sha256": "e723515fdb88d8ef19fd9fdf28a0bb10358adc2afbd1ce6be989811c878b34ee"
+    },
+    {
+      "dll": "MyScriptEngine.dll",
+      "function": "180001d90",
+      "start": 6442458512,
+      "end": 6442458914,
+      "bytes": "48895c24084889742410574883ec30488b052a1d25008bfa33d24c8b403041ffd0488bd84885c00f8453010000488b48088bd74883e1fe488b49084c8b4110488bc841ffd0488bf84885c0488b4308488bcb750aba00000401e9020100004883e0fe488bd7488b40084c8b404041ffd0488bcb833803488b4308740aba01000401e9da0000004883e0fe488bd7488b40084c8b404841ffd0488bf04885c00f84b0000000488338000f84a6000000488b4b08488bd74883e1fe488b49084c8b4178488bcb41ffd0488bf84885c00f84ad0000004c8b06488bd0488bcb41ffd0488b4b08488bd74883e1fe84c07523488b4108488bcb4c8b808000000041ffd033c0488b5c2440488b7424484883c4305fc3488b41204533c0488bcb4c8b0841ffd14885c0755c488b4308488bd74883e0fe488bcb488b40084c8b809000000041ffd033c0488b5c2440488b7424484883c4305fc3488b4308ba02000401488bcb4883e0fe48c74424200000000041b9ffffffff4533c0488b004c8b506041ffd233c0488b5c2440488b7424484883c4305fc3",
+      "sha256": "6f60cc667daa0077b3b94e10f2d21f7274873c71c3d6b2502070b94d343dacf4"
+    },
+    {
+      "dll": "MyScriptEngine.dll",
+      "function": "180001f30",
+      "start": 6442458928,
+      "end": 6442458933,
+      "bytes": "e95bfeffff",
+      "sha256": "7aea68a929f7e0d1ba3bce26ceca8d756c94765527a11499892025d7afd6d42e"
+    },
+    {
+      "dll": "MyScriptEngine.dll",
+      "function": "180001f40",
+      "start": 6442458944,
+      "end": 6442459386,
+      "bytes": "4057415641574883ec304d8bf94d8bf08bfa4d85c9750e4883c430415f415e5fe92bfeffff488b05641b250033d248895c245048896c245848897424604c8b403041ffd0488bd84885c00f844f010000488b48088bd74883e1fe488b49084c8b4110488bc841ffd0488bf04885c0488b4308488bcb750aba00000401e9fe0000004883e0fe488bd6488b40084c8b404041ffd0488bcb833803488b4308740aba01000401e9d60000004883e0fe488bd6488b40084c8b404841ffd0488be84885c00f84ac00000048837810000f84a10000004d85f6750f83ff65740aba00000301e992000000488b4308488bd64883e0fe488bcb488b40084c8b407841ffd0488bf84885c00f84940000004c8b55104d8bcf4d8bc6488bd0488bcb41ffd2488b4b08488bd74883e1fe84c07513488b4108488bcb4c8b808000000041ffd0eb5f488b41204533c0488bcb4c8b0841ffd14885c0754c488b4308488bd74883e0fe488bcb488b40084c8b809000000041ffd0eb2cba02000401488b4308488bcb4883e0fe48c74424200000000041b9ffffffff4533c0488b004c8b506041ffd233c0488b6c2458488b5c2450488b7424604883c430415f415e5fc3",
+      "sha256": "08163a32db4f15d7efa221adf51d446cc6e29185aaa3e5141f2aaf72386700f2"
+    },
+    {
+      "dll": "MyScriptEngine.dll",
+      "function": "180001160",
+      "start": 6442455392,
+      "end": 6442455652,
+      "bytes": "48895c2408574883ec30488b055f29250083fa098bfa0f94c24c8b403041ffd0488bd84885c00f84cb000000488b40088bd74883e0fe488bcb488b40084c8b401041ffd0488bf84885c0747c488b4b08488bd04883e1fe488b49084c8b4140488bcb41ffd0833800755e488b4308488bd74883e0fe488bcb488b40084c8b405841ffd0488bf84885c0752f488b4b08488d057a9723004883e1fe488944242041b9ffffffff4533c0ba00000002488b094c8b5160488bcb41ffd2488bc7488b5c24404883c4305fc3488b430841b9ffffffff4883e0fe4533c0ba03000401488bcb488b004c8b5060488d05f9962300488944242041ffd2488b5c244033c04883c4305fc3",
+      "sha256": "5cdfcf5e1d8aa58dc6b7374529a2421a23fe2f0842d78cebf37ce4076479f7b0"
+    },
+    {
+      "dll": "MyScriptEngine.dll",
+      "function": "180037dd0",
+      "start": 6442679760,
+      "end": 6442679865,
+      "bytes": "40534883ec204c8b89980000004c8bc14d85c9744c81faff3f000077444863d2488bc2488bca48c1f80883e20f83e03f48c1f90483e10f498b04c1488b04c8488b1cd04885db7419488bd3498bc8e87d13000084c0740a488d43104883c4205bc333c04883c4205bc3",
+      "sha256": "e63e38c733e8325f49f8268025745ff210e410915f43fdb6e5f8ac82bd0d6697"
+    },
+    {
+      "dll": "MyScriptEngine.dll",
+      "function": "180038000",
+      "start": 6442680320,
+      "end": 6442680325,
+      "bytes": "488b42f0c3",
+      "sha256": "3204725666995e16e2ea9d9e26a57f4a6b358310ed60d6760924b381eb8cc42f"
+    },
+    {
+      "dll": "MyScriptEngine.dll",
+      "function": "180038010",
+      "start": 6442680336,
+      "end": 6442680355,
+      "bytes": "488b42f0488b40184885c07405488b4010c3c3",
+      "sha256": "2b661f25ad71e8941ecef810e7a418362225193fc0a3be0ccfd27375b5dfe151"
+    },
+    {
+      "dll": "MyScriptEngine.dll",
+      "function": "180038120",
+      "start": 6442680608,
+      "end": 6442680775,
+      "bytes": "48895c2410574883ec20488bd94885d20f8484000000488b42f0488d7af083380375774889742430488b7018488b06ffd0488bd7488bcb4c8bd8e8d10f00004885c07417488b48f04d8bc3488b5130488b4a20488bd04c8b09eb17488b430841b8010000004883e0fe498bd3488b004c8b08488bcb41ffd1488bc84885c07407488b4608488901488b742430488bc1488b5c24384883c4205fc3488b5c243833c04883c4205fc3",
+      "sha256": "60f1ee8185071b02ba367475d610bde6563f51af00a84ef68760442dcf023c9e"
+    },
+    {
+      "dll": "MyScriptEngine.dll",
+      "function": "180037e90",
+      "start": 6442679952,
+      "end": 6442680040,
+      "bytes": "4c8b81980000004d85c0744981faff3f000077414863d2488bc2488bca48c1f80883e20f83e03f48c1f90483e10f498b04c0488b04c8488b04d04885c07416488b004885c0740e488b40184885c07405488b4010c333c0c3",
+      "sha256": "6df889909057d5e1da1c216bd9a05b4676179929977269ca32962d28c350796c"
+    }
+  ],
+  "pins": [
+    [
+      "MyScriptInk.dll",
+      6443072528,
+      "mov",
+      "qword ptr [rsp + 0x10], rbp"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072533,
+      "mov",
+      "qword ptr [rsp + 0x18], rsi"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072538,
+      "mov",
+      "qword ptr [rsp + 0x20], rdi"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072543,
+      "push",
+      "r14"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072545,
+      "sub",
+      "rsp, 0x20"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072549,
+      "mov",
+      "rax, qword ptr [rcx + 8]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072553,
+      "mov",
+      "rdi, rdx"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072556,
+      "and",
+      "rax, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072560,
+      "mov",
+      "edx, 4"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072565,
+      "mov",
+      "r14, r8"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072568,
+      "mov",
+      "rbp, rcx"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072571,
+      "mov",
+      "rax, qword ptr [rax + 8]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072575,
+      "mov",
+      "r9, qword ptr [rax + 0x20]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072579,
+      "call",
+      "r9"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072582,
+      "mov",
+      "rdx, rdi"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072585,
+      "mov",
+      "rcx, rbp"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072588,
+      "mov",
+      "r9, qword ptr [rax]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072591,
+      "call",
+      "r9"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072594,
+      "test",
+      "al, al"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072596,
+      "je",
+      "0x180097d76"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072602,
+      "mov",
+      "ecx, dword ptr [r14 + 0x10]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072606,
+      "xor",
+      "esi, esi"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072608,
+      "mov",
+      "dword ptr [rdi + 0x10], ecx"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072611,
+      "mov",
+      "r8d, ecx"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072614,
+      "mov",
+      "qword ptr [rdi + 0x18], rsi"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072618,
+      "mov",
+      "edx, 8"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072623,
+      "mov",
+      "qword ptr [rdi + 0x20], rsi"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072627,
+      "mov",
+      "rcx, rbp"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072630,
+      "mov",
+      "eax, dword ptr [r14 + 0x28]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072634,
+      "mov",
+      "dword ptr [rdi + 0x28], eax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072637,
+      "mov",
+      "eax, dword ptr [r14 + 0x2c]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072641,
+      "mov",
+      "dword ptr [rdi + 0x2c], eax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072644,
+      "mov",
+      "eax, dword ptr [r14 + 0x30]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072648,
+      "mov",
+      "dword ptr [rdi + 0x30], eax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072651,
+      "mov",
+      "eax, dword ptr [r14 + 0x34]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072655,
+      "mov",
+      "dword ptr [rdi + 0x34], eax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072658,
+      "mov",
+      "rax, qword ptr [rbp + 8]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072662,
+      "and",
+      "rax, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072666,
+      "mov",
+      "rax, qword ptr [rax]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072669,
+      "mov",
+      "r9, qword ptr [rax + 0x18]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072673,
+      "call",
+      "r9"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072676,
+      "mov",
+      "qword ptr [rdi + 0x18], rax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072680,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072683,
+      "je",
+      "0x180097d76"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072689,
+      "mov",
+      "eax, dword ptr [rdi + 0x10]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072692,
+      "mov",
+      "qword ptr [rsp + 0x30], rbx"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072697,
+      "test",
+      "eax, eax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072699,
+      "je",
+      "0x180097d04"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072701,
+      "nop",
+      "dword ptr [rax]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072704,
+      "mov",
+      "rdx, qword ptr [r14 + 0x18]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072708,
+      "mov",
+      "rcx, rbp"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072711,
+      "mov",
+      "eax, esi"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072713,
+      "lea",
+      "rbx, [rax*8]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072721,
+      "mov",
+      "rax, qword ptr [rbp + 8]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072725,
+      "mov",
+      "rdx, qword ptr [rbx + rdx]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072729,
+      "and",
+      "rax, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072733,
+      "mov",
+      "rax, qword ptr [rax + 0x10]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072737,
+      "mov",
+      "r8, qword ptr [rax + 0x18]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072741,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072744,
+      "mov",
+      "rcx, qword ptr [rdi + 0x18]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072748,
+      "mov",
+      "qword ptr [rbx + rcx], rax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072752,
+      "mov",
+      "rax, qword ptr [rdi + 0x18]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072756,
+      "cmp",
+      "qword ptr [rbx + rax], 0"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072761,
+      "je",
+      "0x180097d31"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072763,
+      "mov",
+      "eax, dword ptr [rdi + 0x10]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072766,
+      "inc",
+      "esi"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072768,
+      "cmp",
+      "esi, eax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072770,
+      "jb",
+      "0x180097cc0"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072772,
+      "mov",
+      "ebx, eax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072774,
+      "mov",
+      "r8d, 1"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072780,
+      "mov",
+      "rax, qword ptr [rbp + 8]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072784,
+      "mov",
+      "rcx, rbp"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072787,
+      "and",
+      "rax, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072791,
+      "shl",
+      "rbx, 4"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072795,
+      "mov",
+      "rax, qword ptr [rax]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072798,
+      "lea",
+      "rdx, [rbx + 4]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072802,
+      "mov",
+      "r9, qword ptr [rax]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072805,
+      "call",
+      "r9"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072808,
+      "mov",
+      "qword ptr [rdi + 0x20], rax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072812,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072815,
+      "jne",
+      "0x180097d5d"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072817,
+      "mov",
+      "rax, qword ptr [rdi]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072820,
+      "mov",
+      "rdx, rdi"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072823,
+      "mov",
+      "rcx, rbp"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072826,
+      "mov",
+      "r8, qword ptr [rax]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072829,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072832,
+      "xor",
+      "al, al"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072834,
+      "mov",
+      "rbx, qword ptr [rsp + 0x30]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072839,
+      "mov",
+      "rbp, qword ptr [rsp + 0x38]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072844,
+      "mov",
+      "rsi, qword ptr [rsp + 0x40]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072849,
+      "mov",
+      "rdi, qword ptr [rsp + 0x48]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072854,
+      "add",
+      "rsp, 0x20"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072858,
+      "pop",
+      "r14"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072860,
+      "ret",
+      ""
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072861,
+      "mov",
+      "rdx, qword ptr [r14 + 0x20]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072865,
+      "cmp",
+      "rax, rdx"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072868,
+      "je",
+      "0x180097d72"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072870,
+      "lea",
+      "r8, [rbx + 4]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072874,
+      "mov",
+      "rcx, rax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072877,
+      "call",
+      "0x1800d57e0"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072882,
+      "mov",
+      "al, 1"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072884,
+      "jmp",
+      "0x180097d42"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072886,
+      "xor",
+      "al, al"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443072888,
+      "jmp",
+      "0x180097d47"
+    ],
+    [
+      "MyScriptInk.dll",
+      6442593216,
+      "mov",
+      "eax, 0x38"
+    ],
+    [
+      "MyScriptInk.dll",
+      6442593221,
+      "ret",
+      ""
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044080,
+      "mov",
+      "qword ptr [rsp + 8], rbx"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044085,
+      "mov",
+      "qword ptr [rsp + 0x10], rbp"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044090,
+      "mov",
+      "qword ptr [rsp + 0x18], rsi"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044095,
+      "push",
+      "rdi"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044096,
+      "sub",
+      "rsp, 0x30"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044100,
+      "mov",
+      "edi, r9d"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044103,
+      "mov",
+      "rbp, r8"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044106,
+      "mov",
+      "rsi, rcx"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044109,
+      "test",
+      "edx, edx"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044111,
+      "jne",
+      "0x180090d82"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044113,
+      "mov",
+      "rax, qword ptr [rcx + 8]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044117,
+      "and",
+      "rax, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044121,
+      "mov",
+      "rdx, qword ptr [rax + 8]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044125,
+      "mov",
+      "rbx, qword ptr [rdx + 0x78]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044129,
+      "mov",
+      "rax, qword ptr [rdx + 0x10]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044133,
+      "mov",
+      "edx, 0xc49"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044138,
+      "call",
+      "rax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044140,
+      "mov",
+      "rdx, rax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044143,
+      "mov",
+      "rcx, rsi"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044146,
+      "call",
+      "rbx"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044148,
+      "mov",
+      "rbx, rax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044151,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044154,
+      "je",
+      "0x180090dcb"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044160,
+      "mov",
+      "rcx, qword ptr [rsp + 0x60]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044165,
+      "mov",
+      "r9d, edi"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044168,
+      "mov",
+      "qword ptr [rsp + 0x20], rcx"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044173,
+      "mov",
+      "r8, rbp"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044176,
+      "mov",
+      "rcx, rsi"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044179,
+      "mov",
+      "rdx, rax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044182,
+      "call",
+      "0x18008ddb0"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044187,
+      "test",
+      "al, al"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044189,
+      "jne",
+      "0x180090d7d"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044191,
+      "mov",
+      "rax, qword ptr [rsi + 8]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044195,
+      "mov",
+      "rdx, rbx"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044198,
+      "and",
+      "rax, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044202,
+      "mov",
+      "rcx, rsi"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044205,
+      "mov",
+      "rax, qword ptr [rax + 8]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044209,
+      "mov",
+      "r8, qword ptr [rax + 0x80]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044216,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044219,
+      "jmp",
+      "0x180090dcb"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044221,
+      "mov",
+      "rax, rbx"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044224,
+      "jmp",
+      "0x180090dcd"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044226,
+      "cmp",
+      "edx, 4"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044229,
+      "jne",
+      "0x180090dcb"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044231,
+      "mov",
+      "rax, qword ptr [rsp + 0x60]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044236,
+      "mov",
+      "edx, 0xc25"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044241,
+      "mov",
+      "rdi, qword ptr [rsp + 0x68]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044246,
+      "mov",
+      "qword ptr [rdi], rax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044249,
+      "mov",
+      "rax, qword ptr [rcx + 8]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044253,
+      "and",
+      "rax, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044257,
+      "mov",
+      "rcx, qword ptr [rax + 8]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044261,
+      "mov",
+      "rbx, qword ptr [rcx + 0xa0]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044268,
+      "mov",
+      "rax, qword ptr [rcx + 0x10]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044272,
+      "mov",
+      "rcx, rsi"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044275,
+      "call",
+      "rax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044277,
+      "mov",
+      "rdx, rax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044280,
+      "mov",
+      "r9d, 0x68"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044286,
+      "mov",
+      "r8, rdi"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044289,
+      "mov",
+      "rcx, rsi"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044292,
+      "call",
+      "rbx"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044294,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044297,
+      "jne",
+      "0x180090dcd"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044299,
+      "xor",
+      "eax, eax"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044301,
+      "mov",
+      "rbx, qword ptr [rsp + 0x40]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044306,
+      "mov",
+      "rbp, qword ptr [rsp + 0x48]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044311,
+      "mov",
+      "rsi, qword ptr [rsp + 0x50]"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044316,
+      "add",
+      "rsp, 0x30"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044320,
+      "pop",
+      "rdi"
+    ],
+    [
+      "MyScriptInk.dll",
+      6443044321,
+      "ret",
+      ""
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458512,
+      "mov",
+      "qword ptr [rsp + 8], rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458517,
+      "mov",
+      "qword ptr [rsp + 0x10], rsi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458522,
+      "push",
+      "rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458523,
+      "sub",
+      "rsp, 0x30"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458527,
+      "mov",
+      "rax, qword ptr [rip + 0x251d2a]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458534,
+      "mov",
+      "edi, edx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458536,
+      "xor",
+      "edx, edx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458538,
+      "mov",
+      "r8, qword ptr [rax + 0x30]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458542,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458545,
+      "mov",
+      "rbx, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458548,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458551,
+      "je",
+      "0x180001f10"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458557,
+      "mov",
+      "rcx, qword ptr [rax + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458561,
+      "mov",
+      "edx, edi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458563,
+      "and",
+      "rcx, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458567,
+      "mov",
+      "rcx, qword ptr [rcx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458571,
+      "mov",
+      "r8, qword ptr [rcx + 0x10]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458575,
+      "mov",
+      "rcx, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458578,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458581,
+      "mov",
+      "rdi, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458584,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458587,
+      "mov",
+      "rax, qword ptr [rbx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458591,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458594,
+      "jne",
+      "0x180001dee"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458596,
+      "mov",
+      "edx, 0x1040000"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458601,
+      "jmp",
+      "0x180001ef0"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458606,
+      "and",
+      "rax, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458610,
+      "mov",
+      "rdx, rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458613,
+      "mov",
+      "rax, qword ptr [rax + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458617,
+      "mov",
+      "r8, qword ptr [rax + 0x40]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458621,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458624,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458627,
+      "cmp",
+      "dword ptr [rax], 3"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458630,
+      "mov",
+      "rax, qword ptr [rbx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458634,
+      "je",
+      "0x180001e16"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458636,
+      "mov",
+      "edx, 0x1040001"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458641,
+      "jmp",
+      "0x180001ef0"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458646,
+      "and",
+      "rax, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458650,
+      "mov",
+      "rdx, rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458653,
+      "mov",
+      "rax, qword ptr [rax + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458657,
+      "mov",
+      "r8, qword ptr [rax + 0x48]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458661,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458664,
+      "mov",
+      "rsi, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458667,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458670,
+      "je",
+      "0x180001ee4"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458676,
+      "cmp",
+      "qword ptr [rax], 0"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458680,
+      "je",
+      "0x180001ee4"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458686,
+      "mov",
+      "rcx, qword ptr [rbx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458690,
+      "mov",
+      "rdx, rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458693,
+      "and",
+      "rcx, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458697,
+      "mov",
+      "rcx, qword ptr [rcx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458701,
+      "mov",
+      "r8, qword ptr [rcx + 0x78]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458705,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458708,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458711,
+      "mov",
+      "rdi, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458714,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458717,
+      "je",
+      "0x180001f10"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458723,
+      "mov",
+      "r8, qword ptr [rsi]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458726,
+      "mov",
+      "rdx, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458729,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458732,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458735,
+      "mov",
+      "rcx, qword ptr [rbx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458739,
+      "mov",
+      "rdx, rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458742,
+      "and",
+      "rcx, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458746,
+      "test",
+      "al, al"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458748,
+      "jne",
+      "0x180001ea1"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458750,
+      "mov",
+      "rax, qword ptr [rcx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458754,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458757,
+      "mov",
+      "r8, qword ptr [rax + 0x80]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458764,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458767,
+      "xor",
+      "eax, eax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458769,
+      "mov",
+      "rbx, qword ptr [rsp + 0x40]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458774,
+      "mov",
+      "rsi, qword ptr [rsp + 0x48]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458779,
+      "add",
+      "rsp, 0x30"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458783,
+      "pop",
+      "rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458784,
+      "ret",
+      ""
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458785,
+      "mov",
+      "rax, qword ptr [rcx + 0x20]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458789,
+      "xor",
+      "r8d, r8d"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458792,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458795,
+      "mov",
+      "r9, qword ptr [rax]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458798,
+      "call",
+      "r9"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458801,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458804,
+      "jne",
+      "0x180001f12"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458806,
+      "mov",
+      "rax, qword ptr [rbx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458810,
+      "mov",
+      "rdx, rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458813,
+      "and",
+      "rax, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458817,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458820,
+      "mov",
+      "rax, qword ptr [rax + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458824,
+      "mov",
+      "r8, qword ptr [rax + 0x90]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458831,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458834,
+      "xor",
+      "eax, eax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458836,
+      "mov",
+      "rbx, qword ptr [rsp + 0x40]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458841,
+      "mov",
+      "rsi, qword ptr [rsp + 0x48]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458846,
+      "add",
+      "rsp, 0x30"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458850,
+      "pop",
+      "rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458851,
+      "ret",
+      ""
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458852,
+      "mov",
+      "rax, qword ptr [rbx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458856,
+      "mov",
+      "edx, 0x1040002"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458861,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458864,
+      "and",
+      "rax, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458868,
+      "mov",
+      "qword ptr [rsp + 0x20], 0"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458877,
+      "mov",
+      "r9d, 0xffffffff"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458883,
+      "xor",
+      "r8d, r8d"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458886,
+      "mov",
+      "rax, qword ptr [rax]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458889,
+      "mov",
+      "r10, qword ptr [rax + 0x60]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458893,
+      "call",
+      "r10"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458896,
+      "xor",
+      "eax, eax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458898,
+      "mov",
+      "rbx, qword ptr [rsp + 0x40]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458903,
+      "mov",
+      "rsi, qword ptr [rsp + 0x48]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458908,
+      "add",
+      "rsp, 0x30"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458912,
+      "pop",
+      "rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458913,
+      "ret",
+      ""
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458928,
+      "jmp",
+      "0x180001d90"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458944,
+      "push",
+      "rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458946,
+      "push",
+      "r14"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458948,
+      "push",
+      "r15"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458950,
+      "sub",
+      "rsp, 0x30"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458954,
+      "mov",
+      "r15, r9"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458957,
+      "mov",
+      "r14, r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458960,
+      "mov",
+      "edi, edx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458962,
+      "test",
+      "r9, r9"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458965,
+      "jne",
+      "0x180001f65"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458967,
+      "add",
+      "rsp, 0x30"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458971,
+      "pop",
+      "r15"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458973,
+      "pop",
+      "r14"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458975,
+      "pop",
+      "rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458976,
+      "jmp",
+      "0x180001d90"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458981,
+      "mov",
+      "rax, qword ptr [rip + 0x251b64]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458988,
+      "xor",
+      "edx, edx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458990,
+      "mov",
+      "qword ptr [rsp + 0x50], rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442458995,
+      "mov",
+      "qword ptr [rsp + 0x58], rbp"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459000,
+      "mov",
+      "qword ptr [rsp + 0x60], rsi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459005,
+      "mov",
+      "r8, qword ptr [rax + 0x30]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459009,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459012,
+      "mov",
+      "rbx, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459015,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459018,
+      "je",
+      "0x1800020df"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459024,
+      "mov",
+      "rcx, qword ptr [rax + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459028,
+      "mov",
+      "edx, edi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459030,
+      "and",
+      "rcx, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459034,
+      "mov",
+      "rcx, qword ptr [rcx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459038,
+      "mov",
+      "r8, qword ptr [rcx + 0x10]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459042,
+      "mov",
+      "rcx, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459045,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459048,
+      "mov",
+      "rsi, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459051,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459054,
+      "mov",
+      "rax, qword ptr [rbx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459058,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459061,
+      "jne",
+      "0x180001fc1"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459063,
+      "mov",
+      "edx, 0x1040000"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459068,
+      "jmp",
+      "0x1800020bf"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459073,
+      "and",
+      "rax, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459077,
+      "mov",
+      "rdx, rsi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459080,
+      "mov",
+      "rax, qword ptr [rax + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459084,
+      "mov",
+      "r8, qword ptr [rax + 0x40]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459088,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459091,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459094,
+      "cmp",
+      "dword ptr [rax], 3"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459097,
+      "mov",
+      "rax, qword ptr [rbx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459101,
+      "je",
+      "0x180001fe9"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459103,
+      "mov",
+      "edx, 0x1040001"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459108,
+      "jmp",
+      "0x1800020bf"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459113,
+      "and",
+      "rax, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459117,
+      "mov",
+      "rdx, rsi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459120,
+      "mov",
+      "rax, qword ptr [rax + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459124,
+      "mov",
+      "r8, qword ptr [rax + 0x48]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459128,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459131,
+      "mov",
+      "rbp, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459134,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459137,
+      "je",
+      "0x1800020b3"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459143,
+      "cmp",
+      "qword ptr [rax + 0x10], 0"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459148,
+      "je",
+      "0x1800020b3"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459154,
+      "test",
+      "r14, r14"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459157,
+      "jne",
+      "0x180002026"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459159,
+      "cmp",
+      "edi, 0x65"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459162,
+      "je",
+      "0x180002026"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459164,
+      "mov",
+      "edx, 0x1030000"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459169,
+      "jmp",
+      "0x1800020b8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459174,
+      "mov",
+      "rax, qword ptr [rbx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459178,
+      "mov",
+      "rdx, rsi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459181,
+      "and",
+      "rax, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459185,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459188,
+      "mov",
+      "rax, qword ptr [rax + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459192,
+      "mov",
+      "r8, qword ptr [rax + 0x78]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459196,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459199,
+      "mov",
+      "rdi, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459202,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459205,
+      "je",
+      "0x1800020df"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459211,
+      "mov",
+      "r10, qword ptr [rbp + 0x10]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459215,
+      "mov",
+      "r9, r15"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459218,
+      "mov",
+      "r8, r14"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459221,
+      "mov",
+      "rdx, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459224,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459227,
+      "call",
+      "r10"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459230,
+      "mov",
+      "rcx, qword ptr [rbx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459234,
+      "mov",
+      "rdx, rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459237,
+      "and",
+      "rcx, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459241,
+      "test",
+      "al, al"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459243,
+      "jne",
+      "0x180002080"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459245,
+      "mov",
+      "rax, qword ptr [rcx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459249,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459252,
+      "mov",
+      "r8, qword ptr [rax + 0x80]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459259,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459262,
+      "jmp",
+      "0x1800020df"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459264,
+      "mov",
+      "rax, qword ptr [rcx + 0x20]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459268,
+      "xor",
+      "r8d, r8d"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459271,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459274,
+      "mov",
+      "r9, qword ptr [rax]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459277,
+      "call",
+      "r9"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459280,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459283,
+      "jne",
+      "0x1800020e1"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459285,
+      "mov",
+      "rax, qword ptr [rbx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459289,
+      "mov",
+      "rdx, rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459292,
+      "and",
+      "rax, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459296,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459299,
+      "mov",
+      "rax, qword ptr [rax + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459303,
+      "mov",
+      "r8, qword ptr [rax + 0x90]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459310,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459313,
+      "jmp",
+      "0x1800020df"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459315,
+      "mov",
+      "edx, 0x1040002"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459320,
+      "mov",
+      "rax, qword ptr [rbx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459324,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459327,
+      "and",
+      "rax, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459331,
+      "mov",
+      "qword ptr [rsp + 0x20], 0"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459340,
+      "mov",
+      "r9d, 0xffffffff"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459346,
+      "xor",
+      "r8d, r8d"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459349,
+      "mov",
+      "rax, qword ptr [rax]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459352,
+      "mov",
+      "r10, qword ptr [rax + 0x60]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459356,
+      "call",
+      "r10"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459359,
+      "xor",
+      "eax, eax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459361,
+      "mov",
+      "rbp, qword ptr [rsp + 0x58]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459366,
+      "mov",
+      "rbx, qword ptr [rsp + 0x50]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459371,
+      "mov",
+      "rsi, qword ptr [rsp + 0x60]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459376,
+      "add",
+      "rsp, 0x30"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459380,
+      "pop",
+      "r15"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459382,
+      "pop",
+      "r14"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459384,
+      "pop",
+      "rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442459385,
+      "ret",
+      ""
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455392,
+      "mov",
+      "qword ptr [rsp + 8], rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455397,
+      "push",
+      "rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455398,
+      "sub",
+      "rsp, 0x30"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455402,
+      "mov",
+      "rax, qword ptr [rip + 0x25295f]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455409,
+      "cmp",
+      "edx, 9"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455412,
+      "mov",
+      "edi, edx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455414,
+      "sete",
+      "dl"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455417,
+      "mov",
+      "r8, qword ptr [rax + 0x30]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455421,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455424,
+      "mov",
+      "rbx, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455427,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455430,
+      "je",
+      "0x180001257"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455436,
+      "mov",
+      "rax, qword ptr [rax + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455440,
+      "mov",
+      "edx, edi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455442,
+      "and",
+      "rax, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455446,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455449,
+      "mov",
+      "rax, qword ptr [rax + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455453,
+      "mov",
+      "r8, qword ptr [rax + 0x10]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455457,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455460,
+      "mov",
+      "rdi, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455463,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455466,
+      "je",
+      "0x180001228"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455468,
+      "mov",
+      "rcx, qword ptr [rbx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455472,
+      "mov",
+      "rdx, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455475,
+      "and",
+      "rcx, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455479,
+      "mov",
+      "rcx, qword ptr [rcx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455483,
+      "mov",
+      "r8, qword ptr [rcx + 0x40]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455487,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455490,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455493,
+      "cmp",
+      "dword ptr [rax], 0"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455496,
+      "jne",
+      "0x180001228"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455498,
+      "mov",
+      "rax, qword ptr [rbx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455502,
+      "mov",
+      "rdx, rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455505,
+      "and",
+      "rax, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455509,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455512,
+      "mov",
+      "rax, qword ptr [rax + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455516,
+      "mov",
+      "r8, qword ptr [rax + 0x58]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455520,
+      "call",
+      "r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455523,
+      "mov",
+      "rdi, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455526,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455529,
+      "jne",
+      "0x18000121a"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455531,
+      "mov",
+      "rcx, qword ptr [rbx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455535,
+      "lea",
+      "rax, [rip + 0x23977a]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455542,
+      "and",
+      "rcx, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455546,
+      "mov",
+      "qword ptr [rsp + 0x20], rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455551,
+      "mov",
+      "r9d, 0xffffffff"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455557,
+      "xor",
+      "r8d, r8d"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455560,
+      "mov",
+      "edx, 0x2000000"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455565,
+      "mov",
+      "rcx, qword ptr [rcx]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455568,
+      "mov",
+      "r10, qword ptr [rcx + 0x60]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455572,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455575,
+      "call",
+      "r10"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455578,
+      "mov",
+      "rax, rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455581,
+      "mov",
+      "rbx, qword ptr [rsp + 0x40]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455586,
+      "add",
+      "rsp, 0x30"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455590,
+      "pop",
+      "rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455591,
+      "ret",
+      ""
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455592,
+      "mov",
+      "rax, qword ptr [rbx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455596,
+      "mov",
+      "r9d, 0xffffffff"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455602,
+      "and",
+      "rax, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455606,
+      "xor",
+      "r8d, r8d"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455609,
+      "mov",
+      "edx, 0x1040003"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455614,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455617,
+      "mov",
+      "rax, qword ptr [rax]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455620,
+      "mov",
+      "r10, qword ptr [rax + 0x60]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455624,
+      "lea",
+      "rax, [rip + 0x2396f9]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455631,
+      "mov",
+      "qword ptr [rsp + 0x20], rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455636,
+      "call",
+      "r10"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455639,
+      "mov",
+      "rbx, qword ptr [rsp + 0x40]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455644,
+      "xor",
+      "eax, eax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455646,
+      "add",
+      "rsp, 0x30"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455650,
+      "pop",
+      "rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442455651,
+      "ret",
+      ""
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679760,
+      "push",
+      "rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679762,
+      "sub",
+      "rsp, 0x20"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679766,
+      "mov",
+      "r9, qword ptr [rcx + 0x98]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679773,
+      "mov",
+      "r8, rcx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679776,
+      "test",
+      "r9, r9"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679779,
+      "je",
+      "0x180037e31"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679781,
+      "cmp",
+      "edx, 0x3fff"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679787,
+      "ja",
+      "0x180037e31"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679789,
+      "movsxd",
+      "rdx, edx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679792,
+      "mov",
+      "rax, rdx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679795,
+      "mov",
+      "rcx, rdx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679798,
+      "sar",
+      "rax, 8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679802,
+      "and",
+      "edx, 0xf"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679805,
+      "and",
+      "eax, 0x3f"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679808,
+      "sar",
+      "rcx, 4"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679812,
+      "and",
+      "ecx, 0xf"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679815,
+      "mov",
+      "rax, qword ptr [r9 + rax*8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679819,
+      "mov",
+      "rax, qword ptr [rax + rcx*8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679823,
+      "mov",
+      "rbx, qword ptr [rax + rdx*8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679827,
+      "test",
+      "rbx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679830,
+      "je",
+      "0x180037e31"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679832,
+      "mov",
+      "rdx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679835,
+      "mov",
+      "rcx, r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679838,
+      "call",
+      "0x1800391a0"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679843,
+      "test",
+      "al, al"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679845,
+      "je",
+      "0x180037e31"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679847,
+      "lea",
+      "rax, [rbx + 0x10]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679851,
+      "add",
+      "rsp, 0x20"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679855,
+      "pop",
+      "rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679856,
+      "ret",
+      ""
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679857,
+      "xor",
+      "eax, eax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679859,
+      "add",
+      "rsp, 0x20"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679863,
+      "pop",
+      "rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679864,
+      "ret",
+      ""
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680320,
+      "mov",
+      "rax, qword ptr [rdx - 0x10]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680324,
+      "ret",
+      ""
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680336,
+      "mov",
+      "rax, qword ptr [rdx - 0x10]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680340,
+      "mov",
+      "rax, qword ptr [rax + 0x18]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680344,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680347,
+      "je",
+      "0x180038022"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680349,
+      "mov",
+      "rax, qword ptr [rax + 0x10]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680353,
+      "ret",
+      ""
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680354,
+      "ret",
+      ""
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680608,
+      "mov",
+      "qword ptr [rsp + 0x10], rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680613,
+      "push",
+      "rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680614,
+      "sub",
+      "rsp, 0x20"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680618,
+      "mov",
+      "rbx, rcx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680621,
+      "test",
+      "rdx, rdx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680624,
+      "je",
+      "0x1800381ba"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680630,
+      "mov",
+      "rax, qword ptr [rdx - 0x10]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680634,
+      "lea",
+      "rdi, [rdx - 0x10]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680638,
+      "cmp",
+      "dword ptr [rax], 3"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680641,
+      "jne",
+      "0x1800381ba"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680643,
+      "mov",
+      "qword ptr [rsp + 0x30], rsi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680648,
+      "mov",
+      "rsi, qword ptr [rax + 0x18]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680652,
+      "mov",
+      "rax, qword ptr [rsi]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680655,
+      "call",
+      "rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680657,
+      "mov",
+      "rdx, rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680660,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680663,
+      "mov",
+      "r11, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680666,
+      "call",
+      "0x180039130"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680671,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680674,
+      "je",
+      "0x18003817b"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680676,
+      "mov",
+      "rcx, qword ptr [rax - 0x10]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680680,
+      "mov",
+      "r8, r11"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680683,
+      "mov",
+      "rdx, qword ptr [rcx + 0x30]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680687,
+      "mov",
+      "rcx, qword ptr [rdx + 0x20]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680691,
+      "mov",
+      "rdx, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680694,
+      "mov",
+      "r9, qword ptr [rcx]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680697,
+      "jmp",
+      "0x180038192"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680699,
+      "mov",
+      "rax, qword ptr [rbx + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680703,
+      "mov",
+      "r8d, 1"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680709,
+      "and",
+      "rax, 0xfffffffffffffffe"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680713,
+      "mov",
+      "rdx, r11"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680716,
+      "mov",
+      "rax, qword ptr [rax]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680719,
+      "mov",
+      "r9, qword ptr [rax]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680722,
+      "mov",
+      "rcx, rbx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680725,
+      "call",
+      "r9"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680728,
+      "mov",
+      "rcx, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680731,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680734,
+      "je",
+      "0x1800381a7"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680736,
+      "mov",
+      "rax, qword ptr [rsi + 8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680740,
+      "mov",
+      "qword ptr [rcx], rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680743,
+      "mov",
+      "rsi, qword ptr [rsp + 0x30]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680748,
+      "mov",
+      "rax, rcx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680751,
+      "mov",
+      "rbx, qword ptr [rsp + 0x38]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680756,
+      "add",
+      "rsp, 0x20"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680760,
+      "pop",
+      "rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680761,
+      "ret",
+      ""
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680762,
+      "mov",
+      "rbx, qword ptr [rsp + 0x38]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680767,
+      "xor",
+      "eax, eax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680769,
+      "add",
+      "rsp, 0x20"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680773,
+      "pop",
+      "rdi"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680774,
+      "ret",
+      ""
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679952,
+      "mov",
+      "r8, qword ptr [rcx + 0x98]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679959,
+      "test",
+      "r8, r8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679962,
+      "je",
+      "0x180037ee5"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679964,
+      "cmp",
+      "edx, 0x3fff"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679970,
+      "ja",
+      "0x180037ee5"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679972,
+      "movsxd",
+      "rdx, edx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679975,
+      "mov",
+      "rax, rdx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679978,
+      "mov",
+      "rcx, rdx"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679981,
+      "sar",
+      "rax, 8"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679985,
+      "and",
+      "edx, 0xf"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679988,
+      "and",
+      "eax, 0x3f"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679991,
+      "sar",
+      "rcx, 4"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679995,
+      "and",
+      "ecx, 0xf"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442679998,
+      "mov",
+      "rax, qword ptr [r8 + rax*8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680002,
+      "mov",
+      "rax, qword ptr [rax + rcx*8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680006,
+      "mov",
+      "rax, qword ptr [rax + rdx*8]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680010,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680013,
+      "je",
+      "0x180037ee5"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680015,
+      "mov",
+      "rax, qword ptr [rax]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680018,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680021,
+      "je",
+      "0x180037ee5"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680023,
+      "mov",
+      "rax, qword ptr [rax + 0x18]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680027,
+      "test",
+      "rax, rax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680030,
+      "je",
+      "0x180037ee5"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680032,
+      "mov",
+      "rax, qword ptr [rax + 0x10]"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680036,
+      "ret",
+      ""
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680037,
+      "xor",
+      "eax, eax"
+    ],
+    [
+      "MyScriptEngine.dll",
+      6442680039,
+      "ret",
+      ""
+    ]
+  ],
+  "calls": {
+    "MyScriptInk.dll:180097c10": [
+      [
+        6443072579,
+        "r9"
+      ],
+      [
+        6443072591,
+        "r9"
+      ],
+      [
+        6443072673,
+        "r9"
+      ],
+      [
+        6443072741,
+        "r8"
+      ],
+      [
+        6443072805,
+        "r9"
+      ],
+      [
+        6443072829,
+        "r8"
+      ],
+      [
+        6443072877,
+        "0x1800d57e0"
+      ]
+    ],
+    "MyScriptInk.dll:180022bc0": [],
+    "MyScriptInk.dll:180090cf0": [
+      [
+        6443044138,
+        "rax"
+      ],
+      [
+        6443044146,
+        "rbx"
+      ],
+      [
+        6443044182,
+        "0x18008ddb0"
+      ],
+      [
+        6443044216,
+        "r8"
+      ],
+      [
+        6443044275,
+        "rax"
+      ],
+      [
+        6443044292,
+        "rbx"
+      ]
+    ],
+    "MyScriptEngine.dll:180001d90": [
+      [
+        6442458542,
+        "r8"
+      ],
+      [
+        6442458578,
+        "r8"
+      ],
+      [
+        6442458621,
+        "r8"
+      ],
+      [
+        6442458661,
+        "r8"
+      ],
+      [
+        6442458708,
+        "r8"
+      ],
+      [
+        6442458732,
+        "r8"
+      ],
+      [
+        6442458764,
+        "r8"
+      ],
+      [
+        6442458798,
+        "r9"
+      ],
+      [
+        6442458831,
+        "r8"
+      ],
+      [
+        6442458893,
+        "r10"
+      ]
+    ],
+    "MyScriptEngine.dll:180001f30": [],
+    "MyScriptEngine.dll:180001f40": [
+      [
+        6442459009,
+        "r8"
+      ],
+      [
+        6442459045,
+        "r8"
+      ],
+      [
+        6442459088,
+        "r8"
+      ],
+      [
+        6442459128,
+        "r8"
+      ],
+      [
+        6442459196,
+        "r8"
+      ],
+      [
+        6442459227,
+        "r10"
+      ],
+      [
+        6442459259,
+        "r8"
+      ],
+      [
+        6442459277,
+        "r9"
+      ],
+      [
+        6442459310,
+        "r8"
+      ],
+      [
+        6442459356,
+        "r10"
+      ]
+    ],
+    "MyScriptEngine.dll:180001160": [
+      [
+        6442455421,
+        "r8"
+      ],
+      [
+        6442455457,
+        "r8"
+      ],
+      [
+        6442455490,
+        "r8"
+      ],
+      [
+        6442455520,
+        "r8"
+      ],
+      [
+        6442455575,
+        "r10"
+      ],
+      [
+        6442455636,
+        "r10"
+      ]
+    ],
+    "MyScriptEngine.dll:180037dd0": [
+      [
+        6442679838,
+        "0x1800391a0"
+      ]
+    ],
+    "MyScriptEngine.dll:180038000": [],
+    "MyScriptEngine.dll:180038010": [],
+    "MyScriptEngine.dll:180038120": [
+      [
+        6442680655,
+        "rax"
+      ],
+      [
+        6442680666,
+        "0x180039130"
+      ],
+      [
+        6442680725,
+        "r9"
+      ]
+    ],
+    "MyScriptEngine.dll:180037e90": []
+  },
+  "bindings": [
+    [
+      "MyScriptInk.dll",
+      6443397448,
+      6443397072
+    ],
+    [
+      "MyScriptInk.dll",
+      6443397088,
+      6443397048
+    ],
+    [
+      "MyScriptInk.dll",
+      6443397048,
+      0
+    ],
+    [
+      "MyScriptInk.dll",
+      6443397056,
+      6443072528
+    ],
+    [
+      "MyScriptInk.dll",
+      6443397064,
+      6443071696
+    ],
+    [
+      "MyScriptInk.dll",
+      6443396216,
+      6443395800
+    ],
+    [
+      "MyScriptInk.dll",
+      6443395816,
+      6443396264
+    ],
+    [
+      "MyScriptInk.dll",
+      6443396224,
+      6443395456
+    ],
+    [
+      "MyScriptInk.dll",
+      6443395456,
+      6443044080
+    ],
+    [
+      "MyScriptEngine.dll",
+      6444398656,
+      6442679760
+    ],
+    [
+      "MyScriptEngine.dll",
+      6444398672,
+      6442679952
+    ],
+    [
+      "MyScriptEngine.dll",
+      6444398704,
+      6442680320
+    ],
+    [
+      "MyScriptEngine.dll",
+      6444398712,
+      6442680336
+    ],
+    [
+      "MyScriptEngine.dll",
+      6444398760,
+      6442680608
+    ],
+    [
+      "MyScriptEngine.dll",
+      6444398864,
+      6444398640
+    ]
+  ],
+  "exports": [
+    {
+      "path": "MyScriptInk.dll\\focused.c",
+      "sha256": "167577424f853089eff575a5adc557cbc7feb4080d46feb1b176fa49f6908fc8"
+    },
+    {
+      "path": "MyScriptInk.dll\\focused-refs.tsv",
+      "sha256": "3092bae18412bf8c82e51ac5d012cf1af24e91ff838a3ec53de2a018c49919ae"
+    },
+    {
+      "path": "MyScriptInk.dll-bodies.tsv",
+      "sha256": "8f6eed2755a0e24e041659f51afbe008e51fddd718a3e3092b9498d363b9ade6"
+    },
+    {
+      "path": "MyScriptEngine.dll\\focused.c",
+      "sha256": "3dbae9545bf44bfe145b0ab2cb27a05c54eca6d7c2112339a854653dd1794b86"
+    },
+    {
+      "path": "MyScriptEngine.dll\\focused-refs.tsv",
+      "sha256": "98e5894406b47a365137c854d5f935337f5c098e04ab913f0782c0a4bb15854a"
+    },
+    {
+      "path": "MyScriptEngine.dll-bodies.tsv",
+      "sha256": "41fd592dec95eaf851f3212536c2f22fb835f3bf3605449b7b02c513aa2bd164"
+    },
+    {
+      "path": "resolve\\MyScriptEngine.dll\\focused.c",
+      "sha256": "1be71920f22ee4f01d2b6c3af0ef1c7436cd914f383583da877a163d67ee56d4"
+    },
+    {
+      "path": "resolve\\MyScriptEngine.dll\\focused-refs.tsv",
+      "sha256": "dfddd8b32635d8008d7fa4c6b9fb7d027a746d5b36b1aeda48d6e73900c5ffc7"
+    },
+    {
+      "path": "resolve\\MyScriptEngine.dll-bodies.tsv",
+      "sha256": "7424dcc59ef4d3bbf2ad5a370a503d0f9d872fd0331e51a8ac3f5c15b7cfc440"
+    },
+    {
+      "path": "direct\\MyScriptEngine.dll\\focused.c",
+      "sha256": "a07995c723971b62f760fbf1e616f6d81227cef43943059dec0a7d820af65ab8"
+    },
+    {
+      "path": "direct\\MyScriptEngine.dll\\focused-refs.tsv",
+      "sha256": "0c98590ced9fe3afb8b649fe200caf2bd070f69e657ddb408891ae82de13c56d"
+    },
+    {
+      "path": "direct\\MyScriptEngine.dll-bodies.tsv",
+      "sha256": "0cd810b812577d6fa1972464fa174c2548689e58117891a366d4ea653b940910"
+    }
+  ],
+  "defaultSamplerProved": false,
+  "explicitCallerParametersRequired": true,
+  "vendorExecution": false
+}
