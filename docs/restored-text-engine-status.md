@@ -6,6 +6,13 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [public MathResultBuilder boundary](legacy-math2-public-builder-boundary.md)
+now pins the actual supplied-text/source-selection API through ED9 events into
+terminal DOM construction, and the common modern/typed result consumer.
+24 full bodies and3 separately counted return leaves are checked. The actual
+138D base belongs to MyScript2D; public13F0 callbacks are not its implementation
+table. This is static ownership evidence, not a new raw recognizer or parser.
+
 The [fixed blind Russian comparison](russian-blind-comparison-20261020.md)
 records261 unchanged one-track inputs: the full global path is136 exact words
 (52.11%,CER26.18%); raw first-stage and current experimental UI are both29
