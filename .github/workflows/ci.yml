@@ -3190,6 +3190,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native source-bound Math fresh temporary-field publisher failed.' }
           python -I tools/LegacyMathFreshPublisher.Probe/audit_output.py .artifacts/math-fresh-publisher-native.json models/math2/math2-unwrapped.res .artifacts/math-fresh-publisher-managed.json
           if ($LASTEXITCODE -ne 0) { throw 'Native source-bound Math fresh temporary-field publisher oracle failed.' }
+          dotnet run --project tools/LegacyMathOutgoingTransfer.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-outgoing-transfer-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed source-bound Math owning outgoing transfer failed.' }
+          python -I tools/LegacyMathOutgoingTransfer.Probe/audit_output.py .artifacts/math-outgoing-transfer-managed.json models/math2/math2-unwrapped.res
+          if ($LASTEXITCODE -ne 0) { throw 'Managed source-bound Math owning outgoing transfer oracle failed.' }
+          dotnet publish tools/LegacyMathOutgoingTransfer.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-outgoing-transfer-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Source-bound Math owning outgoing transfer probe publish failed.' }
+          $outgoingMathTransfer = if ($IsWindows) { '.artifacts/math-outgoing-transfer-probe/LegacyMathFreshPublisher.Probe.exe' } else { '.artifacts/math-outgoing-transfer-probe/LegacyMathFreshPublisher.Probe' }
+          & $outgoingMathTransfer .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-outgoing-transfer-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native source-bound Math owning outgoing transfer failed.' }
+          python -I tools/LegacyMathOutgoingTransfer.Probe/audit_output.py .artifacts/math-outgoing-transfer-native.json models/math2/math2-unwrapped.res .artifacts/math-outgoing-transfer-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native source-bound Math owning outgoing transfer oracle failed.' }
           dotnet run --project tools/LegacyMathCandidateRetention.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-candidate-retention-managed.json
           if ($LASTEXITCODE -ne 0) { throw 'Managed completed candidate retention failed.' }
           python tools/LegacyMathCandidateRetention.Probe/audit_output.py .artifacts/math-candidate-retention-managed.json

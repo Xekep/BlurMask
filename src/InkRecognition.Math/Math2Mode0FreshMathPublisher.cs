@@ -234,6 +234,25 @@ internal sealed class Math2Mode0FreshMathPublisher : IDisposable
         receipt.Validate(receipt.Copy,receipt.Field,token);
         lock(gate){ObjectDisposedException.ThrowIf(released,this);if(!complete||failed)throw new InvalidOperationException("Successful live Math temporary publication required.");return CopySnapshot();}
     }
+    //Trusted outgoing view. Receipt validation is OUTSIDE field/publisher gates;
+    //the actual pre-NN binding and copy are rechecked inside the field accessor.
+    internal T WithCompletedTransferInput<T>(Func<Math2Mode0OutgoingInput,T> consume,CancellationToken token=default)
+    {
+        receipt.Validate(receipt.Copy,receipt.Field,token);
+        return receipt.Field.WithFreshPublicationInput(receipt,input=>
+        {
+            lock(gate)
+            {
+                void Check(CancellationToken cancellation)
+                {input.Check(cancellation);ObjectDisposedException.ThrowIf(released,this);if(!complete||failed||headerLive)throw new InvalidOperationException("Completed live temporary publication required.");}
+                Check(token);
+                IEnumerable<Math2Mode0PublishNode> Nodes()
+                {foreach(var n in temporary.Nodes)yield return new(n.Id,n.Kind,n.Name.Text,n.Parent?.Id??0,n.Origin,n.Tag,n.Text,n.Number,n.Uri,n.Prefix);}
+                return consume(new(input,receipt.Field.OriginalInkIdentity,thirdInk,temporary.Names,
+                    temporary.Nodes.Count,Nodes,registry,next,reservation,Check));
+            }
+        },token);
+    }
     private void Cleanup(){if(cleanupCount!=0)return;cleanupCount=1;headerLive=false;outer?.Dispose();}
     public void Dispose(){lock(gate){if(released)return;released=true;Cleanup();}}
 }
