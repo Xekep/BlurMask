@@ -6,6 +6,16 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [English119 parent postprocessing](legacy-english119-parent-postprocessing.md)
+now owns actual249/24B/24A/24D/29B/EN265 processing:141 parents,152 guides,
+405 rows,6281 points and1040 guards, independently checked against the resource
+wire/numerical oracle and exact Managed/NativeAOT captures. Production retains
+only the latest completed snapshot; full history is an internal diagnostic
+policy admitted before reservation.141 final and7 failure-prefix comparisons
+prove the policies agree. This stops before source finalizers, main NN/English
+linguistic search and UI integration; it does not establish recognition quality.
+
+
 The [older structured Math search boundary](legacy-math-2d-search-boundary.md)
 pins18 full bodies and the actual06BBC0 to1F45 search dispatch. The outer
 processor owns configured resources; the separate CBD worker supplies request
