@@ -3228,6 +3228,19 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native source-bound Math original source and FIELD application failed.' }
           python -I tools/LegacyMathOriginalApplication.Probe/audit_output.py .artifacts/math-original-application-native.json models/math2/math2-unwrapped.res .artifacts/math-original-application-managed.json
           if ($LASTEXITCODE -ne 0) { throw 'Native source-bound Math original source and FIELD application oracle failed.' }
+          python tools/LegacyMathActualCorpus.Probe/generate_procedural.py .artifacts/math-actual-procedural
+          if ($LASTEXITCODE -ne 0) { throw 'Procedural math corpus generation failed.' }
+          dotnet run --project tools/LegacyMathActualCorpus.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-actual-corpus-managed.json .artifacts/math-actual-procedural/manifest.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed actual Math corpus failed.' }
+          python -I tools/LegacyMathActualCorpus.Probe/audit_output.py .artifacts/math-actual-corpus-managed.json models/math2/math2-unwrapped.res --procedural-only
+          if ($LASTEXITCODE -ne 0) { throw 'Managed actual Math corpus oracle failed.' }
+          dotnet publish tools/LegacyMathActualCorpus.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-actual-corpus-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Actual Math corpus publish failed.' }
+          $actualMathCorpus = if ($IsWindows) { '.artifacts/math-actual-corpus-probe/LegacyMathFreshPublisher.Probe.exe' } else { '.artifacts/math-actual-corpus-probe/LegacyMathFreshPublisher.Probe' }
+          & $actualMathCorpus .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-actual-corpus-native.json .artifacts/math-actual-procedural/manifest.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native actual Math corpus failed.' }
+          python -I tools/LegacyMathActualCorpus.Probe/audit_output.py .artifacts/math-actual-corpus-native.json models/math2/math2-unwrapped.res .artifacts/math-actual-corpus-managed.json --procedural-only
+          if ($LASTEXITCODE -ne 0) { throw 'Native actual Math corpus oracle failed.' }
           dotnet run --project tools/LegacyMathCandidateRetention.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-candidate-retention-managed.json
           if ($LASTEXITCODE -ne 0) { throw 'Managed completed candidate retention failed.' }
           python tools/LegacyMathCandidateRetention.Probe/audit_output.py .artifacts/math-candidate-retention-managed.json

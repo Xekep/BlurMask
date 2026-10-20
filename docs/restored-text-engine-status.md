@@ -6,6 +6,15 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [actual mathematical corpus diagnostic](legacy-math2-actual-raw-corpus.md)
+now checks31 coordinate inputs through93 genuine NN runs and620 exact AL
+records. The selected first procedural integral with equals reaches the existing
+local polynomial solver and returns333; without equals its requested answer
+remains absent. Arithmetic with equals returns3. Independent feature/AL/exact
+rational checks and Managed/NativeAOT agree. CI separately generates17 procedural
+inputs/51 runs; private licensed human inputs remain separate. This diagnostic
+does not calibrate acceptance confidence or replace the app's greedy recognizer.
+
 The [native-order global WORD/TEXT parent](legacy-global-word-text-runtime.md)
 now owns the actual one-alternative result around CHAR publication, separate
 original WORD/ordinary CHAR/TEXT memberships, document32/WORD48/link24 storage,
