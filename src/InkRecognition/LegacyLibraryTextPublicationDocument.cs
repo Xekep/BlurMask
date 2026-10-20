@@ -30,6 +30,8 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
     private LegacyLibraryOriginalInputPatchCompatibility? originalCompatibility;
     private LegacyLibraryTextDomPatchCompatibility? domCompatibility;
     private LegacyLibraryOriginalSourceApplication? originalSourceApplication;
+    private LegacyLibraryOriginalFieldDomPublication? originalFieldDom;
+    public LegacyLibraryOriginalFieldDomPublication? OriginalFieldDomPublication {get{lock(gate)return originalFieldDom;}}
     private LegacyLibraryTextPublicationDocumentSnapshot snapshot;
     public LegacyOwnedRawInkDocument Document=>scope.Document;
     public bool IsFaulted {get{lock(gate)return faulted;}}
@@ -157,6 +159,7 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
             if(registryReplay is not null&&!registryReplay.State.Succeeded)
                 throw new InvalidOperationException("A claimed selected-registry replay must succeed before this library DOM apply.");
             originalSourceApplication?.ValidateForLibraryApply(token);
+            if(originalFieldDom is not null&&!originalFieldDom.State.Succeeded)throw new InvalidOperationException("Publish original FIELD DOM before optional kind4 library target apply.");
             using var domOperation=EnterDomCompatibility(token);
             try{applied=target.ApplyPrepared(edit,failure,cancellation,token);Record("library-target-applied");return snapshot;}
             catch{faulted=true;snapshot=Capture();throw;}
@@ -193,6 +196,30 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
             if(!ReferenceEquals(actual,originalSourceApplication)||!ReferenceEquals(actual.Compatibility,originalCompatibility)||
                 !actual.Compatibility.State.IsReady)throw new InvalidOperationException("Exact claimed original source application required.");
             using var operation=EnterDomCompatibility(token);return action();
+        }
+    }
+    internal LegacyLibraryOriginalFieldDomPublication ClaimOriginalFieldDom(LegacyLibraryOriginalFieldDom owner,
+        LegacyLibraryOriginalSourceApplication application,CancellationToken token)
+    {
+        lock(gate)
+        {
+            Validate(token);ValidateRegistrySource(token);
+            if(originalFieldDom is not null||!ReferenceEquals(originalSourceApplication,application)||application.State.HasEntered)
+                throw new InvalidOperationException("One FIELD edit must be prepared before actual original source application.");
+            using var operation=EnterDomCompatibility(token);
+            var value=application.Owner.WithApplication(application,()=>owner.ClaimPublication(this,application,token),token);
+            originalFieldDom=value;return value;
+        }
+    }
+    internal T WithOriginalFieldDom<T>(LegacyLibraryOriginalFieldDomPublication actual,Func<T> action,CancellationToken token)
+    {
+        lock(gate)
+        {
+            Validate(token);ValidateRegistrySource(token);
+            if(!ReferenceEquals(originalFieldDom,actual)||!ReferenceEquals(originalSourceApplication,actual.SourceApplication))
+                throw new ArgumentException("Exact retained original FIELD/document/source receipt required.");
+            using var operation=EnterDomCompatibility(token);
+            return actual.SourceApplication.Owner.WithApplication(actual.SourceApplication,action,token);
         }
     }
     internal LegacyOwnedMainDetachedTextDom ActualDom=>dom??throw new InvalidOperationException("DOM construction has not entered.");

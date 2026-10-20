@@ -13,6 +13,8 @@ public sealed class LegacyLibraryOriginalSourceHistory : IDisposable
     private bool disposed;
     private LegacyLibraryOriginalSelectedFieldContext? selected;
     private LegacyLibraryOriginalSourceApplication? application;
+    private LegacyLibraryOriginalFieldDom? fieldDom;
+    public LegacyLibraryOriginalFieldDom? FieldDom {get{lock(gate)return fieldDom;}}
     private readonly LegacyLibraryOriginalSourceState initial;
     public LegacyLibraryOriginalTextFieldBootstrap Original {get;}
     public LegacyOwnedRawInkDocument Document=>Original.Document;
@@ -32,12 +34,23 @@ public sealed class LegacyLibraryOriginalSourceHistory : IDisposable
     public static LegacyLibraryOriginalSourceHistory Prepare(LegacyLibraryOriginalTextFieldBootstrap actualOriginal,
         CancellationToken token=default)
     {ArgumentNullException.ThrowIfNull(actualOriginal);return actualOriginal.ClaimSourceHistory(token);}
+    public LegacyLibraryOriginalFieldDom PrepareFieldDom(LegacyLibraryOriginalFieldSelection actualInput,
+        CancellationToken token=default)
+    {
+        lock(gate)
+        {
+            Validate(token);
+            if(selected is not null||fieldDom is not null)throw new InvalidOperationException("One original FIELD DOM owner must precede selected/NN construction.");
+            var value=new LegacyLibraryOriginalFieldDom(this,actualInput,token);fieldDom=value;return value;
+        }
+    }
     public LegacyLibraryOriginalSelectedFieldContext CreateSelectedInput(LegacyLibraryOriginalFieldSelection actualInput,
         CancellationToken token=default)
     {
         lock(gate)
         {
             Validate(token);if(selected is not null)throw new InvalidOperationException("One pre-NN worker selection per history lifetime.");
+            if(fieldDom is not null&&!ReferenceEquals(fieldDom.Input,actualInput))throw new ArgumentException("The pre-NN original DOM field must issue this exact INPUT.");
             var value=LegacyLibraryOriginalSelectedFieldContext.Prepare(Original,actualInput,token);selected=value;return value;
         }
     }
@@ -123,7 +136,7 @@ public sealed class LegacyLibraryOriginalSourceApplication
             foreach(int n in new[]{clone,observer,cancel})if(n < -1||n>=commands.Length)throw new ArgumentOutOfRangeException(nameof(clone));
             if((clone>=0&&commands[clone].Selection is null)||(observer>=0&&commands[observer].Selection is null))
                 throw new ArgumentException("Clone/history refusal requires an actual operation4.");
-            token.ThrowIfCancellationRequested();entered=true;kernel.Trace.Add("library-source-frame:begin");bool success=false;
+            token.ThrowIfCancellationRequested();Owner.FieldDom?.ValidateBeforeSourceRun(this,token);entered=true;kernel.Trace.Add("library-source-frame:begin");bool success=false;
             try
             {
                 for(int i=0;i<commands.Length;i++)
@@ -154,7 +167,7 @@ public sealed class LegacyLibraryOriginalSourceApplication
         {
             if(!entered||rollbackEntered||!kernel.JournalComplete)throw new InvalidOperationException("One complete generated inverse frame required.");
             if(cancel < -1||cancel>=kernel.Journal.Count)throw new ArgumentOutOfRangeException(nameof(cancel));
-            token.ThrowIfCancellationRequested();rollbackEntered=true;kernel.Recording=false;kernel.Trace.Add("rollback:recording0");
+            token.ThrowIfCancellationRequested();Owner.FieldDom?.ValidateSourceRollback(token);rollbackEntered=true;kernel.Recording=false;kernel.Trace.Add("rollback:recording0");
             try
             {
                 for(int i=kernel.Journal.Count-1;i>=0;i--)
