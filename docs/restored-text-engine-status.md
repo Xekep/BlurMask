@@ -6,6 +6,13 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [Math document representation boundary](legacy-math2-document-route-boundary.md)
+pins16 complete Document bodies and distinguishes modern raw sequence output,
+registered typed Math objects and the ED9/EDA event builder. SK is a configured
+knowledge attachment, not a legacy-engine discriminator. No actual raw-markup
+conversion edge into the typed event grammar has yet been established; this
+static proof adds no recognizer, confidence calibration or application switch.
+
 The [fresh global source indices](legacy-global-document-source-indices.md)
 now consume the genuine selected-source owner:11 ready owners retain44 actual
 typed CHAR/WORD sources and their raw memberships.189 guards,40 separate AVL
