@@ -33,6 +33,16 @@ public sealed class LegacyOrdinaryGraphSourceRanges
     public static LegacyOrdinaryGraphSourceRanges Prepare(LegacyOrdinaryCursiveSeedResult actualSeeds,
         LegacySourcePointChronology actualPreparedChronology, LegacyOrdinarySourceInk actualOriginalSource,
         int maximumAtoms, int maximumCandidates=131072, CancellationToken cancellationToken=default)
+        =>PrepareCore(actualSeeds,actualPreparedChronology,actualOriginalSource,maximumAtoms,maximumCandidates,null,cancellationToken);
+
+    internal static LegacyOrdinaryGraphSourceRanges PrepareBounded(LegacyOrdinaryCursiveSeedResult actualSeeds,
+        LegacySourcePointChronology actualPreparedChronology,LegacyOrdinarySourceInk actualOriginalSource,
+        int maximumAtoms,int maximumCandidates,LegacyOrdinaryGraphWorkBudget workBudget,CancellationToken cancellationToken=default)
+        =>PrepareCore(actualSeeds,actualPreparedChronology,actualOriginalSource,maximumAtoms,maximumCandidates,workBudget,cancellationToken);
+
+    private static LegacyOrdinaryGraphSourceRanges PrepareCore(LegacyOrdinaryCursiveSeedResult actualSeeds,
+        LegacySourcePointChronology actualPreparedChronology,LegacyOrdinarySourceInk actualOriginalSource,
+        int maximumAtoms,int maximumCandidates,LegacyOrdinaryGraphWorkBudget? workBudget,CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(actualSeeds);ArgumentNullException.ThrowIfNull(actualPreparedChronology);
         ArgumentNullException.ThrowIfNull(actualOriginalSource);cancellationToken.ThrowIfCancellationRequested();
@@ -47,9 +57,10 @@ public sealed class LegacyOrdinaryGraphSourceRanges
             if((uint)r.StrokeIndex>=(uint)counts.Length||r.StartPoint<0||r.EndPointExclusive<=r.StartPoint||r.EndPointExclusive>counts[r.StrokeIndex])
                 throw new ArgumentException("Actual seed range must address the supplied prepared source.");
         }
+        workBudget?.PreflightSeeds(actualSeeds,counts.Length);
         var seedGraph=actualSeeds.InsertionShift==0?LegacyOrdinaryCursiveSeedGraph.CreateShiftZero(actualSeeds,cancellationToken):
             LegacyOrdinaryCursiveSeedGraph.CreateOrdinaryDeferred(actualSeeds,cancellationToken);
-        var graph=LegacyOrdinaryCursiveCandidateGraph.Generate(actualSeeds,seedGraph,maximumAtoms,maximumCandidates,cancellationToken);
+        var graph=LegacyOrdinaryCursiveCandidateGraph.GenerateWithAllocations(actualSeeds,seedGraph,maximumAtoms,maximumCandidates,null,cancellationToken,workBudget);
         var keys=CopyOwnedKeyRecords(actualOriginalSource,cancellationToken);
         return new(actualSeeds,seedGraph,graph,actualPreparedChronology,actualOriginalSource,keys);
     }

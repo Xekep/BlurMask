@@ -6,6 +6,16 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [English finalized single-source/main108 local graph](legacy-english119-final-single-main-local.md)
+now completes134 actual-source parents and refuses7 active multiline parents,
+with5677 cut records,4 deferred seeds,4083 retained arcs and1267 guards.
+Root rebuilt Managed/NativeAOT captures and the independent raw/native audits
+agree. The internal bounded path checks seed context sets and graph growth before
+large allocations; old public/default paths retain their regression results.
+This is local input/candidates only: English LK/masks/mainNN/global append,
+multiline merge and linguistic publication remain unimplemented dependencies.
+
+
 The [older Math typed-candidate production boundary](legacy-math-typed-candidate-production.md)
 now pins39 complete functions,1199 instruction locations and38 bindings,
 including all297 grammar entries mapped to258 actual AK strings. Matched-root

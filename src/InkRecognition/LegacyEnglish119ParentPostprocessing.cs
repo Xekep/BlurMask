@@ -48,7 +48,7 @@ public sealed class LegacyEnglish119PostprocessingSnapshot
 
 /// <summary>NEW bounded actual EN parent249->24B->assigned24A->24D->29B->EN265.
 /// Stops before169C30/15D360/15D920/main inference. No supplied geometry/results.</summary>
-public sealed class LegacyEnglish119ParentPostprocessing
+public sealed partial class LegacyEnglish119ParentPostprocessing
 {
     private readonly object gate=new();
     private readonly LegacyOrdinarySourceInk original;

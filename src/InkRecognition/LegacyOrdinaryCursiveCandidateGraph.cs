@@ -38,7 +38,8 @@ public sealed class LegacyOrdinaryCursiveCandidateGraph
 
     internal static LegacyOrdinaryCursiveCandidateGraph GenerateWithAllocations(LegacyOrdinaryCursiveSeedResult source,
         LegacyOrdinaryCursiveSeedGraph seedGraph,int maximumAtoms,int maximumCandidates,
-        ILegacyOrdinaryGraphAllocations? allocations,CancellationToken cancellationToken=default)
+        ILegacyOrdinaryGraphAllocations? allocations,CancellationToken cancellationToken=default,
+        LegacyOrdinaryGraphWorkBudget? workBudget=null)
     {
         ArgumentNullException.ThrowIfNull(source); ArgumentNullException.ThrowIfNull(seedGraph);
         cancellationToken.ThrowIfCancellationRequested();
@@ -46,9 +47,16 @@ public sealed class LegacyOrdinaryCursiveCandidateGraph
             throw new ArgumentOutOfRangeException(nameof(maximumAtoms));
         var seeds = source.Seeds.ToArray();
         if (seeds.Length != seedGraph.NodeCount) throw new ArgumentException("Source seed ownership does not match the supplied graph.");
+        workBudget?.InitialGroups(seeds.Length);
         var inkGroups = seeds.Select((s, i) => new LegacyOrdinaryCursiveCandidateInk(i, new[] { i }, new[] { s.Atom.Range })).ToList();
         var mutable = new List<Arc>[seedGraph.NodeCount]; int candidateCount = seedGraph.ArcCount;
         if (candidateCount > maximumCandidates) throw new InvalidOperationException("Candidate graph exceeds its explicit budget.");
+        if(workBudget is not null)
+        {
+            long initialEdges=0;for(int node=0;node<seedGraph.NodeCount;node++)foreach(var arc in seedGraph.GetNode(node))
+            {cancellationToken.ThrowIfCancellationRequested();initialEdges=checked(initialEdges+arc.PredecessorArcIndices.Length+arc.SuccessorArcIndices.Length);}
+            workBudget.InitialEdges(initialEdges);
+        }
         for (int node = 0; node < mutable.Length; node++)
         {
             mutable[node] = [];
@@ -81,6 +89,7 @@ public sealed class LegacyOrdinaryCursiveCandidateGraph
                     if ((right.Flags & 2) != 0 || right.Span != 0)
                         throw new NotSupportedException("Checked ordinary merge requires an unsuppressed singleton right seed.");
                     var leftInk = inkGroups[left.Group]; var rightInk = inkGroups[right.Group];
+                    workBudget?.Composition(checked(leftInk.SeedGroupIndices.Length+rightInk.SeedGroupIndices.Length));
                     int[] ownedSeeds = leftInk.SeedGroupIndices.Span.ToArray().Concat(rightInk.SeedGroupIndices.Span.ToArray())
                         .OrderBy(i => seeds[i].Atom.Range.StrokeIndex).ThenBy(i => seeds[i].Atom.Range.StartPoint).ToArray();
                     if (ownedSeeds.Distinct().Count() != ownedSeeds.Length)
@@ -89,6 +98,7 @@ public sealed class LegacyOrdinaryCursiveCandidateGraph
                     string key = string.Join(";", ranges.Select(r => $"{r.StrokeIndex},{r.StartPoint},{r.EndPointExclusive}"));
                     if (!mergedIds.TryGetValue(key, out int groupId))
                     {
+                        workBudget?.Groups(ownedSeeds.Length,ranges.Length);
                         groupId = inkGroups.Count; mergedIds.Add(key, groupId);
                         inkGroups.Add(new(groupId, ownedSeeds, ranges));
                         allocations?.MergedGroup(groupId,left.Group,right.Group);
@@ -106,6 +116,7 @@ public sealed class LegacyOrdinaryCursiveCandidateGraph
                     if (++candidateCount > maximumCandidates)
                         throw new InvalidOperationException("Candidate graph exceeded its explicit merge budget.");
                     byte flags = (byte)((left.Flags & 0x1e) | ((left.Flags & right.Flags) & 1));
+                    workBudget?.MergedEdges(left.Predecessors.Count,rightSuccessors.Count);
                     var merged = new Arc(groupId, checked((byte)(left.Span + 1)), flags, left.StartId, right.EndId);
                     merged.Predecessors.AddRange(left.Predecessors); merged.Successors.Add(1, rightSuccessors.ToList());
                     int mergedOrdinal = mutable[rightNode].Count; mutable[rightNode].Add(merged);
@@ -123,6 +134,7 @@ public sealed class LegacyOrdinaryCursiveCandidateGraph
                         }
                 }
             }
+        workBudget?.FinalCopies(mutable.Length,inkGroups.Count,candidateCount);
         var result = mutable.Select(n => n.Select(a => new LegacyOrdinaryCursiveCandidateArc(a.Group, a.Span, a.Flags,
             a.StartId, a.EndId, a.Predecessors.ToArray(), Array.AsReadOnly(a.Successors.OrderBy(v => v.Key)
                 .SelectMany(v => v.Value.Select(i => new LegacyCursiveCandidateSuccessor(v.Key, i))).ToArray()))).ToArray()).ToArray();
