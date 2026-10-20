@@ -108,6 +108,28 @@ internal sealed class Math2Mode0OutgoingTransfer:IDisposable
     internal Math2Mode0TransferSnapshot CopyResult(CancellationToken token=default)
         =>publisher.WithCompletedTransferInput(input=>
         {lock(gate){ObjectDisposedException.ThrowIf(released,this);if(!complete||failed||!handedOff||pending is null||!ReferenceEquals(pending.ForwardDom,dom)||!ReferenceEquals(pending.Ink,source)||!ReferenceEquals(originalInk,input.OriginalInk)||!ReferenceEquals(selectedInk,input.Field.SelectedInk)||!ReferenceEquals(thirdInk,input.ThirdInk)||selectedField!=input.Field.FieldIdentity)throw new InvalidOperationException("Completed live owning outgoing transfer required.");return CopySnapshot();}},token);
+    internal T WithOriginalApplicationInput<T>(Math2Mode0OriginalMathFieldSource actualField,
+        Func<Math2Mode0OriginalInput,Math2Mode0OriginalTransferInput,T> action,CancellationToken token=default)
+        =>publisher.WithCompletedTransferInput(input=>
+        {
+            lock(gate)
+            {
+                void Check(CancellationToken cancellation)
+                {input.Check(cancellation);ObjectDisposedException.ThrowIf(released,this);if(!complete||failed||pending is null||dom is null||source is null||!ReferenceEquals(pending.ForwardDom,dom)||!ReferenceEquals(pending.Ink,source))throw new InvalidOperationException("Exact live owning transfer required.");}
+                Check(token);
+                //Compare BEFORE entering another field accessor: only the SAME
+                //already-held original source gate may be reentered here.
+                if(!ReferenceEquals(originalInk,actualField.OriginalInkIdentity))throw new ArgumentException("Foreign original Math source.");
+                return actualField.WithOriginalApplicationInput(this,originalInk,original=>action(original,
+                    new(this,dom!.Names,dom.Writer,dom.PayloadRoot,dom.Operation,dom.Path,dom.Ordinal,
+                        source!.Commands,reservation,Check)),token);
+            }
+        },token);
+    internal bool HasOriginalApplicationAccess(object actualOriginal)
+        =>Monitor.IsEntered(gate)&&!released&&complete&&!failed&&pending is not null&&
+            ReferenceEquals(originalInk,actualOriginal)&&ReferenceEquals(pending.ForwardDom,dom)&&ReferenceEquals(pending.Ink,source);
+    internal bool HasOriginalCommandAccess(Math2Mode0TransferCommand command)
+        =>Monitor.IsEntered(gate)&&source is not null&&source.Commands.Any(c=>ReferenceEquals(c,command));
     public void Dispose(){lock(gate){if(released)return;released=true;cleanupCount++;}}
 }
 

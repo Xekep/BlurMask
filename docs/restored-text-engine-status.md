@@ -6,6 +6,17 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [original Math source/FIELD library application](legacy-math2-original-library-application.md)
+now consumes that same completed outgoing owner, registers its actual detached
+commands in the original source, retains a separate generated inverse journal
+and applies the result to the original FIELD/PAGE. Historical constructor
+snapshots, selected and third registries remain unchanged. Six actual NN paths,
+138 forward/preflight/DOM and eight inverse failure prefixes,379 guards and six
+unsafe-observer cases pass independent checks with byte-identical Managed/AOT.
+Incomplete history blocks DOM entry; source-only rollback is unavailable after
+DOM entry. This is bounded library application, not native CBB/revision acceptance,
+nontrivial formula quality or an application recognizer switch.
+
 The [owning outgoing Math transfer](legacy-math2-outgoing-library-transfer.md)
 now consumes the completed temporary publisher and owns a fourth DOM arena,
 one field-relative insertion and detached source commands in actual signed-ID
@@ -13,8 +24,8 @@ order. Six actual NN outputs,64 injected throw/cancel prefixes and168 guards
 pass the independent numerical/tree/command oracle with byte-identical
 Managed/NativeAOT. Whole budgets precede payload copies and the single-use
 claim. Historical payload snapshots survive publisher disposal; live authority
-still requires its source. Original Math registry/DOM application and native
-page/revision acceptance remain separate.
+still requires its source. Original Math registry/DOM application is checked separately above; native
+page/revision acceptance remains absent.
 
 The [global CHAR source wrapper](legacy-global-text-source-wrapper-runtime.md)
 now retains the actual global scope, source metadata, pre-NN string pool and

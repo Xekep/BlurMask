@@ -244,6 +244,37 @@ internal sealed class Math2Mode0OriginalMathFieldSource : IDisposable
                 selectedInk.Next, entry.C22.Ranges, selectedInk, Check));
         }
     }
+    //Trusted original mutation view reached only through the exact completed
+    //outgoing owner while this SAME source gate is already held. No receipt
+    //validation is acquired here, and selected/pre-NN state stays untouched.
+    internal T WithOriginalApplicationInput<T>(Math2Mode0OutgoingTransfer actualTransfer,object expectedOriginal,
+        Func<Math2Mode0OriginalInput,T> action,CancellationToken token)
+    {
+        if(!Monitor.IsEntered(gate)||!actualTransfer.HasOriginalApplicationAccess(expectedOriginal))throw new ArgumentException("Completed outgoing access must already hold this same original field gate.");
+        lock(gate)
+        {
+            void Check(CancellationToken cancellation)
+            {cancellation.ThrowIfCancellationRequested();CheckScope();if(!complete||!sourcePrepared||!ReferenceEquals(expectedOriginal,originalInk)||!actualTransfer.HasOriginalApplicationAccess(originalInk))throw new ArgumentException("Actual prepared original source required.");}
+            Math2Mode0OriginalRegistry[] Read()=>originalInk.Registry.Values.OrderBy(e=>e.Id).Select(e=>
+                new Math2Mode0OriginalRegistry(e.Id,e.Name,e.Category,e.C22.Ranges,e,e.C22)).ToArray();
+            Math2Mode0OriginalSelection Clone(LegacyNativeInkPositionRange[] ranges)
+            {Check(token);var selection=new Selection(originalInk,ranges.ToArray());return new(originalInk,selection,selection.Ranges);}
+            Math2Mode0OriginalRegistry Register(Math2Mode0TransferCommand command,Math2Mode0OriginalSelection temporary)
+            {
+                Check(token);if(!actualTransfer.HasOriginalCommandAccess(command)||command.Operation!=4||command.Category!=102||command.Id<next||command.Name is not("MATH_SYMBOL"or"MATH_NODE")||!ReferenceEquals(temporary.Owner,originalInk)||temporary.Identity is not Selection candidate||!ReferenceEquals(candidate.Owner,originalInk)||!candidate.Ranges.SequenceEqual(command.Ranges)||originalInk.Registry.ContainsKey(command.Id))throw new ArgumentException("Actual fresh Math command/temporary C22 required.");
+                var canonical=originalInk.Registry.Values.Select(e=>e.C22).FirstOrDefault(c=>c.Ranges.SequenceEqual(candidate.Ranges))??candidate;
+                var entry=new RegistryEntry(command.Id,command.Name,102,originalInk,canonical);originalInk.Registry.Add(entry.Id,entry);
+                originalInk.Next=System.Math.Max(originalInk.Next,checked(entry.Id+1));
+                return new(entry.Id,entry.Name,entry.Category,entry.C22.Ranges,entry,entry.C22);
+            }
+            void Delete(long id,object expectedEntry)
+            {Check(token);if(id<next||!originalInk.Registry.TryGetValue(id,out var entry)||!ReferenceEquals(entry,expectedEntry))throw new ArgumentException("Only exact newly registered original entry can be reversed.");originalInk.Registry.Remove(id);}
+            Check(token);
+            return action(new(this,originalInk,OriginalNameOwner,original.AsReadOnly(),FieldId,tag,next,
+                originalC22??throw new InvalidOperationException("Original INPUT absent."),originalRanges,
+                Read,()=>originalInk.Next,Clone,Register,Delete,Check));
+        }
+    }
     private void CheckScope()
     { ObjectDisposedException.ThrowIf(closed, this); if (failed) throw new InvalidOperationException("Math source retains a failed prefix."); }
     internal void Fail(Binding binding)
