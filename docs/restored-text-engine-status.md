@@ -6,6 +6,14 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [fixed blind Russian comparison](russian-blind-comparison-20261020.md)
+records261 unchanged one-track inputs: the full global path is136 exact words
+(52.11%,CER26.18%); raw first-stage and current experimental UI are both29
+(11.11%,CER56.97%), with identical text. Four refusals remain in every denominator.
+This does not supersede the original-nine4/9 diagnostic or establish Russian
+readiness. The application still uses the first-stage adapter, not the full
+global path; no inference threshold or model parameter changed in this audit.
+
 The [Math document representation boundary](legacy-math2-document-route-boundary.md)
 pins16 complete Document bodies and distinguishes modern raw sequence output,
 registered typed Math objects and the ED9/EDA event builder. SK is a configured
