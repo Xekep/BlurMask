@@ -53,11 +53,13 @@ The root name in the descriptor is a name string, never a cloned subtree.
 
 New sequence/symbol and fallback metadata are built in the CB8-owned BCC.
 The initial old-tag scan uses the temporary field's old mathResult. V10 builds
-an edit between these distinct roots, temporaryBCC.V228 registers that edit,
+an edit between these distinct roots, temporaryBCC.V228 applies that edit,
 and ONLY THEN V40 resolves tags on the temporary field's replacement result.
-V48(false)/V50 follow. V230 releases edit registration on both success and
+V48(false)/V50 follow. V230 releases the remaining edit storage on both success and
 late failure paths. A detached list of caller tags does not provide this
-DOM/edit ownership. Mutating a candidate tree directly must be described as
+DOM/edit ownership. The exact payload cloning, application and cleanup are
+pinned in [the temporary patch proof](legacy-math2-temporary-patch-application.md).
+Mutating a candidate tree directly must be described as
 a library adaptation unless that patch path is actually implemented.
 
 ## Exact symbol and fallback schema

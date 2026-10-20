@@ -59,8 +59,10 @@ symbolSegmentList/symbolSegment/symbolCandidate/char plus mathTerminalNode
 metadata. The pinned literals include `nrs`, `name`, `ref` and `tag`; substituting
 guessed attribute names would change the schema.
 
-The final order is CB8.V10 patch construction, temporary BCC.V228 registration,
-CB8.V40, V48(false), V50, then release of that registration. Only afterward does
+The final order is CB8.V10 patch construction, temporary BCC.V228 application,
+CB8.V40, V48(false), V50, then V230 cleanup of the remaining edit storage.
+The [temporary patch proof](legacy-math2-temporary-patch-application.md) establishes
+that V228 really mutates the retained tree. Only afterward does
 the original DOM.V208 produce its edit, the original Ink.V178 produce its edit,
 and the supplied pending receiver.V18 receive both. Earlier failures skip this
 final handoff. The new BCC and temporary mathResult are cleaned up on exit.
