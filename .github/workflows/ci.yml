@@ -3132,6 +3132,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native source-bound Math outer symbols failed.' }
           python -I tools/LegacyMathOuterSymbols.Probe/audit_output.py .artifacts/math-outer-symbols-native.json models/math2/math2-unwrapped.res .artifacts/math-first-result-copy-native.json .artifacts/math-source-positions-native.json .artifacts/math-outer-symbols-managed.json
           if ($LASTEXITCODE -ne 0) { throw 'Native source-bound Math outer symbols oracle failed.' }
+          dotnet run --project tools/LegacyMathOriginalFieldSource.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-original-field-source-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed source-bound Math original field source failed.' }
+          python -I tools/LegacyMathOriginalFieldSource.Probe/audit_output.py .artifacts/math-original-field-source-managed.json models/math2/math2-unwrapped.res
+          if ($LASTEXITCODE -ne 0) { throw 'Managed source-bound Math original field source oracle failed.' }
+          dotnet publish tools/LegacyMathOriginalFieldSource.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-original-field-source-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Source-bound Math original field source probe publish failed.' }
+          $originalFieldSource = if ($IsWindows) { '.artifacts/math-original-field-source-probe/LegacyMathOriginalFieldSource.Probe.exe' } else { '.artifacts/math-original-field-source-probe/LegacyMathOriginalFieldSource.Probe' }
+          & $originalFieldSource .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-original-field-source-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native source-bound Math original field source failed.' }
+          python -I tools/LegacyMathOriginalFieldSource.Probe/audit_output.py .artifacts/math-original-field-source-native.json models/math2/math2-unwrapped.res .artifacts/math-original-field-source-managed.json .artifacts/math-source-positions-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native source-bound Math original field source oracle failed.' }
           dotnet run --project tools/LegacyMathCandidateRetention.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-candidate-retention-managed.json
           if ($LASTEXITCODE -ne 0) { throw 'Managed completed candidate retention failed.' }
           python tools/LegacyMathCandidateRetention.Probe/audit_output.py .artifacts/math-candidate-retention-managed.json

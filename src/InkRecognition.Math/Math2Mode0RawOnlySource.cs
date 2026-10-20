@@ -12,6 +12,7 @@ internal sealed class Math2Mode0RawOnlySource : IDisposable
     private readonly object gate = new();
     private readonly object factory = Factory;
     private readonly long[] strokeEnds;
+    private readonly Math2Mode0OriginalMathFieldSource.Binding? selectedField;
     private bool disposed;
     private Math2Mode0RawAttentionHistory? history;
     private Math2Mode0InitiallyOrderedCompleted? ordered;
@@ -25,8 +26,9 @@ internal sealed class Math2Mode0RawOnlySource : IDisposable
 
     private Math2Mode0RawOnlySource(Math2Mode0ColdRecordingLoop loop,
         Math2Mode0RawOnlyEf4Policy policy, int frames, long[] ownedEnds,
-        Math2Mode0RawSourcePositions? sourcePositions = null)
-    { Loop = loop; Policy = policy; InputFrameCount = frames; strokeEnds = ownedEnds; this.sourcePositions = sourcePositions; }
+        Math2Mode0RawSourcePositions? sourcePositions = null,
+        Math2Mode0OriginalMathFieldSource.Binding? selectedField = null)
+    { Loop = loop; Policy = policy; InputFrameCount = frames; strokeEnds = ownedEnds; this.sourcePositions = sourcePositions; this.selectedField = selectedField; }
 
     internal static Math2Mode0RawOnlySource PrepareColdDefault(OrtRuntime runtime,
         Math2Mode0ColdBundle bundle, OrtRun run, IReadOnlyList<InkStroke> strokes,
@@ -47,34 +49,75 @@ internal sealed class Math2Mode0RawOnlySource : IDisposable
         int width, CancellationToken token = default)
         => PrepareCore(runtime, bundle, run, strokes, width, true, token);
 
+    internal static Math2Mode0RawOnlySource PrepareColdWithSelectedMathField(OrtRuntime runtime,
+        Math2Mode0ColdBundle bundle, OrtRun run, Math2Mode0OriginalMathFieldSource actualField,
+        CancellationToken token = default)
+    {
+        ArgumentNullException.ThrowIfNull(actualField);
+        return PrepareCore(runtime, bundle, run, actualField.Document.Strokes, null, true, actualField, token);
+    }
     private static Math2Mode0RawOnlySource PrepareCore(OrtRuntime runtime,
         Math2Mode0ColdBundle bundle, OrtRun run, IReadOnlyList<InkStroke> strokes,
         int? width, bool sourceBound, CancellationToken token)
+        => PrepareCore(runtime, bundle, run, strokes, width, sourceBound, null, token);
+
+    private static Math2Mode0RawOnlySource PrepareCore(OrtRuntime runtime,
+        Math2Mode0ColdBundle bundle, OrtRun run, IReadOnlyList<InkStroke> strokes,
+        int? width, bool sourceBound, Math2Mode0OriginalMathFieldSource? actualField, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(runtime); ArgumentNullException.ThrowIfNull(run);
         ArgumentNullException.ThrowIfNull(strokes); token.ThrowIfCancellationRequested();
         var policy = Math2Mode0RawOnlyEf4Policy.Bind(bundle);
         if (width is < 1 or > 16) throw new ArgumentOutOfRangeException(nameof(width));
         MathFeatures features; Math2Mode0RawSourcePositions? positions = null;
-        if (sourceBound)
+        Math2Mode0OriginalMathFieldSource.Binding? field = null;
+        if (actualField != null)
         {
-            // Metadata is checked before cloning or feature/NN preparation.
-            var prepared = Math2Mode0RawSourcePositions.PrepareFeatures(strokes, token);
-            features = prepared.Features; positions = prepared.Positions; positions.ValidateFeatures(features);
+            //Metadata envelope before claim; shared Document XY/positions is
+            //reserved once by the existing source-position owner. No NN yet.
+            long raw = actualField.Document.Strokes.Sum(s => (long)s.Points.Count);
+            long upper = checked(actualField.AdditionalPayloadReservation + raw * 8 + MathPreprocessor.MaxFrames * 8L +
+                actualField.Document.ObjectCount * 128L + 32);
+            if (upper > Math2Mode0SourceBoundOutput.DefaultPayloadBudget)
+                throw new NotSupportedException("Combined Math field/source-position payload exceeds budget before inference claim.");
+            field = actualField.ClaimForInference(token);
         }
-        else features = MathPreprocessor.Process(strokes);
-        if (features.Frames < 1) throw new ArgumentException("Nonempty raw pen input required.");
-        using var source = runtime.Tensor(features.Values, features.Frames, 1, 26);
-        using var downsampling = runtime.Tensor(Enumerable.Repeat(1L, features.Frames).ToArray(), features.Frames, 1);
-        using var ends = runtime.Tensor(features.StrokeEnds, 1, features.StrokeEnds.Length);
-        token.ThrowIfCancellationRequested();
-        var loop = width.HasValue
-            ? Math2Mode0ColdRecordingLoop.PrepareWithPreparedPolicy(bundle, run, source, downsampling, ends,
-                width.Value, 1f, 1000f, token)
-            : Math2Mode0ColdRecordingLoop.PrepareColdDefault(bundle, run, source, downsampling, ends, token);
-        try { return new(loop, policy, features.Frames, features.StrokeEnds.ToArray(), positions); }
-        catch { loop.Dispose(); throw; }
+        try
+        {
+            if (sourceBound)
+            {
+                // Metadata is checked before cloning or feature/NN preparation.
+                var prepared = field == null ? Math2Mode0RawSourcePositions.PrepareFeatures(strokes, token)
+                    : Math2Mode0RawSourcePositions.PrepareFeatures(field.Document, token, field);
+                features = prepared.Features; positions = prepared.Positions; positions.ValidateFeatures(features);
+            }
+            else features = MathPreprocessor.Process(strokes);
+            if (features.Frames < 1) throw new ArgumentException("Nonempty raw pen input required.");
+            field?.Validate(field.Owner, token);
+            using var source = runtime.Tensor(features.Values, features.Frames, 1, 26);
+            using var downsampling = runtime.Tensor(Enumerable.Repeat(1L, features.Frames).ToArray(), features.Frames, 1);
+            using var ends = runtime.Tensor(features.StrokeEnds, 1, features.StrokeEnds.Length);
+            token.ThrowIfCancellationRequested();
+            var loop = width.HasValue
+                ? Math2Mode0ColdRecordingLoop.PrepareWithPreparedPolicy(bundle, run, source, downsampling, ends,
+                    width.Value, 1f, 1000f, token)
+                : Math2Mode0ColdRecordingLoop.PrepareColdDefault(bundle, run, source, downsampling, ends, token);
+            try
+            {
+                var result = new Math2Mode0RawOnlySource(loop, policy, features.Frames, features.StrokeEnds.ToArray(), positions, field);
+                if (field != null) actualField!.SourcePrepared(field);
+                return result;
+            }
+            catch { loop.Dispose(); throw; }
+        }
+        catch { if (field != null) actualField!.Fail(field); throw; }
     }
+    internal Math2Mode0OriginalMathFieldSource.Binding ReadSelectedMathField(Math2Mode0OriginalMathFieldSource actualField)
+        => WithOwner(() =>
+        {
+            var field = selectedField ?? throw new NotSupportedException("This source has no selected Math field provenance.");
+            field.Validate(actualField); field.ValidatePrepared(); return field;
+        });
 
     internal void RunToInitialOrder(CancellationToken token = default)
     {
@@ -125,6 +168,7 @@ internal sealed class Math2Mode0RawOnlySource : IDisposable
     private void Check()
     {
         ObjectDisposedException.ThrowIf(disposed, this);
+        selectedField?.ValidatePrepared();
         if (!ReferenceEquals(factory, Factory)) throw new ArgumentException("Foreign raw source factory.");
     }
     // Detached raw input metadata is inspection, not a replacement-source API.

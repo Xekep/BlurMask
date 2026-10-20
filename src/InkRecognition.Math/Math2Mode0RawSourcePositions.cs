@@ -31,7 +31,7 @@ internal sealed class Math2Mode0RawSourcePositions
 {
     internal LegacyOwnedRawInkDocument Document { get; }
     internal int InputFrameCount { get; }
-    internal long PayloadReservation { get; }
+    internal long PayloadReservation { get; private set; }
     private readonly LegacyNativeInkPositionSnapshot snapshot;
     private readonly int[] sourceOrder;
     private readonly WeakReference<MathFeatures> featureLease;
@@ -53,6 +53,31 @@ internal sealed class Math2Mode0RawSourcePositions
     internal static (MathFeatures Features, Math2Mode0RawSourcePositions Positions) PrepareFeatures(
         IReadOnlyList<InkStroke> strokes, CancellationToken token)
     {
+        ValidateStrokes(strokes, token);
+        var document = LegacyOwnedRawInkDocument.Create(strokes, token);
+        return MathPreprocessor.ProcessWithSourcePositions(document, token);
+    }
+    internal static (MathFeatures Features, Math2Mode0RawSourcePositions Positions) PrepareFeatures(
+        LegacyOwnedRawInkDocument actualDocument, CancellationToken token,
+        Math2Mode0OriginalMathFieldSource.Binding? actualField = null)
+    {
+        ValidateDocument(actualDocument, token);
+        if (actualField != null)
+        {
+            actualField.Validate(actualField.Owner, token);
+            if (!ReferenceEquals(actualDocument, actualField.Document)) throw new ArgumentException("Exact Math field Document required.");
+        }
+        var prepared = MathPreprocessor.ProcessWithSourcePositions(actualDocument, token);
+        if (actualField != null)
+            prepared.Positions.PayloadReservation = checked(prepared.Positions.PayloadReservation + actualField.AdditionalPayloadReservation);
+        return prepared;
+    }
+    internal static void ValidateDocument(LegacyOwnedRawInkDocument actualDocument, CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(actualDocument); ValidateStrokes(actualDocument.Strokes, token);
+    }
+    private static void ValidateStrokes(IReadOnlyList<InkStroke> strokes, CancellationToken token)
+    {
         ArgumentNullException.ThrowIfNull(strokes); token.ThrowIfCancellationRequested();
         if (strokes.Count is < 1 or > 256) throw new ArgumentException("One to256 original raw source objects required.");
         int count = 0;
@@ -67,8 +92,6 @@ internal sealed class Math2Mode0RawSourcePositions
                 if (!float.IsFinite(point.X) || !float.IsFinite(point.Y) || MathF.Abs(point.X) > 100000 || MathF.Abs(point.Y) > 100000)
                     throw new ArgumentException("Finite bounded original raw source points required.");
         }
-        var document = LegacyOwnedRawInkDocument.Create(strokes, token);
-        return MathPreprocessor.ProcessWithSourcePositions(document, token);
     }
 
     internal sealed class Builder
