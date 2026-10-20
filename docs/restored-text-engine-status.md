@@ -6,6 +6,15 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [older Math typed-candidate production boundary](legacy-math-typed-candidate-production.md)
+now pins39 complete functions,1199 instruction locations and38 bindings,
+including all297 grammar entries mapped to258 actual AK strings. Matched-root
+terminal/nonterminal construction, two fractional source vectors and selected
+candidate movement are distinguished from the separate13EC normalized clone.
+That clone's mandatory seven ordered calls remain untransferred, as do learned
+AK operators, matching and request admission. No application-ready tree is claimed.
+
+
 The [older Math resource codecs](legacy-math-resource-codecs.md) and
 [complete actual child serialization](legacy-math-grammar-child-codecs.md)
 now account for26 rules/53 children/18 classes,297 set entries and205 recursive
