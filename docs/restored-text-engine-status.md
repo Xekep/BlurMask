@@ -6,6 +6,14 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [original global raw/cropped point views](legacy-global-ordinary-cropped-source.md)
+now derive actual C49/C4A/C4B numeric semantics from the same original raw document
+and genuine CHAR/WORD ranges.13 sources yield54 views/3014 exact XY points,
+including12 fractional views, with217 guards and Managed/NativeAOT parity.
+The independent oracle starts from committed original coordinates and audited
+range keys. Counter-only failed transactions revoke live use. These point views
+do not implement2DB boundaries,238B0 source mutation or improve OCR quality.
+
 The [owning experimental Math structural adapter](legacy-math2-experimental-structural-adapter.md)
 now exposes a reusable public cold1 owner and detached first-record token/range
 evidence, strict bounded syntax and an explicit equals-gated calculation helper.
