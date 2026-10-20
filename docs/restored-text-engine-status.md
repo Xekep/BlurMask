@@ -6,6 +6,15 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [older Math normalized-clone stage](legacy-math-normalized-clone.md)
+now has a checked static description of its seven ordered structural passes,
+class-specific deep copies, adoption/scratch lifetimes and conditional cache
+reset.91 complete function regions plus separately labelled leaves/thunk/API
+extent are pinned. Table coordinates are distinguished from font metrics.
+This is static analysis only: owning runtime normalization, actual source/request
+admission, learned AK operators, matching and final acceptance remain open.
+
+
 The [English finalized single-source/main108 local graph](legacy-english119-final-single-main-local.md)
 now completes134 actual-source parents and refuses7 active multiline parents,
 with5677 cut records,4 deferred seeds,4083 retained arcs and1267 guards.
