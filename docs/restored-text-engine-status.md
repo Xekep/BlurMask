@@ -6,6 +6,12 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [typed terminal storage proof](legacy-math2-typed-terminal-storage.md)
+now traces real138D/1F44 ownership, candidate/symbol buffers and character-byte
+access:18 full bodies plus10 separately counted return leaves. These routines
+copy supplied state; they are not a hidden neural grammar or font-sizing model.
+Candidate-array producers and complete search remain separate work.
+
 The [genuine global INPUT transform handoff](legacy-global-input-transforms.md)
 now retains the exact pre-NN original-selected Seed through037E80 and026EF0.
 11 actual owners resolve11 identity matrices, then exclude them; the real
