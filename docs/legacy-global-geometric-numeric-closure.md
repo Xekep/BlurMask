@@ -113,3 +113,14 @@ Managed/NativeAOT parity.43 exported bodies are not43 implemented algorithms.
 
 238B0/234D0/339E0/36630 source-membership mutations, the parent's independent
 global document bridge and original acceptance remain outside this batch.
+
+## Separately checked raw crop leaf receivers
+
+Root review additionally resolves the actual raw C49 runtime V20/V28 calls made
+inside0914E0. They use the C49 runtime table65B0, distinct from the C1E service
+table6980. V20=052740 returns the identical object. V28=08E000 only changes a
+crop end of minus-one to the stored point count minus-one; it performs no hidden
+coordinate normalization or interpolation. The separate
+`audit_global_raw_crop_leaf_dispatch.py` checks both bindings and all nine
+ret-terminated leaf instructions. Those leaf extents are labelled explicitly,
+not presented as additional complete Ghidra body exports.
