@@ -6,6 +6,13 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [genuine global023260 no-control cleanup](legacy-global-control-cleanup.md)
+now follows both actual index passes:11 ready owners/33 CHAR/72 full records,
+178 guards and exact Managed/NativeAOT parity. WORD row flags precede the
+aggregate clear and complete CHAR insertion traversal. Five cancellation prefixes
+and two late lifetime invalidations poison entered attempts. Active control
+services, subsequent transforms, DOM acceptance and OCR quality remain separate.
+
 The [public MathResultBuilder boundary](legacy-math2-public-builder-boundary.md)
 now pins the actual supplied-text/source-selection API through ED9 events into
 terminal DOM construction, and the common modern/typed result consumer.
