@@ -30,10 +30,21 @@ public sealed class LegacyLibraryOriginalTextFieldBootstrap
     private Node? pendingField, retainedField;
     private LegacyLibraryOriginalInkSelection? retainedSelection;
     private LegacyLibraryOriginalTextFieldBootstrapState state;
+    private LegacyLibraryOriginalSourceHistory? sourceHistory;
     public LegacyFreshRawInkCurrentView CurrentView { get; }
     public LegacyOwnedRawInkDocument Document => CurrentView.Document;
     public LegacyLibraryOriginalDomNameOwner NameOwner { get; } = new();
     public LegacyLibraryOriginalTextFieldBootstrapState State { get { lock (gate) return state; } }
+    public LegacyLibraryOriginalSourceHistory? SourceHistory { get { lock(gate)return sourceHistory; } }
+    internal LegacyLibraryOriginalSourceHistory ClaimSourceHistory(CancellationToken token)
+    {
+        lock(gate)
+        {
+            token.ThrowIfCancellationRequested();
+            if(sourceHistory is not null)throw new InvalidOperationException("This original bootstrap already retains its source history.");
+            var value=new LegacyLibraryOriginalSourceHistory(this);sourceHistory=value;return value;
+        }
+    }
     public IReadOnlyList<string> FieldIds => Array.AsReadOnly(ids.ToArray());
     private LegacyLibraryOriginalTextFieldBootstrap(LegacyFreshRawInkCurrentView view, string[] ids)
     {

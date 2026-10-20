@@ -29,6 +29,7 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
     private LegacyLibrarySelectedInputRegistryReplay? registryReplay;
     private LegacyLibraryOriginalInputPatchCompatibility? originalCompatibility;
     private LegacyLibraryTextDomPatchCompatibility? domCompatibility;
+    private LegacyLibraryOriginalSourceApplication? originalSourceApplication;
     private LegacyLibraryTextPublicationDocumentSnapshot snapshot;
     public LegacyOwnedRawInkDocument Document=>scope.Document;
     public bool IsFaulted {get{lock(gate)return faulted;}}
@@ -37,6 +38,7 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
     public LegacyLibrarySelectedInputRegistryReplay? SelectedRegistryReplay {get{lock(gate)return registryReplay;}}
     public LegacyLibraryOriginalInputPatchCompatibility? OriginalPatchCompatibility {get{lock(gate)return originalCompatibility;}}
     public LegacyLibraryTextDomPatchCompatibility? DomPatchCompatibility {get{lock(gate)return domCompatibility;}}
+    public LegacyLibraryOriginalSourceApplication? OriginalSourceApplication {get{lock(gate)return originalSourceApplication;}}
     public LegacyLibraryTextPublicationDocumentSnapshot Snapshot {get{lock(gate)return snapshot;}}
 
     private LegacyLibraryTextPublicationDocument(LegacyLibraryTextPublicationScope scope,
@@ -154,6 +156,7 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
                 throw new InvalidOperationException("One successfully transported unapplied edit required.");
             if(registryReplay is not null&&!registryReplay.State.Succeeded)
                 throw new InvalidOperationException("A claimed selected-registry replay must succeed before this library DOM apply.");
+            originalSourceApplication?.ValidateForLibraryApply(token);
             using var domOperation=EnterDomCompatibility(token);
             try{applied=target.ApplyPrepared(edit,failure,cancellation,token);Record("library-target-applied");return snapshot;}
             catch{faulted=true;snapshot=Capture();throw;}
@@ -169,6 +172,29 @@ public sealed class LegacyLibraryTextPublicationDocument : IDisposable
         row?.CopyScalarStorage40(),applied is not null,scope.Context.Result.CopyIdentifier38(),
         words.Owner.SelectionContext.CopyPendingCommands().Select(c=>new LegacyLibraryTextPublicationCommandSnapshot(c)).ToArray());
     internal LegacyFreshMainSourceRangeUtf8 ActualSources=>sources??throw new InvalidOperationException("Source formatting has not completed.");
+    internal LegacyLibraryOriginalSourceApplication ClaimOriginalSourceApplication(LegacyLibraryOriginalSourceHistory history,
+        LegacyLibraryOriginalInputPatchCompatibility compatibility,CancellationToken token)
+    {
+        lock(gate)
+        {
+            Validate(token);ValidateRegistrySource(token);
+            if(originalSourceApplication is not null||!ReferenceEquals(compatibility,originalCompatibility)||
+                !ReferenceEquals(compatibility.Replay,registryReplay)||registryReplay.HasEntered||!compatibility.State.IsReady)
+                throw new InvalidOperationException("One actual ready original preflight before registry entry required.");
+            using var operation=EnterDomCompatibility(token);
+            var value=history.ClaimApplication(this,compatibility,token);originalSourceApplication=value;return value;
+        }
+    }
+    internal T WithOriginalSourceApplication<T>(LegacyLibraryOriginalSourceApplication actual,Func<T> action,CancellationToken token)
+    {
+        lock(gate)
+        {
+            Validate(token);ValidateRegistrySource(token);
+            if(!ReferenceEquals(actual,originalSourceApplication)||!ReferenceEquals(actual.Compatibility,originalCompatibility)||
+                !actual.Compatibility.State.IsReady)throw new InvalidOperationException("Exact claimed original source application required.");
+            using var operation=EnterDomCompatibility(token);return action();
+        }
+    }
     internal LegacyOwnedMainDetachedTextDom ActualDom=>dom??throw new InvalidOperationException("DOM construction has not entered.");
     internal LegacyLibraryTextDomTransportRow? ActualTransportRow=>row;
     internal LegacyLibraryTextDomTarget? ActualTarget=>target;
