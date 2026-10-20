@@ -6,6 +6,26 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [global CHAR source wrapper](legacy-global-text-source-wrapper-runtime.md)
+now retains the actual global scope, source metadata, pre-NN string pool and
+INPUT transaction through refresh, range processing, exact interning and CHAR
+registration. Thirteen actual inputs produce37 processed keys and80 UTF8 rows;
+115 guards and four separately prepared registration-refusal prefixes pass
+independent portable oracles and fresh Managed/NativeAOT. Old public choices
+and numeric reuse remain unchanged. These inputs do not naturally exercise
+duplicate keys or overlap branches. Global WORD/TEXT and document acceptance
+remain separate; this does not improve the recorded Russian quality result.
+
+The [English119 source-record owner](legacy-english119-source-records.md)
+preserves exact raw coordinates before deduplication and owns the preparation
+used by its actual rich result. It traverses all ordered WORDs against that
+same pool, graph and sampler108, preserving the loaded249 exponent0.75.
+An independent raw-resource/geometry oracle verifies all225360 output bytes
+for132 inputs and313 source720 rows;717 guards and fresh Managed/NativeAOT
+pass. Old English and Russian captures remain unchanged. This direct-child
+identity-map scope does not restore native parent filtering, flat-stroke
+override, append/reset or application integration.
+
 The [original FIELD DOM publication](legacy-library-original-field-dom-publication.md) now applies
 the actual text result into the retained original PAGE and field after its
 source registrations succeed. INPUT and sibling fields remain intact. Twenty
@@ -40,8 +60,7 @@ session and emits UTF8 through the actual acoustic alphabet. Eight sources,
 12 owners,24 appended rows,1440 complete pool bytes and92 guards pass an
 independent resource/geometry/prefix oracle with byte-identical Managed and
 NativeAOT captures. Old ordinary/configured/emission captures remain unchanged.
-Global source-rich CHAR/WORD/TEXT publication and quality evaluation remain
-separate.
+Global WORD/TEXT publication and quality evaluation remain separate.
 
 The [live global glyph choices](legacy-global-text-glyph-choices.md) now join
 that same scope and completed source to all-owner refresh, actual alternative
@@ -52,7 +71,7 @@ raw-resource oracle. One immutable input map is shared across glyphs, and direct
 string access after scope close is checked for all13 inputs. The nine
 [attributed coordinate fixtures](../tools/test-data/russian-recorded-words/README.md)
 are now tracked for offline CI; expected labels do not enter recognition.
-Russian quality remains4/9 exact,16/33 character edits. Source-node publication,
+Russian quality remains4/9 exact,16/33 character edits. WORD/TEXT publication,
 document acceptance and application replacement are still separate.
 
 The [original Math field source](legacy-math2-owned-original-field-source.md)
@@ -266,7 +285,7 @@ registry checks and fresh NativeAOT. The selected worker's bare reader context
 is explicitly null; it is not relabeled as the original page context. The
 original-page DOM/revision/acceptance join remains under development.
 
-The exact committed app at70f58d5 builds with0 warnings and passes headless
+The exact committed app at1587914 builds with0 warnings and passes headless
 `--ai-pen-test`. Russian diagnostics remain4/9 exact with16/33 character edits;
 no new release or full-engine readiness is asserted. The new
 [recorded error evidence](russian-recorded-error-evidence.md) traces actual
