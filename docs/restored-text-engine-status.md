@@ -6,6 +6,16 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [native-order global WORD/TEXT parent](legacy-global-word-text-runtime.md)
+now owns the actual one-alternative result around CHAR publication, separate
+original WORD/ordinary CHAR/TEXT memberships, document32/WORD48/link24 storage,
+guide56 and pending registrations.13 actual sources produce37 links and63
+commands;190 guards,13 failure paths and deterministic reservation interleavings
+pass independent raw-model/prefix checks and byte-identical Managed/NativeAOT.
+Direct child entrypoints cannot bypass the parent reservation. MIR/II retain
+unequal WORD/TEXT coverage and still require the missing238B0 geometric branch;
+document/DOM adoption and Russian quality are not completed by this batch.
+
 The [fresh English119 native parent](legacy-english119-parent-source-records.md)
 now owns actual EN ingress, source scale,2E3 grouping, descriptor split/physical
 order, filtered pre-NN child maps and first249 source720 publication.137 raw

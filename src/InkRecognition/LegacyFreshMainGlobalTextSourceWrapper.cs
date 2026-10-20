@@ -27,6 +27,7 @@ public sealed class LegacyFreshMainGlobalTextSourceWrapper
     private bool entered,firstPassComplete,faulted,completed;
     private int nextSelection;
     private int lineOffset;
+    private LegacyFreshMainGlobalWordTextPublication? reservedWordParent;
     public LegacyFreshMainGlobalTextGlyphChoices Choices{get;}
     public LegacyLibraryGlobalTextPublicationScope Scope=>Choices.Scope;
     public LegacyFreshMainGlobalNoCandidateSourceCompletion Completion=>Choices.Completion;
@@ -130,18 +131,47 @@ public sealed class LegacyFreshMainGlobalTextSourceWrapper
     }
     public LegacyFreshMainGlobalTextSourceWord Publish(ReadOnlySpan<byte> allocator40,ReadOnlySpan<byte> selection4,CancellationToken token=default)
         =>PublishCore(allocator40,selection4,0,token);
-    internal LegacyFreshMainGlobalTextSourceWord PublishPreparedCharFailure(ReadOnlySpan<byte> allocator40,
-        ReadOnlySpan<byte> selection4,int failure,CancellationToken token=default)
-    {if(failure is<1 or>4)throw new ArgumentOutOfRangeException(nameof(failure));return PublishCore(allocator40,selection4,failure,token);}
-    private LegacyFreshMainGlobalTextSourceWord PublishCore(ReadOnlySpan<byte> allocator40,ReadOnlySpan<byte> selection4,
-        int preparedCharFailure,CancellationToken token)
+    internal void ReserveForWord(LegacyFreshMainGlobalWordTextPublication actual,CancellationToken token)
     {
         lock(gate)
         {
             ValidatePreclaim(token);
+            if(reservedWordParent is not null||!ReferenceEquals(actual.Wrapper,this))
+                throw new InvalidOperationException("Unused actual global wrapper required for WORD reservation.");
+            //Reserve the public Choices entrypoint too, before any WORD
+            //interner/payload prefix. No concurrent standalone publisher can
+            //claim this scope in the parent-before-CHAR interval.
+            Choices.ClaimSourceWrapper(this,token);reservedWordParent=actual;
+        }
+    }
+    internal LegacyFreshMainGlobalTextSourceWord PublishIntoWord(LegacyFreshMainGlobalWordTextPublication actual,
+        ReadOnlySpan<byte> allocator40,ReadOnlySpan<byte> selection4,int preparedCharFailure,CancellationToken token)
+        =>PublishCore(allocator40,selection4,preparedCharFailure,token,actual);
+    internal void FaultReservedWord(LegacyFreshMainGlobalWordTextPublication actual)
+    {
+        lock(gate)
+        {
+            if(!ReferenceEquals(reservedWordParent,actual))throw new ArgumentException("Exact reserved WORD parent required.");
+            if(!faulted){faulted=true;trace.Add("word-parent-fault");}
+            Choices.FaultSourceWrapper(this);
+        }
+    }
+    internal LegacyFreshMainGlobalTextSourceWord PublishPreparedCharFailure(ReadOnlySpan<byte> allocator40,
+        ReadOnlySpan<byte> selection4,int failure,CancellationToken token=default)
+    {if(failure is<1 or>4)throw new ArgumentOutOfRangeException(nameof(failure));return PublishCore(allocator40,selection4,failure,token);}
+    private LegacyFreshMainGlobalTextSourceWord PublishCore(ReadOnlySpan<byte> allocator40,ReadOnlySpan<byte> selection4,
+        int preparedCharFailure,CancellationToken token,LegacyFreshMainGlobalWordTextPublication? wordParent=null)
+    {
+        lock(gate)
+        {
+            ValidatePreclaim(token);
+            if(!ReferenceEquals(reservedWordParent,wordParent))throw new InvalidOperationException("This wrapper belongs to a reserved native-order WORD publication.");
+            wordParent?.RequireCharacterEntry(this,token);
             if(allocator40.Length!=40||selection4.Length%4!=0||selection4.Length>65536*4)
                 throw new ArgumentException("Complete allocator40 and whole bounded selection4 storage required.");
-            Choices.ClaimSourceWrapper(this,token);entered=true;trace.Add("claim");
+            if(wordParent is null)Choices.ClaimSourceWrapper(this,token);
+            else Choices.ValidateWrapper(this,token);
+            entered=true;trace.Add("claim");
             try
             {
                 byte[] beforeWord=Completion.Word.Word.CopyStorage();int nn=Completion.Source.CachedMainGroupEvaluations;
@@ -161,6 +191,7 @@ public sealed class LegacyFreshMainGlobalTextSourceWrapper
                     skipped[i]=(flags&7)==1&&(symbol&0x7ffc)!=0&&(symbol&3)==3;positive[i]=unchecked((short)(reference>>24))>=0;
                     joiner[i]=hasJoiner&&(flags&7)==0&&symbol==joinerLabel;
                     if(skipped[i]){ranges[i]=[];trace.Add("skip:"+i);continue;}
+                    if(positive[i])wordParent?.VisitPositiveSource(this,i,token);
                     var refreshed=Choices.Refresh.RefreshOwner(key,allocator40,token);trace.Add("refresh:"+i);
                     var projected=Choices.Projection.Project(refreshed.Source,token);positions[i]=projected;
                     ranges[i]=operations.Intersect(projected.CopyRanges(token),wordClip,token);
@@ -201,6 +232,7 @@ public sealed class LegacyFreshMainGlobalTextSourceWrapper
                     if((uint)marker>=(uint)rows.Count||rows[marker].Text is null)
                         throw new NotSupportedException("Actual global source marker has no available row.");
                     selectedFlags|=rows[marker].Flags;output.Add(new(currentSource,payload,currentSelection.Selection,marker,!key.Inserted));
+                    wordParent?.AppendCharacter(this,output[^1],token);
                     currentSelection=null;currentSource=null;trace.Add("glyph-complete:"+i);
                 }
                 if(!Completion.Word.Word.CopyStorage().AsSpan().SequenceEqual(beforeWord)||

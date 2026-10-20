@@ -18,6 +18,7 @@ public sealed class LegacyOwnedMainTextSourceNode
     public LegacyOwnedMainProcessedGlyphSource? FirstProcessedSource {get;}
     public LegacyOwnedMainWordSourceCollection? FirstWordSource {get;}
     public LegacyFreshMainGlobalProcessedGlyphSource? FirstGlobalSource {get;}
+    public LegacyFreshMainGlobalWordSourceReceipt? FirstGlobalWordSource {get;}
     public LegacyOwnedMainGlyphDocumentPositions FirstSourcePositions => firstSource ??
         throw new InvalidOperationException("Explicitly prepared numeric node has no actual source-position producer.");
     internal LegacyOwnedMainTextSourceNode? Left,Right,Previous,Next;
@@ -26,8 +27,8 @@ public sealed class LegacyOwnedMainTextSourceNode
     internal LegacyOwnedMainTextSourceNode(LegacyOwnedMainTextSourceInterner owner,int identity,
         LegacyNativeInkPositionRange[] key,LegacyOwnedMainGlyphDocumentPositions? source,
         LegacyOwnedMainProcessedGlyphSource? processed=null,LegacyOwnedMainWordSourceCollection? wordSource=null,
-        LegacyFreshMainGlobalProcessedGlyphSource? globalSource=null)
-    {Owner=owner;Identity=identity;ranges=key;firstSource=source;FirstProcessedSource=processed;FirstWordSource=wordSource;FirstGlobalSource=globalSource;}
+        LegacyFreshMainGlobalProcessedGlyphSource? globalSource=null,LegacyFreshMainGlobalWordSourceReceipt? globalWordSource=null)
+    {Owner=owner;Identity=identity;ranges=key;firstSource=source;FirstProcessedSource=processed;FirstWordSource=wordSource;FirstGlobalSource=globalSource;FirstGlobalWordSource=globalWordSource;}
     public byte[] CopyRanges16()
     {
         byte[] bytes=new byte[ranges.Length*16];
@@ -100,10 +101,20 @@ public sealed class LegacyOwnedMainTextSourceInterner
         return InternCore(source.CopyRanges(),null,token,wordSource:source);
     }
 
+    internal LegacyOwnedMainTextSourceInternResult InternGlobalWord(LegacyFreshMainGlobalWordSourceReceipt actual,CancellationToken token)
+    {
+        actual.Owner.RequireWordIntern(actual,token);
+        if(!ReferenceEquals(actual.Owner.Scope.SharedState.Words,this)||!ReferenceEquals(actual.Owner.Scope.Document,Document))
+            throw new ArgumentException("Exact global WORD interner and original document required.");
+        var value=InternCore(actual.CopyOriginalKey(),null,token,globalWordSource:actual);
+        if(!ReferenceEquals(value.Node.FirstGlobalWordSource,actual))
+            throw new InvalidOperationException("Prepared, old or foreign WORD node cannot become a global payload.");
+        return value;
+    }
     private LegacyOwnedMainTextSourceInternResult InternCore(LegacyNativeInkPositionRange[] key,
         LegacyOwnedMainGlyphDocumentPositions? source,CancellationToken token,
         LegacyOwnedMainProcessedGlyphSource? processed=null,LegacyOwnedMainWordSourceCollection? wordSource=null,
-        LegacyFreshMainGlobalProcessedGlyphSource? globalSource=null)
+        LegacyFreshMainGlobalProcessedGlyphSource? globalSource=null,LegacyFreshMainGlobalWordSourceReceipt? globalWordSource=null)
     {
         token.ThrowIfCancellationRequested();
         if(key.Length>65536)throw new ArgumentOutOfRangeException(nameof(key));
@@ -121,7 +132,7 @@ public sealed class LegacyOwnedMainTextSourceInterner
             token.ThrowIfCancellationRequested();
             //No callbacks/cancellation occur once links are changed. Native
             //01B4E0 has no cancellation callback inside its AVL mutation.
-            var node=new LegacyOwnedMainTextSourceNode(this,inserted.Count+1,key,source,processed,wordSource,globalSource);
+            var node=new LegacyOwnedMainTextSourceNode(this,inserted.Count+1,key,source,processed,wordSource,globalSource,globalWordSource);
             if(inserted.Count!=0){node.Previous=inserted[^1];inserted[^1].Next=node;}
             root=Insert(root,node);inserted.Add(node);rangeCount+=key.Length;
             return new(node,true);
