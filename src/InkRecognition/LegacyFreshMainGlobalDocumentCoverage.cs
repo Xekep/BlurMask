@@ -12,6 +12,7 @@ public sealed class LegacyFreshMainGlobalDocumentCoverage
     private readonly LegacyNativeInkPositionRange[][] keys;
     private readonly LegacyOwnedFreshTextSelection[] commands;
     private readonly byte[] lineStorage;
+    private readonly long next;
     public LegacyFreshMainGlobalWordTextPublication Publication {get;}
     public int SelectedAlternativeIndex=>0;
     public bool UsesOrdinaryWordRanges {get;}
@@ -28,12 +29,12 @@ public sealed class LegacyFreshMainGlobalDocumentCoverage
         LegacyOwnedFreshTextSelection[] commands,byte[] lines,bool ordinary,int last)
     {Publication=publication;this.word=word;this.text=text;this.initial=initial;this.remaining=remaining;
      this.links=links;this.keys=keys;this.commands=commands;lineStorage=lines;
-     UsesOrdinaryWordRanges=ordinary;LastReferencedLine=last;}
+     UsesOrdinaryWordRanges=ordinary;LastReferencedLine=last;next=publication.Scope.SharedState.Selections.NextSelectionId;}
     public static LegacyFreshMainGlobalDocumentCoverage Prepare(LegacyFreshMainGlobalWordTextPublication actual,
         CancellationToken token=default)
     {
         ArgumentNullException.ThrowIfNull(actual);token.ThrowIfCancellationRequested();actual.Scope.Validate();
-        if(!actual.IsComplete||actual.IsFaulted||actual.Wrapper.IsFaulted||actual.Wrapper.Choices.IsFaulted||
+        if(actual.Scope.SharedState.Selections.Failed||!actual.IsComplete||actual.IsFaulted||actual.Wrapper.IsFaulted||actual.Wrapper.Choices.IsFaulted||
             actual.AlternativeCount!=1||actual.SelectedWordIndex!=0||!actual.HasDocumentWordLink||
             !actual.HasTextReceipt||actual.Text.Selection is null)
             throw new ArgumentException("Exact successfully completed actual global WORD/TEXT owner required.");
@@ -90,7 +91,8 @@ public sealed class LegacyFreshMainGlobalDocumentCoverage
     public void Validate(CancellationToken token=default)
     {
         token.ThrowIfCancellationRequested();Publication.Scope.Validate();
-        if(!Publication.IsComplete||Publication.IsFaulted||Publication.Wrapper.IsFaulted||
+        if(Publication.Scope.SharedState.Selections.Failed||Publication.Scope.SharedState.Selections.NextSelectionId!=next||
+            !Publication.IsComplete||Publication.IsFaulted||Publication.Wrapper.IsFaulted||
             !Publication.CopyPendingSelections().SequenceEqual(commands)||
             !Publication.WordSource.CopyCharacterLinks().SequenceEqual(links)||
             !Publication.CopySourceLines56().AsSpan().SequenceEqual(lineStorage))

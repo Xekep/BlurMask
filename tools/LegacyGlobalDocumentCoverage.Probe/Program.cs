@@ -44,7 +44,14 @@ foreach(var(name,raw)in samples)
  if(!parent.IsComplete||parent.IsFaulted)throw new Exception("Read-only coverage changed parent publication.");
  writer.WriteEndObject();
 }
-writer.WriteEndArray();writer.WriteNumber("completed",completed);writer.WriteNumber("refused",refused);writer.WriteNumber("guards",guards);writer.WriteEndObject();writer.Flush();
+writer.WriteEndArray();
+{
+ using var scope=Scope([M()]);var parent=Parent(scope);parent.Publish(new byte[40],new byte[8160]);var result=LegacyFreshMainGlobalDocumentCoverage.Prepare(parent);
+ var pending=parent.CopyPendingSelections().ToArray();long next=scope.SharedState.Selections.NextSelectionId,output=-1;
+ if(scope.SharedState.Selections.CreatePrepared(parent.Text.CopyRanges(),0,ref output,1)is not null||!scope.SharedState.Selections.Failed||scope.SharedState.Selections.NextSelectionId!=next+1||!parent.CopyPendingSelections().SequenceEqual(pending))throw new Exception("Prepared registration refusal did not retain counter-only failure.");
+ Reject(()=>result.Validate());Reject(()=>result.CopySourceLines56());Reject(()=>LegacyFreshMainGlobalDocumentCoverage.Prepare(parent));
+}
+writer.WriteBoolean("poisonedCounterWithoutCommand",true);writer.WriteNumber("completed",completed);writer.WriteNumber("refused",refused);writer.WriteNumber("guards",guards);writer.WriteEndObject();writer.Flush();
 if(completed!=11||refused!=2)throw new Exception("Actual equality branch coverage changed.");
 Console.WriteLine($"PASS13 global post-TEXT owners: {completed} exact coverage/{refused} explicit238B0 refusals/{guards} guards.");
 void Reject(Action action){try{action();}catch(Exception e)when(e is ArgumentException or InvalidOperationException or NotSupportedException or OperationCanceledException){guards++;return;}throw new Exception("Expected refusal.");}

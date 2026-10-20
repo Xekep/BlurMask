@@ -18,6 +18,7 @@ rules=('!actual.IsComplete||actual.IsFaulted','actual.AlternativeCount!=1||actua
  'LegacyOwnedRawInkRangeOperations.Equal(word,text)','Unequal actual WORD/TEXT coverage requires geometric238B0',
  'source.PriorRangeCount!=0','keys[i]=source.Source.CopyRanges(token)',
  'comparisons>16_777_216','remaining=operations.Subtract(remaining,keys[i],token)',
+ 'actual.Scope.SharedState.Selections.Failed','Publication.Scope.SharedState.Selections.NextSelectionId!=next',
  'Publication.CopyPendingSelections().SequenceEqual(commands)',
  'Publication.WordSource.CopyCharacterLinks().SequenceEqual(links)')
 for rule in rules:assert rule in runtime,rule

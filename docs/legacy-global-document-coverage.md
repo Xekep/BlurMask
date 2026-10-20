@@ -37,10 +37,15 @@ and16777216 conservative interval-pair comparisons. These are work bounds, not
 native allocator or process-memory equivalence.
 
 Thirteen genuine global paths produce11 equal-coverage results and two explicit
-238B0 refusals.33 actual CHAR subtractions and59 precompletion/cancellation/
+238B0 refusals.33 actual CHAR subtractions and62 precompletion/cancellation/
 closed-scope guards pass. The independent Python oracle first verifies the paired
 CHAR and WORD/TEXT producers against raw resources, then recomputes exact keys,
 selected line visits and each C21 subtraction. Expected word labels never enter
 inference or the algorithm oracle. Recorded Russian quality remains unchanged.
 The new runtime file grants its separate probe assembly test access; no old
 runtime or assembly-access file changes.
+
+Live validation also checks the selection transaction's failure latch and exact
+next counter. A failed registration may consume a counter without appending any
+command; unchanged command references alone cannot authorize further live use.
+The separate prepared control exercises precisely that failure prefix.

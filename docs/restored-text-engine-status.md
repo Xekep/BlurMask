@@ -9,7 +9,7 @@ default recognizer.
 The [genuine global post-TEXT coverage](legacy-global-document-coverage.md)
 now consumes the actual global parent through same-line consistency, exact
 WORD/TEXT comparison and forward CHAR subtraction.13 inputs produce11 bounded
-equal-coverage results and two explicit238B0 refusals;33 subtractions and59
+equal-coverage results and two explicit238B0 refusals;33 subtractions and62
 guards pass independent producer/range oracles and Managed/NativeAOT parity.
 No configured-two-alternative owner is fabricated. Source selections, indices,
 transforms, DOM adoption and Russian quality remain separate.

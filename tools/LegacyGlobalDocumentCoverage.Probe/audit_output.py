@@ -29,6 +29,7 @@ for s in actual['samples']:
  remaining=[r[:]for r in initial]
  for key in keys:remaining=ops.subtract(remaining,key,s['counts']);subtractions+=1
  assert s['remaining']==remaining
-assert(completed,refused,actual['completed'],actual['refused'],actual['guards'])==(11,2,11,2,59)
+assert(completed,refused,actual['completed'],actual['refused'],actual['guards'])==(11,2,11,2,62)
+assert actual['poisonedCounterWithoutCommand']is True
 if len(sys.argv)==6:assert Path(coverage_path).read_bytes()==Path(sys.argv[5]).read_bytes()
 print(f'PASS13 genuine global post-TEXT owners/{completed} exact/{refused} explicit238B0 refusals/{subtractions} actual forward CHAR subtractions; no DOM/quality claim.')
