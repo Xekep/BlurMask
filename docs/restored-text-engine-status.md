@@ -6,6 +6,13 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [fresh global source indices](legacy-global-document-source-indices.md)
+now consume the genuine selected-source owner:11 ready owners retain44 actual
+typed CHAR/WORD sources and their raw memberships.189 guards,40 separate AVL
+controls and independent replay pass with exact Managed/NativeAOT parity.
+Source creation order, duplicate memberships and entered failure prefixes are
+preserved. Geometric238B0,023260, DOM acceptance and OCR quality remain separate.
+
 The [owned selected-source overlay](legacy-global-document-selected-sources.md)
 now preserves genuine post-TEXT CHAR/WORD selection state:13 inputs yield11
 overlays,33 complete CHAR nodes and33 link-order writes, with73 guards and
