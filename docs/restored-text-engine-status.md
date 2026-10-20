@@ -6,6 +6,13 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [genuine global pending counter handoff](legacy-global-counter-handoff.md)
+now appends operation7 to the same actual post026EF0 C4D:55 original selection
+commands plus11 counter commands,69 guards and exact Managed/NativeAOT parity.
+Initial Next comes from the complete selected registry; immutable command
+counters, prior source objects and failure prefixes remain distinct from
+execution. Selected/original replay, final2E7 and DOM acceptance are still separate.
+
 The [raw timing constructor boundary](legacy-global-raw-timing-caller.md)
 checks12 additional complete function ranges and15 bindings. C1C has no default
 constructor: its clone preserves timing, while extended construction forwards
