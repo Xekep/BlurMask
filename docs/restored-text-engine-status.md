@@ -6,6 +6,25 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [original FIELD DOM publication](legacy-library-original-field-dom-publication.md) now applies
+the actual text result into the retained original PAGE and field after its
+source registrations succeed. INPUT and sibling fields remain intact. Twenty
+actual paths, eight successful field publications and340 guards pass independent
+whole-tree/source-tag checks and byte-identical Managed/NativeAOT captures.
+Whole-page node, byte and depth limits are checked before source mutation;
+incomplete source history cannot authorize publication. This bounded library
+join does not restore native CBB acceptance, revisions or combined rollback.
+
+The [fresh Math publisher](legacy-math2-fresh-publisher.md) now consumes the
+actual produced field/copy receipt, clones that field into a temporary arena,
+applies three ordered result-subtree insertions and resolves tags against a
+distinct third source registry. Six actual NN outputs,70 injected failure or
+cancellation prefixes and180 guards pass an independent complete DOM/range
+oracle with identical Managed/NativeAOT captures. Two outputs use cold width1;
+four use explicitly prepared wider search policies. All five earlier Math
+captures remain unchanged. This is temporary-field publication, not original
+page acceptance, formula evaluation or a change to the app recognizer.
+
 Additional owning joins now have independent latest-branch checks.
 The [original-source history](legacy-library-original-source-history.md)
 executes actual transferred CHAR/WORD/TEXT commands against the original
@@ -247,7 +266,7 @@ registry checks and fresh NativeAOT. The selected worker's bare reader context
 is explicitly null; it is not relabeled as the original page context. The
 original-page DOM/revision/acceptance join remains under development.
 
-The exact committed app at5853591 builds with0 warnings and passes headless
+The exact committed app at70f58d5 builds with0 warnings and passes headless
 `--ai-pen-test`. Russian diagnostics remain4/9 exact with16/33 character edits;
 no new release or full-engine readiness is asserted. The new
 [recorded error evidence](russian-recorded-error-evidence.md) traces actual
