@@ -4,7 +4,35 @@ The full text engine is not restored. Russian cursive and automatic replacement
 are not ready for general use. The restored main pipeline is not the app's
 default recognizer.
 
-## Latest checked additions (2026-10-18)
+## Latest checked additions (2026-10-20)
+
+Three additional owning joins now have independent latest-branch checks.
+The [original-source history](legacy-library-original-source-history.md)
+executes actual transferred CHAR/WORD/TEXT commands against the original
+source registry and retains a separate generated inverse journal. Fourteen
+actual applications,4096 signed counter controls and193 guards pass in Managed
+and NativeAOT. Ignored observer-history allocation refusal remains distinct
+from failed registration: an incomplete journal cannot authorize apply or
+rollback. This is explicit library source history, not native CBB/page acceptance.
+
+The [global ordinary refresh](legacy-global-ordinary-glyph-refresh.md) now
+refreshes all matching compact alternatives in the same completed global
+session and emits UTF8 through the actual acoustic alphabet. Eight sources,
+12 owners,24 appended rows,1440 complete pool bytes and92 guards pass an
+independent resource/geometry/prefix oracle with byte-identical Managed and
+NativeAOT captures. Old ordinary/configured/emission captures remain unchanged.
+Global source-rich CHAR/WORD/TEXT publication and quality evaluation remain
+separate.
+
+The [original Math field source](legacy-math2-owned-original-field-source.md)
+now creates INPUT102, clones the selected field and forms C23 before inference,
+then retains the same document through NN/EE4/C79, first copy and outer symbols.
+Two actual inputs, seven separately prepared C23 branches,22 failure prefixes
+and69 guards pass independent checks and NativeAOT. Scoped receipts reject
+foreign fields even when their immutable document is identical. Missing/empty
+INPUT does not become the whole raw domain. Math CB8/DOM and original-page
+acceptance remain unfinished. None of these component results changes the
+recorded Russian quality result or the app's default recognizer.
 
 The [owned English119 candidate stage](legacy-english-owned119-candidates.md)
 now connects actual108 cuts, original chronology, capped/pruned groups and
@@ -109,8 +137,9 @@ the immutable original document but permit decoder GC. The
 actual symbols into a second independent library, retaining the same document
 and source ranges. Four actual inputs,24 failure prefixes and107 guards pass
 independent whole-field/budget/GC checks and fresh NativeAOT; first-copy and
-EE4 captures remain unchanged. Full formula output, multi-F0 grouping and
-math-specific source/DOM registration remain unfinished. The
+EE4 captures remain unchanged. The original math-specific source is now owned
+as described above; full formula DOM, multi-F0 grouping and math-specific
+result registration remain unfinished. The
 [symbol/source DOM transport](legacy-math2-symbol-dom-transport.md) remains a
 static contract for the next join, not an implemented accepted formula.
 Separately prepared
@@ -162,8 +191,8 @@ establishes live TOP/source completion before detached byte import. The
 the same selected document before NN and completes actual forward count/fill,
 ranking and275 scores for one ordinary no-pending/no-bit8 WORD. Six actual
 scopes/126 cached NN groups/720 full WORD bytes/212 guards pass independent
-checks and NativeAOT without repeating inference. Global glyph refresh,
-source-rich CHAR/WORD/TEXT and final document publication remain unfinished;
+checks and NativeAOT without repeating inference. Global glyph refresh is now
+owned as described above; source-rich CHAR/WORD/TEXT and final document publication remain unfinished;
 existing imported completion is not a substitute. The
 [owning document publisher](legacy-library-text-publication-document.md)
 now joins source lines, TEXT registration, coverage, cleanup, detached DOM,
@@ -195,17 +224,17 @@ now creates actual library original field/INPUT owners before recognition, over
 the same immutable raw document/current view.64 raw owners,560 success/failure
 streams and1278 guards pass an independent ordered DOM/registry/history oracle
 and fresh NativeAOT. Prior INPUT and document captures remain unchanged. This
-is an explicit library history-journal adaptation; joining that original owner
-to the selected pre-NN processing context remains unfinished.
+is an explicit library history-journal adaptation. The original-selected
+pre-NN join and bounded original-source history are now owned as described above.
 The [selected field owner](legacy-library-original-selected-field-context.md)
 now retains the exact original/chosen entry, clones the selected PAGE field and
 copies every matching INPUT ID plus original Next.272 actual selected copies,
 350 failure/cancellation prefixes and2191 guards pass independent full DOM/raw/
 registry checks and fresh NativeAOT. The selected worker's bare reader context
 is explicitly null; it is not relabeled as the original page context. The
-additive processing-context/publication join remains under development.
+original-page DOM/revision/acceptance join remains under development.
 
-The exact committed app at6f7fa62 builds with0 warnings and passes headless
+The exact committed app at5853591 builds with0 warnings and passes headless
 `--ai-pen-test`. Russian diagnostics remain4/9 exact with16/33 character edits;
 no new release or full-engine readiness is asserted. The new
 [recorded error evidence](russian-recorded-error-evidence.md) traces actual
