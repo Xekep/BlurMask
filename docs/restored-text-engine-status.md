@@ -6,6 +6,16 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [timed raw ingress and ordinary WORD/CHAR geometry](legacy-global-timed-ordinary-geometry.md)
+now has13 numerical cases/37 CHARs/54 views, separating9 genuinely measured
+tracks from4 prepared uniform controls. Root rebuilt Managed/NativeAOT and the
+independent full scalar/native evidence audits agree.18 prepared horizontal
+controls include exact-source metadata aliases and distinct payloads with equal
+numeric IDs/keys; a shared source write produces one receipt. All13 old untimed
+parents refuse foreign timing receipts. Geometry-aware downstream selection,
+document adoption, application integration and recognition quality remain open.
+
+
 The [older Math normalized-clone stage](legacy-math-normalized-clone.md)
 now has a checked static description of its seven ordered structural passes,
 class-specific deep copies, adoption/scratch lifetimes and conditional cache
