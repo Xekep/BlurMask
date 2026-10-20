@@ -6,6 +6,13 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [ordinary global geometry proposal](legacy-global-geometric-ordinary-plan.md)
+joins genuine pre-selection WORD/CHAR/line identities to the proved cropped
+point views and fixes the source timing boundary.10 additional complete Ink
+bodies are checked. Timing depends on actual rate/channel/baseTag producers,
+which XY alone cannot establish; this is not a completed2DB runtime. Native
+guide/CHAR mutation order and the naturally present II10000 flag are retained.
+
 The [genuine global023260 no-control cleanup](legacy-global-control-cleanup.md)
 now follows both actual index passes:11 ready owners/33 CHAR/72 full records,
 178 guards and exact Managed/NativeAOT parity. WORD row flags precede the
