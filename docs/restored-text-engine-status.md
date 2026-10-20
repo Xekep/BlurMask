@@ -6,6 +6,13 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [older structured Math search boundary](legacy-math-2d-search-boundary.md)
+pins18 full bodies and the actual06BBC0 to1F45 search dispatch. The outer
+processor owns configured resources; the separate CBD worker supplies request
+and result state. Existing typed-tree constraints are not a font model or a
+proved rawEE4 conversion. Search callees, resource readers and candidate
+production remain separate unclosed work.
+
 The [genuine global pending counter handoff](legacy-global-counter-handoff.md)
 now appends operation7 to the same actual post026EF0 C4D:55 original selection
 commands plus11 counter commands,69 guards and exact Managed/NativeAOT parity.
