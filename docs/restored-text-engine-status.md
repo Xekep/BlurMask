@@ -6,6 +6,14 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [genuine global post-TEXT coverage](legacy-global-document-coverage.md)
+now consumes the actual global parent through same-line consistency, exact
+WORD/TEXT comparison and forward CHAR subtraction.13 inputs produce11 bounded
+equal-coverage results and two explicit238B0 refusals;33 subtractions and59
+guards pass independent producer/range oracles and Managed/NativeAOT parity.
+No configured-two-alternative owner is fabricated. Source selections, indices,
+transforms, DOM adoption and Russian quality remain separate.
+
 The [actual mathematical corpus diagnostic](legacy-math2-actual-raw-corpus.md)
 now checks31 coordinate inputs through93 genuine NN runs and620 exact AL
 records. The selected first procedural integral with equals reaches the existing
