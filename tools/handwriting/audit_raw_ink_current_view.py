@@ -4,7 +4,6 @@ Reads PE bytes only. Page/C51/tag/DAF ownership is deliberately not inferred.
 import argparse,hashlib,json,struct,sys
 from pathlib import Path
 from capstone import Cs,CS_ARCH_X86,CS_MODE_64
-import pefile
 root=Path(__file__).resolve().parents[2];sys.path.insert(0,str(root/'research/myscript/scripts'))
 from inspect_text_features import Binary
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('output',type=Path);a=p.parse_args()
@@ -69,12 +68,25 @@ pins(0x18004d580,0x18004d5a4,[('movabs','rcx, 0x3ff0000000000000'),('mov','qword
  ('mov','qword ptr [rdx + 0x20], rcx'),('mov','qword ptr [rdx + 0x28], rax')])
 pins(0x18006f194,0x18006f21f,[('call','0x1800369a0'),('call','0x18006b7f0'),('ucomisd','xmm1, xmm7'),
  ('ucomisd','xmm5, xmm6'),('jp','0x18006f21f'),('je','0x18006f5b5')])
-# Additional fullfunction hashes from native exception directory, independently
-# pinning the complete append/matcher/export bodies even for branches outside scope.
-pe=pefile.PE(data=b.data);full=[]
-for s in [0x180070ee0,0x1800978d0,0x180098080,0x180090cf0,0x18008ddb0,0x180065940,0x18006b7f0,0x18006f080,0x18006d2c0,0x180091700]:
- row=next(x.struct for x in pe.DIRECTORY_ENTRY_EXCEPTION if x.struct.BeginAddress==s-0x180000000);e=row.EndAddress+0x180000000
- full.append(dict(start=hex(s),end=hex(e),sha256=hashlib.sha256(b.data[b.off(s):b.off(e)]).hexdigest()))
+# Exact full contiguous Ghidra function bodies. A PE unwind entry can stop
+# at the first prologue fragment; it must not be called a whole-function hash.
+# Bounds below were checked against the retained functions.tsv body_bytes and
+# complete linear disassembly. Keep fullFunctions report keys for consumers.
+full=[]
+full_bounds=[(6442913504, 6442914075, '5e5f03f2dfefccc5ee7e1e9123633eaf289bc1d276ec51dad669d5382ebf7e89'),
+ (6443071696, 6443072522, '88a071a9148bc8c0a088da9621eef3fb9554c79637b55cd4c2d60586de124b27'),
+ (6443073664, 6443074410, '982b126728085dedf3754caf5dd666999e1cb6bd6039c7c6e4fbcfcfe5c19aff'),
+ (6443044080, 6443044322, 'e723515fdb88d8ef19fd9fdf28a0bb10358adc2afbd1ce6be989811c878b34ee'),
+ (6443031984, 6443032226, 'a66d10803f9f318596e2ede7f5e6f0e1c40032f32ddddf53b415f7cdfc80f493'),
+ (6442867008, 6442870025, '83385e2e4d504549e6457502815b81ec1c1a67cea8360b0d43d08d1465164e09'),
+ (6442891248, 6442892455, '6d84d78f54adca5e5ccc9cb3094501ce19bb94dfb2ad087f36c8b96513941636'),
+ (6442905728, 6442907287, '4d624881c600a68865a8965f94542cc16cffc9e4103c16ac1c82f1ab82f8dcf3'),
+ (6442898112, 6442901782, 'bd472ece3e3c7a5d41de2a62ceaece4a0807d607157548b9362845698c7e5591'),
+ (6443046656, 6443049596, '1e787357ebd5ca94970011136f35231b2b5a8a9873bec508c5285a0fc7af9b08')]
+for s,e,h in full_bounds:
+ raw=b.data[b.off(s):b.off(e)];assert hashlib.sha256(raw).hexdigest()==h,(hex(s),hex(e))
+ xs=list(md.disasm(raw,s));assert xs[-1].address+xs[-1].size==e
+ full.append(dict(start=hex(s),end=hex(e),sha256=h,extentSource='complete contiguous Ghidra body; not first PE unwind fragment'))
 report=dict(peSha256=hashlib.sha256(b.data).hexdigest(),regions=regions,fullFunctions=full,pins=pin_count,
  scope='new library-owned XY root,kind0/C49 full current views,checked06B7F0 matching and exact identity exclusion only',
  pending=['native SDK page observers/history','source tag/C51 registry counter','actual037E80 caller range and result binding','DAF input32 source rows','026EF0/prior/cache/final2E7 handoff'],vendorExecution=False,documentAcceptance=False)
