@@ -28,6 +28,7 @@ public sealed class LegacyNativeDelimiterQuerySource
     private readonly Slot[] slots = Enumerable.Range(0, 8).Select(_ => new Slot()).ToArray();
     private int nextSlot, active;
     private bool valid = true;
+    private byte[] recordScratch = [];
 
     /// <summary>1D4950 stores the signed coordinate-mode byte at247+80;
     ///1D60C0 supplies that value to237380. This reads the same bounded v10d
@@ -156,7 +157,9 @@ public sealed class LegacyNativeDelimiterQuerySource
                     level.Query.Flags24 = q.Flags24; level.Query.Flags26 = q.Flags26;
                 }
             }
-            byte[] output = new byte[q.Capacity * 32];
+            int recordLength = q.Capacity * 32;
+            if (recordScratch.Length < recordLength) recordScratch = new byte[recordLength];
+            Memory<byte> output = recordScratch.AsMemory(0, recordLength);
             int written = 0, backendCalls = 0;
             if (!Traverse(0, query.SourceTag, q.ParentContext, 0, 0, 0, 0))
             { valid = false; return new(-1, ReadOnlyMemory<byte>.Empty, query.SlotIndex, slot.Accepted, backendCalls); }
@@ -169,7 +172,7 @@ public sealed class LegacyNativeDelimiterQuerySource
                 if ((uint)query.SourceTag == 0)
                     for (int i = 0; i < written; i++)
                     {
-                        var row = output.AsSpan(i * 32, 32);
+                        var row = output.Span.Slice(i * 32, 32);
                         //238510 applies the OUTER tag's kind only in this
                         //low-node-zero branch; it preserves the row's bit3.
                         row[23] = Carry(row[23], (byte)(query.SourceTag >> 44 & 7), (byte)(row[23] >> 3 & 1));
@@ -179,10 +182,10 @@ public sealed class LegacyNativeDelimiterQuerySource
                         if (prefix != 0) Prefix(row, prefix);
                     }
                 else if ((query.SourceTag & (4UL << 40)) == 0)
-                    for (int i = 0; i < written; i++) Prefix(output.AsSpan(i * 32, 32), ordinary, allowExtra: false);
+                    for (int i = 0; i < written; i++) Prefix(output.Span.Slice(i * 32, 32), ordinary, allowExtra: false);
             }
             cancellationToken.ThrowIfCancellationRequested();
-            return new(written, output.AsMemory(0, written * 32).ToArray(), query.SlotIndex, slot.Accepted, backendCalls);
+            return new(written, output.Slice(0, written * 32).ToArray(), query.SlotIndex, slot.Accepted, backendCalls);
 
             bool Traverse(int depth, ulong tag, ulong parentContext, byte carriedLength, int carriedCost, byte carriedKind, byte carriedFlag)
             {
@@ -249,7 +252,7 @@ public sealed class LegacyNativeDelimiterQuerySource
                                 if (written == q.Capacity) return true;
                                 if (slot.Accepted >= q.Skip)
                                 {
-                                    var target = output.AsSpan(written * 32, 32);
+                                    var target = output.Span.Slice(written * 32, 32);
                                     row.CopyTo(target);
                                     BinaryPrimitives.WriteInt32LittleEndian(target[16..], unchecked(BinaryPrimitives.ReadInt32LittleEndian(target[16..]) + carriedCost));
                                     target[22] = unchecked((byte)(target[22] + carriedLength));

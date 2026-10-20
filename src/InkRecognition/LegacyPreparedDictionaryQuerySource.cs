@@ -39,6 +39,7 @@ public sealed class LegacyPreparedDictionaryQuerySource
     private readonly ulong[] initialContexts;
     private int nextSlot;
     private bool reading;
+    private byte[] recordScratch = [];
     public uint DescriptorFlags => map.DescriptorFlags;
 
     private sealed class Slot
@@ -90,8 +91,9 @@ public sealed class LegacyPreparedDictionaryQuerySource
         if (reading) throw new InvalidOperationException("Dictionary queries are not reentrant.");
         if ((uint)query.Node >= lexicon.NodeCount || query.Skip is < 0 or > 2_000_000 || query.Capacity is < 1 or > 512)
             throw new ArgumentException("Expected a checked node, nonnegative offset and positive bounded page capacity.");
-        // CopySelectedMap also refuses absent auxiliary data before mutating the query ring.
-        ushort[] selected = map.CopySelectedMap(auxiliary, (byte)query.Flags24);
+        //Select also refuses absent auxiliary data before mutating the ring.
+        //The map is immutable; no per-page copy or public alias is needed.
+        ReadOnlySpan<ushort> selected = map.ReadSelectedMap(auxiliary, (byte)query.Flags24);
         reading = true;
         try
         {
@@ -126,7 +128,9 @@ public sealed class LegacyPreparedDictionaryQuerySource
                     if (Accept(packed, selected, auxiliary)) slot.Accepted++;
                 }
             }
-            var recordStorage = new byte[query.Capacity * 32];
+            int storageLength = query.Capacity * 32;
+            if (recordScratch.Length < storageLength) recordScratch = new byte[storageLength];
+            Span<byte> recordStorage = recordScratch.AsSpan(0, storageLength);
             while (NextChild(slot) < slot.End && slot.Accepted < query.Skip + query.Capacity)
             {
                 cancellationToken.ThrowIfCancellationRequested(); Refill(slot);
@@ -151,7 +155,8 @@ public sealed class LegacyPreparedDictionaryQuerySource
                         if (context != 0 && child.Created) linkCreatedContext(context, query.ParentContext);
                     }
                     byte flags = (byte)((query.Node == 0 ? 1 : 0) | ((packed & lexicon.PackedTerminalBit) != 0 ? 2 : 0));
-                    Span<byte> record = recordStorage.AsSpan(written * 32, 32);
+                    Span<byte> record = recordStorage.Slice(written * 32, 32);
+                    record.Clear(); //Preserve fresh-zero padding on every emitted row.
                     BinaryPrimitives.WriteUInt32LittleEndian(record, (uint)node);
                     record[5] = flags;
                     BinaryPrimitives.WriteUInt64LittleEndian(record[8..], context);
@@ -166,17 +171,17 @@ public sealed class LegacyPreparedDictionaryQuerySource
             // A supplied extra-cost buffer would then have a negative memset size.
             if (clearExtraCosts && returned < 0)
                 throw new ArgumentException("Native extra-cost clearing requires an in-range page offset.");
-            return new(returned, recordStorage.AsSpan(0, Math.Max(0, returned) * 32).ToArray(), query.SlotIndex, NextChild(slot), slot.Accepted,
+            return new(returned, recordStorage.Slice(0, Math.Max(0, returned) * 32).ToArray(), query.SlotIndex, NextChild(slot), slot.Accepted,
                 clearExtraCosts ? new byte[returned * 12] : []);
         }
         finally { reading = false; }
     }
 
-    private bool Accept(uint packed, ushort[] selected, bool auxiliary)
+    private bool Accept(uint packed, ReadOnlySpan<ushort> selected, bool auxiliary)
     {
         uint lexical = packed & lexicon.PackedLabelMask;
         if (lexical >= selected.Length) throw new InvalidDataException("Packed edge exceeds the prepared lexical map.");
-        return selected[lexical] != ushort.MaxValue && (!auxiliary || (packed & lexicon.PackedTerminalBit) != 0);
+        return selected[(int)lexical] != ushort.MaxValue && (!auxiliary || (packed & lexicon.PackedTerminalBit) != 0);
     }
 
     private static int NextChild(Slot slot) => slot.Start + slot.BlockCursor;

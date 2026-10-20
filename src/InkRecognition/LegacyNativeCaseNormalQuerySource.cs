@@ -20,6 +20,7 @@ public sealed class LegacyNativeCaseNormalQuerySource
     private readonly Slot[] slots=Enumerable.Range(0,8).Select(_=>new Slot()).ToArray();
     private int nextSlot,active;
     private bool valid=true;
+    private byte[] recordScratch=[],costScratch=[];
     public LegacyNativeCaseRecordExpansion Expansion {get;}
     public bool DutchLigatureMode {get;}
     public bool ExtraCostSideTable {get;}
@@ -102,7 +103,13 @@ public sealed class LegacyNativeCaseNormalQuerySource
                 inner.Flags24=q.Flags24;inner.Flags26=q.Flags26;
             }
             inner.ContextRoot=q.ContextRoot;inner.ParentContext=q.ParentContext;
-            byte[] output=new byte[q.Capacity*32],costs=ExtraCostSideTable?new byte[q.Capacity*12]:[];
+            int recordLength=q.Capacity*32,costLength=ExtraCostSideTable?q.Capacity*12:0;
+            if(recordScratch.Length<recordLength)recordScratch=new byte[recordLength];
+            if(costScratch.Length<costLength)costScratch=new byte[costLength];
+            //Only exact emitted prefixes are copied into returned owned pages.
+            //Memory slices retain the original capacity even if a callback
+            //mutates the public request while it is being serviced.
+            Memory<byte> output=recordScratch.AsMemory(0,recordLength),costs=costScratch.AsMemory(0,costLength);
             int written=0;
             if(q.Capacity<=4)return Result(0);
             while(true)
@@ -144,11 +151,11 @@ public sealed class LegacyNativeCaseNormalQuerySource
                     foreach(var value in expanded)
                     {
                         if(written>=q.Capacity)throw new InvalidDataException("Native four-row slack exceeded.");
-                        value.Record.Span.CopyTo(output.AsSpan(written*32));
+                        value.Record.Span.CopyTo(output.Span[(written*32)..]);
                         if(ExtraCostSideTable)
                         {
-                            slot.Costs.AsSpan(ordinal*12,12).CopyTo(costs.AsSpan(written*12));
-                            var field=costs.AsSpan(written*12+4,4);
+                            slot.Costs.AsSpan(ordinal*12,12).CopyTo(costs.Span[(written*12)..]);
+                            var field=costs.Span.Slice(written*12+4,4);
                             BinaryPrimitives.WriteInt32LittleEndian(field,unchecked(BinaryPrimitives.ReadInt32LittleEndian(field)+value.CostDelta));
                         }
                         written++;slot.Accepted=checked(slot.Accepted+1);
@@ -157,8 +164,8 @@ public sealed class LegacyNativeCaseNormalQuerySource
                 if(written>=q.Capacity-4)return Result(written);
             }
             LegacyNativeCaseNormalQueryPage Result(int count)=>new(count,
-                count<0?ReadOnlyMemory<byte>.Empty:output.AsMemory(0,count*32).ToArray(),
-                !ExtraCostSideTable||count<0?ReadOnlyMemory<byte>.Empty:costs.AsMemory(0,count*12).ToArray(),
+                count<0?ReadOnlyMemory<byte>.Empty:output.Slice(0,count*32).ToArray(),
+                !ExtraCostSideTable||count<0?ReadOnlyMemory<byte>.Empty:costs.Slice(0,count*12).ToArray(),
                 query.SlotIndex,slot.Accepted,slot.Offset);
         }
         catch{valid=false;throw;}

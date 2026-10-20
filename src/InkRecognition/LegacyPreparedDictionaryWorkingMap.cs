@@ -65,6 +65,11 @@ public sealed class LegacyPreparedDictionaryWorkingMap
     public ushort[] CopySelectedMap(bool auxiliaryEnumeration, byte queryFlags36) =>
         Select(auxiliaryEnumeration, queryFlags36).ToArray();
 
+    //Immutable model-owned maps can be borrowed inside a serialized query.
+    //The public API still returns an independent, mutable caller snapshot.
+    internal ReadOnlySpan<ushort> ReadSelectedMap(bool auxiliaryEnumeration, byte queryFlags36) =>
+        Select(auxiliaryEnumeration, queryFlags36);
+
     /// <summary>
     /// Checked dictionary graph→selected map→candidate gate shared by0920a0,
     /// 0922f0 and092540. FFFF suppresses an edge; auxiliary enumeration also
