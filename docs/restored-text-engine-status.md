@@ -6,6 +6,14 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [genuine global INPUT transform handoff](legacy-global-input-transforms.md)
+now retains the exact pre-NN original-selected Seed through037E80 and026EF0.
+11 actual owners resolve11 identity matrices, then exclude them; the real
+seed108 vector swaps before checking export status.121 guards, five cancellation
+prefixes, three prepared failed exports and five owner invalidations pass
+independent replay and exact Managed/NativeAOT parity. Nonidentity/DAF matching,
+pending counter handoff, final transport and original acceptance remain separate.
+
 The [ordinary global geometry proposal](legacy-global-geometric-ordinary-plan.md)
 joins genuine pre-selection WORD/CHAR/line identities to the proved cropped
 point views and fixes the source timing boundary.10 additional complete Ink
