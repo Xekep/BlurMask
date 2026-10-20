@@ -6,6 +6,16 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [owning outgoing Math transfer](legacy-math2-outgoing-library-transfer.md)
+now consumes the completed temporary publisher and owns a fourth DOM arena,
+one field-relative insertion and detached source commands in actual signed-ID
+order. Six actual NN outputs,64 injected throw/cancel prefixes and168 guards
+pass the independent numerical/tree/command oracle with byte-identical
+Managed/NativeAOT. Whole budgets precede payload copies and the single-use
+claim. Historical payload snapshots survive publisher disposal; live authority
+still requires its source. Original Math registry/DOM application and native
+page/revision acceptance remain separate.
+
 The [global CHAR source wrapper](legacy-global-text-source-wrapper-runtime.md)
 now retains the actual global scope, source metadata, pre-NN string pool and
 INPUT transaction through refresh, range processing, exact interning and CHAR
@@ -285,7 +295,7 @@ registry checks and fresh NativeAOT. The selected worker's bare reader context
 is explicitly null; it is not relabeled as the original page context. The
 original-page DOM/revision/acceptance join remains under development.
 
-The exact committed app at1587914 builds with0 warnings and passes headless
+The exact committed app at59ed6ba builds with0 warnings and passes headless
 `--ai-pen-test`. Russian diagnostics remain4/9 exact with16/33 character edits;
 no new release or full-engine readiness is asserted. The new
 [recorded error evidence](russian-recorded-error-evidence.md) traces actual
