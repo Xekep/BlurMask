@@ -254,8 +254,10 @@ public sealed class LegacyFreshMainTextGlyphChoices : IDisposable
     {
         ArgumentNullException.ThrowIfNull(input);CheckSources(input.Sources,token);token.ThrowIfCancellationRequested();
         if(!ReferenceEquals(input.Owner,this))throw new ArgumentException("Same publication selection owner required.");
-        //00C860 clears99.0283B0's HeaderE filter is therefore false in this
-        //fresh owner (only short18 may be configured), independently of the selected glyph.
+        //0283B0 zeroes local138.byte8 before024F30 forwards it to0213A0.
+        //Only a prior-result property12D0065 can overwrite that byte. This
+        //fresh no-prior-result route excludes that branch; knowledge99 is
+        //a separate value, not the direct producer of this wrapper filter.
         return LegacyNativeTextGlyphCaller.Produce(input.GlyphOwner,Emitter.PrimaryAlphabet,
             header,input.Selection.CopySelectionRows4(),LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(input.Reference),false,
             unchecked((int)input.Selection.SelectedMarker!.Value),strings,publication,normalization,

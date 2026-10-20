@@ -19,8 +19,10 @@ Emission uses `LegacyFreshMainGlyphUtf8Emission`, including the actual distinct
 empty control2A and nonnull empty alternate owners. A kind4 failure cannot
 silently become a primary-alphabet lookup. Full circled emission uses the
 existing checked normalization/payload kernel. No successful circled winner
-is claimed by this integration test. HeaderE filtering is false by the same
-private fresh knowledge99 lifecycle, rather than a caller switch.
+is claimed by this integration test. HeaderE filtering is false from the
+fresh wrapper's zeroed local138.byte8 and absent prior-result property branch,
+rather than knowledge99 or a caller switch. The exact producer is pinned in
+[the global choice plan](legacy-global-text-glyph-choices-plan.md).
 
 The string pool belongs to the publication owner. Disposing that owner makes
 retained strings unreadable. The selected marker is carried through filtering;

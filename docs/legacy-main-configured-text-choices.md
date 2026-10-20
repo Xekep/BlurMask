@@ -17,10 +17,11 @@ records and the existing13A830 logic, including a real allocation refusal.
 
 The shared kernel then calls TOP273.V50 through the actual emitter, followed
 by0213A0 empty removal/selected-marker adjustment and021000 classification and
-string interning. HeaderE filtering stays false from the fresh99=0 lifecycle;
-setting the only supported main short18 property does not change99 or the
-empty control/alternate source vectors. Existing static audits pin those
-independent properties rather than infer them from observed text.
+string interning. HeaderE filtering stays false from the wrapper's zeroed
+local138.byte8 and absent prior-result property12D0065 branch. Knowledge99
+is separate; setting the supported main short18 property does not create a
+prior result or change the empty control/alternate source vectors. The exact
+filter producer is pinned in [the global choice plan](legacy-global-text-glyph-choices-plan.md).
 
 Every choices object owns one fresh local UTF8 string pool. It does not claim
 that independently preparing two choice objects recreates a complete native
