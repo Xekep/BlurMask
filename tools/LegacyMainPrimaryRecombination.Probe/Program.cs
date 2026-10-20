@@ -27,6 +27,7 @@ foreach (var test in data.RootElement.GetProperty("cases").EnumerateArray())
     var config = LegacyNativeWordControllerConfiguration.CreateFresh20baa0() with
     { PrimaryAlternativeCount2402 = pc, SecondaryAlternativeCount2404 = sc, PrimaryArcLimit230a = test.GetProperty("limit").GetUInt16(), Mode22f6 = 0 };
     var profile = LegacyCursiveCategoryProfile.Load(ak.AsSpan(test.GetProperty("profileOffset").GetInt32()), test.GetProperty("profileOffset").GetInt32(), out _);
+    if(streams==0) CheckOwnedPoolAllocation(profile);
     var policy = new LegacyNativeHigherArcRecombinationPolicy(65535, test.GetProperty("threshold").GetInt32(),
         test.GetProperty("capEnabled").GetBoolean(), test.GetProperty("cap").GetByte(), test.GetProperty("permission").GetByte());
     var reset = new LegacyNativeHigherArcResetParameters(65535, test.GetProperty("resetSource").GetUInt32());
@@ -120,3 +121,29 @@ static void Write64(Span<byte> b, int o, ulong v) => BinaryPrimitives.WriteUInt6
 static void Write32(Span<byte> b, int o, int v) => BinaryPrimitives.WriteInt32LittleEndian(b[o..], v);
 
 if (args.Length == 8) ActualCasePrefix.Run(args);
+
+static void CheckOwnedPoolAllocation(LegacyCursiveCategoryProfile profile)
+{
+    const int active=256, poolRows=4096, rowBytes=80;
+    byte[] heap=new byte[active*128],primary=new byte[poolRows*rowBytes],secondary=new byte[poolRows*rowBytes];
+    Array.Fill(primary,(byte)0xa5);Array.Fill(secondary,(byte)0x5a);
+    for(int i=0;i<active;i++)Write32(heap,i*128+88,i);
+    var config=LegacyNativeWordControllerConfiguration.CreateFresh20baa0() with
+        {PrimaryAlternativeCount2402=2,SecondaryAlternativeCount2404=2};
+    var contexts=new LegacySymbolContextFactory();
+    long before=GC.GetAllocatedBytesForCurrentThread();
+    var result=LegacyNativePrimaryWordRecombination.Apply(heap,active,0,config,
+        _=>throw new Exception("Root must not request parent rows."),
+        _=>throw new Exception("Root must not request source headers."),profile,contexts,s=>s,
+        default,default,default,null,0,new byte[80],primary,secondary);
+    long allocated=GC.GetAllocatedBytesForCurrentThread()-before;
+    long ownedBytes=heap.Length+primary.Length+secondary.Length;
+    if(allocated>ownedBytes*4+1024*1024)
+        throw new Exception($"Recombination allocated {allocated} bytes for {ownedBytes} owned bytes; whole pools must not be cloned per active row.");
+    if(!primary.All(b=>b==0xa5)||!secondary.All(b=>b==0x5a)||
+       !result.HeapStorage128.Span.SequenceEqual(heap)||result.Steps.Count!=active||
+       !result.PrimaryStorage40.Span[(active*rowBytes)..].SequenceEqual(primary.AsSpan(active*rowBytes))||
+       !result.SecondaryStorage40.Span[(active*rowBytes)..].SequenceEqual(secondary.AsSpan(active*rowBytes)))
+        throw new Exception("Private destination reuse changed public inputs, heap or inactive alternative blocks.");
+    Console.WriteLine($"PASS owned recombination pools: {active} root rows/{poolRows} allocated pool rows/{allocated} allocated bytes; independent public inputs and inactive blocks.");
+}

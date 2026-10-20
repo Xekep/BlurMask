@@ -30,3 +30,28 @@ The complete before capture SHA256 is
 `34ed943ba53f3ee25bb12ba11586bcfdb873d8578be71dae57326557618b6e23`;
 after is `0bca96bdcbfc2cec9aa4f2a47b6e206096832b5df4e825584f46b273ed3c2432`.
 They remain local diagnostic artifacts; no runtime timing constants are inferred.
+
+## Owned alternative pools
+
+A second change keeps the dispatcher's one privately copied primary/secondary
+pool pair throughout recombination. The root, primary-parent and higher-reset
+producers share the same validation and numerical code with their public APIs;
+an internal-only path updates the dispatcher's owned destination. Public `Create`
+still clones caller inputs, parent snapshots remain defensive copies, source
+ordinals are unchanged and callbacks receive no destination buffers. An exception
+discards private output, with the same pre-existing context side effects.
+
+On the same261 inputs, all complete output fields still match the original
+baseline exactly. Median allocations are now171,139,680 bytes (72.7% below
+baseline), maximum481,801,520. Observed median149.4 ms and maximum1206.3 ms do
+not establish a latency guarantee. The capture SHA256 is
+`5432ccec18357edebba17601137ecfa3527f141a3f387e8e0f3f0c4f54ac696b`.
+
+The existing recombination probe now exercises256 root candidates against4096
+pool rows, enforcing an allocation bound based on owned storage while checking
+unchanged caller inputs, heap and inactive pool blocks. It allocated about767 kB
+under both Managed and NativeAOT. Existing256 mixed-route streams,2598 full80-byte
+callbacks,298 general merges,512 primary-parent and512 higher-reset controls pass;
+actual150-slot captures are byte-identical under Managed/NativeAOT. CI already
+runs this probe in both modes. Other allocation hotspots and end-to-end application
+integration remain separate work.

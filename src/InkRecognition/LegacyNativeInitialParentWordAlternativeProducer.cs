@@ -18,6 +18,21 @@ public static class LegacyNativeInitialParentWordAlternativeProducer
         LegacyNativeWordParentRowLookup parentRowLookup, LegacySymbolContextFactory contexts,
         Func<ushort, ushort> mapSymbol2360, ReadOnlySpan<byte> primaryStorage,
         ReadOnlySpan<byte> secondaryStorage, CancellationToken cancellationToken = default)
+        => CreateCore(heapStorage, activeCount, currentNode, configuration, parentRowLookup, contexts, mapSymbol2360, primaryStorage, secondaryStorage, cancellationToken, null, null);
+
+    // Only the dispatcher's private, already-owned pools may use this path.
+    internal static void UpdateOwned(ReadOnlySpan<byte> heapStorage,
+        int activeCount, uint currentNode, LegacyNativeWordControllerConfiguration configuration,
+        LegacyNativeWordParentRowLookup parentRowLookup, LegacySymbolContextFactory contexts,
+        Func<ushort, ushort> mapSymbol2360, byte[] primaryStorage,
+        byte[] secondaryStorage, CancellationToken cancellationToken = default)
+        => _ = CreateCore(heapStorage, activeCount, currentNode, configuration, parentRowLookup, contexts, mapSymbol2360, primaryStorage, secondaryStorage, cancellationToken, primaryStorage, secondaryStorage);
+
+    private static LegacyNativeInitialParentWordAlternatives CreateCore(ReadOnlySpan<byte> heapStorage,
+        int activeCount, uint currentNode, LegacyNativeWordControllerConfiguration configuration,
+        LegacyNativeWordParentRowLookup parentRowLookup, LegacySymbolContextFactory contexts,
+        Func<ushort, ushort> mapSymbol2360, ReadOnlySpan<byte> primaryStorage,
+        ReadOnlySpan<byte> secondaryStorage, CancellationToken cancellationToken, byte[]? ownedPrimary, byte[]? ownedSecondary)
     {
         ArgumentNullException.ThrowIfNull(parentRowLookup);
         ArgumentNullException.ThrowIfNull(contexts);
@@ -33,7 +48,7 @@ public static class LegacyNativeInitialParentWordAlternativeProducer
             primaryStorage.Length % (pc * 40) != 0 || secondaryStorage.Length % (sc * 40) != 0)
             throw new ArgumentException("Complete bounded heap and alternative row storage required.");
         if (pc == 1 && sc == 1)
-            return new(primaryStorage.ToArray(), secondaryStorage.ToArray());
+            return new((ownedPrimary ?? primaryStorage.ToArray()), (ownedSecondary ?? secondaryStorage.ToArray()));
         for (int index = 0; index < activeCount; index++)
         {
             var slot = heapStorage.Slice(index * 128, 128);
@@ -45,7 +60,7 @@ public static class LegacyNativeInitialParentWordAlternativeProducer
                 sc > 1 && ordinal >= secondaryStorage.Length / (sc * 40))
                 throw new ArgumentException("Ordinal58 must cover each enabled candidate pool.");
         }
-        byte[] primary = primaryStorage.ToArray(), secondary = secondaryStorage.ToArray();
+        byte[] primary = (ownedPrimary ?? primaryStorage.ToArray()), secondary = (ownedSecondary ?? secondaryStorage.ToArray());
         for (int index = 0; index < activeCount; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();

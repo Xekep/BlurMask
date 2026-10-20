@@ -19,6 +19,23 @@ public static class LegacyNativeHigherArcResetAlternativeProducer
         LegacyNativeWordParentRowLookup parentRowLookup, LegacySymbolContextFactory contexts,
         Func<ushort, ushort> mapSymbol2360, ReadOnlySpan<byte> primaryStorage,
         ReadOnlySpan<byte> secondaryStorage, CancellationToken cancellationToken = default)
+        => CreateCore(heapStorage, activeCount, currentNode, configuration, parameters, sourceDescriptorHeaderLookup, parentRowLookup, contexts, mapSymbol2360, primaryStorage, secondaryStorage, cancellationToken, null, null);
+
+    // Only the dispatcher's private, already-owned pools may use this path.
+    internal static void UpdateOwned(ReadOnlySpan<byte> heapStorage,
+        int activeCount, uint currentNode, LegacyNativeWordControllerConfiguration configuration,
+        LegacyNativeHigherArcResetParameters parameters, Func<byte, uint> sourceDescriptorHeaderLookup,
+        LegacyNativeWordParentRowLookup parentRowLookup, LegacySymbolContextFactory contexts,
+        Func<ushort, ushort> mapSymbol2360, byte[] primaryStorage,
+        byte[] secondaryStorage, CancellationToken cancellationToken = default)
+        => _ = CreateCore(heapStorage, activeCount, currentNode, configuration, parameters, sourceDescriptorHeaderLookup, parentRowLookup, contexts, mapSymbol2360, primaryStorage, secondaryStorage, cancellationToken, primaryStorage, secondaryStorage);
+
+    private static LegacyNativeInitialParentWordAlternatives CreateCore(ReadOnlySpan<byte> heapStorage,
+        int activeCount, uint currentNode, LegacyNativeWordControllerConfiguration configuration,
+        LegacyNativeHigherArcResetParameters parameters, Func<byte, uint> sourceDescriptorHeaderLookup,
+        LegacyNativeWordParentRowLookup parentRowLookup, LegacySymbolContextFactory contexts,
+        Func<ushort, ushort> mapSymbol2360, ReadOnlySpan<byte> primaryStorage,
+        ReadOnlySpan<byte> secondaryStorage, CancellationToken cancellationToken, byte[]? ownedPrimary, byte[]? ownedSecondary)
     {
         ArgumentNullException.ThrowIfNull(sourceDescriptorHeaderLookup);
         ArgumentNullException.ThrowIfNull(parentRowLookup);
@@ -31,7 +48,7 @@ public static class LegacyNativeHigherArcResetAlternativeProducer
             (uint)activeCount > (uint)(heapStorage.Length / 128) || primaryStorage.Length % (pc * 40) != 0 ||
             secondaryStorage.Length % (sc * 40) != 0)
             throw new ArgumentException("Complete bounded heap and alternative row storage required.");
-        if (pc == 1 && sc == 1) return new(primaryStorage.ToArray(), secondaryStorage.ToArray());
+        if (pc == 1 && sc == 1) return new((ownedPrimary ?? primaryStorage.ToArray()), (ownedSecondary ?? secondaryStorage.ToArray()));
         for (int index = 0; index < activeCount; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -45,7 +62,7 @@ public static class LegacyNativeHigherArcResetAlternativeProducer
                 sc > 1 && ordinal >= secondaryStorage.Length / (sc * 40))
                 throw new ArgumentException("Actual ordinal58 must address enabled pools.");
         }
-        byte[] primary = primaryStorage.ToArray(), secondary = secondaryStorage.ToArray();
+        byte[] primary = (ownedPrimary ?? primaryStorage.ToArray()), secondary = (ownedSecondary ?? secondaryStorage.ToArray());
         for (int index = 0; index < activeCount; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();

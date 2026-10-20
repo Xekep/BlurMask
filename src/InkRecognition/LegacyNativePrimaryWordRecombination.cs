@@ -74,9 +74,8 @@ public static class LegacyNativePrimaryWordRecombination
             if (previous == uint.MaxValue)
             {
                 route = LegacyNativePrimaryWordRecombinationRoute.Root;
-                var result = LegacyNativeRootWordAlternativeProducer.Create(slot, 1, currentNode,
+                LegacyNativeRootWordAlternativeProducer.UpdateOwned(slot, 1, currentNode,
                     configuration, contexts, mapSymbol2360, primary, secondary, cancellationToken);
-                primary = result.PrimaryStorage.ToArray(); secondary = result.SecondaryStorage.ToArray();
             }
             else
             {
@@ -86,9 +85,8 @@ public static class LegacyNativePrimaryWordRecombination
                 if (parentOrdinal < configuration.PrimaryArcLimit230a)
                 {
                     route = LegacyNativePrimaryWordRecombinationRoute.PrimaryParent;
-                    var result = LegacyNativeInitialParentWordAlternativeProducer.Create(slot, 1, currentNode,
+                    LegacyNativeInitialParentWordAlternativeProducer.UpdateOwned(slot, 1, currentNode,
                         configuration, Lookup, contexts, mapSymbol2360, primary, secondary, cancellationToken);
-                    primary = result.PrimaryStorage.ToArray(); secondary = result.SecondaryStorage.ToArray();
                 }
                 else
                 {
@@ -97,10 +95,9 @@ public static class LegacyNativePrimaryWordRecombination
                         header, U16(slot, 36), resetParameters.SpecialLabel24ea))
                     {
                         route = LegacyNativePrimaryWordRecombinationRoute.SecondaryParentReset;
-                        var result = LegacyNativeHigherArcResetAlternativeProducer.Create(slot, 1, currentNode,
+                        LegacyNativeHigherArcResetAlternativeProducer.UpdateOwned(slot, 1, currentNode,
                             configuration, resetParameters, Header, Lookup, contexts, mapSymbol2360,
                             primary, secondary, cancellationToken);
-                        primary = result.PrimaryStorage.ToArray(); secondary = result.SecondaryStorage.ToArray();
                     }
                     else
                     {

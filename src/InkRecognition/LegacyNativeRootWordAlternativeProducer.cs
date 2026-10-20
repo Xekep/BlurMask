@@ -15,6 +15,21 @@ public static class LegacyNativeRootWordAlternativeProducer
         LegacySymbolContextFactory contexts, Func<ushort, ushort> mapSymbol2360,
         ReadOnlySpan<byte> primaryStorage, ReadOnlySpan<byte> secondaryStorage,
         CancellationToken cancellationToken = default)
+        => CreateCore(heapStorage, activeCount, currentNode, configuration, contexts, mapSymbol2360, primaryStorage, secondaryStorage, cancellationToken, null, null);
+
+    // Only the dispatcher's private, already-owned pools may use this path.
+    internal static void UpdateOwned(ReadOnlySpan<byte> heapStorage,
+        int activeCount, uint currentNode, LegacyNativeWordControllerConfiguration configuration,
+        LegacySymbolContextFactory contexts, Func<ushort, ushort> mapSymbol2360,
+        byte[] primaryStorage, byte[] secondaryStorage,
+        CancellationToken cancellationToken = default)
+        => _ = CreateCore(heapStorage, activeCount, currentNode, configuration, contexts, mapSymbol2360, primaryStorage, secondaryStorage, cancellationToken, primaryStorage, secondaryStorage);
+
+    private static LegacyNativeRootWordAlternatives CreateCore(ReadOnlySpan<byte> heapStorage,
+        int activeCount, uint currentNode, LegacyNativeWordControllerConfiguration configuration,
+        LegacySymbolContextFactory contexts, Func<ushort, ushort> mapSymbol2360,
+        ReadOnlySpan<byte> primaryStorage, ReadOnlySpan<byte> secondaryStorage,
+        CancellationToken cancellationToken, byte[]? ownedPrimary, byte[]? ownedSecondary)
     {
         ArgumentNullException.ThrowIfNull(contexts);
         ArgumentNullException.ThrowIfNull(mapSymbol2360);
@@ -33,7 +48,7 @@ public static class LegacyNativeRootWordAlternativeProducer
             throw new ArgumentException("Complete alternative pool rows required.");
 
         if (primaryCount == 1 && secondaryCount == 1)
-            return new(primaryStorage.ToArray(), secondaryStorage.ToArray());
+            return new((ownedPrimary ?? primaryStorage.ToArray()), (ownedSecondary ?? secondaryStorage.ToArray()));
 
         // Refuse unsupported parent branches before changing the shared index.
         for (int slotIndex = 0; slotIndex < activeCount; slotIndex++)
@@ -52,8 +67,8 @@ public static class LegacyNativeRootWordAlternativeProducer
                 _ = contexts.ReadNode(suffix);
         }
 
-        byte[] primary = primaryStorage.ToArray();
-        byte[] secondary = secondaryStorage.ToArray();
+        byte[] primary = (ownedPrimary ?? primaryStorage.ToArray());
+        byte[] secondary = (ownedSecondary ?? secondaryStorage.ToArray());
         for (int slotIndex = 0; slotIndex < activeCount; slotIndex++)
         {
             cancellationToken.ThrowIfCancellationRequested();
