@@ -198,39 +198,18 @@ public sealed class LegacyOwnedMainOrdinaryGlyphRefresh
             }
             state.SourceAllocation26 = state.Source.CopySourceAllocation26();
             state.SourceScoreBits = Scoring.ReadFirstCandidateScoreBits(state.Source, token);
-            int first = starts[state.Source.BaseNode], end = starts[state.Source.BaseNode + 1], visited = 0;
-            for (int index = first; index < end; index++)
+            LegacyRussianMainReplacementResolution Resolve(ushort symbol,CancellationToken ct)
             {
-                token.ThrowIfCancellationRequested(); ReadOnlySpan<byte> row = compact.AsSpan(index * 40, 40);
-                byte traits = row[0x20];
-                if ((traits & 0x20) == 0 || (traits & 7) != 0 ||
-                    BinaryPrimitives.ReadUInt64LittleEndian(row[8..]) != state.Source.BaseSourceKey) continue;
-                var inserted = pool.AppendDescriptor(canonicalOwnerKey, index - first, false, allocatedRecordStorage40, token);
-                ushort symbol = BinaryPrimitives.ReadUInt16LittleEndian(row[0x1c..]);
-                ushort emitted, normalized; byte variant = 0;
-                if (symbol == replacement)
-                {
-                    var resolved = callbacks.ResolveReplacement(state.Source.BaseNode, state.Source.BaseArc, token);
-                    emitted = resolved.EmittedSymbol; normalized = resolved.NormalizedOriginal; variant = resolved.ExternalVariant;
-                }
-                else
-                {
-                    var resolved = resolver.Resolve(symbol, 0, false, token);
-                    emitted = resolved.EmittedSymbol; normalized = resolved.NormalizedOriginal;
-                }
-                if (!LegacyNativeGlyphSymbolUpdate.Apply(pool, inserted.Reference, emitted, 1, 0, variant != 0, token))
-                    throw new NotSupportedException("Actual ordinary scalar symbol update did not complete.");
-                byte[] record = pool.CopyRecord(inserted.Reference, token);
-                uint symbolScore = Scoring.ReadSymbolScoreBits(state.Source, normalized, token);
-                BinaryPrimitives.WriteUInt32LittleEndian(record.AsSpan(0x10), symbolScore);
-                pool.ReplaceRecord(inserted.Reference, record, token);
-                var scores = Scoring.ReadPreparedSymbol(state.Source, normalized, (traits & 0x40) != 0, token);
-                BinaryPrimitives.WriteInt32LittleEndian(record.AsSpan(0x14), scores.Cost);
-                BinaryPrimitives.WriteSingleLittleEndian(record.AsSpan(0x0c), row[0x21] / 255f);
-                ushort flags = BinaryPrimitives.ReadUInt16LittleEndian(record.AsSpan(4));
-                BinaryPrimitives.WriteUInt16LittleEndian(record.AsSpan(4), (ushort)((flags & 0xfff7) | ((traits & 0x40) != 0 ? 8 : 0)));
-                pool.ReplaceRecord(inserted.Reference, record, token); visited++;
+                if(symbol==replacement)return callbacks.ResolveReplacement(state.Source.BaseNode,state.Source.BaseArc,ct);
+                var resolved=resolver.Resolve(symbol,0,false,ct);
+                return new(resolved.EmittedSymbol,resolved.NormalizedOriginal,0);
             }
+            var operations=new LegacyOrdinaryGlyphRefreshOperations(Resolve,
+                (symbol,ct)=>Scoring.ReadSymbolScoreBits(state.Source,symbol,ct),
+                (symbol,end,ct)=>new(Scoring.ReadPreparedSymbol(state.Source,symbol,end,ct).Cost));
+            int visited=LegacyNativeOrdinaryGlyphRefreshKernel.Apply(pool,canonicalOwnerKey,compact,
+                starts[state.Source.BaseNode],starts[state.Source.BaseNode+1],state.Source.BaseSourceKey,
+                operations,allocatedRecordStorage40,token);
             token.ThrowIfCancellationRequested();
             return state.Completed = new(this, state.Source, state.SourceScoreBits.Value, visited);
         }

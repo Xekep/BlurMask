@@ -35,6 +35,11 @@ public sealed class LegacyFreshMainGlobalOrdinaryGlyphProducer
         LegacyOrdinaryGlyphProductionScratch scratch,ulong conversionArgument=0,
         ReadOnlySpan<byte> preparedCompact40=default,CancellationToken token=default)
         =>LegacyMainOrdinaryGlyphProductionKernel.Produce(operations,preparedRow72,scratch,conversionArgument,preparedCompact40,token);
+    internal LegacyRussianMainReplacementResolution ResolveForRefresh(int node,ushort arc,ushort symbol,CancellationToken token)
+    {
+        _=Geometry.Group(node,arc,token);
+        return ResolveOwnedSymbol(symbol,0,node,arc,token);
+    }
     private LegacyRussianMainReplacementResolution ResolveOwnedSymbol(ushort symbol,ulong conversion,int node,ushort arc,CancellationToken token)
     {
         token.ThrowIfCancellationRequested();int count=Geometry.Policy.Owner.Model.AcousticAlphabet.LabelCount;

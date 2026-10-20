@@ -12,6 +12,7 @@ public sealed class LegacyFreshMainGlobalGlyphExecutionSession
     private readonly object gate=new();
     private int next,active;
     private bool stopped;
+    internal LegacyFreshMainGlobalOrdinaryGlyphProducer OrdinaryProducer=>ordinary;
     public LegacyFreshMainGlobalPlainResultOwnership Ownership{get;}
     public LegacyFreshMainGlobalGlyphAssociationSession Associations{get;}
     public LegacyFreshMainGlobalSourceWidthStatistics Width{get;}

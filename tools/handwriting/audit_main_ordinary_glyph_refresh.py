@@ -36,19 +36,28 @@ for address, mnemonic, operands in pins:
     assert instructions[address] == (mnemonic, operands)
 code = (root / 'src/InkRecognition/LegacyOwnedMainOrdinaryGlyphRefresh.cs').read_text(encoding='utf-8')
 order = ['state.Source = SourceMetadata.Read(', 'state.SourceAllocation26 =',
-         'state.SourceScoreBits =', 'pool.AppendDescriptor(', 'resolver.Resolve(',
-         'LegacyNativeGlyphSymbolUpdate.Apply(', 'Scoring.ReadSymbolScoreBits(',
-         'record.AsSpan(0x10)', 'Scoring.ReadPreparedSymbol(', 'record.AsSpan(0x14)',
-         'record.AsSpan(0x0c)']
+         'state.SourceScoreBits =', 'LegacyNativeOrdinaryGlyphRefreshKernel.Apply(']
 positions = [code.index(part) for part in order]
 assert positions == sorted(positions)
-assert 'index - first, false, allocatedRecordStorage40' in code
-assert 'state.Source.BaseSourceKey) continue;' in code
+kernel = (root / 'src/InkRecognition/LegacyNativeOrdinaryGlyphRefreshKernel.cs').read_text(encoding='utf-8')
+kernel_order = ['pool.AppendDescriptor(', 'operations.ResolveSymbol(',
+                'LegacyNativeGlyphSymbolUpdate.Apply(', 'operations.ReadSymbolScoreBits(',
+                'record.AsSpan(0x10)', 'operations.ReadPreparedSymbol(', 'record.AsSpan(0x14)',
+                'record.AsSpan(0x0c)']
+positions = [kernel.index(part) for part in kernel_order]
+assert positions == sorted(positions)
+assert 'index - first, false, allocatedRecordStorage40' in kernel
+assert '!= baseSourceKey) continue;' in kernel
+assert 'if(symbol==replacement)return callbacks.ResolveReplacement(state.Source.BaseNode,state.Source.BaseArc,ct);' in code
+assert 'var resolved=resolver.Resolve(symbol,0,false,ct);' in code
+assert 'Scoring.ReadSymbolScoreBits(state.Source,symbol,ct)' in code
+assert 'Scoring.ReadPreparedSymbol(state.Source,symbol,end,ct)' in code
 assert 'progress.Add(canonicalOwnerKey, state)' in code
 report = dict(function=[hex(start), hex(end)], pins=len(pins), binding='ordinary240.V90=217670',
-              managedOrder=order, actualScope='Nonnegative ordinary CASE source owners; native scalar/pool order preserved',
+              managedOrder=order, sharedKernelOrder=kernel_order,
+              actualScope='Nonnegative ordinary CASE source owners; actual owner delegates preserve native scalar/pool order',
               remaining=['negative/span sources', 'native retry behavior after a failed4000 refresh', 'full final string-wrapper acceptance'],
               noVendorExecution=True)
 args.output.parent.mkdir(parents=True, exist_ok=True)
 args.output.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
-print('PASS10 ordered native instructions/actual240.V90 binding/11 managed stage-order pins; no full-wrapper claim.')
+print('PASS10 unchanged native instructions/actual240.V90 binding/old owner and shared-kernel ordered stages; no full-wrapper claim.')
