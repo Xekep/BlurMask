@@ -6,7 +6,7 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
-Three additional owning joins now have independent latest-branch checks.
+Additional owning joins now have independent latest-branch checks.
 The [original-source history](legacy-library-original-source-history.md)
 executes actual transferred CHAR/WORD/TEXT commands against the original
 source registry and retains a separate generated inverse journal. Fourteen
@@ -23,6 +23,18 @@ independent resource/geometry/prefix oracle with byte-identical Managed and
 NativeAOT captures. Old ordinary/configured/emission captures remain unchanged.
 Global source-rich CHAR/WORD/TEXT publication and quality evaluation remain
 separate.
+
+The [live global glyph choices](legacy-global-text-glyph-choices.md) now join
+that same scope and completed source to all-owner refresh, actual alternative
+selection, UTF8 publication and original packed ranges. Thirteen actual inputs,
+including all nine recorded Russian words, produce37 glyphs/80 alternatives/
+38 source ranges with byte-identical Managed/NativeAOT and an independent
+raw-resource oracle. One immutable input map is shared across glyphs, and direct
+string access after scope close is checked for all13 inputs. The nine
+[attributed coordinate fixtures](../tools/test-data/russian-recorded-words/README.md)
+are now tracked for offline CI; expected labels do not enter recognition.
+Russian quality remains4/9 exact,16/33 character edits. Source-node publication,
+document acceptance and application replacement are still separate.
 
 The [original Math field source](legacy-math2-owned-original-field-source.md)
 now creates INPUT102, clones the selected field and forms C23 before inference,
@@ -191,8 +203,9 @@ establishes live TOP/source completion before detached byte import. The
 the same selected document before NN and completes actual forward count/fill,
 ranking and275 scores for one ordinary no-pending/no-bit8 WORD. Six actual
 scopes/126 cached NN groups/720 full WORD bytes/212 guards pass independent
-checks and NativeAOT without repeating inference. Global glyph refresh is now
-owned as described above; source-rich CHAR/WORD/TEXT and final document publication remain unfinished;
+checks and NativeAOT without repeating inference. Global glyph refresh and
+UTF8 alternatives/original ranges are now owned as described above; source-rich
+CHAR/WORD/TEXT and final document publication remain unfinished;
 existing imported completion is not a substitute. The
 [owning document publisher](legacy-library-text-publication-document.md)
 now joins source lines, TEXT registration, coverage, cleanup, detached DOM,
