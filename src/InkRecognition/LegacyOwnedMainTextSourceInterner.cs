@@ -17,6 +17,7 @@ public sealed class LegacyOwnedMainTextSourceNode
     public int RangeCount => ranges.Length;
     public LegacyOwnedMainProcessedGlyphSource? FirstProcessedSource {get;}
     public LegacyOwnedMainWordSourceCollection? FirstWordSource {get;}
+    public LegacyFreshMainGlobalProcessedGlyphSource? FirstGlobalSource {get;}
     public LegacyOwnedMainGlyphDocumentPositions FirstSourcePositions => firstSource ??
         throw new InvalidOperationException("Explicitly prepared numeric node has no actual source-position producer.");
     internal LegacyOwnedMainTextSourceNode? Left,Right,Previous,Next;
@@ -24,8 +25,9 @@ public sealed class LegacyOwnedMainTextSourceNode
     internal ReadOnlySpan<LegacyNativeInkPositionRange> Key=>ranges;
     internal LegacyOwnedMainTextSourceNode(LegacyOwnedMainTextSourceInterner owner,int identity,
         LegacyNativeInkPositionRange[] key,LegacyOwnedMainGlyphDocumentPositions? source,
-        LegacyOwnedMainProcessedGlyphSource? processed=null,LegacyOwnedMainWordSourceCollection? wordSource=null)
-    {Owner=owner;Identity=identity;ranges=key;firstSource=source;FirstProcessedSource=processed;FirstWordSource=wordSource;}
+        LegacyOwnedMainProcessedGlyphSource? processed=null,LegacyOwnedMainWordSourceCollection? wordSource=null,
+        LegacyFreshMainGlobalProcessedGlyphSource? globalSource=null)
+    {Owner=owner;Identity=identity;ranges=key;firstSource=source;FirstProcessedSource=processed;FirstWordSource=wordSource;FirstGlobalSource=globalSource;}
     public byte[] CopyRanges16()
     {
         byte[] bytes=new byte[ranges.Length*16];
@@ -78,6 +80,17 @@ public sealed class LegacyOwnedMainTextSourceInterner
 
     internal LegacyOwnedMainTextSourceInternResult InternPrepared(ReadOnlySpan<LegacyNativeInkPositionRange> key,
         CancellationToken token=default)=>InternCore(key.ToArray(),null,token);
+    internal LegacyOwnedMainTextSourceInternResult InternGlobalProcessed(LegacyFreshMainGlobalProcessedGlyphSource actual,
+        CancellationToken token)
+    {
+        actual.Owner.RequireCurrentSource(actual,token);
+        if(!ReferenceEquals(actual.Document,Document)||!ReferenceEquals(actual.Owner.CharacterInterner,this))
+            throw new ArgumentException("Actual global processed source and exact scope CHAR interner required.");
+        var result=InternCore(actual.CopyRanges(token),null,token,globalSource:actual);
+        if(result.Node.FirstGlobalSource is not{} first||!ReferenceEquals(first.Owner,actual.Owner))
+            throw new InvalidOperationException("Prepared, old or foreign source nodes cannot become global payloads.");
+        return result;
+    }
 
     internal LegacyOwnedMainTextSourceInternResult InternWordSource(LegacyOwnedMainWordSourceCollection source,
         CancellationToken token)
@@ -89,7 +102,8 @@ public sealed class LegacyOwnedMainTextSourceInterner
 
     private LegacyOwnedMainTextSourceInternResult InternCore(LegacyNativeInkPositionRange[] key,
         LegacyOwnedMainGlyphDocumentPositions? source,CancellationToken token,
-        LegacyOwnedMainProcessedGlyphSource? processed=null,LegacyOwnedMainWordSourceCollection? wordSource=null)
+        LegacyOwnedMainProcessedGlyphSource? processed=null,LegacyOwnedMainWordSourceCollection? wordSource=null,
+        LegacyFreshMainGlobalProcessedGlyphSource? globalSource=null)
     {
         token.ThrowIfCancellationRequested();
         if(key.Length>65536)throw new ArgumentOutOfRangeException(nameof(key));
@@ -107,7 +121,7 @@ public sealed class LegacyOwnedMainTextSourceInterner
             token.ThrowIfCancellationRequested();
             //No callbacks/cancellation occur once links are changed. Native
             //01B4E0 has no cancellation callback inside its AVL mutation.
-            var node=new LegacyOwnedMainTextSourceNode(this,inserted.Count+1,key,source,processed,wordSource);
+            var node=new LegacyOwnedMainTextSourceNode(this,inserted.Count+1,key,source,processed,wordSource,globalSource);
             if(inserted.Count!=0){node.Previous=inserted[^1];inserted[^1].Next=node;}
             root=Insert(root,node);inserted.Add(node);rangeCount+=key.Length;
             return new(node,true);

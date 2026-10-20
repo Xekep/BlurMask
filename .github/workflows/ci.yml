@@ -789,6 +789,9 @@ jobs:
           python -I tools/LegacyGlobalOrdinaryRefresh.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-separation-profile.json .artifacts/legacy-global-ordinary-refresh-managed.json
           dotnet run --project tools/LegacyGlobalTextGlyphChoices.Probe -c Release -- models .artifacts/legacy-global-text-glyph-choices-managed.json tools/test-data/russian-recorded-words/manifest.json
           python -I tools/LegacyGlobalTextGlyphChoices.Probe/audit_output.py models .artifacts/legacy-global-text-glyph-choices-managed.json
+          python tools/LegacyMainTextSourceWrapper.Probe/reference_controls.py .artifacts/legacy-global-text-source-wrapper-controls.json
+          dotnet run --project tools/LegacyGlobalTextSourceWrapper.Probe -c Release -- models tools/test-data/russian-recorded-words/manifest.json .artifacts/legacy-global-text-source-wrapper-managed.json .artifacts/legacy-global-text-source-wrapper-controls.json
+          python -I tools/LegacyGlobalTextSourceWrapper.Probe/audit_output.py models .artifacts/legacy-global-text-source-wrapper-managed.json
           dotnet run --project tools/LegacyTextPublicationDocument.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json models/text-unicode/legacy-circled-payload-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-text-publication-document-managed.json
           python tools/LegacyTextPublicationDocument.Probe/audit_output.py .artifacts/legacy-text-publication-document-managed.json
           dotnet run --project tools/LegacySelectedInputRegistryReplay.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json models/text-unicode/legacy-circled-payload-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-selected-input-registry-replay-managed.json
@@ -835,6 +838,8 @@ jobs:
           python tools/LegacyEnglish119Terminal.Probe/audit_output.py models .artifacts/legacy-en119-context-managed.json .artifacts/legacy-en119-terminal-managed.json
           dotnet run --project tools/LegacyEnglish119PlainText.Probe -c Release -- models .artifacts/legacy-en119-controller-managed.json .artifacts/legacy-en119-plain-text-managed.json
           python -I tools/LegacyEnglish119PlainText.Probe/audit_output.py models .artifacts/legacy-en119-candidates-managed.json .artifacts/legacy-en119-controller-managed.json .artifacts/legacy-en119-confidence-managed.json .artifacts/legacy-en119-primary-managed.json .artifacts/legacy-en119-terminal-managed.json .artifacts/legacy-en119-plain-text-managed.json
+          dotnet run --project tools/LegacyEnglish119SourceRecords.Probe -c Release -- models .artifacts/legacy-en119-controller-managed.json .artifacts/legacy-en119-source-records-managed.json
+          python -I tools/LegacyEnglish119SourceRecords.Probe/audit_output.py models .artifacts/legacy-en119-controller-managed.json .artifacts/legacy-en119-plain-text-managed.json .artifacts/legacy-en119-source-records-managed.json
           dotnet run --project tools/LegacyEnglishLiteFirstPreprocessing.Probe -c Release -- models .artifacts/legacy-en-short-controls.json .artifacts/legacy-en-short-managed.json
           python tools/LegacyEnglishLiteFirstPreprocessing.Probe/audit_output.py models .artifacts/legacy-en-short-managed.json
           dotnet run --project tools/LegacyPreparedNetwork107.Probe -c Release -- models models/ru-RU/legacy-engine-profile.json .artifacts/legacy-prepared-network107-managed.json
@@ -1493,6 +1498,7 @@ jobs:
             @{ Name = 'LegacyGlobalTextPublication'; Args = @('models', '.artifacts/legacy-global-text-publication-native.json') },
             @{ Name = 'LegacyGlobalOrdinaryRefresh'; Args = @('models', '.artifacts/legacy-global-ordinary-refresh-native.json') },
             @{ Name = 'LegacyGlobalTextGlyphChoices'; Args = @('models', '.artifacts/legacy-global-text-glyph-choices-native.json', 'tools/test-data/russian-recorded-words/manifest.json') },
+            @{ Name = 'LegacyGlobalTextSourceWrapper'; Args = @('models', 'tools/test-data/russian-recorded-words/manifest.json', '.artifacts/legacy-global-text-source-wrapper-native.json', '.artifacts/legacy-global-text-source-wrapper-controls.json') },
             @{ Name = 'LegacyTextPublicationDocument'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-text-publication-document-native.json') },
             @{ Name = 'LegacySelectedInputRegistryReplay'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-selected-input-registry-replay-native.json') },
             @{ Name = 'LegacyOriginalInputPatchCompatibility'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-original-input-patch-compatibility-native.json') },
@@ -1514,6 +1520,7 @@ jobs:
             @{ Name = 'LegacyEnglish119Context'; Args = @('models', '.artifacts/legacy-en119-controller-native.json', '.artifacts/legacy-en119-primary-controls.json', '.artifacts/legacy-en119-context-native.json') },
             @{ Name = 'LegacyEnglish119Terminal'; Args = @('models', '.artifacts/legacy-en119-controller-native.json', '.artifacts/legacy-en119-terminal-native.json') },
             @{ Name = 'LegacyEnglish119PlainText'; Args = @('models', '.artifacts/legacy-en119-controller-native.json', '.artifacts/legacy-en119-plain-text-native.json') },
+            @{ Name = 'LegacyEnglish119SourceRecords'; Args = @('models', '.artifacts/legacy-en119-controller-native.json', '.artifacts/legacy-en119-source-records-native.json') },
             @{ Name = 'LegacyEnglishLiteFirstPreprocessing'; Args = @('models', '.artifacts/legacy-en-short-controls.json', '.artifacts/legacy-en-short-native.json') },
             @{ Name = 'LegacyPreparedNetwork107'; Args = @('models', 'models/ru-RU/legacy-engine-profile.json', '.artifacts/legacy-prepared-network107-native.json') },
             @{ Name = 'LegacyMainWordRanking'; Args = @('.artifacts/legacy-main-word-ranking-native.json') },
@@ -2156,6 +2163,11 @@ jobs:
               if ($LASTEXITCODE -ne 0) { throw 'Global glyph choices native oracle failed' }
               if ((Get-FileHash .artifacts/legacy-global-text-glyph-choices-native.json).Hash -ne (Get-FileHash .artifacts/legacy-global-text-glyph-choices-managed.json).Hash) { throw 'Global glyph choices Managed/Native parity failed' }
             }
+            if ($name -eq 'LegacyGlobalTextSourceWrapper') {
+              python -I tools/LegacyGlobalTextSourceWrapper.Probe/audit_output.py models .artifacts/legacy-global-text-source-wrapper-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyGlobalTextSourceWrapper independent audit failed' }
+              if ((Get-FileHash .artifacts/legacy-global-text-source-wrapper-native.json).Hash -ne (Get-FileHash .artifacts/legacy-global-text-source-wrapper-managed.json).Hash) { throw 'LegacyGlobalTextSourceWrapper Managed/Native parity failed' }
+            }
             if ($name -eq 'LegacyTextPublicationDocument') {
               python tools/LegacyTextPublicationDocument.Probe/audit_output.py .artifacts/legacy-text-publication-document-native.json
               if ($LASTEXITCODE -ne 0) { throw 'LegacyTextPublicationDocument independent audit failed' }
@@ -2239,6 +2251,11 @@ jobs:
             if ($name -eq 'LegacyEnglish119PlainText') {
               python -I tools/LegacyEnglish119PlainText.Probe/audit_output.py models .artifacts/legacy-en119-candidates-native.json .artifacts/legacy-en119-controller-native.json .artifacts/legacy-en119-confidence-native.json .artifacts/legacy-en119-primary-native.json .artifacts/legacy-en119-terminal-native.json .artifacts/legacy-en119-plain-text-native.json
               if ($LASTEXITCODE -ne 0) { throw 'LegacyEnglish119PlainText independent audit failed' }
+            }
+            if ($name -eq 'LegacyEnglish119SourceRecords') {
+              python -I tools/LegacyEnglish119SourceRecords.Probe/audit_output.py models .artifacts/legacy-en119-controller-native.json .artifacts/legacy-en119-plain-text-native.json .artifacts/legacy-en119-source-records-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyEnglish119SourceRecords independent audit failed' }
+              if ((Get-FileHash .artifacts/legacy-en119-source-records-native.json).Hash -ne (Get-FileHash .artifacts/legacy-en119-source-records-managed.json).Hash) { throw 'LegacyEnglish119SourceRecords Managed/Native parity failed' }
             }
             if ($name -eq 'LegacyEnglishLiteFirstPreprocessing') {
               python tools/LegacyEnglishLiteFirstPreprocessing.Probe/audit_output.py models .artifacts/legacy-en-short-native.json

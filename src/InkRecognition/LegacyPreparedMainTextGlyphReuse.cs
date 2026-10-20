@@ -43,7 +43,9 @@ public sealed class LegacyPreparedMainTextGlyphReuse
     private readonly LegacyNativeUnicodeNormalizationData normalization;
     private readonly object gate = new();
     private bool failed;
-    public LegacyFreshMainGlyphUtf8Emission Emission { get; }
+    private readonly LegacyFreshMainGlyphUtf8Emission? emission;
+    private readonly LegacyFreshMainGlobalTextSourceWrapper? globalOwner;
+    public LegacyFreshMainGlyphUtf8Emission Emission=>emission??throw new InvalidOperationException("Global reuse has no legacy emitter.");
     public uint AggregateFlags { get; private set; }
     public int RecordCount { get { lock(gate) return rows.Count; } }
 
@@ -56,7 +58,7 @@ public sealed class LegacyPreparedMainTextGlyphReuse
         ArgumentNullException.ThrowIfNull(properties); ArgumentNullException.ThrowIfNull(normalization);
         ArgumentNullException.ThrowIfNull(existingRecords);
         if(existingRecords.Count>65536)throw new ArgumentOutOfRangeException(nameof(existingRecords));
-        Emission=actualEmission;strings=actualStringPool;this.properties=properties;this.normalization=normalization;
+        emission=actualEmission;strings=actualStringPool;this.properties=properties;this.normalization=normalization;
         AggregateFlags=aggregateFlags;
         foreach(var record in existingRecords)
         {
@@ -70,12 +72,42 @@ public sealed class LegacyPreparedMainTextGlyphReuse
     {
         lock(gate)return Array.AsReadOnly(rows.Select(r=>new LegacyPreparedTextGlyphReuseRecord(r.Storage,r.Text)).ToArray());
     }
+    private LegacyPreparedMainTextGlyphReuse(LegacyFreshMainGlobalTextSourceWrapper owner,
+        IReadOnlyList<LegacyPreparedTextGlyphReuseRecord> existingRecords,uint aggregateFlags)
+    {
+        owner.Validate(default);globalOwner=owner;strings=owner.Choices.StringPool;
+        properties=owner.Choices.Properties;normalization=owner.Choices.Normalization;AggregateFlags=aggregateFlags;
+        if(existingRecords.Count>65536)throw new ArgumentOutOfRangeException(nameof(existingRecords));
+        foreach(var record in existingRecords)
+        {if(record.Text is not null)strings.Validate(record.Text);rows.Add(new(record.CopyStorage40(),record.Text));}
+    }
+    internal static LegacyPreparedMainTextGlyphReuse CreateGlobal(LegacyFreshMainGlobalTextSourcePayload payload,
+        IReadOnlyList<LegacyPreparedTextGlyphReuseRecord> records,uint aggregateFlags)
+    {
+        payload.Owner.RequireInitializingPayload(payload);return new(payload.Owner,records,aggregateFlags);
+    }
+    internal LegacyPreparedTextGlyphReuseResult ApplyGlobal(LegacyFreshMainGlobalTextSourcePayload payload,
+        LegacyGlobalSourceSelectedGlyph selected,CancellationToken token)
+    {
+        if(globalOwner is null||!ReferenceEquals(globalOwner,payload.Owner)||!ReferenceEquals(payload.ReuseKernel,this))
+            throw new ArgumentException("Exact typed global source payload and reuse kernel required.");
+        globalOwner.RequireReusablePayload(payload,selected,token);
+        byte[] selections=selected.Selection.CopySelectionRows4();
+        ulong key=LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(selected.Reference);
+        return Process(selections.Length/4,unchecked((int)selected.Selection.SelectedMarker!.Value),i=>
+        {
+            ushort ordinal=BinaryPrimitives.ReadUInt16LittleEndian(selections.AsSpan(i*4));
+            var glyph=selected.Glyphs.Resolve(key|((ulong)ordinal<<40));
+            return new(glyph.PublicationFlags,globalOwner.Choices.Emitter.Emit(glyph,token));
+        },token);
+    }
 
     public LegacyPreparedTextGlyphReuseResult Apply(LegacyNativeGlyphRecordOwner actualSnapshot,
         ReadOnlySpan<byte> selectionRows4, ulong referenceBase, int selectedInputIndex,
         CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(actualSnapshot);token.ThrowIfCancellationRequested();
+        if(emission is null)throw new InvalidOperationException("Legacy Apply cannot accept a global emitter.");
         if(selectionRows4.Length%4!=0||selectionRows4.Length>65536*4||
             referenceBase!=LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(referenceBase))
             throw new ArgumentException("Bounded complete selection rows and canonical source key required.");

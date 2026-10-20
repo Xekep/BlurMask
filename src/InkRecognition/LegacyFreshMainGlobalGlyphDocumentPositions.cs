@@ -24,6 +24,8 @@ internal sealed class LegacyFreshMainGlobalGlyphProjectionContext
     private readonly LegacyNativeTextSourceInputMap map;
     private readonly LegacyNativeInkPositionRange[] original;
     internal LegacyLibraryGlobalTextPublicationScope Scope {get;}
+    internal LegacyNativeInkPositionRange[] CopyOriginalRoot(CancellationToken token)
+    {Scope.Validate();completion.Validate(token);return original.ToArray();}
     internal LegacyFreshMainGlobalGlyphProjectionContext(LegacyLibraryGlobalTextPublicationScope scope,
         LegacyFreshMainGlobalNoCandidateSourceCompletion completion,CancellationToken token)
     {

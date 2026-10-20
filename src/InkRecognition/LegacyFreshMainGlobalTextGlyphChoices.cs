@@ -38,12 +38,17 @@ public sealed class LegacyFreshMainGlobalTextGlyphChoices
     private readonly byte[] header;
     private readonly LegacyFreshMainGlobalGlyphProjectionContext projection;
     private bool entered,faulted;
+    private LegacyFreshMainGlobalTextSourceWrapper? sourceWrapper;
     public LegacyFreshMainGlobalNoCandidateSourceCompletion Completion{get;}
     public LegacyFreshMainGlobalOrdinaryGlyphRefresh Refresh{get;}
     public LegacyFreshMainGlobalGlyphUtf8Emission Emitter{get;}
     public LegacyOwnedRawInkDocument Document=>scope.Document;
     public bool IsFaulted{get{lock(gate)return faulted;}}
     internal LegacyNativeUtf8StringPool StringPool=>strings;
+    internal LegacyLibraryGlobalTextPublicationScope Scope=>scope;
+    internal LegacyNativeTextPublicationData Properties=>properties;
+    internal LegacyNativeUnicodeNormalizationData Normalization=>normalization;
+    internal LegacyFreshMainGlobalGlyphProjectionContext Projection=>projection;
     private LegacyFreshMainGlobalTextGlyphChoices(LegacyLibraryGlobalTextPublicationScope scope,
         LegacyFreshMainGlobalNoCandidateSourceCompletion completion,ReadOnlySpan<byte> resource,
         LegacyNativeTextPublicationData properties,LegacyNativeUnicodeNormalizationData normalization,
@@ -140,4 +145,42 @@ public sealed class LegacyFreshMainGlobalTextGlyphChoices
             catch{faulted=true;throw;}
         }
     }
+    internal void ClaimSourceWrapper(LegacyFreshMainGlobalTextSourceWrapper actual,CancellationToken token)
+    {
+        lock(gate)
+        {
+            Validate(token);
+            if(!ReferenceEquals(actual.Choices,this)||!ReferenceEquals(actual.Scope,scope)||entered)
+                throw new ArgumentException("One actual identical global wrapper/publication required.");
+            actual.ValidatePreclaim(token);entered=true;sourceWrapper=actual;
+        }
+    }
+    internal void ValidateWrapper(LegacyFreshMainGlobalTextSourceWrapper actual,CancellationToken token)
+    {
+        Validate(token);
+        if(!ReferenceEquals(sourceWrapper,actual)||!ReferenceEquals(actual.Choices,this))
+            throw new ArgumentException("Exact claimed global source wrapper required.");
+    }
+    internal LegacyGlobalSourceSelectedGlyph SelectForWrapper(LegacyFreshMainGlobalTextSourceWrapper actual,
+        int index,ReadOnlySpan<byte> allocation4,CancellationToken token)
+    {
+        ValidateWrapper(actual,token);actual.RequireNextSelection(index,token);
+        ulong reference=actual.ReferenceAt(index),key=LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(reference);
+        uint marker=unchecked((uint)(int)(short)(reference>>40));
+        var selected=LegacyPreparedGlyphAlternativeSelection.Select(Emitter.TopOwner.GlyphPool.CopyOwnerNode(key,token),
+            marker,allocation4,cancellationToken:token);
+        if(!selected.Succeeded)throw new NotSupportedException("Actual global wrapper selection allocation refused.");
+        return new(actual,index,reference,selected,new([Emitter.TopOwner.GlyphPool.CopyOwnerNode(key,token)]));
+    }
+    internal LegacyNativeTextGlyphCallerResult EmitFreshForWrapper(LegacyGlobalSourceSelectedGlyph selected,CancellationToken token)
+    {
+        ValidateWrapper(selected.Owner,token);selected.Owner.RequireCurrentSelection(selected,token);
+        return LegacyNativeTextGlyphCaller.Produce(selected.Glyphs,Emitter.PrimaryAlphabet,header,
+            selected.Selection.CopySelectionRows4(),LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(selected.Reference),false,
+            unchecked((int)selected.Selection.SelectedMarker!.Value),strings,properties,normalization,
+            actualControlLabelLookup:text=>Emitter.ReadControlLabel(text,token),
+            actualFullGlyphEmitter:glyph=>Emitter.Emit(glyph,token),cancellationToken:token);
+    }
+    internal void FaultSourceWrapper(LegacyFreshMainGlobalTextSourceWrapper actual)
+    {lock(gate){if(!ReferenceEquals(sourceWrapper,actual))throw new ArgumentException("Exact wrapper claim required.");faulted=true;}}
 }
