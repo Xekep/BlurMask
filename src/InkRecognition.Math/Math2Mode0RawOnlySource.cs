@@ -56,6 +56,15 @@ internal sealed class Math2Mode0RawOnlySource : IDisposable
         ArgumentNullException.ThrowIfNull(actualField);
         return PrepareCore(runtime, bundle, run, actualField.Document.Strokes, null, true, actualField, token);
     }
+    //Diagnostic policy only. Actual inference retains the field before NN;
+    //this does not claim fresh EEB chooses a wider search automatically.
+    internal static Math2Mode0RawOnlySource PrepareWithPreparedSearchAndSelectedMathField(OrtRuntime runtime,
+        Math2Mode0ColdBundle bundle, OrtRun run, Math2Mode0OriginalMathFieldSource actualField,
+        int width, CancellationToken token = default)
+    {
+        ArgumentNullException.ThrowIfNull(actualField);
+        return PrepareCore(runtime, bundle, run, actualField.Document.Strokes, width, true, actualField, token);
+    }
     private static Math2Mode0RawOnlySource PrepareCore(OrtRuntime runtime,
         Math2Mode0ColdBundle bundle, OrtRun run, IReadOnlyList<InkStroke> strokes,
         int? width, bool sourceBound, CancellationToken token)

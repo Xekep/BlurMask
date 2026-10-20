@@ -212,6 +212,38 @@ internal sealed class Math2Mode0OriginalMathFieldSource : IDisposable
             catch { failed = true; throw; }
         }
     }
+    //Caller validates the produced receipt BEFORE entering this gate. Never
+    //acquire its gate here: receipt validation takes receipt -> field order.
+    internal T WithFreshPublicationInput<T>(Math2Mode0SelectedMathFieldCopy receipt,
+        Func<Math2Mode0PublicationInput, T> action, CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(receipt); ArgumentNullException.ThrowIfNull(action);
+        lock (gate)
+        {
+            void Check(CancellationToken cancellation)
+            {
+                cancellation.ThrowIfCancellationRequested(); CheckScope();
+                if (activeBinding is null || !sourcePrepared || !ReferenceEquals(receipt.Field, this))
+                    throw new ArgumentException("Exact produced fresh Math field receipt required.");
+                Validate(activeBinding, this); receipt.Copy.ValidateForOuterCopy(cancellation);
+            }
+            Check(token);
+            if (selectedInk.Registry.Count != 1 || selectedInk.Next != 1 ||
+                !selectedInk.Registry.TryGetValue(0, out var entry) || entry.Category != 102 ||
+                entry.Name != "INPUT" || !ReferenceEquals(entry.Owner, selectedInk) ||
+                !ReferenceEquals(entry.C22, selectedC22) || !entry.C22.Ranges.SequenceEqual(domain) ||
+                !ReferenceEquals(receipt.Copy.Document, Document) || selected.Any(n => n.Name == "mathResult"))
+                throw new NotSupportedException("One fresh full INPUT102, no prior result or matcher attachment required.");
+            var field = selected.SingleOrDefault(n => n.Kind == 3 && n.Name == "mathField" &&
+                selected.Any(a => a.Kind == 0 && a.Name == "id" && a.Parent == n.Id && a.StringValue == FieldId));
+            var input = field is null ? null : selected.SingleOrDefault(n => n.Kind == 3 && n.Name == "input" && n.Parent == field.Id);
+            if (field is null || input is null || !selected.Any(a => a.Kind == 0 && a.Name == "tag" &&
+                a.Parent == input.Id && a.ValueTag == 4 && a.NumericValue == entry.Id))
+                throw new InvalidOperationException("Actual selected field/id/input/tag identity required for publication.");
+            return action(new(Document, SelectedNameOwner, selected.AsReadOnly(), field.Id, entry.Id,
+                selectedInk.Next, entry.C22.Ranges, selectedInk, Check));
+        }
+    }
     private void CheckScope()
     { ObjectDisposedException.ThrowIf(closed, this); if (failed) throw new InvalidOperationException("Math source retains a failed prefix."); }
     internal void Fail(Binding binding)

@@ -3162,6 +3162,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native source-bound Math original field source failed.' }
           python -I tools/LegacyMathOriginalFieldSource.Probe/audit_output.py .artifacts/math-original-field-source-native.json models/math2/math2-unwrapped.res .artifacts/math-original-field-source-managed.json .artifacts/math-source-positions-native.json
           if ($LASTEXITCODE -ne 0) { throw 'Native source-bound Math original field source oracle failed.' }
+          dotnet run --project tools/LegacyMathFreshPublisher.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-fresh-publisher-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Managed source-bound Math fresh temporary-field publisher failed.' }
+          python -I tools/LegacyMathFreshPublisher.Probe/audit_output.py .artifacts/math-fresh-publisher-managed.json models/math2/math2-unwrapped.res
+          if ($LASTEXITCODE -ne 0) { throw 'Managed source-bound Math fresh temporary-field publisher oracle failed.' }
+          dotnet publish tools/LegacyMathFreshPublisher.Probe -c Release -r $rid -p:PublishAot=true -o .artifacts/math-fresh-publisher-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Source-bound Math fresh temporary-field publisher probe publish failed.' }
+          $freshMathPublisher = if ($IsWindows) { '.artifacts/math-fresh-publisher-probe/LegacyMathFreshPublisher.Probe.exe' } else { '.artifacts/math-fresh-publisher-probe/LegacyMathFreshPublisher.Probe' }
+          & $freshMathPublisher .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-fresh-publisher-native.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native source-bound Math fresh temporary-field publisher failed.' }
+          python -I tools/LegacyMathFreshPublisher.Probe/audit_output.py .artifacts/math-fresh-publisher-native.json models/math2/math2-unwrapped.res .artifacts/math-fresh-publisher-managed.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native source-bound Math fresh temporary-field publisher oracle failed.' }
           dotnet run --project tools/LegacyMathCandidateRetention.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-candidate-retention-managed.json
           if ($LASTEXITCODE -ne 0) { throw 'Managed completed candidate retention failed.' }
           python tools/LegacyMathCandidateRetention.Probe/audit_output.py .artifacts/math-candidate-retention-managed.json
