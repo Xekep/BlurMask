@@ -12,8 +12,8 @@ vector at[RBP-11]. At02B28D..02B2A8 it supplies the former as028070's fourth
 argument and the latter as its sixth argument. C23 input selection, existing
 mathResult extraction and029290 processing precede that call. The complete
 raw-only first-result and single-source outer-vector owning joins are now
-implemented separately. The native field/C23 grouping and original receiver
-remain unjoined.
+implemented separately. The bounded library original field/C23 source is now
+owned separately; CB8 publication and the original receiver remain unjoined.
 
 028070 iterates its fourth argument using an exact40-byte stride:
 02834D computes index*5,028356 multiplies that by8, and028374 calls027E20.
@@ -36,15 +36,19 @@ the earlier range-success test; failure-prefix accounting must preserve that
 ordering rather than claiming the operation rolled back all counter changes.
 
 Freeze metadata is checked using the actual range-comparison service and the
-separate32-byte rows. A matched nonzero flag1C sets the symbol's `freeze`.
-Text-node construction and append must then succeed. Failure destroys the
-new symbol node and returns null; a partially built symbol is not returned.
+separate32-byte rows. The first equal row is decisive: its nonzero flag1C sets
+the symbol's `freeze`; a later true match cannot override an earlier false one.
+Text-node construction must succeed or the new symbol is destroyed. The append
+return is ignored by the native helper, so it does not provide an additional
+success guarantee. These details are pinned in the
+[complete schema proof](legacy-math2-dom-schema-clone.md).
 
 These operations require the actual selected input/range source, CB8 naming
 state and original field context. The named library raw-only source now retains
 original IDs, fractional processed positions and C21 range unions. Its first
 and outer copies preserve those ranges, but do not create the actual native
-field/C23/CB8 naming owner or prove applicability to an SDK page.
+CB8 naming owner or prove applicability to an SDK page. The bounded original
+Math field/C23 owner is described in `legacy-math2-owned-original-field-source.md`.
 
 ## Result publication is later than string output
 
@@ -77,6 +81,6 @@ artifacts and excluded from Git/releases.
 The checked runtime source-bound symbol-row producer and its independent copies
 are described in `legacy-math2-owned-source-positions.md`,
 `legacy-math2-first-result-copy.md` and `legacy-math2-owned-outer-symbols.md`.
-The next runtime join needs the genuine math field/C23/CB8 owner. Its temporary
+The next runtime join needs the genuine CB8 owner over the existing field/C23 source. Its temporary
 tag/late registration contract is pinned in `legacy-math2-cb8-tag-owner.md`.
 A DOM facade without those owners would still leave required algorithms missing.
