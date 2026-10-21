@@ -4,7 +4,40 @@ The full text engine is not restored. Russian cursive and automatic replacement
 are not ready for general use. The restored main pipeline is not the app's
 default recognizer.
 
-## Latest checked additions (2026-10-20)
+## Development integration (2026-10-21)
+
+The [opt-in application adapter](experimental-global-text-adapter.md) now uses
+the actual Russian global dictionary path. The default setting remains off.
+It snapshots bounded caller coordinates, preserves genuine source provenance,
+and retains ink for unsupported or uncertain output. Managed/NativeAOT captures
+match, and the complete NativeAOT application passes its headless AI-pen checks.
+This development change has not qualified a new release.
+
+The [collapsed-subgroup correction](russian-first-degenerate-runtime-20261021.md)
+removes four real first-stage refusals while preserving all257 earlier successful
+outputs. The fixed261-word raw diagnostic now has137 exact words and325 edits
+in1276 characters. The unchanged host score gate admits122:93 exact and29 wrong;
+139 retain ink. Native scores remain uncalibrated. These results do not establish
+usable Russian cursive recognition.
+
+The [actual FIRST arithmetic audit](russian-first-candidate-arithmetic-20261021.md)
+checks32,530 candidate groups without expected labels and finds no further
+normalization/feature/NN/cost discrepancy on this one-track corpus. CUT/graph,
+MAIN selection and model/data limits remain under investigation.
+
+The [English MAIN119 knowledge and main-only masks](legacy-english-main119-masks-runtime.md)
+are owned and independently checked on134 genuine single-line chains, with seven
+explicit multiline refusals. This does not execute MAIN neural inference.
+The [recorded English FIRST baseline](english-recorded-baseline-20261021.md)
+completes100 real multi-stroke-capable inputs but has only14 exact words. English
+recognition is not ready.
+
+The [raw-object kind receipt](legacy-global-raw-object-kinds-runtime.md) now carries
+the actual C49-to-C1E base-kind provenance through all13 publication cases. The
+earlier inferred C25 interpretation was incorrect. All six downstream captures
+match Managed/NativeAOT; the former12 successful cases remain unchanged.
+
+## Earlier checked additions (2026-10-20)
 
 The [owning Math raw215 loader](legacy-math-mixed107-raw-owner.md) now reads
 all six actual architecture02 models into distinct int16/int8/scales storage.
@@ -203,11 +236,11 @@ table. This is static ownership evidence, not a new raw recognizer or parser.
 
 The [fixed blind Russian comparison](russian-blind-comparison-20261020.md)
 records261 unchanged one-track inputs: the full global path is136 exact words
-(52.11%,CER26.18%); raw first-stage and current experimental UI are both29
+(52.11%,CER26.18%); raw first-stage and the previous experimental UI were both29
 (11.11%,CER56.97%), with identical text. Four refusals remain in every denominator.
 This does not supersede the original-nine4/9 diagnostic or establish Russian
-readiness. The application still uses the first-stage adapter, not the full
-global path; no inference threshold or model parameter changed in this audit.
+readiness. This historical audit preceded the development global-adapter and
+collapsed-subgroup corrections above; no threshold or model parameter was tuned.
 
 The [Math document representation boundary](legacy-math2-document-route-boundary.md)
 pins16 complete Document bodies and distinguishes modern raw sequence output,
@@ -593,11 +626,11 @@ graph/cache support and language completion without target fitting.
 
 ## App and library are different stages
 
-The optional **Experimental text engine** setting shipped in 1.2.8-rc.7 uses the
-bundled, bounded first-stage single-word decoder. Its native candidate score is
-not calibrated recognition confidence. Enabling it does not enable the main
-CASE dictionary pipeline described below. The ordinary English recognizer and
-the separate formula/solver modules retain their existing paths.
+The optional **Experimental text engine** setting shipped in 1.2.8-rc.7 used the
+bundled first-stage single-word decoder. Development main now connects that
+opt-in setting to the bounded Russian global dictionary adapter described above.
+Its native candidate score is not calibrated recognition confidence. English
+MAIN decoding and reliable Russian cursive quality remain unfinished.
 
 The reusable library now has these checked stages:
 
