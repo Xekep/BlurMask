@@ -6,6 +6,14 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [English sparse language format and numeric binding](legacy-english-lk-sparse101-boundary.md)
+have a checked static reference: all75 fields,643871 packed values,114667
+sparse rows,1536 compiled costs and the actually written case-table domains.
+The reserved initial row and absent-field constructor default are preserved.
+This evidence does not implement source query/history, configured masks or
+the complete English neural path. The reusable runtime is a separate next step.
+
+
 The reusable [English packed-data loader](legacy-english-lk-packed102-runtime.md)
 is implemented and independently rebuilt as Managed and Native AOT. All666547
 nodes,260074 terminal paths,104-to-217 exact text mappings,55 guards and12
