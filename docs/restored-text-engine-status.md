@@ -22,6 +22,12 @@ trajectories under the Russian model, with independent numerical checks and
 Managed/NativeAOT parity. No mismatch was found. This tests physical boundaries
 missing from the one-list Russian corpus; it is not a Russian accuracy result.
 
+The [English word-transition component](english-main-word-policy-transition-runtime-20261021.md)
+now derives its policy and geometry from the actual completed MAIN owner. Both
+recorded corpora pass independent cache/request checks and Managed/NativeAOT
+parity. The private query lease, scored dictionary rows and word winner remain
+unfinished; this component does not replace the default English recognizer.
+
 The [full English resource loader](native-english-text-resource.md) now loads the
 existing BLSTM/CTC model in C# with all67 tensors and parameter bytes identical to
 the independent exporter. The application bundles it as the default when an

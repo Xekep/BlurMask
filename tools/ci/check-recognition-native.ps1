@@ -324,6 +324,7 @@ $cases = @(
   @{ Name = 'LegacyEnglishSparseQuery'; Args = @('models', '.artifacts/legacy-en-sparse-query-native') },
   @{ Name = 'LegacyEnglishQuerySession'; Args = @('models', '.artifacts/legacy-en-query-prep-native') },
   @{ Name = 'LegacyEnglishMainD0'; Args = @('models', '.artifacts/legacy-en119-final-single-blind.json', '.artifacts/legacy-en-main119-d0-native.json') },
+  @{ Name = 'LegacyEnglishMainWordTransitions'; Args = @('models', '.artifacts/legacy-en119-final-single-blind.json', '.artifacts/legacy-en-word-transitions-native.json') },
   @{ Name = 'LegacyMathMixed107Raw'; Args = @('models/math/math-ak.res', '.artifacts/legacy-math-mixed107-raw-native.json') },
   @{ Name = 'LegacyEnglishLiteFirstPreprocessing'; Args = @('models', '.artifacts/legacy-en-short-controls.json', '.artifacts/legacy-en-short-native.json') },
   @{ Name = 'LegacyPreparedNetwork107'; Args = @('models', 'models/ru-RU/legacy-engine-profile.json', '.artifacts/legacy-prepared-network107-native.json') },
@@ -1137,6 +1138,11 @@ foreach ($case in $cases) {
     python -I -B tools/LegacyEnglish119FinalSingle.Probe/audit_output.py models .artifacts/legacy-en119-final-single-native.json .artifacts/legacy-en119-postprocessing-native.json
     if ($LASTEXITCODE -ne 0) { throw 'LegacyEnglish119FinalSingle independent audit failed' }
     if ((Get-FileHash .artifacts/legacy-en119-final-single-native.json).Hash -ne (Get-FileHash .artifacts/legacy-en119-final-single-managed.json).Hash) { throw 'LegacyEnglish119FinalSingle Managed/Native parity failed' }
+  }
+  if ($name -eq 'LegacyEnglishMainWordTransitions') {
+    python -I -B tools/LegacyEnglishMainWordTransitions.Probe/audit_output.py models .artifacts/legacy-en-word-transitions-native.json .artifacts/legacy-en-word-transitions-oracle-native.json
+    if ($LASTEXITCODE -ne 0) { throw 'English word transitions independent numeric oracle failed' }
+    if ((Get-FileHash .artifacts/legacy-en-word-transitions-native.json).Hash -ne (Get-FileHash .artifacts/legacy-en-word-transitions-managed.json).Hash) { throw 'English word transitions Managed/Native parity failed' }
   }
   if ($name -eq 'LegacyMathMixed107Raw') {
     python -I -B tools/LegacyMathMixed107Raw.Probe/audit_output.py models/math/math-ak.res .artifacts/legacy-math-mixed107-raw-native.json --reference tools/handwriting/math_legacy_mixed107_reference.py
