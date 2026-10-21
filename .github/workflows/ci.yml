@@ -141,6 +141,11 @@ jobs:
         run: dotnet run --project tools/InkRecognition.RawContent.Probe -c Release
       - name: Legacy integer network and Russian feature numerical controls
         run: dotnet run --project tools/LegacyInk.Probe -c Release
+      - name: Exact Russian collapsed subgroup features and independent neural oracle
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyRussianFirstDegenerate.Probe -c Release -- models tools/LegacyRussianFirstDegenerate.Probe/normalized-controls.json .artifacts/legacy-russian-first-degenerate-managed.json
+          python -I -B tools/LegacyRussianFirstDegenerate.Probe/audit_output.py models tools/LegacyRussianFirstDegenerate.Probe/normalized-controls.json .artifacts/legacy-russian-first-degenerate-managed.json
       - name: Russian packed lexicon and bounded candidate decoding
         run: dotnet run --project tools/LegacyLexicon.Probe -c Release
       - name: Russian segmented word mapping and ambiguity guards
@@ -1577,6 +1582,7 @@ jobs:
             @{ Name = 'LegacyEnglish119FinalSingle'; Args = @('models', '.artifacts/legacy-en119-final-single-blind.json', '.artifacts/legacy-en119-final-single-native.json') },
             @{ Name = 'LegacyEnglishLkPacked102'; Args = @('models', '.artifacts/legacy-en-lk-packed102-native.json') },
             @{ Name = 'LegacyEnglishLkSparse101'; Args = @('models', '.artifacts/legacy-en-lk-sparse101-native.json') },
+            @{ Name = 'LegacyRussianFirstDegenerate'; Args = @('models', 'tools/LegacyRussianFirstDegenerate.Probe/normalized-controls.json', '.artifacts/legacy-russian-first-degenerate-native.json') },
             @{ Name = 'LegacyEnglishMainMasks'; Args = @('models', '.artifacts/legacy-en119-final-single-blind.json', '.artifacts/legacy-en-main119-masks-native.json') },
             @{ Name = 'LegacyMathMixed107Raw'; Args = @('models/math/math-ak.res', '.artifacts/legacy-math-mixed107-raw-native.json') },
             @{ Name = 'LegacyEnglishLiteFirstPreprocessing'; Args = @('models', '.artifacts/legacy-en-short-controls.json', '.artifacts/legacy-en-short-native.json') },
@@ -2377,6 +2383,11 @@ jobs:
               python -I -B tools/LegacyMathMixed107Raw.Probe/audit_output.py models/math/math-ak.res .artifacts/legacy-math-mixed107-raw-native.json --reference tools/handwriting/math_legacy_mixed107_reference.py
               if ($LASTEXITCODE -ne 0) { throw 'LegacyMathMixed107Raw independent audit failed' }
               if ((Get-FileHash .artifacts/legacy-math-mixed107-raw-native.json).Hash -ne (Get-FileHash .artifacts/legacy-math-mixed107-raw-managed.json).Hash) { throw 'LegacyMathMixed107Raw Managed/Native parity failed' }
+            }
+            if ($name -eq 'LegacyRussianFirstDegenerate') {
+              python -I -B tools/LegacyRussianFirstDegenerate.Probe/audit_output.py models tools/LegacyRussianFirstDegenerate.Probe/normalized-controls.json .artifacts/legacy-russian-first-degenerate-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'Russian collapsed subgroup independent oracle failed' }
+              if ((Get-FileHash .artifacts/legacy-russian-first-degenerate-native.json).Hash -ne (Get-FileHash .artifacts/legacy-russian-first-degenerate-managed.json).Hash) { throw 'Russian collapsed subgroup Managed/Native parity failed' }
             }
             if ($name -eq 'LegacyEnglishMainMasks') {
               python -I -B tools/LegacyEnglishMainMasks.Probe/audit_runtime.py --models models --capture .artifacts/legacy-en-main119-masks-native.json --output .artifacts/legacy-en-main119-masks-oracle-native.json

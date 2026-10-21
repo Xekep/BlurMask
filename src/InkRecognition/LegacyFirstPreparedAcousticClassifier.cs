@@ -46,8 +46,15 @@ public sealed class LegacyFirstPreparedAcousticClassifier
             row.Frame.Line.Height,Model.NormalizationTarget,maximumRangesBeforeMerge,cancellationToken);
         var merged=LegacyNormalizedPenUpMerge.Merge(geometry.Strokes,maximumStrokesAfterMerge,cancellationToken);
         short[] trajectory=new short[247],raster=new short[229];
-        LegacyStrokeFeatures.Extract(merged.Strokes,cancellationToken).CopyTo(trajectory,0);
-        LegacyRasterFeatures.Extract(merged.Strokes,cancellationToken).CopyTo(raster,0);
+        if(LegacyRussianFirstDegenerateFeatures.TryCreate(Model,merged.Strokes,cancellationToken,out var collapsedTrajectory,out var collapsedRaster))
+        {
+            collapsedTrajectory.CopyTo(trajectory,0);collapsedRaster.CopyTo(raster,0);
+        }
+        else
+        {
+            LegacyStrokeFeatures.Extract(merged.Strokes,cancellationToken).CopyTo(trajectory,0);
+            LegacyRasterFeatures.Extract(merged.Strokes,cancellationToken).CopyTo(raster,0);
+        }
         context.CopyTo(trajectory.AsSpan(217,28));context.CopyTo(raster.AsSpan(199,28));
         trajectory[^2]=raster[^2]=startBoundary;trajectory[^1]=raster[^1]=endBoundary;
         var scores=Model.EvaluatePreparedInputs(trajectory,raster,activations,cancellationToken);
