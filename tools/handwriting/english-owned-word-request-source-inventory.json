@@ -1,0 +1,87 @@
+{
+  "scope": "STATIC owned private English query/request boundary, not runtime approval or decoder",
+  "base": "5eff0c65d7f1d2a502eb1adc6114d1b048c111d2",
+  "sourcePins": [
+    {
+      "path": "src/InkRecognition/LegacyEnglishFreshDictionaryQuerySession.cs",
+      "bytes": 10289,
+      "sha256": "bc580041a1aac9aee93e3a15b2f8aaa0a2e2113b18a9ba26dd6f096bab279780"
+    },
+    {
+      "path": "src/InkRecognition/LegacyEnglishFreshDictionaryQuerySession.Prepared.cs",
+      "bytes": 8434,
+      "sha256": "2f11df8fff018a9abeba0e5bb80ebb988516a99588a02e4c38df768c2e96c076"
+    },
+    {
+      "path": "src/InkRecognition/LegacyEnglishMainD0Binding.cs",
+      "bytes": 4267,
+      "sha256": "6f8c60e105a5ad97c323df176f2bc815ad30236be81cc9be27f67b27c6129b2e"
+    },
+    {
+      "path": "src/InkRecognition/LegacyEnglishMainSpanSession.cs",
+      "bytes": 9430,
+      "sha256": "99922bb2e6cb62de53a299e82d37833c922458cbf38948cf49f77408a166b30f"
+    },
+    {
+      "path": "src/InkRecognition/LegacyEnglishMainD0Receipt.cs",
+      "bytes": 3531,
+      "sha256": "4042617248d9c352edf0b2f938ddc59eca386a2e7b8d5afe06d8015eb49d0280"
+    },
+    {
+      "path": "src/InkRecognition/LegacyPreparedDictionaryQuerySource.cs",
+      "bytes": 10479,
+      "sha256": "e71bb9caee6c416def54240e83bfcc6e075aef49d9aed65655baad0c6522ec9a"
+    },
+    {
+      "path": "src/InkRecognition/LegacyPreparedAggregateDictionaryQuerySource.cs",
+      "bytes": 8643,
+      "sha256": "41aa5ae68c6e94d46e1b42339809d915b79db08ec935352dc4964db47678802b"
+    },
+    {
+      "path": "src/InkRecognition/LegacyOrdinaryDictionaryQueryPreparation.cs",
+      "bytes": 3481,
+      "sha256": "c5a97b22287009c3037bf97b2305c5b3750350d827af90c6b5b5de8215878d2d"
+    },
+    {
+      "path": "src/InkRecognition/LegacyNativeWordStartupRequestFactory.cs",
+      "bytes": 4542,
+      "sha256": "94967a97322c96458d4dacbd9712a9d66909040bec658646d045f4b04e17425f"
+    },
+    {
+      "path": "src/InkRecognition/LegacyNativeMainWordRequestFrame.cs",
+      "bytes": 983,
+      "sha256": "ffdb5c42f27c2fe9764320bb41056b1cb047d1110555c7f1da9629564ca9fdd1"
+    },
+    {
+      "path": "src/InkRecognition/LegacyNativeWordRecombinationRequest.cs",
+      "bytes": 8431,
+      "sha256": "40d499ff3d707f8ac46456e66f235503f17420fef77990b17479b1282a9076f1"
+    },
+    {
+      "path": "src/InkRecognition/LegacySymbolContextFactory.cs",
+      "bytes": 11603,
+      "sha256": "1b7904a437552b638aefe2f3ec91633b3fb7b2516945f6f7e45d3ade2aca2d02"
+    }
+  ],
+  "proposedOldSeams": [
+    {
+      "path": "src/InkRecognition/LegacyEnglishFreshDictionaryQuerySession.cs",
+      "method": "CopyPreparationSnapshot",
+      "change": "Refuse queryBusy before contexts.Capture while holding gate; queryBusy is defined only by NEW companion.",
+      "reason": "Context factory explicitly requires serialized access; off-lock query/graft may mutate its Dictionary and AVL. Existing d0Busy alone is not observed here.",
+      "preserve": "All non-query snapshots, including completed historical/faulted snapshots, unchanged."
+    }
+  ],
+  "newProduction": [
+    "LegacyEnglishOwnedWordDecoder.cs",
+    "LegacyEnglishOwnedWordQueryBinding.cs",
+    "LegacyEnglishOwnedWordQueryRow.cs",
+    "LegacyEnglishOwnedWordScoringRequest.cs"
+  ],
+  "blockedConsumers": [
+    "N frontend128/category/backend58 runtime helper",
+    "Actual heap/materialized parent88 production",
+    "Terminal/winner end-to-end schedule"
+  ],
+  "runtimeChanged": false
+}
