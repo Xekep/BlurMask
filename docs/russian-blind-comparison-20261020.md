@@ -38,9 +38,12 @@ The archive SHA256 is
 The broader set includes ten writers and29 sessions, excluding all writers3,7,12
 used by the original nine-word diagnostic. Selection follows available source
 files rather than recognition outputs. Original X is preserved and original Y
-is negated, matching the committed loader. Each record is one continuous track:
+is negated, matching the committed loader. Each supplied record is one coordinate sequence:
 pen-up metadata is unavailable, and no release events or stroke splits are
 invented. Original targets, including a mixed Latin character, remain unchanged.
+The recorder's release handler stores no boundary, so original physical
+continuity is unknown. The Y conversion follows its documented upward axis;
+see [recorder provenance](russian-recording-coordinate-provenance.md).
 
 Inference receives only blind coordinates. Expected targets are opened after
 all outputs and the independent raw-acoustic-alphabet emission audit. The first

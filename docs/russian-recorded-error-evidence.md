@@ -3,7 +3,9 @@
 The restored library still returns4/9 exact words and16/33 character edits
 (48.48% CER) on the existing nine short recorded tracks. This is a tiny
 diagnostic, not representative handwriting quality. Every supplied track is
-one continuous physical path; pen-up events are absent. No releases, expected
+one coordinate sequence; original physical stroke boundaries are unknown.
+See [recorder coordinate and boundary provenance](russian-recording-coordinate-provenance.md).
+No releases, expected
 labels or corrective dictionary entries were inserted into inference.
 
 Verified library base: `d8cd38117cfad9f3f9d1bfd4cf992d17b79564d8`.
