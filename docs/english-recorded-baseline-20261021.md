@@ -57,3 +57,21 @@ score-bit and frame-count result exactly; Managed and NativeAOT match. This is a
 comparison of different complete pipelines/resources, not an isolated effect of
 one algorithm. The sample is no longer unseen. English MAIN dictionary inference
 remains separate. See [direct English resource loading](native-english-text-resource.md).
+
+## Negative prefix-beam diagnostic
+
+An additional diagnostic captured the existing full-resource network's complete
+probabilities without changing its features or weights. The existing independent
+standard CTC prefix-beam reference used its unchanged width32/top32 defaults.
+Its exhaustive81-path control passed; all100 original greedy outputs and finite
+normalized probability rows were checked before evaluating the new outputs.
+This method follows [CTC prefix decoding](https://www.cs.toronto.edu/~graves/icml_2006.pdf),
+not the restored vendor dictionary/controller.
+
+It produced69 exact words and41 edits/721 characters, with three changed outputs;
+the existing greedy result is69 exact and40 edits. It is not enabled in production.
+This already opened sample provides a negative diagnostic, not an unseen test or
+a justification for tuning beam limits. Coordinates and recording boundaries
+were unchanged. Captures and the independent script remain under
+`E:/BlurMask-build-artifacts-20261014/root-english-ctc-*20261021.json` and
+`root-audit-english-ctc-beam-20261021.py`.

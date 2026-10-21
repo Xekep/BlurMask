@@ -43,7 +43,13 @@ better Russian recognition or reducing eager neural work.
 
 The [English MAIN119 knowledge and main-only masks](legacy-english-main119-masks-runtime.md)
 are owned and independently checked on134 genuine single-line chains, with seven
-explicit multiline refusals. This does not execute MAIN neural inference.
+explicit multiline refusals. The [MAIN acoustic scorer](legacy-english-main119-acoustic-runtime.md)
+now evaluates its four actual neural families from real graph geometry, including
+baseline and directional features, weighted scores and all220 ordinary cache
+costs. Independent full-feature/raw-matrix checks cover4066 original groups and
+11330 recorded groups. Managed/NativeAOT captures match; source identity, bounds,
+cancellation and concurrent publication are checked. Word search and selection
+remain unfinished; these acoustic checks do not establish improved accuracy.
 The [recorded English FIRST baseline](english-recorded-baseline-20261021.md)
 completes100 real multi-stroke-capable inputs but has only14 exact words. English
 recognition is not ready.
