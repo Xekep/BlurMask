@@ -57,14 +57,14 @@ internal static class AiPenProbe
                 throw new InvalidOperationException("Experimental engine setting did not survive serialization.");
             Program.Settings = enabled;
             var recognizer = AiRecognitionModels.Current;
-            if (recognizer is not ExperimentalFirstStageTextRecognizer || !ReferenceEquals(recognizer, AiRecognitionModels.Current))
+            if (recognizer is not ExperimentalGlobalTextRecognizer || !ReferenceEquals(recognizer, AiRecognitionModels.Current))
                 throw new InvalidOperationException("Experimental mode did not select the bundled independent engine.");
             InkStroke Draw(params (float X, float Y)[] points) => new(points.Select(p => new InkPoint(p.X, p.Y)).ToArray());
             InkStroke[] ink = [Draw((0,90),(0,10),(25,60),(50,10),(50,90)),Draw((65,90),(65,10)),
                 Draw((65,90),(115,10)),Draw((115,90),(115,10)),Draw((130,90),(130,10),(175,10),(185,20),(185,45),(175,55),(130,55))];
             var actual = recognizer.Recognize(ink);
-            if (actual.Text != "MИP" || !actual.ExperimentalCandidateScore || actual.Confidence < .5f)
-                throw new InvalidOperationException($"Experimental first-stage integration changed its actual diagnostic result: '{actual.Text}', score {actual.Confidence}.");
+            if (actual.Text != "МИР" || !actual.ExperimentalCandidateScore || actual.Confidence < .5f)
+                throw new InvalidOperationException($"Experimental global dictionary integration changed its actual diagnostic result: '{actual.Text}', score {actual.Confidence}.");
             var marks = ink.Select(stroke =>
             {
                 var mark = new InkMark(InkTool.Pen, Colors.Black, 3, new(stroke.Points[0].X, stroke.Points[0].Y));
@@ -81,9 +81,9 @@ internal static class AiPenProbe
             try { recognizer.Recognize(ink,cancel.Token); throw new InvalidOperationException("Canceled experimental request succeeded."); }
             catch (OperationCanceledException) { }
             Program.Settings = missing;
-            if (AiRecognitionModels.Current is ExperimentalFirstStageTextRecognizer)
+            if (AiRecognitionModels.Current is ExperimentalGlobalTextRecognizer)
                 throw new InvalidOperationException("Disabling experimental mode retained the wrong engine.");
-            Console.WriteLine($"Experimental bundled first-stage engine → application text layout: '{actual.Text}', native candidate score {actual.Confidence}; settings, rollback, bounds and cancellation passed. Russian cursive accuracy is not asserted.");
+            Console.WriteLine($"Experimental bundled global dictionary engine → application text layout: '{actual.Text}', native candidate score {actual.Confidence}; settings, rollback, bounds and cancellation passed. Russian cursive accuracy is not asserted.");
         }
         finally { Program.Settings = original; }
     }

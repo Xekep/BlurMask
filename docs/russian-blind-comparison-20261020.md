@@ -1,15 +1,26 @@
 # Russian recognition: fixed blind diagnostic
 
-The current experimental application adapter is still the older first-stage
-recognizer. The independently executable full global dictionary path produces
-better results on this diagnostic, but neither result establishes usable Russian
-cursive recognition or completion of the engine.
+The comparison below records the previous first-stage application adapter. The
+opt-in application path now uses `ExperimentalGlobalTextRecognizer`, which runs
+the actual full global dictionary path and admits only an ordinary single WORD
+with the existing minimum native glyph-score gate. The setting remains disabled
+by default. Neither path establishes usable Russian cursive recognition or
+completion of the engine.
+
+On the same 261 blind inputs the new host adapter admits122 words:93 exact and29
+incorrect;139 retain the original ink. Managed and NativeAOT captures match byte
+for byte. These figures include all inputs; accuracy among accepted words is not
+whole-corpus accuracy. An independent Python admission audit reconstructs the
+policy from the separate raw global outputs and glyph-score snapshots before
+consulting targets. Scores are uncalibrated. No thresholds were tuned. The source6120 collapsed-subgroup correction raises
+raw global exact words from136 to137 while preserving all257 old successes. See the
+[adapter boundary and checks](experimental-global-text-adapter.md).
 
 | Unchanged path | Exact words / all inputs | Character edits / reference characters | CER |
 | --- | --- | --- | --- |
 | A: full global raw WORD output | 136 / 261 (52.11%) | 334 / 1276 | 26.18% |
 | B: actual source6120 first-stage owner | 29 / 261 (11.11%) | 727 / 1276 | 56.97% |
-| C: current experimental UI adapter | 29 / 261 (11.11%) | 727 / 1276 | 56.97% |
+| C: previous experimental UI adapter | 29 / 261 (11.11%) | 727 / 1276 | 56.97% |
 
 All paths use the same frozen input coordinates and acoustic resource. Each has
 257 supported/nonempty outputs and four refusals or empty outputs; all261 remain
@@ -69,9 +80,9 @@ an input/model mismatch possibility, not proof that inventing pen-up events
 would fix recognition. No beam size, language weight, score threshold, model
 parameter or output filter was tuned against these expected answers.
 
-The next application integration must preserve actual global output provenance,
-define an explicit admission policy and retain ink on unsupported or uncertain
-inputs. Raw ranking costs must not be relabeled as calibrated confidence.
+The new application integration preserves actual global output provenance and
+retains ink on unsupported or uncertain inputs. Its unchanged .5 glyph-score
+admission gate does not convert native scores into calibrated confidence.
 English main inference, automatic text/formula choice, placement and original
 document acceptance remain separate work. This diagnostic does not enable a new
 default recognizer or qualify a release.

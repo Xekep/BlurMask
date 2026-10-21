@@ -37,10 +37,10 @@ public static class UiText
         ["English · экспериментально"] = ["English · experimental", "English · expérimental", "English · experimentell"],
         ["Новый движок распознавания · экспериментально"] = ["New recognition engine · experimental", "Nouveau moteur de reconnaissance · expérimental", "Neue Handschrifterkennung · experimentell"],
         ["Новый движок · отдельные слова"] = ["New engine · individual words", "Nouveau moteur · mots isolés", "Neue Erkennung · einzelne Wörter"],
-        ["Пробный режим для отдельных слов. Словарный проход и слитный русский почерк ещё не готовы. Нераспознанные штрихи останутся на месте."] =
-            ["Preview for individual words. Dictionary decoding and Russian cursive are still unfinished. Unrecognized ink stays in place.",
-             "Mode d’essai pour les mots isolés. Le décodage par dictionnaire et l’écriture cursive russe ne sont pas encore prêts. Les traits non reconnus sont conservés.",
-             "Vorschau für einzelne Wörter. Wörterbuchauswertung und russische Schreibschrift sind noch nicht fertig. Nicht erkannte Striche bleiben erhalten."],
+        ["Отдельные русские слова со словарём. Пока может ошибаться. Нераспознанные штрихи останутся на месте."] =
+            ["Russian words with dictionary support. Recognition is still experimental. Unrecognized ink stays in place.",
+             "Mots russes avec dictionnaire. La reconnaissance reste expérimentale. Les traits non reconnus restent en place.",
+             "Russische Wörter mit Wörterbuch. Die Erkennung ist noch experimentell. Nicht erkannte Striche bleiben erhalten."],
         ["Формулы"] = ["Formulas", "Formules", "Formeln"],
         ["Использовать Giac"] = ["Use Giac", "Utiliser Giac", "Giac verwenden"],
         ["Для сложных вычислений включите Giac в настройках."] = ["Enable Giac in settings for advanced calculations.", "Activez Giac dans les paramètres pour les calculs avancés.", "Aktivieren Sie Giac in den Einstellungen für komplexe Berechnungen."],

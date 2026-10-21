@@ -285,6 +285,7 @@ $cases = @(
   @{ Name = 'LegacyGlobalInputTransforms'; Args = @('models', 'tools/test-data/russian-recorded-words/manifest.json', '.artifacts/legacy-global-transforms-native.json') },
   @{ Name = 'LegacyGlobalCounterHandoff'; Args = @('models', 'tools/test-data/russian-recorded-words/manifest.json', '.artifacts/legacy-global-counter-native.json') },
   @{ Name = 'LegacyGlobalSourceRangeUtf8'; Args = @('models', 'tools/test-data/russian-recorded-words/manifest.json', '.artifacts/legacy-global-source-range-utf8-native.json') },
+  @{ Name = 'ExperimentalGlobalText'; Args = @('models', '.artifacts/experimental-global-text-native.json') },
   @{ Name = 'LegacyGlobalCroppedSource'; Args = @('models', 'tools/test-data/russian-recorded-words/manifest.json', '.artifacts/legacy-global-cropped-source-native.json') },
   @{ Name = 'LegacyGlobalTimedGeometry'; Args = @('models', 'tools/test-data/russian-recorded-words/manifest.json', '.artifacts/legacy-global-timed-parent-native.json', '.artifacts/legacy-global-timed-geometry-native.json') },
   @{ Name = 'LegacyTextPublicationDocument'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-text-publication-document-native.json') },
@@ -988,6 +989,10 @@ foreach ($case in $cases) {
   if ($name -eq 'LegacyGlobalInputTransforms') {
     python -I tools/LegacyGlobalInputTransforms.Probe/audit_output.py models .artifacts/legacy-global-text-source-wrapper-native.json .artifacts/legacy-global-word-text-native.json .artifacts/legacy-global-document-coverage-native.json .artifacts/legacy-global-selected-native.json .artifacts/legacy-global-indices-native.json .artifacts/legacy-global-cleanup-native.json .artifacts/legacy-global-transforms-native.json .artifacts/legacy-global-transforms-managed.json
     if ($LASTEXITCODE -ne 0) { throw 'LegacyGlobalInputTransforms independent audit/parity failed' }
+  }
+  if ($name -eq 'ExperimentalGlobalText') {
+    python -I -B tools/ExperimentalGlobalText.Probe/audit_output.py .artifacts/experimental-global-text-native.json --parity .artifacts/experimental-global-text-managed.json
+    if ($LASTEXITCODE -ne 0) { throw 'ExperimentalGlobalText admission/parity failed' }
   }
   if ($name -eq 'LegacyGlobalSourceRangeUtf8') {
     python -I -B tools/LegacyGlobalSourceRangeUtf8.Probe/audit_output.py .artifacts/legacy-global-source-range-utf8-native.json .artifacts/legacy-global-word-text-native.json

@@ -65,7 +65,7 @@ internal sealed class SettingsWindow : Window
         _experimentalTextEngine = new CheckBox { Content = UiText.T("Новый движок распознавания · экспериментально"),
             Name = "ExperimentalTextEngine", IsChecked = _draft.ExperimentalTextEngine };
         general.Children.Add(_experimentalTextEngine);
-        general.Children.Add(new TextBlock { Text = UiText.T("Пробный режим для отдельных слов. Словарный проход и слитный русский почерк ещё не готовы. Нераспознанные штрихи останутся на месте."),
+        general.Children.Add(new TextBlock { Text = UiText.T("Отдельные русские слова со словарём. Пока может ошибаться. Нераспознанные штрихи останутся на месте."),
             FontSize = 12, Foreground = Brushes.Gray, TextWrapping = TextWrapping.Wrap });
         _enabled = new CheckBox { Content = UiText.T("Включить горячие клавиши"), IsChecked = _draft.HotkeysEnabled, Margin = new Thickness(0, 10, 0, 0) };
         general.Children.Add(_enabled);

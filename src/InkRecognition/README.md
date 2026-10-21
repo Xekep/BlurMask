@@ -42,8 +42,8 @@ labels, preprocessing parameters, architecture, tensor inventory and packed
 weights. [The exporter](../../tools/export-ink-model.py) documents the exact layout.
 No model weights are embedded in this library.
 
-Current limits: whole-word geometry is heuristic; CTC has no lexical language
-model; Russian and Math2 are not implemented here. Confidence is an acoustic
+Limits of the initial CTC API: whole-word geometry is heuristic; CTC has no
+lexical language model; Russian and Math2 are not implemented by that API. Confidence is an acoustic
 score. This is an experimental engine, not a reproduction of the complete
 MyScript SDK.
 
@@ -51,14 +51,26 @@ MyScript SDK.
 separationProfile)` exposes the restored ordinary first stage through the same
 `IStrokeTextRecognizer` interface. It requires the supported pinned Russian AK
 resource and the repository runtime profiles; it does not run vendor binaries.
-This adapter handles supported single-word paths only, without the unfinished
-main dictionary decoder. It can mix similar Cyrillic and Latin letters.
+This diagnostic adapter handles supported single-word first-stage paths only,
+without the main dictionary decoder. It can mix similar Cyrillic and Latin letters.
 `TextRecognition.ExperimentalCandidateScore` identifies its native glyph10
 candidate score, which must not be presented as a calibrated recognition
 probability. Unsupported paths return empty text. The adapter accepts at most32
 strokes/1024 finite points and has a two-second cooperative processing budget;
-external cancellation still propagates. The BlurMask application bundles these
-three assets and exposes the adapter behind a setting disabled by default.
+external cancellation still propagates.
+
+The BlurMask opt-in application setting now uses
+`ExperimentalGlobalTextRecognizer.Load(acoustic, linguistic, engine, line30,
+line50, separation, cases, publication)`. It owns the actual full Russian global
+dictionary context and creates private recognition state per invocation. The
+host admits one ordinary raw WORD only, preserves real source keys, and retains
+ink when any glyph has an unsupported kind or a native candidate score below.5.
+The same32-stroke/1024-point limit and cooperative two-second budget apply.
+Native scores remain uncalibrated. Eight resources are bundled in the application;
+the independent library does not embed weights. The setting stays disabled by
+default. English main decoding, automatic text/formula choice and reliable
+Russian cursive quality remain unfinished. See the
+[host adapter checks](../../docs/experimental-global-text-adapter.md).
 
 The legacy RU investigation has a separate experimental API:
 `LegacyInkNetwork.Load` reads a complete FEA0/version106 classifier. The caller

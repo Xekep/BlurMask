@@ -38,6 +38,11 @@
     <EmbeddedResource Include="../../models/ru-RU/ru_RU-ak-cur.lite.res" LogicalName="BlurMask.ExperimentalInk.acoustic" />
     <EmbeddedResource Include="../../models/ru-RU/legacy-engine-profile.json" LogicalName="BlurMask.ExperimentalInk.engine" />
     <EmbeddedResource Include="../../models/ru-RU/legacy-separation-profile.json" LogicalName="BlurMask.ExperimentalInk.separation" />
+    <EmbeddedResource Include="../../models/ru-RU/ru_RU-lk-text.lite.res" LogicalName="BlurMask.ExperimentalInk.linguistic" />
+    <EmbeddedResource Include="../../models/line-geometry/line-2e3-30.res" LogicalName="BlurMask.ExperimentalInk.spatial30" />
+    <EmbeddedResource Include="../../models/line-geometry/line-2e3-50.res" LogicalName="BlurMask.ExperimentalInk.physical50" />
+    <EmbeddedResource Include="../../models/text-unicode/legacy-case-data.json" LogicalName="BlurMask.ExperimentalInk.cases" />
+    <EmbeddedResource Include="../../models/text-unicode/legacy-text-publication-data.json" LogicalName="BlurMask.ExperimentalInk.publication" />
     <ProjectReference Include="../InkRecognition/InkRecognition.csproj" />
     <ProjectReference Include="../InkRecognition.Math/InkRecognition.Math.csproj" />
     <ProjectReference Include="../InkRecognition.RawContent/InkRecognition.RawContent.csproj" />
