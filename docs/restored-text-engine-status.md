@@ -6,6 +6,14 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [six actual Math mixed107 raw models](legacy-math-mixed107.md) now have
+an independent byte-exact resource reference and native loader/dispatch proof.
+Their first matrices use int16 weights; second matrices use int8 plus row scales.
+Absolute alignment and opaque padding are preserved. Raw215 ownership is
+distinguished from evaluator212/213. This is static/reference work only;
+the owning runtime loader, features, activation and recognition remain separate.
+
+
 The [English sparse language format and numeric binding](legacy-english-lk-sparse101-boundary.md)
 have a checked static reference: all75 fields,643871 packed values,114667
 sparse rows,1536 compiled costs and the actually written case-table domains.
