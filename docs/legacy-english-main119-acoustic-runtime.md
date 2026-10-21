@@ -1,5 +1,13 @@
 # Actual English MAIN119 acoustic checkpoint N
 
+**Open landmark defect:** the actual2B1 producer calls BC280, which starts its
+point2 Y comparison from point1. The reused generic2B0 B6D20 helper starts from
+point0 instead. Current captures and independent references share that older
+convention; they do not establish complete native feature equivalence. See the
+[blocker and required correction](actual-2b1-landmark-blocker-20261021.md).
+The whole/local dimension and calibration corrections below remain valid but
+do not close this additional helper difference.
+
 **Whole-dimension correction,2026-10-21:** subsequent full-body review found that
 BEDF0 also passes raw88/stored68 into B4AF0. Its nonzero branch omits the
 coordinate unit from whole post-resampling width/height, not just local extents.

@@ -1,5 +1,9 @@
 # Actual English MAIN119 fresh D0 bridge
 
+Upstream qualification: the [actual2B1 landmark defect](actual-2b1-landmark-blocker-20261021.md)
+is open in N. These D0 pool/map/permission checks reproduce current N costs;
+they do not prove complete native acoustic inputs or word recognition.
+
 This bounded library checkpoint publishes acoustic selected rows, permissions and the actual once-refreshed source working map for a completed actual English MAIN119 graph. It does not implement dictionary startup/continuation, qualifier/category/request framing, word search or accepted English text. It has no recognition accuracy claim and does not change the application default.
 
 `LegacyEnglishMainSpanSession.Prepare` consumes the exact pristine `LegacyEnglishFreshDictionaryQuerySession`, whose scorer and sparse query share the same actual masks/source identity. Its graph comes from the completed actual MainLocal owner. No caller-supplied costs, flags, map, graph, callbacks, resource version or language owner can replace this lineage. The sole existing-runtime seam is changing `LegacyEnglish119MainLocalCandidates` to a sealed partial declaration; all new access and lifecycle code lives in three new files.

@@ -1,4 +1,10 @@
-# Actual2B1 stored flag: complete selected producer closure
+# Actual2B1 stored flag: selected flag-access closure
+
+**Scope correction:** the receiver68 inventory below does not prove numerical
+equivalence of all reachable helpers. The BC280 landmark pass differs from the
+reused generic2B0 B6D20 pass; see the [open blocker](actual-2b1-landmark-blocker-20261021.md).
+Russian V2 integration is blocked. The earlier broad complete-producer claim
+is withdrawn; raw flag accesses and dimension-branch evidence remain valid.
 
 The earlier V1 Russian package is incomplete and MUST NOT be integrated as a
 native feature producer. It omitted one active use of raw profile88. Its
@@ -6,8 +12,9 @@ statement that common post-resampling dimensions retain the added coordinate
 unit is wrong. The V1 captures and strict131/261 quality result remain immutable
 historical evidence, not V2 predictions or a Russian-readiness claim.
 
-This STATIC checkpoint closes every concrete actual2B1 table method and its
-configured1111 production branches together, before the minimal V2 correction.
+This STATIC checkpoint inventories every concrete actual2B1 table method and
+the configured1111 flag branches before the proposed V2 correction. It does not
+close every helper's numerical semantics.
 Vendor binaries were read statically; none was executed or loaded.
 
 ## Raw source, initializer and all flag accesses
