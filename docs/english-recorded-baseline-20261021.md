@@ -75,3 +75,28 @@ a justification for tuning beam limits. Coordinates and recording boundaries
 were unchanged. Captures and the independent script remain under
 `E:/BlurMask-build-artifacts-20261014/root-english-ctc-*20261021.json` and
 `root-audit-english-ctc-beam-20261021.py`.
+
+## Additional fixed mouse-input comparison
+
+The unchanged full-resource CTC recognizer was also checked on the first100
+archive entries from [Cursive Transformer](https://github.com/greydanus/cursivetransformer),
+pinned commit `adc1e10abf705000031de3a4899a413e543dad1c`, `data/bigbank.json.zip`.
+These entries belong to one mouse/trackpad writer. The source collector stores
+explicit pen states and quantized normalized coordinates on a1200x200 canvas.
+The diagnostic restores those canvas units and splits only at recorded releases:
+421 strokes and32480 pen-down points, without smoothing or invented boundaries.
+Archive SHA256 is `b8a96d19ec444fc1a87d124cbc061ba8e91c0574fe0fe95d7f819f07869ba798`.
+
+Inputs and Managed/NativeAOT outputs were frozen before target evaluation. The
+result is53 exact words,74 edits in535 reference characters (13.83% CER), zero
+empty results. Both runtimes are byte-identical. No model, geometry, threshold or
+decoder policy was tuned. This is a separate single-writer mouse diagnostic,
+not a representative tablet benchmark, native frame proof or ready English
+recognition. Targets have now been opened; later comparisons are fixed replays.
+
+Input SHA256: `cad887b43716fc069e6b126746f810dd9ba65e65dd09fbe4b618042980ae704f`.
+Capture SHA256: `483f99c608461e8117b5f9c007359273d9abda6db56cd1194a2b94d82d8543bb`.
+Targets SHA256: `b39d04d7c139612b8df5478e26573db8f9a19e22618aaf261c56a90b1b400443`.
+Raw data, collector source, hashes, label-free harness, captures and posthoc rows
+remain on E in `english-mouse-cursive-20261021` and
+`root-english-mouse-test-20261021`. Recordings are not redistributed here.
