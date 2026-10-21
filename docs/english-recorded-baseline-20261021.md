@@ -81,14 +81,15 @@ were unchanged. Captures and the independent script remain under
 The unchanged full-resource CTC recognizer was also checked on the first100
 archive entries from [Cursive Transformer](https://github.com/greydanus/cursivetransformer),
 pinned commit `adc1e10abf705000031de3a4899a413e543dad1c`, `data/bigbank.json.zip`.
-These entries belong to one mouse/trackpad writer. The source collector stores
+These entries belong to one mouse/trackpad writer and include arbitrary ASCII
+strings, digits and punctuation; they are not100 ordinary English words. The source collector stores
 explicit pen states and quantized normalized coordinates on a1200x200 canvas.
 The diagnostic restores those canvas units and splits only at recorded releases:
 421 strokes and32480 pen-down points, without smoothing or invented boundaries.
 Archive SHA256 is `b8a96d19ec444fc1a87d124cbc061ba8e91c0574fe0fe95d7f819f07869ba798`.
 
 Inputs and Managed/NativeAOT outputs were frozen before target evaluation. The
-result is53 exact words,74 edits in535 reference characters (13.83% CER), zero
+result is53 exact transcriptions,74 edits in535 reference characters (13.83% CER), zero
 empty results. Both runtimes are byte-identical. No model, geometry, threshold or
 decoder policy was tuned. This is a separate single-writer mouse diagnostic,
 not a representative tablet benchmark, native frame proof or ready English
