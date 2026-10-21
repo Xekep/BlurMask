@@ -42,9 +42,9 @@ f=functions();init=f['1801a6980'];front=f['180150d00'];ctor=f['18000c860'];copy=
 assert "*(char *)(param_2 + 0x1dc) = param_3[10]"in init
 assert "*(undefined8 *)(param_2 + 0xd0) = 0"in ctor
 assert "local_b8[0x1a] == 0"in front and "*(char *)(local_b8[0x1a] + 8) != '\\x01'"in front
-#Supporting evidence only: no direct D0 access in registered callbacks does
-#not establish arbitrary transitive handler closure. The public owner is NEW,
-#has no external property/event/reuse channel, and copies only registered fields.
+assert "CONCAT12(uVar6,CONCAT11(uVar5,uVar7))"in front and "+ 0xf5"in front
+#Packet starts at local_a8: uStack_a0 low bytes are E1 at8, D0 at9,
+#F5/type23F at10 DECIMAL. D0 callback scans do not prove graph1DC's F5 producer.
 property_rows=b.data[b.off(0x180274ba0):b.off(0x180274ba0)+52*32]
 assert hashlib.sha256(property_rows).hexdigest()=='af88a033bb95e941dca5f41e50dcfb00e50018c010f79e7457fc4005ebd93b38'
 callbacks=[]
@@ -62,6 +62,7 @@ ak=(ROOT/'models/ru-RU/ru_RU-ak-cur.lite.res').read_bytes();assert hashlib.sha25
 assert struct.unpack_from('<2f',ak,189165)==(.5,5.) and ak[189173]==0
 assert b.qwords(0x1802e1490+0x78,1)[0]==0x180194170
 report=dict(blocks=[dict(start=hex(a),endExclusive=hex(z),sha256=h)for a,z,h in blocks],pins=[f'{a:x} {m} {o}'for a,(m,o)in pins.items()],registeredCallbacks=callbacks,
- freshScope='Owned NEW2B3, no external configuration/event/reuse: ctorD0=0; registered property copying does not copy rawD0.150D00 config10 tests D0 nonnull and byte8==1;1A6980 writes1DC. This is not a universal no-transitive-D0-mutation claim and not derived from20E associated28.',
+ freshScope='OPEN producer proof:150D00 packet byte9 is D0-container predicate; byte10 decimal is F5/type23F predicate.1A6980 reads byte10 into1DC. D0 callback scans do not close F5 constructor/copy/property/event mutations; no new numerical conclusion.',
+ freshGraph1DcProven=False,
  semantics='Kind6: request04 packed context key; graphD0 signextends24bits after7bit shift; ordered1AAA60 follows compact selector1; first path bbox copied, subsequent stored group boxes expanded. Main191=1 kind6A0 BEFORE192=0. Ordinary0/2/5 pair140 disabled;118 full status/source/descriptor/line and limit branches separately.',vendorExecution=False)
 Path(args.output).write_text(json.dumps(report,indent=2)+'\n');print(f'PASS static{len(blocks)} PE blocks/{len(pins)} pins/8dispatch targets/{len(callbacks)} supporting property callbacks; no vendor execution')

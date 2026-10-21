@@ -73,16 +73,18 @@ remain separate source policies.
 
 ## Fresh graph1DC ownership
 
-`1ACFA0` first tests graph1DC. `1A6980` copies that byte from config10. In
-`150D00`, config10 is true only for a nonnull containerD0 with byte8==1.
-NEW2B3 constructor00C860 explicitly clears D0. This factory's actual owned fresh
-path has no external property/event or reused-container channel. Genericcopy
-00EBA0 copies registered properties rather than the raw D0 storage.
-The static audit additionally checks all104 registered getter/setter bodies for
-absence of direct+D0 access. That scan is supporting evidence; it does **not**
-prove arbitrary transitive handlers cannot mutateD0 and is not used to extend
-the scope to configured/reused objects. NoAssociated20E+28 is unrelated to this
-proof and is not substituted for it.
+This producer proof remains open. The previous attribution to containerD0 was
+incorrect: `1A6980` reads config byte10 **decimal**, not byte0x10. In `150D00`,
+the packet begins at local_a8 and uStack_a0 begins at byte8. Its packed low three
+bytes contain E1 at8, the D0-container predicate at9, and the F5/type23F predicate
+at10. Thus graph1DC comes from F5 combined with the type check.
+
+The constructor and all subsequent source/copy/property/event mutations of F5
+must be closed for the admitted route before claiming graph1DC=0. The existing
+scan of104 registered callbacks for direct+D0 access does not establish that
+different field's provenance. NoAssociated20E+28 is also unrelated. No numerical
+change follows from this proof correction alone; the callback controls below
+do not establish complete native producer equivalence or Russian readiness.
 
 ## Verification
 
