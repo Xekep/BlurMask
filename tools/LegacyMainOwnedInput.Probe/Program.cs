@@ -78,10 +78,14 @@ using(var output=File.Create(args[7]))using(var w=new Utf8JsonWriter(output))
     //All-identical input distinguishes raw endpoint3 from the incorrect
     //retained-count endpoint0 used by a reconstructed count of one.
     var tiny=LegacyFreshFirstResultOwnershipFactory.Prepare(ak,6120,[new InkStroke([new(0,0),new(0,0),new(0,0),new(0,0)])]);
-    //The current temporal classifier rejects zero spatial extent; this is a
-    //separate real limitation, not hidden by a fabricated scored point glyph.
-    try{LegacyFreshFirstOwnedRecognition.PrepareForOwnedFactory(ak,tiny,activations,table);throw new Exception("Zero-extent classifier scope changed; review actual production before widening this test.");}
-    catch(ArgumentException e)when(e.ParamName=="strokes"&&e.Message.Contains("no spatial extent")){guards++;}
+    //The pinned Russian classifier now owns native00A9F0 degenerate features.
+    //Their exact vectors/NN costs have a separate independent oracle in
+    //LegacyRussianFirstDegenerate.Probe; here check the real owning entry point
+    //without inventing a printable result for a point.
+    var tinyOwned=LegacyFreshFirstOwnedRecognition.PrepareForOwnedFactory(ak,tiny,activations,table);
+    if(!ReferenceEquals(tinyOwned.Factory,tiny)||tinyOwned.GroupScores.Count!=1)
+        throw new Exception("Degenerate input lost its actual first factory/group.");
+    w.WriteNumber("identicalClassifiedGroups",tinyOwned.GroupScores.Count);
     var tinyCuts=tiny.Frame.Row.GenerateRussianCuts();var tinyScope=new LegacyFirstRowPrimitiveScope(tiny.Frame.Row,tinyCuts,[4]);
     var whole=new[]{new LegacyInkRange(0,0,tinyCuts.Cuts.PreparedInk.StrokePointCounts.Span[0])};
     if(tiny.Frame.Row.OriginalSource.Strokes[0].Points.Count!=1||tinyScope.Evaluate(whole,1).EndpointFieldsAreZero)

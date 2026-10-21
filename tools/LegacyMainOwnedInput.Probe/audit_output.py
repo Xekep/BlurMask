@@ -95,8 +95,9 @@ for sample in root['inputs']:
     assert all(n>0 for n in sample['smoothedCounts'])
 assert supported==['oneMIR','twoRowsReverse','twoWordsOffset230','twoWordsOffset300']
 assert unsupported==['twoWordsOffset450','twoWordsOffset700','ownEnglishHIHI']
-assert (root['passed'],root['unsupported'],root['multipleInputs'],root['guards'])==(4,3,1,7)
+assert (root['passed'],root['unsupported'],root['multipleInputs'],root['guards'])==(4,3,1,6)
 assert (root['duplicateRawEndThird'],root['duplicateRetainedCount'])==(3,2)
 assert (root['identicalEndingThird'],root['identicalRetainedCount'])==(3,1)
+assert root['identicalClassifiedGroups']==1
 assert guides_checked==5 and rows_checked==14
 print(f'PASS independent raw192 AL masks/{cells_checked} primary-B8 cells/{rows_checked} source720 rows/{guides_checked} NumPy IRLS guides +deskew; 3 actual multiword scope refusals, no text accuracy assertion')
