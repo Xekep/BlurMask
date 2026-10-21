@@ -16,6 +16,12 @@ words and342 edits, below the historical generic2B0 result137/325. Correcting
 native arithmetic has not improved selected words. The all-flag audit is not a
 full-program proof of every helper. See the [defect history](actual-2b1-landmark-blocker-20261021.md).
 
+The [real multi-stroke context diagnostic](russian-real-context-20261021.md)
+additionally checks1384 windows and10302 group contexts from100 preserved Latin
+trajectories under the Russian model, with independent numerical checks and
+Managed/NativeAOT parity. No mismatch was found. This tests physical boundaries
+missing from the one-list Russian corpus; it is not a Russian accuracy result.
+
 The [full English resource loader](native-english-text-resource.md) now loads the
 existing BLSTM/CTC model in C# with all67 tensors and parameter bytes identical to
 the independent exporter. The application bundles it as the default when an
