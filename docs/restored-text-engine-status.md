@@ -6,6 +6,14 @@ default recognizer.
 
 ## Development integration (2026-10-21)
 
+The [full English resource loader](native-english-text-resource.md) now loads the
+existing BLSTM/CTC model in C# with all67 tensors and parameter bytes identical to
+the independent exporter. The application bundles it as the default when an
+optional English pack is absent. It preserves all100 fixed diagnostic outputs:
+69 exact words,40/721 character edits. This is a separate English path; automatic
+Russian/English arbitration and the legacy MAIN dictionary decoder are unfinished.
+
+
 The [opt-in application adapter](experimental-global-text-adapter.md) now uses
 the actual Russian global dictionary path. The default setting remains off.
 It snapshots bounded caller coordinates, preserves genuine source provenance,

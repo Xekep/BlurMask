@@ -9,6 +9,9 @@ internal static class AiRecognitionModels
     private static StrokeTextRecognizer? _recognizer;
     private static DateTime _modified;
     private static long _length = -1;
+    private static readonly Lazy<StrokeTextRecognizer> English = new(() =>
+        NativeEnglishTextResource.Load(ReadEmbedded("english")));
+    internal static StrokeTextRecognizer BundledEnglish => English.Value;
     private static readonly Lazy<ExperimentalGlobalTextRecognizer> Experimental = new(() =>
         ExperimentalGlobalTextRecognizer.Load(ReadEmbedded("acoustic"), ReadEmbedded("linguistic"),
             ReadEmbedded("engine"), ReadEmbedded("spatial30"), ReadEmbedded("physical50"),
@@ -30,7 +33,7 @@ internal static class AiRecognitionModels
                 try
                 {
                     var file = new FileInfo(PathName);
-                    if (!file.Exists) { _recognizer = null; _length = -1; return null; }
+                    if (!file.Exists) { _recognizer = null; _length = -1; return English.Value; }
                     if (_modified == file.LastWriteTimeUtc && _length == file.Length) return _recognizer;
                     _recognizer = null; _modified = file.LastWriteTimeUtc; _length = file.Length;
                     using var stream = file.OpenRead();

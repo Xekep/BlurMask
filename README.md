@@ -13,7 +13,7 @@ definitions in `packaging`, documentation in `docs`, and recognition resources i
 AI pen uses an experimental local stroke recognizer in a separate library. Existing
 local model packs are detected automatically; recognition starts on pen release and its printed replacement
 keeps the original size and color. Recognition can be undone. The default English
-path uses separately installed model packs; without one, ink stays handwritten.
+path loads a bundled resource in C#; an optional installed model pack takes precedence.
 Development builds also bundle the opt-in experimental Russian global dictionary
 path, disabled by default. Russian cursive quality and English MAIN decoding remain
 unfinished. See [AI pen documentation](docs/ai-pen.md) and the
@@ -52,7 +52,7 @@ and [official tool guide](https://epicpen.com/userguide).
 - **AI pen** starts recognition when a stroke ends and replaces a completed row after a 0.5-second writing pause.
   Symbols share a font size and baseline; position, bounding size and color are preserved. Conversion is automatic.
   Recognition processes stroke coordinates locally: English text uses native C#; **Formulas** uses the bundled native CPU runtime.
-  English model packs are installed separately; experimental Russian resources are bundled.
+  English and experimental Russian resources are bundled; custom English packs are optional.
   The previous raster recognizers have been removed. Russian handwriting is not ready.
   Fonts are automatic: Inter for text, STIX Two Math for formulas and STIX Two Text Italic for variables; settings has no font selector.
   Uncertain results stay handwritten, and Undo restores the original strokes. See [model details and limits](docs/ai-pen.md).

@@ -285,6 +285,7 @@ $cases = @(
   @{ Name = 'LegacyGlobalInputTransforms'; Args = @('models', 'tools/test-data/russian-recorded-words/manifest.json', '.artifacts/legacy-global-transforms-native.json') },
   @{ Name = 'LegacyGlobalCounterHandoff'; Args = @('models', 'tools/test-data/russian-recorded-words/manifest.json', '.artifacts/legacy-global-counter-native.json') },
   @{ Name = 'LegacyGlobalSourceRangeUtf8'; Args = @('models', 'tools/test-data/russian-recorded-words/manifest.json', '.artifacts/legacy-global-source-range-utf8-native.json') },
+  @{ Name = 'NativeEnglishResource'; Args = @('models', '.artifacts/native-english-reference.ikrpack', '.artifacts/native-english-resource-native.json') },
   @{ Name = 'ExperimentalGlobalText'; Args = @('models', '.artifacts/experimental-global-text-native.json') },
   @{ Name = 'LegacyGlobalCroppedSource'; Args = @('models', 'tools/test-data/russian-recorded-words/manifest.json', '.artifacts/legacy-global-cropped-source-native.json') },
   @{ Name = 'LegacyGlobalTimedGeometry'; Args = @('models', 'tools/test-data/russian-recorded-words/manifest.json', '.artifacts/legacy-global-timed-parent-native.json', '.artifacts/legacy-global-timed-geometry-native.json') },
@@ -989,6 +990,10 @@ foreach ($case in $cases) {
   if ($name -eq 'LegacyGlobalInputTransforms') {
     python -I tools/LegacyGlobalInputTransforms.Probe/audit_output.py models .artifacts/legacy-global-text-source-wrapper-native.json .artifacts/legacy-global-word-text-native.json .artifacts/legacy-global-document-coverage-native.json .artifacts/legacy-global-selected-native.json .artifacts/legacy-global-indices-native.json .artifacts/legacy-global-cleanup-native.json .artifacts/legacy-global-transforms-native.json .artifacts/legacy-global-transforms-managed.json
     if ($LASTEXITCODE -ne 0) { throw 'LegacyGlobalInputTransforms independent audit/parity failed' }
+  }
+  if ($name -eq 'NativeEnglishResource') {
+    python -I -B tools/NativeEnglishResource.Probe/audit_output.py .artifacts/native-english-resource-native.json --parity .artifacts/native-english-resource-managed.json
+    if ($LASTEXITCODE -ne 0) { throw 'NativeEnglishResource independent reference/parity failed' }
   }
   if ($name -eq 'ExperimentalGlobalText') {
     python -I -B tools/ExperimentalGlobalText.Probe/audit_output.py .artifacts/experimental-global-text-native.json --parity .artifacts/experimental-global-text-managed.json

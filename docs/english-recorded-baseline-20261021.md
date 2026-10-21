@@ -47,3 +47,13 @@ Evidence and the headless harness remain under
 `root-plucoll-first-*-20261021.json` files. The same fixed inputs are intended for
 comparison after genuine MAIN neural scoring and language decoding are joined;
 container, mask and data-loading checks alone are not improved accuracy.
+
+## Separate full-resource CTC comparison
+
+The existing full-resource English BLSTM/CTC path was subsequently run on these
+same fixed inputs without tuning. It has69 exact words/100 and40 edits/721
+characters (5.55% CER). The new C# raw-resource loader preserves every text,
+score-bit and frame-count result exactly; Managed and NativeAOT match. This is a
+comparison of different complete pipelines/resources, not an isolated effect of
+one algorithm. The sample is no longer unseen. English MAIN dictionary inference
+remains separate. See [direct English resource loading](native-english-text-resource.md).

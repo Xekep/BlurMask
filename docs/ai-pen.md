@@ -8,13 +8,14 @@ The previous symbol/PARSeq recognizers, weights, training tools and fixtures hav
 been removed. There is no fallback to them.
 
 The optional **Experimental text engine** setting uses the bundled restored
-first-stage decoder. The newer main CASE pipeline remains library-only;
+global dictionary adapter. The setting remains disabled by default;
 Russian cursive is not ready. See the [restoration status and measured limits](restored-text-engine-status.md).
 
-This first integration supports an experimental English acoustic model. It uses
+The default English path loads the bundled full acoustic resource directly in C#. It uses
 a bounding-box normalization heuristic, a three-layer bidirectional LSTM and
 standard CTC collapse. It has no recovered lexical dictionary. English examples
-and digits have been verified. Russian raw-stroke recognition is not ready.
+and digits have been verified. The separate experimental Russian path is not ready
+for general use, and automatic Russian/English language arbitration is unfinished.
 The separate **Formulas** mode uses the reusable native
 [InkRecognition.Math module](ink-math-engine.md) and a user-installed Math2 pack.
 The default **Automatic** mode selects text or mathematical notation after the
@@ -63,9 +64,11 @@ distant writing starts a new fragment. Undo/redo retain previous live associatio
 ## Model installation
 
 Source resources for English, Russian, mathematics and Raw Content are stored in
-[`models`](../models/README.md). Application model packs are installed separately
+[`models`](../models/README.md). The full English resource and experimental Russian resources are bundled.
+Optional application model packs are installed separately
 from the executable.
-An absent, invalid or uncertain model leaves the original ink untouched. The
+An absent optional English pack uses the bundled English resource. Invalid explicit
+packs or uncertain recognition leave the original ink untouched. The
 application discovers installed local packs automatically; Settings has no model
 selectors or file pickers. Developer installation commands below check model
 structure and checksum before replacing a working model. The pen menu shows the

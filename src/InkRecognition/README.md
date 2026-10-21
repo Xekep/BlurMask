@@ -41,6 +41,13 @@ bytes, version, body length and SHA256 of the body. The body contains language,
 labels, preprocessing parameters, architecture, tensor inventory and packed
 weights. [The exporter](../../tools/export-ink-model.py) documents the exact layout.
 No model weights are embedded in this library.
+`NativeEnglishTextResource.Load(rawResource, token)` also reads the pinned full
+English `.res` in C#, without a Python conversion step or SDK dependency. It
+constructs the same validated portable model in memory; all67 tensors and native
+parameter bytes match the independent exporter. The application bundles that
+resource as its default English path. This does not implement English MAIN
+dictionary decoding or automatic bilingual selection. See
+[direct English resource loading](../../docs/native-english-text-resource.md).
 
 Limits of the initial CTC API: whole-word geometry is heuristic; CTC has no
 lexical language model; Russian and Math2 are not implemented by that API. Confidence is an acoustic

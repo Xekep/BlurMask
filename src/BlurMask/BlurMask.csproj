@@ -43,6 +43,7 @@
     <EmbeddedResource Include="../../models/line-geometry/line-2e3-50.res" LogicalName="BlurMask.ExperimentalInk.physical50" />
     <EmbeddedResource Include="../../models/text-unicode/legacy-case-data.json" LogicalName="BlurMask.ExperimentalInk.cases" />
     <EmbeddedResource Include="../../models/text-unicode/legacy-text-publication-data.json" LogicalName="BlurMask.ExperimentalInk.publication" />
+    <EmbeddedResource Include="../../models/en-US/en_US-ak-cur.res" LogicalName="BlurMask.ExperimentalInk.english" />
     <ProjectReference Include="../InkRecognition/InkRecognition.csproj" />
     <ProjectReference Include="../InkRecognition.Math/InkRecognition.Math.csproj" />
     <ProjectReference Include="../InkRecognition.RawContent/InkRecognition.RawContent.csproj" />

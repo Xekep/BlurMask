@@ -83,6 +83,12 @@ internal static class AiPenProbe
             Program.Settings = missing;
             if (AiRecognitionModels.Current is ExperimentalGlobalTextRecognizer)
                 throw new InvalidOperationException("Disabling experimental mode retained the wrong engine.");
+            var english=AiRecognitionModels.BundledEnglish;
+            if(english.Language!="en-US"||!ReferenceEquals(english,AiRecognitionModels.BundledEnglish)||
+                english.Recognize([ink[0]]).Text!="M")
+                throw new InvalidOperationException("Bundled raw English resource did not reach the independent application decoder.");
+            if(!File.Exists(AiRecognitionModels.PathName)&&!ReferenceEquals(AiRecognitionModels.Current,english))
+                throw new InvalidOperationException("Missing optional pack did not use bundled English.");
             Console.WriteLine($"Experimental bundled global dictionary engine → application text layout: '{actual.Text}', native candidate score {actual.Confidence}; settings, rollback, bounds and cancellation passed. Russian cursive accuracy is not asserted.");
         }
         finally { Program.Settings = original; }
