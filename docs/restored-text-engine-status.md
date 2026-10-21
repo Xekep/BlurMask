@@ -77,6 +77,13 @@ untouched allocation residue. Fresh Managed/NativeAOT builds match exactly.
 This evaluates lexical terminals; the NN-selected candidate/controller bridge
 and automatic Russian/English selection are still separate work.
 
+The [fresh English query binding](english-fresh-query-session-preparation-20261021.md)
+now owns its dictionary context pool, initial source map and query state separately
+from the masks-only pool. Independent checks reproduce188 preparation states,
+20481 node references and582 prepared records, including growth, restoration and
+fault prefixes. Managed/NativeAOT captures match. Its public surface only prepares
+and snapshots the binding; genuine acoustic requests and word search remain missing.
+
 The [raw-object kind receipt](legacy-global-raw-object-kinds-runtime.md) now carries
 the actual C49-to-C1E base-kind provenance through all13 publication cases. The
 earlier inferred C25 interpretation was incorrect. All six downstream captures

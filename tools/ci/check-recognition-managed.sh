@@ -666,6 +666,8 @@ dotnet run --project tools/LegacyEnglishMainAcoustic.Probe -c Release -- models 
 python -I -B tools/LegacyEnglishMainAcoustic.Probe/audit_runtime.py --models models --capture .artifacts/legacy-en-main119-acoustic-managed.json --output .artifacts/legacy-en-main119-acoustic-oracle-managed.json
 dotnet run --project tools/LegacyEnglishSparseQuery.Probe -c Release -- models .artifacts/legacy-en-sparse-query-managed
 python -I -B tools/LegacyEnglishSparseQuery.Probe/audit_output.py --repo . --models models --capture .artifacts/legacy-en-sparse-query-managed --output .artifacts/legacy-en-sparse-query-oracle-managed.json
+dotnet run --project tools/LegacyEnglishQuerySession.Probe -c Release -- models .artifacts/legacy-en-query-prep-managed
+python -I -B tools/LegacyEnglishQuerySession.Probe/audit_output.py --repo . --models models --capture .artifacts/legacy-en-query-prep-managed/capture.json --output .artifacts/legacy-en-query-prep-oracle-managed.json
 dotnet run --project tools/LegacyMathMixed107Raw.Probe -c Release -- models/math/math-ak.res .artifacts/legacy-math-mixed107-raw-managed.json
 python -I -B tools/LegacyMathMixed107Raw.Probe/audit_output.py models/math/math-ak.res .artifacts/legacy-math-mixed107-raw-managed.json --reference tools/handwriting/math_legacy_mixed107_reference.py
 dotnet run --project tools/LegacyEnglishLiteFirstPreprocessing.Probe -c Release -- models .artifacts/legacy-en-short-controls.json .artifacts/legacy-en-short-managed.json

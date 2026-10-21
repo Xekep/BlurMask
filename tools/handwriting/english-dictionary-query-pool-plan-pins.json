@@ -1,0 +1,467 @@
+{
+  "binary": "MyScriptText.dll",
+  "sha256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+  "base": "0x180000000",
+  "fullBodies": 9,
+  "regions": [
+    {
+      "function": "1800918d0",
+      "start": "0x1800918d0",
+      "endExclusive": "0x180091b2d",
+      "bytes": 605,
+      "sha256": "800c6d2d18f00872a5cbe09086cb4dbd750bb5eaefa17dc836aeebf795ea5479",
+      "instructions": 185
+    },
+    {
+      "function": "180091b30",
+      "start": "0x180091b30",
+      "endExclusive": "0x180091cdf",
+      "bytes": 431,
+      "sha256": "a83b847fb79d187a191ee7446e6dd434e053a834f7635c087c0e84b44209bfc5",
+      "instructions": 122
+    },
+    {
+      "function": "1800920a0",
+      "start": "0x1800920a0",
+      "endExclusive": "0x1800922ee",
+      "bytes": 590,
+      "sha256": "2a79ddb35b150d07d9dbad64578549e026ca970b7c7e5217e791b89b24b3fb1b",
+      "instructions": 140
+    },
+    {
+      "function": "1801fd240",
+      "start": "0x1801fd240",
+      "endExclusive": "0x1801fd896",
+      "bytes": 1622,
+      "sha256": "5a3027f00e5b20cbda1f5e49b209cbb7b91e62765a2e28bcd4945a9f88f6ccda",
+      "instructions": 380
+    },
+    {
+      "function": "1801fd240",
+      "start": "0x1801fd8a0",
+      "endExclusive": "0x1801fdf79",
+      "bytes": 1753,
+      "sha256": "56314b48cec8b206c8790040fecd419b75549a31d3ef7f7b80d148356810ad2a",
+      "instructions": 407
+    },
+    {
+      "function": "1801fd240",
+      "start": "0x1801fdf80",
+      "endExclusive": "0x1801fe737",
+      "bytes": 1975,
+      "sha256": "0e174e85732d274639c44407428d95540e3e8abbd729c6d495299822f224eda5",
+      "instructions": 453
+    },
+    {
+      "function": "180236910",
+      "start": "0x180236910",
+      "endExclusive": "0x180236b27",
+      "bytes": 535,
+      "sha256": "836b698f3f3a24ea3d39ea234d8e89ebc21ee39436c95669c9647b45adaa948a",
+      "instructions": 157
+    },
+    {
+      "function": "180093b50",
+      "start": "0x180093b50",
+      "endExclusive": "0x180093f31",
+      "bytes": 993,
+      "sha256": "4e4a3dc99ffc003c6cb622a0b6a38c1c3fecce92b48acadce7b95c0bf8ffe845",
+      "instructions": 240
+    },
+    {
+      "function": "1801f6e50",
+      "start": "0x1801f6e50",
+      "endExclusive": "0x1801f6fa6",
+      "bytes": 342,
+      "sha256": "175be73c6ce954356e04604a632af2c1e9232a1b73d116633488933e1fa8e7c3",
+      "instructions": 105
+    },
+    {
+      "function": "180093ab0",
+      "start": "0x180093ab0",
+      "endExclusive": "0x180093ae5",
+      "bytes": 53,
+      "sha256": "ce6bee14747d3c7ae8959a8ba5eecbf77afba5a31ad06095758a0f8be471454b",
+      "instructions": 16
+    },
+    {
+      "function": "180236490",
+      "start": "0x180236490",
+      "endExclusive": "0x1802367ab",
+      "bytes": 795,
+      "sha256": "f465068a74ecc4e979e491344deb88e9ce7df76871df90081532370ce5bff82c",
+      "instructions": 208
+    }
+  ],
+  "calls": [
+    {
+      "at": "0x18009190f",
+      "bytes": "e81c020000",
+      "binding": "0x180091b30"
+    },
+    {
+      "at": "0x1800919d3",
+      "bytes": "e858010000",
+      "binding": "0x180091b30"
+    },
+    {
+      "at": "0x180091ad5",
+      "bytes": "e8e6fcffff",
+      "binding": "0x1800917c0"
+    },
+    {
+      "at": "0x180091c18",
+      "bytes": "41ffd2",
+      "binding": "r10"
+    },
+    {
+      "at": "0x180091c47",
+      "bytes": "41ffd1",
+      "binding": "r9"
+    },
+    {
+      "at": "0x18009222a",
+      "bytes": "e8a1f6ffff",
+      "binding": "0x1800918d0"
+    },
+    {
+      "at": "0x1801fd292",
+      "bytes": "41ffd2",
+      "binding": "r10"
+    },
+    {
+      "at": "0x1801fd2ad",
+      "bytes": "41ffd1",
+      "binding": "r9"
+    },
+    {
+      "at": "0x1801fd2d7",
+      "bytes": "e864a5ffff",
+      "binding": "0x1801f7840"
+    },
+    {
+      "at": "0x1801fd49d",
+      "bytes": "41ffd1",
+      "binding": "r9"
+    },
+    {
+      "at": "0x1801fd57a",
+      "bytes": "e8019bffff",
+      "binding": "0x1801f7080"
+    },
+    {
+      "at": "0x1801fd5f9",
+      "bytes": "e8d242e9ff",
+      "binding": "0x1800918d0"
+    },
+    {
+      "at": "0x1801fd67c",
+      "bytes": "e82f99ffff",
+      "binding": "0x1801f6fb0"
+    },
+    {
+      "at": "0x1801fd6bc",
+      "bytes": "e80f42e9ff",
+      "binding": "0x1800918d0"
+    },
+    {
+      "at": "0x1801fd74d",
+      "bytes": "ffd0",
+      "binding": "rax"
+    },
+    {
+      "at": "0x1801fd789",
+      "bytes": "41ffd2",
+      "binding": "r10"
+    },
+    {
+      "at": "0x1801fd7d1",
+      "bytes": "41ffd1",
+      "binding": "r9"
+    },
+    {
+      "at": "0x1801fd872",
+      "bytes": "41ffd2",
+      "binding": "r10"
+    },
+    {
+      "at": "0x1801fd966",
+      "bytes": "41ffd1",
+      "binding": "r9"
+    },
+    {
+      "at": "0x1801fd9a1",
+      "bytes": "41ffd1",
+      "binding": "r9"
+    },
+    {
+      "at": "0x1801fd9c8",
+      "bytes": "41ffd2",
+      "binding": "r10"
+    },
+    {
+      "at": "0x1801fda60",
+      "bytes": "e81b96ffff",
+      "binding": "0x1801f7080"
+    },
+    {
+      "at": "0x1801fda82",
+      "bytes": "e8c9130600",
+      "binding": "0x18025ee50"
+    },
+    {
+      "at": "0x1801fdbc6",
+      "bytes": "e895b1ffff",
+      "binding": "0x1801f8d60"
+    },
+    {
+      "at": "0x1801fdc0d",
+      "bytes": "41ffd2",
+      "binding": "r10"
+    },
+    {
+      "at": "0x1801fdcd8",
+      "bytes": "41ffd1",
+      "binding": "r9"
+    },
+    {
+      "at": "0x1801fdd18",
+      "bytes": "41ffd1",
+      "binding": "r9"
+    },
+    {
+      "at": "0x1801fde54",
+      "bytes": "e807afffff",
+      "binding": "0x1801f8d60"
+    },
+    {
+      "at": "0x1801fdef2",
+      "bytes": "ffd0",
+      "binding": "rax"
+    },
+    {
+      "at": "0x1801fdf11",
+      "bytes": "41ffd1",
+      "binding": "r9"
+    },
+    {
+      "at": "0x1801fe013",
+      "bytes": "e8b838e9ff",
+      "binding": "0x1800918d0"
+    },
+    {
+      "at": "0x1801fe0f2",
+      "bytes": "e8d937e9ff",
+      "binding": "0x1800918d0"
+    },
+    {
+      "at": "0x1801fe140",
+      "bytes": "e88b37e9ff",
+      "binding": "0x1800918d0"
+    },
+    {
+      "at": "0x1801fe225",
+      "bytes": "41ffd2",
+      "binding": "r10"
+    },
+    {
+      "at": "0x1801fe250",
+      "bytes": "41ffd1",
+      "binding": "r9"
+    },
+    {
+      "at": "0x1801fe2b0",
+      "bytes": "41ffd1",
+      "binding": "r9"
+    },
+    {
+      "at": "0x1801fe2da",
+      "bytes": "41ffd2",
+      "binding": "r10"
+    },
+    {
+      "at": "0x1801fe30b",
+      "bytes": "e8400b0600",
+      "binding": "0x18025ee50"
+    },
+    {
+      "at": "0x1801fe44e",
+      "bytes": "e80da9ffff",
+      "binding": "0x1801f8d60"
+    },
+    {
+      "at": "0x1801fe48b",
+      "bytes": "41ffd2",
+      "binding": "r10"
+    },
+    {
+      "at": "0x1801fe61d",
+      "bytes": "e83ea7ffff",
+      "binding": "0x1801f8d60"
+    },
+    {
+      "at": "0x1802369e0",
+      "bytes": "41ffd2",
+      "binding": "r10"
+    },
+    {
+      "at": "0x180236a1e",
+      "bytes": "41ffd1",
+      "binding": "r9"
+    },
+    {
+      "at": "0x180236ab9",
+      "bytes": "41ffd2",
+      "binding": "r10"
+    },
+    {
+      "at": "0x180236af5",
+      "bytes": "41ffd1",
+      "binding": "r9"
+    },
+    {
+      "at": "0x180093bf3",
+      "bytes": "e8e8e0ffff",
+      "binding": "0x180091ce0"
+    },
+    {
+      "at": "0x180093d68",
+      "bytes": "41ffd2",
+      "binding": "r10"
+    },
+    {
+      "at": "0x180093d98",
+      "bytes": "ffd0",
+      "binding": "rax"
+    },
+    {
+      "at": "0x180093e2c",
+      "bytes": "41ffd2",
+      "binding": "r10"
+    },
+    {
+      "at": "0x180093e65",
+      "bytes": "41ffd2",
+      "binding": "r10"
+    },
+    {
+      "at": "0x180093eac",
+      "bytes": "ffd0",
+      "binding": "rax"
+    },
+    {
+      "at": "0x180093ed4",
+      "bytes": "41ffd2",
+      "binding": "r10"
+    },
+    {
+      "at": "0x180093f1c",
+      "bytes": "e82faf1c00",
+      "binding": "0x18025ee50"
+    },
+    {
+      "at": "0x1801f6eae",
+      "bytes": "41ffd0",
+      "binding": "r8"
+    },
+    {
+      "at": "0x1801f6f11",
+      "bytes": "e83a7f0600",
+      "binding": "0x18025ee50"
+    },
+    {
+      "at": "0x1801f6f3e",
+      "bytes": "e8cd820600",
+      "binding": "0x18025f210"
+    },
+    {
+      "at": "0x1801f6f77",
+      "bytes": "e894820600",
+      "binding": "0x18025f210"
+    },
+    {
+      "at": "0x180093ad1",
+      "bytes": "41ffd1",
+      "binding": "r9"
+    },
+    {
+      "at": "0x180236503",
+      "bytes": "41ffd2",
+      "binding": "r10"
+    },
+    {
+      "at": "0x18023655c",
+      "bytes": "41ffd1",
+      "binding": "r9"
+    },
+    {
+      "at": "0x1802365de",
+      "bytes": "41ffd0",
+      "binding": "r8"
+    },
+    {
+      "at": "0x180236610",
+      "bytes": "e85bfdffff",
+      "binding": "0x180236370"
+    }
+  ],
+  "tables": [
+    {
+      "at": "0x1802b4360",
+      "bytes": "6029098001000000f0422b80010000007039098001000000d039098001000000903a098001000000a03a098001000000103b098001000000e0bc238001000000403f098001000000503f098001000000603f098001000000f0a305800100000000a4058001000000803f0980010000004040098001000000f0400980010000007029098001000000b03a098001000000",
+      "label": "2B7 source V10/V40/V48/V88"
+    },
+    {
+      "at": "0x1802e8bb0",
+      "bytes": "705f238001000000608b2e80010000009064238001000000b067238001000000206823800100000030682380010000005068238001000000e068238001000000306b238001000000406b238001000000506b238001000000c06b238001000000206c238001000000a06c238001000000206d238001000000906d238001000000c06d238001000000606e238001000000",
+      "label": "28D aggregate V10/V40/V48/V88"
+    },
+    {
+      "at": "0x1802ed2c0",
+      "bytes": "000000000000f83f",
+      "label": "pool descriptor growth double1.5"
+    }
+  ],
+  "upstream": {
+    "path": "tools/handwriting/english-sparse-query-history-plan-pins.json",
+    "sha256": "a8dd1680172a47ac16211f86984ea7263bdd4164ba754faf8550d46cc4e724ac"
+  },
+  "unchangedOwners": [
+    {
+      "path": "src/InkRecognition/LegacySymbolContextFactory.cs",
+      "lfSha256": "ddc4c289cf0d14e83961531de77d0e4bb79afb3907bd93db019178bec65f3778"
+    },
+    {
+      "path": "src/InkRecognition/LegacyPreparedDictionaryQuerySource.cs",
+      "lfSha256": "e71bb9caee6c416def54240e83bfcc6e075aef49d9aed65655baad0c6522ec9a"
+    },
+    {
+      "path": "src/InkRecognition/LegacyPreparedDictionaryWorkingMap.cs",
+      "lfSha256": "db40d475e26118d7ffab9cfcbf4d6c7f53bd416e767de1b82f158bfe2d16ea95"
+    },
+    {
+      "path": "src/InkRecognition/LegacyDictionaryInitialSymbolMaps.cs",
+      "lfSha256": "b4956a1277f90004cacb18e1be1eb0062642d96ace6b24a2520162375167f456"
+    },
+    {
+      "path": "src/InkRecognition/LegacyEnglishMainOnlySourceMasks.cs",
+      "lfSha256": "8e2f61c5e1b212a2405fb9e881ff1511b4791879d2b140bc7a5515cd5a8247f4"
+    }
+  ],
+  "scope": "STATIC fresh shared context pool and ordinary dictionary query/source-tag producer only",
+  "vendorExecuted": false,
+  "acousticContract": {
+    "frozenManifestSha256": "d344af2d9bf182807f5713c5d7e4f3d73b06b42f149e59e33ed6dc5f97c79b16",
+    "files": [
+      {
+        "path": "src/InkRecognition/LegacyEnglishMainOnlyAcousticScorer.cs",
+        "lfSha256": "79c179c072bec633ab5bc53fe6c1fc3b69f90e65e653b624e8e388bde80a9dd8"
+      },
+      {
+        "path": "src/InkRecognition/LegacyEnglishMainAcousticModel.cs",
+        "lfSha256": "06b8b4c86ea6a316f0245a0fe2a2c4947814ed3142af60195d466a6e10aa76cc"
+      }
+    ],
+    "scope": "Pinned public same-M/scorer/arc contract, not a new acoustic proof or controller adapter"
+  }
+}
