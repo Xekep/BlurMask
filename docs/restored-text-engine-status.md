@@ -33,6 +33,15 @@ checks32,530 candidate groups without expected labels and finds no further
 normalization/feature/NN/cost discrepancy on this one-track corpus. CUT/graph,
 MAIN selection and model/data limits remain under investigation.
 
+The [FIRST cut/chronology audit](russian-first-cuts-chronology-20261021.md)
+checks82512 actual records and32530 source-range projections. The separate
+[MAIN acoustic diagnostic](russian-main-acoustic-corpus-20261021.md) reproduces
+original probabilities/costs on27866 groups and independently checks normalized
+points and trajectory/raster features. It excludes the313 directional producer;
+subsequent static review found a native2B1 selector that the current Russian
+calibrated2B0 path discards. Correcting that producer is now the priority. These
+diagnostics do not validate the omitted directional inputs or improve accuracy.
+
 The [FIRST final-node correction](russian-first-final-prune-20261021.md) now
 applies the existing complete sampler eligibility pass at the actual FIRST
 entry point. Independent graph, separation and reciprocal-link checks pass on
