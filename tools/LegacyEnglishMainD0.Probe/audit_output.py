@@ -4,13 +4,23 @@ No expected handwriting targets are read.
 """
 from pathlib import Path
 import argparse,ast,hashlib,json,struct,subprocess,sys,tempfile,random
-p=argparse.ArgumentParser();p.add_argument('--models',type=Path,required=True);p.add_argument('--capture',type=Path,required=True);p.add_argument('--acoustic',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args();root=Path(__file__).resolve().parents[2]
+p=argparse.ArgumentParser();p.add_argument('--models',type=Path,required=True);p.add_argument('--capture',type=Path,required=True);p.add_argument('--acoustic',type=Path,required=True);p.add_argument('--acoustic-report',type=Path);p.add_argument('--output',type=Path,required=True);a=p.parse_args();root=Path(__file__).resolve().parents[2]
 sha=lambda b:hashlib.sha256(b).hexdigest();captureBytes=a.capture.read_bytes();actual=json.loads(captureBytes);nnBytes=a.acoustic.read_bytes()
-assert sha(nnBytes)in ['1eeff7449c49e7056b0f61ed71f6f89b83df03fef641def987cf63b225853af0','38396269d1fa4f2bf91d54e7994a04e3b8fee8915e417fc621e7530237e0066c']
 nn=json.loads(nnBytes);assert actual['TargetsRead']is False and nn['TargetsRead']is False and actual['InputSha256']==nn['InputSha256']
 assert actual['Guards']==42 and actual['Cancellations']==6
 assert [r['Name']for r in actual['Rows']]==[r['Name']for r in nn['Rows']]and actual['Refused']==nn['MultilineRefused']
 with tempfile.TemporaryDirectory(prefix='blurm-d0-',dir=a.output.parent)as temporary:
+ # Whole-file fixture hashes include input serialization/platform metadata.
+ # Bind to the independently audited CURRENT bytes, never a Windows-only golden.
+ # Always execute the current independent numerical oracle. A stale report
+ # from an older implementation cannot authorize a changed producer.
+ proof_path=a.acoustic_report or Path(temporary)/'acoustic-numerical-proof.json'
+ assert proof_path.resolve()not in {a.acoustic.resolve(),a.capture.resolve(),a.output.resolve()},'Distinct acoustic report output required'
+ subprocess.run([sys.executable,'-I','-B',str(root/'tools/LegacyEnglishMainAcoustic.Probe/audit_runtime.py'),'--models',str(a.models),'--capture',str(a.acoustic),'--output',str(proof_path)],check=True)
+ assert proof_path.stat().st_size<=1024*1024,'Bounded independent acoustic report required'
+ proof=json.loads(proof_path.read_bytes())
+ expected=dict(status='PASS',captureSha256=sha(nnBytes),inputSha256=nn['InputSha256'],owners=len(nn['Rows']),multilineRefused=len(nn['MultilineRefused']),groups=nn['GroupCount'],arcs=nn['ArcCount'],networks=nn['GroupCount']*4,guards=39,cancellations=12,preparedControls=16,nativeExecuted=False,targetsRead=False)
+ for key,value in expected.items():assert key in proof and proof[key]==value,('Matching independent current-file acoustic audit required',key)
  refPath=Path(temporary)/'actual-maps.json';subprocess.run([sys.executable,'-I','-B',str(root/'tools/LegacyEnglishMainMasks.Probe/reference_actual.py'),str(a.models),str(refPath)],check=True);ref=json.loads(refPath.read_text())
 primary=ref['sourceMaps']['primary'];assert ref['sourceMaps']['descriptor']==0xc0e
 tree=ast.parse((root/'tools/LegacyCaseAlphabetRanges.Probe/reference_controls.py').read_text(encoding='utf-8-sig'));tree.body=[n for n in tree.body if isinstance(n,(ast.Import,ast.ImportFrom,ast.FunctionDef,ast.ClassDef))];scope={};exec(compile(tree,'raw-alphabet-reference','exec'),scope)

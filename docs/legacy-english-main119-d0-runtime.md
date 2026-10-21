@@ -20,6 +20,16 @@ A pristine binding claim requires zero prior transport operations/attempts/outpu
 
 The independent Python oracle consumes only raw models, an independently raw-audited MAIN acoustic capture and this D0 capture. It reconstructs the entire node/span schedule, all actual group costs, native pool invalidation/recompute/reuse,217 permissions,220 eligibility values, preserved primary/aux maps and source refresh. Both original134 single owners/seven multiline refusals and fixed PluColl100 use targets-blind input. Managed and NativeAOT are compared byte-for-byte. These are semantic/data tests, not execution of the vendor SDK.
 
+The D0 auditor always runs the current independent MAIN acoustic numerical oracle
+against the supplied acoustic file before checking D0. It does not admit files
+by a Windows capture hash or reuse an existing PASS report. Optional
+`--acoustic-report PATH` selects an output report, which must differ from both
+inputs and the D0 report. CI performs this upstream numerical check once, inside
+the D0 phase; earlier MAIN checks still compare Managed and NativeAOT captures.
+A changed JSON byte hash is accepted only after fresh numerical verification.
+Controls verify that corrupt probabilities are rejected despite a stale PASS
+file and that an output path cannot overwrite an input.
+
 The upstream whole-unit correction is mandatory: raw88=1 affects BEDF0/B4AF0 whole post-resampling dimensions as well as both local families. Earlier D0 captures using the incomplete first correction are retained as historical evidence and are superseded by the new captures.
 
 The new SpanSession declaration is sealed partial before its first frozen publication, enabling a later separately reviewed NEW companion to perform an atomic pristine decoder claim under its existing private gate. No decoder method is implemented by that declaration.

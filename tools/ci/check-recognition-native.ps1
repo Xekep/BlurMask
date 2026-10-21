@@ -1142,8 +1142,6 @@ foreach ($case in $cases) {
     if ((Get-FileHash .artifacts/legacy-en-main119-masks-native.json).Hash -ne (Get-FileHash .artifacts/legacy-en-main119-masks-managed.json).Hash) { throw 'LegacyEnglishMainMasks Managed/Native parity failed' }
   }
   if ($name -eq 'LegacyEnglishMainAcoustic') {
-    python -I -B tools/LegacyEnglishMainAcoustic.Probe/audit_runtime.py --models models --capture .artifacts/legacy-en-main119-acoustic-native.json --output .artifacts/legacy-en-main119-acoustic-oracle-native.json
-    if ($LASTEXITCODE -ne 0) { throw 'LegacyEnglishMainAcoustic independent raw oracle failed' }
     if ((Get-FileHash .artifacts/legacy-en-main119-acoustic-native.json).Hash -ne (Get-FileHash .artifacts/legacy-en-main119-acoustic-managed.json).Hash) { throw 'LegacyEnglishMainAcoustic Managed/Native parity failed' }
   }
   if ($name -eq 'LegacyEnglishQuerySession') {
@@ -1152,7 +1150,7 @@ foreach ($case in $cases) {
     if ((Get-FileHash .artifacts/legacy-en-query-prep-native/capture.json).Hash -ne (Get-FileHash .artifacts/legacy-en-query-prep-managed/capture.json).Hash) { throw 'English query preparation Managed/Native parity failed' }
   }
   if ($name -eq 'LegacyEnglishMainD0') {
-    python -I -B tools/LegacyEnglishMainD0.Probe/audit_output.py --models models --capture .artifacts/legacy-en-main119-d0-native.json --acoustic .artifacts/legacy-en-main119-acoustic-native.json --output .artifacts/legacy-en-main119-d0-oracle-native.json
+    python -I -B tools/LegacyEnglishMainD0.Probe/audit_output.py --models models --capture .artifacts/legacy-en-main119-d0-native.json --acoustic .artifacts/legacy-en-main119-acoustic-native.json --acoustic-report .artifacts/legacy-en-main119-acoustic-oracle-native.json --output .artifacts/legacy-en-main119-d0-oracle-native.json
     if ($LASTEXITCODE -ne 0) { throw 'English D0 independent pool/map/permission oracle failed' }
     if ((Get-FileHash .artifacts/legacy-en-main119-d0-native.json).Hash -ne (Get-FileHash .artifacts/legacy-en-main119-d0-managed.json).Hash) { throw 'English D0 Managed/Native parity failed' }
   }
