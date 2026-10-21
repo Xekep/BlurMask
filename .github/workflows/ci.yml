@@ -144,6 +144,7 @@ jobs:
       - name: Exact Russian collapsed subgroup features and independent neural oracle
         shell: bash
         run: |
+          mkdir -p .artifacts
           dotnet run --project tools/LegacyRussianFirstDegenerate.Probe -c Release -- models tools/LegacyRussianFirstDegenerate.Probe/normalized-controls.json .artifacts/legacy-russian-first-degenerate-managed.json
           python -I -B tools/LegacyRussianFirstDegenerate.Probe/audit_output.py models tools/LegacyRussianFirstDegenerate.Probe/normalized-controls.json .artifacts/legacy-russian-first-degenerate-managed.json
       - name: Russian packed lexicon and bounded candidate decoding
