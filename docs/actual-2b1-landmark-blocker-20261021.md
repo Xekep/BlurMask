@@ -1,7 +1,12 @@
 # Actual2B1 landmark producer: open defect
 
-Russian V2 integration is blocked. English MAIN N is already committed but has
-the same unresolved helper mismatch. No app default or release is changed.
+**Update:** the [shared BC280 helper and English N/D0 correction](directional-2b1-landmarks-runtime-20261021.md)
+are now independently checked and integrated. Russian V2 remains blocked;
+Russian V3/full quality checks are pending. The text below records the discovered
+defect and why the earlier matching captures were insufficient.
+
+Russian V2 integration was blocked. English MAIN N initially had the same
+unresolved helper mismatch. No app default or release was changed by this finding.
 
 The actual2B1 BEDF0 producer calls BC280. Before comparing point2, its full body
 loads previousY from psVar19[3], the Y coordinate of point1. The generic2B0 B6D20

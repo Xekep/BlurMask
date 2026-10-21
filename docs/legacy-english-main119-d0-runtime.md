@@ -1,8 +1,10 @@
 # Actual English MAIN119 fresh D0 bridge
 
-Upstream qualification: the [actual2B1 landmark defect](actual-2b1-landmark-blocker-20261021.md)
-is open in N. These D0 pool/map/permission checks reproduce current N costs;
-they do not prove complete native acoustic inputs or word recognition.
+Upstream correction: N now uses [actual2B1 BC280 landmarks](directional-2b1-landmarks-runtime-20261021.md).
+Both D0 corpora were rerun against the corrected N inputs. The134 capture is
+unchanged; the100-owner capture is now
+`f7b4fb9dd22d4f6170ea9be3585cc117841cda09df357b3dcd91c9d2eefb9a2f`.
+Pool/map/permission checks remain separate from whole-word recognition.
 
 This bounded library checkpoint publishes acoustic selected rows, permissions and the actual once-refreshed source working map for a completed actual English MAIN119 graph. It does not implement dictionary startup/continuation, qualifier/category/request framing, word search or accepted English text. It has no recognition accuracy claim and does not change the application default.
 

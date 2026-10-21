@@ -8,9 +8,9 @@ ROOT=Path(__file__).resolve().parents[2]
 CALIBRATION=json.loads(Path(__file__).with_name('native-2b1-default-tables.json').read_text(encoding='utf-8-sig'))
 for entry in ['temporalMin','temporalMax','spatialMin','spatialMax']:
  assert hashlib.sha256(struct.pack('<274h',*CALIBRATION[entry]['values'])).hexdigest()==CALIBRATION[entry]['sha256']
-def defs(name):
- p=ROOT/'tools'/name/'reference_controls.py';t=ast.parse(p.read_text(encoding='utf-8-sig'));t.body=[n for n in t.body if isinstance(n,(ast.Import,ast.ImportFrom,ast.FunctionDef,ast.ClassDef))];d={};exec(compile(t,str(p),'exec'),d);return d
-coord=defs('LegacyDirectionalCoordinates.Probe');land=defs('LegacyDirectional.Probe')['reference'];cross=defs('LegacyIntersection.Probe')['classification'];globalstat=defs('LegacyDirectionalStatistics.Probe')['reference'];temporalstat=defs('LegacyDirectionalWindow.Probe')['reference'];spatialstat=defs('LegacySpatialStatistics.Probe')['reference'];basestat=defs('LegacyDirectionalBaseline.Probe')['reference']
+def defs(name,filename='reference_controls.py'):
+ p=ROOT/'tools'/name/filename;t=ast.parse(p.read_text(encoding='utf-8-sig'));t.body=[n for n in t.body if isinstance(n,(ast.Import,ast.ImportFrom,ast.FunctionDef,ast.ClassDef))];d={};exec(compile(t,str(p),'exec'),d);return d
+coord=defs('LegacyDirectionalCoordinates.Probe');land=defs('LegacyDirectional2B1.Probe','reference_landmarks.py')['reference'];cross=defs('LegacyIntersection.Probe')['classification'];globalstat=defs('LegacyDirectionalStatistics.Probe')['reference'];temporalstat=defs('LegacyDirectionalWindow.Probe')['reference'];spatialstat=defs('LegacySpatialStatistics.Probe')['reference'];basestat=defs('LegacyDirectionalBaseline.Probe')['reference']
 def f(x):return struct.unpack('<f',struct.pack('<f',x))[0]
 def div(a,b):return (-1 if(a<0)!=(b<0)else 1)*(abs(a)//abs(b))
 def i32(x):return (x+2**31)%2**32-2**31
@@ -127,7 +127,9 @@ def assembly(global_,windows,base,spatial,minimum=None,maximum=None):
  result+=[sat(ratio(i32(v+(4096 if i==3 else 0)),8192 if i in(2,3)else 1024 if i>=6 else 4096))for i,v in enumerate(base)];assert len(result)==283;return result
 
 def directional(strokes):
- normalized=coord['norm'](strokes);samples=coord['resample'](normalized,100);samples['width']=max(1,max(p[0]for st in samples['strokes']for p in st));samples['height']=max(1,max(p[1]for st in samples['strokes']for p in st));flags=land(samples['strokes'])['flags'];case=dict(strokes=samples['strokes'],width=samples['width'],height=samples['height'],step=samples['step'],gridScale=10);intersections,loops=cross(case);case.update(arc=samples['cumulative'][-1],flags=flags,intersections=intersections,intersectionCount=loops,cumulative=samples['cumulative'],shift=normalized['shift'],unit=False)
+ normalized=coord['norm'](strokes);samples=coord['resample'](normalized,100)
+ assert 1<=sum(map(len,samples['strokes']))<=255
+ samples['width']=max(1,max(p[0]for st in samples['strokes']for p in st));samples['height']=max(1,max(p[1]for st in samples['strokes']for p in st));flags=land(samples['strokes'])['flags'];case=dict(strokes=samples['strokes'],width=samples['width'],height=samples['height'],step=samples['step'],gridScale=10);intersections,loops=cross(case);case.update(arc=samples['cumulative'][-1],flags=flags,intersections=intersections,intersectionCount=loops,cumulative=samples['cumulative'],shift=normalized['shift'],unit=False)
  global_=globalstat(case);shift=normalized['shift'];scale=lambda v:v<<shift if shift>=0 else v>>-shift
  if samples['step']==0:by,bh=0,100
  else:by,bh=scale(-normalized['minY']),max(1,scale(100))

@@ -6,7 +6,7 @@ from pathlib import Path
 import argparse,ast,hashlib,json,struct,subprocess,sys,tempfile,random
 p=argparse.ArgumentParser();p.add_argument('--models',type=Path,required=True);p.add_argument('--capture',type=Path,required=True);p.add_argument('--acoustic',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args();root=Path(__file__).resolve().parents[2]
 sha=lambda b:hashlib.sha256(b).hexdigest();captureBytes=a.capture.read_bytes();actual=json.loads(captureBytes);nnBytes=a.acoustic.read_bytes()
-assert sha(nnBytes)in ['1eeff7449c49e7056b0f61ed71f6f89b83df03fef641def987cf63b225853af0','62d7caedc1ef6a248dd45ae638c57a74cc06b7cedd83529a4b10b1a4cd6ad9db']
+assert sha(nnBytes)in ['1eeff7449c49e7056b0f61ed71f6f89b83df03fef641def987cf63b225853af0','38396269d1fa4f2bf91d54e7994a04e3b8fee8915e417fc621e7530237e0066c']
 nn=json.loads(nnBytes);assert actual['TargetsRead']is False and nn['TargetsRead']is False and actual['InputSha256']==nn['InputSha256']
 assert actual['Guards']==42 and actual['Cancellations']==6
 assert [r['Name']for r in actual['Rows']]==[r['Name']for r in nn['Rows']]and actual['Refused']==nn['MultilineRefused']

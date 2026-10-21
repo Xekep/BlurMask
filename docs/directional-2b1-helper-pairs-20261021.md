@@ -1,5 +1,9 @@
 # Actual2B1 helper seam, V2 blocker and bounded V3 proposal
 
+Update: the [shared BC280 helper and English N/D0 correction](directional-2b1-landmarks-runtime-20261021.md)
+are now integrated. Russian V3/full evaluation remain pending. The static proof
+and proposed boundaries below are preserved as the preimplementation checkpoint.
+
 This is a STATIC correction proof. No vendor binary is loaded or executed, and
 no production code is changed here. V2 captures, source and metrics remain
 immutable historical evidence, not a complete native-feature parity claim.

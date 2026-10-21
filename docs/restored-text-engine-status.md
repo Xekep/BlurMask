@@ -6,14 +6,14 @@ default recognizer.
 
 ## Development integration (2026-10-21)
 
-**Open producer defect:** actual2B1 uses BC280 landmarks, whose first reversal
-comparison starts from point1 Y. The reused generic2B0 B6D20 pass starts from
-point0 Y. Both English N and the proposed Russian V2 producer still use the
-generic pass. V2 integration is blocked, and the earlier complete-native-feature
-claim is withdrawn. The all-flag audit covers receiver68 accesses, not every
-helper's numerical equivalence. See the [landmark blocker](actual-2b1-landmark-blocker-20261021.md).
-Russian production remains at the historical generic2B0 checkpoint below;
-V2's fixed132/261 exact words and342 edits are incomplete-producer evidence.
+The [actual2B1 landmark correction](directional-2b1-landmarks-runtime-20261021.md)
+now supplies BC280 separately from generic2B0 B6D20. English N and D0 use the
+corrected path, with independent134/100 numerical checks and Managed/NativeAOT
+parity. This does not complete English word search. Russian V2 integration was
+blocked; Russian V3 and its quality evaluation remain pending. Russian production
+still uses the historical generic2B0 checkpoint below. V2's132/261 exact words
+and342 edits are incomplete-producer evidence. The all-flag audit is not a
+full-program proof of every helper. See the [defect history](actual-2b1-landmark-blocker-20261021.md).
 
 The [full English resource loader](native-english-text-resource.md) now loads the
 existing BLSTM/CTC model in C# with all67 tensors and parameter bytes identical to

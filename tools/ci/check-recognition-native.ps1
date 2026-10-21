@@ -3,6 +3,7 @@ if ($LASTEXITCODE -ne 0) { throw 'English preprocessing control generation faile
 python tools/LegacyEnglishFirstSlant.Probe/reference_controls.py .artifacts/legacy-en-short-controls.json .artifacts/legacy-en-slant-controls.json
 if ($LASTEXITCODE -ne 0) { throw 'English preprocessing control generation failed' }
 $cases = @(
+  @{ Name = 'LegacyDirectional2B1'; Args = @('.artifacts/legacy-directional-2b1-controls.json') },
   @{ Name = 'LegacyLinePairFeatures'; Args = @('.artifacts/line-pair-controls.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res') },
   @{ Name = 'LegacyCursiveGeometry'; Args = @('.artifacts/cursive-geometry-controls.json') },
   @{ Name = 'LegacyCursivePreparedInk'; Args = @('.artifacts/cursive-prepared-controls.json') },

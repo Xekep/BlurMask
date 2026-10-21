@@ -5,6 +5,8 @@ equivalence of all reachable helpers. The BC280 landmark pass differs from the
 reused generic2B0 B6D20 pass; see the [open blocker](actual-2b1-landmark-blocker-20261021.md).
 Russian V2 integration is blocked. The earlier broad complete-producer claim
 is withdrawn; raw flag accesses and dimension-branch evidence remain valid.
+English N now uses the [separately checked BC280 implementation](directional-2b1-landmarks-runtime-20261021.md);
+that correction does not broaden this flag-only proof.
 
 The earlier V1 Russian package is incomplete and MUST NOT be integrated as a
 native feature producer. It omitted one active use of raw profile88. Its

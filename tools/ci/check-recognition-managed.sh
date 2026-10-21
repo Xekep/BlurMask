@@ -1,4 +1,6 @@
 set -euo pipefail
+python tools/LegacyDirectional2B1.Probe/reference_controls.py .artifacts/legacy-directional-2b1-controls.json
+dotnet run --project tools/LegacyDirectional2B1.Probe -c Release -- .artifacts/legacy-directional-2b1-controls.json
 dotnet run --project tools/LegacyRussianBundle.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
 python tools/LegacyLineGeometry.Probe/reference_controls.py .artifacts/legacy-line-geometry-controls.json
 dotnet run --project tools/LegacyLineGeometry.Probe -c Release -- .artifacts/legacy-line-geometry-controls.json

@@ -105,7 +105,9 @@ internal sealed class LegacyEnglishMainGlyphFeatures
             raster=new short[208];trajectory.AsSpan(210,7).CopyTo(raster);baseline.CopyTo(raster,7);LegacyRasterFeatures.Project(pixels).CopyTo(raster,16);
         }
         inputs[0]=Append(trajectory,boundary);inputs[1]=Append(raster,boundary);
-        var samples=LegacyDirectionalResampling.Prepare(strokes,100,false,token);var direction=LegacyDirectionalLandmarks.Extract(samples.Strokes,token);var intersections=LegacyDirectionalIntersections.Extract(samples,10,token);
+        var samples=LegacyDirectionalResampling.Prepare(strokes,100,false,token);
+        if(samples.CumulativePhysicalLengths.Length is<1 or>255)throw new ArgumentException("Actual2B1 facade admits1..255 prepared samples before shared byte-indexed consumers.");
+        var direction=LegacyDirectional2B1Landmarks.Extract(samples.Strokes,token);var intersections=LegacyDirectionalIntersections.Extract(samples,10,token);
         var global=LegacyDirectionalStatistics.Extract(samples.Strokes,samples.Width,samples.Height,samples.PhysicalArcLength,direction.Flags.Span,intersections.Flags.Span,intersections.SelfLoopCount,token);
         int[] baseStats=samples.SourceStepFixed==0?LegacyDirectionalBaselineStatistics.ExtractPrepared(samples.Strokes,samples.Width,samples.Height,samples.PhysicalArcLength,0,100,token):LegacyDirectionalBaselineStatistics.Extract(samples,new(0,100),token);
         var temporalMembership=LegacyArcLengthWindows.Partition(samples.CumulativePhysicalLengths.Span,16,token);int[][] temporal=new int[16][],spatial=new int[16][];
