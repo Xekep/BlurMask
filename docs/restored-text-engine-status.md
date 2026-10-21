@@ -28,6 +28,12 @@ recorded corpora pass independent cache/request checks and Managed/NativeAOT
 parity. The private query lease, scored dictionary rows and word winner remain
 unfinished; this component does not replace the default English recognizer.
 
+The [linguistic13F wire reader](linguistic-root13f-wire-layout.md) now preserves
+the complete bundled RU22/EN21 child inventories, with native byte proofs,
+independent parsing and Managed/NativeAOT parity. Source admission and the13A
+automaton/query backend remain unported. Merely reading the other children does
+not enable bilingual recognition or justify changing the selected-only policy.
+
 The [full English resource loader](native-english-text-resource.md) now loads the
 existing BLSTM/CTC model in C# with all67 tensors and parameter bytes identical to
 the independent exporter. The application bundles it as the default when an

@@ -623,6 +623,8 @@ dotnet run --project tools/LegacyPreparedGlyphRewrite.Probe -c Release -- models
 python tools/LegacyPreparedGlyphRewrite.Probe/audit_output.py models .artifacts/legacy-prepared-glyph-rewrite-managed.json
 dotnet run --project tools/LegacySource247Wire.Probe -c Release -- models .artifacts/legacy-source247-wire-managed.json
 python tools/LegacySource247Wire.Probe/audit_output.py models .artifacts/legacy-source247-wire-managed.json
+dotnet run --project tools/LegacyLinguisticRoot13F.Probe -c Release -- models .artifacts/legacy-linguistic-root13f-managed.json
+python -I -B tools/LegacyLinguisticRoot13F.Probe/audit_output.py models .artifacts/legacy-linguistic-root13f-managed.json .artifacts/legacy-linguistic-root13f-oracle-managed.json
 python tools/LegacyEnglishLiteFirstPreprocessing.Probe/reference_controls.py .artifacts/legacy-en-short-controls.json
 python tools/LegacyEnglishFirstSlant.Probe/reference_controls.py .artifacts/legacy-en-short-controls.json .artifacts/legacy-en-slant-controls.json
 dotnet run --project tools/LegacyFirstAcoustic119Wire.Probe -c Release -- models .artifacts/legacy-first-acoustic119-wire-managed.json

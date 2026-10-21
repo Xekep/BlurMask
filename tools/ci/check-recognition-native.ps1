@@ -301,6 +301,7 @@ $cases = @(
   @{ Name = 'LegacyOriginalSelectedField'; Args = @('.artifacts/legacy-original-selected-field-native.json') },
   @{ Name = 'LegacyPreparedGlyphRewrite'; Args = @('models', '.artifacts/legacy-prepared-glyph-rewrite-native.json') },
   @{ Name = 'LegacySource247Wire'; Args = @('models', '.artifacts/legacy-source247-wire-native.json') },
+  @{ Name = 'LegacyLinguisticRoot13F'; Args = @('models', '.artifacts/legacy-linguistic-root13f-native.json') },
   @{ Name = 'LegacyFirstAcoustic119Wire'; Args = @('models', '.artifacts/legacy-first-acoustic119-wire-native.json') },
   @{ Name = 'LegacyEnglishFirstSlant'; Args = @('models', '.artifacts/legacy-en-slant-controls.json', '.artifacts/legacy-en-slant-native.json') },
   @{ Name = 'LegacyEnglishNoInitialGlyph'; Args = @('models', '.artifacts/legacy-en-slant-controls.json', '.artifacts/legacy-en-noinitial-glyph-native.json') },
@@ -1070,6 +1071,11 @@ foreach ($case in $cases) {
   if ($name -eq 'LegacyPreparedGlyphRewrite') {
     python tools/LegacyPreparedGlyphRewrite.Probe/audit_output.py models .artifacts/legacy-prepared-glyph-rewrite-native.json
     if ($LASTEXITCODE -ne 0) { throw 'LegacyPreparedGlyphRewrite independent audit failed' }
+  }
+  if ($name -eq 'LegacyLinguisticRoot13F') {
+    python -I -B tools/LegacyLinguisticRoot13F.Probe/audit_output.py models .artifacts/legacy-linguistic-root13f-native.json .artifacts/legacy-linguistic-root13f-oracle-native.json
+    if ($LASTEXITCODE -ne 0) { throw 'Linguistic13F independent wire oracle failed' }
+    if ((Get-FileHash .artifacts/legacy-linguistic-root13f-native.json).Hash -ne (Get-FileHash .artifacts/legacy-linguistic-root13f-managed.json).Hash) { throw 'Linguistic13F Managed/Native parity failed' }
   }
   if ($name -eq 'LegacySource247Wire') {
     python tools/LegacySource247Wire.Probe/audit_output.py models .artifacts/legacy-source247-wire-native.json

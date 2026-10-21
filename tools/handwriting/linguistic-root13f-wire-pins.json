@@ -1,0 +1,283 @@
+{
+  "binary": "MyScriptText.dll",
+  "sha256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+  "regions": [
+    {
+      "function": "1801d2680",
+      "start": "0x1801d2680",
+      "endExclusive": "0x1801d28c0",
+      "bytes": 576,
+      "sha256": "ca21bc34a5572aedaf376ac733f707b7aa05ee7b3a236d0bee0dfb3f958dcd9d"
+    },
+    {
+      "function": "1801d22e0",
+      "start": "0x1801d22e0",
+      "endExclusive": "0x1801d258f",
+      "bytes": 687,
+      "sha256": "8041251cdc7d7a1efad3111b5d5236b5e62c9831092e2e6cb206b5ab7ddac66f"
+    },
+    {
+      "function": "1801d1240",
+      "start": "0x1801d1240",
+      "endExclusive": "0x1801d146f",
+      "bytes": 559,
+      "sha256": "dc8058d2c139e7ebe84c356263702c66bf9920f53cc2d7141e7083a2ed81b7fa"
+    }
+  ],
+  "instructions": [
+    {
+      "at": "0x1801d26a2",
+      "bytes": "48c744242001000000",
+      "mnemonic": "mov",
+      "operands": "qword ptr [rsp + 0x20], 1"
+    },
+    {
+      "at": "0x1801d26b5",
+      "bytes": "41b904000000",
+      "mnemonic": "mov",
+      "operands": "r9d, 4"
+    },
+    {
+      "at": "0x1801d26c3",
+      "bytes": "4c8d4510",
+      "mnemonic": "lea",
+      "operands": "r8, [rbp + 0x10]"
+    },
+    {
+      "at": "0x1801d26dd",
+      "bytes": "4c8d442450",
+      "mnemonic": "lea",
+      "operands": "r8, [rsp + 0x50]"
+    },
+    {
+      "at": "0x1801d26e2",
+      "bytes": "41b901000000",
+      "mnemonic": "mov",
+      "operands": "r9d, 1"
+    },
+    {
+      "at": "0x1801d26e8",
+      "bytes": "48c744242038000000",
+      "mnemonic": "mov",
+      "operands": "qword ptr [rsp + 0x20], 0x38"
+    },
+    {
+      "at": "0x1801d270b",
+      "bytes": "41b904000000",
+      "mnemonic": "mov",
+      "operands": "r9d, 4"
+    },
+    {
+      "at": "0x1801d272f",
+      "bytes": "83f8ff",
+      "mnemonic": "cmp",
+      "operands": "eax, -1"
+    },
+    {
+      "at": "0x1801d2732",
+      "bytes": "752f",
+      "mnemonic": "jne",
+      "operands": "0x1801d2763"
+    },
+    {
+      "at": "0x1801d2738",
+      "bytes": "4c8d454c",
+      "mnemonic": "lea",
+      "operands": "r8, [rbp + 0x4c]"
+    },
+    {
+      "at": "0x1801d273c",
+      "bytes": "41b904000000",
+      "mnemonic": "mov",
+      "operands": "r9d, 4"
+    },
+    {
+      "at": "0x1801d2763",
+      "bytes": "89454c",
+      "mnemonic": "mov",
+      "operands": "dword ptr [rbp + 0x4c], eax"
+    },
+    {
+      "at": "0x1801d276a",
+      "bytes": "4c8d4550",
+      "mnemonic": "lea",
+      "operands": "r8, [rbp + 0x50]"
+    },
+    {
+      "at": "0x1801d276e",
+      "bytes": "41b904000000",
+      "mnemonic": "mov",
+      "operands": "r9d, 4"
+    },
+    {
+      "at": "0x1801d1280",
+      "bytes": "ba33010000",
+      "mnemonic": "mov",
+      "operands": "edx, 0x133"
+    },
+    {
+      "at": "0x1801d1289",
+      "bytes": "bd00010000",
+      "mnemonic": "mov",
+      "operands": "ebp, 0x100"
+    },
+    {
+      "at": "0x1801d1299",
+      "bytes": "440fb7cd",
+      "mnemonic": "movzx",
+      "operands": "r9d, bp"
+    },
+    {
+      "at": "0x1801d12a6",
+      "bytes": "4c8b5010",
+      "mnemonic": "mov",
+      "operands": "r10, qword ptr [rax + 0x10]"
+    },
+    {
+      "at": "0x1801d12be",
+      "bytes": "41b904000000",
+      "mnemonic": "mov",
+      "operands": "r9d, 4"
+    },
+    {
+      "at": "0x1801d12c4",
+      "bytes": "48c744242001000000",
+      "mnemonic": "mov",
+      "operands": "qword ptr [rsp + 0x20], 1"
+    },
+    {
+      "at": "0x1801d130b",
+      "bytes": "488b4028",
+      "mnemonic": "mov",
+      "operands": "rax, qword ptr [rax + 0x28]"
+    },
+    {
+      "at": "0x1801d130f",
+      "bytes": "4c8b4018",
+      "mnemonic": "mov",
+      "operands": "r8, qword ptr [rax + 0x18]"
+    },
+    {
+      "at": "0x1801d1313",
+      "bytes": "41ffd0",
+      "mnemonic": "call",
+      "operands": "r8"
+    },
+    {
+      "at": "0x1801d1330",
+      "bytes": "ffc8",
+      "mnemonic": "dec",
+      "operands": "eax"
+    },
+    {
+      "at": "0x1801d1332",
+      "bytes": "443be0",
+      "mnemonic": "cmp",
+      "operands": "r12d, eax"
+    },
+    {
+      "at": "0x1801d1335",
+      "bytes": "7339",
+      "mnemonic": "jae",
+      "operands": "0x1801d1370"
+    },
+    {
+      "at": "0x1801d133b",
+      "bytes": "41b804000000",
+      "mnemonic": "mov",
+      "operands": "r8d, 4"
+    },
+    {
+      "at": "0x1801d1347",
+      "bytes": "4c8b4828",
+      "mnemonic": "mov",
+      "operands": "r9, qword ptr [rax + 0x28]"
+    },
+    {
+      "at": "0x1801d134b",
+      "bytes": "41ffd1",
+      "mnemonic": "call",
+      "operands": "r9"
+    },
+    {
+      "at": "0x1801d1355",
+      "bytes": "41b801000000",
+      "mnemonic": "mov",
+      "operands": "r8d, 1"
+    },
+    {
+      "at": "0x1801d135e",
+      "bytes": "4c8b5130",
+      "mnemonic": "mov",
+      "operands": "r10, qword ptr [rcx + 0x30]"
+    },
+    {
+      "at": "0x1801d1365",
+      "bytes": "41ffd2",
+      "mnemonic": "call",
+      "operands": "r10"
+    },
+    {
+      "at": "0x1801d22e0",
+      "bytes": "c744241814121977",
+      "mnemonic": "mov",
+      "operands": "dword ptr [rsp + 0x18], 0x77191214"
+    },
+    {
+      "at": "0x1801d22ee",
+      "bytes": "4584c0",
+      "mnemonic": "test",
+      "operands": "r8b, r8b"
+    },
+    {
+      "at": "0x1801d22f1",
+      "bytes": "0f84f7010000",
+      "mnemonic": "je",
+      "operands": "0x1801d24ee"
+    }
+  ],
+  "tables": [
+    {
+      "at": "0x1802e5310",
+      "bytes": "03000000000000003f01000033010000ffffffff00000000",
+      "meaning": "13F descriptor kind13F parent133"
+    },
+    {
+      "at": "0x1802e5328",
+      "bytes": "58532e8001000000",
+      "meaning": "13F meta"
+    },
+    {
+      "at": "0x1802e5360",
+      "bytes": "a8532e8001000000",
+      "meaning": "13F actual vtable"
+    },
+    {
+      "at": "0x1802e53b8",
+      "bytes": "40121d8001000000",
+      "meaning": "13F V10 reader"
+    },
+    {
+      "at": "0x1802e54b0",
+      "bytes": "02000000000000003301000004000000ffffffff00000000",
+      "meaning": "133 descriptor kind133 parent4"
+    },
+    {
+      "at": "0x1802e54c8",
+      "bytes": "28552e8001000000",
+      "meaning": "133 meta"
+    },
+    {
+      "at": "0x1802e5530",
+      "bytes": "f8542e8001000000",
+      "meaning": "133 actual vtable"
+    },
+    {
+      "at": "0x1802e5508",
+      "bytes": "80261d8001000000",
+      "meaning": "133 V10 reader"
+    }
+  ],
+  "bodyExtentEvidence": "Exact complete Ghidra body address sets from read-only noanalysis export; not first pdata unwind",
+  "scope": "Wire grammar only; native activation/acceptance and source selection excluded"
+}
