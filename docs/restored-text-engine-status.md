@@ -89,10 +89,18 @@ from the masks-only pool. Independent checks reproduce188 preparation states,
 fault prefixes. Managed/NativeAOT captures match. Its public surface only prepares
 and snapshots the binding; genuine acoustic requests and word search remain missing.
 
+The [fresh English D0 bridge](legacy-english-main119-d0-runtime.md) now joins
+actual graph-selected pooled acoustic rows, permissions and the once-refreshed
+same-owner working map. Independent checks cover both fixed owner sets and
+Managed/NativeAOT parity. Rebuildtrue, executable dictionary requests and whole-word
+search remain unsupported; a readable receipt alone grants no query lease.
+
 The [ordinary English word lifecycle audit](english-word-lifecycle-plan-20261021.md)
 closes startup flag provenance and the scheduling projection over the fixed graph.
-It is a static plan. The active English pair-transition branch, outer MAIN
-configuration lineage and actual row/search/selection join remain unfinished.
+It is a static plan. The [fresh outer policy and active English pair-transition
+proof](english-main-word-policy-transition-plan-20261021.md) now establishes the
+declared direct fresh/no-copy route. Its runtime and actual row/search/selection
+join remain unfinished; configured/high-driver equivalence is not established.
 
 The [raw-object kind receipt](legacy-global-raw-object-kinds-runtime.md) now carries
 the actual C49-to-C1E base-kind provenance through all13 publication cases. The

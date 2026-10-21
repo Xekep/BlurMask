@@ -321,6 +321,7 @@ $cases = @(
   @{ Name = 'LegacyEnglishMainAcoustic'; Args = @('models', '.artifacts/legacy-en119-final-single-blind.json', '.artifacts/legacy-en-main119-acoustic-native.json') },
   @{ Name = 'LegacyEnglishSparseQuery'; Args = @('models', '.artifacts/legacy-en-sparse-query-native') },
   @{ Name = 'LegacyEnglishQuerySession'; Args = @('models', '.artifacts/legacy-en-query-prep-native') },
+  @{ Name = 'LegacyEnglishMainD0'; Args = @('models', '.artifacts/legacy-en119-final-single-blind.json', '.artifacts/legacy-en-main119-d0-native.json') },
   @{ Name = 'LegacyMathMixed107Raw'; Args = @('models/math/math-ak.res', '.artifacts/legacy-math-mixed107-raw-native.json') },
   @{ Name = 'LegacyEnglishLiteFirstPreprocessing'; Args = @('models', '.artifacts/legacy-en-short-controls.json', '.artifacts/legacy-en-short-native.json') },
   @{ Name = 'LegacyPreparedNetwork107'; Args = @('models', 'models/ru-RU/legacy-engine-profile.json', '.artifacts/legacy-prepared-network107-native.json') },
@@ -1148,6 +1149,11 @@ foreach ($case in $cases) {
     python -I -B tools/LegacyEnglishQuerySession.Probe/audit_output.py --repo . --models models --capture .artifacts/legacy-en-query-prep-native/capture.json --output .artifacts/legacy-en-query-prep-oracle-native.json
     if ($LASTEXITCODE -ne 0) { throw 'English query preparation independent oracle failed' }
     if ((Get-FileHash .artifacts/legacy-en-query-prep-native/capture.json).Hash -ne (Get-FileHash .artifacts/legacy-en-query-prep-managed/capture.json).Hash) { throw 'English query preparation Managed/Native parity failed' }
+  }
+  if ($name -eq 'LegacyEnglishMainD0') {
+    python -I -B tools/LegacyEnglishMainD0.Probe/audit_output.py --models models --capture .artifacts/legacy-en-main119-d0-native.json --acoustic .artifacts/legacy-en-main119-acoustic-native.json --output .artifacts/legacy-en-main119-d0-oracle-native.json
+    if ($LASTEXITCODE -ne 0) { throw 'English D0 independent pool/map/permission oracle failed' }
+    if ((Get-FileHash .artifacts/legacy-en-main119-d0-native.json).Hash -ne (Get-FileHash .artifacts/legacy-en-main119-d0-managed.json).Hash) { throw 'English D0 Managed/Native parity failed' }
   }
   if ($name -eq 'LegacyEnglishSparseQuery') {
     python -I -B tools/LegacyEnglishSparseQuery.Probe/audit_output.py --repo . --models models --capture .artifacts/legacy-en-sparse-query-native --output .artifacts/legacy-en-sparse-query-oracle-native.json

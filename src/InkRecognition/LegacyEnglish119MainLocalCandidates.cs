@@ -19,7 +19,7 @@ public sealed partial class LegacyEnglish119FinalizedSingleSource
 
 /// <summary>Actual MAIN297/108 cuts and shift1/cap8 deferred LOCAL ordinary
 ///graph. Not global compact publication, mainNN, masks or a linguistic winner.</summary>
-public sealed class LegacyEnglish119MainLocalCandidates
+public sealed partial class LegacyEnglish119MainLocalCandidates
 {
     private readonly object gate=new();
     private readonly LegacyOrdinarySourceInk original;
