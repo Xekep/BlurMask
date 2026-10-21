@@ -47,8 +47,8 @@ for sample in d['samples']:
  assert sample['membershipBound']==sum(len(s['ranges'])for s in expected)
  chars,words=both(expected);assert sample['characters']==chars and sample['words']==words
  assert sample['prefixes']==prefixes(expected)and sample['ready']and not sample['faulted'];total+=len(expected)
-# Prior prepared/failure controls unchanged; one extra genuine owner runs12 guard calls:189+12=201.
-assert(total,d['sources'],d['completed'],d['refused'],d['guards'],d['budgetGuards'])==(46,46,12,1,201,4)
+# Prior prepared/failure controls unchanged; one extra genuine owner runs12 guard calls:201+12=213.
+assert(total,d['sources'],d['completed'],d['refused'],d['guards'],d['budgetGuards'])==(50,50,13,0,213,4)
 success=next(s for s in d['samples']if s['name']=='M')['sources'];assert len(d['failures'])==3
 for failure in d['failures']:
  count=failure['after'];assert count in(0,1,2)and failure['faulted']and not failure['ready']and failure['visited']==count
@@ -66,4 +66,4 @@ minimum=[0,1]
 for height in range(2,33):minimum.append(1+minimum[-1]+minimum[-2])
 assert minimum[22]<=65536<minimum[23]==75024
 if len(sys.argv)==8:assert Path(index_path).read_bytes()==Path(sys.argv[7]).read_bytes()
-print(f'PASS independent12 global indices/46 typed sources/3 entered-failure prefixes/40 prepared AVL cases/{nodes} nodes/{members} memberships/rotations{rotations};no023260/DOM/quality.')
+print(f'PASS independent13 global indices/50 typed sources/3 entered-failure prefixes/40 prepared AVL cases/{nodes} nodes/{members} memberships/rotations{rotations};no023260/DOM/quality.')

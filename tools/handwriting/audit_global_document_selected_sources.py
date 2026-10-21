@@ -6,7 +6,7 @@ from pathlib import Path
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('output',type=Path)
 p.add_argument('--native-repo',type=Path,required=True);a=p.parse_args()
 root=Path(__file__).resolve().parents[2];dependencies={}
-for index,name in enumerate(['audit_main_document_selected_sources','audit_global_document_coverage']):
+for index,name in enumerate(['audit_main_document_selected_sources','audit_global_document_coverage','audit_global_raw_object_kinds']):
  out=a.output.with_name('gsel-'+hashlib.sha256(str(a.output.resolve()).encode()).hexdigest()[:12]+'-'+str(index)+'.json');saved=sys.argv
  try:
   sys.argv=[name,str(out)]+(['--native-repo',str(a.native_repo)]if index else[])
@@ -18,6 +18,9 @@ rules=[
  'actual.Validate(token);var parent=actual.Publication',
  'parent.SelectedWordIndex!=0||parent.AlternativeCount!=1||parent.WordSource.Field40!=-1',
  'parent.Scope.SharedState.Selections.Failed',
+ 'LegacyGlobalRawObjectKinds? rawKinds=null',
+ 'LegacyGlobalRawObjectKinds.ComputeMetadata(actual,s.Source,s.Scalars,s.Key,ref rawKinds,token)',
+ 'rawKinds?.Validate(token)',
  'ReferenceEquals(parent.Scope.Seed,parent.Scope.Context.Result.PublicationSeed)',
  'ReferenceEquals(parent.Scope.Seed.PendingSelections,parent.Scope.SharedState.Selections)',
  'ReferenceEquals(source.Owner,parent.Wrapper)',
@@ -44,6 +47,8 @@ rules=[
  'ReferenceEquals(rows[i].Text,Texts[i])',
 ]
 for rule in rules:assert rule in source,rule
+assert source.index('LegacyGlobalRawObjectKinds.ComputeMetadata(')<source.index('uint wordMetadata=')
+assert source.index('rawKinds?.Validate(token)')<source.index('var result=new LegacyFreshMainGlobalDocumentSelectedSources')
 assert source.index('if((flags&0x10600000)!=0)return')<source.index('if((flags&0x20000000)!=0)')<source.index('if(count!=1)return')<source.index('bool lookup=')
 assert source.index('if(bytes>4_194_304)')<source.index('var captured=')
 assert 'LegacyOwnedMainWordSourceChoicesResult'not in source and 'LegacyLibraryTextPublicationScope'not in source
@@ -53,5 +58,5 @@ while depth:depth+=(old[end]=='{')-(old[end]=='}');end+=1
 bodyhash=hashlib.sha256(old[start:end].encode()).hexdigest();assert bodyhash=='d67baa317be52dfb695ad12214acf34c1e733fa37b905f76df0b41959f9d6685'
 a.output.write_text(json.dumps(dict(status='PASS bounded actual-global selected-source overlay',vendorExecution=False,
  dependencies=dependencies,runtimeRules=len(rules)+4,oldNumericBodySha256=bodyhash,
- scope='same global coverage/Seed/fullCHARAVL/selectedWORD; lazy reached prior+C25 refusal; no020920/DOM/acceptance'),indent=2)+'\n')
-print('PASS actual global selected-source typed lifecycle/lazy native branches/fullAVL64/link-order write composition; zero old seams.')
+ scope='same global coverage/Seed/fullCHARAVL/selectedWORD; lazy reached prior refusal/actual typed C49 raw-slot kind lookup; no020920/DOM/acceptance'),indent=2)+'\n')
+print('PASS actual global selected-source lifecycle/native kind receipt/fullAVL64/link-order composition; one reviewed Prepare metadata seam.')

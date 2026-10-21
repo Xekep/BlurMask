@@ -25,8 +25,7 @@ foreach(var(name,raw)in samples)
 {
  using var scope=Scope(raw);var parent=Parent(scope);parent.Publish(new byte[40],new byte[8160]);LegacyFreshMainGlobalDocumentCoverage coverage;
  try{coverage=LegacyFreshMainGlobalDocumentCoverage.Prepare(parent);}catch(NotSupportedException e)when(e.Message.StartsWith("Unequal actual WORD/TEXT")){output.Add(D(("name",name),("refusal","238B0")));continue;}
- LegacyFreshMainGlobalDocumentSelectedSources state;
- try{state=LegacyFreshMainGlobalDocumentSelectedSources.Prepare(coverage);}catch(NotSupportedException e)when(e.Message=="Native01FD40 actually reaches C25 raw-object lookup; concrete kind is not inferred."){output.Add(D(("name",name),("refusal","C25")));continue;}
+ var state=LegacyFreshMainGlobalDocumentSelectedSources.Prepare(coverage);
  var cleanup=LegacyFreshMainGlobalControlCleanup.Prepare(LegacyFreshMainGlobalDocumentSourceIndices.Prepare(state).Run()).Run();
  var handoff=LegacyFreshMainGlobalCounterHandoff.Apply(LegacyFreshMainGlobalInputTransforms.Prepare(cleanup).Run());
  var before=scope.SharedState.Selections.CopyPendingCommands().Select(c=>c.CommandIdentity).ToArray();long next=scope.SharedState.Selections.NextSelectionId;

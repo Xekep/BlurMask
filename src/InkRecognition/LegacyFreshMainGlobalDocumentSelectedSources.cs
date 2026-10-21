@@ -100,11 +100,12 @@ public sealed class LegacyFreshMainGlobalDocumentSelectedSources
         }
         var order=Traverse(tree,root,token);var captured=order.Select(id=>new Snapshot(payloads[id],token)).ToArray();
         var metadata=new uint[order.Length];var flags=new uint[order.Length];var indices=new int[order.Length];
+        LegacyGlobalRawObjectKinds? rawKinds=null;
         for(int i=0;i<order.Length;i++)
         {
-            token.ThrowIfCancellationRequested();var s=captured[i];uint value=s.Scalars.Flags!.Value;
-            ValidateMetadataBranch(value,s.Scalars.SelectionId!.Value,s.Source.Node.RangeCount,s.Key);
-            metadata[i]=flags[i]=value;indices[i]=unchecked((int)(s.Scalars.Field40!.Value>>32));
+            token.ThrowIfCancellationRequested();var s=captured[i];
+            metadata[i]=flags[i]=LegacyGlobalRawObjectKinds.ComputeMetadata(actual,s.Source,s.Scalars,s.Key,ref rawKinds,token);
+            indices[i]=unchecked((int)(s.Scalars.Field40!.Value>>32));
         }
         var ordinal=order.Select((id,i)=>(id,i)).ToDictionary(x=>x.id,x=>x.i);
         uint wordMetadata=ComputeWordMetadata(originalWordFlags,links.Select(l=>metadata[ordinal[l.Source.Node.Identity]]).ToArray());
@@ -114,6 +115,7 @@ public sealed class LegacyFreshMainGlobalDocumentSelectedSources
         //separate immutable output arrays; no configured owner is constructed.
         LegacyFreshMainDocumentSelectedSources.ApplySelectedCharacters(flags,indices,writes.Select(w=>w.TreeOrdinal).ToArray(),writes.Select(w=>w.SelectedMarker).ToArray());
         var states=order.Select((id,i)=>new LegacyGlobalDocumentCharacterState(payloads[id],metadata[i],flags[i],indices[i])).ToArray();
+        rawKinds?.Validate(token);
         actual.Validate(token);if(interner.RootIdentity!=root||!interner.CopyTree().AsSpan().SequenceEqual(tree))throw new InvalidOperationException("Actual CHAR AVL changed during overlay preparation.");
         var result=new LegacyFreshMainGlobalDocumentSelectedSources(actual,captured,tree,root,links,states,writes,wordMetadata,
             originalWordFlags,originalWordSelection,originalWord48,originalNext);result.Validate(token);return result;

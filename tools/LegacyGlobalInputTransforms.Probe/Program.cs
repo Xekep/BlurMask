@@ -23,11 +23,7 @@ foreach(var(name,raw)in samples)
  LegacyFreshMainGlobalDocumentCoverage coverage;
  try{coverage=LegacyFreshMainGlobalDocumentCoverage.Prepare(parent);}
  catch(NotSupportedException e)when(e.Message.StartsWith("Unequal actual WORD/TEXT")){output.Add(D(("name",name),("completed",false),("refusal","238B0")));refused++;continue;}
- LegacyFreshMainGlobalDocumentSelectedSources state;
- var refusalBefore=RefusalSnapshot(parent);var refusalSeed=scope.Seed;
- try{state=LegacyFreshMainGlobalDocumentSelectedSources.Prepare(coverage);}
- catch(NotSupportedException e)when(e.Message=="Native01FD40 actually reaches C25 raw-object lookup; concrete kind is not inferred.")
- {if(!ReferenceEquals(scope.Seed,refusalSeed)||RefusalSnapshot(parent)!=refusalBefore)throw new Exception("C25 refusal mutated actual owner prefix.");output.Add(D(("name",name),("completed",false),("refusal","C25")));refused++;continue;}
+ var state=LegacyFreshMainGlobalDocumentSelectedSources.Prepare(coverage);
 var index=LegacyFreshMainGlobalDocumentSourceIndices.Prepare(state).Run();var cleanup=LegacyFreshMainGlobalControlCleanup.Prepare(index);
  Reject(()=>LegacyFreshMainGlobalInputTransforms.Prepare(cleanup));cleanup.Run();Reject(()=>LegacyFreshMainGlobalInputTransforms.Prepare(cleanup,new(true)));
  var stage=LegacyFreshMainGlobalInputTransforms.Prepare(cleanup);Reject(()=>stage.ValidateCurrent());Reject(()=>stage.Run(new(true)));Reject(()=>LegacyFreshMainGlobalInputTransforms.Prepare(cleanup));
@@ -66,7 +62,7 @@ for(int kind=0;kind<3;kind++)
  if(stage.VectorWasSwapped||stage.IsComplete||!stage.IsFaulted||!ReferenceEquals(scope.Seed.CurrentTransforms,kind==2?foreign:initial))throw new Exception("Invalid owner mutated seed at export boundary.");Reject(()=>stage.Run());Reject(()=>stage.ValidateCurrent());preSwap.Add(D(("kind",kind),("prefixes",Prefixes(stage))));
 }
 using(var f=File.Create(args[2]))using(var j=new Utf8JsonWriter(f))WriteJson(j,D(("samples",output),("completed",complete),("refused",refused),("matrices",matrices),("failures",failures),("failedExports",failedExports),("invalidations",invalidations),("preSwap",preSwap),("guards",guards)));
-if(complete!=12||refused!=1||matrices!=13)throw new Exception("Actual transform coverage changed.");
+if(complete!=13||refused!=0||matrices!=16)throw new Exception("Actual transform coverage changed.");
 Console.WriteLine($"PASS13 genuine global INPUT transforms/{complete} complete/{refused} explicit selected-source refusals/{matrices} resolved matrices/5 cancellation prefixes/3 failed exports/2 invalidations/{guards} guards; no final acceptance.");
 LegacyFreshMainGlobalControlCleanup Cleanup(LegacyLibraryGlobalTextPublicationScope scope){var p=Parent(scope);p.Publish(new byte[40],new byte[8160]);return LegacyFreshMainGlobalControlCleanup.Prepare(LegacyFreshMainGlobalDocumentSourceIndices.Prepare(LegacyFreshMainGlobalDocumentSelectedSources.Prepare(LegacyFreshMainGlobalDocumentCoverage.Prepare(p))).Run()).Run();}
 void Reject(Action a){try{a();}catch(Exception e)when(e is ArgumentException or InvalidOperationException or NotSupportedException or OperationCanceledException){guards++;return;}throw new Exception("Expected transform refusal.");}
@@ -92,5 +88,3 @@ void WriteJson(Utf8JsonWriter w,object? value)
   default:throw new Exception("Untracked diagnostic JSON type "+value.GetType());
  }
 }
-
-string RefusalSnapshot(LegacyFreshMainGlobalWordTextPublication p)=>string.Join("|",new[]{p.Wrapper.Choices.StringPool.Count.ToString(),p.Scope.SharedState.Selections.NextSelectionId.ToString(),p.Scope.SharedState.Selections.Failed.ToString(),p.WordSource.Flags.ToString(),Convert.ToHexString(p.WordSource.CopyChoiceScalar48()),Convert.ToHexString(p.CopySourceLines56()),string.Join(";",p.CopyPendingSelections().Select(c=>$"{c.SelectionId}:{c.Name}:"+string.Join(",",c.CopyRanges().Select(x=>$"{x.First.Value:X16}-{x.Last.Value:X16}")))),string.Join(";",p.WordSource.CopyCharacterLinks().Select(l=>$"{l.Source.Node.Identity}:{l.Source.CopyAssignedScalars()}:"+Convert.ToHexString(l.Source.Node.CopyRanges16())+":"+string.Join(",",l.Source.CopyRecords().Select(x=>Convert.ToHexString(x.CopyStorage40())+":"+(x.Text is{}t?Convert.ToHexString(t.ReadBytes()):"null"))))) });

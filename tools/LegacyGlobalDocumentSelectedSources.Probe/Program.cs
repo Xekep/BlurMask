@@ -16,6 +16,11 @@ var recorded=RecordedInputs.Load(args[1]);for(int i=0;i<recorded.Samples.Length;
 
 
 var output=new List<object>();int guards=0,complete=0,refused=0,totalNodes=0,totalWrites=0;
+var typedKinds=new List<object>();var kindChecks=new List<string>();
+void RejectKind(string stage,Action action){try{action();}catch(Exception e)when(e is ArgumentException or InvalidOperationException or NotSupportedException or OperationCanceledException){kindChecks.Add(stage);return;}throw new Exception("Expected raw-kind receipt refusal: "+stage);}
+RejectKind("null",()=>LegacyGlobalRawObjectKinds.Prepare(null!));
+foreach(var x in new[]{new[]{0,0,0},new[]{257,257,257},new[]{1,0,1},new[]{1,4097,1},new[]{2,2,1},new[]{int.MaxValue,int.MaxValue,int.MaxValue}})RejectKind("preflight",()=>LegacyGlobalRawObjectKinds.Preflight(x[0],x[1],x[2]));
+if(LegacyGlobalRawObjectKinds.Preflight(256,4096,256)!=16384)throw new Exception("Raw inventory inclusive boundary changed.");
 foreach(var(name,raw)in samples)
 {
  using var scope=Scope(raw);var parent=Parent(scope);parent.Publish(Enumerable.Range(0,40).Select(i=>(byte)(i*29+7)).ToArray(),new byte[8160]);
@@ -24,11 +29,37 @@ foreach(var(name,raw)in samples)
  catch(NotSupportedException e)when(e.Message.StartsWith("Unequal actual WORD/TEXT")){output.Add(D(("name",name),("completed",false),("refusal","238B0")));refused++;continue;}
  Reject(()=>LegacyFreshMainGlobalDocumentSelectedSources.Prepare(coverage,new(true)));
  var pending=parent.CopyPendingSelections().ToArray();var line=parent.CopySourceLines56();var word48=parent.WordSource.CopyChoiceScalar48();uint wordFlags=parent.WordSource.Flags;
- LegacyFreshMainGlobalDocumentSelectedSources state;
- var refusalBefore=RefusalSnapshot(parent);var refusalSeed=scope.Seed;
- try{state=LegacyFreshMainGlobalDocumentSelectedSources.Prepare(coverage);}
- catch(NotSupportedException e)when(e.Message=="Native01FD40 actually reaches C25 raw-object lookup; concrete kind is not inferred.")
- {if(!ReferenceEquals(scope.Seed,refusalSeed)||RefusalSnapshot(parent)!=refusalBefore)throw new Exception("C25 refusal mutated actual owner prefix.");output.Add(D(("name",name),("completed",false),("refusal","C25")));refused++;continue;}
+ var kindBefore=RefusalSnapshot(parent);var kindSeed=scope.Seed;var original=scope.Context.OriginalSelectedInput!;
+ RejectKind("cancel-create",()=>LegacyGlobalRawObjectKinds.Prepare(coverage,new(true)));
+ var rawKinds=LegacyGlobalRawObjectKinds.Prepare(coverage);rawKinds.Validate();
+ RejectKind("out-of-range",()=>rawKinds.Lookup((uint)scope.Document.ObjectCount));RejectKind("max-index",()=>rawKinds.Lookup(uint.MaxValue));
+ var foreignView=LegacyFreshRawInkCurrentView.Prepare(scope.Document);
+ RejectKind("foreign-view",()=>LegacyGlobalRawObjectKinds.ValidateBinding(coverage,original,foreignView));
+ if(typedKinds.Count==0)
+ {
+  var bootstrap=LegacyLibraryOriginalTextFieldBootstrap.Prepare(original.CurrentView,["foreign"]);bootstrap.Run();var foreignSelected=LegacyLibraryOriginalSelectedFieldContext.Prepare(bootstrap,bootstrap.State.Inputs[0]);foreignSelected.Run();
+  RejectKind("foreign-selected",()=>LegacyGlobalRawObjectKinds.ValidateBinding(coverage,foreignSelected,original.CurrentView));
+ }
+ for(int stop=1;stop<=rawKinds.Count;stop++)
+ {using var cancel=new CancellationTokenSource();int reached=0;RejectKind("cancel-prefix",()=>LegacyGlobalRawObjectKinds.PrepareDiagnostic(coverage,n=>{reached=n;if(n==stop)cancel.Cancel();},cancel.Token));if(reached!=stop)throw new Exception("Missing raw kind cancellation prefix.");}
+ var kindRows=new List<object>();for(int i=0;i<rawKinds.Count;i++)
+ {var kind=rawKinds.Lookup((uint)i);if(!ReferenceEquals(kind.OriginalCurve,original.CurrentView.Curves[i])||!ReferenceEquals(kind.OriginalCurve.Document,scope.Document)||kind.OriginalSourceIndex!=i||kind.ConcreteType!=0xc49||kind.ReportedKind!=0xc1e)throw new Exception("Raw kind/source lineage changed.");kindRows.Add(D(("source",i),("points",kind.OriginalCurve.PointCount),("concrete",kind.ConcreteType),("reported",kind.ReportedKind)));}
+ foreach(var link in parent.WordSource.CopyCharacterLinks())
+ {
+  byte[] key=link.Source.Node.CopyRanges16();if(key.Length!=16||key[1]!=0||BinaryPrimitives.ReadUInt16LittleEndian(key.AsSpan(2))!=0||key[9]!=255||BinaryPrimitives.ReadUInt16LittleEndian(key.AsSpan(10))!=3||BinaryPrimitives.ReadUInt32LittleEndian(key.AsSpan(4))!=BinaryPrimitives.ReadUInt32LittleEndian(key.AsSpan(12)))continue;
+  using var foreignScope=LegacyLibraryGlobalTextPublicationScope.PrepareOriginalSelected(models,original,0,table,cd,pd);var foreignParent=Parent(foreignScope);foreignParent.Publish(new byte[40],new byte[8160]);var foreignCoverage=LegacyFreshMainGlobalDocumentCoverage.Prepare(foreignParent);LegacyGlobalRawObjectKinds? foreignReceipt=LegacyGlobalRawObjectKinds.Prepare(foreignCoverage);
+  if(!ReferenceEquals(foreignScope.Document,scope.Document))throw new Exception("Foreign receipt control lost same Document.");
+  RejectKind("foreign-receipt",()=>LegacyGlobalRawObjectKinds.ComputeMetadata(coverage,link.Source,link.Source.CopyAssignedScalars(),key,ref foreignReceipt,default));foreignReceipt!.Validate();
+  LegacyGlobalRawObjectKinds? ownReceipt=rawKinds;
+  RejectKind("snapshot-scalars",()=>LegacyGlobalRawObjectKinds.ComputeMetadata(coverage,link.Source,link.Source.CopyAssignedScalars()with{Flags=0x01000000u},key,ref ownReceipt,default));
+  RejectKind("snapshot-skip-flags",()=>LegacyGlobalRawObjectKinds.ComputeMetadata(coverage,link.Source,link.Source.CopyAssignedScalars()with{Flags=0x10000000u},key,ref ownReceipt,default));
+  var wrongKey=key.ToArray();wrongKey[4]=0;wrongKey[12]=0;RejectKind("snapshot-key",()=>LegacyGlobalRawObjectKinds.ComputeMetadata(coverage,link.Source,link.Source.CopyAssignedScalars(),wrongKey,ref ownReceipt,default));
+  var foreignSource=foreignParent.WordSource.CopyCharacterLinks().Single(l=>l.Source.Node.CopyRanges16().AsSpan().SequenceEqual(key)).Source;
+  RejectKind("foreign-source",()=>LegacyGlobalRawObjectKinds.ComputeMetadata(coverage,foreignSource,foreignSource.CopyAssignedScalars(),key,ref ownReceipt,default));
+ }
+ if(!ReferenceEquals(kindSeed,scope.Seed)||RefusalSnapshot(parent)!=kindBefore)throw new Exception("Raw kind controls changed actual source/string/pending/Seed inputs.");
+ typedKinds.Add(D(("name",name),("objects",kindRows),("cancellationPrefixes",rawKinds.Count),("unchanged",true)));
+ var state=LegacyFreshMainGlobalDocumentSelectedSources.Prepare(coverage);
 state.Validate();complete++;
  var copies=state.Characters.Select(c=>D(("node",c.OriginalSource.Node.Identity),("before",c.OriginalSource.Flags!.Value),("metadata",c.MetadataFlags),("flags",c.Flags),("before44",unchecked((int)(c.OriginalSource.CopyAssignedScalars().Field40!.Value>>32))),("index44",c.SelectedChoiceIndex44),("selection",c.OriginalSource.SelectionId!.Value),("key16",Convert.ToHexString(c.OriginalSource.Node.CopyRanges16())),("records",c.OriginalSource.CopyRecords().Select(r=>D(("scalar40",Convert.ToHexString(r.CopyStorage40())),("utf8",r.Text is{}text?Convert.ToHexString(text.ReadBytes()):null))).ToArray()))).ToArray();
  var links=parent.WordSource.CopyCharacterLinks().Select(l=>new[]{l.Source.Node.Identity,l.Marker}).ToArray();
@@ -44,7 +75,7 @@ state.Validate();complete++;
  if(complete%3==0)parent.Wrapper.CharacterInterner.InternPrepared([]);
  else{long identity=-1;_ = scope.SharedState.Selections.CreatePrepared([],0,ref identity,complete%3==1?1:0);}
  Reject(()=>state.Validate());Reject(()=>LegacyFreshMainGlobalDocumentSelectedSources.Prepare(coverage));
- scope.Dispose();Reject(()=>state.Validate());Reject(()=>LegacyFreshMainGlobalDocumentSelectedSources.Prepare(coverage));
+ scope.Dispose();RejectKind("disposed-validate",()=>rawKinds.Validate());RejectKind("disposed-lookup",()=>rawKinds.Lookup(0));Reject(()=>state.Validate());Reject(()=>LegacyFreshMainGlobalDocumentSelectedSources.Prepare(coverage));
 }
 var prepared=new List<object>();
 for(int i=0;i<256;i++)
@@ -80,8 +111,11 @@ for(int i=0;i<256;i++)
  uint before=unchecked((uint)(i*2654435761L));uint[] metadata=Enumerable.Range(0,i%9).Select(k=>(i%4==0?0u:i%4==1?0x10000000u:i%4==2?0x01000000u:(k%2==0?0x4000u:0u))|((uint)(i+k)&255)).ToArray();
  preparedWords.Add(D(("before",before),("metadata",metadata),("after",LegacyFreshMainGlobalDocumentSelectedSources.ComputeWordMetadata(before,metadata))));
 }
-using(var jsonFile=File.Create(args[2]))using(var jsonWriter=new Utf8JsonWriter(jsonFile))WriteJson(jsonWriter,D(("samples",output),("completed",complete),("refused",refused),("totalNodes",totalNodes),("totalWrites",totalWrites),("prepared",prepared),("preparedWords",preparedWords),("lazy",lazy),("guards",guards)));
-if(complete!=12||refused!=1||totalNodes!=34||totalWrites!=34)throw new Exception("Actual supported branch changed.");
+using(var scope=Scope([M()]))
+{var p=Parent(scope);p.Publish(new byte[40],new byte[8160]);var c=LegacyFreshMainGlobalDocumentCoverage.Prepare(p);var k=LegacyGlobalRawObjectKinds.Prepare(c);long id=-1;_=scope.SharedState.Selections.CreatePrepared([],0,ref id,1);RejectKind("poisoned-validate",()=>k.Validate());RejectKind("poisoned-lookup",()=>k.Lookup(0));RejectKind("poisoned-create",()=>LegacyGlobalRawObjectKinds.Prepare(c));}
+var metadataKinds=new List<object>();for(int i=0;i<256;i++){uint flags=unchecked((uint)(i*2654435761L));foreach(int kind in new[]{0xc25,0xc1e})metadataKinds.Add(D(("before",flags),("kind",kind),("after",LegacyGlobalRawObjectKinds.ProjectMetadata(flags,kind))));}
+using(var jsonFile=File.Create(args[2]))using(var jsonWriter=new Utf8JsonWriter(jsonFile))WriteJson(jsonWriter,D(("samples",output),("completed",complete),("refused",refused),("totalNodes",totalNodes),("totalWrites",totalWrites),("prepared",prepared),("preparedWords",preparedWords),("lazy",lazy),("guards",guards),("typedKinds",typedKinds),("kindChecks",kindChecks),("metadataKinds",metadataKinds)));
+if(complete!=13||refused!=0||totalNodes!=37||totalWrites!=37)throw new Exception("Actual supported branch changed.");
 Console.WriteLine($"PASS13 global selected sources/{complete} overlays/{refused} explicit selected-source refusals/{totalNodes} fullCHAR/{totalWrites} selected writes/256 prepared alias controls/14 lazy controls/{guards} guards; no020920/DOM.");
 void Reject(Action action){try{action();}catch(Exception e)when(e is ArgumentException or InvalidOperationException or NotSupportedException or OperationCanceledException){guards++;return;}throw new Exception("Expected selected source refusal.");}
 LegacyLibraryGlobalTextPublicationScope Scope(InkStroke[] ink){var d=LegacyOwnedRawInkDocument.Create(ink,default);var original=LegacyLibraryOriginalTextFieldBootstrap.Prepare(LegacyFreshRawInkCurrentView.Prepare(d),["a","b"]);original.Run();var selected=LegacyLibraryOriginalSelectedFieldContext.Prepare(original,original.State.Inputs[1]);selected.Run();return LegacyLibraryGlobalTextPublicationScope.PrepareOriginalSelected(models,selected,0,table,cd,pd);}

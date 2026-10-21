@@ -35,8 +35,8 @@ for sample in d['samples']:
  assert(sample['alternatives'],sample['lines'],sample['transforms'],sample['daf'])==(p['documentAlternativeCount'],p['lineCount'],0,0)
  assert sample['swapped']and sample['following']and sample['prefixes']==normal
  total+=len(fragments)
-# Prior fault/export/invalidations unchanged; one extra genuine owner runs7 guards:121+7=128.
-assert(d['completed'],d['refused'],d['matrices'],total,d['guards'])==(12,1,13,13,128)
+# Prior fault/export/invalidations unchanged; one extra genuine owner runs7 guards:128+7=135.
+assert(d['completed'],d['refused'],d['matrices'],total,d['guards'])==(13,0,16,16,135)
 for at,f in enumerate(d['failures']):
  assert f['stage']==['Entered','Exported','Swapped','InputSpans','Complete'][at]
  kept=normal[:min(at+1,4)];assert f['prefixes']==kept+[dict(kept[-1],stage='fault')]
@@ -51,4 +51,4 @@ for disposed,f in zip((False,True),d['invalidations']):
 assert len(d['preSwap'])==3
 for n,f in enumerate(d['preSwap']):assert f['kind']==n and f['prefixes']==normal[:2]+[prefix('fault')]
 if len(sys.argv)==10:assert Path(transforms).read_bytes()==Path(sys.argv[9]).read_bytes(),'Managed/Native mismatch'
-print('PASS independent12 original-selected global INPUT owners/13 identity matrices/real seed-vector swap/5 cancellation prefixes/3 failed exports/5 owner invalidations/128 guards; no final acceptance.')
+print('PASS independent13 original-selected global INPUT owners/16 identity matrices/real seed-vector swap/5 cancellation prefixes/3 failed exports/5 owner invalidations/135 guards; no final acceptance.')

@@ -26,9 +26,9 @@ for s in d['samples'][:-1]:
  assert s['commands']==commands(p,True)
  assert bytes.fromhex(s['body56'])==struct.pack('<qq',s['final'],s['initial'])+bytes(40)
  total+=len(s['commands'])
-# Prior entered-allocation controls unchanged; one extra genuine owner runs6 guards:69+6=75.
-assert(d['completed'],d['refused'],d['commands'],total,d['guards'])==(12,1,70,70,75)
+# Prior entered-allocation controls unchanged; one extra genuine owner runs6 guards:75+6=81.
+assert(d['completed'],d['refused'],d['commands'],total,d['guards'])==(13,0,76,76,81)
 failure=d['samples'][-1];p=parents['M']
 assert failure==dict(name='prepared-allocation',failed=True,next=p['nextAfter'],commands=commands(p,False))
 if len(sys.argv)==11:assert Path(counter).read_bytes()==Path(sys.argv[10]).read_bytes(),'Managed/Native mismatch'
-print('PASS independent12 genuine global pending owners/58 original selection commands/12 trailing operation7/75 guards; no selected/original registry replay or DOM claim.')
+print('PASS independent13 genuine global pending owners/63 original selection commands/13 trailing operation7/81 guards; no selected/original registry replay or DOM claim.')
