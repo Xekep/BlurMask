@@ -1,4 +1,4 @@
-﻿using System.Buffers.Binary;
+using System.Buffers.Binary;
 namespace InkRecognition;
 
 /// <summary>NEW private fresh OUTER2B3 direct208/20E binding policy. Not an
@@ -57,4 +57,3 @@ public sealed class LegacyEnglishFreshMainWordPolicy
         if(!ReferenceEquals(binding.Source,local.Owner.MainWire.Source)||!ReferenceEquals(binding.Source,binding.LanguageQuery.DataOwner.Source)||binding.Source.SourceKind!=0x135||binding.Masks.Policy!="independent-main13B-only/nonbypassed/no-user-restriction"||!binding.Source.Fingerprint.Equals("ca46297ada4a80de0d4bbd40650a8ace5c3809af9edbd493fb8f4eb692a18657",StringComparison.OrdinalIgnoreCase))throw new ArgumentException("Exact actual English source instance required; no copied/child knowledge coercion.");
     }
 }
-

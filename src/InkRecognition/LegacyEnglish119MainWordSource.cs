@@ -126,4 +126,3 @@ internal sealed class LegacyEnglish119MainWordSource
     internal void Validate(CancellationToken token)
     {Profile.Validate(token);if(!Owner.IsComplete||Owner.IsFaulted)throw new InvalidOperationException("Actual retained completed local source required.");}
 }
-

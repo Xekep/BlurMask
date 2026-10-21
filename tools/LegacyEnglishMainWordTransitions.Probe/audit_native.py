@@ -38,4 +38,3 @@ for relative in ['tools/handwriting/english-main-word-policy-transition-pins.jso
 report=dict(status='PASS static producer-derived ordinary group metadata admission',fullBodies=len({r['function']for r in proof['regions']}),completeRegions=len(proof['regions']),instructions=sum(r['instructions']for r in proof['regions']),calls=len(proof['calls']),writeCopyWitnesses=len(proof['writeAndCopyWitnesses']),dispatchBindings=len(proof['bindings']),unregisteredFalseLeaf=True,upstream=upstream,
  distinction='arc.Flags differs from wideword6(kind7) and wide50(compact6). Ordinary19F850 zero96 and merged1A3B30 zero50;19C4E0 copies50 to6 and7 to7. Native type1=0100/50=1 not admitted by sealed ordinary0/-1 MainLocal producer.',targetsRead=False,vendorExecuted=False)
 a.output.write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report,ensure_ascii=True))
-

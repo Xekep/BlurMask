@@ -162,4 +162,3 @@ public sealed class LegacyEnglishMainWordTransitions
     private static void Write32(LegacyNativeWordRecombinationRequest r,int at,int value)
     {Span<byte>b=stackalloc byte[4];BinaryPrimitives.WriteInt32LittleEndian(b,value);for(int i=0;i<4;i++)r.WriteByte(at+i,b[i]);}
 }
-
