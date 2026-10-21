@@ -7,7 +7,7 @@ namespace InkRecognition;
 /// No configured-two-alternative owner, geometric238B0 or DOM is fabricated.</summary>
 public sealed class LegacyFreshMainGlobalDocumentCoverage
 {
-    private readonly LegacyNativeInkPositionRange[] word,text,initial,remaining;
+    private readonly LegacyNativeInkPositionRange[] word,normalizedWord,text,initial,remaining;
     private readonly LegacyFreshMainGlobalWordCharacterLink[] links;
     private readonly LegacyNativeInkPositionRange[][] keys;
     private readonly LegacyOwnedFreshTextSelection[] commands;
@@ -23,11 +23,11 @@ public sealed class LegacyFreshMainGlobalDocumentCoverage
     public int AdjacentCharacterChecks=>links.Length-1;
     public int CharacterSubtractions=>links.Length;
     private LegacyFreshMainGlobalDocumentCoverage(LegacyFreshMainGlobalWordTextPublication publication,
-        LegacyNativeInkPositionRange[] word,LegacyNativeInkPositionRange[] text,
+        LegacyNativeInkPositionRange[] word,LegacyNativeInkPositionRange[] normalizedWord,LegacyNativeInkPositionRange[] text,
         LegacyNativeInkPositionRange[] initial,LegacyNativeInkPositionRange[] remaining,
         LegacyFreshMainGlobalWordCharacterLink[] links,LegacyNativeInkPositionRange[][] keys,
         LegacyOwnedFreshTextSelection[] commands,byte[] lines,bool ordinary,int last)
-    {Publication=publication;this.word=word;this.text=text;this.initial=initial;this.remaining=remaining;
+    {Publication=publication;this.word=word;this.normalizedWord=normalizedWord;this.text=text;this.initial=initial;this.remaining=remaining;
      this.links=links;this.keys=keys;this.commands=commands;lineStorage=lines;
      UsesOrdinaryWordRanges=ordinary;LastReferencedLine=last;next=publication.Scope.SharedState.Selections.NextSelectionId;}
     public static LegacyFreshMainGlobalDocumentCoverage Prepare(LegacyFreshMainGlobalWordTextPublication actual,
@@ -66,11 +66,16 @@ public sealed class LegacyFreshMainGlobalDocumentCoverage
         //025E40's signed max+1 is1; no tail exists for this one actual ALT.
         //027670 sees a single WORD and returns before its gap-extension loop.
         var word=payload.OriginalSource.CopyOriginalKey();var text=actual.Text.CopyRanges();
-        if(!LegacyOwnedRawInkRangeOperations.Equal(word,text))
+        //0248D0 appends WORD keys to a local C21 before exact TEXT comparison.
+        //Keep original WORD bytes for interner identity and CHAR fallback.
+        long unionWork=PreflightUnionWork(word.Length);
+        var operations=LegacyOwnedRawInkRangeOperations.Prepare(actual.Scope.Document);
+        var normalizedWord=operations.Union([],word,token);
+        if(!LegacyOwnedRawInkRangeOperations.Equal(normalizedWord,text))
             throw new NotSupportedException("Unequal actual WORD/TEXT coverage requires geometric238B0; containment is not equality.");
         var ordinary=payload.CopyOrdinaryRanges();bool useOrdinary=ordinary.Length!=0;
         var initial=useOrdinary?ordinary:word.ToArray();
-        var keys=new LegacyNativeInkPositionRange[links.Length][];long comparisons=0,retained=initial.Length;
+        var keys=new LegacyNativeInkPositionRange[links.Length][];long comparisons=unionWork,retained=initial.Length;
         for(int i=0;i<links.Length;i++)
         {
             token.ThrowIfCancellationRequested();var source=links[i].Source;
@@ -81,12 +86,18 @@ public sealed class LegacyFreshMainGlobalDocumentCoverage
             if(retained>1_048_576||comparisons>16_777_216)
                 throw new NotSupportedException("Whole postcoverage interval work budget exceeded before subtraction.");
         }
-        var operations=LegacyOwnedRawInkRangeOperations.Prepare(actual.Scope.Document);
         var remaining=initial.ToArray();
         for(int i=0;i<keys.Length;i++){token.ThrowIfCancellationRequested();remaining=operations.Subtract(remaining,keys[i],token);}
         //Native keeps the sole WORD choice even if this remainder is nonempty.
-        var result=new LegacyFreshMainGlobalDocumentCoverage(actual,word,text,initial,remaining,links,keys,pending,lines,useOrdinary,last);
+        var result=new LegacyFreshMainGlobalDocumentCoverage(actual,word,normalizedWord,text,initial,remaining,links,keys,pending,lines,useOrdinary,last);
         result.Validate(token);return result;
+    }
+    internal static long PreflightUnionWork(int count)
+    {
+        if(count is<0 or>65536)throw new NotSupportedException("Bounded source-range count required before union.");
+        long work=(long)count*count;
+        if(work>16_777_216)throw new NotSupportedException("Whole postcoverage union work budget exceeded before union.");
+        return work;
     }
     public void Validate(CancellationToken token=default)
     {
@@ -99,6 +110,7 @@ public sealed class LegacyFreshMainGlobalDocumentCoverage
             throw new InvalidOperationException("Actual global post-TEXT prefix changed.");
     }
     public LegacyNativeInkPositionRange[] CopyWordRanges(){Validate();return word.ToArray();}
+    public LegacyNativeInkPositionRange[] CopyNormalizedWordCoverageRanges(){Validate();return normalizedWord.ToArray();}
     public LegacyNativeInkPositionRange[] CopyTextRanges(){Validate();return text.ToArray();}
     public LegacyNativeInkPositionRange[] CopyInitialCharacterCoverage(){Validate();return initial.ToArray();}
     public LegacyNativeInkPositionRange[] CopyRemainingCharacterCoverage(){Validate();return remaining.ToArray();}

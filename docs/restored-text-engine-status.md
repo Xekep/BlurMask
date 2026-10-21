@@ -6,6 +6,17 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [native WORD coverage union correction](legacy-global-native-coverage-union-runtime.md)
+now preserves raw WORD keys while comparing their canonical union with TEXT.
+All13 actual coverage cases take the equal fast path; earlier raw-key comparison
+incorrectly rejected MIR andII. Downstream12 cases complete through70 pending
+commands, with the real MIR C25 lookup still explicitly unsupported. The12
+transform owners contain13 actual matrices. All six Managed/Native AOT captures
+match; all previous11 successful cases and prior13 producers remain unchanged.
+This corrects the earlier branch interpretation without adding geometry or DOM
+acceptance and does not constitute a recognition-quality improvement.
+
+
 The [six actual Math mixed107 raw models](legacy-math-mixed107.md) now have
 an independent byte-exact resource reference and native loader/dispatch proof.
 Their first matrices use int16 weights; second matrices use int8 plus row scales.

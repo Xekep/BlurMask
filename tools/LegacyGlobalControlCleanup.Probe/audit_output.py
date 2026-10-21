@@ -18,7 +18,7 @@ def prefixes(word,order):
 count=records=0
 for sample in d['samples']:
  state=states[sample['name']];ix=indices[sample['name']];assert sample['completed']==state['completed']==ix['completed']
- if not state['completed']:assert sample==dict(name=sample['name'],completed=False,refusal='238B0');continue
+ if not state['completed']:assert sample==dict(name=sample['name'],completed=False,refusal=state['refusal']);continue
  assert sample['word48']==state['word48After']
  raw=bytes.fromhex(sample['word48']);assert len(raw)==48 and int.from_bytes(raw[8:12],'little')&0x100000==0
  assert sample['wordBefore']==state['wordFlags'] and sample['wordAfter']==state['wordFlags']&~0x100000
@@ -34,7 +34,8 @@ for sample in d['samples']:
     text=bytes.fromhex(row['utf8']).decode('utf8');assert text not in ('\U000f0000','\U000f0001')
   records+=len(c['records'])
  assert sample['prefixes']==prefixes(state['wordFlags'],sample['order']);count+=len(expected)
-assert (d['completed'],d['refused'],count,d['characters'],records,d['records'],d['guards'],d['flagControls'])==(11,2,33,33,72,72,178,96)
+# Prior prepared/failure controls unchanged; one extra genuine owner runs8 guards:178+8=186.
+assert (d['completed'],d['refused'],count,d['characters'],records,d['records'],d['guards'],d['flagControls'])==(12,1,34,34,74,74,186,96)
 assert d['claimRace']is True
 m=next(s for s in d['samples']if s['name']=='M');all_prefixes=prefixes(m['wordBefore'],m['order'])
 for at,f in enumerate(d['failures']):
@@ -50,4 +51,4 @@ for disposed,f in zip((False,True),d['invalidations']):
  assert f['disposed']==disposed and f['faulted']and not f['complete']
  assert f['prefixes']==all_prefixes[:-1]+[dict(all_prefixes[-2],stage='fault')]
 if len(sys.argv)==9:assert Path(cleanup).read_bytes()==Path(sys.argv[8]).read_bytes(),'Managed/Native capture mismatch'
-print('PASS independent11 actual global cleanup owners/33 CHAR/72 full records/WORD48 flags and ordered clear/5 cancellation prefixes/2 late invalidations/178 guards; no active control services or quality claim.')
+print('PASS independent12 actual global cleanup owners/34 CHAR/74 full records/WORD48 flags and ordered clear/5 cancellation prefixes/2 late invalidations/186 guards; no active control services or quality claim.')

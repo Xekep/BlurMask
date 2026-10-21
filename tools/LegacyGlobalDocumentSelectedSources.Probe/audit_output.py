@@ -19,8 +19,17 @@ def lookup(key):
 assert len(d['samples'])==13 and len({s['name']for s in d['samples']})==13
 for s in d['samples']:
  name=s['name'];p=parents[name];c=children[name];v=coverage[name]
- assert s['completed']==v['completed']
- if not s['completed']:assert s['refusal']=='238B0';continue
+ assert v['completed']
+ # Native lazy predicate depends on actual source key/flags, never label/name.
+ reached=[]
+ for g in p['links']:
+  flags=g['metadataFlags'];key=g['processed']
+  if flags&0x10600000==0:
+   if flags&0x20000000:assert g['selectionId']==-1
+   elif len(key)==1 and lookup(b''.join(struct.pack('<QQ',*v)for v in key).hex()):reached.append(g['node'])
+ if reached:
+  assert s==dict(name=name,completed=False,refusal='C25');continue
+ assert s['completed']
  assert s['tree']==c['tree'];tree={n[0]:n for n in s['tree']};order=[]
  def visit(identity,depth=0):
   assert depth<64
@@ -51,7 +60,8 @@ for s in d['samples']:
  assert bytes.fromhex(s['lineBefore'])==bytes.fromhex(s['lineAfter'])==bytes.fromhex(p['sourceLines56'])
  assert bytes.fromhex(s['word48Before'])==bytes.fromhex(s['word48After'])==bytes.fromhex(p['wordChoice48'])
  nodes+=len(tree);writes+=len(expectedwrites)
-assert(nodes,writes,d['completed'],d['refused'],d['totalNodes'],d['totalWrites'],d['guards'])==(33,33,11,2,33,33,73)
+# Guards:13pre-cancel +12*5 historical/stale/disposed +2lazy refusals +5scalar failures =80.
+assert(nodes,writes,d['completed'],d['refused'],d['totalNodes'],d['totalWrites'],d['guards'])==(34,34,12,1,34,34,13+12*5+2+5)
 assert len(d['prepared'])==len(d['preparedWords'])==256 and len(d['lazy'])==14
 for p in d['preparedWords']:
  expected=p['before']&0xfeffffff
@@ -68,4 +78,4 @@ for p in d['lazy']:
   elif p['count']==1:expected=not lookup(p['key16'])
  assert p['success']==expected
 if len(sys.argv)==7:assert Path(selected_path).read_bytes()==Path(sys.argv[6]).read_bytes()
-print('PASS independent11 global overlays/33 complete AVL nodes/33 link-order writes/WORD flags/full old CHAR rows/256 alias controls/14 lazy branches; no020920/DOM/quality claim.')
+print('PASS independent12 global overlays/34 complete AVL nodes/34 link-order writes;1 actual C25 refusal/WORD flags/full old CHAR rows/256 alias controls/14 lazy branches; no020920/DOM/quality claim.')

@@ -24,7 +24,12 @@ foreach(var(name,raw)in samples)
  catch(NotSupportedException e)when(e.Message.StartsWith("Unequal actual WORD/TEXT")){output.Add(D(("name",name),("completed",false),("refusal","238B0")));refused++;continue;}
  Reject(()=>LegacyFreshMainGlobalDocumentSelectedSources.Prepare(coverage,new(true)));
  var pending=parent.CopyPendingSelections().ToArray();var line=parent.CopySourceLines56();var word48=parent.WordSource.CopyChoiceScalar48();uint wordFlags=parent.WordSource.Flags;
- var state=LegacyFreshMainGlobalDocumentSelectedSources.Prepare(coverage);state.Validate();complete++;
+ LegacyFreshMainGlobalDocumentSelectedSources state;
+ var refusalBefore=RefusalSnapshot(parent);var refusalSeed=scope.Seed;
+ try{state=LegacyFreshMainGlobalDocumentSelectedSources.Prepare(coverage);}
+ catch(NotSupportedException e)when(e.Message=="Native01FD40 actually reaches C25 raw-object lookup; concrete kind is not inferred.")
+ {if(!ReferenceEquals(scope.Seed,refusalSeed)||RefusalSnapshot(parent)!=refusalBefore)throw new Exception("C25 refusal mutated actual owner prefix.");output.Add(D(("name",name),("completed",false),("refusal","C25")));refused++;continue;}
+state.Validate();complete++;
  var copies=state.Characters.Select(c=>D(("node",c.OriginalSource.Node.Identity),("before",c.OriginalSource.Flags!.Value),("metadata",c.MetadataFlags),("flags",c.Flags),("before44",unchecked((int)(c.OriginalSource.CopyAssignedScalars().Field40!.Value>>32))),("index44",c.SelectedChoiceIndex44),("selection",c.OriginalSource.SelectionId!.Value),("key16",Convert.ToHexString(c.OriginalSource.Node.CopyRanges16())),("records",c.OriginalSource.CopyRecords().Select(r=>D(("scalar40",Convert.ToHexString(r.CopyStorage40())),("utf8",r.Text is{}text?Convert.ToHexString(text.ReadBytes()):null))).ToArray()))).ToArray();
  var links=parent.WordSource.CopyCharacterLinks().Select(l=>new[]{l.Source.Node.Identity,l.Marker}).ToArray();
  var writes=state.SelectionWrites.Select(w=>new[]{w.TreeOrdinal,w.SourceNodeIdentity,w.SelectedMarker}).ToArray();
@@ -76,8 +81,8 @@ for(int i=0;i<256;i++)
  preparedWords.Add(D(("before",before),("metadata",metadata),("after",LegacyFreshMainGlobalDocumentSelectedSources.ComputeWordMetadata(before,metadata))));
 }
 using(var jsonFile=File.Create(args[2]))using(var jsonWriter=new Utf8JsonWriter(jsonFile))WriteJson(jsonWriter,D(("samples",output),("completed",complete),("refused",refused),("totalNodes",totalNodes),("totalWrites",totalWrites),("prepared",prepared),("preparedWords",preparedWords),("lazy",lazy),("guards",guards)));
-if(complete!=11||refused!=2||totalNodes!=33||totalWrites!=33)throw new Exception("Actual supported branch changed.");
-Console.WriteLine($"PASS13 global selected sources/{complete} overlays/{refused} coverage refusals/{totalNodes} fullCHAR/{totalWrites} selected writes/256 prepared alias controls/14 lazy controls/{guards} guards; no020920/DOM.");
+if(complete!=12||refused!=1||totalNodes!=34||totalWrites!=34)throw new Exception("Actual supported branch changed.");
+Console.WriteLine($"PASS13 global selected sources/{complete} overlays/{refused} explicit selected-source refusals/{totalNodes} fullCHAR/{totalWrites} selected writes/256 prepared alias controls/14 lazy controls/{guards} guards; no020920/DOM.");
 void Reject(Action action){try{action();}catch(Exception e)when(e is ArgumentException or InvalidOperationException or NotSupportedException or OperationCanceledException){guards++;return;}throw new Exception("Expected selected source refusal.");}
 LegacyLibraryGlobalTextPublicationScope Scope(InkStroke[] ink){var d=LegacyOwnedRawInkDocument.Create(ink,default);var original=LegacyLibraryOriginalTextFieldBootstrap.Prepare(LegacyFreshRawInkCurrentView.Prepare(d),["a","b"]);original.Run();var selected=LegacyLibraryOriginalSelectedFieldContext.Prepare(original,original.State.Inputs[1]);selected.Run();return LegacyLibraryGlobalTextPublicationScope.PrepareOriginalSelected(models,selected,0,table,cd,pd);}
 LegacyFreshMainGlobalWordTextPublication Parent(LegacyLibraryGlobalTextPublicationScope scope){scope.Run(new byte[4096*40],new byte[120],new byte[40],new ushort[256],new byte[64],new byte[72]);var c=scope.CompleteSources(new byte[400],new byte[4],new byte[4]);return LegacyFreshMainGlobalWordTextPublication.Prepare(LegacyFreshMainGlobalTextSourceWrapper.Prepare(scope,c,ak,pd,norm,circles));}
@@ -98,3 +103,5 @@ void WriteJson(Utf8JsonWriter w,object? value)
   default:throw new Exception("Untracked diagnostic JSON type "+value.GetType());
  }
 }
+
+string RefusalSnapshot(LegacyFreshMainGlobalWordTextPublication p)=>string.Join("|",new[]{p.Wrapper.Choices.StringPool.Count.ToString(),p.Scope.SharedState.Selections.NextSelectionId.ToString(),p.Scope.SharedState.Selections.Failed.ToString(),p.WordSource.Flags.ToString(),Convert.ToHexString(p.WordSource.CopyChoiceScalar48()),Convert.ToHexString(p.CopySourceLines56()),string.Join(";",p.CopyPendingSelections().Select(c=>$"{c.SelectionId}:{c.Name}:"+string.Join(",",c.CopyRanges().Select(x=>$"{x.First.Value:X16}-{x.Last.Value:X16}")))),string.Join(";",p.WordSource.CopyCharacterLinks().Select(l=>$"{l.Source.Node.Identity}:{l.Source.CopyAssignedScalars()}:"+Convert.ToHexString(l.Source.Node.CopyRanges16())+":"+string.Join(",",l.Source.CopyRecords().Select(x=>Convert.ToHexString(x.CopyStorage40())+":"+(x.Text is{}t?Convert.ToHexString(t.ReadBytes()):"null"))))) });

@@ -21,7 +21,12 @@ foreach(var(name,raw)in samples)
 {
  using var scope=Scope(raw);var parent=Parent(scope);parent.Publish(new byte[40],new byte[8160]);LegacyFreshMainGlobalDocumentCoverage coverage;
  try{coverage=LegacyFreshMainGlobalDocumentCoverage.Prepare(parent);}catch(NotSupportedException e)when(e.Message.StartsWith("Unequal actual WORD/TEXT")){output.Add(D(("name",name),("completed",false),("refusal","238B0")));refused++;continue;}
- var state=LegacyFreshMainGlobalDocumentSelectedSources.Prepare(coverage);var cleanup=LegacyFreshMainGlobalControlCleanup.Prepare(LegacyFreshMainGlobalDocumentSourceIndices.Prepare(state).Run()).Run();var transforms=LegacyFreshMainGlobalInputTransforms.Prepare(cleanup);
+ LegacyFreshMainGlobalDocumentSelectedSources state;
+ var refusalBefore=RefusalSnapshot(parent);var refusalSeed=scope.Seed;
+ try{state=LegacyFreshMainGlobalDocumentSelectedSources.Prepare(coverage);}
+ catch(NotSupportedException e)when(e.Message=="Native01FD40 actually reaches C25 raw-object lookup; concrete kind is not inferred.")
+ {if(!ReferenceEquals(scope.Seed,refusalSeed)||RefusalSnapshot(parent)!=refusalBefore)throw new Exception("C25 refusal mutated actual owner prefix.");output.Add(D(("name",name),("completed",false),("refusal","C25")));refused++;continue;}
+var cleanup=LegacyFreshMainGlobalControlCleanup.Prepare(LegacyFreshMainGlobalDocumentSourceIndices.Prepare(state).Run()).Run();var transforms=LegacyFreshMainGlobalInputTransforms.Prepare(cleanup);
  Reject(()=>LegacyFreshMainGlobalCounterHandoff.Apply(transforms));transforms.Run();Reject(()=>LegacyFreshMainGlobalCounterHandoff.Apply(transforms,new(true)));
  var owner=scope.SharedState.Selections;var foreign=LegacyOwnedFreshTextSourceContext.PrepareSelectedBinding(scope.Context.InputBinding);Reject(()=>foreign.AppendActualGlobalCounter(transforms,false,default));if(foreign.CopyPendingCommands().Count!=0)throw new Exception("Foreign transaction changed.");
  var before=owner.CopyPendingSelections().ToArray();long initial=scope.Seed.InputBinding.Next,next=owner.NextSelectionId;var registry=scope.Context.InputBinding.CopyInitialRegistryIds();
@@ -40,8 +45,8 @@ using(var scope=Scope([M()]))
  output.Add(D(("name","prepared-allocation"),("failed",owner.Failed),("next",next),("commands",Commands(owner.CopyPendingCommands()))));
 }
 using(var f=File.Create(args[2]))using(var j=new Utf8JsonWriter(f))WriteJson(j,D(("samples",output),("completed",complete),("refused",refused),("commands",total),("guards",guards)));
-if(complete!=11||refused!=2||total!=66)throw new Exception("Actual global command coverage changed.");
-Console.WriteLine($"PASS13 genuine global counter owners/{complete} complete/{refused} coverage refusals/{total} ordered operation4+7 commands/{guards} guards; no replay/DOM acceptance.");
+if(complete!=12||refused!=1||total!=70)throw new Exception("Actual global command coverage changed.");
+Console.WriteLine($"PASS13 genuine global counter owners/{complete} complete/{refused} explicit selected-source refusals/{total} ordered operation4+7 commands/{guards} guards; no replay/DOM acceptance.");
 LegacyFreshMainGlobalInputTransforms Transform(LegacyLibraryGlobalTextPublicationScope scope){var p=Parent(scope);p.Publish(new byte[40],new byte[8160]);return LegacyFreshMainGlobalInputTransforms.Prepare(LegacyFreshMainGlobalControlCleanup.Prepare(LegacyFreshMainGlobalDocumentSourceIndices.Prepare(LegacyFreshMainGlobalDocumentSelectedSources.Prepare(LegacyFreshMainGlobalDocumentCoverage.Prepare(p))).Run()).Run()).Run();}
 object[] Commands(IReadOnlyList<LegacyOwnedFreshTextPendingCommand> all)=>all.Select(c=>(object)D(("op",(int)c.OperationCode),("id",c.CommandIdentity),("previous",c.PreviousCommandIdentity),("next",c.NextCommandIdentity),("selection",c.Selection is{}s?D(("id",s.SelectionId),("name",s.Name),("category",s.Category),("ranges",s.CopyRanges().Select(r=>new[]{r.First.Value,r.Last.Value}).ToArray())):null),("counter",c.Counter is{}counter?new[]{counter.OldCounter20,counter.NewCounter18}:null))).ToArray();
 void Reject(Action a){try{a();}catch(Exception e)when(e is ArgumentException or InvalidOperationException or NotSupportedException or OperationCanceledException){guards++;return;}throw new Exception("Expected global counter refusal.");}
@@ -65,3 +70,5 @@ void WriteJson(Utf8JsonWriter w,object? value)
   default:throw new Exception("Untracked diagnostic JSON type "+value.GetType());
  }
 }
+
+string RefusalSnapshot(LegacyFreshMainGlobalWordTextPublication p)=>string.Join("|",new[]{p.Wrapper.Choices.StringPool.Count.ToString(),p.Scope.SharedState.Selections.NextSelectionId.ToString(),p.Scope.SharedState.Selections.Failed.ToString(),p.WordSource.Flags.ToString(),Convert.ToHexString(p.WordSource.CopyChoiceScalar48()),Convert.ToHexString(p.CopySourceLines56()),string.Join(";",p.CopyPendingSelections().Select(c=>$"{c.SelectionId}:{c.Name}:"+string.Join(",",c.CopyRanges().Select(x=>$"{x.First.Value:X16}-{x.Last.Value:X16}")))),string.Join(";",p.WordSource.CopyCharacterLinks().Select(l=>$"{l.Source.Node.Identity}:{l.Source.CopyAssignedScalars()}:"+Convert.ToHexString(l.Source.Node.CopyRanges16())+":"+string.Join(",",l.Source.CopyRecords().Select(x=>Convert.ToHexString(x.CopyStorage40())+":"+(x.Text is{}t?Convert.ToHexString(t.ReadBytes()):"null"))))) });

@@ -23,7 +23,12 @@ foreach(var(name,raw)in samples)
  LegacyFreshMainGlobalDocumentCoverage coverage;
  try{coverage=LegacyFreshMainGlobalDocumentCoverage.Prepare(parent);}
  catch(NotSupportedException e)when(e.Message.StartsWith("Unequal actual WORD/TEXT")){output.Add(D(("name",name),("completed",false),("refusal","238B0")));refused++;continue;}
- var state=LegacyFreshMainGlobalDocumentSelectedSources.Prepare(coverage);var pending=parent.CopyPendingSelections().ToArray();
+ LegacyFreshMainGlobalDocumentSelectedSources state;
+ var refusalBefore=RefusalSnapshot(parent);var refusalSeed=scope.Seed;
+ try{state=LegacyFreshMainGlobalDocumentSelectedSources.Prepare(coverage);}
+ catch(NotSupportedException e)when(e.Message=="Native01FD40 actually reaches C25 raw-object lookup; concrete kind is not inferred.")
+ {if(!ReferenceEquals(scope.Seed,refusalSeed)||RefusalSnapshot(parent)!=refusalBefore)throw new Exception("C25 refusal mutated actual owner prefix.");output.Add(D(("name",name),("completed",false),("refusal","C25")));refused++;continue;}
+var pending=parent.CopyPendingSelections().ToArray();
  Reject(()=>LegacyFreshMainGlobalDocumentSourceIndices.Prepare(state,new(true)));
  var indices=LegacyFreshMainGlobalDocumentSourceIndices.Prepare(state);Reject(()=>indices.ValidateCurrent());
  Reject(()=>indices.Run(new(true)));if(indices.IsReady||indices.IsFaulted||indices.CopySources().Count!=0)throw new Exception("Pre-entry cancellation changed fresh owner.");
@@ -52,6 +57,7 @@ for(int at=0;at<=2;at++)
 {
  using var scope=Scope([M()]);var parent=Parent(scope);parent.Publish(new byte[40],new byte[8160]);
  var coverage=LegacyFreshMainGlobalDocumentCoverage.Prepare(parent);var state=LegacyFreshMainGlobalDocumentSelectedSources.Prepare(coverage);
+
  var index=LegacyFreshMainGlobalDocumentSourceIndices.Prepare(state);Reject(()=>index.RunPreparedFailure(at));
  if(!index.IsFaulted||index.IsReady)throw new Exception("Entered index prefix did not poison owner.");
  var sources=index.CopySources().ToArray();failures.Add(D(("after",at),("faulted",index.IsFaulted),("ready",index.IsReady),("visited",sources.Length),
@@ -84,8 +90,8 @@ var membershipBudget=new LegacyGlobalDocumentIndexBudget();for(int i=0;i<16;i++)
 var intervalBudget=new LegacyGlobalDocumentIndexBudget();intervalBudget.Add(Enumerable.Range(0,65536).Select(i=>new LegacyNativeInkPositionRange(new((ulong)i),new((ulong)i+1))).ToArray());Reject(()=>intervalBudget.Add([new(new(65537),new(65538))]));
 var vectorBudget=new LegacyGlobalDocumentIndexBudget();for(int i=0;i<65536;i++)vectorBudget.Add([new(new((ulong)(i>>8)),new(65535)),new(new((ulong)(i&255)),new(65535))]);Reject(()=>vectorBudget.Add([range,range,range]));
 using(var jf=File.Create(args[2]))using(var jw=new Utf8JsonWriter(jf))WriteJson(jw,D(("samples",output),("completed",complete),("refused",refused),("sources",totalSources),("failures",failures),("prepared",prepared),("partialVectorFailure",partial),("budgetGuards",4),("guards",guards)));
-if(complete!=11||refused!=2||totalSources!=44)throw new Exception("Actual index coverage changed.");
-Console.WriteLine($"PASS13 actualglobal indices/{complete} ready/{refused} coverage refusals/{totalSources} typed sources/40 prepared AVL cases/3 entered-failure owners/{guards} guards; no023260/DOM.");
+if(complete!=12||refused!=1||totalSources!=46)throw new Exception("Actual index coverage changed.");
+Console.WriteLine($"PASS13 actualglobal indices/{complete} ready/{refused} explicit selected-source refusals/{totalSources} typed sources/40 prepared AVL cases/3 entered-failure owners/{guards} guards; no023260/DOM.");
 void Reject(Action a){try{a();}catch(Exception e)when(e is ArgumentException or InvalidOperationException or NotSupportedException or OperationCanceledException){guards++;return;}throw new Exception("Expected source-index refusal.");}
 ulong[][] Ranges(IEnumerable<LegacyNativeInkPositionRange> key)=>key.Select(r=>new[]{r.First.Value,r.Last.Value}).ToArray();
 Dictionary<string,object?> Actual(LegacyGlobalDocumentSourceIndexSnapshot s,LegacyGlobalDocumentIndexedSource[] sources)=>D(("intervalRoot",s.IntervalRoot),("vectorRoot",s.VectorRoot),("dirty",s.IntervalDirty),("added",s.SourcesAdded),
@@ -117,3 +123,5 @@ void WriteJson(Utf8JsonWriter w,object? value)
   default:throw new Exception("Untracked diagnostic JSON type "+value.GetType());
  }
 }
+
+string RefusalSnapshot(LegacyFreshMainGlobalWordTextPublication p)=>string.Join("|",new[]{p.Wrapper.Choices.StringPool.Count.ToString(),p.Scope.SharedState.Selections.NextSelectionId.ToString(),p.Scope.SharedState.Selections.Failed.ToString(),p.WordSource.Flags.ToString(),Convert.ToHexString(p.WordSource.CopyChoiceScalar48()),Convert.ToHexString(p.CopySourceLines56()),string.Join(";",p.CopyPendingSelections().Select(c=>$"{c.SelectionId}:{c.Name}:"+string.Join(",",c.CopyRanges().Select(x=>$"{x.First.Value:X16}-{x.Last.Value:X16}")))),string.Join(";",p.WordSource.CopyCharacterLinks().Select(l=>$"{l.Source.Node.Identity}:{l.Source.CopyAssignedScalars()}:"+Convert.ToHexString(l.Source.Node.CopyRanges16())+":"+string.Join(",",l.Source.CopyRecords().Select(x=>Convert.ToHexString(x.CopyStorage40())+":"+(x.Text is{}t?Convert.ToHexString(t.ReadBytes()):"null"))))) });

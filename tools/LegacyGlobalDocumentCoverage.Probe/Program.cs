@@ -22,22 +22,26 @@ foreach(var(name,raw)in samples)
  Reject(()=>LegacyFreshMainGlobalDocumentCoverage.Prepare(parent));
  parent.Publish(Enumerable.Range(0,40).Select(i=>(byte)(i*29+7)).ToArray(),new byte[8160]);
  var before=parent.CopyPendingSelections().ToArray();byte[] lines=parent.CopySourceLines56(),word=parent.WordSource.CopyChoiceScalar48();
- void Unchanged(){if(!parent.CopyPendingSelections().SequenceEqual(before)||!parent.CopySourceLines56().SequenceEqual(lines)||!parent.WordSource.CopyChoiceScalar48().SequenceEqual(word))throw new Exception("Coverage mutated the actual pending/line/WORD state.");}
+ var coverageSeed=scope.Seed;var immutableBefore=CoverageSnapshot(parent);
+ void Unchanged(){if(!ReferenceEquals(scope.Seed,coverageSeed)||CoverageSnapshot(parent)!=immutableBefore||!parent.CopyPendingSelections().SequenceEqual(before)||!parent.CopySourceLines56().SequenceEqual(lines)||!parent.WordSource.CopyChoiceScalar48().SequenceEqual(word))throw new Exception("Coverage mutated the actual pending/line/WORD state.");}
  writer.WriteStartObject();writer.WriteString("name",name);
  writer.WriteStartArray("counts");foreach(var s in scope.Document.Strokes)writer.WriteNumberValue(s.Points.Count);writer.WriteEndArray();
  Ranges("word",parent.OriginalWordSource.CopyOriginalKey());Ranges("text",parent.Text.CopyRanges());
- using var stop=new CancellationTokenSource();stop.Cancel();Reject(()=>LegacyFreshMainGlobalDocumentCoverage.Prepare(parent,stop.Token));
+ using var stop=new CancellationTokenSource();stop.Cancel();Reject(()=>LegacyFreshMainGlobalDocumentCoverage.Prepare(parent,stop.Token));Unchanged();
  try
  {
   var result=LegacyFreshMainGlobalDocumentCoverage.Prepare(parent);completed++;
   writer.WriteBoolean("completed",true);writer.WriteNumber("lineCount",result.LineCount);writer.WriteNumber("last",result.LastReferencedLine);
   writer.WriteNumber("wordVisits",result.WordVisits);writer.WriteNumber("helpers",result.LineHelperCalls);writer.WriteNumber("adjacent",result.AdjacentCharacterChecks);
   writer.WriteBoolean("ordinary",result.UsesOrdinaryWordRanges);writer.WriteNumber("subtractions",result.CharacterSubtractions);
+  Ranges("normalizedWord",result.CopyNormalizedWordCoverageRanges());
+  if(!result.CopyWordRanges().SequenceEqual(parent.OriginalWordSource.CopyOriginalKey()))throw new Exception("Raw WORD identity changed.");
+  var normalizedCopy=result.CopyNormalizedWordCoverageRanges();normalizedCopy.AsSpan().Clear();if(result.CopyNormalizedWordCoverageRanges().SequenceEqual(normalizedCopy))throw new Exception("Normalized union aliases caller.");
   Ranges("initial",result.CopyInitialCharacterCoverage());Ranges("remaining",result.CopyRemainingCharacterCoverage());
   writer.WriteStartArray("keys");foreach(var key in result.CopyCharacterKeys()){writer.WriteStartArray();foreach(var r in key){writer.WriteStartArray();writer.WriteNumberValue(r.First.Value);writer.WriteNumberValue(r.Last.Value);writer.WriteEndArray();}writer.WriteEndArray();}writer.WriteEndArray();
   var copy=result.CopyCharacterKeys();copy[0].AsSpan().Fill(default);var bytes=result.CopySourceLines56();bytes.AsSpan().Fill(255);
   if(result.CopyCharacterKeys()[0].SequenceEqual(copy[0])||result.CopySourceLines56().SequenceEqual(bytes))throw new Exception("Diagnostic arrays alias retained coverage.");
-  result.Validate();Unchanged();scope.Dispose();Reject(()=>result.Validate());Reject(()=>result.CopyWordRanges());Reject(()=>result.CopyCharacterKeys());
+  result.Validate();Unchanged();scope.Dispose();Reject(()=>result.Validate());Reject(()=>result.CopyWordRanges());Reject(()=>result.CopyCharacterKeys());Reject(()=>result.CopyNormalizedWordCoverageRanges());
  }
  catch(NotSupportedException e)when(e.Message.StartsWith("Unequal actual WORD/TEXT")){Unchanged();refused++;writer.WriteBoolean("completed",false);writer.WriteString("refusal","238B0");}
  // Scope can have been deliberately closed after successful diagnostics.
@@ -51,10 +55,15 @@ writer.WriteEndArray();
  if(scope.SharedState.Selections.CreatePrepared(parent.Text.CopyRanges(),0,ref output,1)is not null||!scope.SharedState.Selections.Failed||scope.SharedState.Selections.NextSelectionId!=next+1||!parent.CopyPendingSelections().SequenceEqual(pending))throw new Exception("Prepared registration refusal did not retain counter-only failure.");
  Reject(()=>result.Validate());Reject(()=>result.CopySourceLines56());Reject(()=>LegacyFreshMainGlobalDocumentCoverage.Prepare(parent));
 }
+if(LegacyFreshMainGlobalDocumentCoverage.PreflightUnionWork(0)!=0||LegacyFreshMainGlobalDocumentCoverage.PreflightUnionWork(4096)!=16_777_216)throw new Exception("Union budget inclusive boundary changed.");
+Reject(()=>LegacyFreshMainGlobalDocumentCoverage.PreflightUnionWork(-1));Reject(()=>LegacyFreshMainGlobalDocumentCoverage.PreflightUnionWork(4097));Reject(()=>LegacyFreshMainGlobalDocumentCoverage.PreflightUnionWork(int.MaxValue));
+writer.WriteNumber("unionBudgetGuards",3);
 writer.WriteBoolean("poisonedCounterWithoutCommand",true);writer.WriteNumber("completed",completed);writer.WriteNumber("refused",refused);writer.WriteNumber("guards",guards);writer.WriteEndObject();writer.Flush();
-if(completed!=11||refused!=2)throw new Exception("Actual equality branch coverage changed.");
+if(completed!=13||refused!=0)throw new Exception("Actual equality branch coverage changed.");
 Console.WriteLine($"PASS13 global post-TEXT owners: {completed} exact coverage/{refused} explicit238B0 refusals/{guards} guards.");
 void Reject(Action action){try{action();}catch(Exception e)when(e is ArgumentException or InvalidOperationException or NotSupportedException or OperationCanceledException){guards++;return;}throw new Exception("Expected refusal.");}
 void Ranges(string name,IEnumerable<LegacyNativeInkPositionRange> ranges){writer.WriteStartArray(name);foreach(var r in ranges){writer.WriteStartArray();writer.WriteNumberValue(r.First.Value);writer.WriteNumberValue(r.Last.Value);writer.WriteEndArray();}writer.WriteEndArray();}
 LegacyLibraryGlobalTextPublicationScope Scope(InkStroke[] ink){var d=LegacyOwnedRawInkDocument.Create(ink,default);var original=LegacyLibraryOriginalTextFieldBootstrap.Prepare(LegacyFreshRawInkCurrentView.Prepare(d),["a","b"]);original.Run();var selected=LegacyLibraryOriginalSelectedFieldContext.Prepare(original,original.State.Inputs[1]);selected.Run();return LegacyLibraryGlobalTextPublicationScope.PrepareOriginalSelected(models,selected,0,table,cd,pd);}
 LegacyFreshMainGlobalWordTextPublication Parent(LegacyLibraryGlobalTextPublicationScope scope){scope.Run(new byte[4096*40],new byte[120],new byte[40],new ushort[256],new byte[64],new byte[72]);var c=scope.CompleteSources(new byte[400],new byte[4],new byte[4]);return LegacyFreshMainGlobalWordTextPublication.Prepare(LegacyFreshMainGlobalTextSourceWrapper.Prepare(scope,c,ak,pd,norm,circles));}
+
+string CoverageSnapshot(LegacyFreshMainGlobalWordTextPublication p)=>string.Join("|",new[]{p.Wrapper.Choices.StringPool.Count.ToString(),p.Scope.SharedState.Selections.NextSelectionId.ToString(),p.Scope.SharedState.Selections.Failed.ToString(),p.WordSource.Flags.ToString(),Convert.ToHexString(p.WordSource.CopyChoiceScalar48()),Convert.ToHexString(p.CopySourceLines56()),string.Join(";",p.CopyPendingSelections().Select(c=>$"{c.SelectionId}:{c.Name}:"+string.Join(",",c.CopyRanges().Select(x=>$"{x.First.Value:X16}-{x.Last.Value:X16}")))),string.Join(";",p.WordSource.CopyCharacterLinks().Select(l=>$"{l.Source.Node.Identity}:{l.Source.CopyAssignedScalars()}:"+Convert.ToHexString(l.Source.Node.CopyRanges16())+":"+string.Join(",",l.Source.CopyRecords().Select(x=>Convert.ToHexString(x.CopyStorage40())+":"+(x.Text is{}t?Convert.ToHexString(t.ReadBytes()):"null"))))) });

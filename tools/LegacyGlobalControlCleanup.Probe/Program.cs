@@ -23,7 +23,12 @@ foreach(var(name,raw)in samples)
  LegacyFreshMainGlobalDocumentCoverage coverage;
  try{coverage=LegacyFreshMainGlobalDocumentCoverage.Prepare(parent);}
  catch(NotSupportedException e)when(e.Message.StartsWith("Unequal actual WORD/TEXT")){output.Add(D(("name",name),("completed",false),("refusal","238B0")));refused++;continue;}
- var state=LegacyFreshMainGlobalDocumentSelectedSources.Prepare(coverage);var index=LegacyFreshMainGlobalDocumentSourceIndices.Prepare(state);
+ LegacyFreshMainGlobalDocumentSelectedSources state;
+ var refusalBefore=RefusalSnapshot(parent);var refusalSeed=scope.Seed;
+ try{state=LegacyFreshMainGlobalDocumentSelectedSources.Prepare(coverage);}
+ catch(NotSupportedException e)when(e.Message=="Native01FD40 actually reaches C25 raw-object lookup; concrete kind is not inferred.")
+ {if(!ReferenceEquals(scope.Seed,refusalSeed)||RefusalSnapshot(parent)!=refusalBefore)throw new Exception("C25 refusal mutated actual owner prefix.");output.Add(D(("name",name),("completed",false),("refusal","C25")));refused++;continue;}
+var index=LegacyFreshMainGlobalDocumentSourceIndices.Prepare(state);
  Reject(()=>LegacyFreshMainGlobalControlCleanup.Prepare(index));index.Run();
  Reject(()=>LegacyFreshMainGlobalControlCleanup.Prepare(index,new(true)));
  var cleanup=LegacyFreshMainGlobalControlCleanup.Prepare(index);Reject(()=>cleanup.ValidateCurrent());Reject(()=>cleanup.Run(new(true)));
@@ -69,8 +74,8 @@ using(var scope=Scope([M()]))
  Task.WaitAll(Task.Run(Attempt),Task.Run(Attempt));if(wins!=1||losses!=1)throw new Exception("Exclusive claim race.");
 }
 using(var f=File.Create(args[2]))using(var j=new Utf8JsonWriter(f))WriteJson(j,D(("samples",output),("completed",complete),("refused",refused),("characters",visited),("records",records),("failures",failures),("invalidations",invalidations),("flagControls",controls),("claimRace",true),("guards",guards)));
-if(complete!=11||refused!=2||visited!=33||records!=72)throw new Exception($"Actual cleanup coverage changed {complete}/{refused}/{visited}/{records}.");
-Console.WriteLine($"PASS13 genuine global cleanup/{complete} completed/{refused} coverage refusals/{visited} CHAR/{records} records/5 cancellation prefixes/{controls} flag controls/{guards} guards; no active control services/DOM.");
+if(complete!=12||refused!=1||visited!=34||records!=74)throw new Exception($"Actual cleanup coverage changed {complete}/{refused}/{visited}/{records}.");
+Console.WriteLine($"PASS13 genuine global cleanup/{complete} completed/{refused} explicit selected-source refusals/{visited} CHAR/{records} records/5 cancellation prefixes/{controls} flag controls/{guards} guards; no active control services/DOM.");
 void Reject(Action a){try{a();}catch(Exception e)when(e is ArgumentException or InvalidOperationException or NotSupportedException or OperationCanceledException){guards++;return;}throw new Exception("Expected cleanup refusal.");}
 byte[] Json(object value){using var m=new MemoryStream();using(var j=new Utf8JsonWriter(m))WriteJson(j,value);return m.ToArray();}
 object[] Snapshot(LegacyFreshMainGlobalDocumentSelectedSources s)=>s.Characters.Select(c=>(object)D(("node",c.OriginalSource.Node.Identity),("flags",c.Flags),("records",c.OriginalSource.CopyRecords().Select(r=>D(("scalar40",Convert.ToHexString(r.CopyStorage40())),("utf8",r.Text is{}text?Convert.ToHexString(text.ReadBytes()):null))).ToArray()))).ToArray();
@@ -95,3 +100,5 @@ void WriteJson(Utf8JsonWriter w,object? value)
   default:throw new Exception("Untracked diagnostic JSON type "+value.GetType());
  }
 }
+
+string RefusalSnapshot(LegacyFreshMainGlobalWordTextPublication p)=>string.Join("|",new[]{p.Wrapper.Choices.StringPool.Count.ToString(),p.Scope.SharedState.Selections.NextSelectionId.ToString(),p.Scope.SharedState.Selections.Failed.ToString(),p.WordSource.Flags.ToString(),Convert.ToHexString(p.WordSource.CopyChoiceScalar48()),Convert.ToHexString(p.CopySourceLines56()),string.Join(";",p.CopyPendingSelections().Select(c=>$"{c.SelectionId}:{c.Name}:"+string.Join(",",c.CopyRanges().Select(x=>$"{x.First.Value:X16}-{x.Last.Value:X16}")))),string.Join(";",p.WordSource.CopyCharacterLinks().Select(l=>$"{l.Source.Node.Identity}:{l.Source.CopyAssignedScalars()}:"+Convert.ToHexString(l.Source.Node.CopyRanges16())+":"+string.Join(",",l.Source.CopyRecords().Select(x=>Convert.ToHexString(x.CopyStorage40())+":"+(x.Text is{}t?Convert.ToHexString(t.ReadBytes()):"null"))))) });

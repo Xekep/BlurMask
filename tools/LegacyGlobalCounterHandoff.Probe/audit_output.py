@@ -20,14 +20,15 @@ def commands(p,append):
 total=0
 for s in d['samples'][:-1]:
  p=parents[s['name']];t=prior[s['name']];assert s['completed']==t['completed']
- if not t['completed']:assert s==dict(name=s['name'],completed=False,refusal='238B0');continue
+ if not t['completed']:assert s==dict(name=s['name'],completed=False,refusal=t['refusal']);continue
  assert s['initialIds']==[0,1]and s['initial']==p['nextBefore']==2
  assert s['final']==p['nextAfter']and s['selectionCount']==len(p['commands'])
  assert s['commands']==commands(p,True)
  assert bytes.fromhex(s['body56'])==struct.pack('<qq',s['final'],s['initial'])+bytes(40)
  total+=len(s['commands'])
-assert(d['completed'],d['refused'],d['commands'],total,d['guards'])==(11,2,66,66,69)
+# Prior entered-allocation controls unchanged; one extra genuine owner runs6 guards:69+6=75.
+assert(d['completed'],d['refused'],d['commands'],total,d['guards'])==(12,1,70,70,75)
 failure=d['samples'][-1];p=parents['M']
 assert failure==dict(name='prepared-allocation',failed=True,next=p['nextAfter'],commands=commands(p,False))
 if len(sys.argv)==11:assert Path(counter).read_bytes()==Path(sys.argv[10]).read_bytes(),'Managed/Native mismatch'
-print('PASS independent11 genuine global pending owners/55 original selection commands/11 trailing operation7/69 guards; no selected/original registry replay or DOM claim.')
+print('PASS independent12 genuine global pending owners/58 original selection commands/12 trailing operation7/75 guards; no selected/original registry replay or DOM claim.')

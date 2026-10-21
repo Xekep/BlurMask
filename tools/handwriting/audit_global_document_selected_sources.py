@@ -10,7 +10,7 @@ for index,name in enumerate(['audit_main_document_selected_sources','audit_globa
  out=a.output.with_name('gsel-'+hashlib.sha256(str(a.output.resolve()).encode()).hexdigest()[:12]+'-'+str(index)+'.json');saved=sys.argv
  try:
   sys.argv=[name,str(out)]+(['--native-repo',str(a.native_repo)]if index else[])
-  runpy.run_path(str(a.native_repo/'tools/handwriting'/(name+'.py')),run_name='__main__')
+  runpy.run_path(str((root if index else a.native_repo)/'tools/handwriting'/(name+'.py')),run_name='__main__')
  finally:sys.argv=saved
  dependencies[name]=hashlib.sha256(out.read_bytes()).hexdigest()
 source=(root/'src/InkRecognition/LegacyFreshMainGlobalDocumentSelectedSources.cs').read_text(encoding='utf-8-sig')
