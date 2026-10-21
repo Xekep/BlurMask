@@ -1,5 +1,13 @@
 # Actual English MAIN119 acoustic checkpoint N
 
+**Additional open defect,2026-10-21:** subsequent full-body review found that
+BEDF0 also passes raw88/stored68 into B4AF0. Its nonzero branch omits the
+coordinate unit from whole post-resampling width/height, not just local extents.
+The current N producer still adds that unit. A second correction is in progress;
+the captures below reproduce the current implementation, not complete native
+feature equivalence. Source normalization/allocation and the shared calibration
+kernel are separate from this missing post-resampling branch.
+
 **Corrected checkpoint,2026-10-21:** further static review found two branches
 missing from both the original implementation and its independent reference:
 raw88=1 suppresses the local coordinate unit, and actual2B1 NULL calibration
