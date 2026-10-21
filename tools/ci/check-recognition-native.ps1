@@ -318,6 +318,7 @@ $cases = @(
   @{ Name = 'LegacyEnglishLkSparse101'; Args = @('models', '.artifacts/legacy-en-lk-sparse101-native.json') },
   @{ Name = 'LegacyRussianFirstDegenerate'; Args = @('models', 'tools/LegacyRussianFirstDegenerate.Probe/normalized-controls.json', '.artifacts/legacy-russian-first-degenerate-native.json') },
   @{ Name = 'LegacyEnglishMainMasks'; Args = @('models', '.artifacts/legacy-en119-final-single-blind.json', '.artifacts/legacy-en-main119-masks-native.json') },
+  @{ Name = 'LegacyEnglishSparseQuery'; Args = @('models', '.artifacts/legacy-en-sparse-query-native') },
   @{ Name = 'LegacyMathMixed107Raw'; Args = @('models/math/math-ak.res', '.artifacts/legacy-math-mixed107-raw-native.json') },
   @{ Name = 'LegacyEnglishLiteFirstPreprocessing'; Args = @('models', '.artifacts/legacy-en-short-controls.json', '.artifacts/legacy-en-short-native.json') },
   @{ Name = 'LegacyPreparedNetwork107'; Args = @('models', 'models/ru-RU/legacy-engine-profile.json', '.artifacts/legacy-prepared-network107-native.json') },
@@ -1135,6 +1136,13 @@ foreach ($case in $cases) {
     python -I -B tools/LegacyEnglishMainMasks.Probe/audit_runtime.py --models models --capture .artifacts/legacy-en-main119-masks-native.json --output .artifacts/legacy-en-main119-masks-oracle-native.json
     if ($LASTEXITCODE -ne 0) { throw 'LegacyEnglishMainMasks independent raw oracle failed' }
     if ((Get-FileHash .artifacts/legacy-en-main119-masks-native.json).Hash -ne (Get-FileHash .artifacts/legacy-en-main119-masks-managed.json).Hash) { throw 'LegacyEnglishMainMasks Managed/Native parity failed' }
+  }
+  if ($name -eq 'LegacyEnglishSparseQuery') {
+    python -I -B tools/LegacyEnglishSparseQuery.Probe/audit_output.py --repo . --models models --capture .artifacts/legacy-en-sparse-query-native --output .artifacts/legacy-en-sparse-query-oracle-native.json
+    if ($LASTEXITCODE -ne 0) { throw 'English sparse terminal query independent oracle failed' }
+    foreach ($stream in @('capture.json', 'prepared-records.bin', 'lexical-first-records.bin', 'lexical-continuation-records.bin')) {
+      if ((Get-FileHash (Join-Path '.artifacts/legacy-en-sparse-query-native' $stream)).Hash -ne (Get-FileHash (Join-Path '.artifacts/legacy-en-sparse-query-managed' $stream)).Hash) { throw "English sparse terminal query Managed/Native parity failed: $stream" }
+    }
   }
   if ($name -eq 'LegacyEnglishLkSparse101') {
     python -I -B tools/LegacyEnglishLkSparse101.Probe/audit_runtime.py models .artifacts/legacy-en-lk-sparse101-native.json .artifacts/legacy-en-lk-sparse101-oracle-native.json --native .artifacts/legacy-en-lk-sparse101-managed.json

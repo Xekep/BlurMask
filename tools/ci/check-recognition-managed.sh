@@ -661,6 +661,8 @@ python -I -B tools/handwriting/audit_english_lk_sparse101.py --models models --o
 python -I -B tools/LegacyEnglishMainMasks.Probe/reference_actual.py models .artifacts/legacy-en-main119-masks-raw-model.json
 dotnet run --project tools/LegacyEnglishMainMasks.Probe -c Release -- models .artifacts/legacy-en119-final-single-blind.json .artifacts/legacy-en-main119-masks-managed.json
 python -I -B tools/LegacyEnglishMainMasks.Probe/audit_runtime.py --models models --capture .artifacts/legacy-en-main119-masks-managed.json --output .artifacts/legacy-en-main119-masks-oracle-managed.json
+dotnet run --project tools/LegacyEnglishSparseQuery.Probe -c Release -- models .artifacts/legacy-en-sparse-query-managed
+python -I -B tools/LegacyEnglishSparseQuery.Probe/audit_output.py --repo . --models models --capture .artifacts/legacy-en-sparse-query-managed --output .artifacts/legacy-en-sparse-query-oracle-managed.json
 dotnet run --project tools/LegacyMathMixed107Raw.Probe -c Release -- models/math/math-ak.res .artifacts/legacy-math-mixed107-raw-managed.json
 python -I -B tools/LegacyMathMixed107Raw.Probe/audit_output.py models/math/math-ak.res .artifacts/legacy-math-mixed107-raw-managed.json --reference tools/handwriting/math_legacy_mixed107_reference.py
 dotnet run --project tools/LegacyEnglishLiteFirstPreprocessing.Probe -c Release -- models .artifacts/legacy-en-short-controls.json .artifacts/legacy-en-short-managed.json

@@ -40,6 +40,15 @@ The [recorded English FIRST baseline](english-recorded-baseline-20261021.md)
 completes100 real multi-stroke-capable inputs but has only14 exact words. English
 recognition is not ready.
 
+The [English sparse terminal query service](english-sparse-terminal-query-runtime-20261021.md)
+now owns real dictionary terminal IDs and same-owner two-class history for its
+order3 language model.
+Independent raw-resource checks cover643868 prepared numerical rows,260074
+actual lexical FIRST rows and4096 continuations, including all written bytes and
+untouched allocation residue. Fresh Managed/NativeAOT builds match exactly.
+This evaluates lexical terminals; the NN-selected candidate/controller bridge
+and automatic Russian/English selection are still separate work.
+
 The [raw-object kind receipt](legacy-global-raw-object-kinds-runtime.md) now carries
 the actual C49-to-C1E base-kind provenance through all13 publication cases. The
 earlier inferred C25 interpretation was incorrect. All six downstream captures
