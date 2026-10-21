@@ -33,7 +33,7 @@ public static class LegacyFreshFirstCandidateGraphPreparer
         var ranges=LegacyOrdinaryGraphSourceRanges.Prepare(actualSeeds,cuts.Chronology,
             factory.Frame.Row.OriginalSource,span.MaximumAtoms,cancellationToken:cancellationToken);
         var profile=LegacyOrdinarySamplerGroupPruningProfile.ReadV106Node(actualResource,geometry.SamplerOffset);
-        var prune=LegacyOrdinarySamplerGroupPruning.Prepare(ranges.Graph,cuts.Cuts.PreparedInk,
+        var prune=LegacyOrdinarySamplerGroupPruning.PrepareSingleDescriptor(ranges.Graph,cuts.Cuts.PreparedInk,
             factory.Frame.Row.Frame.Line.Height,profile,table,cancellationToken);
         return new(ranges.WithSamplerPruning(prune,cancellationToken),prune,graphOffset,span);
     }

@@ -33,6 +33,14 @@ checks32,530 candidate groups without expected labels and finds no further
 normalization/feature/NN/cost discrepancy on this one-track corpus. CUT/graph,
 MAIN selection and model/data limits remain under investigation.
 
+The [FIRST final-node correction](russian-first-final-prune-20261021.md) now
+applies the existing complete sampler eligibility pass at the actual FIRST
+entry point. Independent graph, separation and reciprocal-link checks pass on
+72 generated controls and100 recorded multi-stroke geometries;36 recordings
+exercise95 formerly omitted tail removals. All261 one-track Russian outputs
+remain byte-exact. This repairs candidate availability without demonstrating
+better Russian recognition or reducing eager neural work.
+
 The [English MAIN119 knowledge and main-only masks](legacy-english-main119-masks-runtime.md)
 are owned and independently checked on134 genuine single-line chains, with seven
 explicit multiline refusals. This does not execute MAIN neural inference.

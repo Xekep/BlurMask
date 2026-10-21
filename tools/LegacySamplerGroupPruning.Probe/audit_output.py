@@ -45,31 +45,32 @@ for case in data['cases']:
         for cost in costs:
             total = total + cost if len(boxes) >= 9 or f(f(total) + f(cost)) < 0x4000000 else 0x4000000
         geometry.append(min(total, 0x4000000))
-    graph = copy.deepcopy(case['before'])
-    labels = [list(range(len(node))) for node in graph]
-    removed = 0
-    #Mutation follows native order, and changes live ordinals immediately.
-    for node in range(len(graph) - 1):
-        for ordinal in range(len(graph[node]) - 1, -1, -1):
-            arc = graph[node][ordinal]
-            if arc[1] == 0 or geometry[arc[0]] <= case['threshold']:
-                continue
-            if min(geometry[arc[0]], case['laterCap']) <= case['threshold']:
-                clip_disagreements += 1
-            for other_node, arcs in enumerate(graph):
-                for other in arcs:
-                    if other_node - other[1] - 1 == node:
-                        other[5] = [p - (p > ordinal) for p in other[5] if p != ordinal]
-                    other[6] = [[offset, index - (index > ordinal)] if other_node + offset == node else [offset, index]
-                                for offset, index in other[6] if other_node + offset != node or index != ordinal]
-            del graph[node][ordinal]
-            del labels[node][ordinal]
-            removed += 1
-    final_rejections += sum(a[1] > 0 and geometry[a[0]] > case['threshold'] for a in graph[-1])
-    assert graph == case['after'], (case['maximumAtoms'], case['threshold'], 'full arc/link bytes differ')
-    assert labels == case['originalOrdinals']
-    assert removed == case['removed']
+    def mutate(include_final):
+        graph = copy.deepcopy(case['before'])
+        labels = [list(range(len(node))) for node in graph]
+        removed = clipped = 0
+        for node in range(len(graph) if include_final else len(graph)-1):
+            for ordinal in range(len(graph[node])-1,-1,-1):
+                arc=graph[node][ordinal]
+                if arc[1]==0 or geometry[arc[0]]<=case['threshold']:continue
+                if min(geometry[arc[0]],case['laterCap'])<=case['threshold']:clipped+=1
+                for other_node,arcs in enumerate(graph):
+                    for other in arcs:
+                        if other_node-other[1]-1==node:
+                            other[5]=[p-(p>ordinal) for p in other[5] if p!=ordinal]
+                        other[6]=[[offset,index-(index>ordinal)] if other_node+offset==node else [offset,index]
+                                  for offset,index in other[6] if other_node+offset!=node or index!=ordinal]
+                del graph[node][ordinal];del labels[node][ordinal];removed+=1
+        return graph,labels,removed,clipped
+    graph,labels,removed,clipped=mutate(True)
+    local,local_labels,local_removed,_=mutate(False)
+    final_rejections += sum(a[1]>0 and geometry[a[0]]>case['threshold'] for a in local[-1])
+    assert not any(a[1]>0 and geometry[a[0]]>case['threshold'] for a in graph[-1])
+    assert graph==case['after'] and labels==case['originalOrdinals']
+    assert local==case['local'] and local_labels==case['localOrdinals']
+    assert removed==case['removed'] and local_removed==case['localRemoved']
+    clip_disagreements+=clipped
     total_removed += removed
 assert total_removed > 0 and final_rejections > 0 and clip_disagreements > 0
 print(f'PASS72 independent actual binary32/mutable-pruning cases, {total_removed} removals, '
-      f'{final_rejections} deliberately unpruned final arcs, {clip_disagreements} raw-versus-clipped decisions; full provenance/adjacency preserved.')
+      f'{final_rejections} legacy-local final rejections removed by complete FIRST, {clip_disagreements} raw-versus-clipped decisions; full provenance/adjacency preserved.')

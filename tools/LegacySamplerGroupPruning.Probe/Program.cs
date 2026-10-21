@@ -28,7 +28,11 @@ for(int iteration=0;iteration<24;iteration++)foreach(int threshold in new[]{0,20
  var original=LegacyOrdinaryGraphSourceRanges.Prepare(seeds,cuts.Chronology,row.OriginalSource,output.SpanProfile.MaximumAtoms);
  var before=original.Graph;var after=output.SourceRanges.Graph;
  Require(after.MaximumAtoms==3+iteration%5&&output.ResourceGraphOffset==12727,"Owned resource span cap was replaced with a diagnostic constant.");
- Require(after.GetNode(after.NodeCount-1).Count==before.GetNode(before.NodeCount-1).Count,"Native final node must remain unpruned.");
+ var profile=LegacyOrdinarySamplerGroupPruningProfile.ReadV106Node(ownedResource,sampler);
+ var local=LegacyOrdinarySamplerGroupPruning.Prepare(before,cuts.Cuts.PreparedInk,row.Frame.Line.Height,profile,table);
+ Require(local.Graph.GetNode(before.NodeCount-1).Count==before.GetNode(before.NodeCount-1).Count,"Explicit legacy local API must retain final node.");
+ Require(after.GetNode(after.NodeCount-1).Count<=local.Graph.GetNode(before.NodeCount-1).Count,"Complete pass cannot add tail arcs.");
+ for(int n=0;n<before.NodeCount-1;n++)Require(output.Pruning.OriginalArcOrdinals[n].Span.SequenceEqual(local.OriginalArcOrdinals[n].Span),"Complete pass changed earlier-node provenance.");
  for(int n=0;n<after.NodeCount;n++)for(int a=0;a<after.GetNode(n).Count;a++)
  {
   int old=output.Pruning.OriginalArcOrdinals[n].Span[a];
@@ -38,7 +42,6 @@ for(int iteration=0;iteration<24;iteration++)foreach(int threshold in new[]{0,20
  Reject(()=>LegacyFreshFirstCandidateGraphPreparer.Prepare(ownedResource,factory,cuts,seeds,table,new CancellationToken(true)));
  var badResource=ownedResource.ToArray();badResource[12727+16]^=1;
  Reject(()=>LegacyFreshFirstCandidateGraphPreparer.Prepare(badResource,factory,cuts,seeds,table));
- var profile=LegacyOrdinarySamplerGroupPruningProfile.ReadV106Node(ownedResource,sampler);
  writer.WriteStartObject();writer.WriteNumber("height",row.Frame.Line.Height);writer.WriteNumber("gap",profile.Separation.GapOffset);
  writer.WriteNumber("slope",profile.Separation.Slope);writer.WriteNumber("threshold",threshold);writer.WriteNumber("laterCap",profile.Separation.MaximumCost);
  writer.WriteNumber("maximumAtoms",after.MaximumAtoms);writer.WriteNumber("removed",output.Pruning.RemovedArcCount);
@@ -46,7 +49,8 @@ for(int iteration=0;iteration<24;iteration++)foreach(int threshold in new[]{0,20
  foreach(int count in cuts.Cuts.PreparedInk.StrokePointCounts.Span)
  {writer.WriteStartArray();for(int p=0;p<count;p++){var point=cuts.Cuts.PreparedInk.Points.Span[at++];writer.WriteStartArray();writer.WriteNumberValue(point.X);writer.WriteNumberValue(point.Y);writer.WriteEndArray();}writer.WriteEndArray();}writer.WriteEndArray();
  writer.WriteStartArray("groups");foreach(var g in before.Groups){writer.WriteStartArray();foreach(var r in g.Ranges.Span){writer.WriteStartArray();writer.WriteNumberValue(r.StrokeIndex);writer.WriteNumberValue(r.StartPoint);writer.WriteNumberValue(r.EndPointExclusive);writer.WriteEndArray();}writer.WriteEndArray();}writer.WriteEndArray();
- WriteGraph("before",before);WriteGraph("after",after);
+ WriteGraph("before",before);WriteGraph("after",after);WriteGraph("local",local.Graph);
+ writer.WriteNumber("localRemoved",local.RemovedArcCount);writer.WriteStartArray("localOrdinals");foreach(var list in local.OriginalArcOrdinals){writer.WriteStartArray();foreach(int ordinal in list.Span)writer.WriteNumberValue(ordinal);writer.WriteEndArray();}writer.WriteEndArray();
  writer.WriteStartArray("originalOrdinals");foreach(var list in output.Pruning.OriginalArcOrdinals){writer.WriteStartArray();foreach(int ordinal in list.Span)writer.WriteNumberValue(ordinal);writer.WriteEndArray();}writer.WriteEndArray();
  writer.WriteEndObject();cases++;removed+=output.Pruning.RemovedArcCount;lastRetained+=after.GetNode(after.NodeCount-1).Count;
 }
