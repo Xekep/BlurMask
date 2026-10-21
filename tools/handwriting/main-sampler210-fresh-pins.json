@@ -1,0 +1,144 @@
+{
+  "binarySha256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+  "policyDependency": {
+    "path": "tools/handwriting/english-main-word-policy-transition-pins.json",
+    "sha256": "4c173cf12ccec3cc8e9373e1148a457bb8551104b8e8742ba95ec487555b2267"
+  },
+  "instructions": [
+    {
+      "at": "0x1801514a4",
+      "bytes": "498b5e08",
+      "mnemonic": "mov",
+      "operands": "rbx, qword ptr [r14 + 8]"
+    },
+    {
+      "at": "0x1801514af",
+      "bytes": "ba3f020000",
+      "mnemonic": "mov",
+      "operands": "edx, 0x23f"
+    },
+    {
+      "at": "0x1801514fb",
+      "bytes": "488b5b60",
+      "mnemonic": "mov",
+      "operands": "rbx, qword ptr [rbx + 0x60]"
+    },
+    {
+      "at": "0x180151519",
+      "bytes": "ffd7",
+      "mnemonic": "call",
+      "operands": "rdi"
+    },
+    {
+      "at": "0x180151525",
+      "bytes": "0f9545bc",
+      "mnemonic": "setne",
+      "operands": "byte ptr [rbp - 0x44]"
+    },
+    {
+      "at": "0x180151593",
+      "bytes": "4c8d45b7",
+      "mnemonic": "lea",
+      "operands": "r8, [rbp - 0x49]"
+    },
+    {
+      "at": "0x1801515a3",
+      "bytes": "4c8b4810",
+      "mnemonic": "mov",
+      "operands": "r9, qword ptr [rax + 0x10]"
+    },
+    {
+      "at": "0x1801515a7",
+      "bytes": "41ffd1",
+      "mnemonic": "call",
+      "operands": "r9"
+    },
+    {
+      "at": "0x1801a6db9",
+      "bytes": "0fb64505",
+      "mnemonic": "movzx",
+      "operands": "eax, byte ptr [rbp + 5]"
+    },
+    {
+      "at": "0x1801a6dbd",
+      "bytes": "88442431",
+      "mnemonic": "mov",
+      "operands": "byte ptr [rsp + 0x31], al"
+    },
+    {
+      "at": "0x1801a6df2",
+      "bytes": "4c8d442430",
+      "mnemonic": "lea",
+      "operands": "r8, [rsp + 0x30]"
+    },
+    {
+      "at": "0x1801a6dfd",
+      "bytes": "4c8b4818",
+      "mnemonic": "mov",
+      "operands": "r9, qword ptr [rax + 0x18]"
+    },
+    {
+      "at": "0x1801a6e01",
+      "bytes": "41ffd1",
+      "mnemonic": "call",
+      "operands": "r9"
+    },
+    {
+      "at": "0x18018d971",
+      "bytes": "410fb64001",
+      "mnemonic": "movzx",
+      "operands": "eax, byte ptr [r8 + 1]"
+    },
+    {
+      "at": "0x18018d976",
+      "bytes": "888210020000",
+      "mnemonic": "mov",
+      "operands": "byte ptr [rdx + 0x210], al"
+    },
+    {
+      "at": "0x180194211",
+      "bytes": "4180be1002000000",
+      "mnemonic": "cmp",
+      "operands": "byte ptr [r14 + 0x210], 0"
+    }
+  ],
+  "windows": [
+    {
+      "start": "0x18015149a",
+      "endExclusive": "0x1801515aa",
+      "sha256": "1a6990a3582bc91de7ed78a2457392f6c1a1cd1a4c92dd2226637de153ccda13",
+      "scope": "exact instruction window, not full function"
+    },
+    {
+      "start": "0x1801a6d9a",
+      "endExclusive": "0x1801a6e04",
+      "sha256": "ce433e395938b75eceb71aae92d5c5ba2325d2b7f692d504a4c310762e336529",
+      "scope": "exact instruction window, not full function"
+    },
+    {
+      "start": "0x18018d950",
+      "endExclusive": "0x18018d980",
+      "sha256": "b0d7ce282db0215981713a5b82f5f2e3f8296df5e4efc35ef6a2cfad88fea23f",
+      "scope": "exact instruction window, not full function"
+    },
+    {
+      "start": "0x180194211",
+      "endExclusive": "0x18019422d",
+      "sha256": "c434257a3e8892ecf02c7a4cefbb11ffa6ad5c503310e2d4b4379e5899401ebd",
+      "scope": "exact instruction window, not full function"
+    }
+  ],
+  "slots": [
+    {
+      "at": "0x1802e2000",
+      "target": "0x1801a6980",
+      "bytes": "80691a8001000000"
+    },
+    {
+      "at": "0x1802e14a8",
+      "target": "0x18018d920",
+      "bytes": "20d9188001000000"
+    }
+  ],
+  "nativeExecuted": false
+}
