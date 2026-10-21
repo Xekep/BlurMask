@@ -127,7 +127,7 @@ def assembly(global_,windows,base,spatial,minimum=None,maximum=None):
  result+=[sat(ratio(i32(v+(4096 if i==3 else 0)),8192 if i in(2,3)else 1024 if i>=6 else 4096))for i,v in enumerate(base)];assert len(result)==283;return result
 
 def directional(strokes):
- normalized=coord['norm'](strokes);samples=coord['resample'](normalized,100);flags=land(samples['strokes'])['flags'];case=dict(strokes=samples['strokes'],width=samples['width'],height=samples['height'],step=samples['step'],gridScale=10);intersections,loops=cross(case);case.update(arc=samples['cumulative'][-1],flags=flags,intersections=intersections,intersectionCount=loops,cumulative=samples['cumulative'],shift=normalized['shift'],unit=False)
+ normalized=coord['norm'](strokes);samples=coord['resample'](normalized,100);samples['width']=max(1,max(p[0]for st in samples['strokes']for p in st));samples['height']=max(1,max(p[1]for st in samples['strokes']for p in st));flags=land(samples['strokes'])['flags'];case=dict(strokes=samples['strokes'],width=samples['width'],height=samples['height'],step=samples['step'],gridScale=10);intersections,loops=cross(case);case.update(arc=samples['cumulative'][-1],flags=flags,intersections=intersections,intersectionCount=loops,cumulative=samples['cumulative'],shift=normalized['shift'],unit=False)
  global_=globalstat(case);shift=normalized['shift'];scale=lambda v:v<<shift if shift>=0 else v>>-shift
  if samples['step']==0:by,bh=0,100
  else:by,bh=scale(-normalized['minY']),max(1,scale(100))

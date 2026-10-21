@@ -1,0 +1,667 @@
+{
+  "binary": "MyScriptText.dll",
+  "sha256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+  "scope": "Complete actual2B1 class table plus configured1111 producers. Readsite receiver aliases manually reviewed; stored68 has one write/three reads and three numeric consumers.",
+  "regions": {
+    "1801c2940": [
+      {
+        "start": "0x1801c2940",
+        "endExclusive": "0x1801c4710",
+        "bytes": 7632,
+        "sha256": "248a500e7a728e30dd9a0af6584c041904de3d69a5e557f20cb2b9fa17f9a978"
+      },
+      {
+        "start": "0x1801c4791",
+        "endExclusive": "0x1801c4798",
+        "bytes": 7,
+        "sha256": "a53a1a3330bddd252291f8c054b5cb7b8bd242218b45d2def69b2a5cc0ff8e68"
+      }
+    ],
+    "1801b0560": [
+      {
+        "start": "0x1801b0560",
+        "endExclusive": "0x1801b065f",
+        "bytes": 255,
+        "sha256": "753cc854100fa86adcfd6ca526de016e48406cbc38f78c73c7dd06b1f5503301"
+      }
+    ],
+    "1801b0760": [
+      {
+        "start": "0x1801b0760",
+        "endExclusive": "0x1801b3cdd",
+        "bytes": 13693,
+        "sha256": "3660d3da40f435dbbfbfd0c4312e4420dcfc0784230390938b94d8e41ebfd3e5"
+      }
+    ],
+    "1800b5760": [
+      {
+        "start": "0x1800b5760",
+        "endExclusive": "0x1800b5a11",
+        "bytes": 689,
+        "sha256": "dfb4963f5520b55471f786ae2d3ea7122d4e7e146ea881d2d372cf054f02da10"
+      }
+    ],
+    "1800b5d00": [
+      {
+        "start": "0x1800b5d00",
+        "endExclusive": "0x1800b5d89",
+        "bytes": 137,
+        "sha256": "0a7ca434f7c4c209a7471a80d8baa5a876f9d88c2a43646b2745913befe58fbc"
+      }
+    ],
+    "1800b5d90": [
+      {
+        "start": "0x1800b5d90",
+        "endExclusive": "0x1800b5e19",
+        "bytes": 137,
+        "sha256": "021ccfbf15034dee716cdba9fb6d2b5a2d595ede85103ae9fe57bb40091970d1"
+      }
+    ],
+    "1800bf090": [
+      {
+        "start": "0x1800bf090",
+        "endExclusive": "0x1800bff31",
+        "bytes": 3745,
+        "sha256": "6c975519f5056a7d5bb8bfca3ebdf7dec67214cf39f92b08d0ffbea9e41ce404"
+      }
+    ],
+    "1800bff40": [
+      {
+        "start": "0x1800bff40",
+        "endExclusive": "0x1800c0d92",
+        "bytes": 3666,
+        "sha256": "48f389563dc7d9d9561558128a258d83832cb5d47da9c8746ea8e97c77ce785e"
+      }
+    ],
+    "1800b9720": [
+      {
+        "start": "0x1800b9720",
+        "endExclusive": "0x1800ba057",
+        "bytes": 2359,
+        "sha256": "1996e37476167c86bdebdb2292f381ca0f0b23043d4e229f2476cc46ef74bdc8"
+      }
+    ],
+    "1800ba060": [
+      {
+        "start": "0x1800ba060",
+        "endExclusive": "0x1800baa6c",
+        "bytes": 2572,
+        "sha256": "88d23ba9779a85284ce06309467f335e74aeec9153c63e4ab74135748eef7875"
+      }
+    ],
+    "1800be270": [
+      {
+        "start": "0x1800be270",
+        "endExclusive": "0x1800be614",
+        "bytes": 932,
+        "sha256": "56454de1c8e0468a64e8e670f78269740aba378fe8773ce7e30b6329a3defc54"
+      }
+    ],
+    "1801b75b0": [
+      {
+        "start": "0x1801b75b0",
+        "endExclusive": "0x1801b7f70",
+        "bytes": 2496,
+        "sha256": "8c46659918980aba36dc16fd5a663fab9069b039ab6572271a2e53c28962dcd3"
+      }
+    ],
+    "1800bd520": [
+      {
+        "start": "0x1800bd520",
+        "endExclusive": "0x1800bd865",
+        "bytes": 837,
+        "sha256": "6c96899c89ac351f04bed619b24fbf89838912ad3a0cce2d1b6c6c743303059a"
+      }
+    ],
+    "1800bd870": [
+      {
+        "start": "0x1800bd870",
+        "endExclusive": "0x1800bdc05",
+        "bytes": 917,
+        "sha256": "f570e701b1961fe9987fc7e5710dd37a55c5782c4525dade81762c4cab77bcf3"
+      }
+    ],
+    "1800bedf0": [
+      {
+        "start": "0x1800bedf0",
+        "endExclusive": "0x1800bf08e",
+        "bytes": 670,
+        "sha256": "0cf4fafa5eae36589d861afe0b4f30505ca978a2c756d53a1bf7dc7fe47ad85d"
+      }
+    ],
+    "1800bc120": [
+      {
+        "start": "0x1800bc120",
+        "endExclusive": "0x1800bc27a",
+        "bytes": 346,
+        "sha256": "6a3a5af7a7aed9074f02fe2da50464362d32d0eb8a29271c7bd85877edbda58b"
+      }
+    ],
+    "1800be620": [
+      {
+        "start": "0x1800be620",
+        "endExclusive": "0x1800be8ab",
+        "bytes": 651,
+        "sha256": "3874bafb65ee2125e4020077523750a8f35e3c780387168866cd11200e4767ac"
+      }
+    ],
+    "1800be8b0": [
+      {
+        "start": "0x1800be8b0",
+        "endExclusive": "0x1800beb4c",
+        "bytes": 668,
+        "sha256": "42ee0b14a713d5dd3db19d1ff7b718ca7e3cdec7adda96548552f1360dca19d3"
+      }
+    ],
+    "1800beb50": [
+      {
+        "start": "0x1800beb50",
+        "endExclusive": "0x1800bedec",
+        "bytes": 668,
+        "sha256": "6b699e88ce12b82fff0c008933adc4a37bf20478bb2c891ba53e420472f6193f"
+      }
+    ],
+    "1800b4af0": [
+      {
+        "start": "0x1800b4af0",
+        "endExclusive": "0x1800b4d10",
+        "bytes": 544,
+        "sha256": "38bbd96c6928192046b1a487fc653cea57662726053d0366575dbc39b268717b"
+      }
+    ],
+    "1800b4d10": [
+      {
+        "start": "0x1800b4d10",
+        "endExclusive": "0x1800b4dca",
+        "bytes": 186,
+        "sha256": "af6703f91d22764af977426e699892aedcbb12f16b5363d789392a9c785d64e8"
+      },
+      {
+        "start": "0x1800b4dd0",
+        "endExclusive": "0x1800b4fa7",
+        "bytes": 471,
+        "sha256": "e83d7b545b3857d12aeca641226c8a6a7d3d13b77c7ec0237f28c2c972354380"
+      },
+      {
+        "start": "0x1800b4fb0",
+        "endExclusive": "0x1800b5686",
+        "bytes": 1750,
+        "sha256": "2698bbf074aca4e739623a02d8cc528605d3e2444cb85e4967320410fb214db0"
+      }
+    ],
+    "1800bc280": [
+      {
+        "start": "0x1800bc280",
+        "endExclusive": "0x1800bc646",
+        "bytes": 966,
+        "sha256": "b805947576444d61eee9c6e34c2159b76601eed68f091111b279906635b1c7bc"
+      }
+    ],
+    "1800bc650": [
+      {
+        "start": "0x1800bc650",
+        "endExclusive": "0x1800bc894",
+        "bytes": 580,
+        "sha256": "c9b1745e2d9f4b9370f50857228f178717f3671ed3b0fea0675f6070f816082f"
+      }
+    ],
+    "1800bc8a0": [
+      {
+        "start": "0x1800bc8a0",
+        "endExclusive": "0x1800bc9d8",
+        "bytes": 312,
+        "sha256": "de8274af7584eb5e12ede96b2c7ee320d22d80cda100082e308e35ef9e697f82"
+      }
+    ],
+    "1800bc9e0": [
+      {
+        "start": "0x1800bc9e0",
+        "endExclusive": "0x1800bcc12",
+        "bytes": 562,
+        "sha256": "15f685a4c1ba6e4943f5774725debe0c23001197efb4f632b8df4067f11b9f37"
+      }
+    ],
+    "1800bcc20": [
+      {
+        "start": "0x1800bcc20",
+        "endExclusive": "0x1800bcd20",
+        "bytes": 256,
+        "sha256": "02e3ffe3fc3a13b0d48b2b4a57df117f1550281d828e0efa251641b86901e8b5"
+      }
+    ],
+    "1800bd280": [
+      {
+        "start": "0x1800bd280",
+        "endExclusive": "0x1800bd51a",
+        "bytes": 666,
+        "sha256": "a06f7a16ab3c3272236782a3137c8e9f192d509f1d81597526e65dfe444d4ee6"
+      }
+    ],
+    "1801c25b0": [
+      {
+        "start": "0x1801c25b0",
+        "endExclusive": "0x1801c2933",
+        "bytes": 899,
+        "sha256": "5f0993e3fd28d8062c11f6c5ea6a3addd6182f68bddd6d150b7b2122acffe336"
+      }
+    ],
+    "1800bdef0": [
+      {
+        "start": "0x1800bdef0",
+        "endExclusive": "0x1800be26d",
+        "bytes": 893,
+        "sha256": "a9e55aef2d1f36cf77632a88371d4aec52b7c8229f7e352d96fe79d463c4c107"
+      }
+    ],
+    "1800c0da0": [
+      {
+        "start": "0x1800c0da0",
+        "endExclusive": "0x1800c1c82",
+        "bytes": 3810,
+        "sha256": "104b30212c2a4ee36e9d37cf4e9dcbfc4638d39f80911fd2bdc30d29567748c7"
+      }
+    ],
+    "1800bb560": [
+      {
+        "start": "0x1800bb560",
+        "endExclusive": "0x1800bb5c5",
+        "bytes": 101,
+        "sha256": "c361825a4ccaa1afd425b1530de23c7cbf3819af36edcc123d116d3411a3614a"
+      }
+    ],
+    "1800c1c90": [
+      {
+        "start": "0x1800c1c90",
+        "endExclusive": "0x1800c1df6",
+        "bytes": 358,
+        "sha256": "b395afbcf99dec90416e8a4f9410a21c1576e42237e80c68352607f83cf8d24a"
+      }
+    ],
+    "1800b5c20": [
+      {
+        "start": "0x1800b5c20",
+        "endExclusive": "0x1800b5cf5",
+        "bytes": 213,
+        "sha256": "5c1b8588489e1eb2882441ce12fc6f9e0df74e12e69c8eb1589b9e27c95486eb"
+      }
+    ]
+  },
+  "tables": [
+    {
+      "name": "temporalMin",
+      "at": "0x1802b7610",
+      "bytes": 548,
+      "sha256": "48e3034ea277c9fa1dbbc6ffba6f841452ecd970803c7bc69bb83e6914d44a48"
+    },
+    {
+      "name": "temporalMax",
+      "at": "0x1802b7aa0",
+      "bytes": 548,
+      "sha256": "fb4c595107c923d7280041710949079f5d867111057437cd59fc132f16c1833b"
+    },
+    {
+      "name": "spatialMin",
+      "at": "0x1802b7840",
+      "bytes": 548,
+      "sha256": "a8a6e49ffa0dfbe044d20c1cda2ed396750e5bd1c06901980b8b321f72622c7e"
+    },
+    {
+      "name": "spatialMax",
+      "at": "0x1802b7cd0",
+      "bytes": 548,
+      "sha256": "0f6882f5871f4ef4d7e954b97af3c2e6d2dd7fdce5ad905b2b01a2f20eab0232"
+    }
+  ],
+  "descriptorPins": [
+    {
+      "at": "0x1802b6b80",
+      "bytes": "0300000000000000af02000003000000ffffffff00000000c06a2b80010000000000000000000000",
+      "label": "2AF descriptor"
+    },
+    {
+      "at": "0x1802b6ac0",
+      "bytes": "f068088001000000106b2b8001000000f86a2b8001000000",
+      "label": "2AF factory"
+    },
+    {
+      "at": "0x1802b6b10",
+      "bytes": "f0560b8001000000806b2b800100000060570b8001000000205a0b8001000000a05a0b8001000000205b0b8001000000a05b0b8001000000205c0b8001000000005d0b8001000000905d0b8001000000205e0b8001000000b05e0b8001000000305f0b8001000000",
+      "label": "2AF virtual dispatch"
+    },
+    {
+      "at": "0x1802b7f00",
+      "bytes": "0300000000000000b102000003000000ffffffff00000000687a2b80010000000000000000000000",
+      "label": "2B1 descriptor"
+    },
+    {
+      "at": "0x1802b7a68",
+      "bytes": "80d4088001000000a0752b8001000000487f2b8001000000",
+      "label": "2B1 factory"
+    },
+    {
+      "at": "0x1802b75a0",
+      "bytes": "f0de0b8001000000007f2b800100000070e20b800100000020e60b8001000000b0e80b800100000050eb0b8001000000f03f0b8001000000f0ed0b800100000090f00b800100000040ff0b8001000000a00d0c800100000060b50b8001000000901c0c8001000000",
+      "label": "2B1 virtual dispatch"
+    },
+    {
+      "at": "0x1802e5180",
+      "bytes": "03000000000000005702000003000000ffffffff0000000040512e80010000000000000000000000",
+      "label": "257 descriptor"
+    },
+    {
+      "at": "0x1802e5140",
+      "bytes": "00b50f8001000000c8512e800100000000522e8001000000",
+      "label": "257 factory"
+    },
+    {
+      "at": "0x1802e51c8",
+      "bytes": "f0eb1c800100000080512e8001000000c0eb1c8001000000d0eb1c8001000000e0eb1c800100000090f91c8001000000e0ec1c8001000000",
+      "label": "257 virtual dispatch"
+    },
+    {
+      "at": "0x1802e1ff0",
+      "bytes": "c0cf198001000000401d2e800100000080691a800100000030721a8001000000c0731a800100000080751a8001000000d0751a8001000000f0751a800100000010761a800100000040761a8001000000a0761a800100000000771a8001000000c0771a8001000000d0771a800100000050781a800100000020791a800100000050791a8001000000d0781a800100000070791a8001000000",
+      "label": "21B group/span/kind/range dispatch"
+    },
+    {
+      "at": "0x1802ed2b0",
+      "bytes": "000000403333f33f",
+      "label": "1BC900 fallback exponent1.2000000476837158"
+    },
+    {
+      "at": "0x180260fd0",
+      "bytes": "000000004100000082000000c1000000ff0000003c01000076010000ad010000e101000013020000410200006c02000094020000b8020000da020000f8020000140300002e03000045030000590300006c0300007c0300008b03000098030000a4030000af030000b8030000c0030000c8030000ce030000d4030000d9030000de030000e2030000e5030000e8030000eb030000ed030000f0030000f2030000f3030000f5030000f6030000f7030000f8030000f9030000fa030000fa030000",
+      "label": "hidden48 activation constants"
+    },
+    {
+      "at": "0x180261090",
+      "bytes": "00020000100200002002000030020000400200004f0200005f0200006f0200007e0200008d0200009c020000aa020000b8020000c6020000d4020000e1020000ee020000fa02000006030000120300001d03000028030000330300003d030000460300005003000059030000610300006a030000720300007903000080030000870300008e030000940300009a0300009f030000a5030000aa030000af030000b3030000b8030000bc030000c0030000c3030000c7030000ca030000cd030000d0030000d3030000d5030000d8030000da030000dc030000de030000e0030000e2030000e4030000e6030000e7030000e9030000ea030000eb030000ed030000ee030000ef030000f0030000f1030000f2030000f2030000f3030000f4030000f5030000f5030000f6030000f6030000f7030000f8030000f8030000f8030000f9030000f9030000fa030000fa030000fa030000fb030000fb030000fb030000fc030000fc030000fc030000fc030000fc030000fd030000fd030000fd030000fd030000fd030000fd030000fd030000fe030000fe030000fe030000fe030000fe030000fe030000fe030000fe030000fe030000fe030000fe030000ff030000ff030000ff030000ff030000ff030000ff030000ff030000ff030000ff030000ff030000ff030000ff030000ff030000ff030000ff030000ff03000000040000",
+      "label": "output128 activation constants"
+    },
+    {
+      "at": "0x1802ba2c0",
+      "bytes": "d0690e800100000040a22b800100000030a10e8001000000a0a10e800100000010a30e800100000070a50e8001000000e0a60e800100000040a90e8001000000e0aa0e800100000070ad0e800100000090af0e800100000030b10e8001000000c0b30e8001000000c0b60e800100000080b80e8001000000d0a2048001000000d0a204800100000020bb0e800100000060bb0e8001000000",
+      "label": "actual212 virtual dispatch; V78/V80 no-op"
+    },
+    {
+      "at": "0x180260a50",
+      "bytes": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000002000000020000000200000002000000020000000200000003000000030000000300000003000000030000000400000004000000040000000400000005000000050000000500000006000000060000000700000007000000080000000800000009000000090000000a0000000b0000000b0000000c0000000d0000000e0000000f00000010000000110000001200000013000000140000001600000017000000190000001a0000001c0000001e00000020000000220000002400000027000000290000002c0000002f0000003200000035000000390000003c0000004000000044000000490000004e00000053000000580000005e000000640000006a00000071000000790000008100000089000000920000009b000000a5000000b0000000bb000000c8000000d5000000e2000000f1000000010100001101000023010000360100004a0100005f010000760100008e010000a8010000c3010000e10100000002000021020000440200006a02000092020000bc020000ea0200001a0300004d03000084030000be030000fc0300003e04000085040000cf0400001f05000074050000ce0500002e060000950600000207000076070000f1070000750800000109000096090000350a0000de0a0000920b0000520c00001e0d0000f70d0000de0e0000d40f0000db100000f21100001b13000057140000a81500000f1700008d180000231a0000d41b0000a11d00008c1f000096210000c22300001226000089280000282b0000f32d0000eb30000016340000743700000a3b0000dc3e0000ed42000041470000dd4b0000c5500000ff5500008f5b00007b610000c9670000806e0000a6750000427d00005c850000fd8d00002c970000f3a000005cab000072b600003fc20000d0ce000030dc00006fea000099f90000be090100ee1a01003b2d0100b7400100765501008d6b0100118301001a9c0100c2b6010024d301005bf1010087110200c83302003f580200137f020069a802006cd40200480303002c3503004a6a0300d8a203000ddf0300281f04006963040014ac040072f90400d14b050084a30500e30006004d64060025ce0600d53e0700cfb607008c3608008dbe0800594f090083e90900a68d0a00673c0b0076f60b008ebc0c00768f0d0002700e00145f0f009e5d10009e6c1100268d120058c0130068071500a163160060d617001a6119005c051b00cdc41c0030a11e00639c200065b8220055f72400755b27002ee729000e9d2c00d17f2f005c923200c9d7350060533900a3083d004dfb4000572f4500fba84900ba6c4e005f7f530004e6580018a65e0065c56400134a6b00b13a72003a9e79001d7c810044dc89001dc792009f459c005961a6007424b100c799bc00d6ccc800e8c9d5000f9ee3003357f20025040201aab412018c792401ab64370110894b01fefa600109d07701281f9001d100aa010d8fc50195e5e201ec21020280632302c5cb46025a7e6c022ca194029c5cbf02a8dbec02144c1d039cde500322c78703e43cc203b17a000428bf4204f44c89040e6bd4040a6524055e8b7905b133d4053ab93406147d9b069fe60807f0637d07376af9073a767d08d20c0a096ebb9f09a4183f0ac8c4e80a8b6a9d0babbf5d0ca6852a0d7f8a040e8aa9ec0e4ecce30f6bebea10980f0312a8522d13ace06a141df9bc151df02417d02fa418c5393c1a7da8ee1b0531bd1db2a4a91feff2b521352be4231a7f36268944af2818f8502b8d3f1e2e83ec193143ff4634c8a9a837f652423b059a173f2a5a2c4373ae8447eaf5244cfdd711512a495056fd8fe55b5c4ad761",
+      "label": "352 EXP conversion constants"
+    }
+  ],
+  "sourceExport": "E:\\BlurMask-build-artifacts-20261014\\review-russian-main313-native-20261021",
+  "dependency": "english-main119-acoustic-pins.json",
+  "abiInstructions": [
+    {
+      "at": "0x1801b16a0",
+      "bytes": "410fb68c3c89000000",
+      "instruction": "movzx ecx, byte ptr [r12 + rdi + 0x89]"
+    },
+    {
+      "at": "0x1801b16a9",
+      "bytes": "888c2498000000",
+      "instruction": "mov byte ptr [rsp + 0x98], cl"
+    },
+    {
+      "at": "0x1801b16b0",
+      "bytes": "410fb68c3c88000000",
+      "instruction": "movzx ecx, byte ptr [r12 + rdi + 0x88]"
+    },
+    {
+      "at": "0x1801b16b9",
+      "bytes": "888c2490000000",
+      "instruction": "mov byte ptr [rsp + 0x90], cl"
+    },
+    {
+      "at": "0x1800b5760",
+      "bytes": "48895c2408",
+      "instruction": "mov qword ptr [rsp + 8], rbx"
+    },
+    {
+      "at": "0x1800b5765",
+      "bytes": "48896c2410",
+      "instruction": "mov qword ptr [rsp + 0x10], rbp"
+    },
+    {
+      "at": "0x1800b576a",
+      "bytes": "4889742418",
+      "instruction": "mov qword ptr [rsp + 0x18], rsi"
+    },
+    {
+      "at": "0x1800b576f",
+      "bytes": "57",
+      "instruction": "push rdi"
+    },
+    {
+      "at": "0x1800b5770",
+      "bytes": "4156",
+      "instruction": "push r14"
+    },
+    {
+      "at": "0x1800b5772",
+      "bytes": "4157",
+      "instruction": "push r15"
+    },
+    {
+      "at": "0x1800b5774",
+      "bytes": "4881eca0000000",
+      "instruction": "sub rsp, 0xa0"
+    },
+    {
+      "at": "0x1800b577b",
+      "bytes": "807a0800",
+      "instruction": "cmp byte ptr [rdx + 8], 0"
+    },
+    {
+      "at": "0x1800b577f",
+      "bytes": "458bf1",
+      "instruction": "mov r14d, r9d"
+    },
+    {
+      "at": "0x1800b5782",
+      "bytes": "450fb7f8",
+      "instruction": "movzx r15d, r8w"
+    },
+    {
+      "at": "0x1800b5786",
+      "bytes": "488bf2",
+      "instruction": "mov rsi, rdx"
+    },
+    {
+      "at": "0x1800b5789",
+      "bytes": "488bf9",
+      "instruction": "mov rdi, rcx"
+    },
+    {
+      "at": "0x1800b578c",
+      "bytes": "0f855c020000",
+      "instruction": "jne 0x1800b59ee"
+    },
+    {
+      "at": "0x1800b5792",
+      "bytes": "0fbeac2458010000",
+      "instruction": "movsx ebp, byte ptr [rsp + 0x158]"
+    },
+    {
+      "at": "0x1800b579a",
+      "bytes": "8d45ff",
+      "instruction": "lea eax, [rbp - 1]"
+    },
+    {
+      "at": "0x1800b579d",
+      "bytes": "3c01",
+      "instruction": "cmp al, 1"
+    },
+    {
+      "at": "0x1800b579f",
+      "bytes": "0f8768020000",
+      "instruction": "ja 0x1800b5a0d"
+    },
+    {
+      "at": "0x1800b57a5",
+      "bytes": "448bc5",
+      "instruction": "mov r8d, ebp"
+    },
+    {
+      "at": "0x1800b57a8",
+      "bytes": "4183e801",
+      "instruction": "sub r8d, 1"
+    },
+    {
+      "at": "0x1800b57ac",
+      "bytes": "0f841b010000",
+      "instruction": "je 0x1800b58cd"
+    },
+    {
+      "at": "0x1800b57b2",
+      "bytes": "4183f801",
+      "instruction": "cmp r8d, 1"
+    },
+    {
+      "at": "0x1800b57b6",
+      "bytes": "0f8551020000",
+      "instruction": "jne 0x1800b5a0d"
+    },
+    {
+      "at": "0x1800b57bc",
+      "bytes": "488b4108",
+      "instruction": "mov rax, qword ptr [rcx + 8]"
+    },
+    {
+      "at": "0x1800b57c0",
+      "bytes": "bab1020000",
+      "instruction": "mov edx, 0x2b1"
+    },
+    {
+      "at": "0x1800b57c5",
+      "bytes": "4883e0fe",
+      "instruction": "and rax, 0xfffffffffffffffe"
+    },
+    {
+      "at": "0x1800b57c9",
+      "bytes": "488b4808",
+      "instruction": "mov rcx, qword ptr [rax + 8]"
+    }
+  ],
+  "closedLeaf": {
+    "at": "0x1800b3ff0",
+    "bytes": "b800040000c3",
+    "scope": "Exact closed leaf through return; no Ghidra full-body claim.",
+    "instructions": [
+      "mov eax,0x400",
+      "ret"
+    ]
+  },
+  "actual2B1Table": {
+    "at": "0x1802b75a0",
+    "bytes": "f0de0b8001000000007f2b800100000070e20b800100000020e60b8001000000b0e80b800100000050eb0b8001000000f03f0b8001000000f0ed0b800100000090f00b800100000040ff0b8001000000a00d0c800100000060b50b8001000000901c0c80010000000000000000000000",
+    "entries": [
+      "0x1800bdef0",
+      "0x1802b7f00",
+      "0x1800be270",
+      "0x1800be620",
+      "0x1800be8b0",
+      "0x1800beb50",
+      "0x1800b3ff0",
+      "0x1800bedf0",
+      "0x1800bf090",
+      "0x1800bff40",
+      "0x1800c0da0",
+      "0x1800bb560",
+      "0x1800c1c90",
+      "0x0"
+    ]
+  },
+  "directByte68InstructionInventory": [
+    {
+      "function": "1800be270",
+      "at": "0x1800be2cc",
+      "bytes": "884268",
+      "mnemonic": "mov",
+      "operands": "byte ptr [rdx + 0x68], al"
+    },
+    {
+      "function": "1800bedf0",
+      "at": "0x1800bee64",
+      "bytes": "440fb64b68",
+      "mnemonic": "movzx",
+      "operands": "r9d, byte ptr [rbx + 0x68]"
+    },
+    {
+      "function": "1800bf090",
+      "at": "0x1800bf628",
+      "bytes": "410fb64768",
+      "mnemonic": "movzx",
+      "operands": "eax, byte ptr [r15 + 0x68]"
+    },
+    {
+      "function": "1800bff40",
+      "at": "0x1800c0420",
+      "bytes": "0fb64668",
+      "mnemonic": "movzx",
+      "operands": "eax, byte ptr [rsi + 0x68]"
+    }
+  ],
+  "selectedFlagConsumers": [
+    {
+      "caller": "1800bedf0",
+      "callee": "1800b4af0",
+      "effect": "whole dimensions max(1,maxCoord) for flag1"
+    },
+    {
+      "caller": "1800bf090",
+      "callee": "1800bd520",
+      "effect": "temporal local extent excludes coordinate unit for flag1"
+    },
+    {
+      "caller": "1800bff40",
+      "callee": "1800bd870",
+      "effect": "spatial local extent excludes coordinate unit for flag1"
+    }
+  ],
+  "configured1111": {
+    "flags": 4369,
+    "globalMask": 1974271,
+    "baselineMask": 511,
+    "temporalMask": 925695,
+    "spatialMask": 925695,
+    "globalCount": 17,
+    "baselineCount": 9,
+    "temporalWindows": 16,
+    "spatialGrid": [
+      4,
+      4
+    ],
+    "inactiveUpperGrid": [
+      5,
+      5
+    ],
+    "preBaselineCount": 274,
+    "geometryCount": 283,
+    "russianContextCount": 28,
+    "boundaryCount": 2,
+    "wholeAddsUnit": false,
+    "localAddsUnit": false
+  },
+  "consumerCalls": [
+    {
+      "caller": "1800bedf0",
+      "at": "0x1800bee72",
+      "target": "0x1800b4af0",
+      "bytes": "e8795cffff"
+    },
+    {
+      "caller": "1800bf090",
+      "at": "0x1800bf656",
+      "target": "0x1800bd520",
+      "bytes": "e8c5deffff"
+    },
+    {
+      "caller": "1800bff40",
+      "at": "0x1800c046d",
+      "target": "0x1800bd870",
+      "bytes": "e8fed3ffff"
+    }
+  ],
+  "receiverFlagInventoryScope": "All concrete actual2B1 vtable methods: nonstack directbyte+68 instruction inventory, no nonstack wider access overlapping68, corroborated manual receiver-alias/full-decompilation review. Not whole-program absence claim."
+}

@@ -6,8 +6,8 @@ remain unchanged. Agent N owns the separate fresh D0 receipt/working-map join.
 This proposal identifies the actual request and row lifecycle after that join;
 it does not promote PREPARED cursors or lexical terminals into selected words.
 
-The current N feature producer still has a separately documented
-[post-resampling dimension defect](legacy-english-main119-acoustic-runtime.md).
+The N feature producer has a separately documented
+[post-resampling dimension correction](legacy-english-main119-acoustic-runtime.md).
 The fixed acoustic capture used here is historical and supplies only graph
 scheduling facts, not proof of those feature values. Runtime knowledge F5 and
 graph1DC provenance also require their actual outer MAIN owner; a child driver's

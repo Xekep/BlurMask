@@ -1,12 +1,11 @@
 # Actual English MAIN119 acoustic checkpoint N
 
-**Additional open defect,2026-10-21:** subsequent full-body review found that
+**Whole-dimension correction,2026-10-21:** subsequent full-body review found that
 BEDF0 also passes raw88/stored68 into B4AF0. Its nonzero branch omits the
 coordinate unit from whole post-resampling width/height, not just local extents.
-The current N producer still adds that unit. A second correction is in progress;
-the captures below reproduce the current implementation, not complete native
-feature equivalence. Source normalization/allocation and the shared calibration
-kernel are separate from this missing post-resampling branch.
+The current producer now selects that branch. Source normalization/allocation
+and the shared calibration kernel remain unchanged. The earlier calibration-only
+captures are historical; the current revision's captures are listed below.
 
 **Corrected checkpoint,2026-10-21:** further static review found two branches
 missing from both the original implementation and its independent reference:
@@ -21,7 +20,7 @@ English recognizer is separate.
 
 The owned model checks the exact 1111/1111 variant2 profile, real boundary signs and four aligned107 wire objects (228/210/285/285 inputs, 200 hidden, 182 outputs). It copies their matrices once per actual Source identity (360,960 logical payload bytes), not per glyph. Equal-byte foreign Source instances remain distinct. No first-stage or Russian model/header is relabeled as MAIN.
 
-The feature join uses the actual stored ranges for float257 dynamic weights and boundary signs, and native signed source-key ordering for integer normalization. Actual FF/FF100 gives baseline0/height100. The pen-up cap is10. The 226/208 trajectory/raster inputs include their real baseline9; directional temporal/spatial vectors use actual2B1 full-int32 transforms, first signed-short saturation, native274-column calibration over indices1..273, and second signed-short saturation before baseline9. Bias stays1024; equal ranges preserve the first saturated value. Local raw extents omit the coordinate unit because stored raw88=1. Whole geometry/resampling retains its independently proved coordinate convention. The degenerate00A770 branch retains its native literal condition order, including the unreachable second comparison under the admitted baseline0/100 configuration.
+The feature join uses the actual stored ranges for float257 dynamic weights and boundary signs, and native signed source-key ordering for integer normalization. Actual FF/FF100 gives baseline0/height100. The pen-up cap is10. The 226/208 trajectory/raster inputs include their real baseline9; directional temporal/spatial vectors use actual2B1 full-int32 transforms, first signed-short saturation, native274-column calibration over indices1..273, and second signed-short saturation before baseline9. Bias stays1024; equal ranges preserve the first saturated value. Local extents and whole post-resampling dimensions omit the coordinate unit because stored raw88=1. Source normalization/allocation keeps its separate coordinate convention. The degenerate00A770 branch retains its native literal condition order, including the unreachable second comparison under the admitted baseline0/100 configuration.
 
 All four actual slot modes are2 and use the actual257 mode2 weight. Unmasked mixed EXP/sigmoid uses special180; the two actual212 normalization slots are the pinned RET0 no-op. Related-case80 relaxation runs before division of the weighted integer sum. Ordinary primitive/fallback costs, B8 size penalties, whole-stroke dot rule, seven ordered positive groups, quote slots, native heap pruning, actual span+1 power100, ranking and soft-hyphen copy retain their proved order.
 
@@ -61,7 +60,7 @@ is274. BE270 stores raw88 into68; BD520/BD870 use this nonzero flag to omit
 local bbox units. The native full bodies remain pinned, including disjoint
 regions; unregistered bounded leaves are not labeled complete functions.
 
-Corrected validation: Managed/NativeAOT original134/7 capture SHA256
+Historical calibration-only validation (missing whole-dimension branch): Managed/NativeAOT original134/7 capture SHA256
 `547e6318786fe752252546d816fbeb84b5166789fc43d95adc14cbc83171c576`,
 and PluColl100 `3df3e6bff27f96b4c5163f1d0cc6fbdce510457e0ffde44aa9f07dfb7ad12b00`.
 Both full independent feature/NN/cache oracles pass. Each capture includes all
@@ -73,3 +72,23 @@ The existing64KiB small model/workspace reservation conservatively covers the
 additional2,192-byte retained catalog plus bounded548-byte decoding scratch
 and16 window-reference snapshot; the overall16MiB envelope is unchanged and
 still does not represent process RSS.
+
+
+### Whole post-resampling extent correction (2026-10-21)
+
+The admitted actual2B1 profile byte88=1 is stored at receiver+68. Its effect is present at all three consumers: BEDF0 -> B4AF0 (whole resampled dimensions), BF090 -> BD520 (temporal local dimensions), and BFF40 -> BD870 (spatial local dimensions). The earlier calibration correction fixed only the latter two; its claim that whole geometry could retain the default unit was incomplete.
+
+BEDF0 passes the actual stored flag to B4AF0. The full B4AF0 tail computes width=max(1,maxResampledX), height=max(1,maxResampledY) for nonzero flag. For zero flag it adds the coordinate unit. This revision selects the existing false includeCoordinateUnit path for the actual2B1 producer and reconstructs the same nonzero branch independently in the raw Python feature wrapper. The generic resampler/default-reference helpers and the shared two-stage assembly/catalog are unchanged. Normalization, resampled points, physical cumulative distances and trajectory/raster networks are unchanged; whole dimensions affect directional global features and spatial memberships and therefore both directional networks.
+
+The admitted mask1111 enables one16-window temporal family and a uniform4 by4 spatial family; the optional upper5 by5 family is disabled. Global mask1E1FFF selects17 channels, each local maskE1FFF selects16, baseline mask1FF selects9; bias+17+16*16=274 activates default calibration before the9 baseline channels. Receiver68 has one write in BE270 and the three selected reads above. The [complete concrete-method audit](russian-main-2b1-all-flag-sites-20261021.md) and manual reachable-helper review close this configured producer; the instruction scan is not formal transitive alias analysis. B3FF0 is an exact6-byte constant1024 leaf consumed as NN activation scale.
+
+This correction changes experimental MAIN acoustic vectors only. It supplies neither an English whole-word decoder nor a readiness/accuracy claim. Previous frozen captures remain historical and are superseded for this producer by the new revision captures.
+
+Current Managed/NativeAOT capture SHA256 is
+`1eeff7449c49e7056b0f61ed71f6f89b83df03fef641def987cf63b225853af0`
+for134 owners/seven refusals and
+`62d7caedc1ef6a248dd45ae638c57a74cc06b7cedd83529a4b10b1a4cd6ad9db`
+for100 recorded owners. Both complete feature/NN/cache oracles pass. Directional
+inputs change in4057/4066 and11330/11330 groups respectively; trajectory/raster,
+source720 and graph data remain exact. Five separate whole-extent controls cover
+zero, positive and negative scale shifts. No target text is used by these checks.

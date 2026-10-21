@@ -63,8 +63,10 @@ the native default tables, local extents and two separate saturation stages;
 both complete numerical references pass on the same fixed inputs. This repairs
 those omitted branches without establishing better word accuracy. Further review
 found another raw88-dependent branch: whole post-resampling dimensions must also
-omit the coordinate unit. That correction is pending; current captures do not
-establish complete native feature equivalence. Source identity, bounds,
+omit the coordinate unit. That branch is now corrected, with a complete
+[concrete-method/selected-flag audit](russian-main-2b1-all-flag-sites-20261021.md)
+and repeated full numerical checks. These checks do not restore the missing
+word decoder or establish handwriting accuracy. Source identity, bounds,
 cancellation and concurrent publication are checked. Word search and selection
 remain unfinished; these acoustic checks do not establish improved accuracy.
 The [recorded English FIRST baseline](english-recorded-baseline-20261021.md)
