@@ -6,6 +6,15 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [owning Math raw215 loader](legacy-math-mixed107-raw-owner.md) now reads
+all six actual architecture02 models into distinct int16/int8/scales storage.
+Independent current-core Managed/Native AOT builds match every weight, padding
+byte and envelope;3439 checks cover777 cancellation/throw prefixes, copies,
+concurrency and disposal. The old architecture12 guards and APIs are unchanged.
+This is model storage only. Feature extraction, activation, evaluator212/213,
+candidate ranking and application recognition are not implemented by this step.
+
+
 The reusable [English sparse DATA and fresh numeric binding](legacy-english-lk-sparse101-runtime.md)
 is implemented with zero old runtime edits. Independent Managed/Native AOT
 rebuilds match all75 fields,643871 packed values,1536 costs,144 pair and1728
