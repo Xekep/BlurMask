@@ -872,6 +872,9 @@ jobs:
           dotnet run --project tools/LegacyEnglishLkPacked102.Probe -c Release -- models .artifacts/legacy-en-lk-packed102-managed.json
           python -I -B tools/LegacyEnglishLkPacked102.Probe/audit_runtime.py models .artifacts/legacy-en-lk-packed102-managed.json .artifacts/legacy-en-lk-packed102-reference-managed.json
           python -I -B tools/handwriting/audit_english_lk_packed102.py --models models --output .artifacts/legacy-en-lk-packed102-model-audit.json
+          dotnet run --project tools/LegacyEnglishLkSparse101.Probe -c Release -- models .artifacts/legacy-en-lk-sparse101-managed.json
+          python -I -B tools/LegacyEnglishLkSparse101.Probe/audit_runtime.py models .artifacts/legacy-en-lk-sparse101-managed.json .artifacts/legacy-en-lk-sparse101-oracle-managed.json
+          python -I -B tools/handwriting/audit_english_lk_sparse101.py --models models --output .artifacts/legacy-en-lk-sparse101-model-audit.json
           dotnet run --project tools/LegacyEnglishLiteFirstPreprocessing.Probe -c Release -- models .artifacts/legacy-en-short-controls.json .artifacts/legacy-en-short-managed.json
           python tools/LegacyEnglishLiteFirstPreprocessing.Probe/audit_output.py models .artifacts/legacy-en-short-managed.json
           dotnet run --project tools/LegacyPreparedNetwork107.Probe -c Release -- models models/ru-RU/legacy-engine-profile.json .artifacts/legacy-prepared-network107-managed.json
@@ -1568,6 +1571,7 @@ jobs:
             @{ Name = 'LegacyEnglish119Postprocessing'; Args = @('models', '.artifacts/legacy-en119-controller-native.json', '.artifacts/legacy-en119-postprocessing-native.json') },
             @{ Name = 'LegacyEnglish119FinalSingle'; Args = @('models', '.artifacts/legacy-en119-final-single-blind.json', '.artifacts/legacy-en119-final-single-native.json') },
             @{ Name = 'LegacyEnglishLkPacked102'; Args = @('models', '.artifacts/legacy-en-lk-packed102-native.json') },
+            @{ Name = 'LegacyEnglishLkSparse101'; Args = @('models', '.artifacts/legacy-en-lk-sparse101-native.json') },
             @{ Name = 'LegacyEnglishLiteFirstPreprocessing'; Args = @('models', '.artifacts/legacy-en-short-controls.json', '.artifacts/legacy-en-short-native.json') },
             @{ Name = 'LegacyPreparedNetwork107'; Args = @('models', 'models/ru-RU/legacy-engine-profile.json', '.artifacts/legacy-prepared-network107-native.json') },
             @{ Name = 'LegacyMainWordRanking'; Args = @('.artifacts/legacy-main-word-ranking-native.json') },
@@ -2361,6 +2365,10 @@ jobs:
               python -I -B tools/LegacyEnglish119FinalSingle.Probe/audit_output.py models .artifacts/legacy-en119-final-single-native.json .artifacts/legacy-en119-postprocessing-native.json
               if ($LASTEXITCODE -ne 0) { throw 'LegacyEnglish119FinalSingle independent audit failed' }
               if ((Get-FileHash .artifacts/legacy-en119-final-single-native.json).Hash -ne (Get-FileHash .artifacts/legacy-en119-final-single-managed.json).Hash) { throw 'LegacyEnglish119FinalSingle Managed/Native parity failed' }
+            }
+            if ($name -eq 'LegacyEnglishLkSparse101') {
+              python -I -B tools/LegacyEnglishLkSparse101.Probe/audit_runtime.py models .artifacts/legacy-en-lk-sparse101-native.json .artifacts/legacy-en-lk-sparse101-oracle-native.json --native .artifacts/legacy-en-lk-sparse101-managed.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyEnglishLkSparse101 independent audit/parity failed' }
             }
             if ($name -eq 'LegacyEnglishLkPacked102') {
               python -I -B tools/LegacyEnglishLkPacked102.Probe/audit_runtime.py models .artifacts/legacy-en-lk-packed102-native.json .artifacts/legacy-en-lk-packed102-reference-native.json

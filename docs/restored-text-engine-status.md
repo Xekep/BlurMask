@@ -6,6 +6,15 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The reusable [English sparse DATA and fresh numeric binding](legacy-english-lk-sparse101-runtime.md)
+is implemented with zero old runtime edits. Independent Managed/Native AOT
+rebuilds match all75 fields,643871 packed values,1536 costs,144 pair and1728
+triple case entries.143 guards/18 cancellation controls and all six prior
+English/P captures pass. Only1580304 language-wire bytes are retained; the
+12416948-byte copy envelope is a conservative logical bound, not process RSS.
+Query/history, configured source policy/masks and full main inference remain open.
+
+
 The [actual global source-range UTF8 stage](legacy-global-source-range-utf8.md)
 now formats CHAR insertion order, raw WORD and TEXT keys from the real global
 counter handoff, preserving typed identities and separate caller-brace bytes.
