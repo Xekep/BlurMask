@@ -875,6 +875,9 @@ jobs:
           dotnet run --project tools/LegacyEnglishLkSparse101.Probe -c Release -- models .artifacts/legacy-en-lk-sparse101-managed.json
           python -I -B tools/LegacyEnglishLkSparse101.Probe/audit_runtime.py models .artifacts/legacy-en-lk-sparse101-managed.json .artifacts/legacy-en-lk-sparse101-oracle-managed.json
           python -I -B tools/handwriting/audit_english_lk_sparse101.py --models models --output .artifacts/legacy-en-lk-sparse101-model-audit.json
+          python -I -B tools/LegacyEnglishMainMasks.Probe/reference_actual.py models .artifacts/legacy-en-main119-masks-raw-model.json
+          dotnet run --project tools/LegacyEnglishMainMasks.Probe -c Release -- models .artifacts/legacy-en119-final-single-blind.json .artifacts/legacy-en-main119-masks-managed.json
+          python -I -B tools/LegacyEnglishMainMasks.Probe/audit_runtime.py --models models --capture .artifacts/legacy-en-main119-masks-managed.json --output .artifacts/legacy-en-main119-masks-oracle-managed.json
           dotnet run --project tools/LegacyMathMixed107Raw.Probe -c Release -- models/math/math-ak.res .artifacts/legacy-math-mixed107-raw-managed.json
           python -I -B tools/LegacyMathMixed107Raw.Probe/audit_output.py models/math/math-ak.res .artifacts/legacy-math-mixed107-raw-managed.json --reference tools/handwriting/math_legacy_mixed107_reference.py
           dotnet run --project tools/LegacyEnglishLiteFirstPreprocessing.Probe -c Release -- models .artifacts/legacy-en-short-controls.json .artifacts/legacy-en-short-managed.json
@@ -1574,6 +1577,7 @@ jobs:
             @{ Name = 'LegacyEnglish119FinalSingle'; Args = @('models', '.artifacts/legacy-en119-final-single-blind.json', '.artifacts/legacy-en119-final-single-native.json') },
             @{ Name = 'LegacyEnglishLkPacked102'; Args = @('models', '.artifacts/legacy-en-lk-packed102-native.json') },
             @{ Name = 'LegacyEnglishLkSparse101'; Args = @('models', '.artifacts/legacy-en-lk-sparse101-native.json') },
+            @{ Name = 'LegacyEnglishMainMasks'; Args = @('models', '.artifacts/legacy-en119-final-single-blind.json', '.artifacts/legacy-en-main119-masks-native.json') },
             @{ Name = 'LegacyMathMixed107Raw'; Args = @('models/math/math-ak.res', '.artifacts/legacy-math-mixed107-raw-native.json') },
             @{ Name = 'LegacyEnglishLiteFirstPreprocessing'; Args = @('models', '.artifacts/legacy-en-short-controls.json', '.artifacts/legacy-en-short-native.json') },
             @{ Name = 'LegacyPreparedNetwork107'; Args = @('models', 'models/ru-RU/legacy-engine-profile.json', '.artifacts/legacy-prepared-network107-native.json') },
@@ -2373,6 +2377,11 @@ jobs:
               python -I -B tools/LegacyMathMixed107Raw.Probe/audit_output.py models/math/math-ak.res .artifacts/legacy-math-mixed107-raw-native.json --reference tools/handwriting/math_legacy_mixed107_reference.py
               if ($LASTEXITCODE -ne 0) { throw 'LegacyMathMixed107Raw independent audit failed' }
               if ((Get-FileHash .artifacts/legacy-math-mixed107-raw-native.json).Hash -ne (Get-FileHash .artifacts/legacy-math-mixed107-raw-managed.json).Hash) { throw 'LegacyMathMixed107Raw Managed/Native parity failed' }
+            }
+            if ($name -eq 'LegacyEnglishMainMasks') {
+              python -I -B tools/LegacyEnglishMainMasks.Probe/audit_runtime.py --models models --capture .artifacts/legacy-en-main119-masks-native.json --output .artifacts/legacy-en-main119-masks-oracle-native.json
+              if ($LASTEXITCODE -ne 0) { throw 'LegacyEnglishMainMasks independent raw oracle failed' }
+              if ((Get-FileHash .artifacts/legacy-en-main119-masks-native.json).Hash -ne (Get-FileHash .artifacts/legacy-en-main119-masks-managed.json).Hash) { throw 'LegacyEnglishMainMasks Managed/Native parity failed' }
             }
             if ($name -eq 'LegacyEnglishLkSparse101') {
               python -I -B tools/LegacyEnglishLkSparse101.Probe/audit_runtime.py models .artifacts/legacy-en-lk-sparse101-native.json .artifacts/legacy-en-lk-sparse101-oracle-native.json --native .artifacts/legacy-en-lk-sparse101-managed.json
