@@ -46,8 +46,11 @@ are owned and independently checked on134 genuine single-line chains, with seven
 explicit multiline refusals. The [MAIN acoustic scorer](legacy-english-main119-acoustic-runtime.md)
 now evaluates its four actual neural families from real graph geometry, including
 baseline and directional features, weighted scores and all220 ordinary cache
-costs. Independent full-feature/raw-matrix checks cover4066 original groups and
-11330 recorded groups. Managed/NativeAOT captures match; source identity, bounds,
+costs. Implementation/reference checks cover4066 original groups and11330
+recorded groups, with matching Managed/NativeAOT captures. A subsequent static
+review found that native2B1 default calibration and raw88-dependent local
+extents were omitted in both calculations. Native feature equivalence is
+therefore unclosed, and correction is in progress. Source identity, bounds,
 cancellation and concurrent publication are checked. Word search and selection
 remain unfinished; these acoustic checks do not establish improved accuracy.
 The [recorded English FIRST baseline](english-recorded-baseline-20261021.md)

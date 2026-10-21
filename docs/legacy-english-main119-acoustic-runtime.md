@@ -1,5 +1,13 @@
 # Actual English MAIN119 acoustic checkpoint N
 
+**Review correction,2026-10-21:** the native2B1 producer proof is incomplete.
+Further static review identified default calibration in BF090/BFF40 and the
+raw88-dependent local-extent policy. The current implementation and its
+independent reference both omit these branches. The captures below reproduce
+the current implementation; they do not establish native feature equivalence.
+Correction and renewed evaluation are in progress. This scorer is not the
+application's default English recognizer.
+
 This checkpoint evaluates the four genuine MAIN107 families for an actual completed English119 single ordinary source/local graph and the explicit independent main13B-only masks. It does not select a linguistic word, accept text, replace the application recognizer, or claim English handwriting is complete.
 
 `LegacyEnglishMainOnlyAcousticScorer.Prepare(masks)` requires the actual M owner and retains its exact Source identity. `ScoreArc(node, ordinal)` resolves the actual immutable local graph's group and span. It returns defensive copies of 220 costs, a shortlist, fallback cost, span-power and negative-baseline metadata. The detached scorer has a private once-published result per live group; it does not claim the native mutable group-pool/epoch ABI. A group used with multiple spans is explicitly refused before evaluation.
