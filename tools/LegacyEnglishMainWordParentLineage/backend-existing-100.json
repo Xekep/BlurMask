@@ -1,0 +1,14 @@
+{
+  "Scope": "TEST ONLY actual pooled D0 costs -\u003E existing pure startup initializer/backend58/frontend128; PREPARED numeric requests, not dictionary-query authority or decoder",
+  "Owners": 100,
+  "SelectedRows": 23048,
+  "FiniteSymbols": 230361,
+  "MissingCategoryDiagnosticCases": 234102,
+  "Cases": 545432,
+  "Accepted": 499336,
+  "Rejected": 46096,
+  "Digest": "20f8e009130236fd40b64d6c9ce74ae3dadf3720acd8b023d24f2d3ea7aa00e1",
+  "TargetsRead": false,
+  "NativeExecuted": false,
+  "GenuineQueryRows": false
+}
