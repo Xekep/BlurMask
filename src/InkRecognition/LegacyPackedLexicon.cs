@@ -6,7 +6,7 @@ namespace InkRecognition;
 /// Bounded, read-only legacy type2b4 dictionary graph. This is a lexical backend,
 /// not a handwriting recognizer. Labels and acoustic scores belong to the caller.
 /// </summary>
-public sealed class LegacyPackedLexicon
+public sealed partial class LegacyPackedLexicon
 {
     private const int MaximumNodes = 2_000_000;
     private readonly PackedArray _labels, _offsets;

@@ -6,6 +6,15 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The reusable [English packed-data loader](legacy-english-lk-packed102-runtime.md)
+is implemented and independently rebuilt as Managed and Native AOT. All666547
+nodes,260074 terminal paths,104-to-217 exact text mappings,55 guards and12
+cancellation controls agree with the independent raw-data oracle; captures are
+byte-identical. Existing Russian and English regressions remain unchanged.
+The old Russian reader still refuses the English format. This data loader does
+not yet implement the English sparse language model, controller or masks.
+
+
 The older Math [request/source admission](legacy-math-worker-admission.md)
 and [AK operator routing](legacy-math-ak-operator-routing.md) are now independently
 checked against static vendor bytes. The context, worker, selected XY source,
