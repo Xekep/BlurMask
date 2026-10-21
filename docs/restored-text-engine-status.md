@@ -6,6 +6,16 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The older Math [request/source admission](legacy-math-worker-admission.md)
+and [AK operator routing](legacy-math-ak-operator-routing.md) are now independently
+checked against static vendor bytes. The context, worker, selected XY source,
+raw/normalized cache reset and presearch/post-candidate operator order are
+distinguished explicitly. The two stored5F networks rescore symbol sequences;
+they are not raw-stroke classifiers. These are static checkpoints only:
+initial feature/model execution, matching, full runtime ownership and final
+recognition remain unfinished.
+
+
 The [actual English packed dictionary](legacy-english-lk-packed102-boundary.md)
 now has an independent full-data reference and static native-byte audit.
 All 666547 nodes and 260074 terminals were checked, including exact packed-data
