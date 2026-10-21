@@ -40,11 +40,23 @@ public sealed class LegacyDirectionalGlyphClassifier
     private readonly LegacyDirectionalAcousticFamily[] _families;
     private readonly LegacyDirectionalCalibration _temporal, _spatial;
     private readonly LegacyInkActivations _activations;
+    private readonly bool _actual2B1;
     public int OutputWidth { get; }
 
     public LegacyDirectionalGlyphClassifier(IReadOnlyList<LegacyDirectionalAcousticFamily> families,
         LegacyInkActivations activations, LegacyDirectionalCalibration temporal, LegacyDirectionalCalibration spatial)
+        : this(families, activations, temporal, spatial, false) { }
+
+    internal static LegacyDirectionalGlyphClassifier CreateActual2B1(
+        IReadOnlyList<LegacyDirectionalAcousticFamily> families, LegacyInkActivations activations,
+        LegacyDirectionalCalibration temporal, LegacyDirectionalCalibration spatial) =>
+        new(families, activations, temporal, spatial, true);
+
+    private LegacyDirectionalGlyphClassifier(IReadOnlyList<LegacyDirectionalAcousticFamily> families,
+        LegacyInkActivations activations, LegacyDirectionalCalibration temporal, LegacyDirectionalCalibration spatial,
+        bool actual2B1)
     {
+        _actual2B1 = actual2B1;
         ArgumentNullException.ThrowIfNull(families); ArgumentNullException.ThrowIfNull(activations);
         if (families.Count != 4) throw new ArgumentException("Exactly four matching acoustic families required.", nameof(families));
         int[] widths = [256,238,313,313]; ushort[] kinds = [0x1f,0x2f,0x3f,0x4f];
@@ -91,10 +103,20 @@ public sealed class LegacyDirectionalGlyphClassifier
             inputs[0] = LegacyStrokeFeatures.ExtractInputWithBaseline(glyph, baseline, context, startBoundary, endBoundary, cancellationToken);
             inputs[1] = LegacyRasterFeatures.ExtractInputWithBaseline(glyph, baseline, context, startBoundary, endBoundary, cancellationToken);
         }
-        inputs[2] = LegacyTemporalDirectionalFeatures.Extract(glyph, baseline, _temporal.Minima.Span, _temporal.Maxima.Span,
-            context, startBoundary, endBoundary, cancellationToken);
-        inputs[3] = LegacySpatialDirectionalFeatures.Extract(glyph, baseline, _spatial.Minima.Span, _spatial.Maxima.Span,
-            context, startBoundary, endBoundary, cancellationToken);
+        if (_actual2B1)
+        {
+            var directional = LegacySaturatedDirectionalFeatures.Extract(glyph, baseline,
+                _temporal.Minima.Span, _temporal.Maxima.Span, _spatial.Minima.Span, _spatial.Maxima.Span,
+                context, startBoundary, endBoundary, cancellationToken);
+            inputs[2] = directional.Temporal; inputs[3] = directional.Spatial;
+        }
+        else
+        {
+            inputs[2] = LegacyTemporalDirectionalFeatures.Extract(glyph, baseline, _temporal.Minima.Span, _temporal.Maxima.Span,
+                context, startBoundary, endBoundary, cancellationToken);
+            inputs[3] = LegacySpatialDirectionalFeatures.Extract(glyph, baseline, _spatial.Minima.Span, _spatial.Maxima.Span,
+                context, startBoundary, endBoundary, cancellationToken);
+        }
         var scores = new LegacyAcousticFamilyScores?[7];
         var probabilities = new ReadOnlyMemory<int>?[7];
         for (int i = includeBaselineFamilies ? 0 : 2; i < 4; i++)

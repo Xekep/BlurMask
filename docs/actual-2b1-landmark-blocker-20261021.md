@@ -2,7 +2,9 @@
 
 **Update:** the [shared BC280 helper and English N/D0 correction](directional-2b1-landmarks-runtime-20261021.md)
 are now independently checked and integrated. Russian V2 remains blocked;
-Russian V3/full quality checks are pending. The text below records the discovered
+[Russian V3](russian-main-2b1-runtime-20261021.md) is checked and integrated in the
+opt-in bundle, with132/261 exact results and342 edits: no word-quality gain.
+Russian cursive remains unfinished. The text below records the discovered
 defect and why the earlier matching captures were insufficient.
 
 Russian V2 integration was blocked. English MAIN N initially had the same

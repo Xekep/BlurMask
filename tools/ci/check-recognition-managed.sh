@@ -594,6 +594,11 @@ dotnet run --project tools/NativeEnglishResource.Probe -c Release -- models .art
 python -I -B tools/NativeEnglishResource.Probe/audit_output.py .artifacts/native-english-resource-managed.json
 dotnet run --project tools/ExperimentalGlobalText.Probe -c Release -- models .artifacts/experimental-global-text-managed.json
 python -I -B tools/ExperimentalGlobalText.Probe/audit_output.py .artifacts/experimental-global-text-managed.json
+dotnet run --project tools/LegacyRussianMain2B1.Probe -c Release -- models --controls .artifacts/legacy-ru-main2b1-controls-managed.json
+python -I -B tools/LegacyRussianMain2B1.Probe/audit_controls.py models .artifacts/legacy-ru-main2b1-controls-managed.json .artifacts/legacy-ru-main2b1-controls-oracle-managed.json
+dotnet run --project tools/LegacyRussianMain2B1.Probe -c Release -- models tools/LegacyRussianMain2B1.Probe/small-inputs.json .artifacts/legacy-ru-main2b1-small-managed.json
+python -I -B tools/LegacyRussianMain2B1.Probe/audit_output.py models .artifacts/legacy-ru-main2b1-small-managed.json .artifacts/legacy-ru-main2b1-small-oracle-managed.json --small
+python -I -B tools/LegacyRussianMain2B1.Probe/audit_stream.py .artifacts/legacy-ru-main2b1-stream
 dotnet run --project tools/LegacyGlobalCroppedSource.Probe -c Release -- models tools/test-data/russian-recorded-words/manifest.json .artifacts/legacy-global-cropped-source-managed.json
 python -I tools/LegacyGlobalCroppedSource.Probe/audit_output.py models tools/test-data/russian-recorded-words/manifest.json .artifacts/legacy-global-text-source-wrapper-managed.json .artifacts/legacy-global-word-text-managed.json .artifacts/legacy-global-cropped-source-managed.json
 dotnet run --project tools/LegacyGlobalTimedGeometry.Probe -c Release -- models tools/test-data/russian-recorded-words/manifest.json .artifacts/legacy-global-timed-parent-managed.json .artifacts/legacy-global-timed-geometry-managed.json

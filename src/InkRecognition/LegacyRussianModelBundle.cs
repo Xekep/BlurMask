@@ -61,6 +61,9 @@ public sealed class LegacyRussianModelBundle
         Verify(lexicalResource, 6200992, LexicalHash);
         int sourceKind = checked((int)BinaryPrimitives.ReadUInt32LittleEndian(acousticResource[5233..]));
         if (sourceKind != 0x135) throw Invalid("Unsupported Russian acoustic source kind.");
+        // Raw21D/profile88=1,89=2: 2AF dispatches actual2B1, not the generic2B0 API.
+        if (!acousticResource.Slice(195871, 16).SequenceEqual(new byte[] {1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0}))
+            throw Invalid("Actual Russian1111/2B1 selector differs.");
         cancellationToken.ThrowIfCancellationRequested();
         if (engineProfile.Length is < 2 or > 128 * 1024) throw Invalid("Engine profile size outside bounds.");
         try
@@ -77,6 +80,14 @@ public sealed class LegacyRussianModelBundle
                 Integers(root.GetProperty("activations").GetProperty("output"), 128));
             var temporal = Geometry(root.GetProperty("temporal"));
             var spatial = Geometry(root.GetProperty("spatial"));
+            // Native optional calibration owners are NULL for these exact
+            // resources, selecting built-in2B1 defaults. SHA strings in caller
+            // JSON do not authenticate its arrays: compare all four vectors.
+            if (!temporal.Minima.Span.SequenceEqual(LegacyDirectional2B1DefaultCalibration.CopyMinimum(false)) ||
+                !temporal.Maxima.Span.SequenceEqual(LegacyDirectional2B1DefaultCalibration.CopyMaximum(false)) ||
+                !spatial.Minima.Span.SequenceEqual(LegacyDirectional2B1DefaultCalibration.CopyMinimum(true)) ||
+                !spatial.Maxima.Span.SequenceEqual(LegacyDirectional2B1DefaultCalibration.CopyMaximum(true)))
+                throw Invalid("Russian2B1 calibration must match actual native defaults.");
             var centers = root.GetProperty("centers"); var slopes = root.GetProperty("slopes");
             if (centers.GetArrayLength() != 4 || slopes.GetArrayLength() != 4)
                 throw Invalid("Expected four acoustic confidence families.");
@@ -119,13 +130,16 @@ public sealed class LegacyRussianModelBundle
     }
 
     /// <summary>
-    /// Construct the experimental word path with an explicit alias policy.
-    /// Native full language ranking and automatic geometry are not inferred.
+    /// Historical separated-whole-glyph experiment with explicit alias policy
+    /// and generic wrapping2B0 features. The actual FIRST/MAIN global pipeline
+    /// uses CreatePreparedGlyphClassifier instead. Native full language ranking
+    /// and automatic geometry are not inferred by this historical method.
     /// </summary>
     public LegacyDirectionalWordRecognizer CreateWordRecognizer(int? relatedFormMode = null) =>
         new(_families, _initial, _activations, AcousticAlphabet, LexicalAlphabet, Lexicon, _temporal, _spatial, relatedFormMode);
 
-    public LegacyDirectionalGlyphClassifier CreateGlyphClassifier() => new(_families, _activations, _temporal, _spatial);
+    public LegacyDirectionalGlyphClassifier CreateGlyphClassifier() =>
+        LegacyDirectionalGlyphClassifier.CreateActual2B1(_families, _activations, _temporal, _spatial);
     public LegacyPreparedGlyphClassifier CreatePreparedGlyphClassifier() => new(CreateGlyphClassifier(), AcousticWeights);
     public LegacyContextWindowScorer CreateContextWindowScorer() => new(_initial, _activations);
 

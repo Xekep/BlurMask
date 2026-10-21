@@ -1,5 +1,13 @@
 # Prepared fresh main240 acoustic and cache
 
+The pinned Russian bundle now selects the
+[actual2B1 producer](russian-main-2b1-runtime-20261021.md): whole and local
+no-unit dimensions, SAT-CALIB-SAT, and BC280 landmarks. The diagnostic collector
+recomputes those same directional inputs rather than the historical generic2B0
+ones. Fresh Managed and NativeAOT checks pass all40 networks,7200 probabilities,
+1800 raw/calibrated costs and1950 cache entries. This verifies the numerical
+join; it does not establish better word accuracy or complete the word winner.
+
 `LegacyPreparedFreshMain240AcousticScorer` consumes the owned main sampler
 result, not first6120 geometry. It runs actual main189734 four-family features,
 EXP probability/integer channels and the192-label/195-entry final class cache.

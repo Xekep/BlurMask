@@ -25,26 +25,44 @@ def evaluate(n,inputs):
   value=i32(i32(dot)*scale);index=abs(value)>>16;v=activation[index] if index<len(activation) else 1018;hidden.append(-v if value<=0 else v)
  return exp_prob([i32(i32(dot)*scale) for dot,scale in zip(w2@np.array(hidden,dtype=np.int64),s2)])
 dynamic=[struct.unpack_from('<H',data,195771)[0]]+list(struct.unpack_from('<8f',data,195773))
-def samples(path):
- decoder=json.JSONDecoder()
+def samples(path,chunk_size=65536):
+ if not isinstance(chunk_size,int) or chunk_size<1:raise ValueError("Positive stream chunk size required")
+ decoder=json.JSONDecoder();marker='"samples":['
  with path.open(encoding='utf8') as stream:
-  buffer=stream.read(65536);marker='"samples":[';assert marker in buffer;pos=buffer.index(marker)+len(marker)
+  buffer=''
+  while marker not in buffer:
+   chunk=stream.read(chunk_size)
+   if not chunk:raise ValueError("Missing samples array header")
+   buffer+=chunk
+  pos=buffer.index(marker)+len(marker)
   assert '"expectedLabelsRead":false' in buffer[:pos]
   assert 'c8fe150f3ca960cf7216da88c1dd90e1045aed2ef4652a8fa66c9e7a85353dce' in buffer[:pos]
+  first=True
   while True:
-   buffer=buffer[pos:].lstrip(' ,\r\n\t');pos=0
-   while not buffer:
-    chunk=stream.read(65536)
-    if not chunk:raise ValueError("Truncated capture before closing samples array")
-    buffer+=chunk
+   buffer=buffer[pos:];pos=0
+   while True:
+    buffer=buffer.lstrip(' \r\n\t')
+    if buffer:break
+    buffer=stream.read(chunk_size)
+    if not buffer:raise ValueError("Truncated capture before closing samples array")
    if buffer[0]==']':return
+   if not first:
+    if buffer[0]!=',':raise ValueError("Missing comma between sample objects")
+    buffer=buffer[1:]
+    while True:
+     buffer=buffer.lstrip(' \r\n\t')
+     if buffer:break
+     buffer=stream.read(chunk_size)
+     if not buffer:raise ValueError("Truncated capture after sample comma")
+   if buffer[0]!='{':raise ValueError("Expected sample object")
    while True:
     try:obj,pos=decoder.raw_decode(buffer);break
     except json.JSONDecodeError:
-     chunk=stream.read(65536)
+     chunk=stream.read(chunk_size)
      if not chunk:raise
      buffer+=chunk
-   yield obj
+   if not isinstance(obj,dict):raise ValueError("Expected sample object")
+   first=False;yield obj
 counts=dict(samples=0,originalGroups=0,originalProbabilities=0,rawCosts=0,recomputedInputShorts=0,dynamicExactGroups=0,dynamicMaxUlps=0,independentDynamicCostDifferences=0)
 baseline=json.loads(Path(sys.argv[3]).read_bytes());assert len(baseline['samples'])==261
 baseline_rows={s['id']:s for s in baseline['samples']}

@@ -288,6 +288,7 @@ $cases = @(
   @{ Name = 'LegacyGlobalSourceRangeUtf8'; Args = @('models', 'tools/test-data/russian-recorded-words/manifest.json', '.artifacts/legacy-global-source-range-utf8-native.json') },
   @{ Name = 'NativeEnglishResource'; Args = @('models', '.artifacts/native-english-reference.ikrpack', '.artifacts/native-english-resource-native.json') },
   @{ Name = 'ExperimentalGlobalText'; Args = @('models', '.artifacts/experimental-global-text-native.json') },
+  @{ Name = 'LegacyRussianMain2B1'; Args = @('models', '--controls', '.artifacts/legacy-ru-main2b1-controls-native.json') },
   @{ Name = 'LegacyGlobalCroppedSource'; Args = @('models', 'tools/test-data/russian-recorded-words/manifest.json', '.artifacts/legacy-global-cropped-source-native.json') },
   @{ Name = 'LegacyGlobalTimedGeometry'; Args = @('models', 'tools/test-data/russian-recorded-words/manifest.json', '.artifacts/legacy-global-timed-parent-native.json', '.artifacts/legacy-global-timed-geometry-native.json') },
   @{ Name = 'LegacyTextPublicationDocument'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/ru_RU-lk-text.lite.res', 'models/ru-RU/legacy-engine-profile.json', 'models/ru-RU/legacy-separation-profile.json', 'models/text-unicode/legacy-case-data.json', 'models/text-unicode/legacy-text-publication-data.json', 'models/text-unicode/legacy-normalization-data.json', 'models/text-unicode/legacy-circled-payload-data.json', 'models/line-geometry/line-2e3-30.res', 'models/line-geometry/line-2e3-50.res', '.artifacts/legacy-text-publication-document-native.json') },
@@ -1003,6 +1004,17 @@ foreach ($case in $cases) {
   if ($name -eq 'ExperimentalGlobalText') {
     python -I -B tools/ExperimentalGlobalText.Probe/audit_output.py .artifacts/experimental-global-text-native.json --parity .artifacts/experimental-global-text-managed.json
     if ($LASTEXITCODE -ne 0) { throw 'ExperimentalGlobalText admission/parity failed' }
+  }
+  if ($name -eq 'LegacyRussianMain2B1') {
+    python -I -B tools/LegacyRussianMain2B1.Probe/audit_controls.py models .artifacts/legacy-ru-main2b1-controls-native.json .artifacts/legacy-ru-main2b1-controls-oracle-native.json
+    if ($LASTEXITCODE -ne 0) { throw 'Russian MAIN2B1 controls independent oracle failed' }
+    & $probe models tools/LegacyRussianMain2B1.Probe/small-inputs.json .artifacts/legacy-ru-main2b1-small-native.json
+    if ($LASTEXITCODE -ne 0) { throw 'Russian MAIN2B1 small Native capture failed' }
+    python -I -B tools/LegacyRussianMain2B1.Probe/audit_output.py models .artifacts/legacy-ru-main2b1-small-native.json .artifacts/legacy-ru-main2b1-small-oracle-native.json --small
+    if ($LASTEXITCODE -ne 0) { throw 'Russian MAIN2B1 small independent oracle failed' }
+    foreach ($corpusCase in @('controls', 'small')) {
+      if ((Get-FileHash ".artifacts/legacy-ru-main2b1-$corpusCase-native.json").Hash -ne (Get-FileHash ".artifacts/legacy-ru-main2b1-$corpusCase-managed.json").Hash) { throw "Russian MAIN2B1 $corpusCase Managed/Native parity failed" }
+    }
   }
   if ($name -eq 'LegacyGlobalSourceRangeUtf8') {
     python -I -B tools/LegacyGlobalSourceRangeUtf8.Probe/audit_output.py .artifacts/legacy-global-source-range-utf8-native.json .artifacts/legacy-global-word-text-native.json

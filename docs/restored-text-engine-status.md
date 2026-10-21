@@ -10,9 +10,10 @@ The [actual2B1 landmark correction](directional-2b1-landmarks-runtime-20261021.m
 now supplies BC280 separately from generic2B0 B6D20. English N and D0 use the
 corrected path, with independent134/100 numerical checks and Managed/NativeAOT
 parity. This does not complete English word search. Russian V2 integration was
-blocked; Russian V3 and its quality evaluation remain pending. Russian production
-still uses the historical generic2B0 checkpoint below. V2's132/261 exact words
-and342 edits are incomplete-producer evidence. The all-flag audit is not a
+blocked. [Russian V3](russian-main-2b1-runtime-20261021.md) now uses the corrected
+producer in the opt-in bundle. Its fixed-dataset evaluation remains132/261 exact
+words and342 edits, below the historical generic2B0 result137/325. Correcting
+native arithmetic has not improved selected words. The all-flag audit is not a
 full-program proof of every helper. See the [defect history](actual-2b1-landmark-blocker-20261021.md).
 
 The [full English resource loader](native-english-text-resource.md) now loads the
@@ -30,9 +31,9 @@ and retains ink for unsupported or uncertain output. Managed/NativeAOT captures
 match, and the complete NativeAOT application passes its headless AI-pen checks.
 This development change has not qualified a new release.
 
-The [collapsed-subgroup correction](russian-first-degenerate-runtime-20261021.md)
+The historical [collapsed-subgroup correction](russian-first-degenerate-runtime-20261021.md)
 removes four real first-stage refusals while preserving all257 earlier successful
-outputs. The fixed261-word raw diagnostic now has137 exact words and325 edits
+outputs. The then-current fixed261-word raw diagnostic had137 exact words and325 edits
 in1276 characters. The unchanged host score gate admits122:93 exact and29 wrong;
 139 retain ink. Native scores remain uncalibrated. These results do not establish
 usable Russian cursive recognition.
@@ -47,9 +48,9 @@ checks82512 actual records and32530 source-range projections. The separate
 [MAIN acoustic diagnostic](russian-main-acoustic-corpus-20261021.md) reproduces
 original probabilities/costs on27866 groups and independently checks normalized
 points and trajectory/raster features. It excludes the313 directional producer;
-subsequent static review found a native2B1 selector that the current Russian
-calibrated2B0 path discards. Correcting that producer is now the priority. These
-diagnostics do not validate the omitted directional inputs or improve accuracy.
+subsequent static review found a native2B1 selector that the earlier Russian
+calibrated2B0 path discarded. V3 separately checks and integrates those directional
+inputs. The original diagnostic alone does not validate them or improve accuracy.
 
 The [FIRST final-node correction](russian-first-final-prune-20261021.md) now
 applies the existing complete sampler eligibility pass at the actual FIRST
