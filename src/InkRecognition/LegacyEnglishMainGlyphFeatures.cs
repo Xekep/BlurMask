@@ -110,7 +110,7 @@ internal sealed class LegacyEnglishMainGlyphFeatures
         int[] baseStats=samples.SourceStepFixed==0?LegacyDirectionalBaselineStatistics.ExtractPrepared(samples.Strokes,samples.Width,samples.Height,samples.PhysicalArcLength,0,100,token):LegacyDirectionalBaselineStatistics.Extract(samples,new(0,100),token);
         var temporalMembership=LegacyArcLengthWindows.Partition(samples.CumulativePhysicalLengths.Span,16,token);int[][] temporal=new int[16][],spatial=new int[16][];
         var spatialMembership=LegacySpatialWindows.Partition(samples.Strokes.SelectMany(s=>s.Points.ToArray()).ToArray(),samples.Width,samples.Height,4,4,false,token);
-        for(int i=0;i<16;i++){token.ThrowIfCancellationRequested();temporal[i]=LegacyDirectionalWindowStatistics.Extract(samples,temporalMembership[i].Span,direction.Flags.Span,intersections.Flags.Span,true,token);spatial[i]=LegacySpatialWindowStatistics.Extract(samples,spatialMembership[i].ToArray().Select(i=>checked((byte)i)).ToArray(),direction.Flags.Span,intersections.Flags.Span,true,token);}
+        for(int i=0;i<16;i++){token.ThrowIfCancellationRequested();temporal[i]=LegacyDirectionalWindowStatistics.Extract(samples,temporalMembership[i].Span,direction.Flags.Span,intersections.Flags.Span,false,token);spatial[i]=LegacySpatialWindowStatistics.Extract(samples,spatialMembership[i].ToArray().Select(i=>checked((byte)i)).ToArray(),direction.Flags.Span,intersections.Flags.Span,false,token);}
         inputs[2]=Append(LegacyEnglishMainFeatureAssembly.Compose(global,temporal,baseStats,false,token),boundary);inputs[3]=Append(LegacyEnglishMainFeatureAssembly.Compose(global,spatial,baseStats,true,token),boundary);
         bool whole=strokes.Count==1&&stored[0].StartPoint==0&&stored[^1].EndPointExclusive==snapshot.Counts[stored[^1].StrokeIndex];bool zero=false;float? probability=null;
         if(whole){var start=snapshot.Owner.ResolveCutPoint(stored[0].StrokeIndex,stored[0].StartPoint);var end=snapshot.Owner.ResolveCutEndingMetadata(stored[^1].StrokeIndex,stored[^1].EndPointExclusive-1,token);zero=start.Key.Third==0&&end.Key.Third==0;probability=snapshot.Probabilities[stored[0].StrokeIndex];}
@@ -129,22 +129,11 @@ internal sealed class LegacyEnglishMainGlyphFeatures
     }
 }
 
-/// <summary>Actual2B1 full-int transform then signed-short saturation. No
-///invented calibration/context arrays and no change to old wrapping2B0 APIs.</summary>
+/// <summary>Actual2B1 supplied-null/default274 branch, with both native
+///saturation stages. The catalog and pure kernel are reusable across languages.</summary>
 internal static class LegacyEnglishMainFeatureAssembly
 {
     internal static short[] Compose(int[] global,int[][] local,int[] baseline,bool spatial,CancellationToken token)
-    {
-        if(global.Length!=17||local.Length!=16||baseline.Length!=9||local.Any(v=>v.Length!=16))throw new ArgumentException("Actual17/16x16/9 dimensions required.");
-        var result=new short[283];int at=0;result[at++]=1024;
-        unchecked
-        {
-            for(int i=0;i<17;i++){token.ThrowIfCancellationRequested();int v=global[i];result[at++]=Clamp(i switch{2=>(v*2048-2048)/5-1024,3=>Ratio(v,3072),8=>v*2,>=9 and<=15=>Ratio(v,3),_=>Ratio(v,1024)});}
-            foreach(var window in local)for(int i=0;i<16;i++){token.ThrowIfCancellationRequested();int v=window[i];result[at++]=Clamp(i switch{0 or 1 or 2 when spatial=>Ratio(v,256),4 or 5 or>=9 and<=14=>v*2048-1024,8=>v*2,15=>Ratio(v,spatial?256:128),_=>Ratio(v,1024)});}
-            for(int i=0;i<9;i++){int v=baseline[i]+(i==3?4096:0);result[at++]=Clamp(Ratio(v,i is 2 or 3?8192:i>=6?1024:4096));}
-        }
-        if(at!=283)throw new InvalidDataException("Whole actual2B1 vector required.");return result;
-    }
-    private static int Ratio(int v,int d)=>unchecked(v*2048)/d-1024;
-    private static short Clamp(int v)=>(short)Math.Clamp(v,short.MinValue,short.MaxValue);
+        =>LegacySaturatedDirectionalFeatureAssembly.Compose(global,local,baseline,spatial,
+            LegacyDirectional2B1DefaultCalibration.Minimum(spatial),LegacyDirectional2B1DefaultCalibration.Maximum(spatial),token);
 }

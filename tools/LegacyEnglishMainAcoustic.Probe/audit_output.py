@@ -151,6 +151,13 @@ feature_path=Path(__file__).with_name('reference_features.py');spec=importlib.ut
 for control in capture.get("PreparedAssemblyControls",[]):
  assert assembly(control["Global"],control["Windows"],control["Baseline"],False)==control["Temporal"]
  assert assembly(control["Global"],control["Windows"],control["Baseline"],True)==control["Spatial"]
+assert capture['CalibrationGuards']==6
+for name,key in [('TemporalMin','temporalMin'),('TemporalMax','temporalMax'),('SpatialMin','spatialMin'),('SpatialMax','spatialMax')]:
+ assert capture['CalibrationCatalog'][name]==feature.CALIBRATION[key]['values']
+for control in capture['PreparedCalibrationControls']:
+ for spatial,key in [(False,'Temporal'),(True,'Spatial')]:
+  assert assembly(control['Global'],control['Windows'],control['Baseline'],spatial,control['Minima'],control['Maxima'])==control[key]
+assert len(capture['PreparedCalibrationControls'])==4
 checked=0
 for row in capture['Rows']:
  for g in row['Groups']:

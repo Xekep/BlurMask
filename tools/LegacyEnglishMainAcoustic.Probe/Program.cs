@@ -24,7 +24,11 @@ string SourceDigest(LegacyEnglish119FinalizedSingleSource f)
 object Points(IEnumerable<LegacyInkStroke> strokes)=>strokes.Select(s=>s.Points.ToArray().Select(p=>new int[]{p.X,p.Y}).ToArray()).ToArray();
 object Floats(IEnumerable<InkStroke> strokes)=>strokes.Select(s=>s.Points.Select(p=>new float[]{p.X,p.Y}).ToArray()).ToArray();
 object Ranges(IEnumerable<LegacyInkRange> ranges)=>ranges.Select(r=>new int[]{r.StrokeIndex,r.StartPoint,r.EndPointExclusive}).ToArray();
-bool guarded=false;var preparedControls=new List<object>();
+bool guarded=false;var preparedControls=new List<object>();var calibrationControls=new List<object>();
+var catalog=D(("TemporalMin",LegacyDirectional2B1DefaultCalibration.CopyMinimum(false)),("TemporalMax",LegacyDirectional2B1DefaultCalibration.CopyMaximum(false)),("SpatialMin",LegacyDirectional2B1DefaultCalibration.CopyMinimum(true)),("SpatialMax",LegacyDirectional2B1DefaultCalibration.CopyMaximum(true)));
+int calibrationGuards=0;
+void CalibrationGuard(Action action){int before=guards;Guard(action);if(guards!=before+1)throw new Exception("Calibration refusal.");calibrationGuards++;}
+
 int totalGroups=0,totalArcs=0;var timing=System.Diagnostics.Stopwatch.StartNew();
 var actualItems=inputs.RootElement.ValueKind==JsonValueKind.Array?inputs.RootElement.EnumerateArray().ToArray():inputs.RootElement.GetProperty("samples").EnumerateArray().ToArray();
 foreach(var originalItem in actualItems)
@@ -71,6 +75,22 @@ foreach(var originalItem in actualItems)
    var global=Enumerable.Range(0,17).Select(i=>Pick(i)).ToArray();var windows=Enumerable.Range(0,16).Select(j=>Enumerable.Range(0,16).Select(i=>Pick(j*16+i)).ToArray()).ToArray();var baseline=Enumerable.Range(0,9).Select(i=>Pick(300+i)).ToArray();
    preparedControls.Add(D(("Name","prepared-saturated2B1-"+control),("Global",global),("Windows",windows),("Baseline",baseline),("Temporal",LegacyEnglishMainFeatureAssembly.Compose(global,windows,baseline,false,default)),("Spatial",LegacyEnglishMainFeatureAssembly.Compose(global,windows,baseline,true,default))));
   }
+  var cg=new int[17];var cw=Enumerable.Range(0,16).Select(_=>new int[16]).ToArray();var cb=new int[9];
+  var cm=LegacyDirectional2B1DefaultCalibration.CopyMinimum(false);var cx=LegacyDirectional2B1DefaultCalibration.CopyMaximum(false);
+  CalibrationGuard(()=>LegacySaturatedDirectionalFeatureAssembly.Compose(cg.AsSpan(1),cw,cb,false,cm,cx));
+  CalibrationGuard(()=>LegacySaturatedDirectionalFeatureAssembly.Compose(cg,cw.Take(15).ToArray(),cb,false,cm,cx));
+  CalibrationGuard(()=>LegacySaturatedDirectionalFeatureAssembly.Compose(cg,cw,cb.AsSpan(1),false,cm,cx));
+  CalibrationGuard(()=>LegacySaturatedDirectionalFeatureAssembly.Compose(cg,cw,cb,false,cm.AsSpan(1),cx));
+  CalibrationGuard(()=>LegacySaturatedDirectionalFeatureAssembly.Compose(cg,cw,cb,false,cm,cx.AsSpan(1)));
+  using(var ct=new CancellationTokenSource()){ct.Cancel();CalibrationGuard(()=>LegacySaturatedDirectionalFeatureAssembly.Compose(cg,cw,cb,false,cm,cx,ct.Token));}
+  var untouched=LegacyDirectional2B1DefaultCalibration.CopyMinimum(false);cm[1]^=1;
+  if(!untouched.SequenceEqual(LegacyDirectional2B1DefaultCalibration.CopyMinimum(false)))throw new Exception("Public catalog copy mutated private data.");
+  for(int c=0;c<4;c++)
+  {
+   var g=Enumerable.Repeat(c==0?0:c==1?32767:c==2?-32768:int.MaxValue,17).ToArray();var w=Enumerable.Range(0,16).Select(_=>Enumerable.Repeat(c==0?1:c==1?65535:c==2?-65536:int.MinValue,16).ToArray()).ToArray();
+   var lo=new short[274];var hi=new short[274];if(c==1){Array.Fill(lo,(short)32767);Array.Fill(hi,(short)-32768);}else if(c>=2){Array.Fill(lo,(short)-32768);Array.Fill(hi,(short)32767);} // Equal and negative ranges are literal native arithmetic, not coerced.
+   calibrationControls.Add(D(("Global",g),("Windows",w),("Baseline",cb),("Minima",lo),("Maxima",hi),("Temporal",LegacySaturatedDirectionalFeatureAssembly.Compose(g,w,cb,false,lo,hi)),("Spatial",LegacySaturatedDirectionalFeatureAssembly.Compose(g,w,cb,true,lo,hi))));
+  }
   guarded=true;
  }
  var groups=new List<object>();var graph=new List<object>();var seen=new HashSet<int>();
@@ -95,7 +115,7 @@ foreach(var originalItem in actualItems)
 }
 if(inputs.RootElement.ValueKind==JsonValueKind.Array){if(actualItems.Length!=141||rows.Count!=134||refused.Count!=7)throw new Exception("Original blind141 owner denominator changed.");}
 else if(actualItems.Length!=100||rows.Count!=100||refused.Count!=0)throw new Exception("PluColl100 owner denominator changed.");
-File.WriteAllText(args[2],Encode(D(("InputSha256",Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(args[1])))),("Scope","Actual MAIN119 four107 family acoustic caches; no worddecoder or accepted text"),("TargetsRead",false),("Rows",rows),("MultilineRefused",refused),("GroupCount",totalGroups),("ArcCount",totalArcs),("Guards",guards),("Cancellations",cancels),("PreparedAssemblyControls",preparedControls))));
+File.WriteAllText(args[2],Encode(D(("InputSha256",Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(args[1])))),("Scope","Actual MAIN119 four107 family acoustic caches; no worddecoder or accepted text"),("TargetsRead",false),("Rows",rows),("MultilineRefused",refused),("GroupCount",totalGroups),("ArcCount",totalArcs),("Guards",guards),("Cancellations",cancels),("PreparedAssemblyControls",preparedControls),("CalibrationCatalog",catalog),("PreparedCalibrationControls",calibrationControls),("CalibrationGuards",calibrationGuards))));
 Console.WriteLine($"PASS MAIN rows{rows.Count} multiline{refused.Count} groups{totalGroups} arcs{totalArcs} seconds{timing.Elapsed.TotalSeconds:F2}");
 static string Encode(object value){using var stream=new MemoryStream();using(var writer=new Utf8JsonWriter(stream))Write(writer,value);return System.Text.Encoding.UTF8.GetString(stream.ToArray());}
 static Dictionary<string,object?> D(params (string Name,object? Value)[] values)=>values.ToDictionary(v=>v.Name,v=>v.Value);

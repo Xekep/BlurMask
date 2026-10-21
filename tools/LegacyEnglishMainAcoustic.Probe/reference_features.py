@@ -2,9 +2,12 @@
 pen-up selection, two baseline profiles and saturated2B1. Pure old scalar
 references supply independently tested coordinate/statistics kernels.
 """
-import ast,math,struct
+import ast,math,struct,json,hashlib
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
+CALIBRATION=json.loads(Path(__file__).with_name('native-2b1-default-tables.json').read_text(encoding='utf-8-sig'))
+for entry in ['temporalMin','temporalMax','spatialMin','spatialMax']:
+ assert hashlib.sha256(struct.pack('<274h',*CALIBRATION[entry]['values'])).hexdigest()==CALIBRATION[entry]['sha256']
 def defs(name):
  p=ROOT/'tools'/name/'reference_controls.py';t=ast.parse(p.read_text(encoding='utf-8-sig'));t.body=[n for n in t.body if isinstance(n,(ast.Import,ast.ImportFrom,ast.FunctionDef,ast.ClassDef))];d={};exec(compile(t,str(p),'exec'),d);return d
 coord=defs('LegacyDirectionalCoordinates.Probe');land=defs('LegacyDirectional.Probe')['reference'];cross=defs('LegacyIntersection.Probe')['classification'];globalstat=defs('LegacyDirectionalStatistics.Probe')['reference'];temporalstat=defs('LegacyDirectionalWindow.Probe')['reference'];spatialstat=defs('LegacySpatialStatistics.Probe')['reference'];basestat=defs('LegacyDirectionalBaseline.Probe')['reference']
@@ -112,16 +115,19 @@ def projection(lit):
   bins=range(k*16-(k>=8),k*16-(k>=8)+16);result[16+k]=max(-1024,min(1024,sum(diag[i]for i in bins)*32-1024));result[48+k]=max(-1024,min(1024,sum(anti[i]for i in bins)*32-1024))
   for array,start in[(dy,80),(al,112),(dx,144),(ah,176)]:result[start+k]=(sum((array[i]<<8)//(i+1 if k<8 else 255-i)for i in bins)*128>>8)-1024
  return list(map(sh,result))
-def assembly(global_,windows,base,spatial):
+def assembly(global_,windows,base,spatial,minimum=None,maximum=None):
  def ratio(v,d):return div(i32(v*2048),d)-1024
  result=[1024]
  for i,v in enumerate(global_):result.append(sat(div(i32(v*2048-2048),5)-1024 if i==2 else i32(v*2)if i==8 else ratio(v,3072 if i==3 else 3 if 9<=i<=15 else 1024)))
  for window in windows:
   for i,v in enumerate(window):result.append(sat(ratio(v,256)if spatial and i in(0,1,2,15)else i32(v*2048-1024)if i in(4,5,9,10,11,12,13,14)else i32(v*2)if i==8 else ratio(v,128 if i==15 else 1024)))
+ low=CALIBRATION[('spatial'if spatial else'temporal')+'Min']['values']if minimum is None else minimum;high=CALIBRATION[('spatial'if spatial else'temporal')+'Max']['values']if maximum is None else maximum
+ for i in range(1,274):
+  if high[i]!=low[i]:result[i]=sat(div(i32((result[i]-low[i])*2048),high[i]-low[i])-1024)
  result+=[sat(ratio(i32(v+(4096 if i==3 else 0)),8192 if i in(2,3)else 1024 if i>=6 else 4096))for i,v in enumerate(base)];assert len(result)==283;return result
 
 def directional(strokes):
- normalized=coord['norm'](strokes);samples=coord['resample'](normalized,100);flags=land(samples['strokes'])['flags'];case=dict(strokes=samples['strokes'],width=samples['width'],height=samples['height'],step=samples['step'],gridScale=10);intersections,loops=cross(case);case.update(arc=samples['cumulative'][-1],flags=flags,intersections=intersections,intersectionCount=loops,cumulative=samples['cumulative'],shift=normalized['shift'],unit=True)
+ normalized=coord['norm'](strokes);samples=coord['resample'](normalized,100);flags=land(samples['strokes'])['flags'];case=dict(strokes=samples['strokes'],width=samples['width'],height=samples['height'],step=samples['step'],gridScale=10);intersections,loops=cross(case);case.update(arc=samples['cumulative'][-1],flags=flags,intersections=intersections,intersectionCount=loops,cumulative=samples['cumulative'],shift=normalized['shift'],unit=False)
  global_=globalstat(case);shift=normalized['shift'];scale=lambda v:v<<shift if shift>=0 else v>>-shift
  if samples['step']==0:by,bh=0,100
  else:by,bh=scale(-normalized['minY']),max(1,scale(100))

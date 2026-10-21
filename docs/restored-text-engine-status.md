@@ -58,8 +58,10 @@ baseline and directional features, weighted scores and all220 ordinary cache
 costs. Implementation/reference checks cover4066 original groups and11330
 recorded groups, with matching Managed/NativeAOT captures. A subsequent static
 review found that native2B1 default calibration and raw88-dependent local
-extents were omitted in both calculations. Native feature equivalence is
-therefore unclosed, and correction is in progress. Source identity, bounds,
+extents were omitted in both calculations. The corrected producer now applies
+the native default tables, local extents and two separate saturation stages;
+both complete numerical references pass on the same fixed inputs. This repairs
+the omitted branches without establishing better word accuracy. Source identity, bounds,
 cancellation and concurrent publication are checked. Word search and selection
 remain unfinished; these acoustic checks do not establish improved accuracy.
 The [recorded English FIRST baseline](english-recorded-baseline-20261021.md)
