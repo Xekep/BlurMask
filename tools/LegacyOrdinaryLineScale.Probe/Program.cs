@@ -46,15 +46,19 @@ foreach(int rows in new[]{1,2})
     {
         var frames=LegacyPrepared2e3LineFrames.Infer(scaleSource,line30,line50,LegacyAutomaticLineProfile.ReadResourceNode(acoustic,offset),5,.75f);
         Require(frames.Lines.Count==rows && frames.StrokeLineIndices.Span.IndexOf(-1)<0,"Inferred ordinary fixture lost rows/strokes.");
+        // Actual2B1/1111 features replaced the historical2B0 cost54456.
+        // The distinct inferred frames retain exact profile-specific costs.
+        int expectedCost=offset switch{5789=>53251,11421 or 187976=>53281,_=>throw new InvalidOperationException("Unexpected line profile.")};
         foreach(var frame in frames.Lines)
         {
             var ink=frame.Deskewed.Strokes.Select(s=>new InkStroke(s)).ToArray();
             var options=new LegacyCursiveWordSearchOptions(frame.Deskewed.Line.Baseline,frame.Deskewed.Line.Height,float.NaN,1,BeamWidth:128,MaximumExpandedChoices:10_000_000);
             var words=new LegacyNativeGraphWordRecognizer(model).Recognize(ink,scaleSource.Source.Profile,LegacyOrdinaryCursiveSeedProfile.ReadV10aResourceNode(acoustic,189379),new byte[ink.Length],Enumerable.Repeat(-1,ink.Length).ToArray(),options,cache,
                 (position,arc,glyph)=>new(true,true,true,false,false,null,false,ReadOnlyMemory<ushort>.Empty),false,false,false);
-            Require(words.Words.Count>0 && words.Words[0].Text=="мир" && words.Words[0].Match.Cost==54456,"Own raw→scale→NN→groups→Gaussian→glyph/cache/word regression.");
+            Require(words.Words.Count>0 && words.Words[0].Text=="мир" && words.Words[0].Match.Cost==expectedCost,"Own raw→scale→NN→groups→Gaussian→glyph/cache/word regression.");
+            Require(words.Words[0].Match.AcousticCost==expectedCost-4537 && words.Words[0].Score.Language.LexicalSubtotal==4537,"Own acoustic/lexical path decomposition regression.");
         }
-        Console.WriteLine($"PASS actual raw own MIR rows={rows}, source scale={scaleSource.PrimaryScale}, profile@{offset}, best=мир/54456; no supplied baseline/height/scale.");
+        Console.WriteLine($"PASS actual raw own MIR rows={rows}, source scale={scaleSource.PrimaryScale}, profile@{offset}, best=мир/{expectedCost}; no supplied baseline/height/scale.");
     }
 }
 // Exact upstream singleton branch, essential before a joined physical word can

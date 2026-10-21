@@ -76,6 +76,9 @@ foreach(var scenario in new[]{(Rows:1,Reverse:false),(Rows:2,Reverse:false),(Row
         Console.WriteLine($"Actual native NNscale={inference.NeuralScale}, vertical strips={inference.VerticalStripCount}.");
         Require(frames.Lines.Count==rows && frames.StrokeLineIndices.Span.IndexOf(-1)<0,"Inferred ordinary fixture lost rows/strokes.");
         Require(frames.Lines.Zip(frames.Lines.Skip(1)).All(p=>p.First.Deskewed.Line.Baseline<p.Second.Deskewed.Line.Baseline),"Native mean-Y materialization must preserve top-down rows for translated fixtures.");
+        // Actual2B1/1111 features replaced the historical2B0 cost54456.
+        // The distinct inferred frames retain exact profile-specific costs.
+        int expectedCost=offset switch{5789=>53251,11421 or 187976=>53281,_=>throw new InvalidOperationException("Unexpected line profile.")};
         foreach(var frame in frames.Lines)
         {
             var ink=frame.Deskewed.Strokes.Select(s=>new InkStroke(s)).ToArray();
@@ -83,7 +86,8 @@ foreach(var scenario in new[]{(Rows:1,Reverse:false),(Rows:2,Reverse:false),(Row
             var words=new LegacyNativeGraphWordRecognizer(model).Recognize(ink,scaleSource.Source.Profile,LegacyOrdinaryCursiveSeedProfile.ReadV10aResourceNode(acoustic,189379),new byte[ink.Length],Enumerable.Repeat(-1,ink.Length).ToArray(),options,cache,
                 (position,arc,glyph)=>new(true,true,true,false,false,null,false,ReadOnlyMemory<ushort>.Empty),false,false,false);
             Console.WriteLine($"Own sweep rows={rows}, baseline={frame.Deskewed.Line.Baseline}, top="+string.Join(", ",words.Words.Take(5).Select(w=>$"{w.Text}:{w.Match.Cost}")));
-            Require(words.Words.Count>0 && words.Words[0].Text=="мир" && (rows==3 || words.Words[0].Match.Cost==54456),"Own raw→scale→NN→groups→Gaussian→glyph/cache/word regression.");
+            Require(words.Words.Count>0 && words.Words[0].Text=="мир" && (rows==3 || words.Words[0].Match.Cost==expectedCost),"Own raw→scale→NN→groups→Gaussian→glyph/cache/word regression.");
+            if(rows!=3)Require(words.Words[0].Match.AcousticCost==expectedCost-4537 && words.Words[0].Score.Language.LexicalSubtotal==4537,"Own acoustic/lexical path decomposition regression.");
         }
         Console.WriteLine($"PASS actual raw own MIR rows={rows}, reverse={scenario.Reverse}, source scale={scaleSource.PrimaryScale}, profile@{offset}, best=мир; no supplied baseline/height/scale.");
     }

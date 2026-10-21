@@ -64,7 +64,31 @@ if (args.Length == 8)
     var linePass = new LegacyOwnedMainDirectWordPass(ak, linePolicy, lineOwner.MainLineAcoustic, line.Table, Allocate);
     var lineResult = linePass.RunOwned();
     Require(lineResult.NodeCount == 56, "Actual multi-physical node count changed.");
-    Require(lineResult.CopyCumulativePathCosts()[^1] == 346098, "Actual periodic offset was lost before terminal selection.");
+    //The actual RU MAIN2B1 producer changes this fixture's acoustic costs.
+    //Keep the native50-node normalization window explicit, rather than only
+    //pinning the last cumulative scalar from the former generic2B0 path.
+    const int normalizationNode = 49, expectedOffset = 357861;
+    int backward = lineOwner.SourceGraph.MaximumAtoms;
+    Require(backward == 8, "Actual source backward normalization extent changed.");
+    var cumulative = lineResult.CopyCumulativePathCosts();
+    for (int node = 0; node < lineResult.NodeCount; node++)
+    {
+        var snapshot = lineResult.GetNodeSnapshot(node);
+        Require(snapshot.AppliedPeriodicOffset == (node == normalizationNode ? expectedOffset : 0),
+            "Periodic normalization must apply the actual finite minimum exactly once at node49.");
+        int expectedCumulative = node < normalizationNode - backward ? 0 : expectedOffset;
+        Require(cumulative[node] == expectedCumulative && snapshot.CumulativePathCost2520 == expectedCumulative,
+            "Inclusive backward normalization window or subsequent cumulative carry changed.");
+    }
+    var normalized = lineResult.GetNodeSnapshot(normalizationNode);
+    int normalizedMinimum = Enumerable.Range(0, normalized.SourceEnd23f0)
+        .Select(ordinal => BinaryPrimitives.ReadInt32LittleEndian(normalized.Records.Span[(ordinal * 88 + 16)..])).Min();
+    Require(normalizedMinimum == 0, "The normalized source minimum must be zero after its finite cost shift.");
+    var lineTerminal = LegacyOwnedFreshMainTerminalInvocation.Prepare(linePolicy).SelectOwnedPass(lineResult).Winner;
+    Require(lineTerminal.HasWinner && lineTerminal.RelativeCost == 66894 && lineTerminal.TotalCost == 424755 &&
+        lineTerminal.TotalCost == unchecked(lineTerminal.RelativeCost + cumulative[^1]),
+        "Actual terminal must retain relative66894 plus cumulative357861, independently of row22.");
+    controls += 4;
     CheckResult(lineResult, linePolicy);
 }
 Console.WriteLine($"PASS {controls} actual owned terminal/copy controls and {guards} ownership/cancellation/lifecycle guards; complete selected88 bytes and2520 cost, no text/confidence inference.");
