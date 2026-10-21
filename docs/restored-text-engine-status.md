@@ -6,6 +6,16 @@ default recognizer.
 
 ## Latest checked additions (2026-10-20)
 
+The [actual global source-range UTF8 stage](legacy-global-source-range-utf8.md)
+now formats CHAR insertion order, raw WORD and TEXT keys from the real global
+counter handoff, preserving typed identities and separate caller-brace bytes.
+All58 strings in12 owners agree with the independent original13 publication
+and C21/decimal oracle. Managed and Native AOT captures are byte-identical;
+113 guards include cancellation, defensive copies and disposed-owner refusal.
+Pending commands and counters remain unchanged. MIR's actual C25 lookup,
+DOM construction, registry replay and final acceptance remain separate work.
+
+
 The [native WORD coverage union correction](legacy-global-native-coverage-union-runtime.md)
 now preserves raw WORD keys while comparing their canonical union with TEXT.
 All13 actual coverage cases take the equal fast path; earlier raw-key comparison
