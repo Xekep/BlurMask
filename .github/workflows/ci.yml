@@ -128,7 +128,7 @@ jobs:
         run: python -m pip install numpy PyYAML==6.0.2
       - name: Validate Bash workflow syntax before long recognition tests
         shell: bash
-        run: python tools/check-workflow-shells.py .github/workflows/ci.yml
+        run: python tools/check-workflow-shells.py --bash-script tools/ci/check-recognition-managed.sh .github/workflows/ci.yml
       - run: dotnet restore src/BlurMask/BlurMask.csproj
       - run: dotnet build src/BlurMask/BlurMask.csproj -c Release --no-restore -p:PublishAot=false -p:SelfContained=false
       - name: Portable stroke engine numerical goldens, model validation and ink history

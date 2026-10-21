@@ -17,6 +17,8 @@ import yaml
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--bash', type=Path, help='Explicit Bash executable; Windows defaults to Git Bash')
+    parser.add_argument('--bash-script', action='append', default=[], type=Path,
+                        help='Also parse an extracted Bash script without executing it')
     parser.add_argument('workflows', nargs='+', type=Path)
     args = parser.parse_args()
     bash = str(args.bash) if args.bash else None
@@ -47,6 +49,13 @@ def main():
                     failed = True
                     print(f'{path}: {job_id}: {step.get("name", "unnamed Bash step")}', file=sys.stderr)
                     print((result.stderr + result.stdout).decode('utf-8', errors='replace'), file=sys.stderr)
+    for path in args.bash_script:
+        result = subprocess.run([bash, '-n'], input=path.read_bytes(), capture_output=True)
+        count += 1
+        if result.returncode:
+            failed = True
+            print(f'{path}: extracted Bash script', file=sys.stderr)
+            print((result.stderr + result.stdout).decode('utf-8', errors='replace'), file=sys.stderr)
     if failed:
         return 1
     print(f'PASS syntax of {count} explicit Bash workflow blocks; no workflow commands executed')
