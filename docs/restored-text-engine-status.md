@@ -23,8 +23,12 @@ state. The [owning13A outgoing primitive](linguistic-fst13a-outgoing-runtime.md)
 now executes the exact ordered state slices with target labels, signed-tag
 costs and byte7. All98 actual states/299 transitions and256 default135 costs
 pass independent numerical checks and Managed/NativeAOT parity. This is not a
-number recognizer: full28C alphabet mapping, state0, history and paging still
-need their own integration. No additional root resource is automatically selected.
+number recognizer. The [primary28C alphabet map](linguistic-fst28c-primary-map-runtime.md)
+now derives all16 actual source codes from retained source/acoustic alphabets,
+including the special NUL/space precedence; all299 outgoing projections pass
+independent checks and Managed/NativeAOT parity. Secondary/C4 mapping, state0,
+history and paging still need their own integration. No additional root resource
+is automatically selected.
 
 RC1.2.8-rc.8 is an experimental checkpoint. The subsequent test-only correction
 replaces three stale generic2B0 diagnostic collectors with actual2B1 vectors and

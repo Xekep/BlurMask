@@ -629,6 +629,8 @@ dotnet run --project tools/LegacyFst23C.Probe -c Release -- models .artifacts/le
 python -I -B tools/LegacyFst23C.Probe/audit_output.py models .artifacts/legacy-fst23c-managed.json
 dotnet run --project tools/LegacyFst13AOutgoing.Probe -c Release -- models .artifacts/legacy-fst13a-outgoing-managed.json
 python -I -B tools/LegacyFst13AOutgoing.Probe/audit_output.py models .artifacts/legacy-fst13a-outgoing-managed.json
+dotnet run --project tools/LegacyFst28CPrimaryMap.Probe -c Release -- models .artifacts/legacy-fst28c-primary-map-managed.json
+python -I -B tools/LegacyFst28CPrimaryMap.Probe/audit_output.py models .artifacts/legacy-fst28c-primary-map-managed.json
 python tools/LegacyEnglishLiteFirstPreprocessing.Probe/reference_controls.py .artifacts/legacy-en-short-controls.json
 python tools/LegacyEnglishFirstSlant.Probe/reference_controls.py .artifacts/legacy-en-short-controls.json .artifacts/legacy-en-slant-controls.json
 dotnet run --project tools/LegacyFirstAcoustic119Wire.Probe -c Release -- models .artifacts/legacy-first-acoustic119-wire-managed.json

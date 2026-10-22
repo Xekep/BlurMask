@@ -1,0 +1,222 @@
+{
+  "modules": [
+    {
+      "binary": "MyScriptText.dll",
+      "sha256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+      "regions": [
+        {
+          "function": "18023dfe0",
+          "start": "0x18023dfe0",
+          "endExclusive": "0x18023e0c0",
+          "bytes": 224,
+          "sha256": "b5fa16e1bf35cfc6a757518859337bc21da14c850a4fbefa1facd995b7b824a3"
+        },
+        {
+          "function": "18023ded0",
+          "start": "0x18023ded0",
+          "endExclusive": "0x18023dfdb",
+          "bytes": 267,
+          "sha256": "f1517505a96cd5e7a44929797deb336ef1b8c7748a9ad7b8ed78527ee9a36ef6"
+        },
+        {
+          "function": "18023e0c0",
+          "start": "0x18023e0c0",
+          "endExclusive": "0x18023e358",
+          "bytes": 664,
+          "sha256": "14b9a87bd0356cacb677648ce58fe18caa5ea6df255f2cc7806e5e3059a7d3ab"
+        },
+        {
+          "function": "18023e380",
+          "start": "0x18023e380",
+          "endExclusive": "0x18023f4ee",
+          "bytes": 4462,
+          "sha256": "ed84b42ed039ae40c54c9e10844b53713e8eed5734a59fca57a8b552171104cf"
+        },
+        {
+          "function": "18023f6f0",
+          "start": "0x18023f6f0",
+          "endExclusive": "0x18023ffec",
+          "bytes": 2300,
+          "sha256": "df390a4651d71f30b5943fd226a0fe8b7be260ce1c070fe133ced6d97e7bc4f6"
+        },
+        {
+          "function": "180240010",
+          "start": "0x180240010",
+          "endExclusive": "0x1802406b9",
+          "bytes": 1705,
+          "sha256": "94b972c509d3cd9128d4f6afd773200d80836330296b71ea52f1250242420ac2"
+        },
+        {
+          "function": "1802406c0",
+          "start": "0x1802406c0",
+          "endExclusive": "0x1802413a9",
+          "bytes": 3305,
+          "sha256": "b307325e80458e6068e5051b67aa08ff60695661cdfe1259bd047e9569b8ce10"
+        },
+        {
+          "function": "1802413d0",
+          "start": "0x1802413d0",
+          "endExclusive": "0x180241e90",
+          "bytes": 2752,
+          "sha256": "1c49fab7d198cbaacd1b6be08b3db71f648b1f01b5a1eaa9249a45971fd72fc6"
+        },
+        {
+          "function": "180018f70",
+          "start": "0x180018f70",
+          "endExclusive": "0x180019030",
+          "bytes": 192,
+          "sha256": "47322fa3198824f1023d595807eeb4fed1a54db9f78e30314300b0279989ecdf"
+        }
+      ],
+      "tables": [
+        {
+          "at": "0x1802e91b0",
+          "bytes": "00000000000000000000000000000000e0df238001000000",
+          "scope": "28C initializerlist"
+        },
+        {
+          "at": "0x1802e91d0",
+          "bytes": "03000000000000008c0200008b020000ffffffff0000000038922e8001000000000000000000000000000000000000000000000000000000010000010000000000000000000000000000000001000000401f248001000000501f2480010000000000000000000000",
+          "scope": "28C descriptor"
+        },
+        {
+          "at": "0x1802e9238",
+          "bytes": "d01f24800100000070922e8001000000b0912e80010000000000000000000000701f24800100000000000000000000000000000000000000",
+          "scope": "28C metadata"
+        },
+        {
+          "at": "0x1802e9270",
+          "bytes": "6029098001000000d0912e800100000080e3238001000000f0f4238001000000903a09800100000040f6238001000000b0f6238001000000e0bc238001000000f0ff2380010000000000248001000000b013248001000000d01324800100000000a4058001000000b01e248001000000",
+          "scope": "28C vtable"
+        },
+        {
+          "at": "0x1802badf0",
+          "bytes": "f0a9108001000000e0ae2b800100000080aa108001000000a0ad108001000000b0ad10800100000050bd10800100000030a60c8001000000506d1d8001000000d06d1d8001000000a0b3108001000000d0b3108001000000c0a204800100000030ba10800100000070ba10800100000090ba108001000000b0ba108001000000c0ba108001000000e06d1d8001000000f06d1d8001000000",
+          "scope": "13A source interface"
+        },
+        {
+          "at": "0x1802e5d40",
+          "bytes": "90661d8001000000305c2e800100000000671d8001000000f0661d8001000000606a1d8001000000d0711d800100000030a60c8001000000506d1d8001000000",
+          "scope": "139 parent interface"
+        },
+        {
+          "at": "0x1802eb360",
+          "bytes": "f3b0808100000000f3b0808200000000f3b0808300000000f3b0808400000000",
+          "scope": "special targetlookup F0001..4"
+        },
+        {
+          "at": "0x1802eb380",
+          "bytes": "f3b08088",
+          "scope": "special targetlookup F0008"
+        },
+        {
+          "at": "0x1802eb388",
+          "bytes": "efbfbd",
+          "scope": "replacement"
+        },
+        {
+          "at": "0x1802eb38c",
+          "bytes": "30",
+          "scope": "zero digit"
+        },
+        {
+          "at": "0x1802e9e68",
+          "bytes": "61",
+          "scope": "lower a"
+        },
+        {
+          "at": "0x1802eb390",
+          "bytes": "41",
+          "scope": "upper A"
+        },
+        {
+          "at": "0x1802ecbec",
+          "bytes": "c39f",
+          "scope": "sharp s"
+        },
+        {
+          "at": "0x1802e9bc0",
+          "bytes": "c2ad",
+          "scope": "soft hyphen"
+        },
+        {
+          "at": "0x1802eb394",
+          "bytes": "c2a0",
+          "scope": "NBSP"
+        },
+        {
+          "at": "0x1802eb398",
+          "bytes": "f3b0808c",
+          "scope": "F000C"
+        },
+        {
+          "at": "0x1802eabf8",
+          "bytes": "20",
+          "scope": "space"
+        },
+        {
+          "at": "0x1802eabf4",
+          "bytes": "0a",
+          "scope": "LF"
+        },
+        {
+          "at": "0x1802eb3a0",
+          "bytes": "f3b0808900000000f3b0808a00000000f3b0808b00000000f3b0808000000000f3b0808600000000f3b0808700000000f3b0809000000000f3b0809100000000f3b0809200000000f3b0809300000000f3b0809400000000f3b0809500000000f3b0809600000000f3b0809700000000f3b0809800000000f3b0808500000000f3b080a000000000f3b080a100000000f3b080a200000000f3b080a300000000f3b080a400000000f3b080a500000000f3b080a600000000",
+          "scope": "remaining privateuse specials"
+        },
+        {
+          "at": "0x1802eaa84",
+          "bytes": "e2808d",
+          "scope": "state0 special ZWJ"
+        },
+        {
+          "at": "0x1800ca630",
+          "bytes": "488b4270c3",
+          "scope": "complete sourceV30 actual alphabet pointer+70"
+        },
+        {
+          "at": "0x1801d6de0",
+          "bytes": "8b4260c3",
+          "scope": "complete sourceKind V88 pointer+60"
+        },
+        {
+          "at": "0x18010bab0",
+          "bytes": "41c60000488b82800000008b4020c3",
+          "scope": "complete V78 rawfield20 andzero flag"
+        }
+      ]
+    },
+    {
+      "binary": "MyScriptEngine.dll",
+      "sha256": "d31abcd309cbb558bb80bf50fe1968921de515bc40fbeb0e886a5cf14dbc0a5c",
+      "regions": [
+        {
+          "function": "1800527e0",
+          "start": "0x1800527e0",
+          "endExclusive": "0x180052a73",
+          "bytes": 659,
+          "sha256": "6c7750a33568aba46f885dcb8d1cedfd8ddc3ad20c1d0fcebdaef358051a83b4"
+        },
+        {
+          "function": "180052a80",
+          "start": "0x180052a80",
+          "endExclusive": "0x180052b4f",
+          "bytes": 207,
+          "sha256": "b3b9e1b6d74224a4ceba0c3f26bc9ce48ea446900be1d103740d56f62fc4e4a3"
+        }
+      ],
+      "tables": [
+        {
+          "at": "0x1801de1b0",
+          "bytes": "802305800100000060e11d80010000009027058001000000e027058001000000a027058001000000e027058001000000802a0580010000005026058001000000",
+          "scope": "readableAL V28/V30/V38 dispatch"
+        },
+        {
+          "at": "0x180052650",
+          "bytes": "488b4a5033c0450fb7c8baffff000066423914490f94c0c3",
+          "scope": "complete virtualreverseFFFF leaf"
+        }
+      ]
+    }
+  ]
+}
