@@ -203,3 +203,22 @@ and carry its phase-effective CHAR metadata and ordered failures into genuine
 selected/index/cleanup/transform/counter owners. Numeric lookalikes from an
 old global scope do not confer authority. That join needs a separate reviewed
 proposal; this batch changes none of those stages or the application endpoint.
+
+## Live CI parent validation (2026-10-23)
+
+The timed-geometry oracle previously required the historical parent capture
+`1f2d2f6e2bb57e6d249fc11325a5e9736f358a5cd9dce1fe2664dd8ecdebea58`.
+After subsequent recognition corrections, current parent alternatives and
+compact-row counts changed. This reproduces on Windows as well as macOS;
+replacing the fixed hash alone would hide the dependency.
+
+Managed and Native CI now supply `--models` and `--child` together. The oracle
+first runs the independent raw child and WORD/TEXT parent composition checks,
+then verifies all timed geometry from original coordinates and measured timing.
+Historical static callers without these options still require their original
+exact capture. Existing Native/Managed byte parity remains required. No
+recognition or geometry implementation changes are part of this adjustment.
+
+The current 13-parent run passed 37 CHAR links, 63 selection commands and all
+54 timed views. Controls reject a mismatched old child, changed parent flags,
+changed geometry, missing paired arguments and an unpinned historical parent.

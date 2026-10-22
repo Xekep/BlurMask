@@ -1,12 +1,15 @@
 """Independent ordinary2DB numeric reference from retained native operands.
 No SDK execution, C# invocation, expected transcription input or capture-derived
-expected geometry. Full actual parent capture is an unchanged prerequisite.
+expected geometry. Live CI independently checks the paired current raw child
+and parent; historical static callers retain their exact frozen prerequisite.
 """
-import argparse,base64,hashlib,json,math,struct
+import argparse,base64,hashlib,json,math,runpy,struct,sys
 from pathlib import Path
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('recorded',type=Path);p.add_argument('parent',type=Path);p.add_argument('capture',type=Path)
-p.add_argument('--native',type=Path);p.add_argument('--report',type=Path);a=p.parse_args()
+p.add_argument('--native',type=Path);p.add_argument('--report',type=Path)
+p.add_argument('--models',type=Path);p.add_argument('--child',type=Path);a=p.parse_args()
+if (a.models is None)!=(a.child is None):p.error('--models and --child must be supplied together')
 f=lambda x:struct.unpack('<f',struct.pack('<f',x))[0]
 b32=lambda x:struct.unpack('<i',struct.pack('<f',x))[0]
 b64=lambda x:struct.unpack('<q',struct.pack('<d',x))[0]
@@ -213,7 +216,19 @@ def geometry(sample,parent,raw,temporal):
  assert output['trace']==['structure','rotation','vertical','04D2C0','04E0E0','04DA20','04DD50','horizontal','ready']
  return len(states),len(views)
 
-parent_raw=a.parent.read_bytes();assert hashlib.sha256(parent_raw).hexdigest()=='1f2d2f6e2bb57e6d249fc11325a5e9736f358a5cd9dce1fe2664dd8ecdebea58'
+parent_raw=a.parent.read_bytes()
+if a.models is None:
+ # Historical static-closure callers retain their exact frozen prerequisite.
+ assert hashlib.sha256(parent_raw).hexdigest()=='1f2d2f6e2bb57e6d249fc11325a5e9736f358a5cd9dce1fe2664dd8ecdebea58'
+else:
+ # Live CI validates the current parent against its independently audited raw
+ # child, rather than pinning OCR alternatives from an older implementation.
+ oracle=Path(__file__).resolve().parents[1]/'LegacyGlobalWordText.Probe/audit_output.py'
+ saved=sys.argv
+ try:
+  sys.argv=[str(oracle),str(a.models),str(a.child),str(a.parent)]
+  runpy.run_path(str(oracle),run_name='__main__')
+ finally:sys.argv=saved
 parents={s['name']:s for s in json.loads(parent_raw)['actual']}
 m=[[0.,90.],[0.,10.],[25.,60.],[50.,10.],[50.,90.]]
 raws={'M':[m],'MIR':[m,[[70.,10.],[70.,90.],[120.,10.],[120.,90.]],[[140.,90.],[140.,10.],[180.,10.],[190.,20.],[190.,40.],[180.,50.],[140.,50.]]],
@@ -350,6 +365,7 @@ for prefix in controls['prefixes']:
  assert result['line']==line
 if a.native:assert a.capture.read_bytes()==a.native.read_bytes()
 report=dict(status='PASS independent actual geometry numeric oracle',samples=13,genuineMeasuredTracks=9,preparedUniformCases=4,characters=characters,views=views,
- parentSha256=hashlib.sha256(parent_raw).hexdigest(),captureSha256=hashlib.sha256(a.capture.read_bytes()).hexdigest(),vendorExecution=False,qualityClaim=False)
+ parentSha256=hashlib.sha256(parent_raw).hexdigest(),captureSha256=hashlib.sha256(a.capture.read_bytes()).hexdigest(),
+ parentValidation='historical-frozen'if a.models is None else'paired-independent-raw-child-and-parent',vendorExecution=False,qualityClaim=False)
 if a.report:a.report.write_text(json.dumps(report,indent=2)+'\n')
 print('PASS independent13 ordinary2DB numeric cases/37CHAR/54views, actual measured9 distinct from prepared4; no quality claim')

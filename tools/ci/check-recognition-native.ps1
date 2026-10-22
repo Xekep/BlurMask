@@ -1032,7 +1032,7 @@ foreach ($case in $cases) {
     if ($LASTEXITCODE -ne 0) { throw 'LegacyGlobalCroppedSource independent audit/parity failed' }
   }
   if ($name -eq 'LegacyGlobalTimedGeometry') {
-    python -I tools/LegacyGlobalTimedGeometry.Probe/audit_output.py tools/test-data/russian-recorded-words/manifest.json .artifacts/legacy-global-timed-parent-native.json .artifacts/legacy-global-timed-geometry-native.json --native .artifacts/legacy-global-timed-geometry-managed.json
+    python -I tools/LegacyGlobalTimedGeometry.Probe/audit_output.py tools/test-data/russian-recorded-words/manifest.json .artifacts/legacy-global-timed-parent-native.json .artifacts/legacy-global-timed-geometry-native.json --native .artifacts/legacy-global-timed-geometry-managed.json --models models --child .artifacts/legacy-global-text-source-wrapper-native.json
     if ($LASTEXITCODE -ne 0) { throw 'LegacyGlobalTimedGeometry independent audit/parity failed' }
     if ((Get-FileHash .artifacts/legacy-global-timed-parent-native.json).Hash -ne (Get-FileHash .artifacts/legacy-global-timed-parent-managed.json).Hash) { throw 'LegacyGlobalTimedGeometry parent Managed/Native parity failed' }
   }
