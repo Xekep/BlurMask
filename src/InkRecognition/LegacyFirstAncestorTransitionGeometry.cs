@@ -2,7 +2,8 @@ namespace InkRecognition;
 
 /// <summary>First1EE3B0 transition with both original acoustic parent and its
 /// geometric ancestor. GraphF0/F8 use OriginalNode/OriginalRecord.ArcOrdinal;
-/// sampler118/140 use GeometryNode/GeometryRecord.ArcOrdinal.</summary>
+/// sampler118 uses GeometryNode/GeometryRecord.ArcOrdinal; ordinary140
+/// also unions the original ending bounds when the endpoints differ.</summary>
 public readonly record struct LegacyFirstAncestorTransitionRequest(int CurrentNode,ushort CurrentArc,
     ushort CurrentSymbol,byte CurrentCategory,byte CurrentSpan,byte Kind,LegacyFirstGeometricAncestor Previous);
 
@@ -97,8 +98,15 @@ public sealed class LegacyFirstAncestorTransitionGeometry
         if(request.CurrentSymbol==replacement||previous.Symbol==replacement)return new(incomingCost<0x4000000,incomingCost);
         int c=profile.Categories.CompositeCategories.Span[request.CurrentCategory].GeometryIndex;
         int p=profile.Categories.CompositeCategories.Span[previous.CompositeCategory].GeometryIndex;
+        var sourceBounds=ordinary.GetBounds(request.Previous.GeometryNode,previous.ArcOrdinal);
+        if(request.Previous.GeometryNode!=request.Previous.OriginalNode||previous.ArcOrdinal!=request.Previous.OriginalRecord.ArcOrdinal)
+        {
+            var endingBounds=ordinary.GetBounds(request.Previous.OriginalNode,request.Previous.OriginalRecord.ArcOrdinal);
+            sourceBounds=new(Math.Min(sourceBounds.MinimumX,endingBounds.MinimumX),Math.Min(sourceBounds.MinimumY,endingBounds.MinimumY),
+                Math.Max(sourceBounds.MaximumX,endingBounds.MaximumX),Math.Max(sourceBounds.MaximumY,endingBounds.MaximumY));
+        }
         int delta=LegacyFirstOrdinaryTransitionGeometry.PairCost(ordinary.GetBounds(request.CurrentNode,request.CurrentArc),
-            ordinary.GetBounds(request.Previous.GeometryNode,previous.ArcOrdinal),profile.Categories.Prototypes.Span[c],
+            sourceBounds,profile.Categories.Prototypes.Span[c],
             profile.Categories.Prototypes.Span[p],height,profile.PairScale,profile.PairOffset,profile.PairMaximum);
         int cost=checked(incomingCost+delta);return new(cost<0x4000000,cost);
     }

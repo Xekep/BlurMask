@@ -39,7 +39,7 @@ def replay(source,current,captured,preparedCosts=None):
   return lookup(groups[nodes[n][r['arc']]['Group']],r['symbol'])
  def inspect(final,n,ri,r,kind,parent,pri,ai,o,an,ar,aa,anc,skipped,stage,incoming):
   nonlocal ti
-  cost,ok=correct(stage,n,r['arc'],r['symbol'],r['category'],kind,an,anc['arc'],anc['symbol'],anc['category'],incoming)
+  cost,ok=correct(stage,n,r['arc'],r['symbol'],r['category'],kind,an,anc['arc'],anc['symbol'],anc['category'],incoming,parent,o['arc'])
   expected=[stage,final,n,ri,r['arc'],r['symbol'],r['category'],r['span'],kind,parent,pri,ai,o['arc'],o['symbol'],o['category'],o['span'],o['previous'],o['column'],o['total'],o['acoustic'],int(o['path']),an,ar,aa,anc['arc'],anc['symbol'],anc['category'],anc['span'],anc['previous'],anc['column'],anc['total'],anc['acoustic'],int(anc['path']),skipped,incoming,cost,int(ok)]
   assert ti<len(trace)and trace[ti]==expected,('context ordered callback',ti,trace[ti]if ti<len(trace)else None,expected);ti+=1
   return cost,ok

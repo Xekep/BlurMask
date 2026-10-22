@@ -49,6 +49,9 @@ for d in json.load(open(sys.argv[1],encoding='utf-8')):
             if s==189 or gs==189:delta=0
             else:
                 cp=d['prototypes'][geom[c]];pp=d['prototypes'][geom[gc]];current=boxes[arcs[n][a][1]];previous=boxes[arcs[gn][garc][1]];inv=f(1/f(d['height']))
+                #Native ordinary140 keeps source category, unions distinct original ending(kind0).
+                if (on,oarc)!=(gn,garc):
+                    ending=boxes[arcs[on][oarc][1]];previous=[min(previous[0],ending[0]),min(previous[1],ending[1]),max(previous[2],ending[2]),max(previous[3],ending[3])]
                 bottom=f(f(cp[0])-f(pp[0]));top=f(bottom-f(f(cp[1])-f(pp[1])))
                 error=f(abs(f(f(f(current[1])-f(previous[1]))*inv)-top)+abs(f(f(f(current[3])-f(previous[3]))*inv)-bottom))
                 value=f(min(f(f(error*f(d['pairScale']))-f(d['pairOffset'])),f(d['pairMaximum']))*8192)

@@ -118,7 +118,14 @@ public sealed class LegacyOwnedEnglish119TransitionGeometry
         Check(r,token);if(r.Kind==6)return new(true,incoming);var previous=r.Previous.GeometryRecord;
         if(r.CurrentSymbol==Policy.Replacement||previous.Symbol==Policy.Replacement)return new(incoming<0x4000000,incoming);
         int c=categories.CompositeCategories.Span[r.CurrentCategory].GeometryIndex,p=categories.CompositeCategories.Span[previous.CompositeCategory].GeometryIndex;
-        int delta=LegacyFirstOrdinaryTransitionGeometry.PairCost(ReadBounds(r.CurrentNode,r.CurrentArc),ReadBounds(r.Previous.GeometryNode,previous.ArcOrdinal),
+        var sourceBounds=ReadBounds(r.Previous.GeometryNode,previous.ArcOrdinal);
+        if(r.Previous.GeometryNode!=r.Previous.OriginalNode||previous.ArcOrdinal!=r.Previous.OriginalRecord.ArcOrdinal)
+        {
+            var endingBounds=ReadBounds(r.Previous.OriginalNode,r.Previous.OriginalRecord.ArcOrdinal);
+            sourceBounds=new(Math.Min(sourceBounds.MinimumX,endingBounds.MinimumX),Math.Min(sourceBounds.MinimumY,endingBounds.MinimumY),
+                Math.Max(sourceBounds.MaximumX,endingBounds.MaximumX),Math.Max(sourceBounds.MaximumY,endingBounds.MaximumY));
+        }
+        int delta=LegacyFirstOrdinaryTransitionGeometry.PairCost(ReadBounds(r.CurrentNode,r.CurrentArc),sourceBounds,
             categories.Prototypes.Span[c],categories.Prototypes.Span[p],height,pairScale,pairOffset,pairMaximum);
         int result=checked(incoming+delta);return new(result<0x4000000,result);
     }

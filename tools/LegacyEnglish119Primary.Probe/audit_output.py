@@ -73,12 +73,15 @@ def environment(row):
    state=next(s for s in row['States']if(s['Node'],s['Arc'])==(n,a));b=state['Bounds']
    assert boxes[arc['Group']]==[f(b[k])for k in('MinimumX','MinimumY','MaximumX','MaximumY')]
    assert(bits(state['Future']),bits(state['Prefix']),state['Join'],state['Blank'],state['Matrix'])==(bits(future[n,a]),bits(prefix[n,a]),join[n,a],blank[n,a],matrix[n,a]),('state',n,a)
- def correct(stage,n,a,s,c,kind,gn,garc,gs,gc,incoming):
+ def correct(stage,n,a,s,c,kind,gn,garc,gs,gc,incoming,on,oarc):
   if kind==6:return incoming,True
   if stage==140:
    delta=0
    if s!=209 and gs!=209:
     cp=prototypes[composites[c][1]];pp=prototypes[composites[gc][1]];current=boxes[nodes[n][a]['Group']];previous=boxes[nodes[gn][garc]['Group']];inverse=f(1/height)
+    #Native1ACFA0 ordinary140 unions SOURCE with original ENDING(kind0).
+    if (on,oarc)!=(gn,garc):
+     ending=boxes[nodes[on][oarc]['Group']];previous=[min(previous[0],ending[0]),min(previous[1],ending[1]),max(previous[2],ending[2]),max(previous[3],ending[3])]
     bottom=f(cp[0]-pp[0]);top=f(bottom-f(cp[1]-pp[1]));residual=f(abs(f(f(f(current[1]-previous[1])*inverse)-top))+abs(f(f(f(current[3]-previous[3])*inverse)-bottom)))
     value=f(min(f(f(residual*F('54'))-F('58')),F('5C'))*8192);delta=int(f(value+(.5 if value>0 else -.5)))
    return incoming+delta,incoming+delta<INF
@@ -99,7 +102,7 @@ def replay(row,requests,trace):
  ti=0
  def call(stage,n,a,s,c,span,kind,on,oa,o,gn,ga,g,skipped,incoming):
   nonlocal ti
-  cost,ok=correct(stage,n,a,s,c,kind,gn,g[3],g[5],g[7],incoming)
+  cost,ok=correct(stage,n,a,s,c,kind,gn,g[3],g[5],g[7],incoming,on,o[3])
   expected=[n,a,s,c,span,kind,on,oa,o[3],o[5],o[7],o[4],o[2],o[0],o[1],int(o[6]),gn,ga,g[3],g[5],g[7],g[4],g[2],g[0],g[1],int(g[6]),skipped,incoming,cost,int(ok),stage]
   assert ti<len(trace)and trace[ti]['Data']==expected,('ordered callback',ti,trace[ti]if ti<len(trace)else None,expected);ti+=1;return cost,ok
  for n,proposals in enumerate(requests):

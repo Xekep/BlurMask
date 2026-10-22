@@ -26,6 +26,14 @@ stages and all8 previous A/B1 captures unchanged. Primary/context/terminal
 selection, WORD, source720 and finalized guide remain missing; application
 text recognition and CTC frame heuristics are unchanged.
 
+The [FIRST source/ending correction](legacy-first-source-ending-union-correction.md)
+now preserves the ancestor's category while combining its bounds with the
+original ending for ordinary140. Independent raw checks cover370 inputs and612
+changed-cost witnesses; Managed/NativeAOT parity and the adjacent primary/context
+regressions pass. All370 selected outputs remain unchanged, so this supplies no
+demonstrated handwriting-accuracy improvement. The full-English B3 producer is
+still pending.
+
 The [inline23C wire reader](linguistic-fst23c-wire-reader.md) now retains the
 actual Russian number-rule storage with bounded immutable ownership. It reads
 all99 descriptors and299 raw words, without treating raw field20 as an initial
