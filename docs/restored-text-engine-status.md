@@ -19,9 +19,12 @@ missing; application text recognition and the CTC frame heuristics are unchanged
 The [inline23C wire reader](linguistic-fst23c-wire-reader.md) now retains the
 actual Russian number-rule storage with bounded immutable ownership. It reads
 all99 descriptors and299 raw words, without treating raw field20 as an initial
-state. This is not a number recognizer: outgoing execution, full28C mapping,
-history and paging still need their own integration. No additional root
-resource is automatically selected by this reader.
+state. The [owning13A outgoing primitive](linguistic-fst13a-outgoing-runtime.md)
+now executes the exact ordered state slices with target labels, signed-tag
+costs and byte7. All98 actual states/299 transitions and256 default135 costs
+pass independent numerical checks and Managed/NativeAOT parity. This is not a
+number recognizer: full28C alphabet mapping, state0, history and paging still
+need their own integration. No additional root resource is automatically selected.
 
 RC1.2.8-rc.8 is an experimental checkpoint. The subsequent test-only correction
 replaces three stale generic2B0 diagnostic collectors with actual2B1 vectors and

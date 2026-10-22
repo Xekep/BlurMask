@@ -256,12 +256,16 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y clang zlib1g-dev
-      - name: Storage and full English acoustic checkpoint Native AOT parity
+      - name: Linguistic primitives and full English acoustic Native AOT parity
         shell: pwsh
         run: |
           $suffix = if ($IsWindows) { '.exe' } else { '' }
-          foreach ($project in @('LegacyFst23C.Probe', 'LegacyFullEnglishFirst.Probe')) {
-            $capture = if ($project -eq 'LegacyFst23C.Probe') { 'legacy-fst23c' } else { 'legacy-en-full-first' }
+          foreach ($project in @('LegacyFst23C.Probe', 'LegacyFst13AOutgoing.Probe', 'LegacyFullEnglishFirst.Probe')) {
+            $capture = switch ($project) {
+              'LegacyFst23C.Probe' { 'legacy-fst23c' }
+              'LegacyFst13AOutgoing.Probe' { 'legacy-fst13a-outgoing' }
+              default { 'legacy-en-full-first' }
+            }
             $directory = "./.artifacts/$capture-native"
             dotnet publish "tools/$project/$project.csproj" -c Release -p:PublishAot=true -o $directory
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
