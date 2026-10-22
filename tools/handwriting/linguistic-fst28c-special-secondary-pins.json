@@ -1,0 +1,230 @@
+{
+  "modules": [
+    {
+      "binary": "MyScriptText.dll",
+      "sha256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+      "regions": [
+        {
+          "function": "18000c860",
+          "start": "0x18000c860",
+          "endExclusive": "0x18000c9cf",
+          "bytes": 367,
+          "sha256": "7a66f6ea6707fbd96c1ff9da29228139cbefef56b206141b9af238a769175b24"
+        },
+        {
+          "function": "18020c1c0",
+          "start": "0x18020c1c0",
+          "endExclusive": "0x18020c7df",
+          "bytes": 1567,
+          "sha256": "b2e79df62c10943e6f1940e63d01d0fe5d6ec7107b1e2a09e1ec6d27554c6b5e"
+        },
+        {
+          "function": "18020c9d0",
+          "start": "0x18020c9d0",
+          "endExclusive": "0x18020d74c",
+          "bytes": 3452,
+          "sha256": "dc8920306a8febf89aa094e8ffa9ba5fadea94c93cd53a72eac2b4e971c2a96e"
+        },
+        {
+          "function": "18020d8f0",
+          "start": "0x18020d8f0",
+          "endExclusive": "0x18020e078",
+          "bytes": 1928,
+          "sha256": "abe47eca78185958b2e72ec54cfad2a08fc8c70078d6a64de6f8cb8682cfe806"
+        },
+        {
+          "function": "180237380",
+          "start": "0x180237380",
+          "endExclusive": "0x180237607",
+          "bytes": 647,
+          "sha256": "91b7d0a62dfb3d7ca9ec7a9bdd50b230d4b6a637bbedf4f8164af58cc4e6890c"
+        },
+        {
+          "function": "180236490",
+          "start": "0x180236490",
+          "endExclusive": "0x1802367ab",
+          "bytes": 795,
+          "sha256": "f465068a74ecc4e979e491344deb88e9ce7df76871df90081532370ce5bff82c"
+        },
+        {
+          "function": "1801d60d0",
+          "start": "0x1801d60d0",
+          "endExclusive": "0x1801d61c0",
+          "bytes": 240,
+          "sha256": "05ba354668e68aa0f3a37e9ac88514907e215439820500b8e820428eadb0cadb"
+        },
+        {
+          "function": "18023e380",
+          "start": "0x18023e380",
+          "endExclusive": "0x18023f4ee",
+          "bytes": 4462,
+          "sha256": "ed84b42ed039ae40c54c9e10844b53713e8eed5734a59fca57a8b552171104cf"
+        },
+        {
+          "function": "180237110",
+          "start": "0x180237110",
+          "endExclusive": "0x1802371e9",
+          "bytes": 217,
+          "sha256": "df69c08309c97b7fa6bb748e9939550da7f10cb6a1ad7bc43c61276b3c4ee9ae"
+        }
+      ],
+      "tables": [
+        {
+          "at": "0x180274aa0",
+          "bytes": "0300000000000000b302000003000000ffffffff00000000684b27800100000000000000000000000000000000000000000000000000000000001000000000000000000000000000817f008080800000d0c9008001000000a04a278001000000a0ca008001000000",
+          "scope": "knowledge2B3 descriptor"
+        },
+        {
+          "at": "0x180274b68",
+          "bytes": "c0f7008001000000f04a2780010000002052278001000000000000000000000050eb0080010000000000000000000000",
+          "scope": "knowledge metadata"
+        },
+        {
+          "at": "0x180275220",
+          "bytes": "60c800800100000000000000000000000000000000000000",
+          "scope": "knowledge initializer list"
+        },
+        {
+          "at": "0x180274af0",
+          "bytes": "d0c9008001000000a04a278001000000a0ca008001000000b0ca008001000000c0ca008001000000",
+          "scope": "knowledge frontend/controller setters"
+        },
+        {
+          "at": "0x18000caa0",
+          "bytes": "4c894248b0014d85c0740449895008c3",
+          "scope": "complete frontendidentity setter leaf"
+        },
+        {
+          "at": "0x18000cab0",
+          "bytes": "4c894260b0014d85c0740449895018c3",
+          "scope": "complete controlleridentity setter leaf"
+        },
+        {
+          "at": "0x1802e7ab8",
+          "bytes": "70b4228001000000b07c2e8001000000b07b2e800100000050b422800100000000000000000000000000000000000000",
+          "scope": "controller240metadata"
+        },
+        {
+          "at": "0x1802e7bb0",
+          "bytes": "a0ba20800100000000000000000000000000000000000000",
+          "scope": "controllerinitializerlist"
+        },
+        {
+          "at": "0x1802e7cb0",
+          "bytes": "30be208001000000607c2e8001000000f0a3058001000000c0c1208001000000e0c7208001000000",
+          "scope": "controllerVT18frontend attach"
+        },
+        {
+          "at": "0x1802de610",
+          "bytes": "a004158001000000a0e82d8001000000b0051580010000008007158001000000901b158001000000a01b158001000000b01b158001000000303e0c8001000000",
+          "scope": "frontendflag virtual setters/getters"
+        },
+        {
+          "at": "0x1802e9030",
+          "bytes": "02000000000000008e0200008b020000ffffffff00000000408f2e80010000000000000000000000000000000000000000000000000000000000000200000000000000000000000030902e8001000000c0de238001000000d0902e8001000000b8902e8001000000",
+          "scope": "28Edescriptor"
+        },
+        {
+          "at": "0x1802e8f40",
+          "bytes": "8039088001000000a08f2e8001000000788f2e8001000000000000000000000000031b80010000000000000000000000",
+          "scope": "28Emetadata"
+        },
+        {
+          "at": "0x1802e8f78",
+          "bytes": "00000000000000000000000000000000000000000000000070fa148001000000",
+          "scope": "28E constructor service slots0through18"
+        },
+        {
+          "at": "0x18014fa70",
+          "bytes": "4c894208b001c3",
+          "scope": "complete28E extendedinitializer stores suppliedinner"
+        },
+        {
+          "at": "0x1802e8d88",
+          "bytes": "000000000000000000000000000000001071238001000000",
+          "scope": "290 initializer service slots"
+        },
+        {
+          "at": "0x1802e8fa0",
+          "bytes": "207e0d800100000030902e8001000000f0bc238001000000b09b198001000000",
+          "scope": "28EV10forward"
+        },
+        {
+          "at": "0x18023bcf0",
+          "bytes": "488b5208488b024c8b50100fb6442430884424300fb64424288844242849ffe2",
+          "scope": "complete28Eforwarding tail leaf"
+        },
+        {
+          "at": "0x1802e8d40",
+          "bytes": "0300000000000000900200008e020000ffffffff00000000f08c2e8001000000288d2e80010000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000001071238001000000408d2e8001000000",
+          "scope": "290descriptor"
+        },
+        {
+          "at": "0x1802e8cf0",
+          "bytes": "3093238001000000608c2e8001000000888d2e8001000000000000000000000000000000000000000000000000000000",
+          "scope": "290metadata"
+        },
+        {
+          "at": "0x1802e8c60",
+          "bytes": "f071238001000000408d2e80010000008073238001000000b09b198001000000",
+          "scope": "290V10"
+        },
+        {
+          "at": "0x1802e8b60",
+          "bytes": "03000000000000008d0200008b020000ffffffff00000000288b2e8001000000008b2e800100000000000000000000000000000000000000000000010000000000000000000000000000000000000000705f238001000000608b2e80010000009064238001000000",
+          "scope": "28Ddescriptor"
+        },
+        {
+          "at": "0x1802e8b28",
+          "bytes": "90d50e8001000000b08b2e8001000000408c2e8001000000000000000000000000000000000000000000000000000000",
+          "scope": "28Dmetadata"
+        },
+        {
+          "at": "0x1802e8bb0",
+          "bytes": "705f238001000000608b2e80010000009064238001000000b067238001000000",
+          "scope": "28DV10"
+        },
+        {
+          "at": "0x1802e9270",
+          "bytes": "6029098001000000d0912e800100000080e3238001000000f0f4238001000000",
+          "scope": "28CV10"
+        },
+        {
+          "at": "0x1802badf0",
+          "bytes": "f0a9108001000000e0ae2b800100000080aa108001000000a0ad108001000000b0ad10800100000050bd10800100000030a60c8001000000506d1d8001000000d06d1d8001000000a0b3108001000000d0b3108001000000c0a204800100000030ba10800100000070ba10800100000090ba108001000000b0ba108001000000c0ba108001000000e06d1d8001000000f06d1d8001000000",
+          "scope": "13AV58 true"
+        },
+        {
+          "at": "0x18004a2c0",
+          "bytes": "b001c3",
+          "scope": "complete13AV58 true leaf"
+        }
+      ]
+    },
+    {
+      "binary": "MyScriptEngine.dll",
+      "sha256": "d31abcd309cbb558bb80bf50fe1968921de515bc40fbeb0e886a5cf14dbc0a5c",
+      "regions": [
+        {
+          "function": "180053f20",
+          "start": "0x180053f20",
+          "endExclusive": "0x180054985",
+          "bytes": 2661,
+          "sha256": "680915bba3b20e2387e00ddee15b52a6403edac324a88d76fa031d31d6f5badd"
+        }
+      ],
+      "tables": [
+        {
+          "at": "0x1801db830",
+          "bytes": "607d038001000000707d038001000000d07d038001000000407e038001000000907e038001000000",
+          "scope": "Engine TypeAPI V20 binding"
+        },
+        {
+          "at": "0x180037e90",
+          "bytes": "4c8b81980000004d85c0744981faff3f000077414863d2488bc2488bca48c1f80883e20f83e03f48c1f90483e10f498b04c0488b04c8488b04d04885c07416488b004885c0740e488b40184885c07405488b4010c333c0c3",
+          "scope": "complete registered type constructor-service getter all return paths"
+        }
+      ]
+    }
+  ]
+}

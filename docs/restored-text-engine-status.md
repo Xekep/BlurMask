@@ -31,9 +31,13 @@ pass independent numerical checks and Managed/NativeAOT parity. This is not a
 number recognizer. The [primary28C alphabet map](linguistic-fst28c-primary-map-runtime.md)
 now derives all16 actual source codes from retained source/acoustic alphabets,
 including the special NUL/space precedence; all299 outgoing projections pass
-independent checks and Managed/NativeAOT parity. Secondary/C4 mapping, state0,
-history and paging still need their own integration. No additional root resource
-is automatically selected.
+independent checks and Managed/NativeAOT parity. The
+[target preparation prerequisite](linguistic-fst28c-target-preparation.md) now
+derives14 special/range fields and16 secondary codes under an owned fresh
+constructor-only policy. All59 range comparisons and299 projections pass
+independent checks and Managed/NativeAOT parity, including35 guards. Configured
+property events, complete state0/query, history and paging remain missing.
+No additional root resource is automatically selected.
 
 The [English case M/N/source68 component](english-case-main-source68-runtime-20261022.md)
 now derives the case-expanded masks, scores the actual same-source groups and
