@@ -88,3 +88,14 @@ Remaining scope includes general protocol/multidescriptor source export,
 imported/reused text/alternate vectors, configured higher-source namespace
 sharing and complete string-wrapper integration. This is a source/emission
 owning bridge, not accepted OCR text or confidence calibration.
+
+
+The23 October test-only update records the complete initial glyph-pool snapshot
+before either candidate consumer runs. The independent oracle requires every
+emission reference/raw40-byte row in that same order, every inferred negative
+span key, and the complete graph-derived context-pair/mode grid. It retains all
+raw alphabet, span, projection, source-score and full-pool overlap checks.
+Guard coverage is derived as8 per candidate plus1 per emitted row and3 per
+successful actual/prepared span. Six corrupted captures must be rejected.
+The historical6-span/46-emission aggregate is no longer used as a winner golden;
+no recognition code, model, beam or acceptance threshold changes in this step.

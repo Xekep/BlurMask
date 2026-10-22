@@ -25,7 +25,7 @@ for (int input = 0; input < inputs.Length; input++)
     var views = alternatives.Select(a => LegacyOwnedMainCandidateSource.FromConfigured(result, a)).ToArray();
     if (views.Length != 2) throw new Exception("Actual configured pair required for the sameTOP overlap control.");
     var pool = views[0].Ownership.GlyphPool;
-    w.WriteStartObject(); w.WriteNumber("input", input); WriteSource(views[0]); w.WriteStartArray("candidates");
+    w.WriteStartObject(); w.WriteNumber("input", input); WriteSource(views[0]); WritePool("initialPool", pool.CopyOwnerNodes()); w.WriteStartArray("candidates");
     for (int a = 0; a < views.Length; a++)
     {
         var view = views[a]; var refresh = LegacyOwnedMainSpanGlyphRefresh.PrepareConfigured(view);
