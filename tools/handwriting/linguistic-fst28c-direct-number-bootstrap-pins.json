@@ -1,0 +1,132 @@
+{
+  "scope": "STATIC direct explicit single-number fresh source only; NO fullroot default or query",
+  "modules": [
+    {
+      "name": "MyScriptText.dll",
+      "sha256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+      "regions": [
+        {
+          "function": "18020c9d0",
+          "start": "0x18020c9d0",
+          "bytes": 3452,
+          "sha256": "dc8920306a8febf89aa094e8ffa9ba5fadea94c93cd53a72eac2b4e971c2a96e"
+        },
+        {
+          "function": "180236490",
+          "start": "0x180236490",
+          "bytes": 795,
+          "sha256": "f465068a74ecc4e979e491344deb88e9ce7df76871df90081532370ce5bff82c"
+        },
+        {
+          "function": "180236370",
+          "start": "0x180236370",
+          "bytes": 288,
+          "sha256": "211aec3f646b2030da1c796a901342c9d993d1d736d8af2d434108806a724012"
+        },
+        {
+          "function": "18023e0c0",
+          "start": "0x18023e0c0",
+          "bytes": 664,
+          "sha256": "14b9a87bd0356cacb677648ce58fe18caa5ea6df255f2cc7806e5e3059a7d3ab"
+        },
+        {
+          "function": "18000c860",
+          "start": "0x18000c860",
+          "bytes": 367,
+          "sha256": "7a66f6ea6707fbd96c1ff9da29228139cbefef56b206141b9af238a769175b24"
+        }
+      ],
+      "spans": [
+        {
+          "start": "0x1802bae78",
+          "bytes": 16,
+          "sha256": "33a934f0a9487c0998cc2f2e7113f7c2e9978d87ed2870c7cb496924a15cb248"
+        },
+        {
+          "start": "0x1801d6de0",
+          "bytes": 4,
+          "sha256": "ebcfbfab2de1ada6a22c496757166c81e968e2dc87c7645baf1d3834914ead5d"
+        },
+        {
+          "start": "0x1801d6df0",
+          "bytes": 4,
+          "sha256": "291da00e63c34406c6b4063904c1876d5006ab00d843f1cd0ab56a7578536524"
+        },
+        {
+          "start": "0x1802e9298",
+          "bytes": 8,
+          "sha256": "880b86e8030ddc8ec1a78970d18419611a890b89c819bfbcd7c623fd38dbc616"
+        }
+      ]
+    },
+    {
+      "name": "MyScriptEngine.dll",
+      "sha256": "d31abcd309cbb558bb80bf50fe1968921de515bc40fbeb0e886a5cf14dbc0a5c",
+      "regions": [
+        {
+          "function": "180052260",
+          "start": "0x180052260",
+          "bytes": 288,
+          "sha256": "8e352629cf03a1dbd61711154e942327aeca75b18d0c08fd9d5acac73189ddbe"
+        },
+        {
+          "function": "180053f20",
+          "start": "0x180053f20",
+          "bytes": 2661,
+          "sha256": "680915bba3b20e2387e00ddee15b52a6403edac324a88d76fa031d31d6f5badd"
+        },
+        {
+          "function": "1800573b0",
+          "start": "0x1800573b0",
+          "bytes": 1445,
+          "sha256": "ed2210594ae8d7cdc4bc285d2cfd3af11cbf7c884a2e35d8608f83ad786c3df8"
+        },
+        {
+          "function": "18004e280",
+          "start": "0x18004e280",
+          "bytes": 260,
+          "sha256": "f7d4d1e590b50b08898ae1fca62580711ffd7204e791160eff8781f6e3aeaad5"
+        },
+        {
+          "function": "18004ffe0",
+          "start": "0x18004ffe0",
+          "bytes": 507,
+          "sha256": "3d4bf1e474e9b74cc20c10a3f6e31aba4daa2e5a60a0a6d94e7eeb01e2dca4b1"
+        },
+        {
+          "function": "18005f4c0",
+          "start": "0x18005f4c0",
+          "bytes": 1043,
+          "sha256": "ec93ad31c5bc3277f969f71c8e9f92655dba2a346d8415e85abe4295fe3575ce"
+        }
+      ],
+      "spans": [
+        {
+          "start": "0x1801de208",
+          "bytes": 8,
+          "sha256": "17d7fcdd509b55279b62bc5741f37957311ba5e25bb187e5c4267dca22912a42"
+        },
+        {
+          "start": "0x1801de218",
+          "bytes": 8,
+          "sha256": "828c3d712d53ee2e5ab964dd1dbc9e3c050fa29400a33c42621876755f9a6c7d"
+        },
+        {
+          "start": "0x180052bd0",
+          "bytes": 34,
+          "sha256": "065f552066306ce4f6e06ed08e0e0cc0f8bd4f26dc6bc670ff7a9c1450c8dec5"
+        },
+        {
+          "start": "0x180052640",
+          "bytes": 13,
+          "sha256": "95ed6d561e4d66b80492671b5ad4bd58d3ede095184e40690362544d65f92837"
+        },
+        {
+          "start": "0x1801fb6d0",
+          "bytes": 8592,
+          "sha256": "76aa7cb6cced0afa8a12b3c91e20791d03b87329e7f218df2affedd0f43e0e4a"
+        }
+      ]
+    }
+  ]
+}

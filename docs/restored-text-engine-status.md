@@ -56,6 +56,15 @@ with30 guards and8 corruption negatives. Configured property events, live
 query acquisition, history and paging remain missing. No additional root
 resource is automatically selected.
 
+The [explicit number-source bootstrap](linguistic-fst28c-primary-controller-bootstrap.md)
+now binds that exact initial state to a genuine ordinary graph/source under a
+new private issuer. It derives the explicitly selected singleton's header and
+namespace, validates all98 states/299 rows and preserves all97 cost-state
+references. Four actual procedural graph owners,42 guards and9 corrupted captures
+pass the raw oracle and Managed/NativeAOT parity; the four previous FST captures
+remain byte-exact. The request has no issued context, Query, history or Ready
+API. This does not implement number OCR or full-root default selection.
+
 The [English case M/N/source68 component](english-case-main-source68-runtime-20261022.md)
 now derives the case-expanded masks, scores the actual same-source groups and
 joins pooled D0 to one ordered case-aware working-map refresh. Both original134

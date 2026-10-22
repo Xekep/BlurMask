@@ -1,0 +1,185 @@
+{
+  "scope": "STATIC exact 28C acquisition/controller producer prefix; no executable query or whole controller claim",
+  "nativeFile": "research/myscript/sdk/build/x64/MyScriptText.dll",
+  "nativeSha256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+  "regions": [
+    {
+      "function": "1801fd240",
+      "start": "0x1801fd240",
+      "bytes": 1622,
+      "sha256": "5a3027f00e5b20cbda1f5e49b209cbb7b91e62765a2e28bcd4945a9f88f6ccda"
+    },
+    {
+      "function": "1801fd240",
+      "start": "0x1801fd8a0",
+      "bytes": 1753,
+      "sha256": "56314b48cec8b206c8790040fecd419b75549a31d3ef7f7b80d148356810ad2a"
+    },
+    {
+      "function": "1801fd240",
+      "start": "0x1801fdf80",
+      "bytes": 1975,
+      "sha256": "0e174e85732d274639c44407428d95540e3e8abbd729c6d495299822f224eda5"
+    },
+    {
+      "function": "180201270",
+      "start": "0x180201270",
+      "bytes": 8640,
+      "sha256": "3836069ed42344e26325937ecf620039eb8d03edfff283710655b7d5a2bee24c"
+    },
+    {
+      "function": "180236910",
+      "start": "0x180236910",
+      "bytes": 535,
+      "sha256": "836b698f3f3a24ea3d39ea234d8e89ebc21ee39436c95669c9647b45adaa948a"
+    },
+    {
+      "function": "180237610",
+      "start": "0x180237610",
+      "bytes": 1940,
+      "sha256": "2a6b8f8f0135936c362f52d5f24691a19aee90de8a7a2d014598669420fbf3f3"
+    },
+    {
+      "function": "180237610",
+      "start": "0x180237db0",
+      "bytes": 1239,
+      "sha256": "7326575662a5df235780c2a57efd0d2367932099aad6953555383a1d90c781fd"
+    },
+    {
+      "function": "1802388e0",
+      "start": "0x1802388e0",
+      "bytes": 2037,
+      "sha256": "9e554be474e3a3872c64529be9338a59f6064f518578de7793976fd33747c1db"
+    },
+    {
+      "function": "18023f6f0",
+      "start": "0x18023f6f0",
+      "bytes": 2300,
+      "sha256": "df390a4651d71f30b5943fd226a0fe8b7be260ce1c070fe133ced6d97e7bc4f6"
+    },
+    {
+      "function": "180240010",
+      "start": "0x180240010",
+      "bytes": 1705,
+      "sha256": "94b972c509d3cd9128d4f6afd773200d80836330296b71ea52f1250242420ac2"
+    },
+    {
+      "function": "18020baa0",
+      "start": "0x18020baa0",
+      "bytes": 905,
+      "sha256": "c1187348721616c8976430640335955a38a8347b67d5e91bedb5874f99457537"
+    },
+    {
+      "function": "1800918d0",
+      "start": "0x1800918d0",
+      "bytes": 605,
+      "sha256": "800c6d2d18f00872a5cbe09086cb4dbd750bb5eaefa17dc836aeebf795ea5479"
+    },
+    {
+      "function": "18023e380",
+      "start": "0x18023e380",
+      "bytes": 4462,
+      "sha256": "ed84b42ed039ae40c54c9e10844b53713e8eed5734a59fca57a8b552171104cf"
+    },
+    {
+      "function": "18020d8f0",
+      "start": "0x18020d8f0",
+      "bytes": 1928,
+      "sha256": "abe47eca78185958b2e72ec54cfad2a08fc8c70078d6a64de6f8cb8682cfe806"
+    },
+    {
+      "function": "18023f650",
+      "start": "0x18023f650",
+      "bytes": 90,
+      "sha256": "a60cdd38a524c03bfc15fd3931dc83a13fe8e3a117a8cabd1331883e54a209a0"
+    }
+  ],
+  "data": [
+    {
+      "name": "28C primary and secondary dispatch",
+      "start": "0x1802e92b0",
+      "bytes": 16,
+      "hex": "f0ff2380010000000000248001000000",
+      "sha256": "45ce442ef8dfe009d0c2752dda943628ceea5ae9bd577a13e00827ccda1e39c8"
+    },
+    {
+      "name": "28C eligibility V88",
+      "start": "0x1802e92f8",
+      "bytes": 8,
+      "hex": "50f6238001000000",
+      "sha256": "e2a9b96de89c05a80cfc150592adf6eb226cfbca8923ade03807e01fef7a6b7b"
+    },
+    {
+      "name": "222 frontend V280",
+      "start": "0x1802de890",
+      "bytes": 8,
+      "hex": "1057158001000000",
+      "sha256": "bcbce546c067a293d38b17b12239978922f683ab87656c3ecbbc5cc9dff49b7d"
+    },
+    {
+      "name": "21B ordinary graph V1C8",
+      "start": "0x1802e21b8",
+      "bytes": 8,
+      "hex": "00a4058001000000",
+      "sha256": "e62d42900f4196c6bd7ad0ffd196e12872163a7b29f72a9f60f948c4a971e509"
+    }
+  ],
+  "reviewedRuntimeInventory": [
+    {
+      "path": "src/InkRecognition/LegacyFst28CInitialState.cs",
+      "sha256": "c1e20050b85e69596e2454ba4f23f00676f58520310ab54edebb22466501cde6",
+      "lfSha256": "c1e20050b85e69596e2454ba4f23f00676f58520310ab54edebb22466501cde6"
+    },
+    {
+      "path": "src/InkRecognition/LegacyFreshMainGlobalWordControllerPolicy.cs",
+      "sha256": "3f30970fba3f6c3f354331cb4efacfccb3013188c08820fd7a1304692b102daf",
+      "lfSha256": "3f30970fba3f6c3f354331cb4efacfccb3013188c08820fd7a1304692b102daf"
+    },
+    {
+      "path": "src/InkRecognition/LegacyFreshMainGlobalCaseSession.cs",
+      "sha256": "c110ad86ff276c9b2a42b4fc1b292a7a582dd9b52bf7ad151dcc18b4724cc270",
+      "lfSha256": "c110ad86ff276c9b2a42b4fc1b292a7a582dd9b52bf7ad151dcc18b4724cc270"
+    },
+    {
+      "path": "src/InkRecognition/LegacyOrdinaryRecognitionGraph.cs",
+      "sha256": "7b94c502089ced968692d5ad23d2316e31482355c122edfa065f45d65ceabcfb",
+      "lfSha256": "7b94c502089ced968692d5ad23d2316e31482355c122edfa065f45d65ceabcfb"
+    }
+  ],
+  "evidenceExports": [
+    {
+      "path": "E:\\BlurMask-build-artifacts-20261014\\fst28c-query-native-20261023\\MyScriptText.dll\\focused.c",
+      "sha256": "622783d5b2cf99990925ffc538241b68d9c7794dae406bb3b3f4ad91f41e1e58"
+    },
+    {
+      "path": "E:\\BlurMask-build-artifacts-20261014\\fst28c-query-producer-native-20261023\\MyScriptText.dll\\focused.c",
+      "sha256": "9dd3483e2b0c3295a2278162aef90a10b43339024acac551be141ecee7f219e0"
+    }
+  ],
+  "completeLeaves": [
+    {
+      "start": "0x180155710",
+      "bytes": 17,
+      "hex": "488b5270488b024c8b88c801000049ffe1",
+      "sha256": "c133d91d247a37f9ca2b4de927229df2b63fdbf35e0cd5369e89833a1aff5e44"
+    },
+    {
+      "start": "0x18005a400",
+      "bytes": 3,
+      "hex": "32c0c3",
+      "sha256": "01cb47d078b4841b8408ec4fe278efa83115c6f6e101972987507d2b2b57dcf0"
+    },
+    {
+      "start": "0x18023fff0",
+      "bytes": 8,
+      "hex": "4533c9e9f8f6ffff",
+      "sha256": "bcbb35a4da09eb288ddbf033fc179ed19e13640c530f0a9b024ea93971debfd3"
+    },
+    {
+      "start": "0x180240000",
+      "bytes": 8,
+      "hex": "41b101e9e8f6ffff",
+      "sha256": "e32a8d7b04d716969b88bc4abd6dda96bf18082059d2ccc9087bbfd98b30e6e8"
+    }
+  ]
+}
