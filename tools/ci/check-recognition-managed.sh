@@ -625,6 +625,8 @@ dotnet run --project tools/LegacySource247Wire.Probe -c Release -- models .artif
 python tools/LegacySource247Wire.Probe/audit_output.py models .artifacts/legacy-source247-wire-managed.json
 dotnet run --project tools/LegacyLinguisticRoot13F.Probe -c Release -- models .artifacts/legacy-linguistic-root13f-managed.json
 python -I -B tools/LegacyLinguisticRoot13F.Probe/audit_output.py models .artifacts/legacy-linguistic-root13f-managed.json .artifacts/legacy-linguistic-root13f-oracle-managed.json
+dotnet run --project tools/LegacyFst23C.Probe -c Release -- models .artifacts/legacy-fst23c-managed.json
+python -I -B tools/LegacyFst23C.Probe/audit_output.py models .artifacts/legacy-fst23c-managed.json
 python tools/LegacyEnglishLiteFirstPreprocessing.Probe/reference_controls.py .artifacts/legacy-en-short-controls.json
 python tools/LegacyEnglishFirstSlant.Probe/reference_controls.py .artifacts/legacy-en-short-controls.json .artifacts/legacy-en-slant-controls.json
 dotnet run --project tools/LegacyFirstAcoustic119Wire.Probe -c Release -- models .artifacts/legacy-first-acoustic119-wire-managed.json
@@ -658,6 +660,8 @@ python -I tools/LegacyEnglish119Parent.Probe/audit_output.py models .artifacts/l
 dotnet run --project tools/LegacyEnglish119Postprocessing.Probe -c Release -- models .artifacts/legacy-en119-controller-managed.json .artifacts/legacy-en119-postprocessing-managed.json
 python -I tools/LegacyEnglish119Postprocessing.Probe/audit_output.py models/en-US/en_US-ak-cur.lite.res .artifacts/legacy-en119-postprocessing-managed.json models/ru-RU/ru_RU-ak-cur.lite.res
 python -c "import json,sys; from pathlib import Path; d=json.loads(Path(sys.argv[1]).read_bytes()); Path(sys.argv[2]).write_text(json.dumps([{k:r[k] for k in ('Name','Raw','Resolution')} for r in d['Actual']]), encoding='utf8')" .artifacts/legacy-en119-postprocessing-managed.json .artifacts/legacy-en119-final-single-blind.json
+dotnet run --project tools/LegacyFullEnglishFirst.Probe -c Release -- models .artifacts/legacy-en119-final-single-blind.json .artifacts/legacy-en-full-first-managed.json
+python -I -B tools/LegacyFullEnglishFirst.Probe/audit_output.py models .artifacts/legacy-en-full-first-managed.json
 dotnet run --project tools/LegacyEnglish119FinalSingle.Probe -c Release -- models .artifacts/legacy-en119-final-single-blind.json .artifacts/legacy-en119-final-single-managed.json
 python -I -B tools/LegacyEnglish119FinalSingle.Probe/audit_output.py models .artifacts/legacy-en119-final-single-managed.json .artifacts/legacy-en119-postprocessing-managed.json
 python -I -B tools/handwriting/audit_english119_final_single.py --models models --output .artifacts/legacy-en119-final-single-model-audit.json

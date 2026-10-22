@@ -1,0 +1,56 @@
+{
+  "binary": "MyScriptText.dll",
+  "sha256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+  "regions": [
+    {
+      "function": "1801e1560",
+      "start": "0x1801e1560",
+      "endExclusive": "0x1801e1c2a",
+      "bytes": 1738,
+      "sha256": "6a23d6b9bbfe9ebfba0251884e0b500b6198ed80cffdfb36174b02f2594a7e36"
+    },
+    {
+      "function": "18010aa80",
+      "start": "0x18010aa80",
+      "endExclusive": "0x18010ad9b",
+      "bytes": 795,
+      "sha256": "3828e895198f2da29a211ca343b0cf248d1b8b7610e1dc263b20c8d5bc1670f2"
+    },
+    {
+      "function": "1801d6700",
+      "start": "0x1801d6700",
+      "endExclusive": "0x1801d6a51",
+      "bytes": 849,
+      "sha256": "6c9d36cd262457c2c76babbf1573ea3f6bf3ca742aa2eba1baf23179e784b071"
+    }
+  ],
+  "leaves": [
+    {
+      "start": "0x1801e1fb0",
+      "bytes": "33c9488d058f4b100083fa11480f45c1c3",
+      "scope": "complete interface11 resolver"
+    }
+  ],
+  "tables": [
+    {
+      "at": "0x1802e6b70",
+      "bytes": "03000000000000003c02000003000000ffffffff00000000f06a2e8001000000",
+      "scope": "registered23C"
+    },
+    {
+      "at": "0x1802e6af0",
+      "bytes": "707d0d8001000000e06a2e8001000000286b2e8001000000b01f1e8001000000d01f1e8001000000",
+      "scope": "23C metadata/reader resolver"
+    },
+    {
+      "at": "0x1802e6b48",
+      "bytes": "60151e8001000000d0a6088001000000301c1e8001000000",
+      "scope": "23C interface11"
+    },
+    {
+      "at": "0x1802badf0",
+      "bytes": "f0a9108001000000e0ae2b800100000080aa108001000000",
+      "scope": "13A virtual reader binding"
+    }
+  ]
+}

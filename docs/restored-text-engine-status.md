@@ -6,6 +6,29 @@ default recognizer.
 
 ## Development integration (2026-10-21)
 
+### Additional storage/acoustic checkpoints (2026-10-22)
+
+The [full English FIRST acoustic checkpoint A](legacy-full-english-first-acoustic-checkpoint-a.md)
+now has an independent full-resource owner, parent/child preparation, four
+feature families and the220-channel acoustic cache. All141 original inputs
+and100 fixed PluColl inputs pass acoustic admission, independent numerical
+checks and Managed/NativeAOT parity. These are **not recognized-word counts**.
+Full-FIRST confidence/controller/WORD, source720 and finalized guide remain
+missing; application text recognition and the CTC frame heuristics are unchanged.
+
+The [inline23C wire reader](linguistic-fst23c-wire-reader.md) now retains the
+actual Russian number-rule storage with bounded immutable ownership. It reads
+all99 descriptors and299 raw words, without treating raw field20 as an initial
+state. This is not a number recognizer: outgoing execution, full28C mapping,
+history and paging still need their own integration. No additional root
+resource is automatically selected by this reader.
+
+RC1.2.8-rc.8 is an experimental checkpoint. The subsequent test-only correction
+replaces three stale generic2B0 diagnostic collectors with actual2B1 vectors and
+independently reconstructs all four feature families before checking5916 NN
+evaluations. It does not change the published application's runtime. General
+Russian cursive readiness and accuracy claims remain unchanged.
+
 The [actual2B1 landmark correction](directional-2b1-landmarks-runtime-20261021.md)
 now supplies BC280 separately from generic2B0 B6D20. English N and D0 use the
 corrected path, with independent134/100 numerical checks and Managed/NativeAOT

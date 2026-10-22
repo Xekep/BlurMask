@@ -1,0 +1,37 @@
+# Full English FIRST acoustic checkpoint A
+
+This endpoint implements the actual full English root247/selected249 FIRST path through owned parent ingress, child24A/24C/265, actual shift1/cap7 cuts/candidates, four107 feature inputs and the integer220 acoustic cache. It produces no accepted word, source720 row, finalized parent guide or CTC frame. Application defaults are unchanged.
+
+## Entry and ownership
+
+Load `LegacyFullEnglishFirstKnowledge` from the exact3783049-byte full resource SHA355f15d581dee2baeb092937cef69ae8db321ce3f60e28497c13e628a3b72927. The bounded caller bytes are privately copied before hash/parse. The actual full249/nested247/119/AL217 and four evaluators are retained once; equal bytes in another Knowledge remain a different owner. Existing lite/Russian owners and guards are unchanged.
+
+`LegacyFullEnglishFirstParentInput.Prepare(knowledge, raw, resolution, line30, line50, bounds, token)` requires actual physical resolution, pinned line2E3 resources, finite1..256 strokes/at most4096 total points, and lowerable conservative work limits. It privately snapshots both line resources before validating/loading. Parent source scale, freshB4=0 early2D0 envelope, grouping/split/reorder and157C60 filtering retain actual full source identity and parent maps. All planned filtered maps are preflighted before constructing child preparations. No caller ranges, guide, flags, masks, scores or success result are promoted to ownership.
+
+The full profile owns temporal16/spatial4x4 grid lists and four widths219/201/276/276. The NEW separately audited baseline-free2B1 kernel produces274 channels (bias/global17/local16x16), then two real signs. It uses committed actual BC280 landmarks, zero-unit whole/local dimensions and native two-stage saturation/calibration. It never pads a baseline9 array or changes the old public baseline9 Compose. Existing generic107 evaluators consume the actual full source/model, not a relabeled lite model. All8 positive groups and source policy0x21400 remain joined to that same source.
+
+`Run(table, token)` is one-use. It snapshots and revalidates the shared256-float table before reserving entry, then executes all children sequentially. Source graph/table/cost inputs are private; no external callback runs under a lock. Entered failure/cancellation poisons this owner; completed earlier child caches remain readable historical snapshots. Successful acoustic admission is not word acceptance. Repeated/concurrent entry is refused. The observable NN count uses CAS/Volatile and records started work reservations, including a canceled attempt.
+
+## Logical limits and retained data
+
+Each parent admits at most4096 cumulative live groups and16384 started network evaluations. Source current/filter copies, total retained post265 points, and total retained postcut points are independently capped at8192; existing individual preparation/cut helpers also cap each child at4096 points. The new2B1 facade admits at most255 prepared directional samples before shared byte-indexed consumers.
+
+The64MiB admission partition is16MiB logical model/source peak payload,16MiB retained acoustic caches, and32MiB cumulative charged ordinary graph allocation/work. These are independent-library logical envelopes, not process RSS or an SDK limit. Before cache growth, the complete conservative reservation is `65536 +4096*children +(220*4 +220*12 +256)*liveGroups`; maximum4096groups/256children is16580608 bytes. It includes final220 integers, ranked entries, row/array/dictionary capacity and child masks/groups/profiles. Production stores no neural vector, feature or NN history per group.
+
+The source logical peak calculation is `2*3783049 +6*(373957-8843) +8192*384 +256*4096 +1048576 =14999662` bytes: full wire snapshot/root, selected-wire/matrix views, XY/key/map/stage payloads, physical/child slots and bounded transient feature/cut workspace. Complete ingress/derived dimensions are checked before retaining further snapshots. The graph budget is one private invocation-wide object and charges seed/context/range/edge/composition/pruning growth before additions; old default-null paths are untouched.
+
+Remaining performance limitation: old cut Insert/WithTags helpers may make repeated copies of their bounded4096-point state. Source16MiB bounds logical peak/snapshot payload, not cumulative all cut allocations or CPU work; the graph32MiB component has the stronger cumulative work accounting. This checkpoint does not claim a64MiB process/RSS ceiling or bounded total allocator traffic for every old cut pass.
+
+## Validation
+
+The independent Python oracle reads actual full model matrices, all source/cache fields and native-default data hashes. It reconstructs normalization/chronology permutation/pen-up merge and all219/201/276/276 feature channels from the owned cut coordinates/ranges; then compares every signed107 hidden dot/activation/raw/probability channel, four-family ensemble, all220 final costs and ordered shortlists. Existing numeric preprocessing/cut/graph kernels retain their independently tested scope and exact old goldens; this new feature oracle does not claim an additional end-to-end independent parent/clustering proof merely from the recorded cut coordinates.
+
+The probe separately streams bounded transient diagnostics and copies actual pre-cache neural vectors through an off-lock diagnostic hook; production retains none. Per-parent diagnostic neural retention is capped at4MiB and aggregate streamed diagnostic work at400million scalar units before replay allocations. Every actual input is run both through production and diagnostic paths and complete final results compared. Full actual141 and fixed PluColl100 denominators, admitted/refused outcomes and all raw comparisons are recorded. No expected target text is read. Prepared saturation/equal-range/int32-extrema controls and deterministic lifecycle/budget/table-mutation/cancellation/concurrency controls are separately named.
+
+Final Managed/NativeAOT captures are byte-identical: all141 original inputs admitted/4303 groups/17212 NN evaluations and all100 fixed PluColl inputs admitted/11729 groups/46916 evaluations. Both full raw feature/NN/cache oracles pass, with52 guards,10 deterministic cancellations and production-versus-diagnostic parity for every actual input. These are acoustic admission denominators, not recognized words. The eight existing English Managed regression captures and existing prepared107 capture remain byte-exact; the unchanged legacy Russian acoustic probe passes its independent NN/cache oracle. Captures and dependencies are pinned in the final runtime manifest. Vendor DLLs remain static evidence only; no SDK binary is loaded or executed. Numerical validation is not a word-accuracy claim or universal native CRT equivalence claim.
+
+## Remaining dependencies
+
+B first needs a genuinely full-FIRST confidence/primary/context/terminal/richWORD winner, then source720 and full parent processors/finalizers. Existing lite-owned two-network wrappers cannot be substituted. No empty result or fabricated720 row may bypass that missing producer.
+
+C needs B's actual finalized guide/current source interval and independently closed5F.V120 raw-to-retained graph lifecycle. Current application `.5*bboxHeight`/`.9*bboxHeight` heuristics are not changed by A, and the native full frame is not ready merely because acoustic costs exist.

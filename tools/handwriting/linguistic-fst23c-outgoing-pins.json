@@ -1,0 +1,160 @@
+{
+  "binary": "MyScriptText.dll",
+  "sha256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+  "regions": [
+    {
+      "function": "18010a910",
+      "start": "0x18010a910",
+      "endExclusive": "0x18010a9eb",
+      "bytes": 219,
+      "sha256": "e568a4017df44ecc4e6fea849c462718fd9436b2a2f3459921bbc1063b5a911e"
+    },
+    {
+      "function": "18010b3d0",
+      "start": "0x18010b3d0",
+      "endExclusive": "0x18010ba28",
+      "bytes": 1624,
+      "sha256": "ddfdadab6075c6f395100529368ca02b019b1caa99b32412478bd72ac4775d5b"
+    },
+    {
+      "function": "18010bac0",
+      "start": "0x18010bac0",
+      "endExclusive": "0x18010bbd3",
+      "bytes": 275,
+      "sha256": "b331f275630bf2e2cfc5d1839a711033ccada0e4404bbed07adad1ec3b19bda9"
+    },
+    {
+      "function": "18023f6f0",
+      "start": "0x18023f6f0",
+      "endExclusive": "0x18023ffec",
+      "bytes": 2300,
+      "sha256": "df390a4651d71f30b5943fd226a0fe8b7be260ce1c070fe133ced6d97e7bc4f6"
+    },
+    {
+      "function": "18023e380",
+      "start": "0x18023e380",
+      "endExclusive": "0x18023f4ee",
+      "bytes": 4462,
+      "sha256": "ed84b42ed039ae40c54c9e10844b53713e8eed5734a59fca57a8b552171104cf"
+    }
+  ],
+  "completeLeaves": [
+    {
+      "start": "0x18010b3a0",
+      "bytes": "488b82800000008b4014c3",
+      "scope": "resource stateCount getter V48"
+    },
+    {
+      "start": "0x18010b3b0",
+      "bytes": "4885d27419488b41084881c200feffff4883e0fe488b004c8b400849ffe0c3",
+      "scope": "cost callback releases centered pointer minus512"
+    },
+    {
+      "start": "0x18010ba30",
+      "bytes": "4c8b9280000000b801000000458b4a14443bc876214d8b52180f1f80000000008bc8490fbe54ca0641833c90007c0affc0413bc172ea32c0c3b001c3",
+      "scope": "checks negative selected costs over states1..stateCount-1"
+    },
+    {
+      "start": "0x18010ba70",
+      "bytes": "488b8280000000418bc8488b40180fb744c804c3",
+      "scope": "V68 target label getter"
+    },
+    {
+      "start": "0x18010ba90",
+      "bytes": "488b8280000000418bc8488b40180fb644c807c3",
+      "scope": "V70 target byte7 getter"
+    },
+    {
+      "start": "0x18010bab0",
+      "bytes": "41c60000488b82800000008b4020c3",
+      "scope": "V78 returns rawfield20 and clearsflag"
+    },
+    {
+      "start": "0x18023bce0",
+      "bytes": "418bc0c3",
+      "scope": "28C V38 identity state mapping"
+    },
+    {
+      "start": "0x18023fff0",
+      "bytes": "4533c9e9f8f6ffff",
+      "scope": "28C V40 ordinary-mode entry"
+    },
+    {
+      "start": "0x180240000",
+      "bytes": "41b101e9e8f6ffff",
+      "scope": "28C V48 alternative-mode entry"
+    }
+  ],
+  "tables": [
+    {
+      "at": "0x1802bae88",
+      "bytes": "f0bd108001000000f0ad2b8001000000a8ad2b800100000030bd108001000000d0bc108001000000",
+      "scope": "13A metadata/initializer list dispatch"
+    },
+    {
+      "at": "0x1802bada8",
+      "bytes": "10a910800100000000000000000000000000000000000000",
+      "scope": "13A initializer10A910"
+    },
+    {
+      "at": "0x1802badf0",
+      "bytes": "f0a9108001000000e0ae2b800100000080aa108001000000a0ad108001000000b0ad10800100000050bd10800100000030a60c8001000000506d1d8001000000d06d1d8001000000a0b3108001000000d0b3108001000000c0a204800100000030ba10800100000070ba10800100000090ba108001000000b0ba108001000000c0ba108001000000e06d1d8001000000f06d1d8001000000",
+      "scope": "13A complete scoped virtual source interface"
+    },
+    {
+      "at": "0x1802e9270",
+      "bytes": "6029098001000000d0912e800100000080e3238001000000f0f4238001000000903a09800100000040f6238001000000b0f6238001000000e0bc238001000000f0ff2380010000000000248001000000b013248001000000d013248001000000",
+      "scope": "28C virtual query interface"
+    },
+    {
+      "at": "0x1802ed7a0",
+      "bytes": "00000080000000800000008000000080",
+      "scope": "actual literal read by10B3D0 0x18010b43e"
+    },
+    {
+      "at": "0x1802ed710",
+      "bytes": "0000fe420000fe420000fe420000fe42",
+      "scope": "actual literal read by10B3D0 0x18010b445"
+    },
+    {
+      "at": "0x1802ed52c",
+      "bytes": "000000c6",
+      "scope": "actual literal read by10B3D0 0x18010b491"
+    },
+    {
+      "at": "0x1802ed960",
+      "bytes": "000000c6000000c6000000c6000000c6",
+      "scope": "actual literal read by10B3D0 0x18010b4c9"
+    },
+    {
+      "at": "0x1802ed6d0",
+      "bytes": "0000803f0000803f0000803f0000803f",
+      "scope": "actual literal read by10B3D0 0x18010b4dd"
+    },
+    {
+      "at": "0x1802ed640",
+      "bytes": "7f000000800000008100000082000000",
+      "scope": "actual literal read by10B3D0 0x18010b51e"
+    },
+    {
+      "at": "0x1802ed428",
+      "bytes": "0000fe42",
+      "scope": "actual literal read by10B3D0 0x18010b5e7"
+    },
+    {
+      "at": "0x1802ed194",
+      "bytes": "0000803f",
+      "scope": "actual literal read by10B3D0 0x18010b5ef"
+    },
+    {
+      "at": "0x1802ed610",
+      "bytes": "00000000010000000200000003000000",
+      "scope": "actual literal read by10B3D0 0x18010b75e"
+    },
+    {
+      "at": "0x18010b3b0",
+      "bytes": "4885d27419488b41",
+      "scope": "actual literal read by10B3D0 0x18010ba06"
+    }
+  ]
+}

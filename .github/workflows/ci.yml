@@ -256,6 +256,25 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y clang zlib1g-dev
+      - name: Storage and full English acoustic checkpoint Native AOT parity
+        shell: pwsh
+        run: |
+          $suffix = if ($IsWindows) { '.exe' } else { '' }
+          foreach ($project in @('LegacyFst23C.Probe', 'LegacyFullEnglishFirst.Probe')) {
+            $capture = if ($project -eq 'LegacyFst23C.Probe') { 'legacy-fst23c' } else { 'legacy-en-full-first' }
+            $directory = "./.artifacts/$capture-native"
+            dotnet publish "tools/$project/$project.csproj" -c Release -p:PublishAot=true -o $directory
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $arguments = @('models')
+            if ($project -eq 'LegacyFullEnglishFirst.Probe') { $arguments += '.artifacts/legacy-en119-final-single-blind.json' }
+            $arguments += ".artifacts/$capture-native.json"
+            $executable = Join-Path $directory "$project$suffix"
+            & $executable @arguments
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $managedHash = (Get-FileHash ".artifacts/$capture-managed.json" -Algorithm SHA256).Hash
+            $nativeHash = (Get-FileHash ".artifacts/$capture-native.json" -Algorithm SHA256).Hash
+            if ($managedHash -ne $nativeHash) { throw "$project Managed/Native AOT mismatch." }
+          }
       - name: Publish and run standalone Russian word pipeline as Native AOT
         shell: pwsh
         run: |
