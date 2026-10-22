@@ -37,6 +37,10 @@ substitutes. Result queries are explicitly prepared consumer requests on the
 actual completed map; their provenance from207780 is not claimed. Numeric
 winners and confidence are not acceptance probabilities or OCR quality data.
 
+The following counts/hash describe the historical pre-actual2B1 producer
+capture. Current test-only reconstruction is recorded below; these aggregates
+must not be used as current numeric goldens.
+
 Managed and fresh win-x64 Native AOT pass 8 sources, 631 distinct groups,
 6251 candidate scores, 259 prepared result-query rows and 111 guards. Confidence
 and normalized weights match the independent raw192x4/3A0/float32 oracle exactly
@@ -62,3 +66,39 @@ python tools/handwriting/audit_main_global_result.py --output E:/BlurMask-build-
 
 Native AOT uses the same nine arguments. All artifacts and process TEMP/TMP
 belong on E. Vendor DLLs are read as static PE data, never loaded or executed.
+
+## Test-only oracle correction,2026-10-22
+
+The actual2B1 correction legitimately changes this fixture's retained candidates
+and final permission map. The old aggregate assertion6251scores/259query rows
+was stale; replacing it with new aggregate numbers would not establish correct
+membership. Production code/defaults/binaries are unchanged by this repair.
+
+The probe now records numeric normalized cache inputs, whole/endpoint scope,
+the actual acoustic mask and the SAME completed result lease's immutable map,
+initial contexts and case classifications. A probe-only typed `UnsafeAccessor`
+reads the existing private result-lease field; it never recaptures, refreshes,
+replaces or mutates a source/lease. Existing owner/revision/lifetime guards and
+the no-extra-NN assertion remain active. These snapshots are explicit upstream
+inputs to the result consumer oracle, not a new independent NN/geometry proof.
+
+The Python oracle independently reads the raw AK cache profile, stored alphabet
+forms and case-mask callbacks. Its existing independently tested cache reference
+reconstructs all final class costs and retained heap membership. It additionally
+checks the native equal-cost ranking order before confidence/normalized-weight
+checks. It derives the prepared query32 stream from raw packed LK root children,
+the retained working map, raw stored case forms/TCM512 facts and context records,
+checking every byte rather than only source-byte stamping or an aggregate count.
+Preserved maps, case classifications, masks and source costs are independently
+validated. The retained working map remains an authenticated upstream snapshot;
+this consumer test does not independently replay the full permission producer.
+
+All8owners/631unique groups remain required. Candidate/query totals are derived
+from complete membership reconstruction: current Managed and win-x64 NativeAOT
+both contain6250scores and247prepared query rows, with confidence/weight maxULP0.
+All original scalar/calibration/weight/raw17153-penalty/eight terminal-scan checks
+remain. `test_audit_mutations.py AK LK CAPTURE OUTPUT_DIR` proves rejection of
+candidate deletion, ordering and membership changes, query scalar corruption,
+query-row deletion and retained-map membership changes. These six negative
+captures are written only to the explicit output directory. No handwriting
+quality improvement, new publication scheduler or production behavior is claimed.

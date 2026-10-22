@@ -2,6 +2,7 @@ using InkRecognition;
 using System.Buffers.Binary;
 using System.Text.Json;
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 if(args.Length!=9)throw new ArgumentException("AK engine separation case publication line30 line50 capture LK");
 byte[] ak=File.ReadAllBytes(args[0]),lk=File.ReadAllBytes(args[8]),engine=File.ReadAllBytes(args[1]);
@@ -31,6 +32,18 @@ foreach(var raw in new[]{new[]{M(0),M(140)},new[]{M(0),M(250)},new[]{V(0),V(140)
     result.ValidateResultQueryLease(default);
     if(!ReferenceEquals(selected.PassResult,result)||!ReferenceEquals(selected.Invocation,terminal))throw new Exception("Global terminal owner changed.");
     w.WriteStartObject();w.WriteNumber("owner",owners);w.WriteNumber("nodes",result.NodeCount);w.WriteNumber("primaryLimit",policy.Configuration.PrimaryArcLimit230a);
+    var resultLease=ProbeSnapshots.ReadLease(result);
+    var retainedMap=resultLease.DictionaryLease.Map;
+    Ints("retainedWorkingMap",retainedMap.CopySelectedMap(false,0).Select(v=>(int)v));
+    Ints("retainedPreservedMap",retainedMap.CopySelectedMap(false,0x40).Select(v=>(int)v));
+    Ints("acousticMask",owner.Symbols.CopyMasks().Primary.ToArray().Select(v=>(int)v));
+    w.WriteStartArray("initialContexts");foreach(ulong v in owner.Symbols.Symbols.Symbols.CopyInitialContexts())w.WriteNumberValue(v);w.WriteEndArray();
+    w.WriteNumber("caseVersion",model.LanguageModel.CasePathVersion);
+    var preparation=owner.Symbols.Symbols.Preparation;w.WriteNumber("caseBoundary",preparation.Ranges.LastCasedBoundary);
+    w.WriteStartArray("caseRows");foreach(ushort symbol in Enumerable.Range(0,192).Concat(Enumerable.Range(65507,29)).Select(v=>(ushort)v))
+    {w.WriteStartArray();w.WriteNumberValue(symbol);w.WriteNumberValue(preparation.ReadClassification(symbol));w.WriteNumberValue(preparation.ReadClassification(symbol,true));Forms(false);Forms(true);w.WriteEndArray();
+     void Forms(bool alternate){if(!preparation.TryReadForms(symbol,alternate,out var forms)){w.WriteNullValue();return;}w.WriteStartArray();w.WriteNumberValue(forms.First);w.WriteNumberValue(forms.Second);w.WriteNumberValue(forms.Third);w.WriteEndArray();}}
+    w.WriteEndArray();
     w.WriteNumber("penalty",terminal.LanguagePenalty2534);w.WriteNumber("cumulative",result.FinalCumulativeCost);w.WriteString("finalRecords",Convert.ToHexString(result.FinalRecords));w.WriteNumber("sourceEnd",result.FinalSourceEnd);
     w.WriteStartArray("sourceHeaders");foreach(var header in terminal.CopySources())w.WriteNumberValue(header.Header);w.WriteEndArray();
     var winner=selected.Winner;w.WriteStartArray("winner");w.WriteBooleanValue(winner.HasWinner);w.WriteNumberValue(winner.Ordinal);w.WriteNumberValue(winner.RelativeCost);w.WriteNumberValue(winner.TotalCost);w.WriteNumberValue(winner.RowCost14);w.WriteNumberValue(winner.RowField22);w.WriteNumberValue(winner.FallbackFlag);w.WriteNumberValue(winner.ResultFlag8);w.WriteEndArray();
@@ -43,6 +56,9 @@ foreach(var raw in new[]{new[]{M(0),M(140)},new[]{M(0),M(250)},new[]{V(0),V(140)
         var entries=value.Candidates.Span;groups++;candidates+=entries.Length;
         if(MemoryMarshal.TryGetArray(value.Candidates,out var escaped)&&entries.Length>0){var c=entries[0];escaped.Array![escaped.Offset]=new(c.Symbol,c.Cost,-100);if(value.ReadSymbolScore(c.Symbol)!=c.Confidence)throw new Exception("Candidate public memory escaped.");}
         w.WriteStartObject();w.WriteNumber("group",group);w.WriteNumber("sourceProbabilityBits",BitConverter.SingleToInt32Bits(value.FirstStoredSourceProbability));
+        var normalized=geometry.NormalizeGroup(group);var primitive=geometry.ReadPrimitiveScope(group);
+        w.WriteStartArray("normalizedCacheInput");foreach(var stroke in normalized.Strokes){w.WriteStartArray();foreach(var point in stroke.Points){w.WriteStartArray();w.WriteNumberValue(point.X);w.WriteNumberValue(point.Y);w.WriteEndArray();}w.WriteEndArray();}w.WriteEndArray();
+        w.WriteBoolean("whole",primitive.BoundaryAlignedSingleNormalizedStroke);w.WriteBoolean("zero",primitive.EndpointFieldsAreZero);
         w.WriteStartArray("probabilities");for(int family=0;family<4;family++){var vector=value.CopyFamilyProbabilities(family);w.WriteStartArray();foreach(int p in vector)w.WriteNumberValue(p);w.WriteEndArray();vector[0]^=1;if(vector[0]==value.CopyFamilyProbabilities(family)[0])throw new Exception("Private family vector escaped.");}w.WriteEndArray();
         w.WriteStartArray("rawCosts");foreach(int cost in value.CopyRawIntegerCosts())w.WriteNumberValue(cost);w.WriteEndArray();
         w.WriteStartArray("finalCosts");foreach(int cost in value.CopyFinalClassCosts())w.WriteNumberValue(cost);w.WriteEndArray();
@@ -55,6 +71,7 @@ foreach(var raw in new[]{new[]{M(0),M(140)},new[]{M(0),M(250)},new[]{V(0),V(140)
     //the actual retained map, not a restored207780 request producer.
     byte[] first=ReadAll(),second=ReadAll();if(!first.AsSpan().SequenceEqual(second))throw new Exception("Retained-map repeated result query changed output.");
     w.WriteString("queryRows",Convert.ToHexString(first));queryRows+=first.Length/32;
+    w.WriteStartArray("contextNodes");foreach(var n in owner.Contexts.CopyNodes()){w.WriteStartArray();w.WriteNumberValue(n.Identity);w.WriteNumberValue(n.ParentLink);w.WriteNumberValue(n.Symbol);w.WriteEndArray();}w.WriteEndArray();
     if(owner.AcousticEvaluations!=evaluations)throw new Exception("Publication/confidence evaluated replacement networks.");
     w.WriteNumber("acousticEvaluations",evaluations);w.WriteEndObject();
     Reject(()=>confidence.ReadGroup(-1));Reject(()=>confidence.ReadGroup(graph.State.Groups.Count));Reject(()=>confidence.ReadGroup(0,new(true)));
@@ -78,3 +95,11 @@ foreach(var raw in new[]{new[]{M(0),M(140)},new[]{M(0),M(250)},new[]{V(0),V(140)
 }
 w.WriteEndArray();w.Flush();Console.WriteLine($"PASS {owners} actual global owners/{groups} confidence groups/{candidates} candidate scores/{queryRows} prepared result-query rows/{guards} guards; no text/publication/accuracy claim.");
 void Reject(Action action){try{action();}catch(Exception e)when(e is ArgumentException or InvalidOperationException or NotSupportedException or OperationCanceledException){guards++;return;}throw new Exception("Invalid global result scope accepted.");}
+void Ints(string name,IEnumerable<int> values){w.WriteStartArray(name);foreach(int value in values)w.WriteNumberValue(value);w.WriteEndArray();}
+static class ProbeSnapshots
+{
+    // Read-only diagnostic access to the SAME immutable installed map retained
+    // by the completed result. Never recapture/refresh/replace authorization.
+    [UnsafeAccessor(UnsafeAccessorKind.Field,Name="resultQueries")]
+    internal static extern ref LegacyFreshMainGlobalCaseSession.ResultQueryLease ReadLease(LegacyFreshMainGlobalWordPassResult result);
+}
