@@ -44,3 +44,22 @@ It pins both source variants, both objects, the comparison scripts and report,
 assembler/include dependencies and the preceding byte audits. Microsoft CRT
 source and compiled objects are analysis artifacts; they are not added to the
 application or distributed by this change.
+
+## Packet helper coverage supplement
+
+The selected loader also calls `106360`, which was outside the earlier
+24-function instruction inventory. A fresh read-only export covers its full
+registered body: 1466 bytes and 393 instructions. The actual `106DD0` caller
+passes the local packet address and size112; this is pinned from instructions.
+The immutable evidence manifest is
+`root-ctc-packet-admission-frozen-manifest-20261023.json`, SHA256
+`606d165b3a336ca80198a2aaac330a425db846e7563d8517e8f89dd64b94be50`.
+
+`tools/handwriting/audit_english_ctc_packet_admission.py` verifies that complete
+body, 26 instruction pins and six branch/call destinations. Conditionally,
+when packet count+5C and pointers+60/+68 are zero, its two optional scans and
+two post-builder mapping-write loops are bypassed. The builder `10E410` still
+executes. This is a conditional packet-path result, not proof that the chosen
+raw model produces that packet, or that builder destinations cannot alias
+retained graph headers. Those proofs remain open. No vendor code is executed
+and no runtime predicate or application behavior changes.
