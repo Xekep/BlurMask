@@ -589,7 +589,7 @@ python -I tools/LegacyGlobalInputTransforms.Probe/audit_output.py models .artifa
 dotnet run --project tools/LegacyGlobalCounterHandoff.Probe -c Release -- models tools/test-data/russian-recorded-words/manifest.json .artifacts/legacy-global-counter-managed.json
 python -I tools/LegacyGlobalCounterHandoff.Probe/audit_output.py models .artifacts/legacy-global-text-source-wrapper-managed.json .artifacts/legacy-global-word-text-managed.json .artifacts/legacy-global-document-coverage-managed.json .artifacts/legacy-global-selected-managed.json .artifacts/legacy-global-indices-managed.json .artifacts/legacy-global-cleanup-managed.json .artifacts/legacy-global-transforms-managed.json .artifacts/legacy-global-counter-managed.json
 dotnet run --project tools/LegacyGlobalSourceRangeUtf8.Probe -c Release -- models tools/test-data/russian-recorded-words/manifest.json .artifacts/legacy-global-source-range-utf8-managed.json
-python -I -B tools/LegacyGlobalSourceRangeUtf8.Probe/audit_output.py .artifacts/legacy-global-source-range-utf8-managed.json .artifacts/legacy-global-word-text-managed.json
+python -I -B tools/LegacyGlobalSourceRangeUtf8.Probe/audit_output.py models .artifacts/legacy-global-source-range-utf8-managed.json .artifacts/legacy-global-word-text-managed.json .artifacts/legacy-global-text-source-wrapper-managed.json
 python tools/export-ink-model.py --resource models/en-US/en_US-ak-cur.res --output .artifacts/native-english-reference.ikrpack
 dotnet run --project tools/NativeEnglishResource.Probe -c Release -- models .artifacts/native-english-reference.ikrpack .artifacts/native-english-resource-managed.json
 python -I -B tools/NativeEnglishResource.Probe/audit_output.py .artifacts/native-english-resource-managed.json

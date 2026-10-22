@@ -1019,7 +1019,7 @@ foreach ($case in $cases) {
     }
   }
   if ($name -eq 'LegacyGlobalSourceRangeUtf8') {
-    python -I -B tools/LegacyGlobalSourceRangeUtf8.Probe/audit_output.py .artifacts/legacy-global-source-range-utf8-native.json .artifacts/legacy-global-word-text-native.json
+    python -I -B tools/LegacyGlobalSourceRangeUtf8.Probe/audit_output.py models .artifacts/legacy-global-source-range-utf8-native.json .artifacts/legacy-global-word-text-native.json .artifacts/legacy-global-text-source-wrapper-native.json
     if ($LASTEXITCODE -ne 0) { throw 'LegacyGlobalSourceRangeUtf8 independent audit failed' }
     if ((Get-FileHash .artifacts/legacy-global-source-range-utf8-native.json).Hash -ne (Get-FileHash .artifacts/legacy-global-source-range-utf8-managed.json).Hash) { throw 'LegacyGlobalSourceRangeUtf8 Managed/Native parity failed' }
   }

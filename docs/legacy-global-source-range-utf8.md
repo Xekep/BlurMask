@@ -43,8 +43,10 @@ flag, supplied source class or synthetic fallback result.
 The new probe rebuilds the genuine raw13 publication chain, verifies exact typed
 identities, defensive arrays, all output cancellation prefixes, stateless retry,
 unchanged pending command IDs/counters and disposal invalidation. Its Python
-oracle joins to the hash-pinned original13 WORD/TEXT/CHAR publication evidence,
-derives selected/cleanup flags independently, and replays the separate Python
+oracle first replays the complete independent raw AL/CHAR and WORD/TEXT
+composition checks on the paired same-input child and parent captures, then
+joins to their13 original publications. It does not pin one historical winner's
+JSON hash. It derives selected/cleanup flags independently, and replays the separate Python
 C21/decimal formatter. Expected labels do not enter inference. Managed and
 Native AOT output must agree byte-for-byte before integration.
 
@@ -52,3 +54,8 @@ The unsupported actual MIR C25 lookup remains a separate selected-source
 dependency. This formatter does not infer an object's native class from its
 coordinates, accept MIR through a prepared receipt, or claim completion of the
 full text engine.
+
+Four corrupted formatting captures must be rejected: wrong source identity,
+wrong normalized UTF8, wrong caller UTF8 and a missing pending command. The
+full63-source/13-owner/122-guard fixture coverage and all C21/endpoint checks
+remain mandatory. This test-only change leaves inference and runtime untouched.
