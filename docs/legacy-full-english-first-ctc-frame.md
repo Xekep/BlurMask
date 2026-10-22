@@ -2,6 +2,35 @@
 
 STATIC only. No application/default/inference change. No targets or expected strings are inputs. Previous N/D0/frontend freezes remain immutable.
 
+## Retained kind8 conversion closure correction, 23 October
+
+The alignment-conversion dispatcher `Engine1953E0` switches on `kind - 1`.
+The actual kind8 path therefore uses table entry7 at `195824`, targeting
+`1955B1`. It calls `1916C0` twice through the source/destination matrix handles
+at node38/40. `1916C0` processes the two substates at offsets0/1C0 through
+`193240`; that helper dispatches seven possible calls to `198A00` on matrix
+blocks0/40/80/C0/100/140/180. These two intermediate functions were missing
+from the earlier exploratory 24-function inventory.
+
+The additive read-only export covers the complete registered bodies of
+`1953E0` (1089 bytes), `1916C0` (151 bytes) and `193240` (380 bytes):
+406 instructions, 1620 bytes. The portable audit verifies their exact PE
+identity, the full 14-entry jump table, and all11 focused direct call/tail-jump
+edges. It reads DLL bytes without loading or executing the SDK:
+
+```powershell
+python -I -B tools/handwriting/audit_english_ctc_kind8_conversion.py --sdk research/myscript/sdk/build/x64 --output E:/BlurMask-build-artifacts-20261014/kind8-audit.json
+```
+
+The frozen export/evidence manifest remains on E:
+`root-ctc-kind8-addendum-frozen-manifest-20261023.json`, SHA256
+`2699683bfb545561084c10a08d8f54d0935107b80807f4195d01aea7034e3d66`.
+Earlier exports remain unchanged. The complete selected-path allocation,
+payload-copy and alias/store proof is still open, including the separately
+exported `1D9730` copy helper. This correction does not authorize a
+`V120=false` shortcut, change the application's frame heuristics, or establish
+full native-frame or recognition readiness.
+
 ## Current user-visible path and exact native input
 
 Current StrokeFeatures.Create uses height=.5*bboxExtent and baseline=ymin+.9*bboxExtent, rejects flat extent and resamples the caller's supplied strokes. These are explicit heuristics. The bundled full English resource itself contains no such ratio: its exact SHA355f15d581dee2baeb092937cef69ae8db321ce3f60e28497c13e628a3b72927 is root247/v110, sourceKind135/mode2, positive148 with plain21E/v103 at1774246..3782859. Adapter mode0/kind4 supplies13 normalized features, spacing0.30000001192092896,minPoints2,link_strokes0,transform0 and181 outputs plusblank181. Its nested53 owns5F/v1061774299..3782348; raw layer kinds1,8,8,8/widths13,127,127,127. Type2BE is not the serialized feature owner; it is not used as a substitute identity here.

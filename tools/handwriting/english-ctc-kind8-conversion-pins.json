@@ -1,0 +1,94 @@
+{
+  "scope": "STATIC additive correction; no vendor execution, retained predicate or runtime change",
+  "nativeSha256": "d31abcd309cbb558bb80bf50fe1968921de515bc40fbeb0e886a5cf14dbc0a5c",
+  "regions": [
+    {
+      "function": "1801953e0",
+      "start": "0x1801953e0",
+      "endInclusive": "0x180195820",
+      "bytes": 1089,
+      "sha256": "4b8e3953feece23497dbcad70e5ee71ec4a96e8a42f9af09aa5ee378579b543e",
+      "instructions": 285
+    },
+    {
+      "function": "1801916c0",
+      "start": "0x1801916c0",
+      "endInclusive": "0x180191756",
+      "bytes": 151,
+      "sha256": "0b27276d74623cf4ba42c23c33d7044297ad00eb68188360f65b7a2d43256b73",
+      "instructions": 38
+    },
+    {
+      "function": "180193240",
+      "start": "0x180193240",
+      "endInclusive": "0x1801933bb",
+      "bytes": 380,
+      "sha256": "81f2e6e8a12d568f8c8b5e9a15ce46d154e2b917eee8fcfbcc89e5ee5687ddbf",
+      "instructions": 83
+    }
+  ],
+  "selectedKind": 8,
+  "jumpIndex": 7,
+  "jumpTableAddress": "0x180195824",
+  "selectedTarget": "0x1801955b1",
+  "jumpTableSha256": "632a0e0c0932b57f7b5e984ceddf93d7d9907dc706c42bcb2ab9379d0eaf910d",
+  "directEdges": [
+    {
+      "at": "0x1801955d0",
+      "bytes": "e8ebc0ffff",
+      "target": "0x1801916c0"
+    },
+    {
+      "at": "0x1801955fa",
+      "bytes": "e8c1c0ffff",
+      "target": "0x1801916c0"
+    },
+    {
+      "at": "0x180191712",
+      "bytes": "e8291b0000",
+      "target": "0x180193240"
+    },
+    {
+      "at": "0x180191752",
+      "bytes": "e9e91a0000",
+      "target": "0x180193240"
+    },
+    {
+      "at": "0x18019327c",
+      "bytes": "e87f570000",
+      "target": "0x180198a00"
+    },
+    {
+      "at": "0x1801932a9",
+      "bytes": "e852570000",
+      "target": "0x180198a00"
+    },
+    {
+      "at": "0x1801932cc",
+      "bytes": "e82f570000",
+      "target": "0x180198a00"
+    },
+    {
+      "at": "0x1801932fd",
+      "bytes": "e8fe560000",
+      "target": "0x180198a00"
+    },
+    {
+      "at": "0x180193349",
+      "bytes": "e8b2560000",
+      "target": "0x180198a00"
+    },
+    {
+      "at": "0x180193372",
+      "bytes": "e889560000",
+      "target": "0x180198a00"
+    },
+    {
+      "at": "0x1801933a0",
+      "bytes": "e85b560000",
+      "target": "0x180198a00"
+    }
+  ],
+  "aliasStoreProofComplete": false,
+  "runtimePredicateApproved": false
+}
