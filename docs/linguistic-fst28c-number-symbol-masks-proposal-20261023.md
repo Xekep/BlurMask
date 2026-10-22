@@ -98,8 +98,9 @@ is cleared and released after construction; it is not a second retained model.
 Use `LegacyInkAlphabet.Load` on the authenticated acoustic payload and the
 existing source primary typed map. Read exactly the authenticated v110 zero-group
 field at566380 (the complete native wire partition is independently audited);
-do not call the heavyweight whole-network prefix loader just to return an empty
-knowledge list and do not duplicate an arbitrary-version parser. This factory
+do not call the generic variable-prefix reader just to return an empty knowledge
+list and do not duplicate an arbitrary-version parser. That reader skips network
+envelopes rather than decoding their weights. This factory
 admits this one byte-pinned resource; other group layouts are refused.
 
 The source tokens0..15 and preserved16 map are derived internally from actual

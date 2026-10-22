@@ -14,8 +14,10 @@ Native240.A8 callback2066D0 produces the seed; neutral controller and ordinary
 producer kernels implement the proven numeric prefix. A private fixed AK
 snapshot is fully authenticated before any kind, alphabet or group-field read,
 then cleared in finally. The exact v110 knowledge field is zero at566380;
-its complete independent raw partition ends566382. The heavyweight network
-prefix loader is not invoked merely to obtain an empty group list.
+its complete independent raw partition ends566382. The generic variable-prefix
+reader is not invoked merely to obtain an empty group list. That existing reader
+skips authenticated network envelopes; this avoids an unnecessary traversal,
+not a demonstrated allocation of decoded network weights.
 
 For this exact admitted AK, no Arabic contextual candidate or wide/base pair
 exists. Fresh restriction is absent and bypass is false by the frozen native
