@@ -17,32 +17,40 @@ public static class NativeEnglishTextResource
     {
         token.ThrowIfCancellationRequested();Require(resource.Length==3783049,"Complete full English resource required.");
         byte[] data=resource.ToArray();Require(Convert.ToHexStringLower(SHA256.HashData(data))==SourceSha256,"Unsupported English resource fingerprint.");token.ThrowIfCancellationRequested();
-        Node root=Header(data,0);Require(root.End==data.Length&&root.Flags==0,"Complete unencoded root required.");
-        Require(data.AsSpan(91,8).SequenceEqual(Convert.FromHexString("05012b0000000401")),"Actual inline English alphabet required.");
-        var alphabet=LegacyInkAlphabet.Load(data.AsSpan(99),0x104);
-        var nodes=new List<Node>();
-        for(int at=0;at<=data.Length-16;at++)
-        {
-            if((at&32767)==0)token.ThrowIfCancellationRequested();
-            if(BinaryPrimitives.ReadUInt32LittleEndian(data.AsSpan(at))!=0x0101fe90)continue;
-            uint length=BinaryPrimitives.ReadUInt32LittleEndian(data.AsSpan(at+4));if(length<8||length>(uint)(data.Length-at-8))continue;
-            nodes.Add(Header(data,at));Require(nodes.Count<=4096,"Resource node budget exceeded.");
-        }
-        Profile? profile=null;
-        foreach(var node in nodes.Where(n=>n.Kind==0x21e))
-        {
-            token.ThrowIfCancellationRequested();Require(node.Flags==0&&node.Version==0x103,"Actual text adapter required.");var r=new Cursor(data,node.Offset+16,node.End);
-            Require(r.Int()==1,"One feature scheme required.");int mode=r.Int(),kind=r.Int();if(mode!=0||kind!=4)continue;
-            Require(profile is null,"Exactly one supported English adapter required.");var wrapper=Header(data,r.Position);Require(wrapper.Kind==0x53&&wrapper.Flags==0&&wrapper.End<=node.End,"Owned English network wrapper required.");r.Position=wrapper.End;
-            Require(r.Byte()==1,"Normalized feature channels required.");var means=r.Floats(13);var scales=r.Floats(13);
-            int blank=r.Int(),scoreKind=r.Int(),representation=r.Int();float scoreScale=r.Float();int unused=r.Int();float spacing=r.Float();
-            int minimum=r.Int(1000),transform=r.Int(),property14=r.Int();int property20=r.Byte(),link=r.Byte();float property1c=r.Float();int labelCount=r.Short();
-            Require(labelCount==181&&blank==181&&scoreKind==0&&representation==0&&unused==0&&transform==0&&property14==0&&property20==0&&link==0&&property1c==float.MaxValue&&spacing>0&&minimum is>=1 and<=8,"Unsupported English feature/scoring profile.");
-            var labels=new ushort[labelCount];for(int i=0;i<labels.Length;i++)labels[i]=r.Short();Require(r.Position==r.End,"Unconsumed text adapter.");
-            profile=new(wrapper,means,scales,spacing,minimum,labels);
-        }
-        Require(profile is not null,"Missing supported English adapter.");var p=profile!;
-        var matches=nodes.Where(n=>n.Kind==0x5f&&n.Offset>p.Wrapper.Offset&&n.End<=p.Wrapper.End).ToArray();Require(matches.Length==1,"One owned BLSTM required.");var net=matches[0];Require(net.Flags==0&&net.Version==0x106,"Actual106 network required.");
+        // Resolve the actual delegated source child, rather than interpreting
+        // header-like byte sequences inside unrelated model/tensor payloads.
+        var source=LegacySource247WireLayout.Read(data,token:token);
+        Require(source.Offset==0&&source.End==data.Length&&source.SourceKind==0x135&&
+            source.Alphabet.LabelCount==217&&source.Fingerprint.Equals(SourceSha256,StringComparison.OrdinalIgnoreCase),
+            "Complete actual English source owner required.");
+        var alphabet=source.Alphabet;
+        var children=source.Children.Where(c=>c.Destination=="247.148").ToArray();
+        Require(children.Length==1,"Exactly one delegated English adapter required.");
+        var child=children[0];
+        Require(child.Kind==0x21e&&child.Version==0x103,"Actual text adapter required.");
+        var node=Header(data,child.Offset);
+        Require(node.End==child.End&&node.Flags==0,"Owned complete English adapter required.");
+        var r=new Cursor(data,node.Offset+16,node.End);
+        Require(r.Int()==1&&r.Int()==0&&r.Int()==4,"One actual13-channel English feature scheme required.");
+        var wrapper=Header(data,r.Position);
+        Require(wrapper.Kind==0x53&&wrapper.Version==0x100&&wrapper.Flags==0&&wrapper.End<=node.End,
+            "Owned English network wrapper required.");
+        // These nine bytes are a pinned opaque wrapper prefix, not a generic
+        // wrapper execution policy or retained-graph/V120 proof.
+        const int wrapperPrefixLength=9;
+        Require(wrapper.End-wrapper.Offset>=16+wrapperPrefixLength+16&&
+            data.AsSpan(wrapper.Offset+16,wrapperPrefixLength).SequenceEqual(new byte[]{1,1,0,0,0,1,0,0,0}),
+            "Actual opaque English wrapper prefix required.");
+        var net=Header(data,wrapper.Offset+16+wrapperPrefixLength);
+        Require(net.Kind==0x5f&&net.Flags==0&&net.Version==0x106&&net.End==wrapper.End,
+            "One complete nested actual106 network required.");
+        r.Position=wrapper.End;
+        Require(r.Byte()==1,"Normalized feature channels required.");var means=r.Floats(13);var scales=r.Floats(13);
+        int blank=r.Int(),scoreKind=r.Int(),representation=r.Int();float scoreScale=r.Float();int unused=r.Int();float spacing=r.Float();
+        int minimum=r.Int(1000),transform=r.Int(),property14=r.Int();int property20=r.Byte(),link=r.Byte();float property1c=r.Float();int labelCount=r.Short();
+        Require(labelCount==181&&blank==181&&scoreKind==0&&representation==0&&unused==0&&transform==0&&property14==0&&property20==0&&link==0&&property1c==float.MaxValue&&spacing>0&&minimum is>=1 and<=8,"Unsupported English feature/scoring profile.");
+        var labels=new ushort[labelCount];for(int i=0;i<labels.Length;i++)labels[i]=r.Short();Require(r.Position==r.End,"Unconsumed text adapter.");
+        var p=new Profile(wrapper,means,scales,spacing,minimum,labels);
         var q=new Cursor(data,net.Offset+16,net.End);Require(q.Int(2)==1,"Sequential network required.");int layerCount=q.Int(16);Require(layerCount==4,"Three BLSTM layers required.");var layers=new Layer[layerCount];
         for(int i=0;i<layerCount;i++){int kind=q.Int(),width=q.Int(2048),flags=q.Int(),code=q.Int();Require(flags==0&&code is>=1 and<=3&&width>0,"Unsupported layer metadata.");layers[i]=new(kind,width,code);}
         Require(layers[0].Kind==1&&layers[0].Width==13&&layers.Skip(1).All(l=>l.Kind==8),"English13-channel BLSTM architecture required.");

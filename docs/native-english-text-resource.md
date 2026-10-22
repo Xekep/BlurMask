@@ -8,8 +8,11 @@ No Python process, SDK DLL, on-device certificate or native ML runtime is used.
 This is an adapter to the existing portable BLSTM/CTC engine, separate from the
 unfinished legacy119 MAIN dictionary restoration.
 
-The parser selects the actual13-channel adapter and its enclosed106 sequential
-network. It reads the inline AL104,26 normalization floats, resampling settings,
+The parser follows the authenticated source247 child `247.148` to the actual
+13-channel21E adapter, its53 wrapper and complete nested106 sequential network.
+It no longer scans model/tensor bytes for header signatures. The nine wrapper
+prefix bytes are checked as opaque pinned data; their execution semantics and
+retained5F predicate are not claimed by this adapter. It reads the inline AL104,26 normalization floats, resampling settings,
 output labels and three bidirectional layers. All67 ordered tensors, quantization
 scales, row alignment and2,007,776 parameter bytes remain unchanged. The temporary
 portable image is byte-identical to the independent Python exporter:2,012,905
@@ -19,10 +22,11 @@ by the application. Only this pinned full English resource is supported; other
 profiles do not silently become English.
 
 Source length is checked before copying, the bounded owned snapshot is hashed
-before parsing, node discovery is limited to4096 entries, tensor layout consumes
-the whole payload, and the intermediate portable body is limited to8MiB. These
+before parsing, parent fields and delegated children use the existing bounded
+source247 reader, tensor layout consumes the whole payload, and the intermediate
+portable body is limited to8MiB. These
 are parser/copy limits, not a process-RSS claim. Cancellation is checked before
-and after ownership/loading, during resource scanning, between layers and during
+and after ownership/loading, during parent layout reading, between layers and during
 label publication. Input and weights are not retained through caller aliases.
 
 The application lazily loads this bundled English resource if no optional
@@ -47,3 +51,10 @@ pipeline. This compares entire pipelines and resources, not an isolated causal
 effect. The sample is limited, includes loanwords/proper names and may overlap
 model training. No model, threshold or beam was tuned against its targets.
 These results do not establish Russian or automatic bilingual readiness.
+
+The22 October structural-loading change preserves the full portable image SHA
+and both diagnostic inference rows byte-for-byte against the previous loader.
+Managed and NativeAOT captures also agree. No decoder, frame heuristic, ranking
+threshold or model weight changes in this step. The source247 reader temporarily
+owns another bounded source snapshot; removing the signature scan is not a
+claim of lower peak memory or improved handwriting accuracy.
