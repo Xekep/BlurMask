@@ -29,17 +29,28 @@ disposed sources and counter-only failed selection registration cannot produce
 a successful cleanup. `ValidateCurrent` requires successful completion and a
 still-current upstream index; copied diagnostic prefixes remain historical.
 
-The actual thirteen-input suite retains eleven completed owners and the two
-existing238B0 coverage refusals. It checks33 CHAR owners and72 full string/40-byte
-records. An independent Python oracle first replays the original source,
-WORD/TEXT, coverage, selection and AVL-index captures, then checks the exact
-WORD48 flags, aggregate clear, complete insertion order and unchanged rows.
+The historical eleven-completed/two-refused capture contained33 CHAR owners
+and72 full string/40-byte records. The current thirteen-input suite completes
+all13 and retains37 CHAR owners. Record totals depend on the genuine selected
+source records; the actual2B1-corrected capture has81 instead of the older80.
+Neither value is a replacement expected-record golden. The probe derives its
+expected total from the immutable before-cleanup snapshot and compares the
+post-run source total, alongside its existing complete-byte immutability check.
+The independent oracle first replays the original source, WORD/TEXT, coverage,
+selection and AVL-index captures, then requires the complete unique ordered
+sample membership, WORD48 flags, aggregate clear, insertion order and every
+unchanged scalar40/string record. It derives the complete record total from
+that independently checked SELECTED input. Fixed13-input/37-CHAR coverage stays.
 Managed and NativeAOT output must match byte for byte.
 
 Separately prepared tests cover five cancellation prefixes, late source disposal
 and counter-only invalidation,96 flag-predicate controls and an exclusive claim
 race. These controls are not natural active native control-service invocations.
-There are178 guards. No expected transcription enters the production path or
+There are194 guards:8 per completed owner,4 per five entered-failure controls,
+3 per two late invalidations and2 per32 active flag cases. The oracle derives
+this total from those control counts and retains the96 flag-predicate grid.
+Six negative captures reject a duplicate owner, missing record, changed40-byte
+scalar, wrong insertion order, missing completion prefix and wrong guard count. No expected transcription enters the production path or
 numerical oracle. This stage does not improve the measured Russian accuracy,
 apply a document patch, or implement037E80,026EF0 and final acceptance.
 

@@ -16,7 +16,7 @@ var recorded=RecordedInputs.Load(args[1]);for(int i=0;i<recorded.Samples.Length;
 
 
 
-var output=new List<object>();int guards=0,complete=0,refused=0,visited=0,records=0;
+var output=new List<object>();int guards=0,complete=0,refused=0,visited=0,records=0,expectedRecords=0;
 foreach(var(name,raw)in samples)
 {
  using var scope=Scope(raw);var parent=Parent(scope);parent.Publish(Enumerable.Range(0,40).Select(i=>(byte)(i*29+7)).ToArray(),new byte[8160]);
@@ -31,6 +31,7 @@ var index=LegacyFreshMainGlobalDocumentSourceIndices.Prepare(state);
  if(cleanup.IsFaulted||cleanup.IsComplete||cleanup.CopyPrefixes().Length!=0)throw new Exception("Pre-entry cancellation changed owner.");
  Reject(()=>LegacyFreshMainGlobalControlCleanup.Prepare(index));
  var before48=parent.WordSource.CopyChoiceScalar48();var before=Snapshot(state);var commands=parent.CopyPendingSelections().ToArray();
+ expectedRecords+=before.Sum(value=>((Array)((Dictionary<string,object?>)value)["records"]!).Length);
  cleanup.Run();cleanup.ValidateCurrent();Reject(()=>cleanup.Run());
  if(!before48.AsSpan().SequenceEqual(parent.WordSource.CopyChoiceScalar48())||!Json(before).AsSpan().SequenceEqual(Json(Snapshot(state)))||!commands.SequenceEqual(parent.CopyPendingSelections()))throw new Exception("Cleanup mutated historical source rows or commands.");
  complete++;visited+=cleanup.CopyCharacterVisitOrder().Length;records+=state.Characters.Sum(c=>c.OriginalSource.CopyRecords().Count);
@@ -70,7 +71,7 @@ using(var scope=Scope([M()]))
  Task.WaitAll(Task.Run(Attempt),Task.Run(Attempt));if(wins!=1||losses!=1)throw new Exception("Exclusive claim race.");
 }
 using(var f=File.Create(args[2]))using(var j=new Utf8JsonWriter(f))WriteJson(j,D(("samples",output),("completed",complete),("refused",refused),("characters",visited),("records",records),("failures",failures),("invalidations",invalidations),("flagControls",controls),("claimRace",true),("guards",guards)));
-if(complete!=13||refused!=0||visited!=37||records!=80)throw new Exception($"Actual cleanup coverage changed {complete}/{refused}/{visited}/{records}.");
+if(complete!=13||refused!=0||visited!=37||records!=expectedRecords)throw new Exception($"Actual cleanup coverage changed {complete}/{refused}/{visited}/{records}.");
 Console.WriteLine($"PASS13 genuine global cleanup/{complete} completed/{refused} explicit selected-source refusals/{visited} CHAR/{records} records/5 cancellation prefixes/{controls} flag controls/{guards} guards; no active control services/DOM.");
 void Reject(Action a){try{a();}catch(Exception e)when(e is ArgumentException or InvalidOperationException or NotSupportedException or OperationCanceledException){guards++;return;}throw new Exception("Expected cleanup refusal.");}
 byte[] Json(object value){using var m=new MemoryStream();using(var j=new Utf8JsonWriter(m))WriteJson(j,value);return m.ToArray();}
