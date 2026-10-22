@@ -32,8 +32,16 @@ primary recurrence with actual full-source geometry. All141+100 inputs pass
 Managed/Native AOT parity. Independent replay checks217542 ordered requests,
 3015866 callbacks and14915 complete40-byte records, plus29 guards/7 cancellation
 controls. These are primary candidate results, not recognized words or an
-accuracy gain. Full context, terminal, WORD/source720 and final-guide authority
-are still pending.
+accuracy gain. Terminal, WORD/source720 and final-guide authority are still
+pending.
+
+The [full-FIRST context producer B4](legacy-full-english-first-context-runtime.md)
+now constructs same-owner A8/B0/B8 tables and private symbolic contexts.
+All141+100 inputs pass independent raw-model/table replay and exact
+Managed/Native AOT parity, including324194 ordered callbacks. The verifier checks
+every ordered class-query argument, complete40-byte records and fresh AVL/page
+allocation, with36 guards and7 cancellation controls. These are intermediate
+context tables; no recognized-word or accuracy improvement is claimed.
 
 The [FIRST source/ending correction](legacy-first-source-ending-union-correction.md)
 now preserves the ancestor's category while combining its bounds with the

@@ -684,6 +684,9 @@ python -I -B tools/LegacyFullEnglishFirstController.Probe/audit_output.py --repo
 
 dotnet run --project tools/LegacyFullEnglishFirstPrimary.Probe -c Release -- models .artifacts/legacy-en119-final-single-blind.json .artifacts/legacy-en-full-first-primary-managed.json
 python -I -B tools/LegacyFullEnglishFirstPrimary.Probe/audit_output.py --repo . --models models --b2 .artifacts/legacy-en-full-first-controller-managed.json --inputs .artifacts/legacy-en119-final-single-blind.json --capture .artifacts/legacy-en-full-first-primary-managed.json --output .artifacts/legacy-en-full-first-primary-oracle-managed.json
+
+dotnet run --project tools/LegacyFullEnglishFirstContext.Probe -c Release -- models .artifacts/legacy-en119-final-single-blind.json .artifacts/legacy-en-full-first-context-managed.json
+python -I -B tools/LegacyFullEnglishFirstContext.Probe/audit_output.py --repo . --models models --b3 .artifacts/legacy-en-full-first-primary-managed.json --inputs .artifacts/legacy-en119-final-single-blind.json --capture .artifacts/legacy-en-full-first-context-managed.json --output .artifacts/legacy-en-full-first-context-oracle-managed.json
 dotnet run --project tools/LegacyEnglish119FinalSingle.Probe -c Release -- models .artifacts/legacy-en119-final-single-blind.json .artifacts/legacy-en119-final-single-managed.json
 python -I -B tools/LegacyEnglish119FinalSingle.Probe/audit_output.py models .artifacts/legacy-en119-final-single-managed.json .artifacts/legacy-en119-postprocessing-managed.json
 python -I -B tools/handwriting/audit_english119_final_single.py --models models --output .artifacts/legacy-en119-final-single-model-audit.json
