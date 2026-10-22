@@ -71,7 +71,8 @@ using(var stream=File.Create(args[5]))using(var w=new Utf8JsonWriter(stream))
  for(int i=0;i<scores.Length;i++)
  {
   var score=scores[i];var geo=score.Glyph.Geometry;var bounds=score.BoundarySigns;var cx=score.Context.Span;
-  short[][] inputs=[LegacyStrokeFeatures.ExtractInputWithBaseline(geo.Strokes,geo.Baseline,cx,bounds.Start,bounds.End),LegacyRasterFeatures.ExtractInputWithBaseline(geo.Strokes,geo.Baseline,cx,bounds.Start,bounds.End),LegacyTemporalDirectionalFeatures.Extract(geo.Strokes,geo.Baseline,tm,tx,cx,bounds.Start,bounds.End),LegacySpatialDirectionalFeatures.Extract(geo.Strokes,geo.Baseline,sm,sx,cx,bounds.Start,bounds.End)];
+  var directional=LegacySaturatedDirectionalFeatures.Extract(geo.Strokes,geo.Baseline,tm,tx,sm,sx,cx,bounds.Start,bounds.End);
+  short[][] inputs=[LegacyStrokeFeatures.ExtractInputWithBaseline(geo.Strokes,geo.Baseline,cx,bounds.Start,bounds.End),LegacyRasterFeatures.ExtractInputWithBaseline(geo.Strokes,geo.Baseline,cx,bounds.Start,bounds.End),directional.Temporal,directional.Spatial];
   w.WriteStartObject();w.WriteStartArray("ranges");foreach(var range in geo.Ranges.Span){w.WriteStartArray();w.WriteNumberValue(range.StrokeIndex);w.WriteNumberValue(range.StartPoint);w.WriteNumberValue(range.EndPointExclusive);w.WriteEndArray();}w.WriteEndArray();
   w.WriteStartArray("normalized");foreach(var stroke in geo.Strokes){w.WriteStartArray();foreach(var point in stroke.Points){w.WriteStartArray();w.WriteNumberValue(point.X);w.WriteNumberValue(point.Y);w.WriteEndArray();}w.WriteEndArray();}w.WriteEndArray();
   w.WriteStartArray("context");foreach(short v in cx)w.WriteNumberValue(v);w.WriteEndArray();w.WriteStartArray("inputs");foreach(var vector in inputs){w.WriteStartArray();foreach(short v in vector)w.WriteNumberValue(v);w.WriteEndArray();}w.WriteEndArray();

@@ -12,6 +12,27 @@ dynamic=definitions(ROOT/'tools/LegacyDynamicWeights.Probe/reference_controls.py
 costs=definitions(ROOT/'tools/LegacyCostEnsemble.Probe/reference_controls.py')['reference']
 def f(x):return float(np.float32(x))
 def fixed(values):return [((int(f(v*1024))+32768)&65535)-32768 for v in values]
+
+def independent_actual2b1_inputs(root,profile):
+ # Recompute from independently normalized raw points, not captured NN vectors.
+ # The raw28 context and boundary owners are checked separately by the caller.
+ import importlib.util
+ def load(name,path):
+  spec=importlib.util.spec_from_file_location(name,path);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);return m
+ basic=load('main_basic_feature_reference',root/'tools/LegacyEnglishMainAcoustic.Probe/reference_features.py')
+ directional=load('main_actual2b1_feature_reference',root/'tools/LegacyRussianMain2B1.Probe/reference_features.py').prepare(profile)
+ def produce(strokes,context,boundaries):
+  point=strokes[0][0]
+  if all(p==point for stroke in strokes for p in stroke):
+   y=point[1];base=[-1024,-1024,basic.clamp(basic.div(256*y,100)),-1024,0,0,0,0,0]
+   if y>0:base[4:]=[-1024,-1024,1024,-1024,basic.sh(basic.div(512*(-y-100),100)-1024)]
+   else:base[4:]=[1024,-1024,-1024,basic.sh(basic.div(512*y,100)-1024),-1024]
+   stats=[1024,-768,0,0,-768,1024,-1024];trajectory=[0]*6+[1024]*30+[0]*174+stats+base;raster=stats+base+[-1024]*64+[1024]*128
+  else:
+   geometry=basic.geometry(strokes);lit=basic.pixels(geometry);base=basic.baseline(geometry,lit);trajectory=basic.trajectory(geometry)+base;raster=trajectory[210:217]+base+basic.projection(lit)
+  temporal,spatial=directional(strokes)
+  return [v+list(context)+list(boundaries) for v in [trajectory,raster,temporal,spatial]]
+ return produce
 def labels(data):
  at=99
  def u(fmt):
@@ -85,6 +106,7 @@ def cache(raw,strokes,mask,header,label,p,whole,zero):
  return result,candidates
 if len(sys.argv)!=4:raise ValueError('AK.res engine-profile.json output.json')
 ak=Path(sys.argv[1]).read_bytes();engine=json.loads(Path(sys.argv[2]).read_text());data=json.loads(Path(sys.argv[3]).read_text())
+actual_inputs=independent_actual2b1_inputs(ROOT,engine)
 assert hashlib.sha256(ak).hexdigest()=='7a5f08809e81fb4a2d4c78b3efd251d0986503b0d30d21de3695dab1f8a89978'
 points=[[[f(v) for v in p] for p in stroke] for stroke in data['points']];activation=engine['activations']['hidden'];accepted=[];reference=-np.finfo(np.float32).max
 offset,lv,rv,maximum,maxwindow,blank,cutoff,retain,selector,pointmean,extended=struct.unpack_from('<3fBBHf4B',ak,195746)
@@ -123,7 +145,10 @@ for index,g in enumerate(data['groups']):
  context=[f(f(v+v)-1) for v in context];context=[-1. if v< f(-.99)else v for v in context]
  assert fixed(context)==g['context'],('context28',index)
  for vector in g['inputs']:assert vector[-30:-2]==g['context']and vector[-2:]==g['boundaries']
- prob=[exp_prob(network(ak,n,inputs,activation)) for n,inputs in zip([195895,283697,367899,467101],g['inputs'])]
+ reconstructed=actual_inputs(expected_normal,fixed(context),g['boundaries'])
+ assert list(map(len,reconstructed))==[256,238,313,313]
+ assert reconstructed==g['inputs'],('actual2B1_features',index)
+ prob=[exp_prob(network(ak,n,inputs,activation)) for n,inputs in zip([195895,283697,367899,467101],reconstructed)]
  assert prob==g['probabilities'],('familyNN',index)
  dyn=dynamic(raw,profile_dynamic);np.testing.assert_allclose(g['weights'][:4],[dyn[2]]*4,rtol=1e-6,atol=1e-6)
  integers=costs([dict(probabilities=p,weight=f(g['weights'][i]))for i,p in enumerate(prob)]+[None]*3,1,data['mask'][:180])
