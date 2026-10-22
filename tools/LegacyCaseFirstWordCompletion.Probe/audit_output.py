@@ -46,6 +46,30 @@ uni_levels=struct.unpack_from('<256i',lk,4553492)
 profile=4555548;ws=stored_float(profile+80);wo=stored_float(profile+40)
 us=ws;uo=stored_float(profile+16);scale=stored_float(607064)
 categories=bytes.fromhex('090b0104040404040505050a010c040606060505050202020303030500000000')
+#Independent213410 full88 materialization and204290 current-terminal
+#injection, from every ACTUAL startup128 slot. Do not infer membership from
+#the completion list, deduplicate equal tags, or loosen a stale total bound.
+actual=[c for c in got['captures']if c['kind']=='actual-injected']
+assert [s['node']for s in got['startup']]==[0,1,2,3]
+derived=[];per_node=[]
+for source in got['startup']:
+    assert len(source['heap'])==len(source['parents'])
+    count_here=0
+    for ordinal,(raw_heap,raw_parent)in enumerate(zip(source['heap'],source['parents'])):
+        heap=bytes.fromhex(raw_heap);parent=bytes.fromhex(raw_parent)
+        assert len(heap)==128 and len(parent)==88
+        expected=bytearray(heap[:88])
+        if u16(expected,60)==65535:w16(expected,60,ordinal)
+        assert expected==parent,('startup213410',source['node'],ordinal)
+        if parent[5]&2==0 or parent[7]&1:continue
+        query=bytearray(32);query[:8]=parent[:8];query[20:22]=parent[36:38]
+        derived.append((source['node'],ordinal,parent,query));count_here+=1
+    per_node.append(count_here)
+assert per_node==[14,16,17,22] and len(derived)==69
+assert len(actual)==len(derived)
+for capture,(node,ordinal,parent,query)in zip(actual,derived):
+    assert capture['node']==node and capture['ordinal']==ordinal
+    assert bytes.fromhex(capture['parent'])==parent and bytes.fromhex(capture['query'])==query,('injection204290',node,ordinal)
 seen=set()
 for c in got['captures']:
     query=bytes.fromhex(c['query']);parent=bytes.fromhex(c['parent']);tag=u64(query,0)
@@ -77,6 +101,7 @@ for c in got['captures']:
     w64(slot,40,restart);w16(slot,62,65535);slot[64:84]=output[8:28]
     w32(slot,88,-1);w64(slot,92,(0x4000000<<32)|0xffffffff);w32(slot,104,-1);w64(slot,112,0)
     assert slot==bytes.fromhex(c['slot']),('full128',c['kind'],state,symbol)
-assert got['actualCount']==70 and got['preparedCount']==168 and got['guards']>=13 and len(got['captures'])==238
+assert got['actualCount']==len(derived)==69 and got['preparedCount']==168 and got['guards']==13 and len(got['captures'])==237
+assert sum(c['kind']=='prepared-state-punctuation'for c in got['captures'])==168
 assert seen==set(range(1,13))
-print('PASS independent238 full16 metadata/full40 language/full128 allocations; actual terminal preorder/profile2, all12 categories, full-tag restart and residue preservation;70 actual +168 prepared cases')
+print('PASS independent237 full16 metadata/full40 language/full128 allocations; all startup128-to88 rows and terminal injection membership/order, actual terminal preorder/profile2, all12 categories, full-tag restart and residue preservation;69 actual +168 prepared cases')

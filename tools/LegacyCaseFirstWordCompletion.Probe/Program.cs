@@ -14,7 +14,7 @@ var owner=new LegacyOwnedMainWordSpanPreparation(ak,dictionary,sampled,table);
 var controller=LegacyOwnedFreshMainWordControllerPolicy.Prepare(ak,owner);
 var policy=LegacyFreshCaseMainSourcePolicy.Prepare(ak,lk,controller);
 var initial=new LegacyNativeMainInitialSpecialCandidates(ak,owner,new(1,0),new byte[80]);
-var captures=new List<CompletionCapture>();int actualCount=0,preparedCount=0,guards=0;
+var captures=new List<CompletionCapture>();var startup=new List<StartupCapture>();int actualCount=0,preparedCount=0,guards=0;
 LegacyNativeWordHeapRouter Router(LegacyNativeWordRecordHeap heap)=>new([heap,new(256)],new byte[]{0,0},-1,uint.MaxValue);
 byte[]? chosenParent=null,chosenQuery=null;int chosenNode=-1;ushort chosenOrdinal=0;
 for(int node=0;node<owner.SourceGraph.NodeCount;node++)
@@ -33,6 +33,11 @@ for(int node=0;node<owner.SourceGraph.NodeCount;node++)
     }
     var parents=Enumerable.Range(0,heap.Count).Select(i=>LegacyNativeWordRowMaterializer.Materialize(heap.GetSlotSnapshot(i).Span,
         (ushort)i,1,1,1).Record.ToArray()).ToArray();
+    //Retain the actual startup heap and ALL materialized parents, including
+    //nonterminals, so the Python oracle derives completion membership rather
+    //than trusting the count emitted by this loop after an acoustic change.
+    startup.Add(new(node,Enumerable.Range(0,heap.Count).Select(i=>Convert.ToHexString(heap.GetSlotSnapshot(i).Span)).ToArray(),
+        parents.Select(row=>Convert.ToHexString(row)).ToArray()));
     for(ushort i=0;i<parents.Length;i++)
     {
         var injected=LegacyNativeFirstDictionaryWordCompletion.CreateAlreadyTerminalQuery(parents[i],new byte[32]);
@@ -41,7 +46,7 @@ for(int node=0;node<owner.SourceGraph.NodeCount;node++)
         chosenParent=parents[i];chosenQuery=injected.Value.ToArray();chosenNode=node;chosenOrdinal=i;
     }
 }
-Require(actualCount>0&&chosenParent is not null&&chosenQuery is not null,"No real case startup terminal reached completion.");
+Require(actualCount==69&&chosenParent is not null&&chosenQuery is not null,"Actual RU2B1 case startup must retain exactly69 terminal completions.");
 //Separate prepared state/punctuation controls reuse one real terminal and
 //actual source owner. They do not pretend these modified tags were OCR winners.
 owner.AdvanceNodeEpoch(chosenNode-1);var preparedSpan=owner.Prepare(chosenNode,(byte)chosenNode);
@@ -78,6 +83,13 @@ dictionary.Session.RefreshPermissions(new byte[192]);Reject(()=>Invoke(stale));
 using(var file=File.Create(args[6]))using(var w=new Utf8JsonWriter(file))
 {
     w.WriteStartObject();w.WriteNumber("actualCount",actualCount);w.WriteNumber("preparedCount",preparedCount);w.WriteNumber("guards",guards);
+    w.WriteStartArray("startup");foreach(var s in startup)
+    {
+        w.WriteStartObject();w.WriteNumber("node",s.Node);
+        w.WriteStartArray("heap");foreach(var row in s.Heap)w.WriteStringValue(row);w.WriteEndArray();
+        w.WriteStartArray("parents");foreach(var row in s.Parents)w.WriteStringValue(row);w.WriteEndArray();
+        w.WriteEndObject();
+    }w.WriteEndArray();
     w.WriteStartArray("captures");foreach(var c in captures)
     {
         w.WriteStartObject();w.WriteString("kind",c.Kind);w.WriteNumber("node",c.Node);w.WriteNumber("ordinal",c.Ordinal);
@@ -114,3 +126,4 @@ static void W64(byte[] bytes,int at,ulong value)=>BinaryPrimitives.WriteUInt64Li
 static void Require(bool value,string text){if(!value)throw new Exception(text);}
 internal sealed record CompletionCapture(string Kind,int Node,ushort Ordinal,string Query,string Parent,string Token,
     string Residue,string Storage,string Language,string Slot,ulong Restart,int Path,LegacyWordLanguageScore Score);
+internal sealed record StartupCapture(int Node,string[] Heap,string[] Parents);
