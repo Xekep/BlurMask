@@ -18,8 +18,13 @@ now streams those four actual network outputs through the restored calibration
 and same-source alias/closed-symbol services. All42795/116817 retained scalar
 values pass independent checks and Managed/NativeAOT parity; old A captures
 remain byte-exact. The tests include464 refusal guards and10 cancellation stages.
-Primary/context/terminal selection, WORD, source720 and finalized guide remain
-missing; application text recognition and CTC frame heuristics are unchanged.
+The [full-FIRST ranked and geometry initializer](legacy-full-english-first-controller-initializer.md)
+now owns the same-source ranked costs, group separation and per-arc
+prefix/future/join/blank/margin state. Both141/100 sets pass independent
+numerical checks and Managed/NativeAOT parity, with26 guards/6 cancellation
+stages and all8 previous A/B1 captures unchanged. Primary/context/terminal
+selection, WORD, source720 and finalized guide remain missing; application
+text recognition and CTC frame heuristics are unchanged.
 
 The [inline23C wire reader](linguistic-fst23c-wire-reader.md) now retains the
 actual Russian number-rule storage with bounded immutable ownership. It reads
