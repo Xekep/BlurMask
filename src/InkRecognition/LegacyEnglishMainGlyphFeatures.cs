@@ -4,8 +4,8 @@ namespace InkRecognition;
 ///not a copied parent per glyph and not a native mutable pooled-cache session.</summary>
 internal sealed class LegacyEnglishMainInkSnapshot
 {
-    internal LegacyEnglishMainOnlySourceMasks Masks{get;}
-    internal LegacyEnglish119MainLocalCandidates Owner=>Masks.Knowledge.Owner;
+    internal LegacyEnglishMainAcousticInputs Inputs{get;}
+    internal LegacyEnglish119MainLocalCandidates Owner=>Inputs.Knowledge.Owner;
     internal InkStroke[] Strokes{get;}
     internal int[] Counts{get;}
     internal float[] Probabilities{get;}
@@ -15,8 +15,10 @@ internal sealed class LegacyEnglishMainInkSnapshot
     internal (int Group,int Span)[][] Arcs{get;}
     internal long LogicalReservationBytes{get;}
     internal LegacyEnglishMainInkSnapshot(LegacyEnglishMainOnlySourceMasks masks,CancellationToken token)
+        :this(LegacyEnglishMainAcousticInputs.FromIndependent(masks),token){}
+    internal LegacyEnglishMainInkSnapshot(LegacyEnglishMainAcousticInputs inputs,CancellationToken token)
     {
-        Masks=masks;token.ThrowIfCancellationRequested();var owner=Owner;
+        inputs.RequireCurrent();Inputs=inputs;token.ThrowIfCancellationRequested();var owner=Owner;
         if(!owner.IsComplete||owner.IsFaulted)throw new InvalidOperationException("Complete actual MAIN local graph required.");
         LogicalReservationBytes=Preflight(owner.GroupCount,owner.NodeCount,owner.CandidateCount);
         //The typed completed local owner has already bounded TOTAL graph ranges
@@ -75,7 +77,7 @@ internal sealed class LegacyEnglishMainGlyphFeatures
     {Group=group;Stored=stored;Ordered=ordered;Order=order;Normalized=normalized;Merged=merge.Strokes.ToArray();RetainedPenUps=merge.RetainedBoundaryIndices.ToArray();Inputs=inputs;Dynamic=dynamic;Boundary=boundary;SourceCount=sourceCount;IsDegenerate=degenerate;WholePhysicalStroke=whole;EndpointKeysZero=zero;SourceProbability=probability;}
     internal static LegacyEnglishMainGlyphFeatures Prepare(LegacyEnglishMainInkSnapshot snapshot,LegacyEnglishMainAcousticModel model,int group,CancellationToken token)
     {
-        token.ThrowIfCancellationRequested();if(!ReferenceEquals(snapshot.Masks.Source,model.Source)||(uint)group>=(uint)snapshot.Ranges.Length||snapshot.Spans[group]<0)throw new ArgumentException("Actual same-source live group required.");
+        token.ThrowIfCancellationRequested();if(!ReferenceEquals(snapshot.Inputs.Source,model.Source)||(uint)group>=(uint)snapshot.Ranges.Length||snapshot.Spans[group]<0)throw new ArgumentException("Actual same-source live group required.");
         var stored=snapshot.Ranges[group].ToArray();var keys=new LegacySourcePointKey[stored.Length];int pointCount=0;float minX=float.MaxValue;
         for(int i=0;i<stored.Length;i++)
         {

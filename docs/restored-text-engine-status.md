@@ -35,6 +35,15 @@ independent checks and Managed/NativeAOT parity. Secondary/C4 mapping, state0,
 history and paging still need their own integration. No additional root resource
 is automatically selected.
 
+The [English case M/N/source68 component](english-case-main-source68-runtime-20261022.md)
+now derives the case-expanded masks, scores the actual same-source groups and
+joins pooled D0 to one ordered case-aware working-map refresh. Both original134
+and blind100 sets pass independent checks of15396 groups/61584 NN evaluations,
+30140 D0 passes and initial context topology, with Managed/NativeAOT parity.
+Old independent M/N/D0 and six affected Russian paths retain their results.
+Complete290 query/history, whole-word search and final publication remain missing;
+this component does not change application recognition or prove handwriting accuracy.
+
 RC1.2.8-rc.8 is an experimental checkpoint. The subsequent test-only correction
 replaces three stale generic2B0 diagnostic collectors with actual2B1 vectors and
 independently reconstructs all four feature families before checking5916 NN

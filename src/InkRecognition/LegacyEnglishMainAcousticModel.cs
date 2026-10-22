@@ -23,19 +23,30 @@ public sealed class LegacyEnglishMainAcousticModel
     {
         ArgumentNullException.ThrowIfNull(masks);token.ThrowIfCancellationRequested();
         if(!masks.Knowledge.Owner.IsComplete||masks.Knowledge.Owner.IsFaulted)throw new InvalidOperationException("Complete actual MAIN owner required.");
+        _=LegacyEnglishMainAcousticInputs.FromIndependent(masks); // Validate policy even if case preparation populated Shared first.
         var model=Shared.GetValue(masks.Source,_=>new(masks,token));
         for(int i=0;i<4;i++){token.ThrowIfCancellationRequested();var n=masks.Knowledge.MainWire.Networks[i];if(!ReferenceEquals(model.Source,n.Source)||model.networks[i].Wire.Offset!=n.Offset||model.networks[i].Wire.Fingerprint!=n.Fingerprint)throw new ArgumentException("Same actual MAIN network lineage required.");}
         return model;
     }
-    private LegacyEnglishMainAcousticModel(LegacyEnglishMainOnlySourceMasks masks,CancellationToken token)
+    // PROPOSED typed factory: no supplied mask bytes or old-owner coercion.
+    internal static LegacyEnglishMainAcousticModel PrepareFreshCase(LegacyEnglishMainAcousticInputs inputs,CancellationToken token)
     {
-        Source=masks.Source;var wire=masks.Knowledge.MainWire;var fields=wire.Fields;
+        ArgumentNullException.ThrowIfNull(inputs);inputs.RequireFreshCase();inputs.RequireCurrent();token.ThrowIfCancellationRequested();
+        var model=Shared.GetValue(inputs.Source,_=>new(inputs,token));
+        for(int i=0;i<4;i++){token.ThrowIfCancellationRequested();var n=inputs.Knowledge.MainWire.Networks[i];if(!ReferenceEquals(model.Source,n.Source)||model.networks[i].Wire.Offset!=n.Offset||model.networks[i].Wire.Fingerprint!=n.Fingerprint)throw new ArgumentException("Same actual MAIN network lineage required.");}
+        inputs.RequireCurrent();return model;
+    }
+    private LegacyEnglishMainAcousticModel(LegacyEnglishMainOnlySourceMasks masks,CancellationToken token)
+        :this(LegacyEnglishMainAcousticInputs.FromIndependent(masks),token){}
+    private LegacyEnglishMainAcousticModel(LegacyEnglishMainAcousticInputs inputs,CancellationToken token)
+    {
+        inputs.RequireCurrent();Source=inputs.Source;var wire=inputs.Knowledge.MainWire;var fields=wire.Fields;
         byte[] Field(string owner,string name,int size,int count)
         {token.ThrowIfCancellationRequested();var f=fields.Single(f=>f.Owner==owner&&f.Destination==name);if(f.ElementSize!=size||f.Count!=count)throw new InvalidDataException("Exact bounded MAIN field required.");return f.CopyBytes();}
         float F(string scope,string name)=>BinaryPrimitives.ReadSingleLittleEndian(Field(scope,name,4,1));
         int I(string name)=>BinaryPrimitives.ReadInt32LittleEndian(Field("21D",name,4,1));
         ushort H(string name)=>BinaryPrimitives.ReadUInt16LittleEndian(Field("21D",name,2,1));
-        if(!ReferenceEquals(Source,wire.Source)||wire.Networks.Count!=4||masks.Policy!="independent-main13B-only/nonbypassed/no-user-restriction"||masks.NeuralClassCount!=182)
+        if(!ReferenceEquals(Source,wire.Source)||wire.Networks.Count!=4||inputs.NeuralClassCount!=182)
             throw new ArgumentException("Actual completed independent-main mask owner required.");
         if(!Field("profile0","14..44.raw",1,44).AsSpan().SequenceEqual(Convert.FromHexString("11113F0000001E00100008000A001111FF1F1E00FF010000FF1F0E00FF1F0E00FF000000640000000A000000"))||
             !Field("profile0","88..9E.raw",1,16).AsSpan().SequenceEqual(Convert.FromHexString("01020000000000000000000000000000")))throw new NotSupportedException("Actual1111/2B1 profile required.");

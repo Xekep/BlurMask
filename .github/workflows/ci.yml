@@ -256,23 +256,24 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y clang zlib1g-dev
-      - name: Linguistic primitives and full English acoustic Native AOT parity
+      - name: Linguistic primitives and English acoustic components Native AOT parity
         shell: pwsh
         run: |
           $suffix = if ($IsWindows) { '.exe' } else { '' }
-          foreach ($project in @('LegacyFst23C.Probe', 'LegacyFst13AOutgoing.Probe', 'LegacyFst28CPrimaryMap.Probe', 'LegacyFullEnglishFirst.Probe', 'LegacyFullEnglishFirstConfidence.Probe')) {
+          foreach ($project in @('LegacyFst23C.Probe', 'LegacyFst13AOutgoing.Probe', 'LegacyFst28CPrimaryMap.Probe', 'LegacyFullEnglishFirst.Probe', 'LegacyFullEnglishFirstConfidence.Probe', 'LegacyEnglishCaseMain.Probe')) {
             $capture = switch ($project) {
               'LegacyFst23C.Probe' { 'legacy-fst23c' }
               'LegacyFst13AOutgoing.Probe' { 'legacy-fst13a-outgoing' }
               'LegacyFst28CPrimaryMap.Probe' { 'legacy-fst28c-primary-map' }
               'LegacyFullEnglishFirstConfidence.Probe' { 'legacy-en-full-first-confidence' }
+              'LegacyEnglishCaseMain.Probe' { 'legacy-en-case-main' }
               default { 'legacy-en-full-first' }
             }
             $directory = "./.artifacts/$capture-native"
             dotnet publish "tools/$project/$project.csproj" -c Release -p:PublishAot=true -o $directory
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             $arguments = @('models')
-            if ($project -in @('LegacyFullEnglishFirst.Probe', 'LegacyFullEnglishFirstConfidence.Probe')) { $arguments += '.artifacts/legacy-en119-final-single-blind.json' }
+            if ($project -in @('LegacyFullEnglishFirst.Probe', 'LegacyFullEnglishFirstConfidence.Probe', 'LegacyEnglishCaseMain.Probe')) { $arguments += '.artifacts/legacy-en119-final-single-blind.json' }
             $arguments += ".artifacts/$capture-native.json"
             $executable = Join-Path $directory "$project$suffix"
             & $executable @arguments

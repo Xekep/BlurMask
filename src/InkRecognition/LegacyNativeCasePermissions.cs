@@ -17,9 +17,16 @@ public sealed class LegacyNativeCasePermissions
     /// Values are byte fields, not booleans. The inner dictionary phase remains separate.</summary>
     public byte[] ExpandStoredPermissions(ReadOnlySpan<byte> permissions, CancellationToken cancellationToken=default)
     {
-        if(permissions.Length!=Alphabet.LabelCount)throw new ArgumentException("Permission extent must match owned alphabet.");
+        return ExpandStoredPermissionsCore(Alphabet.LabelCount,_triplets,LanguageModel.CasePathVersion,permissions,cancellationToken);
+    }
+    // Pure versioned scalar kernel only: numeric version is not source authority.
+    internal static byte[] ExpandStoredPermissionsCore(int alphabetCount,ReadOnlySpan<LegacyInkRelatedForms> triplets,
+        ushort casePathVersion,ReadOnlySpan<byte> permissions,CancellationToken cancellationToken)
+    {
+        if(casePathVersion is not (0 or 0x200))throw new NotSupportedException("Native232090 supports only TCM0/200 case-path tables.");
+        if(permissions.Length!=alphabetCount)throw new ArgumentException("Permission extent must match owned alphabet.");
         cancellationToken.ThrowIfCancellationRequested();byte[] result=permissions.ToArray();
-        foreach(var row in _triplets)
+        foreach(var row in triplets)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ushort first=row.First,second=row.Second,third=row.Third;
@@ -29,7 +36,7 @@ public sealed class LegacyNativeCasePermissions
                 if(third!=65535)result[first]|=result[third];
             }
             if(second!=65535 && third!=65535)result[second]|=result[third];
-            if(LanguageModel.CasePathVersion==0x200 && first!=65535 && second!=65535)
+            if(casePathVersion==0x200 && first!=65535 && second!=65535)
                 result[second]|=result[first];
         }
         return result;

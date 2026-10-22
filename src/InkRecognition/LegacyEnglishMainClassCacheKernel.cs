@@ -10,14 +10,17 @@ internal sealed class LegacyEnglishMainClassCacheKernel
     private readonly ushort[] header;
     private readonly Dictionary<string,ushort> labels=new(StringComparer.Ordinal);
     public int CacheWidth=>alphabet.LabelCount+3;
-    private readonly LegacyEnglishMainOnlySourceMasks masks;
+    private readonly LegacyEnglishMainAcousticInputs inputs;
     private readonly LegacyEnglishMainAcousticModel model;
     private readonly byte[] mask;
     private readonly LegacySymbolMaskKnowledgeGroup[] groups;
     internal LegacyEnglishMainClassCacheKernel(LegacyEnglishMainAcousticModel model,LegacyEnglishMainOnlySourceMasks masks)
+        :this(model,LegacyEnglishMainAcousticInputs.FromIndependent(masks)){}
+    internal LegacyEnglishMainClassCacheKernel(LegacyEnglishMainAcousticModel model,LegacyEnglishMainAcousticInputs inputs)
     {
-        if(!ReferenceEquals(model.Source,masks.Source))throw new ArgumentException("Same actual MAIN source required.");
-        this.model=model;this.masks=masks;mask=masks.CopyPrimaryMask();groups=masks.Knowledge.CopyGroups();
+        inputs.RequireCurrent();
+        if(!ReferenceEquals(model.Source,inputs.Source))throw new ArgumentException("Same actual MAIN source required.");
+        this.model=model;this.inputs=inputs;mask=inputs.CopyPrimaryMask();groups=inputs.Knowledge.CopyGroups();
         var profile=model.CacheProfile;var alphabet=model.Source.Alphabet;ReadOnlySpan<byte> serializedAlphabetHeader=alphabet.CopySerializedHeader();
         ArgumentNullException.ThrowIfNull(profile);ArgumentNullException.ThrowIfNull(alphabet);profile.Validate();
         if(serializedAlphabetHeader.Length<16)throw new InvalidDataException("Missing eight-field alphabet header.");
@@ -32,7 +35,7 @@ internal sealed class LegacyEnglishMainClassCacheKernel
     internal LegacyOrdinaryAcousticClassCacheResult Build(ReadOnlySpan<int> neuralCosts,
         LegacyEnglishMainGlyphFeatures feature,int span,CancellationToken cancellationToken)
     {
-        if(!ReferenceEquals(masks.Source,model.Source)||span is<0 or>7||!masks.Knowledge.SizeCostsEnabled||model.FreshMode13Flags!=0x21400)
+        if(!ReferenceEquals(inputs.Source,model.Source)||span is<0 or>7||!inputs.Knowledge.SizeCostsEnabled||model.FreshMode13Flags!=0x21400)
             throw new ArgumentException("Actual fresh same-source MAIN cache required.");
         IReadOnlyList<LegacyInkStroke> normalizedGlyph=feature.Merged;
         byte[] enabledSymbols=mask;
@@ -118,8 +121,8 @@ internal sealed class LegacyEnglishMainClassCacheKernel
                 if(extent>threshold&&labels.TryGetValue(text,out ushort id))
                 {float value=(extent/threshold-1f)*8192f;int penalty=(int)(value<=0?value-.5f:value+.5f);costs[id]=checked(costs[id]+penalty);}
             }
-            SizePenalty(".",100f*masks.Knowledge.DotSizeDivisor);
-            foreach(string text in new[]{",","'","\"","\u3001"})SizePenalty(text,100f*masks.Knowledge.PunctuationSizeDivisor);
+            SizePenalty(".",100f*inputs.Knowledge.DotSizeDivisor);
+            foreach(string text in new[]{",","'","\"","\u3001"})SizePenalty(text,100f*inputs.Knowledge.PunctuationSizeDivisor);
             if(normalizedGlyph.Count==1&&context.IsWholePhysicalStroke&&context.WholeStrokeEndpointCategoriesZero&&Enabled("."))
             {
                 int best=costs[labels["."]];for(int i=0;i<alphabet.LabelCount;i++)best=Math.Min(best,costs[i]);costs[labels["."]]=checked(best-1);
@@ -142,7 +145,7 @@ internal sealed class LegacyEnglishMainClassCacheKernel
         int count=span+1;
         if(count!=1)
         {
-            float factor=(float)Math.Pow(count,(double)masks.Knowledge.CachePower);
+            float factor=(float)Math.Pow(count,(double)inputs.Knowledge.CachePower);
             double fallbackFactor=Math.Pow(count,1.2000000476837158d);
             for(int i=0;i<costs.Length;i++)
             {

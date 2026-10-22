@@ -27,6 +27,7 @@ public sealed class LegacyOrdinaryGraphAcousticPermissionSession
     private readonly Record[] records;
     private readonly List<PoolEntry> pool = [];
     private LegacyPreparedDictionaryWorkingMap source;
+    private readonly LegacyEnglishFreshCaseMainSource.Source68Forwarder? caseTarget;
     private bool valid = true;
     private int active;
 
@@ -51,6 +52,15 @@ public sealed class LegacyOrdinaryGraphAcousticPermissionSession
         records = Enumerable.Range(0, graph.GroupCount).Select(_ => new Record()).ToArray();
     }
 
+    internal LegacyOrdinaryGraphAcousticPermissionSession(LegacyOrdinaryRecognitionGraph graph,
+        LegacyPreparedDictionaryWorkingMap source,ReadOnlySpan<ushort> reservedSlots,
+        Func<int,CancellationToken,LegacyOrdinaryGraphAcousticRow?> compute,
+        LegacyEnglishFreshCaseMainSource.Source68Forwarder caseTarget)
+        :this(graph,source,reservedSlots,compute)
+    {
+        ArgumentNullException.ThrowIfNull(caseTarget);this.caseTarget=caseTarget;caseTarget.BindSession(this,source);
+    }
+
     private static Func<int,CancellationToken,LegacyOrdinaryGraphAcousticRow?> AdaptCompute(
         LegacyOrdinaryCursiveCandidateGraph graph,
         Func<LegacyOrdinaryCursiveCandidateInk,CancellationToken,LegacyOrdinaryGraphAcousticRow?> compute)
@@ -73,7 +83,18 @@ public sealed class LegacyOrdinaryGraphAcousticPermissionSession
     /// </summary>
     public LegacyOrdinaryGraphPermissionPass Evaluate(int anchorNode, byte requestedSpan,
         bool reuseComputed, CancellationToken cancellationToken = default)
+        =>EvaluateCore(anchorNode,requestedSpan,reuseComputed,null,cancellationToken);
+
+    internal LegacyOrdinaryGraphPermissionPass EvaluateForFreshCase(int anchorNode,byte requestedSpan,
+        LegacyEnglishFreshCaseMainSource.D0Lease lease,CancellationToken token)
+        =>EvaluateCore(anchorNode,requestedSpan,false,lease,token);
+
+    private LegacyOrdinaryGraphPermissionPass EvaluateCore(int anchorNode,byte requestedSpan,bool reuseComputed,
+        LegacyEnglishFreshCaseMainSource.D0Lease? lease,CancellationToken cancellationToken)
     {
+        if(caseTarget is null ? lease is not null : lease is null)
+            throw new InvalidOperationException("Exact case target and private operation lease required.");
+        caseTarget?.RequireLease(this,lease!);
         if (Interlocked.CompareExchange(ref active, 1, 0) != 0)
             throw new InvalidOperationException("Ordinary cache session calls must be serialized.");
         try
@@ -133,7 +154,9 @@ public sealed class LegacyOrdinaryGraphAcousticPermissionSession
                 rows.Add(new(snapshot, record.Scale, recompute, 0, false, 0, true));
                 emitted.Add(new(new(anchorNode, ordinal), arc.GroupId, snapshot, recompute));
             }
-            var permission = LegacyPreparedAcousticDictionaryPermissions.BuildAndRefresh(source, reserved, rows, cancellationToken);
+            var permission = caseTarget is null
+                ? LegacyPreparedAcousticDictionaryPermissions.BuildAndRefresh(source,reserved,rows,cancellationToken)
+                : caseTarget.BuildAndRefresh(this,lease!,source,reserved,rows,cancellationToken);
             source = permission.WorkingMap!;
             return new(true, permission, Array.AsReadOnly(selected.ToArray()), Array.AsReadOnly(emitted.ToArray()), computed, reused);
         }

@@ -74,6 +74,10 @@ public sealed class LegacyEnglishMainOnlyAcousticScorer
         token.ThrowIfCancellationRequested();return new(features,networks,neural,new(group,span,result,power));
     }
     private int[] Combine(LegacyEnglishMainNetworkResult[] networks,float weight,CancellationToken token)
+        =>CombineCore(networks,weight,primary,Masks.Knowledge,token);
+    // Pure numeric implementation: this result does not confer typed source authority.
+    internal static int[] CombineCore(LegacyEnglishMainNetworkResult[] networks,float weight,
+        byte[] primary,LegacyEnglish119MainKnowledge knowledge,CancellationToken token)
     {
         const int impossible=0x4000000;var costs=new int[182];float denominator=0;
         if(!float.IsFinite(weight)||weight<0||weight>1)throw new InvalidDataException("Actual257 mode2 weight domain required.");
@@ -86,13 +90,13 @@ public sealed class LegacyEnglishMainOnlyAcousticScorer
         //1B9E20 positive80 modifies the RAW weighted sum before division.
         int best=-1,bestCost=impossible;
         for(int i=0;i<182;i++)if(i!=181&&i!=180&&primary[i]!=0&&costs[i]<bestCost){best=i;bestCost=costs[i];}
-        var alphabet=Masks.Source.Alphabet;
-        if(Masks.Knowledge.RelatedCaseRelaxationEnabled&&best>=0&&alphabet.IsSymbolFlagged((ushort)best)&&alphabet.TryGetRelatedForms((ushort)best,0,out var forms))
+        var alphabet=knowledge.Source.Alphabet;
+        if(knowledge.RelatedCaseRelaxationEnabled&&best>=0&&alphabet.IsSymbolFlagged((ushort)best)&&alphabet.TryGetRelatedForms((ushort)best,0,out var forms))
         {
             int first=forms.First,second=forms.Second;
             if(first<182&&second<182&&primary[first]!=0&&primary[second]!=0)
             {
-                float a=(denominator*Masks.Knowledge.FirstRelatedCaseMultiplier)*8192f,b=(denominator*Masks.Knowledge.SecondRelatedCaseMultiplier)*8192f;
+                float a=(denominator*knowledge.FirstRelatedCaseMultiplier)*8192f,b=(denominator*knowledge.SecondRelatedCaseMultiplier)*8192f;
                 int pa=(int)(a<=0?a-.5f:a+.5f),pb=(int)(b<=0?b-.5f:b+.5f);
                 if(costs[first]+pb<costs[second])costs[second]=costs[first]+pb;
                 else if(costs[second]+pa<costs[first])costs[first]=costs[second]+pa;

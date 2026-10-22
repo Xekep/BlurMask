@@ -71,10 +71,17 @@ public static class LegacyPreparedAcousticDictionaryPermissions
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(source); ArgumentNullException.ThrowIfNull(processedGroups);
+        var bytes = BuildBytes(source.AcousticSymbolCount,reservedSlots,processedGroups,cancellationToken);
+        return bytes.Succeeded ? new(true,bytes.Permissions,source.Refresh(bytes.Permissions.Span,cancellationToken)) : new(false,ReadOnlyMemory<byte>.Empty,null);
+    }
+    internal static LegacyOrdinaryAcousticPermissionBytes BuildBytes(int acousticCount,ReadOnlySpan<ushort> reservedSlots,
+        IReadOnlyList<LegacyPreparedAcousticPermissionGroup> processedGroups,CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(processedGroups);
         cancellationToken.ThrowIfCancellationRequested();
         if (reservedSlots.Length != 6 || processedGroups.Count > 65535)
             throw new ArgumentException("Six prepared reserved slots and bounded callback-selected groups required.");
-        var permission = new byte[source.AcousticSymbolCount];
+        var permission = new byte[acousticCount];
         foreach (ushort slot in reservedSlots)
         {
             if (slot == ushort.MaxValue) continue;
@@ -86,7 +93,7 @@ public static class LegacyPreparedAcousticDictionaryPermissions
         foreach (var group in processedGroups)
         {
             cancellationToken.ThrowIfCancellationRequested(); ArgumentNullException.ThrowIfNull(group);
-            if (!group.Succeeded) return new(false, ReadOnlyMemory<byte>.Empty, null);
+            if (!group.Succeeded) return new(false, ReadOnlyMemory<byte>.Empty);
             var costs = group.FinalCosts.Span;
             totalCosts += costs.Length;
             float thresholdValue = group.CostScale * 40000f;
@@ -106,6 +113,6 @@ public static class LegacyPreparedAcousticDictionaryPermissions
                 permission[symbol] |= flags;
             }
         }
-        return new(true, permission, source.Refresh(permission, cancellationToken));
+        return new(true,permission);
     }
 }
