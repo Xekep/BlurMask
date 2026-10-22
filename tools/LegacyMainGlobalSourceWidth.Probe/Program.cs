@@ -41,7 +41,7 @@ foreach(var raw in new[]{new[]{M(0),M(140)},new[]{M(0),M(250)},new[]{V(0),V(140)
     var plan=LegacyFreshMainGlobalGlyphFlushPlan.Prepare(walk);var width=LegacyFreshMainGlobalSourceWidthStatistics.Prepare(plan,geometryOwner);
     var ordinary=LegacyFreshMainGlobalOrdinaryGlyphProducer.Prepare(ak,callbacks);var protocol=LegacyFreshMainGlobalProtocolGlyphProducer.Prepare(ak,callbacks);
     w.WriteStartObject();w.WriteNumber("owner",owners);w.WriteNumber("count",width.Statistics.Count);w.WriteNumber("sum",width.Statistics.WidthSum);w.WriteNumber("topAC",width.TopAcBits);w.WriteNumber("topB0Bits",width.TopB0Bits);w.WriteNumber("metadataEvents",plan.SourceMetadataEvents.Count);
-    w.WriteBase64String("compact",compact);w.WriteNumber("recordCount",materialized.RecordCount);w.WriteStartArray("flushes");
+    w.WriteBase64String("compact",compact);w.WriteNumber("recordCount",materialized.RecordCount);w.WriteNumber("selectedRecordIndex",materialized.SelectedRecordIndex);w.WriteStartArray("nodeStarts2478");foreach(int start in materialized.CopyNodeStarts2478())w.WriteNumberValue(start);w.WriteEndArray();w.WriteBase64String("acousticAlphabetPayload",ak.AsSpan(99,5134));w.WriteStartArray("flushes");
     foreach(var flush in plan.Flushes)
     {
         byte[] rows72=flush.CopyRows72();w.WriteStartObject();w.WriteBase64String("rows72",rows72);w.WriteStartArray("bounds");

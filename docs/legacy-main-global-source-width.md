@@ -21,9 +21,19 @@ The new probe records eight actual raw-input owners, their compact bytes,
 native flush rows and live bounds, then supplies the derived scalars to the
 real ordinary/protocol producers. The independent Python oracle recomputes
 the ordered float/double accumulator and checks `request64+2C/+30` against the
-derived values. The actual trace contains 23 ordinary rows and eight FFFA
-rows, whose assigned-source delimiter emits no label. These are input fixtures,
-not expected-text or recognition-quality tests. Their global controller is
+derived values. The probe additionally exports the SAME selected compact
+record, per-node2478 starts and authenticated raw5134-byte acoustic alphabet.
+The oracle walks compact predecessor/alternative references independently,
+uses raw alphabet marker/joiner/unit labels and native normalization, and
+requires all eligible records to match the complete flush membership and
+chronology. It derives ordinary/protocol counts from those raw compact records,
+rather than requiring a historical selected-winner row count. The current trace
+contains22 ordinary rows and eight FFFA rows; the former23-ordinary trace
+predated the corrected actual2B1 feature producer. The source-assigned FFFA
+delimiter emits no label. Six corrupted captures must be refused, including
+coordinated row/producer/bounds deletion and permutation. All prior float/double,
+packet, scratch, width-diversity and source-owner checks remain. These are input
+fixtures, not expected-text or recognition-quality tests. Their global controller is
 still partial: the reachable `2144F0 ->213C00` soft-hyphen join is a separate
 pending integration. These traces are not a complete native winner claim.
 
