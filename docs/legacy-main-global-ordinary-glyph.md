@@ -36,13 +36,30 @@ global193860 from stored float ranges and union heights. They compare symbol,
 cursor, raw scalar bits, integer costs, category bytes and partial writes. These
 are prepared consumer checks, not Russian handwriting accuracy measurements.
 
-Managed and Native AOT pass47720 ordinary72 controls,24609 request16 controls,
+The historical pre-actual2B1 capture passes47720 ordinary72 controls,24609 request16 controls,
 2524 preserved-prefix blank refusals and72 guards on631 actual groups. Cached
 reads validate the original source lifetime, including after invalidation.
 Capture SHA256 is
 `2233d0e612311d4d50b30d8da066868820f1fe8959693f5f9b6192084fdea50f`.
 Existing3104 CASE and3288 DIRECT full40 outputs remain byte-identical to their
 committed captures in Managed and Native AOT.
+
+The current consumer oracle no longer fixes that historical control denominator.
+For each genuine group it derives the exact ordered distinct union of actual
+upstream candidate symbols and the nine fixed ordinary/special controls, then
+requires every label's four mode/conversion tuples exactly once in order.
+It also requires all13 request labels times three modes in order. Candidate
+symbols must be unique and nondecreasing in their actual cost. Category refusal
+coverage is derived independently from raw first/start/end maps before inspecting
+success outputs. Fixed631-group/five-cross-group coverage and all fallback,
+confidence, cost, geometry, cursor and preserved-prefix assertions remain.
+The corrected current input vectors yield47716 prepared72 controls and2524
+refusals; these are reported results, not replacement aggregate golden counts.
+Seven negative captures exercise deletion, duplication, mode permutation,
+incomplete request grid, candidate cost disorder, prefix score and request cost.
+The candidate vectors are genuine upstream inputs to this consumer test; this
+repair does not claim to independently reconstruct the complete acoustic heap,
+change model inference, or improve recognition quality.
 
 The probe takes AK,engine,separation,case,publication,line30,line50,capture,LK.
 
