@@ -40,9 +40,13 @@ independent checks and Managed/NativeAOT parity. The
 [target preparation prerequisite](linguistic-fst28c-target-preparation.md) now
 derives14 special/range fields and16 secondary codes under an owned fresh
 constructor-only policy. All59 range comparisons and299 projections pass
-independent checks and Managed/NativeAOT parity, including35 guards. Configured
-property events, complete state0/query, history and paging remain missing.
-No additional root resource is automatically selected.
+independent checks and Managed/NativeAOT parity, including35 guards. The
+[owned initialization prefix](linguistic-fst28c-initial-runtime.md) now retains15
+auxiliary slots,8 private cursor records and the genuine single state0 row,
+using the existing outgoing cost/tag. Both runtimes and the raw oracle agree,
+with30 guards and8 corruption negatives. Configured property events, live
+query acquisition, history and paging remain missing. No additional root
+resource is automatically selected.
 
 The [English case M/N/source68 component](english-case-main-source68-runtime-20261022.md)
 now derives the case-expanded masks, scores the actual same-source groups and

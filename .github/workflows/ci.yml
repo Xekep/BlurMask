@@ -260,12 +260,13 @@ jobs:
         shell: pwsh
         run: |
           $suffix = if ($IsWindows) { '.exe' } else { '' }
-          foreach ($project in @('LegacyFst23C.Probe', 'LegacyFst13AOutgoing.Probe', 'LegacyFst28CPrimaryMap.Probe', 'LegacyFst28CTargetPreparation.Probe', 'LegacyFullEnglishFirst.Probe', 'LegacyFullEnglishFirstConfidence.Probe', 'LegacyFullEnglishFirstController.Probe', 'LegacyEnglishCaseMain.Probe')) {
+          foreach ($project in @('LegacyFst23C.Probe', 'LegacyFst13AOutgoing.Probe', 'LegacyFst28CPrimaryMap.Probe', 'LegacyFst28CTargetPreparation.Probe', 'LegacyFst28CInitialState.Probe', 'LegacyFullEnglishFirst.Probe', 'LegacyFullEnglishFirstConfidence.Probe', 'LegacyFullEnglishFirstController.Probe', 'LegacyEnglishCaseMain.Probe')) {
             $capture = switch ($project) {
               'LegacyFst23C.Probe' { 'legacy-fst23c' }
               'LegacyFst13AOutgoing.Probe' { 'legacy-fst13a-outgoing' }
               'LegacyFst28CPrimaryMap.Probe' { 'legacy-fst28c-primary-map' }
               'LegacyFst28CTargetPreparation.Probe' { 'legacy-fst28c-target-preparation' }
+              'LegacyFst28CInitialState.Probe' { 'legacy-fst28c-initial' }
               'LegacyFullEnglishFirstConfidence.Probe' { 'legacy-en-full-first-confidence' }
               'LegacyFullEnglishFirstController.Probe' { 'legacy-en-full-first-controller' }
               'LegacyEnglishCaseMain.Probe' { 'legacy-en-case-main' }

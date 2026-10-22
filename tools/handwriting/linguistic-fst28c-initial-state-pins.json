@@ -1,0 +1,247 @@
+{
+  "modules": [
+    {
+      "binary": "MyScriptText.dll",
+      "sha256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+      "regions": [
+        {
+          "function": "18023ded0",
+          "start": "0x18023ded0",
+          "endExclusive": "0x18023dfdb",
+          "bytes": 267,
+          "sha256": "f1517505a96cd5e7a44929797deb336ef1b8c7748a9ad7b8ed78527ee9a36ef6"
+        },
+        {
+          "function": "18023dfe0",
+          "start": "0x18023dfe0",
+          "endExclusive": "0x18023e0c0",
+          "bytes": 224,
+          "sha256": "b5fa16e1bf35cfc6a757518859337bc21da14c850a4fbefa1facd995b7b824a3"
+        },
+        {
+          "function": "18023e0c0",
+          "start": "0x18023e0c0",
+          "endExclusive": "0x18023e358",
+          "bytes": 664,
+          "sha256": "14b9a87bd0356cacb677648ce58fe18caa5ea6df255f2cc7806e5e3059a7d3ab"
+        },
+        {
+          "function": "18023f6f0",
+          "start": "0x18023f6f0",
+          "endExclusive": "0x18023ffec",
+          "bytes": 2300,
+          "sha256": "df390a4651d71f30b5943fd226a0fe8b7be260ce1c070fe133ced6d97e7bc4f6"
+        },
+        {
+          "function": "180240010",
+          "start": "0x180240010",
+          "endExclusive": "0x1802406b9",
+          "bytes": 1705,
+          "sha256": "94b972c509d3cd9128d4f6afd773200d80836330296b71ea52f1250242420ac2"
+        },
+        {
+          "function": "1802406c0",
+          "start": "0x1802406c0",
+          "endExclusive": "0x1802413a9",
+          "bytes": 3305,
+          "sha256": "b307325e80458e6068e5051b67aa08ff60695661cdfe1259bd047e9569b8ce10"
+        },
+        {
+          "function": "1800918d0",
+          "start": "0x1800918d0",
+          "endExclusive": "0x180091b2d",
+          "bytes": 605,
+          "sha256": "800c6d2d18f00872a5cbe09086cb4dbd750bb5eaefa17dc836aeebf795ea5479"
+        },
+        {
+          "function": "1800917c0",
+          "start": "0x1800917c0",
+          "endExclusive": "0x1800918cd",
+          "bytes": 269,
+          "sha256": "e52e0ade2514b35822228569f2f4a6abcf6d2f60484cf2a1dc602115e31f0358"
+        },
+        {
+          "function": "180091b30",
+          "start": "0x180091b30",
+          "endExclusive": "0x180091cdf",
+          "bytes": 431,
+          "sha256": "a83b847fb79d187a191ee7446e6dd434e053a834f7635c087c0e84b44209bfc5"
+        },
+        {
+          "function": "1801ecf20",
+          "start": "0x1801ecf20",
+          "endExclusive": "0x1801ecfe3",
+          "bytes": 195,
+          "sha256": "7c32d00e7e4c831ad15c7197cc6302c5bbe424cdcae0f4ddbe6c484f24b7e31c"
+        },
+        {
+          "function": "18020baa0",
+          "start": "0x18020baa0",
+          "endExclusive": "0x18020be29",
+          "bytes": 905,
+          "sha256": "c1187348721616c8976430640335955a38a8347b67d5e91bedb5874f99457537"
+        },
+        {
+          "function": "18020d8f0",
+          "start": "0x18020d8f0",
+          "endExclusive": "0x18020e078",
+          "bytes": 1928,
+          "sha256": "abe47eca78185958b2e72ec54cfad2a08fc8c70078d6a64de6f8cb8682cfe806"
+        },
+        {
+          "function": "1801e1560",
+          "start": "0x1801e1560",
+          "endExclusive": "0x1801e1c2a",
+          "bytes": 1738,
+          "sha256": "6a23d6b9bbfe9ebfba0251884e0b500b6198ed80cffdfb36174b02f2594a7e36"
+        },
+        {
+          "function": "18010bac0",
+          "start": "0x18010bac0",
+          "endExclusive": "0x18010bbd3",
+          "bytes": 275,
+          "sha256": "b331f275630bf2e2cfc5d1839a711033ccada0e4404bbed07adad1ec3b19bda9"
+        },
+        {
+          "function": "18010e3f0",
+          "start": "0x18010e3f0",
+          "endExclusive": "0x18010e451",
+          "bytes": 97,
+          "sha256": "4b940ea37fdbd16b32507e81da8cbcbcf6ea1918cf60716bf2d5f0d327d2c43e"
+        },
+        {
+          "function": "1801d6700",
+          "start": "0x1801d6700",
+          "endExclusive": "0x1801d6a51",
+          "bytes": 849,
+          "sha256": "6c9d36cd262457c2c76babbf1573ea3f6bf3ca742aa2eba1baf23179e784b071"
+        },
+        {
+          "function": "18010aa80",
+          "start": "0x18010aa80",
+          "endExclusive": "0x18010ad9b",
+          "bytes": 795,
+          "sha256": "3828e895198f2da29a211ca343b0cf248d1b8b7610e1dc263b20c8d5bc1670f2"
+        },
+        {
+          "function": "1801d2680",
+          "start": "0x1801d2680",
+          "endExclusive": "0x1801d28c0",
+          "bytes": 576,
+          "sha256": "ca21bc34a5572aedaf376ac733f707b7aa05ee7b3a236d0bee0dfb3f958dcd9d"
+        },
+        {
+          "function": "1801d22e0",
+          "start": "0x1801d22e0",
+          "endExclusive": "0x1801d258f",
+          "bytes": 687,
+          "sha256": "8041251cdc7d7a1efad3111b5d5236b5e62c9831092e2e6cb206b5ab7ddac66f"
+        }
+      ],
+      "tables": [
+        {
+          "at": "0x1802badf0",
+          "bytes": "f0a9108001000000e0ae2b800100000080aa108001000000a0ad108001000000b0ad10800100000050bd10800100000030a60c8001000000506d1d8001000000d06d1d8001000000a0b3108001000000d0b3108001000000c0a204800100000030ba10800100000070ba10800100000090ba108001000000b0ba108001000000c0ba108001000000e06d1d8001000000f06d1d8001000000",
+          "scope": "actual13A slots0through90"
+        },
+        {
+          "at": "0x18010bab0",
+          "bytes": "41c60000488b82800000008b4020c3",
+          "scope": "complete13A V78 capacity field20 getter"
+        },
+        {
+          "at": "0x18010ba90",
+          "bytes": "488b8280000000418bc8488b40180fb644c807c3",
+          "scope": "complete13A V70 targetbyte7 getter"
+        },
+        {
+          "at": "0x18010ba30",
+          "bytes": "4c8b9280000000b801000000458b4a14443bc876214d8b52180f1f80000000008bc8490fbe54ca0641833c90007c0affc0413bc172ea32c0c3b001c3",
+          "scope": "complete13A V60 signedcost negative scan"
+        },
+        {
+          "at": "0x1800ca630",
+          "bytes": "488b4270c3",
+          "scope": "complete13A V30 sourcealphabet getter"
+        },
+        {
+          "at": "0x1801d6de0",
+          "bytes": "8b4260c3",
+          "scope": "completeV88 sourceprior60 getter"
+        },
+        {
+          "at": "0x1801d6df0",
+          "bytes": "8b4264c3",
+          "scope": "completeV90 sourceprior64 getter"
+        },
+        {
+          "at": "0x1802eaa84",
+          "bytes": "e2808d00",
+          "scope": "literalUTF8 ZWJ andNUL"
+        },
+        {
+          "at": "0x1802e54b0",
+          "bytes": "02000000000000003301000004000000ffffffff0000000028552e8001000000",
+          "scope": "registeredparent0x133"
+        },
+        {
+          "at": "0x1802e5528",
+          "bytes": "30e5108001000000f8542e800100000030562e8001000000e02f1d8001000000802f1d8001000000",
+          "scope": "parentmetadata0x133"
+        },
+        {
+          "at": "0x1802e54f8",
+          "bytes": "20261d8001000000b0542e800100000080261d8001000000",
+          "scope": "parentV100x133"
+        },
+        {
+          "at": "0x1802bb240",
+          "bytes": "02000000000000003801000033010000ffffffff0000000088b22b8001000000",
+          "scope": "registeredparent0x138"
+        },
+        {
+          "at": "0x1802bb288",
+          "bytes": "30e5108001000000c0b22b8001000000f0b22b800100000000000000000000000000000000000000",
+          "scope": "parentmetadata0x138"
+        },
+        {
+          "at": "0x1802bb2c0",
+          "bytes": "b0e310800100000040b22b8001000000f0e3108001000000",
+          "scope": "parentV100x138"
+        },
+        {
+          "at": "0x1802e5c30",
+          "bytes": "0200000000000000390100007b020000ffffffff00000000f05b2e8001000000",
+          "scope": "registeredparent0x139"
+        },
+        {
+          "at": "0x1802e5bf0",
+          "bytes": "c0fc138001000000405d2e8001000000205d2e8001000000000000000000000070711d8001000000",
+          "scope": "parentmetadata0x139"
+        },
+        {
+          "at": "0x1802e5d40",
+          "bytes": "90661d8001000000305c2e800100000000671d8001000000",
+          "scope": "parentV100x139"
+        }
+      ]
+    },
+    {
+      "binary": "MyScriptEngine.dll",
+      "sha256": "d31abcd309cbb558bb80bf50fe1968921de515bc40fbeb0e886a5cf14dbc0a5c",
+      "regions": [],
+      "tables": [
+        {
+          "at": "0x1801db830",
+          "bytes": "607d038001000000707d038001000000d07d038001000000407e038001000000907e038001000000f07e038001000000",
+          "scope": "actualEngine TypeAPI V28"
+        },
+        {
+          "at": "0x180037ef0",
+          "bytes": "4c8b81980000004d85c0744981faff3f000077414863d2488bc2488bca48c1f80883e20f83e03f48c1f90483e10f498b04c0488b04c8488b04d04885c07416488b004885c0740e488b40184885c07405488b4008c333c0c3",
+          "scope": "completeV28 registereddescriptor metadata mainVT getter"
+        }
+      ]
+    }
+  ]
+}
