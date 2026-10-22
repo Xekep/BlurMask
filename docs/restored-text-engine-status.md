@@ -22,17 +22,26 @@ The [full-FIRST ranked and geometry initializer](legacy-full-english-first-contr
 now owns the same-source ranked costs, group separation and per-arc
 prefix/future/join/blank/margin state. Both141/100 sets pass independent
 numerical checks and Managed/NativeAOT parity, with26 guards/6 cancellation
-stages and all8 previous A/B1 captures unchanged. Primary/context/terminal
+stages and all8 previous A/B1 captures unchanged. Context/terminal
 selection, WORD, source720 and finalized guide remain missing; application
 text recognition and CTC frame heuristics are unchanged.
+
+The [full-FIRST owning primary98 producer B3](legacy-full-english-first-primary-runtime.md)
+now derives its requests from that complete B2 owner and executes the shared
+primary recurrence with actual full-source geometry. All141+100 inputs pass
+Managed/Native AOT parity. Independent replay checks217542 ordered requests,
+3015866 callbacks and14915 complete40-byte records, plus29 guards/7 cancellation
+controls. These are primary candidate results, not recognized words or an
+accuracy gain. Full context, terminal, WORD/source720 and final-guide authority
+are still pending.
 
 The [FIRST source/ending correction](legacy-first-source-ending-union-correction.md)
 now preserves the ancestor's category while combining its bounds with the
 original ending for ordinary140. Independent raw checks cover370 inputs and612
 changed-cost witnesses; Managed/NativeAOT parity and the adjacent primary/context
 regressions pass. All370 selected outputs remain unchanged, so this supplies no
-demonstrated handwriting-accuracy improvement. The full-English B3 producer is
-still pending.
+demonstrated handwriting-accuracy improvement. The full-English B3 producer
+also consumes this corrected ending-bound rule.
 
 The [inline23C wire reader](linguistic-fst23c-wire-reader.md) now retains the
 actual Russian number-rule storage with bounded immutable ownership. It reads
@@ -64,6 +73,13 @@ references. Four actual procedural graph owners,42 guards and9 corrupted capture
 pass the raw oracle and Managed/NativeAOT parity; the four previous FST captures
 remain byte-exact. The request has no issued context, Query, history or Ready
 API. This does not implement number OCR or full-root default selection.
+
+The [number-source symbol and M-mask producer](linguistic-fst28c-number-symbol-masks.md)
+now enumerates that same source's16 labels and derives all576 intermediate mask
+bytes without a prepared2B7/13B substitute. Four genuine graph associations,
+42 guards and11 corrupted captures pass the independent raw-model oracle and
+Managed/Native AOT parity; the previous five FST captures remain exact. Genuine
+NN/cache D0 permissions, mutable-map refresh and live queries remain absent.
 
 The [English case M/N/source68 component](english-case-main-source68-runtime-20261022.md)
 now derives the case-expanded masks, scores the actual same-source groups and

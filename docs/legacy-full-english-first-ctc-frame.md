@@ -31,6 +31,18 @@ exported `1D9730` copy helper. This correction does not authorize a
 `V120=false` shortcut, change the application's frame heuristics, or establish
 full native-frame or recognition readiness.
 
+A further static check found that the registered body of copy helper `1D9730`
+does not include two of its computed-jump tails. Tables `23D690` and `23D6D8`
+have18 targets outside those registered regions. A separate raw-PE Capstone
+disassembly closes both tails (`1D99A5..1D9A2D`, `1D9C49..1D9CB6`):
+35 instructions/247 bytes, all18 targets at decoded instruction starts, with
+no calls or branches inside the tails. Their memory operands are checked
+explicitly. This is additional control-flow evidence, not a complete copy
+range or allocation-alias proof. The earlier registered-body export alone
+must not be treated as that proof. Frozen E manifest:
+`root-copy-contract-missing-tail-frozen-manifest-20261023.json`, SHA256
+`30311ceeecf7f230f1b5dcd789ca19e53ca39210fc56177dc225931b3ebf9fee`.
+
 ## Current user-visible path and exact native input
 
 Current StrokeFeatures.Create uses height=.5*bboxExtent and baseline=ymin+.9*bboxExtent, rejects flat extent and resamples the caller's supplied strokes. These are explicit heuristics. The bundled full English resource itself contains no such ratio: its exact SHA355f15d581dee2baeb092937cef69ae8db321ce3f60e28497c13e628a3b72927 is root247/v110, sourceKind135/mode2, positive148 with plain21E/v103 at1774246..3782859. Adapter mode0/kind4 supplies13 normalized features, spacing0.30000001192092896,minPoints2,link_strokes0,transform0 and181 outputs plusblank181. Its nested53 owns5F/v1061774299..3782348; raw layer kinds1,8,8,8/widths13,127,127,127. Type2BE is not the serialized feature owner; it is not used as a substitute identity here.
