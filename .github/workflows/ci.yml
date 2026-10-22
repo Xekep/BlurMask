@@ -260,7 +260,7 @@ jobs:
         shell: pwsh
         run: |
           $suffix = if ($IsWindows) { '.exe' } else { '' }
-          foreach ($project in @('LegacyFst23C.Probe', 'LegacyFst13AOutgoing.Probe', 'LegacyFst28CPrimaryMap.Probe', 'LegacyFst28CTargetPreparation.Probe', 'LegacyFst28CInitialState.Probe', 'LegacyFst28CFreshPrimaryControllerBootstrap.Probe', 'LegacyFst28CNumberSymbolMasks.Probe', 'LegacyFullEnglishFirst.Probe', 'LegacyFullEnglishFirstConfidence.Probe', 'LegacyFullEnglishFirstController.Probe', 'LegacyFullEnglishFirstPrimary.Probe', 'LegacyFullEnglishFirstContext.Probe', 'LegacyEnglishCaseMain.Probe', 'LegacyEnglishCaseInitialization.Probe')) {
+          foreach ($project in @('LegacyFst23C.Probe', 'LegacyFst13AOutgoing.Probe', 'LegacyFst28CPrimaryMap.Probe', 'LegacyFst28CTargetPreparation.Probe', 'LegacyFst28CInitialState.Probe', 'LegacyFst28CFreshPrimaryControllerBootstrap.Probe', 'LegacyFst28CNumberSymbolMasks.Probe', 'LegacyFst28CNumberInitialD0.Probe', 'LegacyFullEnglishFirst.Probe', 'LegacyFullEnglishFirstConfidence.Probe', 'LegacyFullEnglishFirstController.Probe', 'LegacyFullEnglishFirstPrimary.Probe', 'LegacyFullEnglishFirstContext.Probe', 'LegacyFullEnglishFirstTerminal.Probe', 'LegacyEnglishCaseMain.Probe', 'LegacyEnglishCaseInitialization.Probe', 'LegacyEnglishCaseInitialQuery.Probe')) {
             $capture = switch ($project) {
               'LegacyFst23C.Probe' { 'legacy-fst23c' }
               'LegacyFst13AOutgoing.Probe' { 'legacy-fst13a-outgoing' }
@@ -269,19 +269,22 @@ jobs:
               'LegacyFst28CInitialState.Probe' { 'legacy-fst28c-initial' }
               'LegacyFst28CFreshPrimaryControllerBootstrap.Probe' { 'legacy-fst28c-bootstrap' }
               'LegacyFst28CNumberSymbolMasks.Probe' { 'legacy-fst28c-number-symbol-masks' }
+              'LegacyFst28CNumberInitialD0.Probe' { 'legacy-fst28c-number-initial-d0' }
               'LegacyFullEnglishFirstConfidence.Probe' { 'legacy-en-full-first-confidence' }
               'LegacyFullEnglishFirstController.Probe' { 'legacy-en-full-first-controller' }
               'LegacyFullEnglishFirstPrimary.Probe' { 'legacy-en-full-first-primary' }
               'LegacyFullEnglishFirstContext.Probe' { 'legacy-en-full-first-context' }
+              'LegacyFullEnglishFirstTerminal.Probe' { 'legacy-en-full-first-terminal' }
               'LegacyEnglishCaseMain.Probe' { 'legacy-en-case-main' }
               'LegacyEnglishCaseInitialization.Probe' { 'legacy-en-case-initialization' }
+              'LegacyEnglishCaseInitialQuery.Probe' { 'legacy-en-case-initial-query' }
               default { 'legacy-en-full-first' }
             }
             $directory = "./.artifacts/$capture-native"
             dotnet publish "tools/$project/$project.csproj" -c Release -p:PublishAot=true -o $directory
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             $arguments = @('models')
-            if ($project -in @('LegacyFullEnglishFirst.Probe', 'LegacyFullEnglishFirstConfidence.Probe', 'LegacyFullEnglishFirstController.Probe', 'LegacyFullEnglishFirstPrimary.Probe', 'LegacyFullEnglishFirstContext.Probe', 'LegacyEnglishCaseMain.Probe', 'LegacyEnglishCaseInitialization.Probe')) { $arguments += '.artifacts/legacy-en119-final-single-blind.json' }
+            if ($project -in @('LegacyFullEnglishFirst.Probe', 'LegacyFullEnglishFirstConfidence.Probe', 'LegacyFullEnglishFirstController.Probe', 'LegacyFullEnglishFirstPrimary.Probe', 'LegacyFullEnglishFirstContext.Probe', 'LegacyFullEnglishFirstTerminal.Probe', 'LegacyEnglishCaseMain.Probe', 'LegacyEnglishCaseInitialization.Probe', 'LegacyEnglishCaseInitialQuery.Probe')) { $arguments += '.artifacts/legacy-en119-final-single-blind.json' }
             $arguments += ".artifacts/$capture-native.json"
             $executable = Join-Path $directory "$project$suffix"
             & $executable @arguments

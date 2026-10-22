@@ -32,8 +32,8 @@ primary recurrence with actual full-source geometry. All141+100 inputs pass
 Managed/Native AOT parity. Independent replay checks217542 ordered requests,
 3015866 callbacks and14915 complete40-byte records, plus29 guards/7 cancellation
 controls. These are primary candidate results, not recognized words or an
-accuracy gain. Terminal, WORD/source720 and final-guide authority are still
-pending.
+accuracy gain. Rich glyph/WORD construction, source720 and final-guide
+authority are still pending.
 
 The [full-FIRST context producer B4](legacy-full-english-first-context-runtime.md)
 now constructs same-owner A8/B0/B8 tables and private symbolic contexts.
@@ -42,6 +42,14 @@ Managed/Native AOT parity, including324194 ordered callbacks. The verifier check
 every ordered class-query argument, complete40-byte records and fresh AVL/page
 allocation, with36 guards and7 cancellation controls. These are intermediate
 context tables; no recognized-word or accuracy improvement is claimed.
+
+The [full-FIRST numeric terminal B5](legacy-full-english-first-terminal-runtime.md)
+now selects the final B8 candidate and retains its exact predecessor chain.
+All141+100 inputs pass independent scalar-bit and40-byte-cell checks and exact
+Managed/Native AOT parity:252 child results and1136 cells, with29 guards and9
+cancellation controls. Existing English/Russian terminal checks remain exact.
+Rich glyph/WORD construction, source720 and finalized parent guides are still
+required; terminal symbols alone do not establish those results.
 
 The [FIRST source/ending correction](legacy-first-source-ending-union-correction.md)
 now preserves the ancestor's category while combining its bounds with the
@@ -89,6 +97,14 @@ bytes without a prepared2B7/13B substitute. Four genuine graph associations,
 Managed/Native AOT parity; the previous five FST captures remain exact. Genuine
 NN/cache D0 permissions, mutable-map refresh and live queries remain absent.
 
+The [number-source initial D0](linguistic-fst28c-number-initial-d0-runtime-20261023.md)
+now derives the genuine node0/span0 group costs, permissions, eligibility and
+filtered primary map under the same source owner. Four actual procedural
+owners pass19 independently recomputed networks and4480 feature channels,
+with exact Managed/Native AOT parity,79 guards and13 corruption controls.
+The six older number-source captures remain exact. Query issuance, history,
+continuation and ready number OCR remain pending.
+
 The [English case M/N/source68 component](english-case-main-source68-runtime-20261022.md)
 now derives the case-expanded masks, scores the actual same-source groups and
 joins pooled D0 to one ordered case-aware working-map refresh. Both original134
@@ -107,6 +123,14 @@ and7 explicit refusals, with58 guards and18 cancellation controls. Historical
 separate. Its2,907,401-byte logical envelope explicitly includes the new graph
 adapter; it is not process RSS. Query issuance, live D0 map forwarding, history,
 terminal search and whole-word publication remain missing from this component.
+
+The [first genuine English case query](english-case-initial-query-runtime-20261023.md)
+now joins the native reset order, actual initial D0, exact refreshed map and
+first128-row query pages under one private source owner. Independent checks
+cover234 accepted owners,956 NN evaluations and10202 complete32-byte records;
+Managed/Native AOT captures match, with57 guards and16 cancellation stages.
+The public104-context initializer retains its previous results. The complete
+word-search scheduler, continuation/history and word publication remain pending.
 
 RC1.2.8-rc.8 is an experimental checkpoint. The subsequent test-only correction
 replaces three stale generic2B0 diagnostic collectors with actual2B1 vectors and

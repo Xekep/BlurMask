@@ -642,6 +642,9 @@ python -I -B tools/LegacyFst28CFreshPrimaryControllerBootstrap.Probe/audit_outpu
 
 dotnet run --project tools/LegacyFst28CNumberSymbolMasks.Probe -c Release -- models .artifacts/legacy-fst28c-number-symbol-masks-managed.json
 python -I -B tools/LegacyFst28CNumberSymbolMasks.Probe/audit_output.py models .artifacts/legacy-fst28c-number-symbol-masks-managed.json
+
+dotnet run --project tools/LegacyFst28CNumberInitialD0.Probe -c Release -- models .artifacts/legacy-fst28c-number-initial-d0-managed.json
+python -I -B tools/LegacyFst28CNumberInitialD0.Probe/audit_output.py models .artifacts/legacy-fst28c-number-initial-d0-managed.json
 python tools/LegacyEnglishLiteFirstPreprocessing.Probe/reference_controls.py .artifacts/legacy-en-short-controls.json
 python tools/LegacyEnglishFirstSlant.Probe/reference_controls.py .artifacts/legacy-en-short-controls.json .artifacts/legacy-en-slant-controls.json
 dotnet run --project tools/LegacyFirstAcoustic119Wire.Probe -c Release -- models .artifacts/legacy-first-acoustic119-wire-managed.json
@@ -687,6 +690,9 @@ python -I -B tools/LegacyFullEnglishFirstPrimary.Probe/audit_output.py --repo . 
 
 dotnet run --project tools/LegacyFullEnglishFirstContext.Probe -c Release -- models .artifacts/legacy-en119-final-single-blind.json .artifacts/legacy-en-full-first-context-managed.json
 python -I -B tools/LegacyFullEnglishFirstContext.Probe/audit_output.py --repo . --models models --b3 .artifacts/legacy-en-full-first-primary-managed.json --inputs .artifacts/legacy-en119-final-single-blind.json --capture .artifacts/legacy-en-full-first-context-managed.json --output .artifacts/legacy-en-full-first-context-oracle-managed.json
+
+dotnet run --project tools/LegacyFullEnglishFirstTerminal.Probe -c Release -- models .artifacts/legacy-en119-final-single-blind.json .artifacts/legacy-en-full-first-terminal-managed.json
+python -I -B tools/LegacyFullEnglishFirstTerminal.Probe/audit_output.py --repo . --models models --b4 .artifacts/legacy-en-full-first-context-managed.json --capture .artifacts/legacy-en-full-first-terminal-managed.json --output .artifacts/legacy-en-full-first-terminal-oracle-managed.json
 dotnet run --project tools/LegacyEnglish119FinalSingle.Probe -c Release -- models .artifacts/legacy-en119-final-single-blind.json .artifacts/legacy-en119-final-single-managed.json
 python -I -B tools/LegacyEnglish119FinalSingle.Probe/audit_output.py models .artifacts/legacy-en119-final-single-managed.json .artifacts/legacy-en119-postprocessing-managed.json
 python -I -B tools/handwriting/audit_english119_final_single.py --models models --output .artifacts/legacy-en119-final-single-model-audit.json
@@ -712,6 +718,9 @@ python -I -B tools/LegacyEnglishCaseMain.Probe/audit_output.py --models models -
 
 dotnet run --project tools/LegacyEnglishCaseInitialization.Probe -c Release -- models .artifacts/legacy-en119-final-single-blind.json .artifacts/legacy-en-case-initialization-managed.json
 python -I -B tools/LegacyEnglishCaseInitialization.Probe/audit_output.py --repo . --models models --capture .artifacts/legacy-en-case-initialization-managed.json --output .artifacts/legacy-en-case-initialization-oracle-managed.json
+
+dotnet run --project tools/LegacyEnglishCaseInitialQuery.Probe -c Release -- models .artifacts/legacy-en119-final-single-blind.json .artifacts/legacy-en-case-initial-query-managed.json
+python -I -B tools/LegacyEnglishCaseInitialQuery.Probe/audit_output.py --repo . --models models --capture .artifacts/legacy-en-case-initial-query-managed.json --case-capture .artifacts/legacy-en-case-main-managed.json --case-proof .artifacts/legacy-en-case-main-oracle-managed.json --output .artifacts/legacy-en-case-initial-query-oracle-managed.json
 dotnet run --project tools/LegacyEnglishMainWordTransitions.Probe -c Release -- models .artifacts/legacy-en119-final-single-blind.json .artifacts/legacy-en-word-transitions-managed.json
 python -I -B tools/LegacyEnglishMainWordTransitions.Probe/audit_output.py models .artifacts/legacy-en-word-transitions-managed.json .artifacts/legacy-en-word-transitions-oracle-managed.json
 dotnet run --project tools/LegacyMathMixed107Raw.Probe -c Release -- models/math/math-ak.res .artifacts/legacy-math-mixed107-raw-managed.json

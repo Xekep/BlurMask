@@ -18,7 +18,8 @@ public sealed class LegacyEnglishCaseInitializationSnapshot
     public ushort CasePathVersion=>0x200;
     public uint DescriptorFlags=>0xc0e;
     public int SelectedPriority=>1024;
-    public int InitialContextCapacity=>104;
+    private readonly int initialContextCapacity;
+    public int InitialContextCapacity=>initialContextCapacity;
     public int InitialPageCapacity{get;}
     public int InitialPageCursor{get;}
     public int PostControlPageCapacity{get;}
@@ -29,10 +30,10 @@ public sealed class LegacyEnglishCaseInitializationSnapshot
     internal LegacyEnglishCaseInitializationSnapshot(ulong container,ulong initialRoot,ulong postRoot,
         LegacySymbolContextNode[] before,LegacySymbolContextNode[] after,int[] beforePages,int[] afterPages,
         ushort[] preserved,ushort[] auxiliaryMap,ulong[] contexts,byte[] classifications,byte[] alternateClassifications,
-        LegacyEnglishCaseInitializationControl[] resolved,int initialCapacity,int initialCursor,int postCapacity,int postCursor)
-    {ContainerIdentity=container;InitialRootIdentity=initialRoot;PostControlRootIdentity=postRoot;initial=before;post=after;initialPages=beforePages;postPages=afterPages;primary=preserved;auxiliary=auxiliaryMap;source68=contexts;ordinary=classifications;alternate=alternateClassifications;controls=resolved;InitialPageCapacity=initialCapacity;InitialPageCursor=initialCursor;PostControlPageCapacity=postCapacity;PostControlPageCursor=postCursor;}
+        LegacyEnglishCaseInitializationControl[] resolved,int initialCapacity,int initialCursor,int postCapacity,int postCursor,int contextCapacity=104)
+    {initialContextCapacity=contextCapacity;ContainerIdentity=container;InitialRootIdentity=initialRoot;PostControlRootIdentity=postRoot;initial=before;post=after;initialPages=beforePages;postPages=afterPages;primary=preserved;auxiliary=auxiliaryMap;source68=contexts;ordinary=classifications;alternate=alternateClassifications;controls=resolved;InitialPageCapacity=initialCapacity;InitialPageCursor=initialCursor;PostControlPageCapacity=postCapacity;PostControlPageCursor=postCursor;}
     internal LegacyEnglishCaseInitializationSnapshot Copy()=>new(ContainerIdentity,InitialRootIdentity,PostControlRootIdentity,
-        initial.ToArray(),post.ToArray(),initialPages.ToArray(),postPages.ToArray(),primary.ToArray(),auxiliary.ToArray(),source68.ToArray(),ordinary.ToArray(),alternate.ToArray(),controls.ToArray(),InitialPageCapacity,InitialPageCursor,PostControlPageCapacity,PostControlPageCursor);
+        initial.ToArray(),post.ToArray(),initialPages.ToArray(),postPages.ToArray(),primary.ToArray(),auxiliary.ToArray(),source68.ToArray(),ordinary.ToArray(),alternate.ToArray(),controls.ToArray(),InitialPageCapacity,InitialPageCursor,PostControlPageCapacity,PostControlPageCursor,initialContextCapacity);
     public LegacySymbolContextNode[] CopyInitialNodes()=>initial.ToArray();
     public LegacySymbolContextNode[] CopyPostControlNodes()=>post.ToArray();
     public int[] CopyInitialPages()=>initialPages.ToArray();

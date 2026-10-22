@@ -1,0 +1,77 @@
+{
+  "supersedesBudgetOnly": "126cf3795685b935a93dea7eb4d979c1e0e1461bb71f54c6ef660d68067f1b27",
+  "sourcePins": {
+    "src/InkRecognition/LegacyFreshMainGlobalContext.cs": "aeaad2bf6bac35052e0d7474a0df373dc9247d1d65e82054524bf19c46dab00b",
+    "src/InkRecognition/LegacyFreshMainGlobalGlyphGeometry.cs": "98b9113bb0f81ef2cfe1d4c1ec96194ee502cf87d0f1686c177fe35c2520ac5c",
+    "src/InkRecognition/LegacyFreshMainGlobalSourceRanges.cs": "8fb16948db37ed654ca215a4d51b6b378540cb59b0f233655b7703b57193e9fe",
+    "src/InkRecognition/LegacyFreshMainDescriptorCutSource.cs": "48c7ba8229a88a5e7ab42681ddd60279bde316f6ac2cae3bed2a45b6f852633c",
+    "src/InkRecognition/LegacySourcePointChronology.cs": "31cf1a0e24f38a0bb0836d9adc91e8bd5259e37345d134b11ea950e09ffa8e2e",
+    "src/InkRecognition/LegacyOrdinaryGraphSourceRanges.cs": "c84a663dcbea60b08f104fc7fd6be712f451058003a6b9c03a27600f5b7c1aef",
+    "src/InkRecognition/LegacyCursivePreparedInk.cs": "22f4799ade2bc899057d195250d92cd0086002c86d12734f8876d9a9c3ad9bae",
+    "src/InkRecognition/LegacyPreparedGlyphClassifier.cs": "71ed3c2ca3c7bffad7269de778e6e69acd5a063f1cd8cf4519f06baab64ef736",
+    "src/InkRecognition/LegacyPreparedGlyphNormalization.cs": "1d5ea1db3511d2514933f48d7981ca12bd4046d4abc05951302c4ccd7ad01bd7",
+    "src/InkRecognition/LegacyDirectionalGlyphClassifier.cs": "374e84422ad49bf0b2f970960cc940032d2c246ec9bd03b96d9d397603fda57e",
+    "src/InkRecognition/LegacyDirectionalAcousticWeightConfiguration.cs": "47473c6fa884e2ad35042c03cfd6e1c2eeb2814b929d5f0702c3c044400ade5f",
+    "src/InkRecognition/LegacyOrdinaryAcousticCacheProfile.cs": "fb99f49b9819f0071073e08c4ac801f1f53487812eb31a0668daa0649f059493",
+    "src/InkRecognition/LegacyPreparedAcousticDictionaryPermissions.cs": "020a0f6ff3f7099aae4699ad05a3b94d9ecf26252a954485736e9f5f4ac91c97",
+    "src/InkRecognition/LegacyInkNetwork.cs": "f364a7d9c216ebf87062f34a73ffe4be2e8511f8675e225a504da3129ac6cb5d",
+    "src/InkRecognition/LegacyFreshMainGlobalOrdinaryState.cs": "dde867551b9c24c06470c64d8da6c1c9197bceb086425ec2021dc0aa4dcc42be",
+    "src/InkRecognition/LegacyOrdinarySourceInk.cs": "36abe3c77a43a16072fb005bb2fd1eae7331978a08d48e74efacfc8c0d9456e8",
+    "src/InkRecognition/LegacyMainFirstResultLineController.cs": "39603e1dd719a8d5694e650d88cc6890b0cc430b6ad4f000d6fdf481888f4acb",
+    "src/InkRecognition/LegacyPriorContextSelection.cs": "44ddf938f672640ef84f2c1c2517130df87faad453e2179c5ff1f3c988a5c4fc",
+    "src/InkRecognition/LegacyContextWeighting.cs": "9be37b8cbe3c691a4ab42e212eebd435c422c6e1b218ee33a3c2cf4493d83076",
+    "src/InkRecognition/LegacyDynamicAcousticWeights.cs": "e9b3ec82b0824b0e786a944f51ba94abf192e12397881c566f1f438ae5067fa6"
+  },
+  "limits": {
+    "N": 65535,
+    "G": 65535,
+    "A": 262144,
+    "S": 32,
+    "D": 32,
+    "P0": 4096,
+    "P": 4096,
+    "R": 256,
+    "T": 64,
+    "C": 96,
+    "L": 255,
+    "Qdyn": 4096
+  },
+  "fixed": {
+    "AK": 572763,
+    "Networks": 376371,
+    "OrdinaryNode": 382839,
+    "AL": 5134,
+    "Calibration": 2192,
+    "Confidence": 6144,
+    "Activation": 704
+  },
+  "requiredCalls": {
+    "AKCopy": 1,
+    "AKSha256": 3,
+    "GlyphNetworkLoad": 4,
+    "ContextNetworkLoad": 1,
+    "V110PrefixTraversal": 3,
+    "SourceCoordinateFullCopies": 4,
+    "ChronologyCopy": 2,
+    "PreparedInkCreate": 1,
+    "SourceResolveForwardDFS": 0,
+    "NormalizeGroup": 0,
+    "AKCleanupClear": 1
+  },
+  "logicalByteCoefficients": {
+    "pointDomain": 512,
+    "descriptor": 128,
+    "stroke": 256,
+    "graphDomain": 16,
+    "contextWindow": 1024,
+    "group": 327680,
+    "fixedReserve": 4096
+  },
+  "sourceDigestPolicy": "SHA256 after ONLY CRLF -> LF byte replacement; no other normalization",
+  "additiveCleanupRevision": {
+    "priorFrozenWorkMaximum": 69122745133,
+    "addedExplicitClearBytes": 572763,
+    "currentWorkMaximum": 69123317896,
+    "currentFixedWork": 4887306
+  }
+}

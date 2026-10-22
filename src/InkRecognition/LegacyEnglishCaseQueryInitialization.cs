@@ -4,7 +4,7 @@ namespace InkRecognition;
 
 /// <summary>Actual fresh290/292 initialization only. No query, scorer, terminal
 ///or completed language-history entry point is exposed.</summary>
-public sealed class LegacyEnglishCaseQueryInitialization
+public sealed partial class LegacyEnglishCaseQueryInitialization
 {
     private LegacyEnglishCaseInitializationPlan? plan;
     private LegacyEnglishCaseQueryInitialization(){}
@@ -57,7 +57,7 @@ public sealed class LegacyEnglishCaseQueryInitialization
 
 //Only this private issuer can produce the typed source-prefix hook accepted
 //by the old factory. A published/failed plan can never re-enter construction.
-internal sealed class LegacyEnglishCaseInitializationPlan
+internal sealed partial class LegacyEnglishCaseInitializationPlan
 {
     private readonly LegacyEnglishCaseQueryInitialization owner;
     private readonly LegacyEnglish119MainKnowledge knowledge;
@@ -72,7 +72,7 @@ internal sealed class LegacyEnglishCaseInitializationPlan
     private LegacyNativeAuxiliaryDelimiterQuerySource? auxiliary;
     private LegacyEnglishCaseInitializationSnapshot? snapshot;
     private LegacyEnglishCaseInitializationNumericTables? tables;
-    internal int ContextCapacity=>104;
+    internal int ContextCapacity=>executionPool?.RequireCapacity(this)??104;
     internal bool IsFailed=>Volatile.Read(ref phase)==6;
     internal int PhaseForAudit=>Volatile.Read(ref phase);
     internal LegacyEnglishCaseInitializationBindings BindingForAudit=>binding??throw new InvalidOperationException("No binding.");
@@ -130,7 +130,7 @@ internal sealed class LegacyEnglishCaseInitializationPlan
         if(controls[0].Identity!=controls[2].Identity||!controls.Select(c=>c.Created).SequenceEqual(new[]{false,true,false,true,true}))throw new InvalidDataException("Actual default/FFFB alias and creation order required.");
         var prior=initial.Single(x=>x.Symbol==0xfffb);if(bySymbol[0xfffb].Identity!=prior.Identity||bySymbol[0xfffb].ParentLink!=prior.ParentLink)throw new InvalidDataException("ExistingFFFB parent must survive.");
         var first=new byte[246];var second=new byte[246];for(int i=0;i<246;i++){token.ThrowIfCancellationRequested();ushort key=unchecked((ushort)(i-29));first[i]=prepared.ReadClassification(key);second[i]=prepared.ReadClassification(key,true);}
-        snapshot=new(contexts.ContainerIdentity,initialRoot,contexts.RootTreeIdentity,initial,post,initialPages,contexts.CopyPageUsedCounts(),maps.CopyPrimary(),maps.CopyAuxiliary(),maps.CopyInitialContexts(),first,second,controls,initialCapacity,initialCursor,contexts.PageDescriptorCapacity,contexts.CurrentPageIndex);
+        snapshot=new(contexts.ContainerIdentity,initialRoot,contexts.RootTreeIdentity,initial,post,initialPages,contexts.CopyPageUsedCounts(),maps.CopyPrimary(),maps.CopyAuxiliary(),maps.CopyInitialContexts(),first,second,controls,initialCapacity,initialCursor,contexts.PageDescriptorCapacity,contexts.CurrentPageIndex,ContextCapacity);
         Check("init:controls",token);tables=LegacyEnglishCaseInitializationNumericTables.Prepare(numeric,token);Check("init:numeric",token);
         ValidateParent(token);Move(2,3);Check("init:prefix-complete",token);
     }
