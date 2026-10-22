@@ -74,6 +74,16 @@ Old independent M/N/D0 and six affected Russian paths retain their results.
 Complete290 query/history, whole-word search and final publication remain missing;
 this component does not change application recognition or prove handwriting accuracy.
 
+The [English case-query initialization](english-case-query-initialization-runtime-20261023.md)
+now constructs the actual private dictionary/case/aggregate/delimiter prefix,
+including the86-to89 context sequence and independently checked numerical
+tables. Fresh main Managed and NativeAOT captures match for134 accepted owners
+and7 explicit refusals, with58 guards and18 cancellation controls. Historical
+100-owner numerical evidence and unchanged English/Russian regressions remain
+separate. Its2,907,401-byte logical envelope explicitly includes the new graph
+adapter; it is not process RSS. Query issuance, live D0 map forwarding, history,
+terminal search and whole-word publication remain missing from this component.
+
 RC1.2.8-rc.8 is an experimental checkpoint. The subsequent test-only correction
 replaces three stale generic2B0 diagnostic collectors with actual2B1 vectors and
 independently reconstructs all four feature families before checking5916 NN

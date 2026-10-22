@@ -127,10 +127,18 @@ public sealed class LegacyEnglishSparseTerminalQuery
     internal LegacyEnglishSparseQueryRow EvaluatePrepared(ReadOnlySpan<int> history,int currentClass,int word,bool boundary,CancellationToken token=default)
     {Validate();return Evaluate(history,currentClass,word,boundary,token);}
     private LegacyEnglishSparseQueryRow Evaluate(ReadOnlySpan<int> history,int current,int word,bool boundary,CancellationToken token)
+        =>EvaluateCore(NumericOwner,wordCodes,classCodes,backoffCodes,wordCosts,classCosts,backoffCosts,
+            history,current,word,boundary,token);
+
+    //Pure numerical transport only; this confers no source/query/history authority.
+    internal static LegacyEnglishSparseQueryRow EvaluateCore(LegacyEnglishLkFreshNumericBinding numeric,
+        byte[] wordCodes,byte[][] classCodes,byte[][] backoffCodes,int[] wordCosts,int[][] classCosts,int[][] backoffCosts,
+        ReadOnlySpan<int> history,int current,int word,bool boundary,CancellationToken token)
     {
         token.ThrowIfCancellationRequested();if(history.Length>2||(uint)current>=1024||(uint)word>=260074)throw new ArgumentOutOfRangeException(nameof(history));
+        var language=numeric.LanguageOwner;
         Span<int> sequence=stackalloc int[3];for(int i=0;i<history.Length;i++){if((uint)history[i]>=1024)throw new ArgumentOutOfRangeException(nameof(history));sequence[i]=history[i];}sequence[history.Length]=current;
-        int cost=boundary?NumericOwner.Boundary94C:0,matchedOrder=0;
+        int cost=boundary?numeric.Boundary94C:0,matchedOrder=0;
         for(int start=0;start<=history.Length;start++)
         {
             token.ThrowIfCancellationRequested();int index=sequence[start],matched=0,needed=history.Length-start;
@@ -138,9 +146,9 @@ public sealed class LegacyEnglishSparseTerminalQuery
             {
                 var offsets=level==0?LegacyEnglishSparsePackedField.Order1Offsets:LegacyEnglishSparsePackedField.Order2Offsets;
                 var labels=level==0?LegacyEnglishSparsePackedField.Order2Labels:LegacyEnglishSparsePackedField.Order3Labels;
-                int lo=LanguageOwner.GetPackedValue(offsets,index),hi=LanguageOwner.GetPackedValue(offsets,index+1),target=sequence[start+level+1],end=hi;
-                while(lo<hi){int mid=lo+(hi-lo)/2;if(LanguageOwner.GetPackedValue(labels,mid)<target)lo=mid+1;else hi=mid;}
-                if(lo==end||LanguageOwner.GetPackedValue(labels,lo)!=target)break;index=lo;matched++;
+                int lo=language.GetPackedValue(offsets,index),hi=language.GetPackedValue(offsets,index+1),target=sequence[start+level+1],end=hi;
+                while(lo<hi){int mid=lo+(hi-lo)/2;if(language.GetPackedValue(labels,mid)<target)lo=mid+1;else hi=mid;}
+                if(lo==end||language.GetPackedValue(labels,lo)!=target)break;index=lo;matched++;
             }
             if(matched==needed){cost=checked(cost+classCosts[needed][classCodes[needed][index]]);matchedOrder=needed+1;break;}
             if(matched==needed-1)cost=checked(cost+backoffCosts[matched][backoffCodes[matched][index]]);

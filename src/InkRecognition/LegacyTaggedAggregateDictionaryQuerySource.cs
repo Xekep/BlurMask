@@ -50,6 +50,22 @@ public sealed class LegacyTaggedDictionaryChild
             caseData,publication,preparation,contexts,dictionary,graph,extraCostSideTable);
         var auxiliary=LegacyNativeCaseAuxiliaryQuerySource.BindOwnedOrdinaryDictionary(dictionary,contexts,graph);
         var eligibility=LegacyOrdinaryDictionarySourceOwner.BindOwnedDictionary(dictionary,contexts,graph);
+        return BindPreparedCase292(dictionary,normal,auxiliary,eligibility,contexts,graph,extraCostSideTable);
+    }
+
+    //Only an initialization-issued binding can enter this English adapter.
+    //No public callback, source flags or arbitrary language owner is accepted.
+    internal static LegacyTaggedDictionaryChild BindEnglishInitialization(LegacyEnglishCaseInitializationBindings binding)
+    {
+        ArgumentNullException.ThrowIfNull(binding);binding.RequireCurrent();
+        return BindPreparedCase292(binding.Dictionary,binding.Normal,binding.Auxiliary,binding.Eligibility,
+            binding.Contexts,binding.Graph,false);
+    }
+
+    private static LegacyTaggedDictionaryChild BindPreparedCase292(LegacyPreparedDictionaryQuerySource dictionary,LegacyNativeCaseNormalQuerySource normal,
+        LegacyNativeCaseAuxiliaryQuerySource auxiliary,LegacyAggregateDictionaryChild eligibility,
+        LegacySymbolContextFactory contexts,LegacyOrdinaryRecognitionGraph graph,bool extraCostSideTable)
+    {
         //The original request owns the native wrapper-cache pointer. Ephemeron
         //keys preserve that identity without retaining every dead controller
         //query forever; value->Request cycles do not keep dead keys alive.

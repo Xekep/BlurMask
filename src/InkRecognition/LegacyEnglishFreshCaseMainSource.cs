@@ -5,7 +5,7 @@ namespace InkRecognition;
 
 /// <summary>Explicit fresh one13B case M/N/source68 component. Not a complete
 ///290 query backend, language history, controller search or recognized word.</summary>
-public sealed class LegacyEnglishFreshCaseMainSource
+public sealed partial class LegacyEnglishFreshCaseMainSource
 {
     private readonly object gate=new();
     private readonly byte[] seed,primary,secondary;
@@ -53,9 +53,11 @@ public sealed class LegacyEnglishFreshCaseMainSource
         LegacyEnglishLkFreshNumericBinding numeric,LegacyNativeCaseData cases,LegacyNativeTextPublicationData publication,CancellationToken token=default)
         =>PrepareCore(knowledge,numeric,cases,publication,null,token);
     internal static LegacyEnglishFreshCaseMainSource PrepareCore(LegacyEnglish119MainKnowledge knowledge,
-        LegacyEnglishLkFreshNumericBinding numeric,LegacyNativeCaseData cases,LegacyNativeTextPublicationData publication,Action<string>? checkpoint,CancellationToken token)
+        LegacyEnglishLkFreshNumericBinding numeric,LegacyNativeCaseData cases,LegacyNativeTextPublicationData publication,Action<string>? checkpoint,CancellationToken token,
+        LegacyEnglishCaseInitializationPlan? initialization=null)
     {
         ArgumentNullException.ThrowIfNull(knowledge);ArgumentNullException.ThrowIfNull(numeric);ArgumentNullException.ThrowIfNull(cases);ArgumentNullException.ThrowIfNull(publication);token.ThrowIfCancellationRequested();
+        initialization?.RequireInputs(knowledge,numeric,cases,publication,token);
         var data=numeric.DataOwner;var language=numeric.LanguageOwner;
         if(!ReferenceEquals(knowledge.Source,data.Source)||!ReferenceEquals(data.AcousticAlphabet,knowledge.Source.Alphabet)||!knowledge.Owner.IsComplete||knowledge.Owner.IsFaulted)
             throw new ArgumentException("Same actual complete MAIN/P-L Source instance required.");
@@ -71,13 +73,14 @@ public sealed class LegacyEnglishFreshCaseMainSource
         void Check(string stage){checkpoint?.Invoke(stage);token.ThrowIfCancellationRequested();}
         Check("case:preflight");
         // Finite initial-key pass only: this is NOT a native query-pool cap.
-        var contexts=new LegacySymbolContextFactory(104);
+        var contexts=new LegacySymbolContextFactory(initialization?.ContextCapacity??104);
         var maps=LegacyDictionaryInitialSymbolMaps.Prepare(data.AcousticAlphabet,data.LexicalAlphabet,contexts,[],token);
         if(contexts.NodeCount!=86)throw new InvalidDataException("Actual initial context topology required.");
         var descriptor=LegacyPreparedDictionarySourceDescriptorFactory.CreateFresh(data.Prefix,data.Dictionary,(uint)language.Order,true);
         var selection=new LegacyPreparedDictionarySourceSelectionBuilder();selection.Add(new(descriptor,1024,contexts.ContainerIdentity));var selected=selection.Prepare();
         if(selected.Count!=1||descriptor.Flags!=0xc0e||descriptor.LanguageOrder!=3||selected[0].Priority!=1024||selected[0].SourceIndex!=0)throw new InvalidDataException("Actual one-source descriptor required.");
         Check("case:maps");
+        initialization?.PrepareSourcePrefix(maps,contexts,token);
         var ranges=LegacyNativeCaseAlphabetRanges.Prepare(data.AcousticAlphabet,cases,publication,token);var enumeration=new LegacyNativeCaseSymbolEnumeration(ranges);
         var tokens=new List<uint>(936);foreach(ushort label in maps.CopyPrimary())
         {token.ThrowIfCancellationRequested();if(!enumeration.Enumerate(label,value=>{if(tokens.Count==936)throw new InvalidDataException("Whole callback bound exceeded.");tokens.Add(value);return true;},token))throw new InvalidDataException("Complete case enumeration required.");}
@@ -88,6 +91,7 @@ public sealed class LegacyEnglishFreshCaseMainSource
         var producer=new LegacyOrdinarySymbolMaskProducer(data.AcousticAlphabet,data.AcousticAlphabet.CopySerializedHeader());
         var masks=producer.Build(controller.Outcome,controller.Mask.Span,knowledge.CopyGroups(),[],[],[],token);
         var result=new LegacyEnglishFreshCaseMainSource(knowledge,numeric,maps,contexts,descriptor.Flags,0x200,tokens.ToArray(),controller.Mask.ToArray(),masks.Primary.ToArray(),masks.Secondary.ToArray());
+        initialization?.BindPrivateRoot(result,token);
         Check("case:complete");result.RequireCurrent();return result;
     }
     internal void RequireCurrent()
