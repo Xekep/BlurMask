@@ -666,6 +666,8 @@ python -I tools/LegacyEnglish119Postprocessing.Probe/audit_output.py models/en-U
 python -c "import json,sys; from pathlib import Path; d=json.loads(Path(sys.argv[1]).read_bytes()); Path(sys.argv[2]).write_text(json.dumps([{k:r[k] for k in ('Name','Raw','Resolution')} for r in d['Actual']]), encoding='utf8')" .artifacts/legacy-en119-postprocessing-managed.json .artifacts/legacy-en119-final-single-blind.json
 dotnet run --project tools/LegacyFullEnglishFirst.Probe -c Release -- models .artifacts/legacy-en119-final-single-blind.json .artifacts/legacy-en-full-first-managed.json
 python -I -B tools/LegacyFullEnglishFirst.Probe/audit_output.py models .artifacts/legacy-en-full-first-managed.json
+dotnet run --project tools/LegacyFullEnglishFirstConfidence.Probe -c Release -- models .artifacts/legacy-en119-final-single-blind.json .artifacts/legacy-en-full-first-confidence-managed.json
+python -I -B tools/LegacyFullEnglishFirstConfidence.Probe/audit_output.py --repo . --models models --capture .artifacts/legacy-en-full-first-managed.json --confidence .artifacts/legacy-en-full-first-confidence-managed.json --output .artifacts/legacy-en-full-first-confidence-oracle-managed.json
 dotnet run --project tools/LegacyEnglish119FinalSingle.Probe -c Release -- models .artifacts/legacy-en119-final-single-blind.json .artifacts/legacy-en119-final-single-managed.json
 python -I -B tools/LegacyEnglish119FinalSingle.Probe/audit_output.py models .artifacts/legacy-en119-final-single-managed.json .artifacts/legacy-en119-postprocessing-managed.json
 python -I -B tools/handwriting/audit_english119_final_single.py --models models --output .artifacts/legacy-en119-final-single-model-audit.json

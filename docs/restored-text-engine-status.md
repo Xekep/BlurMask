@@ -13,8 +13,13 @@ now has an independent full-resource owner, parent/child preparation, four
 feature families and the220-channel acoustic cache. All141 original inputs
 and100 fixed PluColl inputs pass acoustic admission, independent numerical
 checks and Managed/NativeAOT parity. These are **not recognized-word counts**.
-Full-FIRST confidence/controller/WORD, source720 and finalized guide remain
-missing; application text recognition and the CTC frame heuristics are unchanged.
+The [full-FIRST scalar confidence checkpoint B1](legacy-full-english-first-confidence.md)
+now streams those four actual network outputs through the restored calibration
+and same-source alias/closed-symbol services. All42795/116817 retained scalar
+values pass independent checks and Managed/NativeAOT parity; old A captures
+remain byte-exact. The tests include464 refusal guards and10 cancellation stages.
+Primary/context/terminal selection, WORD, source720 and finalized guide remain
+missing; application text recognition and CTC frame heuristics are unchanged.
 
 The [inline23C wire reader](linguistic-fst23c-wire-reader.md) now retains the
 actual Russian number-rule storage with bounded immutable ownership. It reads

@@ -141,11 +141,13 @@ public sealed class LegacyFullEnglishFirstParentInput
     public void Run(LegacyCursiveSeparationTable table,CancellationToken token=default)=>RunCore(table,null,null,token);
     internal void RunPrepared(LegacyCursiveSeparationTable table,Action<string> checkpoint,CancellationToken token)=>RunCore(table,checkpoint,null,token);
     internal void RunDiagnostic(LegacyCursiveSeparationTable table,Action<LegacyFullEnglishFirstCandidates,int,int[]> observer,CancellationToken token=default)=>RunCore(table,null,observer,token);
-    private void RunCore(LegacyCursiveSeparationTable table,Action<string>? checkpoint,Action<LegacyFullEnglishFirstCandidates,int,int[]>? neuralObserver,CancellationToken token)
+    internal void RequireConfidencePristine(){lock(gate)if(entered)throw new InvalidOperationException("Pristine full parent required.");}
+    internal void RunWithConfidence(LegacyCursiveSeparationTable table,LegacyFullEnglishFirstController confidence,Action<string>? checkpoint,CancellationToken token)=>RunCore(table,checkpoint,null,token,confidence);
+    private void RunCore(LegacyCursiveSeparationTable table,Action<string>? checkpoint,Action<LegacyFullEnglishFirstCandidates,int,int[]>? neuralObserver,CancellationToken token,LegacyFullEnglishFirstController? confidence=null)
     {
         ArgumentNullException.ThrowIfNull(table);token.ThrowIfCancellationRequested();
         table=SnapshotTable(table,token);
-        lock(gate){token.ThrowIfCancellationRequested();if(entered)throw new InvalidOperationException("Full FIRST parent is one-use.");entered=true;}
+        lock(gate){token.ThrowIfCancellationRequested();if(entered)throw new InvalidOperationException("Full FIRST parent is one-use.");confidence?.Enter(this);entered=true;}
         try
         {
             checkpoint?.Invoke("run:entry");token.ThrowIfCancellationRequested();
@@ -154,7 +156,7 @@ public sealed class LegacyFullEnglishFirstParentInput
                 token.ThrowIfCancellationRequested();var candidates=LegacyFullEnglishFirstCandidates.Prepare(child,table,budget,token);
                 checkpoint?.Invoke("run:candidates");token.ThrowIfCancellationRequested();
                 var cache=LegacyFullEnglishFirstAcousticCache.Prepare(candidates,budget,token);
-                foreach(int group in candidates.CopyLiveGroupIds())cache.Compute(group,token,checkpoint,neuralObserver is null?null:costs=>neuralObserver(candidates,group,costs));
+                foreach(int group in candidates.CopyLiveGroupIds())cache.Compute(group,token,checkpoint,neuralObserver is null?null:costs=>neuralObserver(candidates,group,costs),confidence);
                 checkpoint?.Invoke("run:child");token.ThrowIfCancellationRequested();lock(gate)prefix.Add(cache);
             }
             token.ThrowIfCancellationRequested();lock(gate)completed=true;

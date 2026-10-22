@@ -77,14 +77,15 @@ public sealed class LegacyFullEnglishFirstAcousticCache
     public LegacyFullEnglishFirstCachedGroup ScoreGroup(int group)
     {lock(gate)return completed.TryGetValue(group,out var result)?result:throw new InvalidOperationException("Only completed parent-owned groups are readable.");}
 
-    internal LegacyFullEnglishFirstCachedGroup Compute(int group,CancellationToken token,Action<string>? checkpoint=null,Action<int[]>? neuralObserver=null)
+    internal LegacyFullEnglishFirstCachedGroup Compute(int group,CancellationToken token,Action<string>? checkpoint=null,Action<int[]>? neuralObserver=null,LegacyFullEnglishFirstController? confidence=null)
     {
         token.ThrowIfCancellationRequested();lock(gate){if(completed.TryGetValue(group,out var found))return found;}
         {
             var features=LegacyFullEnglishFirstFeatures.Prepare(Owner,group,token);
             checkpoint?.Invoke("score:features");token.ThrowIfCancellationRequested();
             var inputs=features.Inputs;var families=new LegacyAcousticCostFamily?[7];
-            for(int i=0;i<4;i++){budget.Network(token);var output=Owner.Knowledge.Evaluate(i,inputs[i],token);families[i]=new(output.CopyProbabilities(),1);checkpoint?.Invoke("score:network"+i);token.ThrowIfCancellationRequested();}
+            var scalar=confidence?.Begin(this,group,token);
+            for(int i=0;i<4;i++){budget.Network(token);var output=Owner.Knowledge.Evaluate(i,inputs[i],token);families[i]=new(output.CopyProbabilities(),1);scalar?.Feed(i,families[i]!.Probability32768.Span,token);checkpoint?.Invoke("score:network"+i);token.ThrowIfCancellationRequested();}
             int[] costs=LegacyAcousticCostEnsemble.Combine(families,1,primary.AsSpan(0,182),token);
             if(disabledPrototype<costs.Length)costs[disabledPrototype]=0x4000000;
             //Diagnostic-only copy, consumed off-lock. Public production Run
@@ -103,7 +104,8 @@ public sealed class LegacyFullEnglishFirstAcousticCache
             var final=cache.BuildWithGroups(costs,features.CopyMergedStrokes(),primary,context,[],groups,token);
             var result=new LegacyFullEnglishFirstCachedGroup(this,group,final,whole,zero,probability);
             checkpoint?.Invoke("score:publish");token.ThrowIfCancellationRequested();
-            lock(gate){token.ThrowIfCancellationRequested();completed.Add(group,result);}return result;
+            lock(gate){token.ThrowIfCancellationRequested();completed.Add(group,result);}
+            if(scalar is not null)confidence!.Publish(result,scalar,token);return result;
         }
     }
 }
