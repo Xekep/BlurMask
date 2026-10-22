@@ -26,10 +26,22 @@ def evaluate(n,inputs):
  return exp_prob([i32(i32(dot)*scale) for dot,scale in zip(w2@np.array(hidden,dtype=np.int64),s2)])
 dynamic=[struct.unpack_from('<H',data,195771)[0]]+list(struct.unpack_from('<8f',data,195773))
 samples=defs(ROOT/'tools/LegacyRussianMainAcoustic.Probe/audit_output.py')['samples']
+
+def validate_small_capture(capture,input_bytes):
+ # Git checks this text fixture out with LF in CI and may retain CRLF locally.
+ # Bind the capture to the actual bytes read by the probe, then pin the parsed
+ # fixture independently of whitespace; no alternative model/result is allowed.
+ inputs=json.loads(input_bytes)
+ canonical=json.dumps(inputs,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode('utf-8')
+ assert hashlib.sha256(canonical).hexdigest()=='b8585ad9490cfb138c96cd0bf8dfee92926fb731590d36c0342c0ea6e396d126'
+ assert capture['expectedLabelsRead']is False
+ assert capture['inputSha256']==hashlib.sha256(input_bytes).hexdigest()
+ assert [s['id']for s in capture['samples']]==[s['id']for s in inputs['samples']]
+
 small=len(sys.argv)==5 and sys.argv[4]=='--small'
 if len(sys.argv)>4 and not small:raise ValueError("Unknown diagnostic corpus mode")
 if small:
- small_data=json.loads(path.read_bytes());assert small_data['expectedLabelsRead']is False and small_data['inputSha256']=='0f59c5d52e293e0c0b24fcbff7c3305f942ccffdef6b4d8be6ca707c9372b859'
+ small_data=json.loads(path.read_bytes());validate_small_capture(small_data,Path(__file__).with_name('small-inputs.json').read_bytes())
  samples=lambda path:iter(small_data['samples'])
 
 counts=dict(samples=0,originalGroups=0,originalProbabilities=0,rawCosts=0,recomputedInputShorts=0,dynamicExactGroups=0,dynamicMaxUlps=0,independentDynamicCostDifferences=0)

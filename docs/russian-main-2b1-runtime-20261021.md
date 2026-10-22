@@ -7,6 +7,16 @@ Russian cursive. Strict fixed-dataset132/261 and342 edits remain below the
 historical generic2B0 result137/325. No model weights, beams, thresholds or
 expected-candidate selection changed.
 
+CI input identity correction, 23 October: the four procedural controls are
+unchanged. Their JSON fixture can have CRLF locally and LF after Git checkout.
+The small-capture oracle now checks the capture's hash against the actual
+fixture bytes, pins the parsed fixture independently of whitespace, and checks
+the exact ordered sample IDs. Both newline forms pass; changed input points,
+wrong hashes, reordered/missing IDs and a true labels-read flag fail. The saved
+four-case capture still reproduces all61920 probabilities and15480 raw costs
+exactly. This fixes a test portability failure, with no production or accuracy
+change.
+
 ## Native variants and owned production
 
 Exactly TWO old production files change: LegacyRussianModelBundle verifies
