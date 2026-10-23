@@ -302,3 +302,20 @@ and no application behavior changes. The53-item frozen manifest
 `root-ctc-graph-blob-frozen-manifest-20261023.json`, SHA256
 `75bc2c60a2678817454defb44c929dafd7bb81596d2a5f35d87f7d017897099e`,
 retains the composed auditors, positive/negative reports and failed prototypes.
+
+`audit_english_ctc_header_origin.py` additionally follows the constructor from
+entry through the end of its first header/quantization phase (exclusive1944EC).
+Four cases cover alignment8/16 and absent/present all-zero flag lanes. The
+allocation callback is required to return one fresh disjoint400-byte block;
+volatile registers are invalidated after that call. No zero-fill is assumed.
+The complete defined graph/header image matches an independent calculation,
+including input/output strides and the shifted codes. Other bytes remain
+unknown. Nine count/width/code/flags/allocation/write/read corruptions refuse.
+
+The first draft exposed an eagerly loaded but unused selected-path scalar
+argument. It is now carried as unknown, rather than guessed zero; the failed
+draft is retained. Actual allocator implementation, later constructor phases,
+and whole-loader preservation remain open. The62-item frozen manifest
+`root-ctc-header-origin-frozen-manifest-20261023.json`, SHA256
+`fe1e2d5b4f75736645d7dc9053cfe5f237d896f60691d36ce87f7cec66b4db84`,
+records the conditional proof without SDK execution or runtime admission.
