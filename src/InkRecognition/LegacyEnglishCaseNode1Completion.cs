@@ -32,8 +32,11 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
     // This returns a primary continuation PREFIX, not a completed node/word.
     internal LegacyEnglishCaseNode1Snapshot RunNode1(CancellationToken token=default)=>RunNode1Core(false,token);
     internal LegacyEnglishCaseNode1Snapshot RunNode1OrdinarySpans(CancellationToken token=default)=>RunNode1Core(true,token);
-    private LegacyEnglishCaseNode1Snapshot RunNode1Core(bool includeWholeStart,CancellationToken token)
+    internal LegacyEnglishCaseNode1Snapshot RunGraphLanguageInputs(CancellationToken token=default)=>RunNode1Core(true,token,true);
+    internal LegacyEnglishCaseNode1Snapshot RunGraphLanguageFirst(CancellationToken token=default)=>RunNode1Core(true,token,true,true);
+    private LegacyEnglishCaseNode1Snapshot RunNode1Core(bool includeWholeStart,CancellationToken token,bool prepareLanguageInputs=false,bool executeLanguageFirst=false)
     {
+        if(executeLanguageFirst)primary.RequireTwoNodeGraphTail(this,token);
         token.ThrowIfCancellationRequested();if(Interlocked.CompareExchange(ref phase,1,0)!=0)throw new InvalidOperationException("One owning node0/node1 invocation required.");
         thread=Environment.CurrentManagedThreadId;LegacyEnglishFreshCaseMainSource? root=null;
         try
@@ -42,6 +45,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             if(!pending||ring is null||completedBacking is null||activeStage is not null)throw new InvalidOperationException("Actual after-FIRST/phase1 node0 state required.");
             node1Pass=primary.Node1Pass(this);var pass=node1Pass;root=pass.Root;
             var graph=pass.Initializer.PlanForAudit.BindingForAudit.Graph;
+            if(prepareLanguageInputs)InitializeGraphController(pass,token);
             if(graph.NodeCount<2||graph.GetNode(1).Count>1024)throw new NotSupportedException("Bounded actual node1 source required.");
             // Logical dedicated node1 payload/copy reservation: geometry <=16Mi,
             // rows/heaps/pools/metadata <=2Mi, accumulated query bytes <=4Mi.
@@ -89,6 +93,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                     var page=pass.Initializer.PlanForAudit.ReadNode1(lease,node1Query,token);
                     if(page.ReturnedCount is <0 or >128||page.Records.Length!=page.ReturnedCount*32||page.ReturnedCount>400-node1Skip||page.Records.Length>4*1024*1024-observed.Length)
                         throw new InvalidDataException("Bounded actual node1 page required.");
+                    if(prepareLanguageInputs)ObserveGraphControllerWrite(page.Records.Span,token);
                     // Before score callbacks: refuse all reached unsupported row
                     // kinds and protocol symbols, never silently drop outputs.
                     for(int at=0;at<page.Records.Length;at+=32)
@@ -137,6 +142,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                     var page=pass.Initializer.PlanForAudit.ReadNode1(lease,node1Query,token);
                     if(page.ReturnedCount is <0 or >128||page.Records.Length!=page.ReturnedCount*32||page.ReturnedCount>400-node1Skip||page.Records.Length>4*1024*1024-observed.Length)
                         throw new InvalidDataException("Bounded actual whole-start source page required.");
+                    if(prepareLanguageInputs)ObserveGraphControllerWrite(page.Records.Span,token);
                     for(int at=0;at<page.Records.Length;at+=32)
                     {
                         var row=page.Records.Span.Slice(at,32);ushort symbol=BinaryPrimitives.ReadUInt16LittleEndian(row[20..]);
@@ -154,12 +160,18 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                 }
                 node1Query=null;
             }
-            var images=LegacyEnglishCaseNode1Materialization.Build(heap,h,categories,contexts,parents,root.Source.Alphabet,token,includeWholeStart);
-            token.ThrowIfCancellationRequested();root.ValidateNode1(lease);root.EndNode1(lease);
+            if(prepareLanguageInputs){ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OrdinalVectors,156*4);ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OrdinalVectors,(156+125)*4);}
+            var images=LegacyEnglishCaseNode1Materialization.Build(heap,h,categories,contexts,parents,root.Source.Alphabet,token,includeWholeStart,prepareLanguageInputs);
+            token.ThrowIfCancellationRequested();root.ValidateNode1(lease);
+            // Preserve historical node0 definedness before moving the actual
+            // owned cursor. These detached snapshots confer no query authority.
+            var parentMasks=ring.CurrentRowMask.AsSpan(0,125*88).ToArray();var parentAlternativeMasks=ring.CurrentPrimaryMask.ToArray();
+            var languageInputs=prepareLanguageInputs?PrepareGraphLanguageInputs(lease,1,images,categories,executeLanguageFirst,token):Array.Empty<LegacyEnglishCaseGraphLanguageInput>();
+            root.EndNode1(lease);
             var resultSnapshot=new LegacyEnglishCaseNode1Snapshot(images,observed.ToArray(),queryRows,queries,scoring,accepted,selected.Length,
                 CopyNode1Parents(parents,false),CopyNode1Parents(parents,true),
                 selected.Select(r=>r.ArcIndex).ToArray(),selected.Select(r=>r.Costs.ToArray()).ToArray(),frames.ToArray(),contexts.CopyNodes().ToArray(),
-                ring.CurrentRowMask.AsSpan(0,125*88).ToArray(),ring.CurrentPrimaryMask.ToArray(),includeWholeStart);
+                parentMasks,parentAlternativeMasks,includeWholeStart,languageInputs,graphCompletedNode);
             pending=false;completedBacking=null;node1Pass=null;Volatile.Write(ref phase,2);return resultSnapshot;
         }
         catch
@@ -167,7 +179,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             if(root is not null)root.FaultNode1(this);pending=false;completedBacking=null;pendingReceipt=null;activeStage=null;
             primary.FaultNode0Completion(this);Volatile.Write(ref phase,3);throw;
         }
-        finally{node1Query=null;node1Pass=null;thread=0;}
+        finally{node1Query=null;node1Pass=null;graphControllerValues=null;graphControllerMask=null;graphLanguageScope=null;graphCompletedNode=null;thread=0;}
     }
     internal void RequireNode1(LegacyEnglishFreshCaseMainSource root,LegacyEnglishCaseInitialQueryPass pass)
     {
@@ -198,7 +210,10 @@ internal readonly record struct LegacyEnglishCaseNode1QueryFrame(int ParentOrdin
 internal sealed class LegacyEnglishCaseNode1Snapshot
 {
     private readonly bool wholeStart;
-    internal string Scope=>wholeStart?"ordinary201270+initial1FD240/node1-span0+span1-primary-prefix/no-flag-prepass/no-node1-language-terminal":"ordinary201270/node1-span0-primary-prefix/no-flag-prepass/no-node1-language-terminal";
+    internal LegacyEnglishCaseGraphNodeSnapshot? CompletedGraphNode{get;}
+    private readonly LegacyEnglishCaseGraphLanguageInput[] languageInputs;
+    internal LegacyEnglishCaseGraphLanguageInput[] CopyLanguageInputs()=>languageInputs.ToArray();
+    internal string Scope=>CompletedGraphNode is not null?"ordinary201270+initial1FD240+204290-FIRST+phase1+V80/current-node-language-prefix/no-wholegraph-loop-no-final-word":wholeStart?"ordinary201270+initial1FD240/node1-span0+span1-primary-prefix/no-flag-prepass/no-node1-language-terminal":"ordinary201270/node1-span0-primary-prefix/no-flag-prepass/no-node1-language-terminal";
     private readonly byte[] heap,rows,alternatives,queries,parentRows,parentAlternatives,parentRowMasks,parentAlternativeMasks;
     private readonly int[] selectedOrdinals;
     private readonly int[][] selectedCosts;
@@ -206,8 +221,8 @@ internal sealed class LegacyEnglishCaseNode1Snapshot
     private readonly LegacySymbolContextNode[] contexts;
     internal int Count{get;}internal int QueryRows{get;}internal int QueryPages{get;}internal int ScoringCalls{get;}internal int AcceptedAllocations{get;}internal int SelectedD0Rows{get;}
     internal LegacyEnglishCaseNode1Snapshot(LegacyEnglishCaseNode1Materialization.Images images,byte[] queries,int queryRows,int pages,int scoring,int accepted,int selected,
-        byte[] parentRows,byte[] parentAlternatives,int[] selectedOrdinals,int[][] selectedCosts,LegacyEnglishCaseNode1QueryFrame[] frames,LegacySymbolContextNode[] contexts,byte[] parentRowMasks,byte[] parentAlternativeMasks,bool wholeStart=false)
-    {this.wholeStart=wholeStart;this.parentRowMasks=parentRowMasks;this.parentAlternativeMasks=parentAlternativeMasks;this.parentRows=parentRows;this.parentAlternatives=parentAlternatives;this.selectedOrdinals=selectedOrdinals;this.selectedCosts=selectedCosts;this.frames=frames;this.contexts=contexts;heap=images.Heap128;rows=images.Rows88;alternatives=images.Alternatives80;this.queries=queries;Count=images.Count;QueryRows=queryRows;QueryPages=pages;ScoringCalls=scoring;AcceptedAllocations=accepted;SelectedD0Rows=selected;}
+        byte[] parentRows,byte[] parentAlternatives,int[] selectedOrdinals,int[][] selectedCosts,LegacyEnglishCaseNode1QueryFrame[] frames,LegacySymbolContextNode[] contexts,byte[] parentRowMasks,byte[] parentAlternativeMasks,bool wholeStart=false,LegacyEnglishCaseGraphLanguageInput[]? languageInputs=null,LegacyEnglishCaseGraphNodeSnapshot? graphNode=null)
+    {CompletedGraphNode=graphNode;this.languageInputs=languageInputs??[];this.wholeStart=wholeStart;this.parentRowMasks=parentRowMasks;this.parentAlternativeMasks=parentAlternativeMasks;this.parentRows=parentRows;this.parentAlternatives=parentAlternatives;this.selectedOrdinals=selectedOrdinals;this.selectedCosts=selectedCosts;this.frames=frames;this.contexts=contexts;heap=images.Heap128;rows=images.Rows88;alternatives=images.Alternatives80;this.queries=queries;Count=images.Count;QueryRows=queryRows;QueryPages=pages;ScoringCalls=scoring;AcceptedAllocations=accepted;SelectedD0Rows=selected;}
     internal byte[] CopyParentRowMasks()=>parentRowMasks.ToArray();internal byte[] CopyParentAlternativeMasks()=>parentAlternativeMasks.ToArray();
     internal byte[] CopyParentRows88()=>parentRows.ToArray();internal byte[] CopyParentAlternatives80()=>parentAlternatives.ToArray();
     internal int[] CopySelectedOrdinals()=>selectedOrdinals.ToArray();internal int[][] CopySelectedCosts()=>selectedCosts.Select(c=>c.ToArray()).ToArray();

@@ -4,10 +4,10 @@ namespace InkRecognition;
 // may exercise this without claiming dictionary/source authority.
 internal static class LegacyEnglishCaseNode1Materialization
 {
-    internal sealed record Images(byte[] Heap128,byte[] Rows88,byte[] Alternatives80,int Count,int InitialCount);
+    internal sealed record Images(byte[] Heap128,byte[] Rows88,byte[] Alternatives80,int Count,int InitialCount,LegacyNativeWordHeapDescriptor? LiveDescriptor=null,int[]? LivePrimaryOrdinals=null);
     internal static Images Build(LegacyNativeWordRecordHeap heap,LegacyNativeWordHeapPreparation preparation,
         LegacyCursiveCategoryProfile categories,LegacySymbolContextFactory contexts,LegacyNativeStoredWordRecord[] parents,
-        LegacyInkAlphabet alphabet,CancellationToken token,bool includeWholeStart=false)
+        LegacyInkAlphabet alphabet,CancellationToken token,bool includeWholeStart=false,bool retainPrimaryOrdinals=false)
     {
         token.ThrowIfCancellationRequested();var c=preparation.Configuration;
         if(heap.Capacity!=250||heap.Count>250||parents.Length!=125||c.PrimaryArcLimit230a!=125||c.PrimaryAlternativeCount2402!=2||c.SecondaryAlternativeCount2404!=1)
@@ -28,7 +28,7 @@ internal static class LegacyEnglishCaseNode1Materialization
         var descriptor=new LegacyNativeWordHeapDescriptor(ordered.Heap.GetSlotStorageSnapshot().Span,250,ordered.Heap.Count,0,preparation.Limits[0]);
         if(!LegacyNativeWordQuotaController.Apply([descriptor],c,0,0,cancellationToken:token)||descriptor.Count>125||descriptor.AllocatedCapacity!=250)
             throw new InvalidDataException("Actual node1 quota/materialization bound failed.");
-        var backing=descriptor.GetBackingStorageSnapshot().ToArray();var rows=new byte[125*88];var alternatives=new byte[125*80];
+        var backing=descriptor.GetBackingStorageSnapshot().ToArray();int[]? primaryOrdinals=retainPrimaryOrdinals?new int[156]:null;if(primaryOrdinals is not null)Array.Fill(primaryOrdinals,-1);var rows=new byte[125*88];var alternatives=new byte[125*80];
         for(int i=0;i<125;i++)
         {
             BinaryPrimitives.WriteInt32LittleEndian(rows.AsSpan(i*88+16),0x4000000);BinaryPrimitives.WriteInt32LittleEndian(rows.AsSpan(i*88+20),0x4000000);
@@ -36,9 +36,9 @@ internal static class LegacyEnglishCaseNode1Materialization
         }
         for(int i=0;i<descriptor.Count;i++)
         {
-            token.ThrowIfCancellationRequested();var stored=LegacyNativeWordRowMaterializer.Materialize(backing.AsSpan(i*128,128),(ushort)i,125,2,1,ordered.PrimaryAlternativeStorage.Span,cancellationToken:token);
+            token.ThrowIfCancellationRequested();if(primaryOrdinals is not null&&i<descriptor.Count)primaryOrdinals[i]=BinaryPrimitives.ReadInt32LittleEndian(backing.AsSpan(i*128+88));var stored=LegacyNativeWordRowMaterializer.Materialize(backing.AsSpan(i*128,128),(ushort)i,125,2,1,ordered.PrimaryAlternativeStorage.Span,cancellationToken:token);
             stored.Record.Span.CopyTo(rows.AsSpan(i*88));stored.PrimaryAlternatives.Span.CopyTo(alternatives.AsSpan(i*80));
         }
-        return new(backing,rows,alternatives,descriptor.Count,heap.Count);
+        return new(backing,rows,alternatives,descriptor.Count,heap.Count,descriptor,primaryOrdinals);
     }
 }

@@ -38,6 +38,20 @@ internal sealed partial class LegacyEnglishCaseInitializationNumericTables
             if(!ReferenceEquals(initializer.NumericForAudit,owner)||!ReferenceEquals(stage.Lease.Root.NumericOwner,owner.Numeric)||
                 !ReferenceEquals(initializer.PlanForAudit.NumericTables,owner))
                 throw new InvalidOperationException("Exact same-live initializer numeric table owner required.");
+            var result=ReadFirstCore(terminalWord,category,token);
+            token.ThrowIfCancellationRequested();stage.Require();return result;
+        }
+        internal Node0FirstNumeric ReadGraphFirst(LegacyEnglishCaseNode0Completion.GraphLanguageScope stage,int terminalWord,int category,CancellationToken token)
+        {
+            stage.Require(token);stage.RequireNumericHandles(this);
+            var initializer=stage.Lease.Pass.Initializer;
+            if(!ReferenceEquals(initializer.NumericForAudit,owner)||!ReferenceEquals(stage.Lease.Root.NumericOwner,owner.Numeric)||!ReferenceEquals(initializer.PlanForAudit.NumericTables,owner))
+                throw new InvalidOperationException("Same live generic language numeric owner required.");
+            stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FirstKernel,2048);
+            var result=ReadFirstCore(terminalWord,category,token);stage.Require(token);return result;
+        }
+        private Node0FirstNumeric ReadFirstCore(int terminalWord,int category,CancellationToken token)
+        {
             if((uint)terminalWord>=260074||(uint)category>12)
                 throw new NotSupportedException("Actual terminal word and case category0..12 required.");
             var language=owner.Numeric.LanguageOwner;
@@ -67,7 +81,7 @@ internal sealed partial class LegacyEnglishCaseInitializationNumericTables
             int baseCost=found?twoCost[twoCode[low]]:checked(backoffCost[backoffCode[0]]+oneCost[oneCode[currentClass]]);
             int fallback=category switch{3=>1,5 or 6=>2,10 or 11 or 12=>3,_=>0};
             int result=checked(baseCost+wordCost[wordCode[terminalWord]]+fallback);
-            token.ThrowIfCancellationRequested();stage.Require();
+            token.ThrowIfCancellationRequested();
             return new(terminalWord,category,currentClass,matched,result);
         }
     }

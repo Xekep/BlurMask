@@ -107,4 +107,15 @@ internal sealed class LegacyEnglishCaseNode0NativeFreshPolicy
         int state=(int)(tag>>58)&31;
         return ignoreCaseC4?0:(tag&(1UL<<40))!=0&&kind==8?7:kind==9?8:expansion.Policy.ReadWordCategory(state);
     }
+    internal int ReadGraphCurrentCaseCategory(LegacyEnglishCaseNode0Completion.GraphLanguageScope stage,ulong tag,ushort ending)
+    {
+        stage.Require();ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.TerminalMetadata,32);
+        if(Volatile.Read(ref bound)!=1||!ReferenceEquals(stage.Lease.Root,root)||!ReferenceEquals(stage.Lease.Pass.Initializer,initializer)||
+            !ReferenceEquals(initializer!.PlanForAudit.BindingForAudit.Normal.Expansion,expansion)||!ReferenceEquals(root!.NumericOwner,numeric)||
+            !ReferenceEquals(root.Knowledge,knowledge)||ignoreCaseC4||knowledgeF5||expansion is null||ending>=expansion.Preparation.Alphabet.LabelCount)
+            throw new InvalidOperationException("Same fresh generic language profile/source/case owner required.");
+        byte kind=expansion.Preparation.ReadClassification(ending);int state=(int)(tag>>58)&31;
+        return (tag&(1UL<<40))!=0&&kind==8?7:kind==9?8:expansion.Policy.ReadWordCategory(state);
+    }
+
 }

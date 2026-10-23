@@ -85,19 +85,24 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         //20-byte language copy OVERWRITES prior defined destination bytes with
         //seven unknowns; sealed N/T provenance represents that mask separately.
         ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FirstAcceptedWriter,171);
+        WriteAcceptedFirstFields(slot,parent,firstWriterLanguage.AsSpan(48,20),firstWriterPrefix.Token.Tag,firstWriterCost,firstWriterOrdinal,previous);
+        // Actual slot78..7F(hex) was never touched, including after heap moves.
+    }
+    private static void WriteAcceptedFirstFields(Span<byte> slot,ReadOnlySpan<byte> parent,ReadOnlySpan<byte> languageEntry20,ulong tag,int cost,int ordinal,int previous)
+    {
         parent.CopyTo(slot);slot[33]&=192;
-        BinaryPrimitives.WriteUInt64LittleEndian(slot,firstWriterPrefix.Token.Tag);slot[39]&=254;
+        BinaryPrimitives.WriteUInt64LittleEndian(slot,tag);slot[39]&=254;
         BinaryPrimitives.WriteInt32LittleEndian(slot[20..],BinaryPrimitives.ReadInt32LittleEndian(parent[20..]));
         BinaryPrimitives.WriteUInt16LittleEndian(slot[62..],ushort.MaxValue);
-        BinaryPrimitives.WriteInt32LittleEndian(slot[16..],firstWriterCost);
-        BinaryPrimitives.WriteUInt16LittleEndian(slot[30..],checked((ushort)firstWriterOrdinal));slot[32]=255;
-        firstWriterLanguage.AsSpan(48,20).CopyTo(slot[64..]);
+        BinaryPrimitives.WriteInt32LittleEndian(slot[16..],cost);
+        BinaryPrimitives.WriteUInt16LittleEndian(slot[30..],checked((ushort)ordinal));slot[32]=255;
+        languageEntry20.CopyTo(slot[64..]);
         BinaryPrimitives.WriteUInt64LittleEndian(slot[8..],0);
         BinaryPrimitives.WriteUInt64LittleEndian(slot[40..],8UL<<40);
         BinaryPrimitives.WriteUInt64LittleEndian(slot[92..],((ulong)0x4000000<<32)|uint.MaxValue);
         BinaryPrimitives.WriteUInt32LittleEndian(slot[88..],uint.MaxValue);
         BinaryPrimitives.WriteInt32LittleEndian(slot[104..],previous);
         BinaryPrimitives.WriteUInt64LittleEndian(slot[112..],0);
-        // Actual slot78..7F(hex) was never touched, including after heap moves.
     }
+
 }

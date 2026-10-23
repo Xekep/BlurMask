@@ -13,12 +13,19 @@ internal sealed class LegacyEnglishCaseNode0Ring
     internal int Length{get;}
     internal int DistinctRows{get;}
     private readonly byte[] currentRowMask,currentPrimaryMask;
-    internal byte[] CurrentRowMask{get{ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.CurrentRowsMask,1);return currentRowMask;}}
-    internal byte[] CurrentPrimaryMask{get{ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.CurrentPrimaryMask,1);return currentPrimaryMask;}}
+    // Opt-in generic cursor. OLD node0 construction does not allocate these
+    // tables or move current. Masks follow the SAME physical120-row aliases.
+    private byte[][]? rowMasks,primaryMasks;
+    private int currentNode;
+    internal int CurrentNode=>currentNode;
+    internal int ActualNodeCount{get;}
+
+    internal byte[] CurrentRowMask{get{ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.CurrentRowsMask,1);return rowMasks is null?currentRowMask:rowMasks[Row(currentNode)];}}
+    internal byte[] CurrentPrimaryMask{get{ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.CurrentPrimaryMask,1);return primaryMasks is null?currentPrimaryMask:primaryMasks[Row(currentNode)];}}
     internal LegacyEnglishCaseNode0Ring(int nodeCount,int retention,LegacyEnglishCaseNode0Ledger ledger,CancellationToken token)
     {
         token.ThrowIfCancellationRequested();if(nodeCount is <1 or >4096||retention!=120)throw new NotSupportedException("Bounded actual native node window/retention required.");
-        this.ledger=ledger;Length=checked((nodeCount+39)/40*40);DistinctRows=Math.Min(retention,Length);
+        this.ledger=ledger;ActualNodeCount=nodeCount;Length=checked((nodeCount+39)/40*40);DistinctRows=Math.Min(retention,Length);
         vectors=ledger.References(LegacyEnglishCaseNode0Ledger.Site.VectorOwners,9);
         ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.VectorOwners,9*8);
         // Nine distinct calls preserve the selected successful native order.
@@ -53,8 +60,48 @@ internal sealed class LegacyEnglishCaseNode0Ring
         currentRowMask=ledger.Bytes(LegacyEnglishCaseNode0Ledger.Site.CurrentRowsMask,RowBytes);
         currentPrimaryMask=ledger.Bytes(LegacyEnglishCaseNode0Ledger.Site.CurrentPrimaryMask,PrimaryBytes);
     }
-    internal Span<byte> CurrentRows=>RowsAt(0);
-    internal Span<byte> CurrentPrimary=>PrimaryAt(0);
+    internal Span<byte> CurrentRows=>RowsAt(currentNode);
+    internal Span<byte> CurrentPrimary=>PrimaryAt(currentNode);
+    internal void EnableGraphCursor(CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();if(rowMasks is not null||currentNode!=0)throw new InvalidOperationException("One generic ring claim required.");
+        // Fixed reference slots; allocate masks only as each physical node enters.
+        var r=ledger.References(LegacyEnglishCaseNode0Ledger.Site.CurrentRowsMask,DistinctRows);
+        var a=ledger.References(LegacyEnglishCaseNode0Ledger.Site.CurrentPrimaryMask,DistinctRows);
+        ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.CurrentRowsMask,checked(16L*DistinctRows));
+        r[0]=currentRowMask;a[0]=currentPrimaryMask;rowMasks=r;primaryMasks=a;
+    }
+    internal void EnterGraphNode(int node,CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();if(rowMasks is null||primaryMasks is null||node!=currentNode+1||(uint)node>=(uint)ActualNodeCount)
+            throw new InvalidOperationException("Only next actual graph node may enter this private ring.");
+        int physicalRow=Row(node);
+        if(rowMasks[physicalRow] is null)
+        {
+            var r=ledger.Bytes(LegacyEnglishCaseNode0Ledger.Site.CurrentRowsMask,RowBytes);
+            var a=ledger.Bytes(LegacyEnglishCaseNode0Ledger.Site.CurrentPrimaryMask,PrimaryBytes);
+            ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.CurrentRowsMask,16);rowMasks[physicalRow]=r;primaryMasks[physicalRow]=a;
+        }
+        else
+        {
+            // Native data residue is preserved across alias reuse; definedness
+            // is reset before new writers, never promoted from old known bytes.
+            ledger.Fill(LegacyEnglishCaseNode0Ledger.Site.CurrentRowsMask,rowMasks[physicalRow],0);
+            ledger.Fill(LegacyEnglishCaseNode0Ledger.Site.CurrentPrimaryMask,primaryMasks[physicalRow],0);
+        }
+        currentNode=node;
+    }
+    private void RequireRetainedNode(int node)
+    {
+        if(rowMasks is null||(uint)node>(uint)currentNode||node<Math.Max(0,currentNode-119))
+            throw new InvalidOperationException("Live retained graph node required; historical images are DATA only.");
+    }
+    internal Span<byte> OwnedRowsAt(int node){RequireRetainedNode(node);return RowsAt(node);}
+    internal Span<byte> OwnedPrimaryAt(int node){RequireRetainedNode(node);return PrimaryAt(node);}
+    internal Span<byte> OwnedRowMaskAt(int node){RequireRetainedNode(node);return rowMasks![Row(node)];}
+    internal Span<byte> OwnedPrimaryMaskAt(int node){RequireRetainedNode(node);return primaryMasks![Row(node)];}
+    internal int SourceEndAt(int node){RequireRetainedNode(node);return BinaryPrimitives.ReadUInt16LittleEndian(vectors[3].AsSpan(2*node));}
+    internal int RetainedEndAt(int node){RequireRetainedNode(node);return BinaryPrimitives.ReadUInt16LittleEndian(vectors[4].AsSpan(2*node));}
     private int Row(int node)
     {ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.PhysicalRows,2);if((uint)node>=(uint)Length)throw new ArgumentOutOfRangeException(nameof(node));return physical[node];}
     internal Span<byte> RowsAt(int node)
@@ -89,7 +136,7 @@ internal sealed class LegacyEnglishCaseNode0Ring
     {
         if(sourceEnd is <125 or >156||retainedEnd<125||retainedEnd>sourceEnd)throw new InvalidDataException("Exact bounded secondary endpoints required.");
         ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.Descriptor,12);
-        BinaryPrimitives.WriteUInt16LittleEndian(vectors[3],checked((ushort)sourceEnd));BinaryPrimitives.WriteUInt16LittleEndian(vectors[4],checked((ushort)retainedEnd));
-        vectors[8].AsSpan(0,4).Clear();vectors[0].AsSpan(0,4).Clear();
+        BinaryPrimitives.WriteUInt16LittleEndian(vectors[3].AsSpan(currentNode*2),checked((ushort)sourceEnd));BinaryPrimitives.WriteUInt16LittleEndian(vectors[4].AsSpan(currentNode*2),checked((ushort)retainedEnd));
+        vectors[8].AsSpan(currentNode*4,4).Clear();vectors[0].AsSpan(currentNode*4,4).Clear();
     }
 }

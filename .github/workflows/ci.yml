@@ -146,6 +146,13 @@ jobs:
           dotnet build tools/LegacyEnglishCaseNode1.ActualEntry -c Release
           dotnet run --no-build --project tools/LegacyEnglishCaseNode1.Probe -c Release -- --prepared models .artifacts/node1-prefix-prepared.json
           python -I -B tools/LegacyEnglishCaseNode1.Probe/audit_prepared.py .artifacts/node1-prefix-prepared.json
+      - name: English graph ring, language anchors and FIRST writer controls
+        shell: bash
+        run: |
+          mkdir -p .artifacts
+          dotnet build tools/LegacyEnglishGraphCursor.Probe -c Release
+          dotnet run --no-build --project tools/LegacyEnglishGraphCursor.Probe -c Release > .artifacts/english-graph-prepared.log
+          python -I -B tools/LegacyEnglishGraphCursor.Probe/audit_prepared.py .artifacts/english-graph-prepared.log --tamper
       - name: Portable stroke engine numerical goldens, model validation and ink history
         run: dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --ai-pen-test
       - name: Math token formatter and model guards
