@@ -376,3 +376,17 @@ The20-item frozen manifest
 `9a01a8e91405507d9128fe3d94f83526de72d448e8e50d7d16e1a8cb5c0d06c9`,
 retains reports and controls. Whole-constructor and runtime predicates remain
 false; no SDK code or inference executes.
+
+The separate `audit_english_ctc_state_callbacks.py` now checks the actual root/
+default slot0 and slot8 callback bodies. Positive32/416-byte malloc requests
+reach the same authenticated HeapAlloc import with flag0; successful accounting
+preserves the allocation pointer and writes only environment/stack metadata.
+The NULL-free path is exactly TEST, JE, RET, with no writes or nested calls.
+Three complete registered functions and one explicitly unregistered five-byte
+thunk are pinned. This supplies the malloc/free contracts previously declared
+by the conditional state-allocation walk, given the same initialized unmodified
+root/default environment and first-success assumption. It still does not prove
+the selected CTC caller's environment origin or subsequent state initialization.
+The14-item `root-ctc-state-callbacks-frozen-manifest-20261023.json`, SHA256
+`73103ed6e41a9ed34f9dbae7ff3ca447d92292a0b8d49adef4ad7a740231ff93`,
+retains the auditors, full body exports, reports and predecessor manifests.
