@@ -24,6 +24,9 @@ for row in pins['runtimeReviewedLF']+pins['independentDefinitionsLF']:
 # Accept only the frozen old source or the exact approved readonly13-line
 # successor. Recover old pin in memory; historical captures remain unchanged.
 def binding_preimage(data):
+ # Authenticate exact full successor and4reverse transforms; preserve old checks.
+ auth=runpy.run_path(str(repo/'tools/LegacyFst28CNumberInitialConsumerContext.Probe/audit_output.py'))['binding_preimages']
+ data=auth(data)[0]
  b=data.replace(b'\r\n',b'\n')
  marker=b'    // Genuine private prefix handoff; detached diagnostics are not accepted.'
  if marker in b:

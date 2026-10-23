@@ -82,6 +82,21 @@ public sealed class LegacyFst28CNumberInitialQueryBinding
     internal static LegacyFst28CNumberInitialQueryBinding CreateBounded(
         LegacyFst28CNumberInitialD0 d0,int byteBudget,int workBudget,CancellationToken token=default,
         Action<string>? checkpoint=null)
+        => CreateCore(d0,byteBudget,workBudget,token,checkpoint,null);
+
+    // The sole private30 path shares EVERY original validation/read/claim/copy
+    // stage and the SAME bootstrap claim with the unchanged default18 entry.
+    internal static LegacyFst28CNumberInitialQueryBinding CreateForConsumerPool(
+        LegacyFst28CNumberInitialD0 d0,LegacyFst28CNumberInitialConsumerContext.Pool pool,
+        CancellationToken token,Action<string>? checkpoint=null)
+    {
+        token.ThrowIfCancellationRequested();ArgumentNullException.ThrowIfNull(pool);
+        return CreateCore(d0,LogicalByteEnvelope,WorkEnvelope,token,checkpoint,pool);
+    }
+
+    private static LegacyFst28CNumberInitialQueryBinding CreateCore(
+        LegacyFst28CNumberInitialD0 d0,int byteBudget,int workBudget,CancellationToken token,
+        Action<string>? checkpoint,LegacyFst28CNumberInitialConsumerContext.Pool? pool)
     {
         token.ThrowIfCancellationRequested(); ArgumentNullException.ThrowIfNull(d0);
         if(byteBudget is <0 or >LogicalByteEnvelope)throw new ArgumentOutOfRangeException(nameof(byteBudget));
@@ -108,6 +123,7 @@ public sealed class LegacyFst28CNumberInitialQueryBinding
             metadata.AggregateNamespace!=1||metadata.AcceptedSkipBase!=uint.MaxValue||metadata.Weight24!=0||metadata.Weight28!=1||metadata.Priority!=1)
             throw new InvalidDataException("Actual singleton constructor prefix differs.");
         var header=boot.RetainInitialNumberHeaderIdentity(d0,token);
+        pool?.ValidateBeforeBindingClaim(d0,header,token);
         void Checkpoint(string stage){token.ThrowIfCancellationRequested();checkpoint?.Invoke(stage);token.ThrowIfCancellationRequested();}
         Checkpoint("before-claim");
         var claim=claims.GetValue(boot,static _=>new Claim());
@@ -122,7 +138,7 @@ public sealed class LegacyFst28CNumberInitialQueryBinding
         for(ushort i=0;i<16;i++){token.ThrowIfCancellationRequested();secondary[i]=policy.MapSecondary(i).Code;
             if(preserved[i]!=policy.PrimaryMap.MapLabel(i).Code)throw new InvalidDataException("Preserved source label differs.");}
         Checkpoint("after-map-copies");
-        var context=new LegacySymbolContextFactory(18);
+        var context=pool is null?new LegacySymbolContextFactory(18):pool.TakeEmptyContext(d0,header,token);
         ulong[] labelNodes=context.CreateInitialSourceMap(preserved,token); //16*8B.
         var labelSlots=new int[16]; //16*4B.
         var auxiliaries=new LegacyFst28CNumberAuxiliaryBinding[15]; //15*16 protocol bytes.
@@ -177,7 +193,9 @@ public sealed class LegacyFst28CNumberInitialQueryBinding
                 throw new InvalidDataException("Native reset store domains overlap.");
         // QWORD340 covers340..347; DWORD348 covers348..34B: adjacent, NOT overlapping.
         Checkpoint("before-publish");
-        return new(d0,header,context,nodes,preserved,current,secondary,labelNodes,labelSlots,auxiliaries,prefixNodes,reset);
+        var result=new LegacyFst28CNumberInitialQueryBinding(d0,header,context,nodes,preserved,current,secondary,labelNodes,labelSlots,auxiliaries,prefixNodes,reset);
+        pool?.AttachInitialBinding(result,context,header,token);
+        return result;
     }
     public bool RetainsExactHeaderIdentity(CancellationToken token=default)
     {token.ThrowIfCancellationRequested();return ReferenceEquals(historicalHeader,Bootstrap.RetainInitialNumberHeaderIdentity(D0,token))&&

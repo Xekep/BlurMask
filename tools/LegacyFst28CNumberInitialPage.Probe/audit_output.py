@@ -16,6 +16,9 @@ pins=json.loads((repo/'tools/handwriting/linguistic-fst28c-number-first-page-pin
 for row in pins['runtimeReviewedLF']+pins['existingIndependentDefinitionsLF']:
  b=(repo/row['path']).read_bytes().replace(b'\r\n',b'\n')
  if row['path'].endswith('LegacyFst28CNumberInitialQueryBinding.cs'):
+  # Exact new private-pool diff is authenticated before old13-line recovery.
+  auth=runpy.run_path(str(repo/'tools/LegacyFst28CNumberInitialConsumerContext.Probe/audit_output.py'))['binding_preimages']
+  b=auth(b)[0]
   marker=b'    // Genuine private prefix handoff; detached diagnostics are not accepted.'
   start=b.index(marker);end=b.index(b'    // Detached inspection cannot be accepted as a query/current-context receipt.',start);addition=b[start:end]
   assert len(addition.splitlines())==13 and sha(addition)=='a84f4d57852e015e525603e65f753495f12c7121f7a3ad63faa7ac1083159fc5'

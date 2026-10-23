@@ -6,6 +6,15 @@ default recognizer.
 
 ## Development integration (2026-10-21)
 
+The [owned initial number consumer context](linguistic-fst28c-number-initial-consumer-context-runtime.md)
+now grafts actual first-page candidates into its private source-bound context.
+Four fixtures pass independent raw-model/page/AVL replay and Managed/NativeAOT
+parity:32 grafts,125 guards,15 corrupted captures and7 source-preimage controls.
+The shared claim admits exactly one default18/private30 race winner; previous
+85/108-check captures remain byte-exact. CI now covers the new component in both
+build modes. Qualifiers, scoring, history and accepted-text integration remain
+unfinished; this does not establish Russian handwriting recognition.
+
 The [English initial PRIMARY consumer](english-case-initial-primary-consumer-runtime-20261023.md)
 now joins actual query rows to owned context grafts, category maps, acoustic
 scoring and the first candidate heap. All234 fixtures pass independent
