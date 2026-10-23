@@ -354,3 +354,25 @@ only, not semantic mutation coverage. The21-item frozen manifest
 `root-ctc-default-allocator-frozen-manifest-20261023.json`, SHA256
 `912c9cf1177c634863a8bbf0380004886000c4f20b13e284ad8cd1cc1eb43e5f`,
 retains the source, report, native body exports and failed write-audit draft.
+
+`audit_english_ctc_state_allocation.py` composes the first header phase with that
+zero-fill contract and walks the constructor through exclusive1946A9, before
+the state initializers. Four alignment/flag cases produce one32-byte zeroed
+pointer array and four ordinary state allocations:32/416/416/416 bytes. The
+output header has no separate state allocation in this loop. All four frees
+receive NULL; allocated state bytes remain unknown rather than being silently
+zeroed. The complete defined graph/header/pointer-table image is independently
+checked, including all four header counts and state-pointer order.
+
+This remains conditional on optional packet count58=0, fresh successful disjoint
+malloc callbacks and free(NULL) preserving live objects. The actual malloc/free
+callback bodies and selected caller origin are not established by this audit.
+Ten semantic controls reject NULL/aliased/undersized allocations, missing header
+zero-fill, unknown malloc reads, pointer subreads and invalid writes. The first
+draft retained stale comparison flags after TEST; the corrected interpreter
+derives signed branches from the current instruction. The failed draft is kept.
+The20-item frozen manifest
+`root-ctc-state-allocation-frozen-manifest-20261023.json`, SHA256
+`9a01a8e91405507d9128fe3d94f83526de72d448e8e50d7d16e1a8cb5c0d06c9`,
+retains reports and controls. Whole-constructor and runtime predicates remain
+false; no SDK code or inference executes.
