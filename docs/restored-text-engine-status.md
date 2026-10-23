@@ -6,6 +6,13 @@ default recognizer.
 
 ## Development integration (2026-10-21)
 
+The [English node0 and retained number source checkpoint](english-case-node0-source-progress-20261023.md)
+records isolated source, compilation and prepared-reference work. These drafts
+are not production integrations. Whole-operation budgets, final receipt/export
+and end-to-end recognition remain open; a confirmed terminal-index undercount
+is being addressed before execution.
+
+
 The [number node0 skipped-language completion](linguistic-fst28c-number-skipped-language-completion.md)
 now continues two genuine initial consumers through root alternatives, sorting,
 duplicate merging, quota and stored records; two language-required cases refuse
