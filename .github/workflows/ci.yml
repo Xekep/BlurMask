@@ -260,7 +260,7 @@ jobs:
         shell: pwsh
         run: |
           $suffix = if ($IsWindows) { '.exe' } else { '' }
-          foreach ($project in @('LegacyFst23C.Probe', 'LegacyFst13AOutgoing.Probe', 'LegacyFst28CPrimaryMap.Probe', 'LegacyFst28CTargetPreparation.Probe', 'LegacyFst28CInitialState.Probe', 'LegacyFst28CFreshPrimaryControllerBootstrap.Probe', 'LegacyFst28CNumberSymbolMasks.Probe', 'LegacyFst28CNumberInitialD0.Probe', 'LegacyFst28CNumberInitialQueryBinding.Probe', 'LegacyFst28CNumberInitialPage.Probe', 'LegacyFst28CNumberInitialConsumerContext.Probe', 'LegacyFst28CNumberInitialConsumer.Probe', 'LegacyFullEnglishFirst.Probe', 'LegacyFullEnglishFirstConfidence.Probe', 'LegacyFullEnglishFirstController.Probe', 'LegacyFullEnglishFirstPrimary.Probe', 'LegacyFullEnglishFirstContext.Probe', 'LegacyFullEnglishFirstTerminal.Probe', 'LegacyFullEnglishFirstPlainText.Probe', 'LegacyFullEnglishFirstGlyphEmission.Probe', 'LegacyEnglishCaseMain.Probe', 'LegacyEnglishCaseInitialization.Probe', 'LegacyEnglishCaseInitialQuery.Probe', 'LegacyEnglishCaseInitialConsumer.Probe', 'LegacyEnglishCasePrimaryCompletion.Probe')) {
+          foreach ($project in @('LegacyFst23C.Probe', 'LegacyFst13AOutgoing.Probe', 'LegacyFst28CPrimaryMap.Probe', 'LegacyFst28CTargetPreparation.Probe', 'LegacyFst28CInitialState.Probe', 'LegacyFst28CFreshPrimaryControllerBootstrap.Probe', 'LegacyFst28CNumberSymbolMasks.Probe', 'LegacyFst28CNumberInitialD0.Probe', 'LegacyFst28CNumberInitialQueryBinding.Probe', 'LegacyFst28CNumberInitialPage.Probe', 'LegacyFst28CNumberInitialConsumerContext.Probe', 'LegacyFst28CNumberInitialConsumer.Probe', 'LegacyFullEnglishFirst.Probe', 'LegacyFullEnglishFirstConfidence.Probe', 'LegacyFullEnglishFirstController.Probe', 'LegacyFullEnglishFirstPrimary.Probe', 'LegacyFullEnglishFirstContext.Probe', 'LegacyFullEnglishFirstTerminal.Probe', 'LegacyFullEnglishFirstPlainText.Probe', 'LegacyFullEnglishFirstGlyphEmission.Probe', 'LegacyFullEnglishFirstSourceRecords.Probe', 'LegacyEnglishCaseMain.Probe', 'LegacyEnglishCaseInitialization.Probe', 'LegacyEnglishCaseInitialQuery.Probe', 'LegacyEnglishCaseInitialConsumer.Probe', 'LegacyEnglishCasePrimaryCompletion.Probe')) {
             $capture = switch ($project) {
               'LegacyFst23C.Probe' { 'legacy-fst23c' }
               'LegacyFst13AOutgoing.Probe' { 'legacy-fst13a-outgoing' }
@@ -281,6 +281,7 @@ jobs:
               'LegacyFullEnglishFirstTerminal.Probe' { 'legacy-en-full-first-terminal' }
               'LegacyFullEnglishFirstPlainText.Probe' { 'legacy-en-full-first-plain' }
               'LegacyFullEnglishFirstGlyphEmission.Probe' { 'legacy-en-full-first-glyph' }
+              'LegacyFullEnglishFirstSourceRecords.Probe' { 'legacy-en-full-first-source' }
               'LegacyEnglishCaseMain.Probe' { 'legacy-en-case-main' }
               'LegacyEnglishCaseInitialization.Probe' { 'legacy-en-case-initialization' }
               'LegacyEnglishCaseInitialQuery.Probe' { 'legacy-en-case-initial-query' }
@@ -292,10 +293,10 @@ jobs:
             dotnet publish "tools/$project/$project.csproj" -c Release -p:PublishAot=true -o $directory
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             $arguments = @('models')
-            if ($project -in @('LegacyFullEnglishFirst.Probe', 'LegacyFullEnglishFirstConfidence.Probe', 'LegacyFullEnglishFirstController.Probe', 'LegacyFullEnglishFirstPrimary.Probe', 'LegacyFullEnglishFirstContext.Probe', 'LegacyFullEnglishFirstTerminal.Probe', 'LegacyFullEnglishFirstPlainText.Probe', 'LegacyFullEnglishFirstGlyphEmission.Probe', 'LegacyEnglishCaseMain.Probe', 'LegacyEnglishCaseInitialization.Probe', 'LegacyEnglishCaseInitialQuery.Probe', 'LegacyEnglishCaseInitialConsumer.Probe', 'LegacyEnglishCasePrimaryCompletion.Probe')) { $arguments += '.artifacts/legacy-en119-final-single-blind.json' }
+            if ($project -in @('LegacyFullEnglishFirst.Probe', 'LegacyFullEnglishFirstConfidence.Probe', 'LegacyFullEnglishFirstController.Probe', 'LegacyFullEnglishFirstPrimary.Probe', 'LegacyFullEnglishFirstContext.Probe', 'LegacyFullEnglishFirstTerminal.Probe', 'LegacyFullEnglishFirstPlainText.Probe', 'LegacyFullEnglishFirstGlyphEmission.Probe', 'LegacyFullEnglishFirstSourceRecords.Probe', 'LegacyEnglishCaseMain.Probe', 'LegacyEnglishCaseInitialization.Probe', 'LegacyEnglishCaseInitialQuery.Probe', 'LegacyEnglishCaseInitialConsumer.Probe', 'LegacyEnglishCasePrimaryCompletion.Probe')) { $arguments += '.artifacts/legacy-en119-final-single-blind.json' }
             $arguments += ".artifacts/$capture-native.json"
             if ($project -eq 'LegacyEnglishCasePrimaryCompletion.Probe') { $arguments = @('--owner') + $arguments }
-            if ($project -eq 'LegacyFullEnglishFirstGlyphEmission.Probe') { $arguments = @('--actual') + $arguments }
+            if ($project -in @('LegacyFullEnglishFirstGlyphEmission.Probe', 'LegacyFullEnglishFirstSourceRecords.Probe')) { $arguments = @('--actual') + $arguments }
             $binaryName = if ($project -eq 'LegacyEnglishCaseInitialConsumer.Probe') { 'LegacyEnglishCaseInitialQuery.Probe' } else { $project }
             $executable = Join-Path $directory "$binaryName$suffix"
             & $executable @arguments
@@ -336,6 +337,22 @@ jobs:
               python -I -B tools/LegacyFullEnglishFirstGlyphEmission.Probe/audit_output.py --repo . --models models --a .artifacts/legacy-en-full-first-native.json --b4 .artifacts/legacy-en-full-first-context-native.json --b6 .artifacts/legacy-en-full-first-plain-native.json --contexts .artifacts/legacy-en-full-first-plain-contexts-native.json --capture ".artifacts/$capture-native.json" --output .artifacts/legacy-en-full-first-glyph-oracle-native.json
               if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
               python -I -B tools/LegacyFullEnglishFirstGlyphEmission.Probe/audit_lifecycle.py --capture ".artifacts/$capture-native.json" --output .artifacts/legacy-en-full-first-glyph-lifecycle-native.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+            if ($project -eq 'LegacyFullEnglishFirstSourceRecords.Probe') {
+              python -I -B tools/LegacyFullEnglishFirstSourceRecords.Probe/audit_output.py --models models --input .artifacts/legacy-en119-final-single-blind.json --b7 .artifacts/legacy-en-full-first-glyph-native.json --capture ".artifacts/$capture-native.json" --report .artifacts/legacy-en-full-first-source-oracle-native.json --tamper
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+              & $executable --prepared models .artifacts/legacy-en-full-first-source-prepared-controls.json .artifacts/legacy-en-full-first-source-prepared-native.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+              if ((Get-FileHash .artifacts/legacy-en-full-first-source-prepared-managed.json).Hash -ne (Get-FileHash .artifacts/legacy-en-full-first-source-prepared-native.json).Hash) { throw 'B8 prepared parity mismatch.' }
+              python -I -B tools/LegacyFullEnglishFirstSourceRecords.Probe/audit_prepared.py --models models --controls .artifacts/legacy-en-full-first-source-prepared-controls.json --capture .artifacts/legacy-en-full-first-source-prepared-native.json --report .artifacts/legacy-en-full-first-source-prepared-oracle-native.json --tamper
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+              & $executable --guards models tools/LegacyFullEnglishFirstSourceRecords.Probe/small-source-owner-blind-raw.json .artifacts/legacy-en-full-first-source-guards-native.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+              if ((Get-FileHash .artifacts/legacy-en-full-first-source-guards-managed.json).Hash -ne (Get-FileHash .artifacts/legacy-en-full-first-source-guards-native.json).Hash) { throw 'B8 lifecycle parity mismatch.' }
+              python -I -B tools/LegacyFullEnglishFirstSourceRecords.Probe/audit_output.py --models models --input tools/LegacyFullEnglishFirstSourceRecords.Probe/small-source-owner-blind-raw.json --b7 .artifacts/legacy-en-full-first-glyph-native.json --capture .artifacts/legacy-en-full-first-source-guards-native.json --report .artifacts/legacy-en-full-first-source-guards-numeric-native.json --tamper
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+              python -I -B tools/LegacyFullEnglishFirstSourceRecords.Probe/audit_lifecycle.py --models models --capture .artifacts/legacy-en-full-first-source-guards-native.json --numeric-report .artifacts/legacy-en-full-first-source-guards-numeric-native.json --report .artifacts/legacy-en-full-first-source-lifecycle-native.json --tamper
               if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             }
             if ($project -eq 'LegacyFullEnglishFirstPlainText.Probe') {

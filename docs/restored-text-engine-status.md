@@ -6,6 +6,15 @@ default recognizer.
 
 ## Development integration (2026-10-21)
 
+The [full English FIRST source720 producer](english-full-first-source-records-runtime-20261023.md)
+now joins completed B7 owners to private source categories, original parent
+coordinates and projected descriptor ranges. Managed/NativeAOT agree on all
+141+100 blind inputs and2,262 complete records across252 children. Independent
+replay checks every record byte, range and chronology; separate small-owner
+tests cover119 lifecycle proofs and actual category backing mutations. This is
+an intermediate producer: accepted273/UTF8, final guide, Russian cursive and
+application/default integration remain unfinished.
+
 The [owned initial number consumer](linguistic-fst28c-number-initial-consumer-runtime.md)
 now joins the retained context to actual root arcs, qualifiers, categories,
 acoustic scoring and a private250-slot heap. Four fixtures pass Managed/Native
@@ -23,8 +32,9 @@ inputs:252 children,1,699 owners and1,131 queries. Independent replay checks all
 40-byte records, original WORD/reference preservation and count/fill chronology.
 Strengthened cancellation, contention and snapshot tests pass separately on two
 original fixtures. Reached headers182/183/184 remain unsupported and refuse
-before entry. Source720, accepted text, final guide and default integration are
-still unfinished; this is not a handwriting accuracy or Russian cursive claim.
+before entry. Source720 is covered by the newer producer above; accepted text,
+final guide and default integration are still unfinished. This is not a
+handwriting accuracy or Russian cursive claim.
 
 The [owned English primary materialization](english-case-primary-completion-runtime-20261023.md)
 now continues the initial consumer through root alternatives, sorting, duplicate

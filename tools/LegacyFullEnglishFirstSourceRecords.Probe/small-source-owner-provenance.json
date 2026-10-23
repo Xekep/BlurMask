@@ -1,0 +1,23 @@
+{
+  "PreparedShapesOnly": true,
+  "TargetsRead": false,
+  "Source": "E:\\BlurMask-build-artifacts-20261014\\en-main-final-single-blind-raw.json",
+  "SourceSHA256": "d1c9284dbe4f79301f2a0d860e14b3c00e5a0ba02430b98a6bac5f0c43fa6b99",
+  "Indices": [
+    4,
+    51,
+    125
+  ],
+  "Names": [
+    "actual-4",
+    "actual-51",
+    "sole-flat"
+  ],
+  "OldB7NetworkCounts": [
+    12,
+    16,
+    4
+  ],
+  "OldB7NetworkCallsTotal": 32,
+  "Scope": "Actual typed owners from structural synthetic rawfixtures, not handwritingquality. Horizontal125 flat status must come from actualscale/unfiltereddescriptor, nevername."
+}
