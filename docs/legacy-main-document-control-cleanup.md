@@ -1,5 +1,27 @@
 # Fresh023260 no-control source pass
 
+## Current-parent audit supplement (2026-10-23)
+
+CI on Windows, Linux and macOS exposed a stale historical assertion of exactly
+12 CHAR objects. The current source pipeline produces14 objects/37 CHAR40 rows
+for the same four probe inputs. The cleanup runtime and capture format are
+unchanged. The audit now accepts paired `--selected SELECTED_CAPTURE` and
+`--indices INDEX_CAPTURE` arguments, independently replays both parent audits,
+and checks the complete source identities, live flags, insertion order, WORD48
+bytes and pending-selection count against them. The standalone historical
+12-object audit remains supported; current captures require both parents.
+The `run.py` wrapper forwards these arguments and both CI paths supply their
+fresh matching parent captures. Append the two arguments to the commands below
+when checking the current pipeline.
+
+Fresh local builds of all three probes passed without warnings. The current
+paired audit and original historical capture pass; seven negative controls
+reject missing provenance, an omitted parent, a missing source, duplicate
+identity, changed CHAR flags, changed WORD flags and a changed CHAR40 record.
+Evidence is in `root-ci-cleanup-oracle-controls-20261023.json` on the analysis
+drive. This local fix does not establish a completed cross-platform CI run or
+improved handwriting recognition.
+
 `LegacyFreshMainDocumentControlCleanup.Prepare(actualSourceIndices).Run()`
 consumes the successful current [020920 owner](legacy-main-document-source-indices.md).
 It scans every actual WORD48 choice, including the unselected choices, then

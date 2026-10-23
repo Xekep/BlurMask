@@ -1271,7 +1271,7 @@ foreach ($case in $cases) {
     if ($LASTEXITCODE -ne 0) { throw 'LegacyMainDocumentSourceIndices independent audit failed' }
   }
   if ($name -eq 'LegacyMainDocumentControlCleanup') {
-    python tools/LegacyMainDocumentControlCleanup.Probe/audit_output.py .artifacts/legacy-main-document-control-cleanup-native.json
+    python tools/LegacyMainDocumentControlCleanup.Probe/audit_output.py .artifacts/legacy-main-document-control-cleanup-native.json --selected .artifacts/legacy-main-document-selected-sources-native.json --indices .artifacts/legacy-main-document-source-indices-native.json
     if ($LASTEXITCODE -ne 0) { throw 'LegacyMainDocumentControlCleanup independent audit failed' }
   }
   if ($name -eq 'LegacyRawInkCurrentView') {
