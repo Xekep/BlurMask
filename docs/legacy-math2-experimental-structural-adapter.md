@@ -118,8 +118,15 @@ calculation method produced `3` and `333`; removing the trailing equals left
 both expressions uncomputed. These generated inputs do not establish accuracy
 on arbitrary human handwriting or Russian cursive.
 
+The corresponding Windows Native AOT build with statically linked rendering also
+passed those headless checks. Its two actual recognition outputs are byte-identical
+to the Managed capture. This verifies no desktop-window behavior. The compiler
+reported two existing Avalonia DirectComposition interop diagnostics, which are
+retained in the build log rather than treated as tested GUI paths.
+
 CI checks the published native model delivery and injected routing on Windows,
 Linux and both macOS architectures. Those CI runs are separate from the local
-Managed checks and must pass before claiming native release verification.
+checks and must pass before claiming cross-platform release verification.
 Local evidence: `E:/BlurMask-build-artifacts-20261014/root-app-manual-math-checks-20261023/`
-and `root-recognized-math-calculation-20261023/`.
+and `root-recognized-math-calculation-20261023/`; native evidence is under
+`root-native-manual-math-checks-20261023/`.

@@ -84,3 +84,20 @@ packing, converted pointer lifetimes and all evaluator branches are not recovere
 by this serialized-data owner. Application recognizer selection is unchanged.
 
 Evidence: `root-selected106-wire-csharp-and-integration-frozen-manifest-20261023.json`, SHA256 `f0c6c394ada942f7e4bfea916c65693a6a01bd53c92434945c2dccd985090e8a`, under `E:/BlurMask-build-artifacts-20261014/`.
+## Scalar activation conversion, 23 October 2026
+
+The existing int16 affine path now preserves the scalar routine's conversion
+order: rounded binary32 to signed int32 (integer-indefinite for invalid or
+out-of-range values), then integer clamping. Previously it clamped the float
+first, so positive infinity incorrectly became the positive limit. Even finite
+normal inputs can overflow the intermediate scale factor. The original F32
+multiplication, rounding expression and sign selection remain unchanged.
+
+This follows the pinned scalar policy, not every native SIMD policy or floating
+point status flag. There is no forced no-inline call boundary. Managed checks
+cover 85 directed native conversion cases and two invalid limits; the existing
+synthetic float/int16/int8 network goldens still pass with maximum error
+`4.4703e-8`. No handwriting-quality improvement is established by these checks.
+Source/ASM and local build evidence are retained under
+`E:/BlurMask-build-artifacts-20261014/ctc-selected106-scalar-inline-successor-20261023/`
+and `root-scalar-quantization-checks-20261023/`.

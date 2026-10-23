@@ -6,6 +6,7 @@ internal static class InkRecognitionChecks
 {
     internal static void Run()
     {
+        VerifyScalarQuantization();
         var pack = File.ReadAllBytes(Path.Combine("tools", "ink-reference-fixture.bin"));
         using var expected = JsonDocument.Parse(File.ReadAllBytes(Path.Combine("tools", "ink-reference-expected.json")));
         var data = expected.RootElement;
@@ -35,6 +36,27 @@ internal static class InkRecognitionChecks
         if (recognizer.Recognize([]).Text.Length != 0 || recognizer.Recognize([new(new InkPoint[] { new(0, 5), new(10, 5) })]).Text.Length != 0)
             throw new InvalidOperationException("Degenerate ink produced text.");
         Console.WriteLine($"Portable ink recognition: synthetic float/int16/int8 BLSTM golden max error {error:G5}; malformed packs, geometry, CTC, limits and cancellation passed.");
+    }
+
+    private static void VerifyScalarQuantization()
+    {
+        // Directed expected CVTTSS2SI32 values from the pinned scalar routine.
+        (float Rounded, int Converted)[] cases =
+        [
+            (0f, 0), (-0f, 0), (float.Epsilon, 0), (-float.Epsilon, 0),
+            (.99999f, 0), (-.99999f, 0), (1.99999f, 1), (-1.99999f, -1),
+            (2147483520f, 2147483520), (-2147483648f, int.MinValue),
+            (2147483648f, int.MinValue), (-2147483904f, int.MinValue),
+            (float.PositiveInfinity, int.MinValue), (float.NegativeInfinity, int.MinValue),
+            (float.NaN, int.MinValue), (float.MaxValue, int.MinValue), (-float.MaxValue, int.MinValue)
+        ];
+        foreach (int limit in new[] { 0, 1, 2047, 4095, 32767 })
+            foreach (var (rounded, converted) in cases)
+                if (LegacyScalarInt16ActivationQuantization.ConvertRoundedAndClamp(rounded, limit) != Math.Clamp(converted, -limit, limit))
+                    throw new InvalidOperationException("Scalar integer conversion order differs from native directed values.");
+        Expect<ArgumentOutOfRangeException>(() => LegacyScalarInt16ActivationQuantization.ConvertRoundedAndClamp(0, -1));
+        Expect<ArgumentOutOfRangeException>(() => LegacyScalarInt16ActivationQuantization.ConvertRoundedAndClamp(0, 32768));
+        Console.WriteLine("Scalar activation conversion: 85 directed native boundary cases and two invalid limits passed.");
     }
 
     private static byte[] Corrupt(byte[] pack) { var changed = pack.ToArray(); changed[^1] ^= 1; return changed; }

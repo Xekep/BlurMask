@@ -159,7 +159,7 @@ internal sealed class NativeNetwork(int inputWidth, LstmLayer[] layers, AffineWe
             {
                 float scaled = x[col] * factor;
                 float rounded = scaled + (x[col] < 0 ? -0.49999f : 0.49999f);
-                q[col] = (int)Math.Clamp(MathF.Truncate(rounded), -integerLimit, integerLimit);
+                q[col] = LegacyScalarInt16ActivationQuantization.ConvertRoundedAndClamp(rounded, integerLimit);
             }
             float inverseFactor = peak / limit;
             var weights = matrix.Shorts!;
