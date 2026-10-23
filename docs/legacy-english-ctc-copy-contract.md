@@ -145,3 +145,25 @@ the final control changes the actual stride. Frozen13-item manifest
 `42b9c89a3d6e25fecd95caa64f001bea19ea36dc34a9ba27262bbee7ead77198`,
 retains immutable copies of all three auditors and their dependencies. No SDK
 code executes and application behavior is unchanged.
+
+## Successful CPU-selector domain supplement
+
+The later `audit_english_ctc_cpu_detection.py` closes the successful-result
+domain left open by the earlier CPU-layout audit. It checks the complete
+463-byte/133-instruction `10EE70` body, all seven switch targets, register
+aliases, four output stores and all five returns. Requested enums outside1..7
+fail the unsigned bound; enum7 reaches the unsupported-platform error tail.
+Automatic selection returns only1,2,3,5,6. Successful explicit selection returns
+one of1..6, including enum4. The combined domain is therefore1..6, which the
+previous alignment mapper maps entirely to8/16 float units.
+
+The proof allows all16 low feature-mask combinations, including combinations
+that no real CPU may provide. It neither executes CPUID/XGETBV nor chooses a
+host CPU configuration. Its72 abstract successful cases and eight corrupted
+body/pointer/bound/table/return/domain/reset controls pass. This narrows the
+alignment proof; allocator separation, complete native pointer dataflow and
+retained-header aliases remain open. No V120 shortcut is approved.
+
+Frozen nine-item manifest `root-ctc-cpu-detection-frozen-manifest-20261023.json`,
+SHA256 `50dc48c51213c180e809292c60d0be6c7079e9bb73cf4c4a76718e6125bd0d37`,
+retains the immutable auditor, full-body export, reports and byte dependencies.
