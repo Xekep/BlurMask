@@ -6,6 +6,7 @@ internal sealed class LegacyEnglishCaseInitialHeap
     private readonly LegacyNativeWordRecordHeap heap;
     private readonly LegacyNativeWordHeapRouter router;
     private long attempts,accepted,moveAllowance;
+    private bool transferred;
     internal LegacyEnglishCaseInitialHeap(LegacyEnglishCaseInitialSourcePolicy policy)
     {
         var h=policy.Heaps;
@@ -16,12 +17,28 @@ internal sealed class LegacyEnglishCaseInitialHeap
     {
         token.ThrowIfCancellationRequested();lock(gate)
         {
+            if(transferred)throw new InvalidOperationException("Primary mutation authority has been consumed.");
             if(++attempts>4194304||moveAllowance>33554432-8)throw new InvalidDataException("Whole heap attempts/hole-write budget exhausted.");
             // Native1F75B0 hole propagation: <=7 full slot copies, final hole
             // fill charged once. No promotion callback or swapped second slot.
             moveAllowance+=8;
             var allocation=router.TryInsertInitialRecord(1,false,fields,0,false,cancellationToken:token);
             if(allocation.Accepted)accepted++;return allocation.Accepted;
+        }
+    }
+    internal (Memory<byte> Storage,int Count) TransferPrimary(LegacyEnglishCasePrimaryCompletion owner,
+        LegacyEnglishCaseInitialConsumer consumer,LegacyEnglishCaseInitialSourcePolicy policy,
+        LegacyEnglishFreshCaseMainSource.InitialQueryLease lease,CancellationToken token)
+    {
+        consumer.RequirePrimaryCompletion(owner,this,policy,lease);token.ThrowIfCancellationRequested();
+        lock(gate)
+        {
+            consumer.RequirePrimaryCompletion(owner,this,policy,lease);token.ThrowIfCancellationRequested();
+            if(transferred)throw new InvalidOperationException("One privately authenticated primary transfer required.");
+            transferred=true; //Any later failure poisons the entered operation; never roll this back.
+            //The public kernel returns a fresh full-capacity array. This private
+            //ownership transfer unwraps that exact new array without another copy.
+            return (System.Runtime.InteropServices.MemoryMarshal.AsMemory(heap.GetSlotStorageSnapshot()),heap.Count);
         }
     }
     internal LegacyEnglishCaseInitialHeapSnapshot CopyHistorical()

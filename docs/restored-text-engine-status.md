@@ -6,6 +6,14 @@ default recognizer.
 
 ## Development integration (2026-10-21)
 
+The [owned English primary materialization](english-case-primary-completion-runtime-20261023.md)
+now continues the initial consumer through root alternatives, sorting, duplicate
+merging, quota and 88/80-byte rows. Managed/Native AOT agree for234 actual owners
+and5,241 rows; independent input-bound replay verifies every output byte and
+context field,46 guards and16 cancellation stages. The preceding consumer/query
+captures remain byte-exact. This is primary-only: auxiliary/history, final text,
+Russian cursive and application/default integration remain unfinished.
+
 The [owned initial number consumer context](linguistic-fst28c-number-initial-consumer-context-runtime.md)
 now grafts actual first-page candidates into its private source-bound context.
 Four fixtures pass independent raw-model/page/AVL replay and Managed/NativeAOT
@@ -21,8 +29,9 @@ scoring and the first candidate heap. All234 fixtures pass independent
 raw-page/request/heap replay and Managed/NativeAOT parity:10,202 rows and5,391
 scoring calls, with58 refusal guards and17 cancellation stages. A rejected
 preentry lease no longer changes the issuer. Existing query/scorer regressions
-and the recorded Russian diagnostic remain unchanged. Alternatives, sorting,
-word materialization, history and final-text integration remain unfinished.
+and the recorded Russian diagnostic remain unchanged. Primary alternatives,
+sorting and materialization are covered by the newer checkpoint above; auxiliary
+alternatives, history and final-text integration remain unfinished.
 
 The [owned initial number page](linguistic-fst28c-number-initial-page-runtime.md)
 now walks the retained Russian number source using genuine source/D0/context

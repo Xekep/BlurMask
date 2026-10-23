@@ -31,12 +31,27 @@ internal sealed class LegacyEnglishCaseInitialConsumer
     private readonly Func<int,ushort,bool> suppressed;
     private LegacyEnglishCaseInitialHeapSnapshot? pending;
     private LegacyEnglishFreshCaseMainSource.InitialQueryLease? issuedLease;
+    private LegacyEnglishCasePrimaryCompletion? completion;
+    private bool completing;
+    private int completionThread;
     private int run,rows,qualified,scoring;private bool currentPrepared;
     internal int MaximumContextNodes=>1289;
     internal int CompletedRows=>Volatile.Read(ref rows);
     internal int QualifiedRows=>Volatile.Read(ref qualified);
     internal int AttemptedScoringCalls=>Volatile.Read(ref scoring);
     internal long LogicalCeiling=>LegacyEnglishCaseInitialSourcePolicy.CompleteLogicalCeiling;
+    internal void AttachPrimaryCompletion(LegacyEnglishCasePrimaryCompletion owner)
+    {
+        if(Volatile.Read(ref run)!=0||completion is not null||!owner.IsPreparedFor(this))throw new InvalidOperationException("One exact prepared primary completion owner required.");
+        completion=owner;
+    }
+    internal void RequirePrimaryCompletion(LegacyEnglishCasePrimaryCompletion owner,LegacyEnglishCaseInitialHeap actualHeap,
+        LegacyEnglishCaseInitialSourcePolicy actualPolicy,LegacyEnglishFreshCaseMainSource.InitialQueryLease lease)
+    {
+        RequireLease(lease);
+        if(!completing||completionThread!=Environment.CurrentManagedThreadId||!ReferenceEquals(completion,owner)||!ReferenceEquals(heap,actualHeap)||!ReferenceEquals(policy,actualPolicy)||!owner.IsRunningFor(this))
+            throw new InvalidOperationException("Exact synchronous live primary completion seam required.");
+    }
     internal LegacyEnglishCaseInitialConsumer(LegacyEnglishCaseInitialQueryPass pass,LegacyEnglishCaseInitialSourcePolicy policy,LegacyEnglishCaseInitialFrontend frontend,LegacyEnglishCaseInitialHeap heap)
     {this.pass=pass;this.policy=policy;this.frontend=frontend;this.heap=heap;request=new(this);readCosts=frontend.ReadCosts;suppressed=frontend.Suppressed;}
     internal LegacyEnglishCaseInitialHeapSnapshot Run(Action<string>? observer=null,CancellationToken token=default)
@@ -106,6 +121,15 @@ internal sealed class LegacyEnglishCaseInitialConsumer
         RequireLease(lease);token.ThrowIfCancellationRequested();
     }
     internal void CompletePrefix(LegacyEnglishFreshCaseMainSource.InitialQueryLease lease,CancellationToken token)
-    {RequireLease(lease);frontend.Require(lease,token);if(rows!=pass.ConsumedRows)throw new InvalidDataException("Complete primary consumer row prefix required.");pending=heap.CopyHistorical();token.ThrowIfCancellationRequested();RequireLease(lease);}
+    {
+        RequireLease(lease);frontend.Require(lease,token);if(rows!=pass.ConsumedRows)throw new InvalidDataException("Complete primary consumer row prefix required.");
+        if(completion is not null)
+        {
+            completionThread=Environment.CurrentManagedThreadId;completing=true;
+            try{completion.CompleteOwned(this,heap,policy,lease,token);}
+            finally{completing=false;completionThread=0;}
+        }
+        pending=heap.CopyHistorical();token.ThrowIfCancellationRequested();RequireLease(lease);
+    }
     internal LegacyEnglishCaseInitialHeapSnapshot CopyHistoricalHeap()=>heap.CopyHistorical();
 }
