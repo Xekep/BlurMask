@@ -476,3 +476,27 @@ retains the composed reports, sources and controls. Service73 registration and
 the actual selected caller origin remain assumptions;194980 and whole-constructor
 proof remain open. This is static initialization analysis, with no SDK execution,
 recognition run or runtime backend approval.
+
+`audit_english_ctc_matrix_allocation.py` continues from that same constructor
+state through the real1946CD call to194980. The complete Ghidra function body
+contains two disjoint code ranges,83 and2445 bytes; both are independently
+decoded and pinned. It follows the selected8/8/8/1 layer paths and all nested
+metadata initializers through the first sizing pass, stopping at194B7D before
+matrix scratch allocation. Eight cases allocate six896-byte recurrent metadata
+objects and one64-byte output object. The5100 defined bytes match the separate
+metadata field algebra, while340 padding bytes remain undefined. Allocation
+does not manufacture zero-filled malloc bytes. All pre-existing objects are
+preserved apart from the seven intended header pointers.
+
+Fifteen semantic refusal controls cover changed widths, code, flags, header
+count, aliased headers, changed core table, NULL/aliased allocation results,
+undefined padding reads, invalid metadata writes and writes to original states
+or workspace. The30-item `root-ctc-matrix-allocation-frozen-manifest-20261023.json`,
+SHA256 `6e5381cf665f35eeafce4306758854ae548f26cae17aa15b62bbddd79fbbc7d1`,
+preserves sources, composed reports, controls, complete Ghidra export and failed
+draft diagnostics. The Ghidra wrapper returned1 despite producing the export;
+the code bounds and bytes were independently checked rather than treating that
+command as successful. This closes a conditional successful metadata-allocation
+and sizing path. Fresh disjoint default ROOT allocations, service registration
+and environment origin remain assumptions; the matrix scratch pass, failure
+cleanup, complete constructor and recognition readiness remain open.
