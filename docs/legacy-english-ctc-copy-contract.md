@@ -439,3 +439,20 @@ The actual CTC environment origin remains unresolved. The11-item
 `root-ctc-service-lookup-frozen-manifest-20261023.json`, SHA256
 `af6c1e948cc0af109fad03a496b927b77c7978961afc074a2eb7e98783f32e86`,
 preserves the static proof and inspection history. No SDK code executes.
+
+`audit_english_ctc_aligned_allocator.py` identifies the readonly service73
+descriptor229CA0 and checks its complete122-byte allocation callback104CC0.
+Conditional on that descriptor being installed and the same default ROOT
+allocator, the callback requests one zeroed element of size
+`workspaceBytes + 8 + alignmentBytes`, aligns the returned address after an
+eight-byte prefix, and stores the original allocation pointer in that prefix.
+For43136/64704-byte workspaces and32/64-byte alignments, all192 possible pointer
+residues preserve alignment and allocation bounds. The sole metadata write stays
+before the workspace, whose bytes retain the default calloc zero-fill.
+
+This closes the bounded successful allocation-body contract, not registration of
+that descriptor, arbitrary-size overflow/failure handling, nonNULL freeing, the
+workspace-writing second pass or whole constructor. The9-item
+`root-ctc-aligned-allocator-frozen-manifest-20261023.json`, SHA256
+`00def6b2eb7a43f48e383bfa790223638b8578645a146644ad063e9244cfef4b`,
+preserves the source, composed reports and readonly inspection evidence.
