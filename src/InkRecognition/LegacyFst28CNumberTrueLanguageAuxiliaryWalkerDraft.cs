@@ -111,7 +111,13 @@ public sealed partial class LegacyFst28CNumberInitialPage
             token.ThrowIfCancellationRequested();var root=Frame(0);
             if(root.CurrentPage is not null&&root.CurrentPage.Consumed!=root.CurrentPage.Returned)
                 throw new NotSupportedException("Bounded whole AUX read cannot discard an active output page.");
-            root.Tag=ulong.MaxValue;root.ParentContext=0;root.RequestedSkip=0;root.CurrentPage=null;
+            BeginReadsetMutation();
+            try
+            {
+                root.Tag=ulong.MaxValue;root.ParentContext=0;root.RequestedSkip=0;root.CurrentPage=null;
+                CommitReadsetMutation(token);
+            }
+            catch{FailAuxiliaryOperation();throw;}
         }
         private int ReadNumberAuxiliaryOuter(ulong actualTag,int acceptedSkip,CancellationToken token)
         {
@@ -166,7 +172,7 @@ public sealed partial class LegacyFst28CNumberInitialPage
                             {
                                 if((flags&7)!=1)flags=(byte)((flags&250)|2);
                                 if(row.ContextIdentity==0)throw new InvalidDataException("FFFB requires its actual live leaf.");
-                                ulong parent=input.Context.ReadNode(row.ContextIdentity).ParentLink;
+                                ulong parent=ReadCurrentContextParent(frame,page,token);
                                 row=row with{ContextIdentity=parent,CaseFlags=flags};
                             }
                             else if(symbol!=65533)

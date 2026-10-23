@@ -91,6 +91,7 @@ public sealed partial class LegacyFst28CNumberInitialPage
                 throw new InvalidOperationException("Cannot reset an active source operation.");
             if(Interlocked.CompareExchange(ref actualNode0EndReset,1,0)!=0)
                 throw new InvalidOperationException("Actual node0 end reset is consumed or poisoned.");
+            BeginReadsetMutation();
             try
             {
                 // Native290237080/236F30 resets actual AUX outer/session first.
@@ -126,6 +127,7 @@ public sealed partial class LegacyFst28CNumberInitialPage
                 {token.ThrowIfCancellationRequested();ring[i].NumberEndResetDomains=new(this,i);}
                 auxiliaryNextSlot=0;
                 token.ThrowIfCancellationRequested();Volatile.Write(ref actualNode0EndReset,2);
+                CommitReadsetMutation(token);RequireFrozenReadset().Revoke();
             }
             catch{FailAuxiliaryOperation();throw;}
         }
@@ -134,6 +136,7 @@ public sealed partial class LegacyFst28CNumberInitialPage
             // No token/gate/field-copy callback here: cancellation cannot prevent
             // cleanup poison. Exact private receiver only; never a CAS loser.
             if(!ReferenceEquals(receiver,Receiver))throw new ArgumentException("Foreign postclaim poison receiver.");
+            frozenReadset?.Poison();
             Volatile.Write(ref auxiliaryFailed,1);Volatile.Write(ref entered,2);
             Volatile.Write(ref actualNode0EndReset,3);
         }

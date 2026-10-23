@@ -118,11 +118,16 @@ internal interface ILegacyFst28CNumberRetainedSourceDraft
     void ValidateExactReceiver(LegacyFst28CNumberTrueLanguageSourceDraft receiver,
         LegacyFst28CNumberInitialPage page,LegacyFst28CNumberInitialConsumerContext.Pool pool,
         CancellationToken token);
+    void SealAfterActualPhase0(LegacyFst28CNumberTrueLanguageSourceDraft receiver,object proof,CancellationToken token);
     void EnterExclusive(LegacyFst28CNumberTrueLanguageSourceDraft receiver,CancellationToken token);
     int ReadActualParentAuxiliary(LegacyFst28CNumberTrueLanguageSourceDraft receiver,object actualParentProof,
         CancellationToken token);
     void ResetAfterActualNode0(LegacyFst28CNumberTrueLanguageSourceDraft receiver,object actualNumericProof,CancellationToken token);
     void PoisonAfterClaim(LegacyFst28CNumberTrueLanguageSourceDraft receiver);
+    // Read-only original-parent validation only; not source/cursor mutation authority.
+    void ValidateOriginalParentReadLease(LegacyFst28CNumberTrueLanguageSourceDraft receiver,
+        LegacyFst28CNumberInitialPage page,LegacyFst28CNumberInitialConsumerContext.Pool pool,
+        CancellationToken token);
     void ValidateLiveLease(LegacyFst28CNumberTrueLanguageSourceDraft receiver,
         LegacyFst28CNumberInitialPage page,LegacyFst28CNumberInitialConsumerContext.Pool pool,
         CancellationToken token);
@@ -228,6 +233,14 @@ public sealed partial class LegacyFst28CNumberInitialPage
         // evolve physical/accepted cursors and evict original ring owners.
         // No state-ID/snapshot can issue this private holder or reopen entered.
         public void ValidateLiveLease(LegacyFst28CNumberTrueLanguageSourceDraft receiver,
+            LegacyFst28CNumberInitialPage page,LegacyFst28CNumberInitialConsumerContext.Pool pool,CancellationToken token)
+        {
+            // Dirty/cross-thread capabilities refuse BEFORE reading live buffers.
+            // Before actual phase0 seal, original deep checks remain mandatory.
+            if(frozenReadset is not null)frozenReadset.RequireClean(this,Volatile.Read(ref actualNode0EndReset)==2);
+            ValidateFullLiveLease(receiver,page,pool,token);
+        }
+        private void ValidateFullLiveLease(LegacyFst28CNumberTrueLanguageSourceDraft receiver,
             LegacyFst28CNumberInitialPage page,LegacyFst28CNumberInitialConsumerContext.Pool pool,
             CancellationToken token)
         {

@@ -14,6 +14,7 @@ internal sealed partial class LegacyFst28CNumberTrueLanguageSourceDraft
         internal int count,unique,descriptorCount,descriptorCapacity;
         internal byte[] heap=[],heapMask=[],primaryPool=[],secondaryPool=[],primaryPoolMask=[],secondaryPoolMask=[];
         internal byte[] stored=[],primary=[],secondary=[],storedMask=[],primaryMask=[],secondaryMask=[];
+        internal bool contextPathsValidated;
         private Phase0State(LegacyFst28CNumberTrueLanguageSourceDraft receiver){this.receiver=receiver;}
         internal static NumericContinuation Issue(LegacyFst28CNumberTrueLanguageSourceDraft receiver,CancellationToken token)
         {
@@ -44,12 +45,13 @@ internal sealed partial class LegacyFst28CNumberTrueLanguageSourceDraft
                     throw new NotSupportedException("Actual Number root target state required.");
                 W32(result.heap,at+88,i);result.heapMask.AsSpan(at+88,4).Fill(255);
             }
-            result.FillActualRootPools(token);
+            result.FillActualRootPools(token);result.contextPathsValidated=true;
             result.Sort(token);result.Reduce(token);result.RebuildAndQuota(token);result.Materialize(token);
             // Native212D80 clears descriptor count BEFORE changing capacity124.
             // No new zeroed working heap/pool replaces live phase0 residue.
             result.descriptorCount=0;result.descriptorCapacity=124;
             receiver.ValidatePhase0OriginalOwner(token);
+            receiver.source!.SealAfterActualPhase0(receiver,result,token);
             return new NumericContinuation(receiver,result);
         }
         private void FillActualRootPools(CancellationToken token)

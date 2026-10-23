@@ -84,3 +84,32 @@ unfinished entry and provides no new Russian-cursive quality result or RC.
 | `root-gated-recognition-main-verification-frozen-manifest-20261023.json` | `1fe8126605bf5254d5b1b809025836db4638d881cdc747bd51a0477403d76064` |
 | `independent-number-context-static-adapter-final-frozen-manifest-20261023.json` | `3189da29912eb2cffedca29148eea49692b0ada489a45559e1cc437a82fc9956` |
 | `independent-number-initial-scorer-stale-pin-frozen-manifest-20261023.json` | `012385c57dca4e686822e771c9905ce62f8fb16922f64f1116363f138725fc97` |
+
+
+## Private parent-read validation reuse
+
+The reviewed capability/readset successor is now stored with the gated Number
+source. It uses copied read dependencies and a private issuer/thread/clean-epoch
+lease. One original-parent getter reuses a successful validation rather than
+repeating the full live-frame scan. Its sole private caller has an upper bound
+of375 such calls. Top-level checks and every actual mutation-boundary full scan
+remain. The scope closes before ordinal writes and phase1 finalization.
+
+Independent source review verified all87 packet pins, five changes from the
+previous prototype, unchanged original three files and unchanged probe. Prepared
+controls contain2000 original/new comparisons,12 dirty-state refusals,4 copy-alias
+controls and27 negatives. These are prepared/source controls, not C# execution.
+The combined current783-file library and owning probe compile with zero warnings
+or errors; all784 C# input files match the integrated main tree byte-for-byte.
+
+The inherited opaque work reservation is retained. The proposed new logical
+payload2368230 bytes, private peak1093684 bytes and work861860694 are unverified
+source proposals. Compact-check1024, scope64 and initialization80 envelopes still
+need proof. No elapsed-time, CPU, RSS or complete worst-case improvement is
+claimed. Whole admission remains closed and the recognizer default is unchanged.
+
+| Parent-read evidence | SHA256 |
+| --- | --- |
+| `fst28c-number-true-language-parent-read-reuse-source-review-manifest-20261023.json` | `7f2d2eef1f3e76a50588a3cf21cb84da7033f47ff35348beaf5736205ef87f21` |
+| `independent-number-parent-read-reuse-source-review-frozen-manifest-20261023.json` | `cda339ff5ceb1a24124ce3720533272fbc013f5852b856d06aadb067f63d200a` |
+| `root-number-parent-read-reuse-compile-and-main-frozen-manifest-20261023.json` | `85ebda580c6acfb00d2d066140a64df5e0fd0db59a83b4715ea2d8c5c608c0d9` |

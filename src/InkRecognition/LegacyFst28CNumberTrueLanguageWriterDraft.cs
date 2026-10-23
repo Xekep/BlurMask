@@ -24,6 +24,24 @@ internal sealed partial class LegacyFst28CNumberTrueLanguageSourceDraft
         private readonly byte[] heap,heapMask,secondary,secondaryMask;
         private readonly byte[] parents,parentMasks,parentSecondary,parentSecondaryMasks;
         private int count;
+        private readonly ParentReadScope parentReadScope;
+        // Scope ONLY original materialized parent reads before ordinal/phase1.
+        // Object and arrays never leave this private NumericContinuation.
+        private sealed class ParentReadScope
+        {
+            private readonly NumericContinuation issuer;
+            private readonly int thread;
+            private int closed;
+            internal ParentReadScope(NumericContinuation issuer)
+            {this.issuer=issuer;thread=Environment.CurrentManagedThreadId;}
+            internal void Require(NumericContinuation actual)
+            {
+                if(!ReferenceEquals(issuer,actual)||thread!=Environment.CurrentManagedThreadId||
+                    Volatile.Read(ref closed)!=0||Volatile.Read(ref actual.finalization)!=0)
+                    throw new InvalidOperationException("Original private parent-read scope is foreign, closed or cross-thread.");
+            }
+            internal void Close()=>Volatile.Write(ref closed,1);
+        }
         internal NumericContinuation(LegacyFst28CNumberTrueLanguageSourceDraft receiver,Phase0State phase0)
         {
             if(!ReferenceEquals(phase0.receiver,receiver))throw new ArgumentException("Foreign private phase0 issuer.");
@@ -32,7 +50,7 @@ internal sealed partial class LegacyFst28CNumberTrueLanguageSourceDraft
             secondary=phase0.secondaryPool;secondaryMask=phase0.secondaryPoolMask;
             parents=phase0.stored;parentMasks=phase0.storedMask;
             parentSecondary=phase0.secondary;parentSecondaryMasks=phase0.secondaryMask;
-            count=phase0.descriptorCount;
+            count=phase0.descriptorCount;parentReadScope=new(this);
         }
         private static int I32(byte[] a,int o)=>BinaryPrimitives.ReadInt32LittleEndian(a.AsSpan(o,4));
         private static ushort U16(byte[] a,int o)=>BinaryPrimitives.ReadUInt16LittleEndian(a.AsSpan(o,2));
@@ -52,6 +70,22 @@ internal sealed partial class LegacyFst28CNumberTrueLanguageSourceDraft
                 Volatile.Read(ref receiver.stage)!=4||!receiver.consumer.ReadSkippedLanguageCompletionClaim())
                 throw new InvalidOperationException("Exact already-entered private receiving state required.");
             receiver.source.ValidateLiveLease(receiver,receiver.page,receiver.pool,token);
+            if(!ReferenceEquals(phase0.receiver,receiver)||!ReferenceEquals(heap,phase0.heap)||
+                !ReferenceEquals(heapMask,phase0.heapMask)||!ReferenceEquals(secondary,phase0.secondaryPool)||
+                !ReferenceEquals(parents,phase0.stored)||phase0.descriptorCount!=0||phase0.descriptorCapacity!=124||
+                heap.Length!=H*128||heapMask.Length!=heap.Length||secondary.Length!=H*80||
+                secondaryMask.Length!=secondary.Length||parents.Length!=157*88||parentMasks.Length!=parents.Length||
+                parentSecondary.Length!=157*80||parentSecondaryMasks.Length!=parentSecondary.Length||count<0||count>DescriptorCapacity)
+                throw new InvalidDataException("Private fixed continuation storage differs.");
+        }
+        private void ValidateReadOnlyParent(CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();parentReadScope.Require(this);
+            receiver.RequireWholeAdmission(token);
+            if(receiver.pool is null||receiver.source is null||receiver.consumer is null||receiver.page is null||
+                Volatile.Read(ref receiver.stage)!=4||!receiver.consumer.ReadSkippedLanguageCompletionClaim())
+                throw new InvalidOperationException("Exact already-entered private receiving state required.");
+            receiver.source.ValidateOriginalParentReadLease(receiver,receiver.page,receiver.pool,token);
             if(!ReferenceEquals(phase0.receiver,receiver)||!ReferenceEquals(heap,phase0.heap)||
                 !ReferenceEquals(heapMask,phase0.heapMask)||!ReferenceEquals(secondary,phase0.secondaryPool)||
                 !ReferenceEquals(parents,phase0.stored)||phase0.descriptorCount!=0||phase0.descriptorCapacity!=124||
@@ -99,7 +133,7 @@ internal sealed partial class LegacyFst28CNumberTrueLanguageSourceDraft
         }
         internal bool TryReadActualParent(int ordinal,out ulong tag,out int cost,CancellationToken token)
         {
-            Validate(token);if((uint)ordinal>=L)throw new ArgumentOutOfRangeException(nameof(ordinal));
+            ValidateReadOnlyParent(token);if((uint)ordinal>=L)throw new ArgumentOutOfRangeException(nameof(ordinal));
             int at=ordinal*88;Known(parentMasks,at+16,4);cost=I32(parents,at+16);tag=0;
             if(cost>=IMP)return false;
             Known(parentMasks,at,88);
@@ -152,7 +186,7 @@ internal sealed partial class LegacyFst28CNumberTrueLanguageSourceDraft
         }
         internal void AssignActualContinuationOrdinals(CancellationToken token)
         {
-            Validate(token);
+            Validate(token);parentReadScope.Close();
             for(int i=0;i<count;i++){token.ThrowIfCancellationRequested();W(heap,heapMask,i*128+0x58,i);}
         }
         internal void ProduceActualContinuationAlternatives(CancellationToken token)

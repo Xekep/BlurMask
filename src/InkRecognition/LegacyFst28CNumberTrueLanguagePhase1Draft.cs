@@ -12,7 +12,7 @@ internal sealed partial class LegacyFst28CNumberTrueLanguageSourceDraft
         private int finalization,sourceEnd,retainedEnd,cleanup,cumulative2520,backward2528;
         internal void FinalizeActualContinuation(CancellationToken token)
         {
-            Validate(token);
+            Validate(token);parentReadScope.Close();
             if(Interlocked.CompareExchange(ref finalization,1,0)!=0)
                 throw new InvalidOperationException("Private numeric finalization is consumed or poisoned.");
             // Exact actual node0/header1 source only; no caller-prepared headers.

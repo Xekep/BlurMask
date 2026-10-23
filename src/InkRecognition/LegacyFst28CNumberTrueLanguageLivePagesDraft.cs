@@ -72,9 +72,15 @@ public sealed partial class LegacyFst28CNumberInitialPage
             if(Volatile.Read(ref auxiliaryFailed)!=0)throw new InvalidOperationException("Private AUX lease is poisoned.");
             if(Interlocked.CompareExchange(ref auxiliaryOperation,1,0)!=0)
                 throw new InvalidOperationException("Private AUX lease operation is already active.");
+            try{BeginReadsetMutation();}catch{Volatile.Write(ref auxiliaryOperation,0);throw;}
         }
-        private void FailAuxiliaryOperation(){Volatile.Write(ref auxiliaryFailed,1);}
-        private void LeaveAuxiliaryOperation(){Volatile.Write(ref auxiliaryOperation,0);}
+        private void FailAuxiliaryOperation(){Volatile.Write(ref auxiliaryFailed,1);frozenReadset?.Poison();}
+        private void LeaveAuxiliaryOperation(CancellationToken token)
+        {
+            try{if(Volatile.Read(ref auxiliaryFailed)==0)CommitReadsetMutation(token);}
+            catch{FailAuxiliaryOperation();throw;}
+            finally{Volatile.Write(ref auxiliaryOperation,0);}
+        }
         private void InitializeAuxiliaryFrames(CancellationToken token)
         {
             EnterAuxiliaryOperation(token);
@@ -84,7 +90,7 @@ public sealed partial class LegacyFst28CNumberInitialPage
                 var frames=new AuxiliaryFrame[8];for(int i=0;i<8;i++){token.ThrowIfCancellationRequested();frames[i]=new(this,input,i);}
                 auxiliaryNextSlot=nextCursor;auxiliaryFrames=frames;
             }
-            catch{FailAuxiliaryOperation();throw;}finally{LeaveAuxiliaryOperation();}
+            catch{FailAuxiliaryOperation();throw;}finally{LeaveAuxiliaryOperation(token);}
         }
         private AuxiliaryFrame Frame(int depth)
         {
@@ -122,7 +128,7 @@ public sealed partial class LegacyFst28CNumberInitialPage
                     child.Tag=ulong.MaxValue;child.ParentContext=0;child.RequestedSkip=0;child.CurrentPage=null;
                 }
             }
-            catch{FailAuxiliaryOperation();throw;}finally{LeaveAuxiliaryOperation();}
+            catch{FailAuxiliaryOperation();throw;}finally{LeaveAuxiliaryOperation(token);}
         }
         private void RefillAuxiliaryFrame(int depth,CancellationToken token)
         {
@@ -134,7 +140,7 @@ public sealed partial class LegacyFst28CNumberInitialPage
                 f.RequestedSkip=checked(page.RequestedSkip+page.Returned);
                 FetchAuxiliaryCore(f,token); // Required even when initial Returned==0.
             }
-            catch{FailAuxiliaryOperation();throw;}finally{LeaveAuxiliaryOperation();}
+            catch{FailAuxiliaryOperation();throw;}finally{LeaveAuxiliaryOperation(token);}
         }
         private LegacyFst28CNumberPageRecord ConsumeAuxiliaryRecord(int depth,CancellationToken token)
         {
@@ -146,7 +152,7 @@ public sealed partial class LegacyFst28CNumberInitialPage
                 if(auxiliaryConsumes>=4000)throw new InvalidDataException("AUX consumed-record work ceiling exceeded.");
                 token.ThrowIfCancellationRequested();var row=f.Rows[page.Consumed++];auxiliaryConsumes++;return row;
             }
-            catch{FailAuxiliaryOperation();throw;}finally{LeaveAuxiliaryOperation();}
+            catch{FailAuxiliaryOperation();throw;}finally{LeaveAuxiliaryOperation(token);}
         }
         private AuxiliaryPageReceipt ValidateCurrentAuxiliaryPage(AuxiliaryFrame frame)
         {
@@ -182,6 +188,7 @@ public sealed partial class LegacyFst28CNumberInitialPage
             if(firstSourceBinding||cursor.NumberEndResetDomains is not null||loaded is null||!ReferenceEquals(loaded.Issuer,this)||loaded.State!=state)
             {
                 var outgoing=input.Outgoing.Query(state,12,12*16,token);
+                RequireFrozenReadset().CompareOutgoing(outgoing);
                 if(outgoing.State!=state||outgoing.OutputFlag!=0||outgoing.Count>12)
                     throw new InvalidDataException("Genuine immutable outgoing source result differs.");
                 for(int i=0;i<outgoing.Count;i++)
