@@ -3,7 +3,8 @@ namespace InkRecognition;
 // Pure managed scalar execution of the recovered quantized BLSTM layout.
 // Every call owns its scratch arrays; loaded weights are never modified.
 internal sealed class NativeNetwork(int inputWidth, LstmLayer[] layers, AffineWeights output,
-    AffineWeights? inputAffine = null)
+    AffineWeights? inputAffine = null,
+    NativeNetworkNumericalPolicy numericalPolicy = NativeNetworkNumericalPolicy.ExistingPortable)
 {
     internal int InputWidth { get; } = inputWidth;
     internal int OutputWidth => output.Rows;
@@ -37,9 +38,9 @@ internal sealed class NativeNetwork(int inputWidth, LstmLayer[] layers, AffineWe
         {
             int nextWidth = layer.OutputWidth;
             var next = AllocateFrames(frames, nextWidth);
-            Direction(current, frames, width, layer.Forward, false, next, nextWidth, 0, cancellationToken);
+            Direction(current, frames, width, layer.Forward, false, next, nextWidth, 0, numericalPolicy, cancellationToken);
             if (layer.Backward is not null)
-                Direction(current, frames, width, layer.Backward, true, next, nextWidth, layer.Width, cancellationToken);
+                Direction(current, frames, width, layer.Backward, true, next, nextWidth, layer.Width, numericalPolicy, cancellationToken);
             current = next; width = nextWidth;
         }
         var probabilities = AllocateFrames(frames, output.Rows);
@@ -54,7 +55,8 @@ internal sealed class NativeNetwork(int inputWidth, LstmLayer[] layers, AffineWe
             for (int i = 0; i < values.Length; i++) values[i] = MathF.Exp(values[i] - maximum);
             // NumPy's contiguous float32 reduction uses eight accumulators and
             // recursively splits blocks above 128 elements.
-            float sum = PairwiseSum(values);
+            float sum = numericalPolicy == NativeNetworkNumericalPolicy.SymbolSequenceScalar
+                ? NativeSymbolSequenceScalarMath.SequentialSum(values) : PairwiseSum(values);
             if (!(sum > 0) || !float.IsFinite(sum)) throw new InvalidDataException("Invalid network softmax.");
             for (int i = 0; i < values.Length; i++) values[i] /= sum;
         }
@@ -69,8 +71,11 @@ internal sealed class NativeNetwork(int inputWidth, LstmLayer[] layers, AffineWe
     }
 
     private static void Direction(float[] features, int frames, int featureWidth, LstmDirection direction,
-        bool reverse, float[] output, int outputWidth, int outputOffset, CancellationToken cancellationToken)
+        bool reverse, float[] output, int outputWidth, int outputOffset,
+        NativeNetworkNumericalPolicy numericalPolicy, CancellationToken cancellationToken)
     {
+        float ActivateSigmoid(float value) => numericalPolicy == NativeNetworkNumericalPolicy.SymbolSequenceScalar
+            ? NativeSymbolSequenceScalarMath.Sigmoid(value) : Sigmoid(value);
         int hidden = direction.Input[0].Rows;
         var state = new float[hidden]; var cell = new float[hidden];
         var gates = new float[checked(hidden * 4)]; var recurrence = new float[hidden];
@@ -98,8 +103,8 @@ internal sealed class NativeNetwork(int inputWidth, LstmLayer[] layers, AffineWe
                     incoming += inputPeephole; forget += forgetPeephole;
                 }
                 float candidate = MathF.Tanh(gates[i]);
-                float inputGate = Sigmoid(incoming);
-                float forgetGate = Sigmoid(forget);
+                float inputGate = ActivateSigmoid(incoming);
+                float forgetGate = ActivateSigmoid(forget);
                 float nextCell = candidate * inputGate;
                 if (step != 0)
                 {
@@ -108,7 +113,7 @@ internal sealed class NativeNetwork(int inputWidth, LstmLayer[] layers, AffineWe
                 }
                 cell[i] = nextCell;
                 float outputPeephole = nextCell * direction.OutputPeephole[i];
-                float outGate = Sigmoid(gates[hidden * 3 + i] + outputPeephole);
+                float outGate = ActivateSigmoid(gates[hidden * 3 + i] + outputPeephole);
                 state[i] = MathF.Tanh(nextCell) * outGate;
                 if (!float.IsFinite(state[i])) throw new InvalidDataException("Nonfinite recurrent network state.");
                 output[t * outputWidth + outputOffset + i] = state[i];

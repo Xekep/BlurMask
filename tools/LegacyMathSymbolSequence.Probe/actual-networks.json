@@ -1,0 +1,106 @@
+[
+  {
+    "offset": 180366,
+    "end": 593164,
+    "object_version": "0x106",
+    "networks": [
+      {
+        "stored_layers": [
+          {
+            "kind": 1,
+            "width": 50,
+            "opaque_u32": 0,
+            "storage_code": 1
+          },
+          {
+            "kind": 3,
+            "width": 100,
+            "opaque_u32": 0,
+            "storage_code": 1
+          }
+        ],
+        "edge_records": []
+      }
+    ],
+    "output_layer": {
+      "width": 241,
+      "kind": 1,
+      "opaque_u32": 0
+    },
+    "extra_rows": 241,
+    "extra_columns": 50,
+    "per_layer_codes": [
+      0,
+      1,
+      3
+    ],
+    "global_code": 2,
+    "alignment": {
+      "bytes": 32,
+      "padding_offset": 180482,
+      "padding_bytes": 30
+    },
+    "parameter_payload": {
+      "offset": 180512,
+      "bytes": 411488,
+      "sha256": "d6c05d18e7eefbd1fc2c08b538d25bde9dcdd5c59443a23c357da8654f356e7d"
+    },
+    "trailing_payload": {
+      "offset": 592004,
+      "bytes": 1160,
+      "sha256": "2c8af703230cede3fb10375a178246f1c04c838af09012f1734a7d93133ab3e1"
+    }
+  },
+  {
+    "offset": 593168,
+    "end": 1005964,
+    "object_version": "0x106",
+    "networks": [
+      {
+        "stored_layers": [
+          {
+            "kind": 1,
+            "width": 50,
+            "opaque_u32": 0,
+            "storage_code": 1
+          },
+          {
+            "kind": 3,
+            "width": 100,
+            "opaque_u32": 0,
+            "storage_code": 1
+          }
+        ],
+        "edge_records": []
+      }
+    ],
+    "output_layer": {
+      "width": 241,
+      "kind": 1,
+      "opaque_u32": 0
+    },
+    "extra_rows": 241,
+    "extra_columns": 50,
+    "per_layer_codes": [
+      0,
+      1,
+      3
+    ],
+    "global_code": 2,
+    "alignment": {
+      "bytes": 32,
+      "padding_offset": 593284,
+      "padding_bytes": 28
+    },
+    "parameter_payload": {
+      "offset": 593312,
+      "bytes": 411488,
+      "sha256": "1c3ab8af796ae7cd3ebf908c24c478021480fe91773adfa5bbbc8a90de9dbcad"
+    },
+    "trailing_payload": {
+      "offset": 1004804,
+      "bytes": 1160,
+      "sha256": "2c8af703230cede3fb10375a178246f1c04c838af09012f1734a7d93133ab3e1"
+    }
+  }
+]
