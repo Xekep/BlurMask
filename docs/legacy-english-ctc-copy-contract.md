@@ -63,3 +63,29 @@ executes. This is a conditional packet-path result, not proof that the chosen
 raw model produces that packet, or that builder destinations cannot alias
 retained graph headers. Those proofs remain open. No vendor code is executed
 and no runtime predicate or application behavior changes.
+
+## Direct state-metadata extent supplement
+
+`tools/handwriting/audit_english_ctc_state_metadata.py` checks the complete
+356-byte/98-instruction `191470` body and 1070-byte/292-instruction `192AE0`
+body directly against the pinned Engine PE. Capstone decodes every byte;
+partial-register alias writes, the real MOV-based RBX restoration and the
+callee's nonvolatile save/restore are checked explicitly. No SDK code executes.
+
+The 64 direct metadata stores fit a 32-byte prefix and two 192-byte substates
+at offsets32 and224. Their composed extent is416 bytes (`0x1A0`), matching
+the actual constructor's kind8 allocation unit. This result does not establish
+the allocation count, allocator separation or provenance of the caller's
+pointers. The report lists another24 non-stack store instructions whose
+payload bounds and aliases remain unproved. Runtime/workspace alignment is
+also not inferred from serialized-model alignment.
+
+One positive audit agrees with the independently decoded instruction-table
+store inventory; seven corrupted extent, offset, dispatch, allocation,
+save/restore and body-length controls are rejected. The earlier failed
+POP-restoration assumption is preserved separately, not rewritten as a pass.
+Evidence manifest `root-ctc-state-metadata-frozen-manifest-20261023.json`, SHA256
+`3d0c58c7b206aa5ca0a5db44667516e8bf70d8d87ea13543d9cd4e4cd520017d`,
+pins13 analysis files and dependencies. This is a partial static result;
+`V120=false`, complete graph-header alias preservation and CTC guide authority
+remain unapproved.
