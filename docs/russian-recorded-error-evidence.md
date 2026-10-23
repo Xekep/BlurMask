@@ -57,3 +57,31 @@ The local frozen probe, audits, captures, dependency hashes and reproduction
 are retained in `E:/BlurMask-build-artifacts-20261014/ru-quality-evidence/`.
 Input manifest SHA-256:
 `56082f15e2d53c7958f8beb353fbf63718f39e256a7f0afd78f0d48ea7372832`.
+
+
+## Current-source repeat, 23 October 2026
+
+A fresh Managed build at4baf802 repeated all nine unchanged coordinate tracks
+once with the current783-file library. All nine independent raw-AK audits pass,
+and the32 publication-residue variants for each recording remain identical.
+The result is still4/9 exact words and16/33 raw-character edits (48.48% CER).
+The only changed raw word relative to the earlier bound capture is writer3's
+`ещё`: previous `Дзб`, current `Дуб`. This still has three character edits.
+No improved Russian-cursive accuracy is established.
+
+The current build has zero warnings/errors. The complete evaluation took23.64s
+with CPU affinity restricted to two processors. This is a nine-input diagnostic
+including model loading, capture export and audits, not interactive latency.
+The target is the project's own C# recognizer. No SDK/vendor engine, GUI, input
+normalization, inferred pen-ups, model edits or target-based corrections were
+used. Targets were read after inference and raw-resource audits. The corpus
+still has only three distinct words from three writers and missing pen-up data.
+
+The default recognizer is not switched by this result. A causal implementation
+bug, calibrated Russian acceptance policy and a representative cursive benchmark
+remain unresolved; selecting reference words from retained alternatives would
+not resolve them.
+
+Evidence: `ru-current-nine-4baf802-diagnostic-frozen-manifest-20261023.json`,
+SHA256`82d325370a480397271ba2f6b814302134ffe1e75cbd01307f4ab074b111a546`,
+under `E:/BlurMask-build-artifacts-20261014/`.
