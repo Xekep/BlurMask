@@ -119,3 +119,53 @@ better handwriting accuracy.
 | `root-en-inc12-delegate-il-frozen-manifest-20261023.json` | `d1f8cc34ce7dff019efd0199699c7b290362817a2f996287671a8a7596be4c7f` |
 | `root-en-prepare-seven-lookups-v2-frozen-manifest-20261023.json` | `5748331c4072aa91565e48e319aae5f8865fadf240b164c89b3c12f11142a608` |
 | `root-independent-ascii64-source-review-frozen-manifest-20261023.json` | `8d273f1b8eb7a4a7bdaf10f7e1d969397b10145bc5a14d30fe8f796fc9f2c24d` |
+
+## Increment16 isolated execution checkpoint
+
+The exact increment16 library and its diagnostic probe compiled separately
+from the application:769 library files and4 probe files, with zero warnings
+and errors. A separately reviewed diagnostic clone then ran on the pinned
+.NET10.0.12 runtime against134 and100 existing inputs. It preserves owner,
+lease, cancellation and one-shot publication checks. Only this clone bypasses
+the unfinished readiness check and raises the logical visit ceiling from16 Mi
+to64 Mi. Production limits, the production refusal and the application remain
+unchanged.
+
+All234 final images matched the independently composed expected images,
+including graph order, masks, inactive backing bytes, ordinals and the
+immutable original primary result after validated context-ID normalization.
+An independent replay checked the same234 matches, exact dataset order and
+denominators, lifecycle events, and sums of all64 accounting sites. This is
+evidence for this internal block on these inputs, not a full-engine or
+handwriting-quality evaluation.
+
+Both captures passed the concrete guard-payload contract:44 ordered checks,
+17 cancellation stages and2 injected observer failures. This version checks
+cancellation exception type and the reached stage; it does not establish
+cancellation-token identity, race coverage or arbitrary mid-sort cancellation.
+
+The highest recorded logical continuation payload was5,740,152 bytes, copy
+work12,554,674 bytes and work40,619,258 visits. These are checked counter
+totals, not a complete allocation attribution, a worst-case certificate or an
+OS memory measurement. The observed visit counts also demonstrate why the
+unchanged production16 Mi limit cannot admit this implementation.
+
+Full resource accounting, production admission and application integration
+remain unfinished. No default recognizer was switched and no RC was released
+from this diagnostic. Russian cursive quality has not been established by it.
+
+A separate repeat measured Windows process memory with
+`K32GetProcessMemoryInfo` at50 ms intervals. The maximum observed working-set
+peak counters were333.05 MiB and263.44 MiB for the134-input and100-input
+processes. Both output files were byte-identical to the independently checked
+captures. These figures include model preparation, retained probe data and
+JSON export; they are not the interactive app's footprint or Linux/AOT
+measurements. A final unsampled interval may be missed. The earlier logical
+payload counters must not be presented as actual process memory.
+
+| Execution evidence | SHA256 |
+| --- | --- |
+| `global-en-fullnode-source-increment16-frozen-manifest-20261023.json` | `b74f2c6599c0e9e5fc40b39b6364ac71eb39b508c061c2be709cdaeee83c8311` |
+| `root-en-node0-actual-diagnostic-frozen-manifest-20261023.json` | `3d3600aa5f7c7b4f11ddee57594e39f1a2b93c5354668776f38c451e66648353` |
+| `independent-en-node0-actual-diagnostic-review-frozen-manifest-20261023.json` | `064fe00186f44cae8a111313c18a8b49101f19566386deccef9811bc1ab2e4b3` |
+| `root-en-node0-memory-diagnostic-frozen-manifest-20261023.json` | `8e4652981a8c8a4bc31dc26ff9bbca06988af278d2db3ec2921011a4718baecc` |
