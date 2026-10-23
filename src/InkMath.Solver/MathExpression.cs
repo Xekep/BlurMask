@@ -205,6 +205,20 @@ internal sealed class MathExpressionParser
                 if (!Functions.TryGetValue(command, out var function)) throw new FormatException("Unsupported mathematical function: " + command);
                 return FunctionArgument(command, function);
             }
+            // The recognition formatter emits plain lim with a braced lower
+            // bound. Require that complete prefix rather than consuming limx,
+            // limit, or the ordinary indexed product lim_2 as a limit operator.
+            if (At("lim"))
+            {
+                int bound = _position + 3;
+                while (bound < _source.Length && char.IsWhiteSpace(_source[bound])) bound++;
+                if (bound < _source.Length && _source[bound++] == '_')
+                {
+                    while (bound < _source.Length && char.IsWhiteSpace(_source[bound])) bound++;
+                    if (bound < _source.Length && _source[bound] == '{')
+                    { _position += 3; return Limit(); }
+                }
+            }
             foreach (var function in OrderedFunctions)
                 if (At(function.Key)) { _position += function.Key.Length; return FunctionArgument(function.Key, function.Value); }
             if (char.IsAsciiLetter(_source[_position])) return Count(new Variable(_source[_position++].ToString()));

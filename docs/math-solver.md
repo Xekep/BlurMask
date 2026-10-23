@@ -142,3 +142,18 @@ This verifies calculation/parsing, not handwriting recognition or math-model
 admission. An independent source review also checked the braced-power cases.
 
 Evidence: `root-math-factorial-final-verification-frozen-manifest-20261023.json`, SHA256 `80156ab773285a64d177ffa5801c54268aee044ee8f9682bb0fa7ee88eacdd8f`, under `E:/BlurMask-build-artifacts-20261014/`.
+
+### Recognized limit notation, 23 October 2026
+
+The parser accepts the formatter's plain `lim_{x\to 0}...` in addition to
+`\lim_{x\to 0}...`. The plain operator requires a braced lower bound, with
+optional whitespace around the underscore. Longer letter products such as
+`limx` and `limit`, and the indexed product `lim_2`, retain their prior meaning.
+Formatter output and recognition goldens are unchanged. One-sided limits are
+outside this change.
+
+The exact existing formatter fixture `lim_{n\to \infty }x` failed parsing
+before the fix. The regression probe now checks it, finite and infinite bare
+limits, token boundaries and malformed/injected inputs alongside the existing
+factorial checks. These tests verify parsing/calculation, not handwriting
+recognition accuracy.

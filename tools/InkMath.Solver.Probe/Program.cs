@@ -15,6 +15,15 @@ var fixtures = new (string Input, string Cas)[]
     (@"\frac{d}{dx}\sin(x)", "diff(sin(x),x,1)"),
     (@"\frac{d^2}{dx^2}x^3", "diff((x^3),x,2)"),
     (@"\lim_{x\to 0}\frac{\sin x}{x}", "limit((sin(x)/x),x,0)"),
+    // Exact existing MathLatexFormatter under-token fixture; keep its golden.
+    (@"lim_{n\to \infty }x", "limit(x,n,infinity)"),
+    (@"lim_{x\to 0}\frac{\sin x}{x}", "limit((sin(x)/x),x,0)"),
+    (@"lim _ {x\to 0}\frac{\sin x}{x}", "limit((sin(x)/x),x,0)"),
+    (@"lim_{n\to \infty }\frac{1}{n}", "limit((1/n),n,infinity)"),
+    ("limx", "(((l*i)*m)*x)"),
+    ("limit", "((((l*i)*m)*i)*t)"),
+    ("lim_2", "((l*i)*m_2)"),
+    ("lim2", "(((l*i)*m)*2)"),
     (@"\sum_{k=1}^{10}k", "sum(k,k,1,10)"),
     (@"\prod_{k=1}^{4}k", "product(k,k,1,4)"),
     (@"x^2-1=0", "(((x^2)-1)=0)"),
@@ -47,7 +56,7 @@ foreach (var (input, expected) in fixtures)
     var actual = new MathExpressionParser(input).Parse().Cas;
     if (actual != expected) throw new Exception($"Math grammar differs for {input}: {actual}");
 }
-foreach (var forbidden in new[] { "3!!", "3!!!", @"\int_1^{10} dx^2", @"\int_1^{10} x dx_2", @"\int_1 x^2 dx", @"\system{whoami}", "read(\"secret\")", "x;system(1)", "x:=1", "__import__('os')", "x\0", new string('-', 4096) + "x", new string('-', 200) + "x", string.Join('^', Enumerable.Repeat("x", 200)), new string('(', 100) + "x" + new string(')', 100), "2+", @"\begin{matrix}1&2\\3\end{matrix}" })
+foreach (var forbidden in new[] { @"lim_{2\to 0}x", @"lim_{x 0}x", @"lim_{x\to 0}", @"lim_{x\to 0}\system{whoami}", @"lim_{x\to 0}x;system(1)", "3!!", "3!!!", @"\int_1^{10} dx^2", @"\int_1^{10} x dx_2", @"\int_1 x^2 dx", @"\system{whoami}", "read(\"secret\")", "x;system(1)", "x:=1", "__import__('os')", "x\0", new string('-', 4096) + "x", new string('-', 200) + "x", string.Join('^', Enumerable.Repeat("x", 200)), new string('(', 100) + "x" + new string(')', 100), "2+", @"\begin{matrix}1&2\\3\end{matrix}" })
 {
     try { new MathExpressionParser(forbidden).Parse(); throw new Exception("Unsafe/invalid input accepted: " + forbidden); }
     catch (FormatException) { }
@@ -103,6 +112,9 @@ var actualFixtures = new (string Input, string Expected)[]
     (@"\frac{d}{dx}\sin(x)", @"\cos x"),
     (@"\frac{d^2}{dx^2}x^3", "6 x"),
     (@"\lim_{x\to 0}\frac{\sin x}{x}", "1"),
+    (@"lim_{x\to 0}\frac{\sin x}{x}", "1"),
+    (@"lim _ {x\to 0}\frac{\sin x}{x}", "1"),
+    (@"lim_{n\to \infty }\frac{1}{n}", "0"),
     (@"\sum_{k=1}^{10}k", "55"),
     (@"\prod_{k=1}^{4}k", "24"),
     (@"\det\begin{matrix}1&2\\3&4\end{matrix}", "-2"),

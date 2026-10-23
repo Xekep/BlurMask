@@ -125,7 +125,7 @@ reported two existing Avalonia DirectComposition interop diagnostics, which are
 retained in the build log rather than treated as tested GUI paths.
 
 CI checks the published native model delivery and injected routing on Windows,
-Linux and both macOS architectures. Those CI runs are separate from the local
+Linux and the macOS runner's architecture. Those CI runs are separate from the local
 checks and must pass before claiming cross-platform release verification.
 Local evidence: `E:/BlurMask-build-artifacts-20261014/root-app-manual-math-checks-20261023/`
 and `root-recognized-math-calculation-20261023/`; native evidence is under
