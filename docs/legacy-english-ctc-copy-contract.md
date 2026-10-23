@@ -282,3 +282,23 @@ remain unapproved. Nine-item frozen manifest
 `root-ctc-header-quantization-frozen-manifest-20261023.json`, SHA256
 `2a4c826f5c09d11a1367e2da8613301913b0a8b3e95f9e5c70214c5d8d1c3276`,
 retains the auditors, native body exports and report without SDK execution.
+
+## Conditional whole-graph blob binding
+
+`audit_english_ctc_graph_blob_dataflow.py` composes the complete1833-byte/
+485-instruction `197DE0` graph walk with the complete `193630` binder. Eight
+declared cases cover alignment8/16 and present/absent blob and scratch storage.
+The twelve incoming/recurrent calls, their order, row counts, quantization codes,
+and blob addresses match an independent field-image calculation. The output
+matrix follows the separately traced inline branch. The resulting sizes are
+2,007,776 and2,041,920 bytes. All5100 defined metadata bytes match; header and
+graph fields remain unchanged. Unknown header padding and blob/scratch payload
+reads are refused. Nine corrupted count/kind/alias/jump/write/read controls fail.
+
+This establishes role order only for the declared initialized, live, disjoint
+objects. Their actual allocator and caller origins remain unproven; the complete
+loader alias proof and runtime predicate remain unapproved. No SDK code executes
+and no application behavior changes. The53-item frozen manifest
+`root-ctc-graph-blob-frozen-manifest-20261023.json`, SHA256
+`75bc2c60a2678817454defb44c929dafd7bb81596d2a5f35d87f7d017897099e`,
+retains the composed auditors, positive/negative reports and failed prototypes.
