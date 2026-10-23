@@ -179,6 +179,11 @@ jobs:
         run: |
           dotnet run --project tools/LegacyMathAkGeometry.Probe -c Release -- . .artifacts/math-ak-geometry.json
           python -I -B tools/LegacyMathAkGeometry.Probe/audit_output.py .artifacts/math-ak-geometry.json .artifacts/math-ak-geometry-audit.json
+      - name: Original Math grammar, parsed reconstruction and AK terminal binding
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyMathGrammar.Probe -c Release -- . .artifacts/math-grammar.json
+          python -I -B tools/LegacyMathGrammar.Probe/audit_output.py . .artifacts/math-grammar.json .artifacts/math-grammar-audit.json
       - name: Raw-content geometry, mixed segmentation and model guards
         run: dotnet run --project tools/InkRecognition.RawContent.Probe -c Release
       - name: Legacy integer network and Russian feature numerical controls

@@ -20,6 +20,9 @@ Static inspection resolves the original same-owner chain more precisely:
    pointer becomes worker+A0; only then does13F8 rescore that tree.
 
 The stored grammar's53 children,26 rules and297 terminal names were decoded.
+An [immutable library loader](legacy-math-grammar-resource.md) now binds this
+configuration to the actual AK alphabet and reconstructs the complete stored
+grammar from parsed fields with independent checks.
 Every terminal name resolves through the same actual AK alphabet:259 labels,
 258 strings and one virtual entry without a string. This verifies resource
 membership, not acoustic recognition or grammar search.
