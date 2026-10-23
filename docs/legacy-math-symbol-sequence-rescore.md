@@ -16,7 +16,7 @@ Native08D200 is a CRT logf dispatcher with AVX/SSE alternatives. The portable he
 
 `model.ScoreRecord(prediction)` requires that exact model's private prepared owner and returns an unaveraged record cost. `LegacyMathAkSymbolSequence.ScorePair(forward,reverse)` requires the actual forward/reverse models, and exact original source ordinals. Prepared symbols now retain their already copied ordinal snapshot so equal mapped IDs cannot substitute for distinct source ordinals (e.g. ordinals40 and118 both map to239). No arrays/Memory escape; typed predictions still come only from their actual model's `Evaluate`. Tests use the separate pure internal arithmetic primitive for synthetic scalars, never manufacture a Prediction or candidate authority.
 
-The two fixed models are authenticated by the complete same resource SHA. Pair scoring is a numerical composition for explicit matching input ordinals, not an issuer for the native13F8/13A5 candidate cohort. It omits00F6C0 exclusions, candidate cost multiplier0.14, length policy1.5, and alternative reordering. `ScoreRecord` and `ScorePair` do not evaluate a network, change old numerical policies, or grant confidence.
+The two fixed models are authenticated by the complete same resource SHA. Pair scoring is a numerical composition for explicit matching input ordinals, not an issuer for the tree consumed by native13F8. Actual13A5 is an acoustic stage; the matched-tree issuer is02A600 after grammar matching. It omits00F6C0 exclusions, candidate cost multiplier0.14, length policy1.5, and alternative reordering. `ScoreRecord` and `ScorePair` do not evaluate a network, change old numerical policies, or grant confidence. See [the recognition frontier](legacy-math-recognition-frontier.md).
 
 ## Bounds and evidence
 

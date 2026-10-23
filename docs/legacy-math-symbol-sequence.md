@@ -60,7 +60,10 @@ outputs must use fresh paths. CI runs the prepared/raw controls.
 
 The owned numerical cost API is described in
 [`legacy-math-symbol-sequence-rescore.md`](legacy-math-symbol-sequence-rescore.md).
-Actual candidate ownership from00D9F0, the full13A5 grammar and integration with
+Actual candidate ownership from00D9F0, the grammar/search pipeline and integration with
 modern Math2/AUTO remain incomplete. The primitive returns distributions and
 numerical costs for explicit prepared symbol sequences, not OCR confidence or
 an application-ready recognition result.
+
+See [the original Math recognition frontier](legacy-math-recognition-frontier.md)
+for the distinct acoustic, grammar and matched-tree producers still required.
