@@ -37,11 +37,20 @@ capture supplies the explicit baseline path; the oracle requires the immutable
 SHA-256 `d1ffe91e88cf7e48f7d68cda029790c2d73f9e8c9f9d8c5640890c3ff1c712d0`.
 The separately verified 100-owner corpus is not currently part of CI.
 
+CI's raw141 fixture uses a different JSON serialization from the historical
+fixture. Their typed coordinates are identical; only the baseline's
+`InputSha256` metadata differs. `immutable_baseline_adapter.py` handles that
+one exact known pair of input/baseline hashes. It recovers the historical raw
+bytes, replaces that single digest literal and still requires the entire
+historical baseline hash above. Other bytes, rows, guards and the100-owner
+baseline are unchanged. Forty-two negative controls and both independent
+134/100 owner replays pass. Unknown hashes or missing raw-input proof refuse.
+
 Reproduce after generating the existing raw-only CI fixture and initial consumer:
 
 ```sh
 dotnet run --project tools/LegacyEnglishCasePrimaryCompletion.Probe -c Release -- --owner models .artifacts/legacy-en119-final-single-blind.json .artifacts/legacy-en-case-primary-completion-managed.json
-python -I -B tools/LegacyEnglishCasePrimaryCompletion.Probe/audit_output.py .artifacts/legacy-en-case-primary-completion-managed.json 134 .artifacts/legacy-en-case-initial-consumer-managed.json
+python -I -B tools/LegacyEnglishCasePrimaryCompletion.Probe/audit_output.py .artifacts/legacy-en-case-primary-completion-managed.json 134 .artifacts/legacy-en-case-initial-consumer-managed.json .artifacts/legacy-en119-final-single-blind.json
 ```
 
 The full-node continuation still requires auxiliary-language heaps, controller

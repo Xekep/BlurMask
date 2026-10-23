@@ -325,7 +325,7 @@ jobs:
               if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             }
             if ($project -eq 'LegacyEnglishCasePrimaryCompletion.Probe') {
-              python -I -B tools/LegacyEnglishCasePrimaryCompletion.Probe/audit_output.py ".artifacts/$capture-native.json" 134 .artifacts/legacy-en-case-initial-consumer-native.json
+              python -I -B tools/LegacyEnglishCasePrimaryCompletion.Probe/audit_output.py ".artifacts/$capture-native.json" 134 .artifacts/legacy-en-case-initial-consumer-native.json .artifacts/legacy-en119-final-single-blind.json
               if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             }
             if ($project -eq 'LegacyFullEnglishFirstGlyphEmission.Probe') {
