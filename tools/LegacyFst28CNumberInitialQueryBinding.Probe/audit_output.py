@@ -21,7 +21,19 @@ for row in pins['runtimeReviewedLF']+pins['independentDefinitionsLF']:
   assert len(addition.splitlines())==13 and sha(addition)=='9de04f4679c9343b7da2b03fee091af2ee36431d8fadd5b350535098b3ac105d'
   b=b[:start]+b[end:]
  assert sha(b)==row['sha256LF'],row['path']
-assert sha((repo/'src/InkRecognition/LegacyFst28CNumberInitialQueryBinding.cs').read_bytes().replace(b'\r\n',b'\n'))=='859a58db8706c1c292362c28c80d08646f51dc86574d799359c76d5efd96fb8f'
+# Accept only the frozen old source or the exact approved readonly13-line
+# successor. Recover old pin in memory; historical captures remain unchanged.
+def binding_preimage(data):
+ b=data.replace(b'\r\n',b'\n')
+ marker=b'    // Genuine private prefix handoff; detached diagnostics are not accepted.'
+ if marker in b:
+  assert sha(b)=='dcfb63ac94035f1c409c56ffa89d9284f557c2b5646deaa78277936df29006e8'
+  start=b.index(marker);end=b.index(b'    // Detached inspection cannot be accepted as a query/current-context receipt.',start);addition=b[start:end]
+  assert len(addition.splitlines())==13 and sha(addition)=='a84f4d57852e015e525603e65f753495f12c7121f7a3ad63faa7ac1083159fc5'
+  b=b[:start]+b[end:]
+ assert sha(b)=='859a58db8706c1c292362c28c80d08646f51dc86574d799359c76d5efd96fb8f'
+ return b
+binding_preimage((repo/'src/InkRecognition/LegacyFst28CNumberInitialQueryBinding.cs').read_bytes())
 def defs(path,names):
  ns={'struct':struct};nodes=[n for n in ast.parse(path.read_text(encoding='utf-8-sig')).body if isinstance(n,(ast.FunctionDef,ast.ClassDef))and n.name in names];assert len(nodes)==len(names);exec(compile(ast.Module(body=nodes,type_ignores=[]),str(path),'exec'),ns);return ns
 alphabet=defs(repo/'tools/LegacyFst28CPrimaryMap.Probe/audit_output.py',{'alphabet'})['alphabet']

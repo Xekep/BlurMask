@@ -6,6 +6,15 @@ default recognizer.
 
 ## Development integration (2026-10-21)
 
+The [owned initial number page](linguistic-fst28c-number-initial-page-runtime.md)
+now walks the retained Russian number source using genuine source/D0/context
+owners. All four fixtures pass independent raw-model/AVL/packed-record replay
+and Managed/NativeAOT parity:32 records,108 guards,15 corrupted captures and4096
+prepared permission combinations. The empty-digit path still performs its
+mandatory refill. Eight preceding components retain their exact capture hashes.
+This is a bounded source-page primitive; it does not recognize numbers or words
+and has no general paging, accepted-text or application/default authority.
+
 ### Additional storage/acoustic checkpoints (2026-10-22)
 
 The [full English FIRST acoustic checkpoint A](legacy-full-english-first-acoustic-checkpoint-a.md)

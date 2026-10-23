@@ -191,6 +191,19 @@ public sealed class LegacyFst28CNumberInitialQueryBinding
             ReferenceEquals(D0,request.Owner),request.Parent is null,request.Source,request.Start,
             request.Span,request.Flags,request.Skip,request.Take,request.CachedOwner is null,LiveTreeRoot!=0);
     }
+    // Genuine private prefix handoff; detached diagnostics are not accepted.
+    internal LegacyFst28CNumberInitialPage.Input RetainInitialPageInput(object invocation, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested(); ArgumentNullException.ThrowIfNull(invocation);
+        if(!RetainsExactHeaderIdentity(token)||!ReferenceEquals(request.Owner,D0)||
+            !ReferenceEquals(request.Header,historicalHeader)||!ReferenceEquals(request.Cohort,cohort)||
+            request.Tag!=(8UL<<40)||request.Parent is not null||request.Source!=0||request.Start!=0||
+            request.Span!=0||request.Flags!=0||request.Skip!=0||request.Take!=128||request.CachedOwner is not null||
+            context.NodeCount!=18||context.RootTreeIdentity==0||nodes.Count!=18)
+            throw new InvalidDataException("Private initial request/header/live cohort differs.");
+        return new(invocation,this,request,historicalHeader,cohort,context,D0,request.Tag,
+            request.Source,request.Start,request.Span,request.Flags,request.Skip,request.Take);
+    }
     // Detached inspection cannot be accepted as a query/current-context receipt.
     public IReadOnlyList<LegacySymbolContextNode> ReadLiveNodes()=>nodes;
     public ushort ReadPreservedCode(ushort label)=>Read(preserved,label);
