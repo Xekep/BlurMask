@@ -197,3 +197,24 @@ Frozen16-item manifest `root-ctc-state-dataflow-frozen-manifest-20261023.json`,
 SHA256 `f2b729d0d3e585dd205601d870b132f154267b85b860559002086f36034e2b0f`,
 retains all four auditors, reports, controls and preceding byte dependencies.
 Application behavior and CTC framing are unchanged.
+
+## Selected106 initial-header projection
+
+`audit_english_ctc_selected_header.py` checks the complete8980-byte selected
+reader and the raw resource's initial fields. Its conditional projection has
+five headers, not four: version106 increments the raw layer count and appends
+the separately serialized output. The width lane is13/127/127/127/182, the kind
+lane1/8/8/8/1 and all five flags are zero. The joint seven-lane allocation has
+six entries per lane, including a spare, for168 bytes. The output kind1 does
+not take the later kind4 header-splitting branch.
+
+This projection assumes successful stream reads and covers initial header
+fields only. The appended output quantization code remains unknown; it is
+reported as NULL rather than guessed from the four raw codes2. Complete packet
+construction, retained-header preservation, allocator separation and matrix-copy
+aliases remain open. No SDK executes and no runtime predicate is approved.
+
+The positive audit and four byte-integrity refusal controls are retained in
+the nine-item `root-ctc-selected-header-frozen-manifest-20261023.json`, SHA256
+`5fb3d8cb503e961071ae0fe2a06e3e12ae2f8f4d7590f264817a015f8cd3e253`.
+Those refusals test input integrity, not independent semantic mutation coverage.
