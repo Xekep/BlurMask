@@ -198,6 +198,38 @@ SHA256 `f2b729d0d3e585dd205601d870b132f154267b85b860559002086f36034e2b0f`,
 retains all four auditors, reports, controls and preceding byte dependencies.
 Application behavior and CTC framing are unchanged.
 
+## Matrix-metadata initializer address flow
+
+`audit_english_ctc_matrix_metadata_dataflow.py` follows the four complete
+`1915E0/192F10/193070/198960` helpers:1169 bytes and268 instructions. Its24
+cases cover declared widths16/128/256, code2, flags0, alignment8/16, both
+initializer modes and NULL/populated scratch pointers. This is symbolic address
+analysis; no SDK instruction executes.
+
+Every metadata write stays inside the declared896-byte object. An independent
+field-image calculation matches all840 defined bytes and leaves56 padding bytes
+unclaimed. Four gate descriptors intentionally share one scratch pointer within
+each direction; the second direction uses the next scratch slice. No scratch
+payload writes occur in these helpers. The checker preserves that sharing
+rather than imposing disjointness on every matrix view.
+
+Nine corrupted address/image controls are rejected, including a missing reset,
+wrong width/code/flags/mode, merged directional scratch slices, undersized
+metadata, a pointer subread and an unwritten-padding read. The first analyzer
+drafts rejected two valid dataflow forms: a byte read from a defined integer
+stack slot, and LEA with its symbolic pointer in the index register at scale1.
+Those transfer rules are now explicit. The first independent store-count formula
+also missed the extra overwrite of each scratch-pointer field; the corrected
+counts are296/344 and the failed drafts are preserved.
+
+The live/disjoint object and helper-input conditions remain assumptions at
+this boundary. Complete caller argument flow, allocation origin, matrix import,
+conversion aliases and retained graph-header preservation still need proof.
+No runtime V120 predicate or application behavior changes. The31-item frozen
+manifest `root-ctc-matrix-metadata-dataflow-frozen-manifest-20261023.json`, SHA256
+`8bcef6d24929bcb9ce2e9589680c48c1f31f39602841d2212094e3907bf58f11`,
+retains the auditors, reports, controls, failed drafts and byte dependencies.
+
 ## Selected106 initial-header projection
 
 `audit_english_ctc_selected_header.py` checks the complete8980-byte selected
