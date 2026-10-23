@@ -378,8 +378,40 @@ Console.WriteLine($"ACTUAL RU NN/cache ? 6 stored root parents x {increments.Cou
 
 // The prepared ancestry/correction fields remain explicit. Their consumers
 // operate on actual NN-derived stored records and feed another native producer.
+// PREPARED inactive storage tail, NOT an NN-produced child. The owning row
+// table covers the controller's full primary cap even when fewer children
+// survive ordering. Collector210870 reads record16 and stops at Impossible;
+// retain the real root cap/parent arc5 rather than shrinking it to childcount5.
+var preparedInactiveTail = new List<LegacyNativeOwnedWordRow>();
+for (int arc = storedChildren.Count; arc < actualConfiguration.PrimaryArcLimit230a; arc++)
+{
+    byte[] inactiveSlot = new byte[128], inactiveAlternatives = new byte[80];
+    BinaryPrimitives.WriteInt32LittleEndian(inactiveSlot.AsSpan(16), 0x4000000);
+    BinaryPrimitives.WriteInt32LittleEndian(inactiveSlot.AsSpan(20), 0x4000000);
+    BinaryPrimitives.WriteUInt16LittleEndian(inactiveSlot.AsSpan(0x3c), ushort.MaxValue);
+    for (int alternative = 0; alternative < 2; alternative++)
+        BinaryPrimitives.WriteInt32LittleEndian(inactiveAlternatives.AsSpan(alternative * 40), 0x4000000);
+    var inactive = LegacyNativeWordRowMaterializer.Materialize(inactiveSlot, (ushort)arc,
+        actualConfiguration.PrimaryArcLimit230a, 2, 2, inactiveAlternatives, inactiveAlternatives);
+    preparedInactiveTail.Add(new((int)currentNode, (ushort)arc, inactive));
+}
 var realRows = parentRows.Select((row, arc) => new LegacyNativeOwnedWordRow(endingNode, (ushort)arc, row))
-    .Concat(storedChildren.Select((row, arc) => new LegacyNativeOwnedWordRow((int)currentNode, (ushort)arc, row))).ToArray();
+    .Concat(storedChildren.Select((row, arc) => new LegacyNativeOwnedWordRow((int)currentNode, (ushort)arc, row)))
+    .Concat(preparedInactiveTail).ToArray();
+Require(actualConfiguration.PrimaryArcLimit230a == parentRows.Count && parentRows.Count == 6 &&
+    realRows.Any(row => row.Node == endingNode && row.Arc == 5) &&
+    realRows.Count(row => row.Node == currentNode) == actualConfiguration.PrimaryArcLimit230a,
+    "Prepared inactive tail lost the real six-parent cap/parent arc5 or complete current storage.");
+foreach (var tail in preparedInactiveTail)
+{
+    Require(BinaryPrimitives.ReadInt32LittleEndian(tail.Row.Record.Span[16..]) == 0x4000000 &&
+        BinaryPrimitives.ReadInt32LittleEndian(tail.Row.Record.Span[20..]) == 0x4000000,
+        "Prepared inactive record costs must explicitly terminate the collector scan.");
+    for (int alternative = 0; alternative < 2; alternative++)
+        Require(BinaryPrimitives.ReadInt32LittleEndian(tail.Row.PrimaryAlternatives.Span[(alternative * 40)..]) == 0x4000000 &&
+            BinaryPrimitives.ReadInt32LittleEndian(tail.Row.SecondaryAlternatives.Span[(alternative * 40)..]) == 0x4000000,
+            "Prepared inactive alternative tables must remain impossible.");
+}
 var realOwner = new LegacyNativePrimaryWordRowOwner(2, realRows);
 ushort originalParent = BinaryPrimitives.ReadUInt16LittleEndian(storedChildren[0].Record.Span[0x1e..]);
 ushort replacementParent = (ushort)((originalParent + 1) % parentRows.Count);
@@ -451,9 +483,23 @@ var rejectionFields = new LegacyContinuationWordRecordFields(0, childRecordCost,
 var rejectionAllocation = LegacyContinuationWordRecordProducer.TryInsert(rejectionRouter, (int)currentNode, 0,
     (node, arc) => realOwner.CopyRow(node, arc).Record, rejectionFields, 1, true);
 Require(rejectionAllocation.Accepted && rejectionHeap.Count == 1, "Actual rejection continuation record was not allocated.");
+int liveSourceHeaderCalls = 0;
 var liveCollected = LegacyNativeWordRejectionCollector.Collect(rejectionHeap.GetSlotStorageSnapshot().Span, rejectionHeap.Count,
-    (int)currentNode, actualConfiguration.PrimaryArcLimit230a, realOwner, actualContexts, _ => 0x20, false,
-    _ => realResidue);
+    (int)currentNode, actualConfiguration.PrimaryArcLimit230a, realOwner, actualContexts,
+    _ => { liveSourceHeaderCalls++; return 0x20; }, false, _ => realResidue);
+Require(liveSourceHeaderCalls == storedChildren.Count,
+    "Collector must stop on the explicit inactive tail before its source-header callback.");
+foreach (var tail in preparedInactiveTail)
+{
+    var unchanged = realOwner.CopyRow(tail.Node, tail.Arc);
+    Require(unchanged.Record.Span.SequenceEqual(tail.Row.Record.Span) &&
+        unchanged.PrimaryAlternatives.Span.SequenceEqual(tail.Row.PrimaryAlternatives.Span) &&
+        unchanged.SecondaryAlternatives.Span.SequenceEqual(tail.Row.SecondaryAlternatives.Span),
+        "Collector mutated the explicitly prepared inactive record/primary/secondary tail.");
+}
+Console.WriteLine($"PREPARED inactive collector tail: {preparedInactiveTail.Count} full stored rows; " +
+    $"real root cap {actualConfiguration.PrimaryArcLimit230a}/parent arc5 preserved; " +
+    $"{liveSourceHeaderCalls} active source-header calls, tail not an NN row.");
 Require(liveCollected.Count > 0, "Native ancestry collector did not produce an actual protected path candidate.");
 var firstCollected = liveCollected.CandidateStorage.Span[..36];
 int replacementRecordCost = BinaryPrimitives.ReadInt32LittleEndian(parentRows[replacementParent].Record.Span[16..]);
