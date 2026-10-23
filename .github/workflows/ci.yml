@@ -179,6 +179,11 @@ jobs:
         run: |
           dotnet run --project tools/LegacyMathAkGeometry.Probe -c Release -- . .artifacts/math-ak-geometry.json
           python -I -B tools/LegacyMathAkGeometry.Probe/audit_output.py .artifacts/math-ak-geometry.json .artifacts/math-ak-geometry-audit.json
+      - name: Original Math single-stroke temporal inputs and independent reference
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyMathAkTemporal.Probe -c Release -- . .artifacts/math-ak-temporal.json
+          python -I -B tools/LegacyMathAkTemporal.Probe/audit_output.py . .artifacts/math-ak-temporal.json .artifacts/math-ak-temporal-audit.json
       - name: Original Math grammar, parsed reconstruction and AK terminal binding
         shell: bash
         run: |

@@ -38,7 +38,9 @@ directional feature extractor. Its temporal/grid branches, calibrations and
 source callbacks must be selected from the actual slot/profile fields.
 The [original XY normalization prerequisite](legacy-math-ak-source-geometry.md)
 is implemented separately with bounded input and independent rounding controls.
-It does not yet provide feature vectors or classifier output.
+The [single-stroke unguided temporal prefix](legacy-math-ak-temporal-features.md)
+now produces the selected1F model's222 inputs with independent source-derived
+checks. It does not provide classifier output or the other feature families.
 The next implementation is that same-source feature/classifier/shortlist
 producer; grammar matching and tree materialization remain after it. Neither
 modern LaTeX/Math2 DOM nor caller-supplied scores can substitute for those

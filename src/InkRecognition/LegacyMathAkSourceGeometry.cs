@@ -9,7 +9,7 @@ namespace InkRecognition;
 /// of MyScript2D00FB90. This is source geometry, not a classifier prediction,
 /// processed13A3 owner, grammar match or old candidate-tree authority.
 /// </summary>
-public sealed class LegacyMathAkSourceGeometry
+public sealed partial class LegacyMathAkSourceGeometry
 {
     public const int MaximumStrokes = 64;
     public const int MaximumPoints = 16_384;
@@ -17,6 +17,7 @@ public sealed class LegacyMathAkSourceGeometry
     private readonly Vector2[][] original;
     private readonly LegacyInkPoint[][] normalized;
     private readonly int[] ends;
+    private readonly short[] calibrationMinimum, calibrationMaximum;
     public int StrokeCount => original.Length;
     public int PointCount { get; }
     public int NormalizationTarget => 8192;
@@ -27,9 +28,10 @@ public sealed class LegacyMathAkSourceGeometry
     public Vector2 OriginalMaximum { get; }
     public float AppliedScale { get; }
     private LegacyMathAkSourceGeometry(Vector2[][] original, LegacyInkPoint[][] normalized,
-        int[] ends, int count, Vector2 minimum, Vector2 maximum, float scale)
+        int[] ends, int count, Vector2 minimum, Vector2 maximum, float scale, short[] calibrationMinimum, short[] calibrationMaximum)
     {
         this.original = original; this.normalized = normalized; this.ends = ends;
+        this.calibrationMinimum = calibrationMinimum; this.calibrationMaximum = calibrationMaximum;
         PointCount = count; OriginalMinimum = minimum; OriginalMaximum = maximum; AppliedScale = scale;
     }
 
@@ -121,7 +123,14 @@ public sealed class LegacyMathAkSourceGeometry
                 result[s] = row;
             }
             token.ThrowIfCancellationRequested();
-            return new(owned, result, cumulative, total, minimum, maximum, scale);
+            var minimum412 = new short[412]; var maximum412 = new short[412];
+            for (int i = 0; i < 412; i++)
+            {
+                minimum412[i] = BinaryPrimitives.ReadInt16LittleEndian(captured.AsSpan(1_006_085 + i * 2, 2));
+                maximum412[i] = BinaryPrimitives.ReadInt16LittleEndian(captured.AsSpan(1_006_909 + i * 2, 2));
+            }
+            token.ThrowIfCancellationRequested();
+            return new(owned, result, cumulative, total, minimum, maximum, scale, minimum412, maximum412);
         }
         finally { CryptographicOperations.ZeroMemory(captured); }
     }
