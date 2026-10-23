@@ -51,39 +51,19 @@ public static class NativeEnglishTextResource
         Require(labelCount==181&&blank==181&&scoreKind==0&&representation==0&&unused==0&&transform==0&&property14==0&&property20==0&&link==0&&property1c==float.MaxValue&&spacing>0&&minimum is>=1 and<=8,"Unsupported English feature/scoring profile.");
         var labels=new ushort[labelCount];for(int i=0;i<labels.Length;i++)labels[i]=r.Short();Require(r.Position==r.End,"Unconsumed text adapter.");
         var p=new Profile(wrapper,means,scales,spacing,minimum,labels);
-        var q=new Cursor(data,net.Offset+16,net.End);Require(q.Int(2)==1,"Sequential network required.");int layerCount=q.Int(16);Require(layerCount==4,"Three BLSTM layers required.");var layers=new Layer[layerCount];
-        for(int i=0;i<layerCount;i++){int kind=q.Int(),width=q.Int(2048),flags=q.Int(),code=q.Int();Require(flags==0&&code is>=1 and<=3&&width>0,"Unsupported layer metadata.");layers[i]=new(kind,width,code);}
-        Require(layers[0].Kind==1&&layers[0].Width==13&&layers.Skip(1).All(l=>l.Kind==8),"English13-channel BLSTM architecture required.");
-        Require(q.Int()==0&&q.Int()==182&&q.Int()==1&&q.Int()==0,"Actual output/edges required.");q.Zero();Require(q.Int()==0&&q.Int()==0,"No extra network dimensions supported.");q.Zero();
-        int[] codes=new int[5];for(int i=0;i<5;i++)codes[i]=q.Int();Require(codes.SequenceEqual(new[]{0,1,1,1,3})&&q.Int()==2,"Actual activation metadata required.");q.Zero();Require(q.Int(1024)*4==32,"Native32-byte alignment required.");int payloadLength=q.Int(64*1024*1024);
-        int padding=(-q.Position)&31;foreach(byte value in q.Take(padding))Require(value==255,"Native alignment bytes required.");int payloadAt=q.Position;q.Take(payloadLength);int tail=q.Int(64*1024*1024);q.Take(tail);Require(q.Position==q.End,"Unconsumed native network.");
-        var tensors=new List<Tensor>();int cursor=0;
-        int Align(int value,int multiple=8)=>checked((value+multiple-1)/multiple*multiple);
-        void Matrix(string name,int rows,int input,int code)
-        {
-            int columns=Align(Align(input+1),code==1?8:code==2?16:32);int bytes=checked(rows*columns*(code==1?4:code==2?2:1));if(code!=1)bytes=checked(bytes+Align(rows)*8+32);
-            tensors.Add(new(name,1,cursor,bytes,rows,columns,input,code));cursor=checked(cursor+bytes);Require(cursor<=payloadLength,"Tensor budget exceeds actual payload.");
-        }
-        int previous=13;
-        for(int i=1;i<4;i++)
-        {
-            token.ThrowIfCancellationRequested();int width=layers[i].Width,code=layers[i-1].Code;
-            foreach(string group in new[]{"input","recurrent"})foreach(string direction in new[]{"forward","backward"})
-            {
-                foreach(string gate in new[]{"g","i","f","o"})Matrix($"layer{i}.{direction}.{group}.{gate}",width,group=="input"?previous:width,code);
-                if(group=="recurrent")foreach(string gate in new[]{"i","f","o"}){int size=Align(width)*4;tensors.Add(new($"layer{i}.{direction}.recurrent.p{gate}",2,cursor,size,width,1,0,1));cursor=checked(cursor+size);Require(cursor<=payloadLength,"Peephole tensor exceeds payload.");}
-            }
-            previous=width*2;
-        }
-        Matrix("output",182,previous,layers[^1].Code);Require(cursor==payloadLength&&tensors.Count==67,"Whole67-tensor payload required.");
+        // Reuse the authenticated data-only selected106 owner; conversion remains here.
+        var selected=LegacySelectedEnglish106WireLayout.Read(source,child,token);
+        var layers=selected.Layers;var tensors=selected.Tensors;
+        int payloadLength=selected.PayloadBytes;
+        byte[] payload=selected.CopyPayload(token);
         Require(payloadLength<=8*1024*1024-16384,"Bounded portable body reservation required.");
         using var body=new MemoryStream(checked(payloadLength+16384));using(var writer=new BinaryWriter(body,Encoding.UTF8,true))
         {
             void I(params int[] v){foreach(int value in v)writer.Write(value);}void Text(string value){byte[] utf8=Encoding.UTF8.GetBytes(value);I(utf8.Length);writer.Write(utf8);}
             I(13,182,181,3,181);Text("en-US");foreach(float value in p.Means)writer.Write(value);foreach(float value in p.Scales)writer.Write(value);writer.Write(p.Spacing);I(p.Minimum,0);
-            for(int i=1;i<4;i++)I(layers[i].Width,1,layers[i-1].Code);I(layers[^1].Code);
+            for(int i=1;i<4;i++)I(layers[i].Width,1,layers[i-1].Code);I(layers[layers.Count-1].Code);
             foreach(ushort label in p.Labels){token.ThrowIfCancellationRequested();if(!alphabet.TryGetText(label,out string text)){Require(label==178,"Unknown output label.");text="";}Text(text);}
-            I(tensors.Count);foreach(var t in tensors){Text(t.Name);I(t.Kind,t.Offset,t.Bytes,t.Rows,t.Columns,t.Input,t.Code);}I(payloadLength);writer.Write(data.AsSpan(payloadAt,payloadLength));
+            I(tensors.Count);foreach(var t in tensors){Text(t.Name);I(t.Kind,t.Offset,t.Bytes,t.Rows,t.Columns,t.Input,t.Code);}I(payloadLength);writer.Write(payload);
         }
         Require(body.Length<=8*1024*1024,"Bounded portable payload required.");
         var bytesBody=body.GetBuffer().AsSpan(0,checked((int)body.Length));var result=new byte[checked(bytesBody.Length+48)];
@@ -97,9 +77,7 @@ public static class NativeEnglishTextResource
     }
     private static void Require(bool condition,string message){if(!condition)throw new InvalidDataException(message);}
     private sealed record Node(int Offset,int End,uint Kind,ushort Flags,ushort Version);
-    private sealed record Layer(int Kind,int Width,int Code);
     private sealed record Profile(Node Wrapper,float[] Means,float[] Scales,float Spacing,int Minimum,ushort[] Labels);
-    private sealed record Tensor(string Name,int Kind,int Offset,int Bytes,int Rows,int Columns,int Input,int Code);
     private sealed class Cursor(byte[] data,int start,int end)
     {
         public int Position{get;set;}=start;public int End=>end;

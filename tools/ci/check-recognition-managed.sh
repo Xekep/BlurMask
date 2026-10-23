@@ -591,6 +591,7 @@ python -I tools/LegacyGlobalCounterHandoff.Probe/audit_output.py models .artifac
 dotnet run --project tools/LegacyGlobalSourceRangeUtf8.Probe -c Release -- models tools/test-data/russian-recorded-words/manifest.json .artifacts/legacy-global-source-range-utf8-managed.json
 python -I -B tools/LegacyGlobalSourceRangeUtf8.Probe/audit_output.py models .artifacts/legacy-global-source-range-utf8-managed.json .artifacts/legacy-global-word-text-managed.json .artifacts/legacy-global-text-source-wrapper-managed.json
 python tools/export-ink-model.py --resource models/en-US/en_US-ak-cur.res --output .artifacts/native-english-reference.ikrpack
+dotnet run --project tools/NativeEnglishResource.Probe -c Release -- --wire-only models .artifacts/native-english-reference.ikrpack .artifacts/native-english-wire-managed.json
 dotnet run --project tools/NativeEnglishResource.Probe -c Release -- models .artifacts/native-english-reference.ikrpack .artifacts/native-english-resource-managed.json
 python -I -B tools/NativeEnglishResource.Probe/audit_output.py .artifacts/native-english-resource-managed.json
 dotnet run --project tools/ExperimentalGlobalText.Probe -c Release -- models .artifacts/experimental-global-text-managed.json

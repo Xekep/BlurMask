@@ -58,3 +58,29 @@ Managed and NativeAOT captures also agree. No decoder, frame heuristic, ranking
 threshold or model weight changes in this step. The source247 reader temporarily
 owns another bounded source snapshot; removing the signature scan is not a
 claim of lower peak memory or improved handwriting accuracy.
+
+
+## Selected106 data owner, 23 October 2026
+
+The converter delegates its network layout to `LegacySelectedEnglish106WireLayout`.
+This data-only owner authenticates the actual Source247/247.148 child and retains
+its absolute serialization origin. It exposes67 immutable tensor descriptors and
+defensive copies of payload,9 alignment bytes and the separate104-byte opaque
+tail. It does not derive tail contents from adapter normalization parameters.
+The existing converter remains the sole IKRPACK writer; the complete portable
+image still has SHA25639418d35708502db6520fa22781614c30c7256efdb9981bf6bbf9b1b0c4f8d5b.
+
+The new `--wire-only` probe performs95 actual C# checks without inference:
+complete portable-byte comparison, every tensor's contiguous range, exact model
+identity, foreign-child refusal, immutable collections, defensive copies,
+caller-buffer mutation, authenticated-input corruption and exact cancellation
+tokens. The independent source review also recomputed all67 raw tensor hashes.
+The check is included before the existing recognition checks in managed CI.
+
+This refactor adds4,016,389 temporary/retained byte-array payload bytes while
+converting (child copy plus payload copy), in addition to existing source/model
+allocations. It is no memory or accuracy optimization. Native temporary matrix
+packing, converted pointer lifetimes and all evaluator branches are not recovered
+by this serialized-data owner. Application recognizer selection is unchanged.
+
+Evidence: `root-selected106-wire-csharp-and-integration-frozen-manifest-20261023.json`, SHA256 `f0c6c394ada942f7e4bfea916c65693a6a01bd53c92434945c2dccd985090e8a`, under `E:/BlurMask-build-artifacts-20261014/`.

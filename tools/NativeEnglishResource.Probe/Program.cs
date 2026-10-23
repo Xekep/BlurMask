@@ -1,6 +1,7 @@
 using InkRecognition;
 using System.Text.Json;
 using System.Security.Cryptography;
+if(args is ["--wire-only",var wireModels,var wireReference,var wireOutput]) { SelectedWireChecks.Run(wireModels,wireReference,wireOutput); return; }
 if(args.Length is not(3 or 4))throw new ArgumentException("MODELS REFERENCE-PACK CAPTURE [FIXED-INPUTS]");
 byte[] resource=File.ReadAllBytes(Path.Combine(args[0],"en-US/en_US-ak-cur.res"));
 byte[] packed=NativeEnglishTextResource.CreatePortableSnapshot(resource);byte[] expected=File.ReadAllBytes(args[1]);
