@@ -423,3 +423,19 @@ caller origin and complete recognition semantics remain open. The25-item
 `ee20011989ebe080e42522fc1cc3abca67b15a567f2998b8e60c1273931c66a4`,
 retains the source, composed reports, controls, native export and failed drafts.
 Whole-constructor and runtime predicates remain false.
+
+`audit_english_ctc_aligned_service_lookup.py` checks the next dispatch boundary.
+It follows034010's initialization of the default core table through its immutable
+descriptor, then the193A40 call requesting service0x49 (decimal73). The complete
+79-byte lookup leaf has no writes or nested calls. Its local returns, following
+INT3 and absence from the PE exception table explicitly bound this unregistered
+function. All16384 admitted service IDs have the same three registry indices as
+an independent division/remainder calculation; service73 uses[0,4,9].
+
+This proves how an installed descriptor is found, not that service73 is actually
+registered or that its aligned allocation callbacks have been checked. Intermediate
+registry arrays must be live; the leaf does not check each of them for NULL.
+The actual CTC environment origin remains unresolved. The11-item
+`root-ctc-service-lookup-frozen-manifest-20261023.json`, SHA256
+`af6c1e948cc0af109fad03a496b927b77c7978961afc074a2eb7e98783f32e86`,
+preserves the static proof and inspection history. No SDK code executes.
