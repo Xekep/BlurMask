@@ -15,6 +15,16 @@ if (args.Length == 0)
     Near(graph.Nodes[0], 111, "INK alphabet index");
     Near(graph.Nodes[1], 1, "Median diagonal normalization");
     Near(graph.Nodes[2], 0, "Line hull area");
+    // Native B610->BBC5 multiplies centroid-ray angle by F32(1/pi)
+    // before both trig calls. Symmetric controls have exact zero centroids.
+    // These are semantic controls with tolerance, not vendor execution goldens.
+    foreach (var line in new[] { Stroke(-1, 0, 1, 0), Stroke(0, -1, 0, 1), Stroke(-1, -1, 1, 1) })
+        Near(RawContentFeatures.Create([line]).Nodes[3], .3498820345625469, "Normalized centroid-ray line dispersion", 1e-6);
+    Near(RawContentFeatures.Create([Stroke(-1, 0, 0, -1, 1, 0, 0, 1)]).Nodes[3],
+        .38691000853915264, "Normalized centroid-ray cardinal dispersion", 1e-6);
+    Near(RawContentFeatures.Create([Stroke(-1, 0, -1, -1, 0, -1, 1, -1, 1, 0, 1, 1, 0, 1, -1, 1)]).Nodes[3],
+        .39539054528080647, "Normalized centroid-ray octant dispersion", 1e-6);
+    Near(RawContentFeatures.Create([Stroke(0, 0)]).Nodes[3], 0, "Single-point radial dispersion", 0);
     Near(graph.Nodes[4], 1, "Open line endpoint/path ratio");
     Near(graph.Nodes[7], 1, "Line length/diagonal");
     int crossEdge = Enumerable.Range(0, graph.EdgeCount).Single(k => graph.Edges[k] == 0 && graph.Edges[k + graph.EdgeCount] == 1);
