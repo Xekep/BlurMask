@@ -81,9 +81,10 @@ def main():
     pins=json.loads((repo/'tools/handwriting/linguistic-fst28c-number-first-page-pins.json').read_bytes())
     for row in pins['runtimeReviewedLF']+pins['existingIndependentDefinitionsLF']:
      b=(repo/row['path']).read_bytes().replace(b'\r\n',b'\n')
+     b=runpy.run_path(str(repo/'tools/LegacyFst28CNumberInitialConsumer.Probe/audit_output.py'))['source_preimage'](row['path'],b)
      if row['path'].endswith('LegacyFst28CNumberInitialQueryBinding.cs'):b=initialPreimage
      assert sha(b)==row['sha256LF'],row['path']
-    assert sha((repo/'src/InkRecognition/LegacyFst28CNumberInitialConsumerContext.cs').read_bytes().replace(b'\r\n',b'\n'))==PRODUCTION_SHA
+    assert sha(runpy.run_path(str(repo/'tools/LegacyFst28CNumberInitialConsumer.Probe/audit_output.py'))['source_preimage']('LegacyFst28CNumberInitialConsumerContext.cs',(repo/'src/InkRecognition/LegacyFst28CNumberInitialConsumerContext.cs').read_bytes()))==PRODUCTION_SHA
     old=sys.argv;sys.argv=[str(repo/'tools/LegacyFst28CNumberInitialD0.Probe/audit_output.py'),str(models),str(d0Path)]
     try:runpy.run_path(sys.argv[0],run_name='__main__')
     finally:sys.argv=old

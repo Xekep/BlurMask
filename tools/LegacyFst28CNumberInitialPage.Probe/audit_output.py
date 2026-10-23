@@ -15,6 +15,7 @@ pins=json.loads((repo/'tools/handwriting/linguistic-fst28c-number-first-page-pin
 # addition, then recover exact original preimage in memory for historical pins.
 for row in pins['runtimeReviewedLF']+pins['existingIndependentDefinitionsLF']:
  b=(repo/row['path']).read_bytes().replace(b'\r\n',b'\n')
+ b=runpy.run_path(str(repo/'tools/LegacyFst28CNumberInitialConsumer.Probe/audit_output.py'))['source_preimage'](row['path'],b)
  if row['path'].endswith('LegacyFst28CNumberInitialQueryBinding.cs'):
   # Exact new private-pool diff is authenticated before old13-line recovery.
   auth=runpy.run_path(str(repo/'tools/LegacyFst28CNumberInitialConsumerContext.Probe/audit_output.py'))['binding_preimages']

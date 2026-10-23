@@ -124,6 +124,18 @@ public sealed class LegacyFst28CNumberInitialConsumerContext
         }
         catch{pool.Poison();throw;}
     }
+    // Trusted receiving handoff to the next owned initial consumer. Historical
+    // diagnostics/snapshots are not accepted as pool, page or source authority.
+    internal void AttachInitialConsumer(LegacyFst28CNumberInitialConsumer receiver,CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();ArgumentNullException.ThrowIfNull(receiver);
+        if(!ReferenceEquals(receiver.ExpectedContext,this))throw new ArgumentException("Foreign receiving context.");
+        var d=pool.ReadDiagnostic(nodes.Length,token);
+        if(!d.Completed||!d.SameD0||!d.SameBootstrap||!d.SameGraph||!d.SameSource||!d.SameHeader||
+            !d.SameBindingAndPage||!d.HistoricalInitialViewRetained||d.ActiveNodes!=18+Count||d.Pages!=1)
+            throw new InvalidOperationException("Exact completed private number pool required.");
+        receiver.AcceptTrustedContext(this,pool,grafts.AsSpan(0,Count),token);
+    }
     private static void ValidateOwner(LegacyFst28CNumberInitialD0 d0,CancellationToken token)
     {
         token.ThrowIfCancellationRequested();

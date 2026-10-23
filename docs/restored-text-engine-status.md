@@ -6,6 +6,16 @@ default recognizer.
 
 ## Development integration (2026-10-21)
 
+The [owned initial number consumer](linguistic-fst28c-number-initial-consumer-runtime.md)
+now joins the retained context to actual root arcs, qualifiers, categories,
+acoustic scoring and a private250-slot heap. Four fixtures pass Managed/Native
+AOT parity and independent raw-model replay:32 first-variant scores,32 missing
+end alternatives and four8-candidate heaps. Exact124 guards,14 exception/token/
+checkpoint witnesses and15 data/8 protocol/6 source corruptions are checked.
+Existing D0/Binding/Page/Context captures remain byte-exact. This is a bounded
+number-source component; word selection, Russian cursive, final text and default
+integration remain unfinished.
+
 The [full English FIRST rich-glyph pass](english-full-first-glyph-emission-runtime-20261023.md)
 now enriches completed B6 candidates using their actual A8 shortlist, source
 ranges, class-query costs and confidence. Managed/Native AOT agree on241 blind
@@ -30,8 +40,9 @@ Four fixtures pass independent raw-model/page/AVL replay and Managed/NativeAOT
 parity:32 grafts,125 guards,15 corrupted captures and7 source-preimage controls.
 The shared claim admits exactly one default18/private30 race winner; previous
 85/108-check captures remain byte-exact. CI now covers the new component in both
-build modes. Qualifiers, scoring, history and accepted-text integration remain
-unfinished; this does not establish Russian handwriting recognition.
+build modes. Initial qualifiers and scoring are covered by the newer consumer
+above; history and accepted-text integration remain unfinished. This does not
+establish Russian handwriting recognition.
 
 The [English initial PRIMARY consumer](english-case-initial-primary-consumer-runtime-20261023.md)
 now joins actual query rows to owned context grafts, category maps, acoustic

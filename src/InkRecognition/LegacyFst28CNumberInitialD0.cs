@@ -14,7 +14,7 @@ public sealed record LegacyFst28CNumberD0GroupSnapshot(int Group, LegacyMainGlyp
 
 /// <summary>One-use fresh node0/span0 number-source D0 prefix. No issued query,
 /// history, repeated refresh, default selection or OCR authority.</summary>
-public sealed class LegacyFst28CNumberInitialD0
+public sealed partial class LegacyFst28CNumberInitialD0
 {
     public const long MaximumLogicalBytes = 32983513, MaximumWork = 69123317896;
     private const string AcousticHash = "7A5F08809E81FB4A2D4C78B3EFD251D0986503B0D30D21DE3695DAB1F8A89978";

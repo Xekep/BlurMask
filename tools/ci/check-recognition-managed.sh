@@ -653,6 +653,9 @@ python -I -B tools/LegacyFst28CNumberInitialPage.Probe/audit_output.py models .a
 
 dotnet run --project tools/LegacyFst28CNumberInitialConsumerContext.Probe -c Release -- models .artifacts/legacy-fst28c-number-initial-consumer-context-managed.json
 python -I -B tools/LegacyFst28CNumberInitialConsumerContext.Probe/audit_output.py models .artifacts/legacy-fst28c-number-initial-consumer-context-managed.json .artifacts/legacy-fst28c-number-initial-d0-managed.json
+
+dotnet run --project tools/LegacyFst28CNumberInitialConsumer.Probe -c Release -- models .artifacts/legacy-fst28c-number-initial-consumer-managed.json
+python -I -B tools/LegacyFst28CNumberInitialConsumer.Probe/audit_output.py models .artifacts/legacy-fst28c-number-initial-consumer-managed.json .artifacts/legacy-fst28c-number-initial-consumer-context-managed.json .artifacts/legacy-fst28c-number-initial-d0-managed.json
 python tools/LegacyEnglishLiteFirstPreprocessing.Probe/reference_controls.py .artifacts/legacy-en-short-controls.json
 python tools/LegacyEnglishFirstSlant.Probe/reference_controls.py .artifacts/legacy-en-short-controls.json .artifacts/legacy-en-slant-controls.json
 dotnet run --project tools/LegacyFirstAcoustic119Wire.Probe -c Release -- models .artifacts/legacy-first-acoustic119-wire-managed.json

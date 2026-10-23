@@ -15,6 +15,7 @@ pins=json.loads((repo/'tools/handwriting/linguistic-fst28c-number-live-query-pin
 # 13-line addition then recover preimage ONLY in memory; never edit old pins.
 for row in pins['runtimeReviewedLF']+pins['independentDefinitionsLF']:
  b=(repo/row['path']).read_bytes().replace(b'\r\n',b'\n')
+ b=runpy.run_path(str(repo/'tools/LegacyFst28CNumberInitialConsumer.Probe/audit_output.py'))['source_preimage'](row['path'],b)
  if row['path'].endswith('LegacyFst28CFreshPrimaryControllerBootstrap.cs'):
   marker=b'    // Trusted readonly seam for the new owning active-context overlay.'
   start=b.index(marker);end=b.index(b'    internal bool IsSameIssuer(',start);addition=b[start:end]
