@@ -76,7 +76,10 @@ currently supported language.
 
 For formulas, a local `.ikrmath` pack is loaded automatically; choose
 **Automatic** or **Formulas** in the AI pen menu. The official CPU runtime is packaged for Windows
-x64, Linux x64 and macOS; model weights are supplied separately.
+x64, Linux x64 and macOS. With the experimental engine enabled, explicitly
+selecting **Formulas** uses the bundled Math2 model. **Auto** does not yet use
+this uncalibrated experimental model. The installed-model path below remains
+available for the previous recognizer.
 
 ```sh
 python tools/export-ink-math-model.py models/math2/math-sr.res --output .artifacts/math2.ikrmath

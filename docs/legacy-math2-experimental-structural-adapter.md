@@ -85,13 +85,41 @@ and resist mutation through copies. Existing first-record integral-with-equals
 produces333 through the explicit local helper; the same integral without equals
 produces no requested result. `1+2=` produces3; `1+2` remains uncomputed.
 
-This is explicitly library glue. It does not recover the missing native
+This is independent library glue. It does not recover the missing native
 raw-Math2-markup to138D..1393 typed-object bridge, original CBB/revision/observer
-acceptance or full native semantic/layout engine. Application files, settings,
-old greedy recognizer and automatic confidence thresholds remain unchanged.
-An app switch requires a separately reviewed admission policy and integration.
+acceptance or full native semantic/layout engine. Automatic confidence thresholds
+and the old installed-model recognizer remain unchanged.
 
 CI explicitly runs the17 generated procedural inputs/51 detachments using the
 independent oracle's `--procedural-only` scope. It consumes the separately
 produced actual raw corpus from that same CI host. The31-input private check
 and licensed human coordinates remain a separate local verification.
+
+## Explicit experimental application integration, 23 October 2026
+
+The existing experimental-engine setting now enables this cold owner when the
+user explicitly selects **Formulas**. It does not supply uncalibrated results
+to **Auto** or text mode. Actual detached results retain absent confidence;
+the internal rendering carrier uses a separate admission tag, never a fabricated
+probability. No confidence value is saved or transmitted in document marks.
+
+Supported release builds package the exact raw Math2 resource and checked
+IKRMATH1 export alongside the existing official ONNX Runtime. Loading is lazy;
+switching away cancels pending publication and releases the cached owner without
+waiting on an inference lock. Invalid assets remain unavailable. Recognition
+has explicit limits of 256 strokes and 4096 points per batch.
+
+An isolated Managed application build passed with zero warnings/errors, all 25
+injected layout/routing guards, genuine model/runtime loading, and the existing
+AI-pen tests with actual local Giac calculations. Two unchanged procedural ink
+fixtures passed the actual application recognition route: `1+2=` and
+`\int _{1}^{10}x^{2}dx=`. Forwarding these actual outputs to the application
+calculation method produced `3` and `333`; removing the trailing equals left
+both expressions uncomputed. These generated inputs do not establish accuracy
+on arbitrary human handwriting or Russian cursive.
+
+CI checks the published native model delivery and injected routing on Windows,
+Linux and both macOS architectures. Those CI runs are separate from the local
+Managed checks and must pass before claiming native release verification.
+Local evidence: `E:/BlurMask-build-artifacts-20261014/root-app-manual-math-checks-20261023/`
+and `root-recognized-math-calculation-20261023/`.

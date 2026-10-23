@@ -362,7 +362,9 @@ internal sealed class DrawingToolbarWindow : Window
                 SelectedIndex = _session.Settings.AiMode switch { "text" => 1, "math" => 2, _ => 0 }, MinWidth = 120, FontSize = 12 };
             var status = new TextBlock { FontSize = 11, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(6, 0) };
             void UpdateStatus() => status.Text = UiText.T(_session.Settings.AiMode == "math"
-                ? AiMathRecognitionModels.Installed ? "Формулы · экспериментально" : "Модель формул не установлена"
+                ? _session.Settings.ExperimentalTextEngine
+                    ? AiExperimentalMathModels.Available ? "Формулы · экспериментально" : "Модель формул недоступна"
+                    : AiMathRecognitionModels.Installed ? "Формулы · экспериментально" : "Модель формул не установлена"
                 : _session.Settings.ExperimentalTextEngine ? "Новый движок · отдельные слова"
                 : _session.Settings.AiMode == "auto" && AiMathRecognitionModels.Installed ? "Текст и формулы · автоматически"
                 : File.Exists(AiRecognitionModels.PathName) ? "English · экспериментально" : "Модель AI-пера не установлена");

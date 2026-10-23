@@ -31,6 +31,8 @@ $required = @('BlurMask.exe')
 foreach ($name in $required) {
     if (-not (Test-Path -LiteralPath (Join-Path $publishDir $name))) { throw "Incomplete publish directory: missing $name" }
 }
+python (Join-Path $PSScriptRoot 'package-experimental-math-model.py') --output $publishDir --rid win-x64 --verify-only
+if ($LASTEXITCODE -ne 0) { throw 'Bundled experimental Math2 assets/runtime missing or invalid.' }
 $nativeDlls = @(Get-ChildItem -LiteralPath $publishDir -Filter '*.dll')
 if ($nativeDlls.Count -ne 0) { throw 'The Windows installer expects the single-executable Native AOT build.' }
 New-Item -ItemType Directory -Path $outputDir -Force | Out-Null

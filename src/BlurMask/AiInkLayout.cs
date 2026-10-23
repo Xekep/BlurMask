@@ -7,6 +7,7 @@ namespace BlurMask;
 // Batch layout is separate from inference: pen lifts do not define character boundaries.
 internal static class AiInkLayout
 {
+    internal enum ResultAdmission { Scored, UncalibratedMath }
     internal sealed record Result(InkMark[] Strokes, InkMark Text, float Confidence = 1)
     {
         internal string? SizingText { get; set; }
@@ -14,7 +15,9 @@ internal static class AiInkLayout
         internal LegacyFontSizeTextSample[]? PreparedFontSizeSamples { get; init; }
         internal bool MathCalculationFailed { get; set; }
         internal bool ExperimentalCandidateScore { get; init; }
-        internal float AcceptanceThreshold => ExperimentalCandidateScore ? .5f : .85f;
+        internal ResultAdmission Admission { get; init; }
+        internal float? ConfidenceForAdmission => Admission==ResultAdmission.UncalibratedMath||!float.IsFinite(Confidence)?null:Confidence;
+        internal float AcceptanceThreshold => Admission==ResultAdmission.UncalibratedMath?float.PositiveInfinity:ExperimentalCandidateScore ? .5f : .85f;
     }
     private sealed class Group(InkMark stroke)
     {

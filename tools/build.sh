@@ -39,6 +39,7 @@ esac
 
 case "$RID" in
   linux-x64|osx-x64|osx-arm64)
+    python3 tools/package-experimental-math-model.py --output "src/BlurMask/bin/Release/net11.0/$RID/publish" --rid "$RID"
     solver_dir=".artifacts/giac-runtime/$RID"
     bash tools/prepare-giac-runtime.sh "$RID" "$solver_dir" .artifacts/installers
     install -d "src/BlurMask/bin/Release/net11.0/$RID/publish/runtimes/$RID/solver"

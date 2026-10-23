@@ -25,14 +25,14 @@ internal static class AiAutomaticLayout
             var classified = (rawAnalyzer ?? AiRawContentModels.Analyze)(ink, cancellationToken);
             if (classified is not null) return RecognizeRegions(strokes, classified, textRecognizer, mathRecognizer, cancellationToken, mathSolver);
         }
-        var text = AiInkLayout.Recognize(strokes, textRecognizer, cancellationToken);
+        var text = AiInkLayout.Recognize(strokes, textRecognizer, cancellationToken).Where(r=>r.Admission==AiInkLayout.ResultAdmission.Scored).ToArray();
         var complete = text.SelectMany(r => r.Strokes).Distinct().Count() == strokes.Count;
-        if (complete && text.Count > 0 && text.All(r => r.Confidence >= r.AcceptanceThreshold && NaturalText(r.Text.Text))) return text;
+        if (complete && text.Length > 0 && text.All(r => r.Confidence >= r.AcceptanceThreshold && NaturalText(r.Text.Text))) return text;
         cancellationToken.ThrowIfCancellationRequested();
         if (mathRecognizer is not null || AiMathRecognitionModels.Installed)
         {
             var formulas = AiMathLayout.Recognize(strokes, mathRecognizer, cancellationToken, calculate: false, minimumConfidence: .85f);
-            if (formulas.Count > 0 && formulas.All(r => r.Confidence >= .85f && Mathematical(r.Text.Text)))
+            if (formulas.Count > 0 && formulas.All(r=>r.Admission==AiInkLayout.ResultAdmission.Scored) && formulas.All(r => r.Confidence >= .85f && Mathematical(r.Text.Text)))
             {
                 foreach (var formula in formulas) AiMathLayout.ApplySolvedResult(formula, cancellationToken, mathSolver);
                 return formulas;
@@ -61,7 +61,7 @@ internal static class AiAutomaticLayout
             var members = region.StrokeIndices.Order().Select(i => strokes[i]).ToArray();
             var decoded = region.Category == InkCategory.Text ? AiInkLayout.Recognize(members, textRecognizer, token) :
                 AiMathLayout.Recognize(members, mathRecognizer, token, calculate: false, minimumConfidence: .85f);
-            if (decoded.Count == 0 || decoded.Any(r => !float.IsFinite(r.Confidence) || r.Confidence < r.AcceptanceThreshold) ||
+            if (decoded.Count == 0 || decoded.Any(r=>r.Admission!=AiInkLayout.ResultAdmission.Scored) || decoded.Any(r => !float.IsFinite(r.Confidence) || r.Confidence < r.AcceptanceThreshold) ||
                 decoded.SelectMany(r => r.Strokes).Distinct().Count() != members.Length) continue;
             foreach (var result in decoded)
                 if (Mathematical(result.Text.Text) && MathTypesetting.Supported(result.Text.Text))

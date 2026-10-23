@@ -25,6 +25,9 @@ public static class UiText
     public static string ExitApp => T("Закрыть программу");
     internal static IReadOnlyDictionary<string, string[]> Translations { get; } = new Dictionary<string, string[]>
     {
+        ["Модель формул недоступна"] = ["Formula model is unavailable", "Modèle de formules indisponible", "Formelmodell nicht verfügbar"],
+        ["Отдельные русские слова со словарём; формулы — в режиме «Формулы». Экспериментальное распознавание может ошибаться. Замену можно отменить."] =
+            ["Russian words with a dictionary; formulas in Formulas mode. Experimental recognition can make mistakes. You can undo replacements.", "Mots russes avec dictionnaire ; formules en mode Formules. La reconnaissance expérimentale peut se tromper. Les remplacements sont annulables.", "Russische Wörter mit Wörterbuch; Formeln im Modus Formeln. Die experimentelle Erkennung kann Fehler machen. Ersetzungen lassen sich rückgängig machen."],
         ["Вышла новая версия {0}"] = ["Version {0} is here", "La version {0} est disponible", "Version {0} ist da"],
         ["Обновимся?"] = ["Ready for an update?", "On met à jour ?", "Zeit für ein Update?"],
         ["Скачать обновление"] = ["Download update", "Télécharger la mise à jour", "Update herunterladen"],

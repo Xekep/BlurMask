@@ -86,6 +86,8 @@ elseif ($Runtime -in @('linux-x64', 'osx-x64', 'osx-arm64')) {
 else { Write-Warning "Formula runtime is not packaged for $Runtime; handwritten ink and text recognition remain available." }
 
 if ($Runtime -in @('win-x64', 'linux-x64', 'osx-x64', 'osx-arm64')) {
+    python (Join-Path $repoRoot 'tools/package-experimental-math-model.py') --output $publishDir --rid $Runtime
+    if ($LASTEXITCODE -ne 0) { throw 'Bundled experimental Math2 model packaging failed.' }
     $solverDirectory = Join-Path $repoRoot ".artifacts/giac-runtime/$Runtime"
     $sourcesDirectory = Join-Path $repoRoot '.artifacts/installers'
     if ($Runtime -eq 'win-x64') {

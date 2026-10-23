@@ -49,7 +49,9 @@ internal sealed class AiPenRecognizer(InkDocument document, Func<string> recogni
             IReadOnlyList<AiInkLayout.Result> results;
             try { if (_disposed || generation != _generation) return; results = await Task.Run(() => infer is not null ? infer(strokes, mode, cancellationToken) : mode switch
                 {
-                    "math" => AiMathLayout.Recognize(strokes, cancellationToken: cancellationToken),
+                    "math" => Program.Settings.ExperimentalTextEngine
+                        ? AiExperimentalMathLayout.Recognize(strokes, token:cancellationToken)
+                        : AiMathLayout.Recognize(strokes, cancellationToken: cancellationToken),
                     "text" => AiInkLayout.Recognize(strokes, cancellationToken: cancellationToken),
                     _ => AiAutomaticLayout.Recognize(strokes, cancellationToken: cancellationToken)
                 }, cancellationToken); }
@@ -65,14 +67,16 @@ internal sealed class AiPenRecognizer(InkDocument document, Func<string> recogni
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 if (_disposed || generation != _generation || document.HasActiveEdit) return;
+                bool calculationFailed=false;
                 foreach (var result in results)
                 {
+                    if(!AiExperimentalMathLayout.CanApply(result,recognitionMode(),Program.Settings.ExperimentalTextEngine))continue;
                     var bounds = result.Strokes.Select(s => s.Bounds).Aggregate((a, b) => a.Union(b));
                     AiTypesetLayout.Fit(result.Text, bounds, result.SizingText, document.Marks,
                         result.SizingComponents, result.PreparedFontSizeSamples);
-                    _batch.Apply(result);
+                    if(_batch.Apply(result)&&result.MathCalculationFailed)calculationFailed=true;
                 }
-                if (results.Any(result => result.MathCalculationFailed)) CalculationFailed?.Invoke();
+                if (calculationFailed) CalculationFailed?.Invoke();
             });
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
