@@ -8,7 +8,7 @@ namespace InkRecognition;
 /// The provided main geometry owns the same prepared graph/source facts; source
 /// frame and controller configuration must come from their actual producers.
 /// </summary>
-public sealed class LegacyNativeOrdinaryParentWordCandidates
+public sealed partial class LegacyNativeOrdinaryParentWordCandidates
 {
     private readonly LegacyOrdinaryRecognitionGraph graph;
     private readonly LegacyInkAlphabet alphabet;
