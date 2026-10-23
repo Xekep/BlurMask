@@ -46,3 +46,14 @@ and all pool rows, with356 cancellation/ownership/re-entry guards. Per-chain
 1024-read allocation checks catch accidental full-buffer copies. Both ordinary
 and configured default chain captures remain unchanged. Actual bit8 eligibility
 remains zero in these diagnostics;275 insertion is not inferred.
+
+## Current-source audit correction, 23 October
+
+The current independently replayed source produces117 new records and31 reuses
+over the same48 connections/148 rows; the historical capture above has118/30.
+The oracle now derives deduplication from each actual row and prior pool,
+checking each case's counters, first/head references, full WORD and complete pool
+bytes, rather than requiring the historical aggregate. It also rejects duplicate
+owner/group entries, incomplete rows and missing cases. The production chain
+and its probe are unchanged; this does not establish native selection or text
+recognition accuracy.
