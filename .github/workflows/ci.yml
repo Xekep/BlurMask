@@ -260,7 +260,7 @@ jobs:
         shell: pwsh
         run: |
           $suffix = if ($IsWindows) { '.exe' } else { '' }
-          foreach ($project in @('LegacyFst23C.Probe', 'LegacyFst13AOutgoing.Probe', 'LegacyFst28CPrimaryMap.Probe', 'LegacyFst28CTargetPreparation.Probe', 'LegacyFst28CInitialState.Probe', 'LegacyFst28CFreshPrimaryControllerBootstrap.Probe', 'LegacyFst28CNumberSymbolMasks.Probe', 'LegacyFst28CNumberInitialD0.Probe', 'LegacyFst28CNumberInitialQueryBinding.Probe', 'LegacyFst28CNumberInitialPage.Probe', 'LegacyFullEnglishFirst.Probe', 'LegacyFullEnglishFirstConfidence.Probe', 'LegacyFullEnglishFirstController.Probe', 'LegacyFullEnglishFirstPrimary.Probe', 'LegacyFullEnglishFirstContext.Probe', 'LegacyFullEnglishFirstTerminal.Probe', 'LegacyFullEnglishFirstPlainText.Probe', 'LegacyEnglishCaseMain.Probe', 'LegacyEnglishCaseInitialization.Probe', 'LegacyEnglishCaseInitialQuery.Probe')) {
+          foreach ($project in @('LegacyFst23C.Probe', 'LegacyFst13AOutgoing.Probe', 'LegacyFst28CPrimaryMap.Probe', 'LegacyFst28CTargetPreparation.Probe', 'LegacyFst28CInitialState.Probe', 'LegacyFst28CFreshPrimaryControllerBootstrap.Probe', 'LegacyFst28CNumberSymbolMasks.Probe', 'LegacyFst28CNumberInitialD0.Probe', 'LegacyFst28CNumberInitialQueryBinding.Probe', 'LegacyFst28CNumberInitialPage.Probe', 'LegacyFullEnglishFirst.Probe', 'LegacyFullEnglishFirstConfidence.Probe', 'LegacyFullEnglishFirstController.Probe', 'LegacyFullEnglishFirstPrimary.Probe', 'LegacyFullEnglishFirstContext.Probe', 'LegacyFullEnglishFirstTerminal.Probe', 'LegacyFullEnglishFirstPlainText.Probe', 'LegacyEnglishCaseMain.Probe', 'LegacyEnglishCaseInitialization.Probe', 'LegacyEnglishCaseInitialQuery.Probe', 'LegacyEnglishCaseInitialConsumer.Probe')) {
             $capture = switch ($project) {
               'LegacyFst23C.Probe' { 'legacy-fst23c' }
               'LegacyFst13AOutgoing.Probe' { 'legacy-fst13a-outgoing' }
@@ -281,15 +281,17 @@ jobs:
               'LegacyEnglishCaseMain.Probe' { 'legacy-en-case-main' }
               'LegacyEnglishCaseInitialization.Probe' { 'legacy-en-case-initialization' }
               'LegacyEnglishCaseInitialQuery.Probe' { 'legacy-en-case-initial-query' }
+              'LegacyEnglishCaseInitialConsumer.Probe' { 'legacy-en-case-initial-consumer' }
               default { 'legacy-en-full-first' }
             }
             $directory = "./.artifacts/$capture-native"
             dotnet publish "tools/$project/$project.csproj" -c Release -p:PublishAot=true -o $directory
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             $arguments = @('models')
-            if ($project -in @('LegacyFullEnglishFirst.Probe', 'LegacyFullEnglishFirstConfidence.Probe', 'LegacyFullEnglishFirstController.Probe', 'LegacyFullEnglishFirstPrimary.Probe', 'LegacyFullEnglishFirstContext.Probe', 'LegacyFullEnglishFirstTerminal.Probe', 'LegacyFullEnglishFirstPlainText.Probe', 'LegacyEnglishCaseMain.Probe', 'LegacyEnglishCaseInitialization.Probe', 'LegacyEnglishCaseInitialQuery.Probe')) { $arguments += '.artifacts/legacy-en119-final-single-blind.json' }
+            if ($project -in @('LegacyFullEnglishFirst.Probe', 'LegacyFullEnglishFirstConfidence.Probe', 'LegacyFullEnglishFirstController.Probe', 'LegacyFullEnglishFirstPrimary.Probe', 'LegacyFullEnglishFirstContext.Probe', 'LegacyFullEnglishFirstTerminal.Probe', 'LegacyFullEnglishFirstPlainText.Probe', 'LegacyEnglishCaseMain.Probe', 'LegacyEnglishCaseInitialization.Probe', 'LegacyEnglishCaseInitialQuery.Probe', 'LegacyEnglishCaseInitialConsumer.Probe')) { $arguments += '.artifacts/legacy-en119-final-single-blind.json' }
             $arguments += ".artifacts/$capture-native.json"
-            $executable = Join-Path $directory "$project$suffix"
+            $binaryName = if ($project -eq 'LegacyEnglishCaseInitialConsumer.Probe') { 'LegacyEnglishCaseInitialQuery.Probe' } else { $project }
+            $executable = Join-Path $directory "$binaryName$suffix"
             & $executable @arguments
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             $managedHash = (Get-FileHash ".artifacts/$capture-managed.json" -Algorithm SHA256).Hash
@@ -301,6 +303,10 @@ jobs:
             }
             if ($project -eq 'LegacyFst28CNumberInitialPage.Probe') {
               python -I -B tools/LegacyFst28CNumberInitialPage.Probe/audit_output.py models ".artifacts/$capture-native.json" .artifacts/legacy-fst28c-number-initial-d0-native.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+            if ($project -eq 'LegacyEnglishCaseInitialConsumer.Probe') {
+              python -I -B tools/LegacyEnglishCaseInitialConsumer.Probe/audit_output.py --repo . --models models --capture ".artifacts/$capture-native.json" --parent .artifacts/legacy-en-case-initial-query-native.json --output .artifacts/legacy-en-case-initial-consumer-oracle-native.json
               if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             }
             if ($project -eq 'LegacyFullEnglishFirstPlainText.Probe') {

@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 namespace InkRecognition;
 
 //Only the first true2144F0 prefix. No public request, graph, map or flags ingress.
-internal sealed class LegacyEnglishCaseInitialQueryPass
+internal sealed partial class LegacyEnglishCaseInitialQueryPass
 {
     internal const ulong InitialTag=0x0000080000000000UL;
     private int phase; //0prepared,1executing,2complete,3failed
@@ -64,10 +64,12 @@ internal sealed class LegacyEnglishCaseInitialQueryPass
                 if(page.ReturnedCount is<0 or>128||page.Records.Length!=page.ReturnedCount*32||page.ReturnedCount>400-ConsumedRows)throw new InvalidDataException("Complete source-bound first-query page required.");
                 var completed=LegacyEnglishCaseInitialQueryRecord.Issue(this,lease,query.Request.Skip,page);
                 lock(pageGate)pages.Add(completed);
+                initialConsumer?.Consume(lease,completed,token);
                 ConsumedRows+=page.ReturnedCount;query.Request.Skip=checked(query.Request.Skip+page.ReturnedCount);
-                if(Initializer.PlanForAudit.BindingForAudit.Contexts.NodeCount>889)throw new InvalidDataException("Whole query context growth bound exceeded.");
+                if(Initializer.PlanForAudit.BindingForAudit.Contexts.NodeCount>(initialConsumer?.MaximumContextNodes??889))throw new InvalidDataException("Whole query context growth bound exceeded.");
                 observer?.Invoke("query:page");token.ThrowIfCancellationRequested();if(page.ReturnedCount==0)break;
             }
+            initialConsumer?.CompletePrefix(lease,token);
             var output=CopyCompletedPages();observer?.Invoke("query:publish");token.ThrowIfCancellationRequested();Root.CompleteInitialQuery(lease);lease=null;Volatile.Write(ref phase,2);return output;
         }
         catch{Volatile.Write(ref phase,entered?3:0);if(lease is not null)Root.PoisonInitialQuery(lease);else if(entered)Root.FaultInitialExecutionOwner(this);throw;}

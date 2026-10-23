@@ -48,7 +48,20 @@ public sealed class LegacyNativeWordAcousticRequestScorer
         Func<int, ushort, bool>? isSuppressedE8 = null,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request); ArgumentNullException.ThrowIfNull(getOwnedGroupCosts);
+        ArgumentNullException.ThrowIfNull(request);
+        return ScoreCore(new LegacyNativeFullWordAcousticAccessor(request), getOwnedGroupCosts,
+            frontendSuppressionEnabled, isSuppressedE8, cancellationToken);
+    }
+
+    // Numeric field transport only. A caller of this kernel acquires no source,
+    // query, cache, parent, category or mask authority.
+    internal bool ScoreCore<TRequest>(TRequest request,
+        Func<int, ushort, LegacyNativeWordAcousticGroupCosts> getOwnedGroupCosts,
+        bool frontendSuppressionEnabled, Func<int, ushort, bool>? isSuppressedE8,
+        CancellationToken cancellationToken)
+        where TRequest : struct, ILegacyNativeWordAcousticAccessor
+    {
+        ArgumentNullException.ThrowIfNull(getOwnedGroupCosts);
         cancellationToken.ThrowIfCancellationRequested();
         int node = request.ReadInt32(0); ushort arc = request.ReadUInt16(12);
         if (node < 0) throw new ArgumentOutOfRangeException(nameof(request));
@@ -102,7 +115,8 @@ public sealed class LegacyNativeWordAcousticRequestScorer
         return accepted;
     }
 
-    private static void Write32(LegacyNativeWordRecombinationRequest request, int offset, int value)
+    private static void Write32<TRequest>(TRequest request, int offset, int value)
+        where TRequest : struct, ILegacyNativeWordAcousticAccessor
     {
         Span<byte> bytes = stackalloc byte[4]; BinaryPrimitives.WriteInt32LittleEndian(bytes, value);
         for (int i = 0; i < bytes.Length; i++) request.WriteByte(offset + i, bytes[i]);

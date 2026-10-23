@@ -734,6 +734,9 @@ python -I -B tools/LegacyEnglishCaseInitialization.Probe/audit_output.py --repo 
 
 dotnet run --project tools/LegacyEnglishCaseInitialQuery.Probe -c Release -- models .artifacts/legacy-en119-final-single-blind.json .artifacts/legacy-en-case-initial-query-managed.json
 python -I -B tools/LegacyEnglishCaseInitialQuery.Probe/audit_output.py --repo . --models models --capture .artifacts/legacy-en-case-initial-query-managed.json --case-capture .artifacts/legacy-en-case-main-managed.json --case-proof .artifacts/legacy-en-case-main-oracle-managed.json --output .artifacts/legacy-en-case-initial-query-oracle-managed.json
+
+dotnet run --project tools/LegacyEnglishCaseInitialConsumer.Probe -c Release -- models .artifacts/legacy-en119-final-single-blind.json .artifacts/legacy-en-case-initial-consumer-managed.json
+python -I -B tools/LegacyEnglishCaseInitialConsumer.Probe/audit_output.py --repo . --models models --capture .artifacts/legacy-en-case-initial-consumer-managed.json --parent .artifacts/legacy-en-case-initial-query-managed.json --output .artifacts/legacy-en-case-initial-consumer-oracle-managed.json
 dotnet run --project tools/LegacyEnglishMainWordTransitions.Probe -c Release -- models .artifacts/legacy-en119-final-single-blind.json .artifacts/legacy-en-word-transitions-managed.json
 python -I -B tools/LegacyEnglishMainWordTransitions.Probe/audit_output.py models .artifacts/legacy-en-word-transitions-managed.json .artifacts/legacy-en-word-transitions-oracle-managed.json
 dotnet run --project tools/LegacyMathMixed107Raw.Probe -c Release -- models/math/math-ak.res .artifacts/legacy-math-mixed107-raw-managed.json

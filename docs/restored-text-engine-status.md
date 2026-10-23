@@ -6,6 +6,15 @@ default recognizer.
 
 ## Development integration (2026-10-21)
 
+The [English initial PRIMARY consumer](english-case-initial-primary-consumer-runtime-20261023.md)
+now joins actual query rows to owned context grafts, category maps, acoustic
+scoring and the first candidate heap. All234 fixtures pass independent
+raw-page/request/heap replay and Managed/NativeAOT parity:10,202 rows and5,391
+scoring calls, with58 refusal guards and17 cancellation stages. A rejected
+preentry lease no longer changes the issuer. Existing query/scorer regressions
+and the recorded Russian diagnostic remain unchanged. Alternatives, sorting,
+word materialization, history and final-text integration remain unfinished.
+
 The [owned initial number page](linguistic-fst28c-number-initial-page-runtime.md)
 now walks the retained Russian number source using genuine source/D0/context
 owners. All four fixtures pass independent raw-model/AVL/packed-record replay
