@@ -218,3 +218,16 @@ The positive audit and four byte-integrity refusal controls are retained in
 the nine-item `root-ctc-selected-header-frozen-manifest-20261023.json`, SHA256
 `5fb3d8cb503e961071ae0fe2a06e3e12ae2f8f4d7590f264817a015f8cd3e253`.
 Those refusals test input integrity, not independent semantic mutation coverage.
+
+The later `audit_english_ctc_header_quantization.py` checks the complete1352-byte
+constructor and its shifted quantization loop. Given the projected five-header
+packet and successful construction, graph.count becomes4. Source code indices
+0..3 are written to header indices1..4 at byte offsets120/200/280/360. The
+appended unknown code slot4 is not read by this loop. All four consumed codes
+are2. The proof checks the header-stride register's complete write set before
+the loop; it does not establish live/disjoint caller objects or preservation
+through later constructor/loader calls. Whole-constructor dataflow and V120
+remain unapproved. Nine-item frozen manifest
+`root-ctc-header-quantization-frozen-manifest-20261023.json`, SHA256
+`2a4c826f5c09d11a1367e2da8613301913b0a8b3e95f9e5c70214c5d8d1c3276`,
+retains the auditors, native body exports and report without SDK execution.
