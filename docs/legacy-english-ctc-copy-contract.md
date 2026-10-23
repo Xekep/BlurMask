@@ -47,8 +47,11 @@ application or distributed by this change.
 
 ## Packet helper coverage supplement
 
-The selected loader also calls `106360`, which was outside the earlier
-24-function instruction inventory. A fresh read-only export covers its full
+The loader contains a call to `106360` in its **pre-0x106 version branch**,
+outside the earlier24-function instruction inventory. The selected full English
+resource is version0x106 and takes the direct `10E410` builder path instead.
+The following helper audit therefore covers the older branch; it does not
+establish the selected resource's admission. A fresh read-only export covers its full
 registered body: 1466 bytes and 393 instructions. The actual `106DD0` caller
 passes the local packet address and size112; this is pinned from instructions.
 The immutable evidence manifest is
@@ -89,3 +92,29 @@ Evidence manifest `root-ctc-state-metadata-frozen-manifest-20261023.json`, SHA25
 pins13 analysis files and dependencies. This is a partial static result;
 `V120=false`, complete graph-header alias preservation and CTC guide authority
 remain unapproved.
+
+## CPU-layout supplement
+
+`tools/handwriting/audit_english_ctc_cpu_layout.py` checks the complete
+81-byte/27-instruction alignment mapper and6883-byte/1132-instruction CPU
+setup body, including all seven dispatch entries and the actual stored field.
+Enums1..7 map to float-unit alignments `[8,8,8,16,8,16,8]`; this is a runtime
+packing rule distinct from the serialized model's alignment. CPU detection is
+not executed, and the auditor does not prove its successful-result domain.
+
+The independent raw reader pins the actual nested5F/version0x106 envelope,
+four input/recurrent layers and separate output metadata. All three recurrent
+layers have width127 and flags0. Conditionally on the native state-helper
+layout and either supported alignment8/16, the prefix stride is256 and each
+subvector stride is128. Consequently both alignments require the same kind8
+workspace:14336 bytes for two rows,21504 for three rows. No host CPU choice or
+extra-row mode is guessed. These arithmetic checks do not prove allocation
+separation or the complete set of loader aliases, and do not approve V120.
+
+One positive audit and seven corrupted body/table/field/resource/call/stride/
+row-count controls pass. Frozen manifest
+`root-ctc-cpu-layout-frozen-manifest-20261023.json`, SHA256
+`18f1cdc678d70ebb65d3e2e480d14dfc59f84787b7792c353a398b560e399c5e`,
+retains17 analysis files/dependencies, including the unchanged SDK/model and
+an immutable snapshot of the portable auditor. No vendor code executes and
+the application's CTC framing remains unchanged.
