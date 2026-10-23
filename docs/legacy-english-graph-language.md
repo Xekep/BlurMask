@@ -45,6 +45,17 @@ zero warnings/errors, the new prepared audit passed and the old node1 prepared
 capture stayed byte-identical. No additional inference was needed for those
 integration checks.
 
+A separate data-only Python reconstruction reparsed the packed LK terminal
+preorder, sparse language costs, case policy and217-to42 category mapping.
+It derived all74 terminal FIRST candidates from the actual pre-language rows,
+then independently replayed the accepted heap and phase1 ordering. The full
+250-slot backing,156 rows,156 ordinals, alternatives and all three mask domains
+matched exactly. All31 unchanged prefix fields matched the prior capture;
+nine field corruptions were rejected. Its frozen evidence packet SHA256 is
+`9cc78d7ffe8ab09922ac1f167ae1995cc78579ef2a945486c6f6f8f836964da9`.
+This replay used no additional model forward and proves only the checked
+two-node path, not a general word recognizer.
+
 Still missing: the generic node/span loop beyond two nodes, connected later
 history/case processing, final207CB0 compact publication before terminal
 selection2257/221840/21FFD0, a live result-query owner, and application text
@@ -55,3 +66,12 @@ dotnet build tools/LegacyEnglishGraphCursor.Probe -c Release
 dotnet run --no-build --project tools/LegacyEnglishGraphCursor.Probe -c Release > prepared.log
 python -I -B tools/LegacyEnglishGraphCursor.Probe/audit_prepared.py prepared.log --tamper
 ```
+
+`tools/LegacyEnglishGraph.ActualEntry` retains the reviewed headless actual
+entry with a project reference to the current library. It accepts only the
+complete pinned141-record coordinate fixture and its fixed original index4,
+checks seven model hashes, uses a60-second cooperative cancellation deadline
+and requires a fresh output path. The successful diagnostic above was run from
+the immutable reviewed build; the portable project is separately compiled.
+CI builds this entry without executing it. It does not accept caller-selected
+expected labels, silently substitute synthetic rows or open the application.

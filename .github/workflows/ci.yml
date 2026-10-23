@@ -151,6 +151,7 @@ jobs:
         run: |
           mkdir -p .artifacts
           dotnet build tools/LegacyEnglishGraphCursor.Probe -c Release
+          dotnet build tools/LegacyEnglishGraph.ActualEntry -c Release
           dotnet run --no-build --project tools/LegacyEnglishGraphCursor.Probe -c Release > .artifacts/english-graph-prepared.log
           python -I -B tools/LegacyEnglishGraphCursor.Probe/audit_prepared.py .artifacts/english-graph-prepared.log --tamper
       - name: Portable stroke engine numerical goldens, model validation and ink history
