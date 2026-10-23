@@ -319,3 +319,16 @@ and whole-loader preservation remain open. The62-item frozen manifest
 `root-ctc-header-origin-frozen-manifest-20261023.json`, SHA256
 `fe1e2d5b4f75736645d7dc9053cfe5f237d896f60691d36ce87f7cec66b4db84`,
 records the conditional proof without SDK execution or runtime admission.
+
+`audit_english_ctc_portable_layout.py` compares the existing application's pinned
+portable pack against that conditional native graph binding. All67 tensor
+storage descriptors match: matrix/vector order, offsets, lengths, rows, strides
+and input widths. The complete2,007,776-byte payload matches the raw resource,
+with contiguous coverage and no omitted tail. Six parsed-descriptor corruptions
+are rejected independently of the input fingerprint. This checks storage, not
+the mathematical meaning of gate labels, network execution, decoding or caller/
+allocator origins. It changes no recognition behavior and runs no inference.
+The40-item frozen manifest
+`root-ctc-portable-layout-frozen-manifest-20261023.json`, SHA256
+`8de3ce1aff70ef57bbeb2276d8c2ce5feb23ce41c0facd1902b3bd4a49ac461d`,
+retains the pack, composed proof reports and corruption controls.
