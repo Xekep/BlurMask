@@ -645,6 +645,8 @@ python -I -B tools/LegacyFst28CNumberSymbolMasks.Probe/audit_output.py models .a
 
 dotnet run --project tools/LegacyFst28CNumberInitialD0.Probe -c Release -- models .artifacts/legacy-fst28c-number-initial-d0-managed.json
 python -I -B tools/LegacyFst28CNumberInitialD0.Probe/audit_output.py models .artifacts/legacy-fst28c-number-initial-d0-managed.json
+dotnet run --project tools/LegacyFst28CNumberInitialQueryBinding.Probe -c Release -- models .artifacts/legacy-fst28c-number-initial-binding-managed.json
+python -I -B tools/LegacyFst28CNumberInitialQueryBinding.Probe/audit_output.py models .artifacts/legacy-fst28c-number-initial-binding-managed.json .artifacts/legacy-fst28c-number-initial-d0-managed.json
 python tools/LegacyEnglishLiteFirstPreprocessing.Probe/reference_controls.py .artifacts/legacy-en-short-controls.json
 python tools/LegacyEnglishFirstSlant.Probe/reference_controls.py .artifacts/legacy-en-short-controls.json .artifacts/legacy-en-slant-controls.json
 dotnet run --project tools/LegacyFirstAcoustic119Wire.Probe -c Release -- models .artifacts/legacy-first-acoustic119-wire-managed.json

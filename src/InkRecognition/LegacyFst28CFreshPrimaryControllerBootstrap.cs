@@ -168,6 +168,19 @@ public sealed class LegacyFst28CFreshPrimaryControllerBootstrap
         return new(true, true, mapHeader.Root is null, request.Parent is null, 0, 0, 8, 128, 0, true,
             request.ContextStart.HasValue || request.ContextLength.HasValue);
     }
+    // Trusted readonly seam for the new owning active-context overlay. Existing
+    // constructor views remain historical; this method does not mutate them.
+    internal object RetainInitialNumberHeaderIdentity(LegacyFst28CNumberInitialD0 owner,
+        CancellationToken token = default)
+    {
+        token.ThrowIfCancellationRequested(); ArgumentNullException.ThrowIfNull(owner);
+        if (!ReferenceEquals(owner.Bootstrap, this) || !ReferenceEquals(owner.Graph, Graph) ||
+            !ReferenceEquals(owner.InitialState, InitialState) ||
+            !ReferenceEquals(owner.Policy, frontend.PolicyIssuer)) throw new ArgumentException("Exact same initial D0 owner required.");
+        _ = ReadConstructorState(token); // Validates private header/frontend/source/cohort.
+        return mapHeader;
+    }
+
     internal bool IsSameIssuer(LegacyFst28CFreshPrimaryControllerBootstrap other)
         => ReferenceEquals(this, other) && ReferenceEquals(cohort, other.cohort);
 }

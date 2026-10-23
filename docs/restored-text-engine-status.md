@@ -105,6 +105,15 @@ with exact Managed/Native AOT parity,79 guards and13 corruption controls.
 The six older number-source captures remain exact. Query issuance, history,
 continuation and ready number OCR remain pending.
 
+The [initial number context/request binding](linguistic-fst28c-number-initial-query-binding-runtime.md)
+now retains the same private header and builds its18-node active context,
+25 exact reset-write domains and fixed first-request prefix from the completed
+typed D0. Four actual owners pass independent raw-map/AVL/reset/request checks
+and Managed/Native AOT parity, with85 guards and15 corruption controls. Seven
+older number captures remain exact. This explicitly reconstructs context after
+D0 in the library; it does not execute the native query lifecycle, publish a
+result page, grant Query/Ready authority or establish number recognition.
+
 The [English case M/N/source68 component](english-case-main-source68-runtime-20261022.md)
 now derives the case-expanded masks, scores the actual same-source groups and
 joins pooled D0 to one ordered case-aware working-map refresh. Both original134
