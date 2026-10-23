@@ -544,3 +544,23 @@ were independently validated. This proves conditional registration when004920
 is called with the default environment. It does not establish that the selected
 CTC caller invokes that module entry, arbitrary populated registry behavior,
 other service registrations, allocation failure cleanup or runtime readiness.
+
+`audit_english_ctc_constructor_return.py` composes the selected successful
+1941B0 path through its real epilogue and synthetic caller return marker.
+Distinct64-bit values for all eight nonvolatile general-purpose registers are
+installed before the original prologue saves them. Two marker sets across the
+eight admitted alignment/flag combinations return true with the original
+caller stack and every saved register restored. The same graph, header, state,
+metadata, scratch objects and call frames survive every composed stage;
+the dispatcher is not restarted with a separately prepared plausible state.
+
+Thirteen controls reject corruption of each saved register slot, the success
+bit, return address, stack pointer and marker domain. Each named saved slot is
+checked against its entry marker before corruption. The21-item
+`root-ctc-constructor-return-frozen-manifest-20261023.json`, SHA256
+`d90670787d4297e545b9caeb4f190dc8a56356b3a2ebbeb397e9ae95ae38d56f`,
+preserves sources and reports. This closes the selected successful constructor
+walk under the inherited packet/default-table/allocation conditions. It does
+not prove actual packet or environment origin, service installation by that
+caller, other packet branches, failure cleanup, weight import or complete
+recognition. Whole-constructor and runtime-readiness predicates remain false.
