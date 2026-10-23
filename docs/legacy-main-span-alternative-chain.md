@@ -24,8 +24,8 @@ emissions are single-use across connection instances; failures retain native
 partial writes and cannot be retried. Pre-entry cancellation and structural
 guards do not consume an emission.
 
-Seven real raw CASE inputs produce56 bounded numeric emissions,195 processed
-rows,174 new descriptors and21 reused descriptors. Managed and Windows NativeAOT
+The historical seven raw CASE inputs produced56 bounded numeric emissions,195
+processed rows,174 new descriptors and21 reused descriptors. Managed and Windows NativeAOT
 captures match byte-for-byte. The Python oracle independently reconstructs full
 40-byte pool records, pool keys/dedup flags, complete120-byte WORD storage,
 collision/force-carry behavior and first-new/head/count outputs. It composes
@@ -60,3 +60,15 @@ independent oracle reconstructs all120 WORD bytes, all pool rows and all three
 float32 costs from captured original compact data. These are numeric chain
 diagnostics, with zero actual bit8 candidates; no219580 eligibility,275 insertion
 or final winner is inferred. The default chain capture remains byte-identical.
+
+## Current-source oracle check (2026-10-23)
+
+Fresh current-source chain and cost-transfer captures produce172 new and23
+reused descriptors, still195 rows across56 cases. The oracle derives each
+case's counts, first/head references and complete WORD/pool bytes from its
+upstream rows. It now validates the aggregate against that replay rather than
+requiring the historical174/21 split as an additional constant. Historical
+captures still pass; neither production code nor old captures are changed.
+Duplicate pool owners/groups, malformed record extents and missing cases are
+also rejected before replay. These checks do not establish upstream numerical
+inference accuracy or final handwriting recognition.

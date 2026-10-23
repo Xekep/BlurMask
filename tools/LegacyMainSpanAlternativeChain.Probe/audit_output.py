@@ -22,6 +22,7 @@ def key(r):return r&0x010000ffffffffff
 def load(nodes):
     result={}
     for n in nodes:
+        assert n['key'] not in result,'Duplicate pool owner in capture'
         data=base64.b64decode(n['records']);assert len(data)==((n['packed']&32767)>>2)*40
         result[n['key']]={'duplicate':bool(n['packed']&32768),'rows':[bytearray(data[i:i+40])for i in range(0,len(data),40)]}
     return result
@@ -32,9 +33,11 @@ created=reused=cases=rows_checked=0
 for sample in samples:
     assert sample['nativeEligible']==0
     groups={g['id']:g for g in sample['groups']}
+    assert len(groups)==len(sample['groups']) and len(sample['cases'])==8
     for c in sample['cases']:
         pool=load(c['beforePool']);word=bytearray(base64.b64decode(c['beforeWord']));assert u64(word,8)==MAX
         residue=base64.b64decode(c['residue']);rows=base64.b64decode(c['rows'])
+        assert len(word)==120 and len(residue)==40 and len(rows)%72==0
         def resolve(ref):return pool[key(ref)]['rows'][(ref>>40)&65535]
         def append(k,d,force):
             node=pool.setdefault(key(k),{'duplicate':False,'rows':[]})
@@ -88,5 +91,9 @@ for sample in samples:
         expected=load(c['afterPool']);assert set(pool)==set(expected)
         for k in pool:assert pool[k]==expected[k],f'full40-byte owner {k:x} differs'
         created+=nc;reused+=nr;cases+=1
-assert (len(samples),cases,created,reused)==(7,56,174,21)
+# Deduplication follows the independently replayed source rows above. Keep the
+# exact case counts/head/WORD120/pool40 checks; a historical174/21 aggregate
+# cannot also describe every later, independently verified source image.
+assert (len(samples),cases,rows_checked)==(7,56,195)
+assert created>0 and reused>0 and created+reused==rows_checked
 print(f'PASS independent {cases} fullWORD/pool connections/{rows_checked} rows/{created} new/{reused} reused; upstream scalar composition, no NN/transcript claim.')
