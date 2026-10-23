@@ -33,6 +33,9 @@ virtual label256 that sentinel would skip native conversion/postprocessing.
 Feature writer0327A0 also uses a different configured program from the English
 directional feature extractor. Its temporal/grid branches, calibrations and
 source callbacks must be selected from the actual slot/profile fields.
+The [original XY normalization prerequisite](legacy-math-ak-source-geometry.md)
+is implemented separately with bounded input and independent rounding controls.
+It does not yet provide feature vectors or classifier output.
 The next implementation is that same-source feature/classifier/shortlist
 producer; grammar matching and tree materialization remain after it. Neither
 modern LaTeX/Math2 DOM nor caller-supplied scores can substitute for those
