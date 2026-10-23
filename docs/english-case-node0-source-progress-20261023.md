@@ -243,3 +243,38 @@ unfinished entry and provides no new Russian-cursive quality result or RC.
 | `root-gated-recognition-main-verification-frozen-manifest-20261023.json` | `1fe8126605bf5254d5b1b809025836db4638d881cdc747bd51a0477403d76064` |
 | `independent-number-context-static-adapter-final-frozen-manifest-20261023.json` | `3189da29912eb2cffedca29148eea49692b0ada489a45559e1cc437a82fc9956` |
 | `independent-number-initial-scorer-stale-pin-frozen-manifest-20261023.json` | `012385c57dca4e686822e771c9905ce62f8fb16922f64f1116363f138725fc97` |
+
+
+## Explicit immutable model-index preparation
+
+The stored source now separates model preprocessing from per-ink work.
+`LegacyEnglishCaseNode0ModelIndexPreparation.Prepare` explicitly builds the same
+preorder map once, on the exact immutable `LegacyPackedLexicon` owner. A cold
+operation refuses before the original root claim; it does not silently warm the
+cache or increase the16Mi operation limit. Each warm operation retains its own
+numeric binding, wrapper and ledger. No token, ink, receipt or ledger is cached.
+
+The model setup's proposed payload2668372, copies22373896 and visits34661736
+have separate limits4/32/40Mi. Per-operation setup128, terminal reads32 and map
+checks8 per label remain named source-unit proposals, not a complete transitive
+work certificate. Default-null cache fields add16 logical instance-field bytes
+to EVERY lexicon, including previous Russian/default loaders, before explicit
+preprocessing. Existing constructors having no new statements does not mean
+unchanged object size. The prepared map retains roughly2.7MB until its model
+owner becomes unreachable; no static fingerprint-keyed cache keeps it alive.
+
+Actual C# checks traversed the entire666547-node public graph independently
+and matched all260074 terminal preorder IDs. They also checked cold/minus-one
+refusals, exact model identity, distinct invocation bindings, concurrent warm
+reads, cancellation and retry. Warm preparation records128 logical visits;
+complete terminal reads remain under the unchanged16Mi limit. Those counters
+are not elapsed-time or CPU claims. Cancellation racing after the final poll
+may successfully publish a complete immutable cache; either outcome is accepted.
+The current786-file library and owning probe build with zero warnings/errors.
+This test performs no NN inference. CI runs the new `--index-only` mode.
+
+This removes a specific repeated dictionary traversal. Whole-operation bounds,
+final readiness, host wiring, English/Russian arbitration and Russian cursive
+quality remain unfinished. No completed-engine or default-switch claim follows.
+
+Evidence: `root-en-model-index-csharp-and-main-frozen-manifest-20261023.json`, SHA256 `f6f4093b19c0594cd521972857e2b233e7d079050d0fa73da62cf4918dda5d28`, under `E:/BlurMask-build-artifacts-20261014/`.

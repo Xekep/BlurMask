@@ -137,6 +137,8 @@ jobs:
           dotnet build tools/LegacyEnglishCaseNode0Completion.Probe -c Release
           dotnet build tools/LegacyFst28CNumberTrueLanguage.Probe -c Release
           python -I -B tools/LegacyEnglishCaseNode0Completion.Probe/check_guard_payload.py --self-test
+          mkdir -p .artifacts
+          dotnet run --no-build --project tools/LegacyEnglishCaseNode0Completion.Probe -c Release -- --index-only models .artifacts/node0-model-index-managed.json
       - name: Portable stroke engine numerical goldens, model validation and ink history
         run: dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --ai-pen-test
       - name: Math token formatter and model guards
