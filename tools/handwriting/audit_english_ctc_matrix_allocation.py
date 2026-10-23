@@ -106,8 +106,17 @@ class MatrixAllocation(Base):
         for r in ('rcx','rdx','r8','r9','r10','r11'): self.setreg(r, None)
         self.setreg('rax', Address(name)); self.zf = self.last_cmp = None
 
-    def run_matrix(self):
-        while self.pc != 0x180194b7d:
+    def invoke(self, target, nxt):
+        if target == 0xABD:
+            self.allocate(target)
+            return nxt
+        assert target in (0x1801915e0,0x180192f10,0x180193070,0x180198960)
+        self.setreg('rsp',plus(self.getreg('rsp'),-8))
+        self.store(self.getreg('rsp'),8,nxt)
+        return target
+
+    def run_until(self, stop):
+        while self.pc != stop:
             self.matrix_steps += 1; assert self.matrix_steps < 12000
             i = instructions[self.pc]; m = i.mnemonic; o = i.operands; nxt = self.pc+i.size
             if m in ('add','sub','and','xor','imul','inc','dec','test','idiv','shl','call'): self.last_cmp = None
@@ -152,16 +161,15 @@ class MatrixAllocation(Base):
                 assert m=='jmp' or self.zf is not None
                 if m=='jmp' or self.zf==(m=='je'): nxt=self.value(i,o[0])
             elif m=='call':
-                target=self.value(i,o[0])
-                if target==0xABD: self.allocate(target)
-                else:
-                    assert target in (0x1801915e0,0x180192f10,0x180193070,0x180198960)
-                    self.setreg('rsp',plus(self.getreg('rsp'),-8)); self.store(self.getreg('rsp'),8,nxt); nxt=target
+                nxt=self.invoke(self.value(i,o[0]),nxt)
             elif m=='ret':
                 nxt=self.load(self.getreg('rsp'),8); self.setreg('rsp',plus(self.getreg('rsp'),8))
             elif m=='nop': pass
             else: raise AssertionError(('unsupported matrix sizing',hex(self.pc),m,i.op_str))
             self.pc=nxt
+
+    def run_matrix(self):
+        self.run_until(0x180194b7d)
         assert len(self.allocations)==7
         expected={}; total=0
         for index,(width,mode) in enumerate([(16,False),(128,True),(256,False),(128,True),(256,False),(128,True)]):

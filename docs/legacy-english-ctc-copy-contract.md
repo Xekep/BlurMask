@@ -500,3 +500,26 @@ command as successful. This closes a conditional successful metadata-allocation
 and sizing path. Fresh disjoint default ROOT allocations, service registration
 and environment origin remain assumptions; the matrix scratch pass, failure
 cleanup, complete constructor and recognition readiness remain open.
+
+`audit_english_ctc_matrix_workspace.py` continues those same objects through
+the second194980 pass and its real return to1946D2. It allocates4576/5056-byte
+scratch storage for alignment8/16, then checks all5100 metadata bytes and typed
+scratch pointers against the separate helper field algebra. All scratch payload
+bytes remain zero and340 malloc padding bytes remain undefined. The seven
+metadata allocations are reused. The original objects, caller stack pointer
+and nonvolatile registers are preserved, except the seven intended header
+pointers and graph scratch pointer. The first-pass interpreter is factored into
+`run_until`/`invoke` so both passes follow the same instruction semantics.
+
+An additional192-residue certificate covers these new allocation sizes with
+32/64-byte alignments, overflow bounds, the prefix pointer outside the payload
+and retained zero-fill. Thirteen semantic refusal controls cover changed input,
+flags/count, metadata aliasing, size/core changes, existing scratch, NULL/aliased
+allocation, undefined padding and invalid writes. The21-item
+`root-ctc-matrix-workspace-frozen-manifest-20261023.json`, SHA256
+`c1a93d9a1c9bb25d50be3aa8736694cc4b9cadec189d912f9523b929bab9b532`,
+preserves the exact sources and reports. This completes the bounded successful
+194980 path with initially NULL scratch. Existing scratch replacement/free,
+failure cleanup, actual service installation and caller origin, matrix import,
+the complete constructor and recognition readiness remain unproved. No SDK
+instructions or recognition runs execute in these static certificates.
