@@ -118,3 +118,30 @@ row-count controls pass. Frozen manifest
 retains17 analysis files/dependencies, including the unchanged SDK/model and
 an immutable snapshot of the portable auditor. No vendor code executes and
 the application's CTC framing remains unchanged.
+
+## Conditional scalar-index supplement
+
+`tools/handwriting/audit_english_ctc_payload_indices.py` composes the two
+preceding byte/model audits with an explicit algebraic mapping of every payload
+store site in `191470`/`192AE0`. For actual width127/flags0, both alignments and
+both extra-row modes reserve thirteen consecutive vectors: one leading vector
+and six per substate. The24 distinct native store sites correspond to46 scalar
+write occurrences because the substate initializer is called twice. The first
+five substate vectors clear their previously initialized bias cells; the sixth
+retains them. Repeated writes are retained in the certificate.
+
+Every computed scalar write fits its own vector and the14336/21504-byte
+workspace. This is a **conditional arithmetic certificate**: it explicitly
+assumes the stated native-to-row mapping and a live, disjoint caller workspace.
+It does not prove the complete native pointer dataflow, allocator separation,
+matrix-copy aliases, loader admission or V120. It supplies no runtime shortcut.
+
+Four arithmetic cases and eight corrupted-site/width/stride/row/count/overlap
+controls pass. An earlier proposed control removed the bias increment before
+rounding; on this specific width it leaves the rounded stride unchanged and
+correctly was not rejected. That failed test assumption is preserved separately;
+the final control changes the actual stride. Frozen13-item manifest
+`root-ctc-payload-indices-frozen-manifest-20261023.json`, SHA256
+`42b9c89a3d6e25fecd95caa64f001bea19ea36dc34a9ba27262bbee7ead77198`,
+retains immutable copies of all three auditors and their dependencies. No SDK
+code executes and application behavior is unchanged.
