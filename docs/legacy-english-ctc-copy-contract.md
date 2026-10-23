@@ -390,3 +390,36 @@ the selected CTC caller's environment origin or subsequent state initialization.
 The14-item `root-ctc-state-callbacks-frozen-manifest-20261023.json`, SHA256
 `73103ed6e41a9ed34f9dbae7ff3ca447d92292a0b8d49adef4ad7a740231ff93`,
 retains the auditors, full body exports, reports and predecessor manifests.
+
+## Constructor-to-initializer sizing pass
+
+`audit_english_ctc_initializer_dispatch.py` composes those allocation checks
+with the separately audited191470/192AE0 scalar initializers. It retains the
+constructor's actual graph, header, state-pointer, stack and register identities,
+walks the four argument moves and CALL at1946BB, then interprets the first pass
+of the complete pinned193A40 body. The previously unknown external constructor
+argument8 byte is explicitly supplied as false or true; its external caller
+origin remains unresolved.
+
+Eight alignment/optional-flags/extra-row cases establish one input state and
+three distinct recurrent states, preserved nonvolatile registers, and no writes
+to the packet, headers, graph or pointer table. Every one of the1280 state
+metadata bytes is defined by this pass. This is metadata initialization; the
+separate neural workspace has not been allocated or populated. A failed control
+initially expected an unknown byte at the end of a recurrent state; checking the
+complete defined image showed that all416 bytes of each recurrent state are
+initialized. The failed logs are retained.
+
+The computed workspace sizes are43136 bytes without an extra row and64704 with
+one, for either supported alignment. Fifteen semantic controls reject altered
+header counts, widths, flags, state order/aliasing, unexpected existing workspace,
+readonly writes, invalid reads and out-of-bounds accesses. The full body is pinned
+by SHA256; instructions are interpreted as symbolic data, with no SDK execution.
+
+The proof stops at exclusive193C66, before service49 aligned workspace allocation.
+Its allocator contract, the workspace-writing second pass,194980, actual selected
+caller origin and complete recognition semantics remain open. The25-item
+`root-ctc-initializer-dispatch-frozen-manifest-20261023.json`, SHA256
+`ee20011989ebe080e42522fc1cc3abca67b15a567f2998b8e60c1273931c66a4`,
+retains the source, composed reports, controls, native export and failed drafts.
+Whole-constructor and runtime predicates remain false.
