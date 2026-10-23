@@ -89,17 +89,21 @@ geometry responses are explicitly prepared controls, not observed inference.
 
 The additional resource consumer uses the existing actual first→main CASE
 fixture and its real D0, four-family main neural scores,195-entry cache, geometry
-and same source/session. It produces 36 root queries→25 root slots and 130
-continuation queries→125 ordinary-parent slots. The owning stored source has125
+and same source/session. The historical capture observed36 root queries and130
+continuation queries, producing25/125 slots; the current upstream observes142
+continuation queries. Those query counts are captured upstream diagnostics,
+not independently derived expectations of this recombination oracle. They are
+checked against the explicit128-row/16384-page bounds per query stream.
+The owning stored source has125
 rows, including its real unused source extent. No expected text is read. This is
 an acoustic root/ordinary-parent prefix: it deliberately does not schedule the
 intervening dictionary language/history phase and therefore is not a complete
 `2144F0` pass.
 
 The independent actual-output audit checks all 150 slots and 52,000 bytes of full
-heap/pool storage, context paths and125 owning source rows. Captured neural/cache
+heap/pool storage, context paths and125 owning source rows. Stage order, exact buffer lengths, parent row/pool shapes and initial ordinal58 sequence are also checked. Captured neural/cache
 inputs are trusted stage inputs here; neural inference is covered by its existing
-separate independent audits. Managed and Windows NativeAOT captures agree at
+separate independent audits. The historical Managed and Windows NativeAOT captures agree at
 SHA-256 `8eedd75ad6714e5f32a5c8e291e64bedfa4f7c0680d3a722837cd1608aa5be5e`.
 
 Run the generator and full managed probe from the repository root (all output
