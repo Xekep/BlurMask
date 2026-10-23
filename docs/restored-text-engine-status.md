@@ -6,6 +6,16 @@ default recognizer.
 
 ## Development integration (2026-10-21)
 
+The [full English FIRST rich-glyph pass](english-full-first-glyph-emission-runtime-20261023.md)
+now enriches completed B6 candidates using their actual A8 shortlist, source
+ranges, class-query costs and confidence. Managed/Native AOT agree on241 blind
+inputs:252 children,1,699 owners and1,131 queries. Independent replay checks all
+40-byte records, original WORD/reference preservation and count/fill chronology.
+Strengthened cancellation, contention and snapshot tests pass separately on two
+original fixtures. Reached headers182/183/184 remain unsupported and refuse
+before entry. Source720, accepted text, final guide and default integration are
+still unfinished; this is not a handwriting accuracy or Russian cursive claim.
+
 The [owned English primary materialization](english-case-primary-completion-runtime-20261023.md)
 now continues the initial consumer through root alternatives, sorting, duplicate
 merging, quota and 88/80-byte rows. Managed/Native AOT agree for234 actual owners

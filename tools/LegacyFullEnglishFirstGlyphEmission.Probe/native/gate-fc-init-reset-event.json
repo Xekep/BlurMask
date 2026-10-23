@@ -1,0 +1,115 @@
+{
+  "status": "PASS_BOUNDED_FRESH_FC",
+  "vendorExecuted": false,
+  "scope": "Fresh23F constructor and exact selected pass/reset/event functions only; not arbitrary external properties or copied class",
+  "functions": {
+    "1801f2560": [
+      {
+        "start": "0x1801f2560",
+        "bytes": 2111,
+        "sha256": "2af8fcc318a6c393d7e0ddfbafae379c3e828367f1cc6fbbda6e593bf56ad1fe",
+        "instructions": 497
+      }
+    ],
+    "1801edde0": [
+      {
+        "start": "0x1801edde0",
+        "bytes": 401,
+        "sha256": "1e0def3ddf5193625b73a8a195f3b385fe9277eca55f9035eaaac8dfcd0b5e7c",
+        "instructions": 99
+      }
+    ],
+    "1801ef070": [
+      {
+        "start": "0x1801ef070",
+        "bytes": 13264,
+        "sha256": "c501b4378e44442183a2a1c6578e5026116ce9a8a9f2ce96d2987323f2e88007",
+        "instructions": 3258
+      }
+    ],
+    "1801edf90": [
+      {
+        "start": "0x1801edf90",
+        "bytes": 134,
+        "sha256": "9a844cd108f2b6a9d77d90a8835ecb4dc9f453134882ca6a53a80c2f195f262b",
+        "instructions": 37
+      }
+    ],
+    "1801f2da0": [
+      {
+        "start": "0x1801f2da0",
+        "bytes": 5420,
+        "sha256": "f8a8dd3e7bafba54ccae8f05cf77191c3d0367e07ec31a6b24626bc5304e98b2",
+        "instructions": 1306
+      }
+    ],
+    "1801f42d0": [
+      {
+        "start": "0x1801f42d0",
+        "bytes": 10594,
+        "sha256": "c4422cf488eba5defdbeed9d8d981d442e7e02f6cb53002ce2b9956bbf408b6d",
+        "instructions": 2461
+      }
+    ],
+    "1801ecff0": [
+      {
+        "start": "0x1801ecff0",
+        "bytes": 631,
+        "sha256": "1ed1b6481a15fd796c287fea0cd7c1f0b84dbf987a907c866db52ca0f1180700",
+        "instructions": 146
+      }
+    ],
+    "1801f2480": [
+      {
+        "start": "0x1801f2480",
+        "bytes": 205,
+        "sha256": "84a95d064f64e5098b33575c5337e3079427b43dfaacff25f2656f2560f8344b",
+        "instructions": 51
+      }
+    ]
+  },
+  "constructor": {
+    "start": "0x1801edb60",
+    "bytes": 263,
+    "sha256": "6d3388ecc207e0ef05fd2481100843f8670ec47822319190a1c4f1b4a55250e8",
+    "instructions": 47,
+    "registered": false,
+    "closedCfg": true
+  },
+  "fcZeroWrite": {
+    "address": "0x1801edc52",
+    "bytes": "898afc000000",
+    "asm": "mov dword ptr [rdx + 0xfc], ecx"
+  },
+  "reads": [
+    {
+      "function": "1801f2560",
+      "address": "0x1801f2870",
+      "bytes": "44038ffc000000",
+      "asm": "add r9d, dword ptr [rdi + 0xfc]",
+      "accesses": [
+        1
+      ]
+    },
+    {
+      "function": "1801f2da0",
+      "address": "0x1801f37df",
+      "bytes": "038ffc000000",
+      "asm": "add ecx, dword ptr [rdi + 0xfc]",
+      "accesses": [
+        1
+      ]
+    },
+    {
+      "function": "1801f42d0",
+      "address": "0x1801f4e2e",
+      "bytes": "418b8dfc000000",
+      "asm": "mov ecx, dword ptr [r13 + 0xfc]",
+      "accesses": [
+        1
+      ]
+    }
+  ],
+  "conclusion": "Explicit constructorFC=0 preserved on admitted fresh initialization/A8/B0/B8/terminal/plain/V90/reset/event path; no reused/copied configuration authority",
+  "limitation": "No claim that scanning displacement252 alone is a universal alias proof; complete bodies and caller ownership exclude generic copy/property callbacks on this admitted path"
+}

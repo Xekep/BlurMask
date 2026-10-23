@@ -1,0 +1,163 @@
+{
+  "status": "PASS_SCOPED_PROVIDER_AND_HEADER_ENDPOINT",
+  "vendorExecuted": false,
+  "completeRegions": [
+    {
+      "function": "18000c860",
+      "start": "0x18000c860",
+      "bytes": 367,
+      "sha256": "7a66f6ea6707fbd96c1ff9da29228139cbefef56b206141b9af238a769175b24",
+      "instructions": 69,
+      "export": "provider-header-bodies/18000c860.c"
+    },
+    {
+      "function": "180150d00",
+      "start": "0x180150d00",
+      "bytes": 3722,
+      "sha256": "87dd5a9169436e46a8cc8c61965faa1936b9a53bca6b032053ad515eade3c000",
+      "instructions": 995,
+      "export": "provider-header-bodies/180150d00.c"
+    },
+    {
+      "function": "1801a6980",
+      "start": "0x1801a6980",
+      "bytes": 1258,
+      "sha256": "e210e63b6e3e80af954e3e4caa1f12788b5ba09639c358525e45f680df40c6f1",
+      "instructions": 284,
+      "export": "provider-header-bodies/1801a6980.c"
+    },
+    {
+      "function": "1801a7230",
+      "start": "0x1801a7230",
+      "bytes": 398,
+      "sha256": "b60ff00d072b7b082d1596f7db6004c78de73391ebc20773ccabfb016fde7372",
+      "instructions": 98,
+      "export": "provider-header-bodies/1801a7230.c"
+    },
+    {
+      "function": "18019eb10",
+      "start": "0x18019eb10",
+      "bytes": 375,
+      "sha256": "38b01235db684ec7f974786822961ff47b9091b157255ea7f193078b4d12676d",
+      "instructions": 107,
+      "export": "provider-header-bodies/18019eb10.c"
+    },
+    {
+      "function": "1801a1ef0",
+      "start": "0x1801a1ef0",
+      "bytes": 5468,
+      "sha256": "e9ec34ca48f5b8d20b63c2f5e1a8775734f8a778d6ef7b3df023a9efedcf6a83",
+      "instructions": 1354,
+      "export": "provider-header-bodies/1801a1ef0.c"
+    },
+    {
+      "function": "1801a37b0",
+      "start": "0x1801a37b0",
+      "bytes": 884,
+      "sha256": "fac615318638a3f796fb0ef3238ca76be96b01b2d2b0e18e42cdaae6912ed312",
+      "instructions": 248,
+      "export": "provider-header-bodies/1801a37b0.c"
+    },
+    {
+      "function": "1801aae70",
+      "start": "0x1801aae70",
+      "bytes": 4709,
+      "sha256": "1e05e24372dfe33d1aca0d83a0e18c97615f464d052fb32368fc58db796b6228",
+      "instructions": 1071,
+      "upstreamExport": "E:\\BlurMask-build-artifacts-20261014\\english-full-first-b6-word-static-frozen-20261023\\full-bodies\\1801aae70.c"
+    }
+  ],
+  "unregisteredSymbolWindow": {
+    "start": "0x18013af30",
+    "bytes": 256,
+    "sha256": "2b71b1a3097d150dc5cbdbc83bec3635ddeddc38a750677bfef0404e65a69951",
+    "claim": "bounded symbol-update window only, not a registered complete function"
+  },
+  "dataPins": [
+    {
+      "start": "0x1802e1590",
+      "bytes": 8,
+      "hex": "0000000000000000",
+      "sha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+      "name": "actual297 V100 NULL"
+    },
+    {
+      "start": "0x1802e2128",
+      "bytes": 8,
+      "hex": "e0c01a8001000000",
+      "sha256": "817b4cc893febbeba27f1360f78883532a71b98568b5245bf46d7007285519e3",
+      "name": "graph invalidation forwarder"
+    },
+    {
+      "start": "0x1802de838",
+      "bytes": 8,
+      "hex": "702a158001000000",
+      "sha256": "d85f7d2bdc2d22d327de69c3a06a8890232316dae8ee2ce0f14ffdfd3fa4e9de",
+      "name": "frontend invalidation"
+    },
+    {
+      "start": "0x1802e42d8",
+      "bytes": 8,
+      "hex": "30251c8001000000",
+      "sha256": "7c68344aacd7fac8face7502a2df9cfe05473e441c4969822f9b0a2bc0dae879",
+      "name": "runtime cursor invalidation"
+    },
+    {
+      "start": "0x1802de7b0",
+      "bytes": 8,
+      "hex": "a02d158001000000",
+      "sha256": "5ba0f67cf4a2075d623bf110469e5f6eff932611803064001769cb0c2209dc4a",
+      "name": "header forwarder"
+    },
+    {
+      "start": "0x1802e2120",
+      "bytes": 8,
+      "hex": "70ae1a8001000000",
+      "sha256": "5235cb01cda757dc317fad25829625eabaa49f5820d15e17a0f00f31ea9281ee",
+      "name": "actual header body"
+    },
+    {
+      "start": "0x1802dc6b0",
+      "bytes": 8,
+      "hex": "30af138001000000",
+      "sha256": "9c73938c47fa559c2ce30884b9b37e633bd0a46fd84d67e105d0894c30a96640",
+      "name": "pool symbol update"
+    }
+  ],
+  "sharedPureLibraries": [
+    {
+      "path": "C:\\Users\\Xekep\\Documents\\GitHub\\BlurMask\\src\\InkRecognition\\LegacyFirstPlainWordDelimiters.cs",
+      "sha256": "120fbd8fd0deb80addfa196b8a2c3f5545954c2924696466a71aeb3488b27b34"
+    },
+    {
+      "path": "C:\\Users\\Xekep\\Documents\\GitHub\\BlurMask\\src\\InkRecognition\\LegacyNativeGlyphSymbolUpdate.cs",
+      "sha256": "924d339f9324f999e67e5abf136a6b9f6d523b012fd97a5664a21597084d8f0a"
+    },
+    {
+      "path": "C:\\Users\\Xekep\\Documents\\GitHub\\BlurMask\\src\\InkRecognition\\LegacyFullEnglishFirstPlainResultFactory.cs",
+      "sha256": "7ac9c19f9d818fe76d1b9db864a7a71260e9603f068cfe689e3f97068bec4cb8"
+    }
+  ],
+  "provider": {
+    "graphPacket0": "150D00 literal0 from shiftedmask",
+    "graphPacket7": "150D00 copies fresh2B3.C4;00C860 explicit U16C4=0",
+    "A6980": "packet0==0 excludes282,packet7==0 excludes2D4; same actual247.V88 sampler297 clone",
+    "V138": "1AC0E0 delegates graph180.V100 only if nonNULL; actual297 V100 NULL",
+    "runtimeV158": "1C2530 clears3C2 cursor only; no NN/rewrite of cached actual modelcosts"
+  },
+  "header": {
+    "labels": [
+      182,
+      183,
+      184
+    ],
+    "requestPreviousNode": -1,
+    "requestCurrent": "same owned graph node/arc",
+    "capacity": 256,
+    "graphContext": "ordinary no-custom19EB10 givesFFFF;1A1EF0/1A37B0 preserve context;reset1A7230 fallback208=0",
+    "native1AAE70": "no metadata then previousNode -1 returns unchangedcapacity;component/externalflags0",
+    "result": "zero components, symbolFFFF passed to13AF30; count0 produceskind1/label1, then preserveskind1 underFFF7 mask and OR40",
+    "notResult": "never invent literal space or category0"
+  },
+  "scope": "Fresh actual full FIRST/B6 ordinary no-properties/no-copy/no-custom-token lineage only; arbitrary native protocol/header metadata excluded"
+}

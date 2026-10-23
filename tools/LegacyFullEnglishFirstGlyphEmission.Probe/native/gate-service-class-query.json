@@ -1,0 +1,423 @@
+{
+  "status": "STATIC_SERVICE_BINDINGS_CLOSED_FOR_ADMITTED_ORDINARY_SCOPE",
+  "binarySha256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+  "vendorExecuted": false,
+  "bindings": [
+    {
+      "name": "23F enrichment",
+      "address": "0x1802e7a60",
+      "raw": "60251f8001000000",
+      "target": "0x1801f2560"
+    },
+    {
+      "name": "frontend score",
+      "address": "0x1802de7c8",
+      "raw": "502f158001000000",
+      "target": "0x180152f50"
+    },
+    {
+      "name": "frontend classquery",
+      "address": "0x1802de7d0",
+      "raw": "902f158001000000",
+      "target": "0x180152f90"
+    },
+    {
+      "name": "runtime scorechannel",
+      "address": "0x1802e4200",
+      "raw": "00131c8001000000",
+      "target": "0x1801c1300"
+    },
+    {
+      "name": "runtime query16",
+      "address": "0x1802e4208",
+      "raw": "a0131c8001000000",
+      "target": "0x1801c13a0"
+    },
+    {
+      "name": "frontend invalidation",
+      "address": "0x1802de838",
+      "raw": "702a158001000000",
+      "target": "0x180152a70"
+    },
+    {
+      "name": "runtime invalidates3C2",
+      "address": "0x1802e42d8",
+      "raw": "30251c8001000000",
+      "target": "0x1801c2530"
+    },
+    {
+      "name": "graph optionalinvalidate",
+      "address": "0x1802e2128",
+      "raw": "e0c01a8001000000",
+      "target": "0x1801ac0e0"
+    },
+    {
+      "name": "297 no callback",
+      "address": "0x1802e1590",
+      "raw": "0000000000000000",
+      "target": "0x0"
+    },
+    {
+      "name": "source predicate",
+      "address": "0x1802de890",
+      "raw": "1057158001000000",
+      "target": "0x180155710"
+    },
+    {
+      "name": "21B false",
+      "address": "0x1802e21b8",
+      "raw": "00a4058001000000",
+      "target": "0x18005a400"
+    },
+    {
+      "name": "replacementkind1",
+      "address": "0x1802de7b8",
+      "raw": "c02d158001000000",
+      "target": "0x180152dc0"
+    },
+    {
+      "name": "header components",
+      "address": "0x1802de7b0",
+      "raw": "a02d158001000000",
+      "target": "0x180152da0"
+    },
+    {
+      "name": "header component body",
+      "address": "0x1802e2120",
+      "raw": "70ae1a8001000000",
+      "target": "0x1801aae70"
+    }
+  ],
+  "closedUnregisteredRegions": [
+    {
+      "start": "0x180152f90",
+      "bytes": 26,
+      "sha256": "3a79016721402f8bfc870c7e32738e9a437ccd4d793e46d9f1c635b84bf5bf98",
+      "instructions": [
+        {
+          "at": "0x180152f90",
+          "bytes": "4c8bda",
+          "asm": "mov r11, rdx"
+        },
+        {
+          "at": "0x180152f93",
+          "bytes": "4d8bc8",
+          "asm": "mov r9, r8"
+        },
+        {
+          "at": "0x180152f96",
+          "bytes": "488b5278",
+          "asm": "mov rdx, qword ptr [rdx + 0x78]"
+        },
+        {
+          "at": "0x180152f9a",
+          "bytes": "4d8bc3",
+          "asm": "mov r8, r11"
+        },
+        {
+          "at": "0x180152f9d",
+          "bytes": "488b02",
+          "asm": "mov rax, qword ptr [rdx]"
+        },
+        {
+          "at": "0x180152fa0",
+          "bytes": "4c8b9088000000",
+          "asm": "mov r10, qword ptr [rax + 0x88]"
+        },
+        {
+          "at": "0x180152fa7",
+          "bytes": "49ffe2",
+          "asm": "jmp r10"
+        }
+      ]
+    },
+    {
+      "start": "0x180152da0",
+      "bytes": 17,
+      "sha256": "f0add432e14cf8f9cd33db607be4837231b8f554cf8f119f142ff851d7c32aff",
+      "instructions": [
+        {
+          "at": "0x180152da0",
+          "bytes": "488b5270",
+          "asm": "mov rdx, qword ptr [rdx + 0x70]"
+        },
+        {
+          "at": "0x180152da4",
+          "bytes": "488b02",
+          "asm": "mov rax, qword ptr [rdx]"
+        },
+        {
+          "at": "0x180152da7",
+          "bytes": "4c8b9030010000",
+          "asm": "mov r10, qword ptr [rax + 0x130]"
+        },
+        {
+          "at": "0x180152dae",
+          "bytes": "49ffe2",
+          "asm": "jmp r10"
+        }
+      ]
+    },
+    {
+      "start": "0x180155710",
+      "bytes": 17,
+      "sha256": "c133d91d247a37f9ca2b4de927229df2b63fdbf35e0cd5369e89833a1aff5e44",
+      "instructions": [
+        {
+          "at": "0x180155710",
+          "bytes": "488b5270",
+          "asm": "mov rdx, qword ptr [rdx + 0x70]"
+        },
+        {
+          "at": "0x180155714",
+          "bytes": "488b02",
+          "asm": "mov rax, qword ptr [rdx]"
+        },
+        {
+          "at": "0x180155717",
+          "bytes": "4c8b88c8010000",
+          "asm": "mov r9, qword ptr [rax + 0x1c8]"
+        },
+        {
+          "at": "0x18015571e",
+          "bytes": "49ffe1",
+          "asm": "jmp r9"
+        }
+      ]
+    },
+    {
+      "start": "0x1801c2530",
+      "bytes": 10,
+      "sha256": "c5ce927855f1a9e5e852a7a78b2d78ed64b717e86348d49f87c4177f013f8a05",
+      "instructions": [
+        {
+          "at": "0x1801c2530",
+          "bytes": "66c782c2030000ffff",
+          "asm": "mov word ptr [rdx + 0x3c2], 0xffff"
+        },
+        {
+          "at": "0x1801c2539",
+          "bytes": "c3",
+          "asm": "ret "
+        }
+      ]
+    },
+    {
+      "start": "0x1801ac0e0",
+      "bytes": 26,
+      "sha256": "1ab588d01ebbc78bded6c7ff3e08a44513765bc9345e083297d298d195cd374f",
+      "instructions": [
+        {
+          "at": "0x1801ac0e0",
+          "bytes": "488b9280010000",
+          "asm": "mov rdx, qword ptr [rdx + 0x180]"
+        },
+        {
+          "at": "0x1801ac0e7",
+          "bytes": "488b02",
+          "asm": "mov rax, qword ptr [rdx]"
+        },
+        {
+          "at": "0x1801ac0ea",
+          "bytes": "4c8b8800010000",
+          "asm": "mov r9, qword ptr [rax + 0x100]"
+        },
+        {
+          "at": "0x1801ac0f1",
+          "bytes": "4d85c9",
+          "asm": "test r9, r9"
+        },
+        {
+          "at": "0x1801ac0f4",
+          "bytes": "7403",
+          "asm": "je 0x1801ac0f9"
+        },
+        {
+          "at": "0x1801ac0f6",
+          "bytes": "49ffe1",
+          "asm": "jmp r9"
+        },
+        {
+          "at": "0x1801ac0f9",
+          "bytes": "c3",
+          "asm": "ret "
+        }
+      ]
+    },
+    {
+      "start": "0x18005a400",
+      "bytes": 3,
+      "sha256": "01cb47d078b4841b8408ec4fe278efa83115c6f6e101972987507d2b2b57dcf0",
+      "instructions": [
+        {
+          "at": "0x18005a400",
+          "bytes": "32c0",
+          "asm": "xor al, al"
+        },
+        {
+          "at": "0x18005a402",
+          "bytes": "c3",
+          "asm": "ret "
+        }
+      ]
+    },
+    {
+      "start": "0x1801edf80",
+      "bytes": 14,
+      "sha256": "d742587b7250b00f6584ed706581a213ebbe65819c70bd30accaeea11c8b93cd",
+      "instructions": [
+        {
+          "at": "0x1801edf80",
+          "bytes": "488b4218",
+          "asm": "mov rax, qword ptr [rdx + 0x18]"
+        },
+        {
+          "at": "0x1801edf84",
+          "bytes": "c7406800000000",
+          "asm": "mov dword ptr [rax + 0x68], 0"
+        },
+        {
+          "at": "0x1801edf8b",
+          "bytes": "b001",
+          "asm": "mov al, 1"
+        },
+        {
+          "at": "0x1801edf8d",
+          "bytes": "c3",
+          "asm": "ret "
+        }
+      ]
+    },
+    {
+      "start": "0x1801ee020",
+      "bytes": 8,
+      "sha256": "e9f80f7a2aff3c8b4aa69e3cc2e6142a3b35dbe6811d07c8658bc2496b496836",
+      "instructions": [
+        {
+          "at": "0x1801ee020",
+          "bytes": "4489828c000000",
+          "asm": "mov dword ptr [rdx + 0x8c], r8d"
+        },
+        {
+          "at": "0x1801ee027",
+          "bytes": "c3",
+          "asm": "ret "
+        }
+      ]
+    },
+    {
+      "start": "0x1801f6c40",
+      "bytes": 4,
+      "sha256": "f75638fe0016cf82faddfa60bf6db21d3445dcb56700c1f3c0aae5c3aa912f53",
+      "instructions": [
+        {
+          "at": "0x1801f6c40",
+          "bytes": "488bc2",
+          "asm": "mov rax, rdx"
+        },
+        {
+          "at": "0x1801f6c43",
+          "bytes": "c3",
+          "asm": "ret "
+        }
+      ]
+    }
+  ],
+  "queryAndFlagPins": [
+    {
+      "at": "0x1801f2b73",
+      "bytes": "b9ffff0000",
+      "asm": "mov ecx, 0xffff"
+    },
+    {
+      "at": "0x1801f2b7b",
+      "bytes": "66894d8e",
+      "asm": "mov word ptr [rbp - 0x72], cx"
+    },
+    {
+      "at": "0x1801f2b88",
+      "bytes": "895d88",
+      "asm": "mov dword ptr [rbp - 0x78], ebx"
+    },
+    {
+      "at": "0x1801f2b8b",
+      "bytes": "6644897590",
+      "asm": "mov word ptr [rbp - 0x70], r14w"
+    },
+    {
+      "at": "0x1801f2b90",
+      "bytes": "c6459301",
+      "asm": "mov byte ptr [rbp - 0x6d], 1"
+    },
+    {
+      "at": "0x1801f2b94",
+      "bytes": "894594",
+      "asm": "mov dword ptr [rbp - 0x6c], eax"
+    },
+    {
+      "at": "0x1801f2b9a",
+      "bytes": "4c8b88c0010000",
+      "asm": "mov r9, qword ptr [rax + 0x1c0]"
+    },
+    {
+      "at": "0x1801f2ba1",
+      "bytes": "41ffd1",
+      "asm": "call r9"
+    },
+    {
+      "at": "0x1801f2bab",
+      "bytes": "894614",
+      "asm": "mov dword ptr [rsi + 0x14], eax"
+    },
+    {
+      "at": "0x1801f2bd4",
+      "bytes": "6683c940",
+      "asm": "or cx, 0x40"
+    },
+    {
+      "at": "0x1801f2be5",
+      "bytes": "66214604",
+      "asm": "and word ptr [rsi + 4], ax"
+    },
+    {
+      "at": "0x1801f2bec",
+      "bytes": "f30f5ec6",
+      "asm": "divss xmm0, xmm6"
+    },
+    {
+      "at": "0x1801f2bf0",
+      "bytes": "f30f11460c",
+      "asm": "movss dword ptr [rsi + 0xc], xmm0"
+    },
+    {
+      "at": "0x1801f2bff",
+      "bytes": "6683c908",
+      "asm": "or cx, 8"
+    }
+  ],
+  "request16": {
+    "node0": "actual graph node",
+    "arc4": "actual signed16 WORD arc",
+    "ordinal6": 65535,
+    "symbol8": "matchedA8 symbol",
+    "prototypeA": "signed category to source-owned prototype",
+    "topB": 1,
+    "primitiveC": 0,
+    "tailD_F": 0
+  },
+  "channels": {
+    "glyphC": "float(A8.byte8)/255f",
+    "glyph10": "sourceV1B8 full4family channel0 firstequal symbol; missing0",
+    "glyph14": "same-source queryV1C0; bool28=true because source slot exists; NOT unconditional04000000"
+  },
+  "flags": {
+    "word6": "preserve upper bits OR40; additionally08 forreplacementE8",
+    "kind4": "ANDFFF7"
+  },
+  "openScopes": [
+    "header182/183/184 component branch must be closed or refused beforeentry",
+    "nonfresh properties/copies/geometry101capture excluded",
+    "existing fullB2 packet proof must exclude wrappers282/2D4 before297 no-op claim"
+  ],
+  "noNNReplay": true
+}

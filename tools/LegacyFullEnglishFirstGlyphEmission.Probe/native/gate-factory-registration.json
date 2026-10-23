@@ -1,0 +1,124 @@
+{
+  "status": "PASS_STATIC_REGISTRATION_1_OBJECT_VT",
+  "vendorExecuted": false,
+  "binaries": {
+    "MyScriptEngine.dll": {
+      "sha256": "d31abcd309cbb558bb80bf50fe1968921de515bc40fbeb0e886a5cf14dbc0a5c",
+      "completeRegions": [
+        {
+          "function": "180034010",
+          "start": "0x180034010",
+          "bytes": 490,
+          "sha256": "bb92a6978700410bd69ec7d6e9c44864968228a0e6ff6e4b1594342f76df8c88",
+          "instructions": 131,
+          "export": "engine-init-bodies/180034010.c"
+        },
+        {
+          "function": "180038120",
+          "start": "0x180038120",
+          "bytes": 167,
+          "sha256": "60f1ee8185071b02ba367475d610bde6563f51af00a84ef68760442dcf023c9e",
+          "instructions": 51,
+          "export": "engine-allocate-bodies/180038120.c"
+        },
+        {
+          "function": "180038250",
+          "start": "0x180038250",
+          "bytes": 195,
+          "sha256": "12a5ad52a28a7d8f4871fb60006b56af49ab075a15dd49320ad485fe7e20c3d6",
+          "instructions": 60,
+          "export": "engine-allocate-bodies/180038250.c"
+        },
+        {
+          "function": "180038e70",
+          "start": "0x180038e70",
+          "bytes": 414,
+          "sha256": "e9b7b1ef5de4a997752099cda937f60ef6c14bd6ca7633fb6e0a73c11609060c",
+          "instructions": 121,
+          "export": "engine-construction-bodies/180038e70.c"
+        }
+      ],
+      "dataPins": [
+        {
+          "start": "0x180252038",
+          "bytes": 8,
+          "hex": "f0b81d8001000000",
+          "sha256": "a522ffcb6be614de1fb213e1382a7b846156cd824d30c1dc24d96ba4c1f8b0ce",
+          "name": "core registry descriptor pointer"
+        },
+        {
+          "start": "0x1801db8f0",
+          "bytes": 40,
+          "hex": "010000000000000001000000ffffffffffffffff00000000000000000000000030b81d8001000000",
+          "sha256": "213a6ed9feb589134d564d9ef09b85481180b82c69ef6e380bbc16f7eeba8a2d",
+          "name": "core descriptor table20"
+        },
+        {
+          "start": "0x1801db8a8",
+          "bytes": 8,
+          "hex": "2081038001000000",
+          "sha256": "2fef4dd08cdc8b4864a7ce38fddf8506856db4ae9d456d08578a24727045eec3",
+          "name": "coreV78"
+        },
+        {
+          "start": "0x1801db8b8",
+          "bytes": 8,
+          "hex": "5082038001000000",
+          "sha256": "242d22fafa4335a8e46d22ef8c5394c8e32e22dac94e0a9b6131d0c65769344e",
+          "name": "coreV88"
+        }
+      ]
+    },
+    "MyScriptText.dll": {
+      "sha256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+      "completeRegions": [
+        {
+          "function": "1801eb340",
+          "start": "0x1801eb340",
+          "bytes": 774,
+          "sha256": "248d47e622925eb2386f8fd4dc4a979013ac9bf10d81921413820dfeb15bab9f",
+          "instructions": 223,
+          "export": "hook-bodies/1801eb340.c"
+        }
+      ],
+      "dataPins": [
+        {
+          "start": "0x1802e7980",
+          "bytes": 32,
+          "hex": "03000000000000003f02000009020000ffffffff0000000030792e8001000000",
+          "sha256": "761a7f0fc1a8ac37f6c8b970d098320d015f2f470bc765531efda7db732a9e54",
+          "name": "actual23F metadata"
+        },
+        {
+          "start": "0x1802e7930",
+          "bytes": 56,
+          "hex": "10a4058001000000d0792e800100000068792e8001000000906c1f8001000000000000000000000000000000000000000000000000000000",
+          "sha256": "e464a7801995f8a406f74c8bd6757398e51da90abb4b8838da13d3328a88b5df",
+          "name": "registration ctor/table prefix"
+        },
+        {
+          "start": "0x1802e79d0",
+          "bytes": 24,
+          "hex": "70dc1e800100000080792e8001000000f0a3058001000000",
+          "sha256": "7266af954ea9aacdf8cb35c9051277d04b8ec2975dd5063fd2822355de0aa937",
+          "name": "object VT begins destructor metadata pair"
+        },
+        {
+          "start": "0x1802e7a60",
+          "bytes": 8,
+          "hex": "60251f8001000000",
+          "sha256": "a04450243be76b54430f18e8c2cb748e76568ca5fd9d0b95140388a211e9e485",
+          "name": "actualV90=1F2560"
+        }
+      ]
+    }
+  },
+  "semantics": [
+    "Engine034010 bindscore descriptor+20 table to runtimeheader8",
+    "Engine038250(V88) calls038E70 then constructor",
+    "038E70 and038120(V78) write allocatedobject[0]=registration[1]",
+    "Text1EB340 count0 selectsactualtype23F",
+    "Text23F registration[1]=2E79D0; slot90=2E7A60=>1F2560"
+  ],
+  "retracted": "Earlier unapproved methodbase+16=2E79E0 would readNULL7A70; allocator disallowsit. No implementedorapprovedruntime used thatguess."
+}
