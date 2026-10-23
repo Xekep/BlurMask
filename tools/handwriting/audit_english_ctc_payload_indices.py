@@ -50,7 +50,7 @@ def audit(binary, resource):
         for extra_row in (False, True):
             rows = 2 + int(extra_row)
             total = rows * (prefix_stride + 12 * vector_stride)
-            allocations, stores = [], []
+            allocations, stores, clears = [], [], []
 
             def vector(offset, stride, logical_width, owner, clear, initial_sites, clear_sites):
                 assert 0 <= logical_width < stride
@@ -62,7 +62,7 @@ def audit(binary, resource):
                     stores.append((site, offset + row * stride + logical_width, 0x3f800000, owner))
                 if clear:
                     for row, site in zip((1, 0), clear_sites, strict=True):
-                        stores.append((site, offset + row * stride + logical_width, 0, owner))
+                        clears.append((site, offset + row * stride + logical_width, 0, owner))
                 return end
 
             end = vector(0, prefix_stride, 2 * width, 'prefix', False, expected_sites[0], ())
@@ -72,6 +72,10 @@ def audit(binary, resource):
                     clear = expected_sites[1][12 + 2 * index:14 + 2 * index] if index < 5 else ()
                     end = vector(end, vector_stride, width, f'substate{direction}/vector{index}',
                                  index < 5, init, clear)
+                # Native192AE0 clears the first five bias cells only after
+                # initializing all six vectors, not after each vector.
+                stores.extend(clears)
+                clears.clear()
             assert end == total and total == (5376 if extra_row else 3584)
             assert 4 * total == next(case['kind8WorkspaceBytes'] for case in layout['conditionalKind8Workspace']
                                      if case['alignmentFloatUnits'] == alignment and case['extraRow'] == extra_row)

@@ -167,3 +167,33 @@ retained-header aliases remain open. No V120 shortcut is approved.
 Frozen nine-item manifest `root-ctc-cpu-detection-frozen-manifest-20261023.json`,
 SHA256 `50dc48c51213c180e809292c60d0be6c7079e9bb73cf4c4a76718e6125bd0d37`,
 retains the immutable auditor, full-body export, reports and byte dependencies.
+
+## Bounded initializer address-dataflow supplement
+
+`audit_english_ctc_state_dataflow.py` now follows register aliases, stack
+arguments, metadata reads, branches and both nested calls in the two pinned
+initializers. Addresses remain symbolic offsets in separate state/workspace/
+stack objects. Unknown pointers, unwritten or partial reads, unsupported
+instructions and undefined branch flags are refused. No SDK is loaded.
+
+Eight cases cover alignment8/16, two/three rows and NULL/populated workspace.
+All24 payload-store sites resolve to46 writes for each populated case; exact
+addresses, scalar values and native order match the independent algebraic
+certificate. Metadata stays within416 bytes and payload within14336/21504.
+Nine corrupted pointer/stack/width/bounds/call/order controls are rejected.
+This establishes the helpers' bounded address dataflow under a live, disjoint
+caller-object assumption. It does not establish that assumption in the complete
+loader, matrix-copy aliases, retained-header preservation or V120.
+
+The cross-check corrected the earlier algebraic certificate's `orderedStores`:
+native code initializes all six vectors before clearing the first five bias
+cells. The old certificate grouped each vector's initialization and clearing
+together. Counts, values and individual bounds were unaffected; the original
+frozen certificate is preserved. The first analyzer draft also rejected a
+valid XOR zeroing idiom because it read the old pointer's low bits first; the
+corrected transfer rule recognizes the zeroing operation without that read.
+
+Frozen16-item manifest `root-ctc-state-dataflow-frozen-manifest-20261023.json`,
+SHA256 `f2b729d0d3e585dd205601d870b132f154267b85b860559002086f36034e2b0f`,
+retains all four auditors, reports, controls and preceding byte dependencies.
+Application behavior and CTC framing are unchanged.
