@@ -45,3 +45,37 @@ LegacyMainNoCandidateSources.Probe AK LK engine separation case publication line
 LegacyMainNoCandidateSources.Probe AK LK engine separation case publication line30 line50 capture.json --recorded manifest.json
 python tools/LegacyMainNoCandidateSources.Probe/audit_output.py capture.json
 ```
+
+## Concurrent entry to global callback completion
+
+The separate `LegacyFreshMainGlobalNoCandidateSourceCompletion.Run` now claims
+entry with `Interlocked.CompareExchange` before its mutation/failure handler.
+Two calls on that same wrapper cannot both start quote cleanup; the losing call
+refuses before entering the failure handler and does not fault the winner.
+This protects one wrapper. Coordination between distinct wrappers and the new
+augmentation stage remains separate pending integration.
+
+`tools/LegacyGlobalNoCandidateConcurrency.Probe` is an explicit headless actual
+diagnostic. Its reviewed plan pins model/profile files and one original stroke;
+the tool checks that the resulting compact pool genuinely has no eligible bit8
+rows, then starts two dedicated workers on the same owner through a barrier.
+It requires exactly one completion and one precise pre-entry refusal, unchanged
+NN evaluation count, an unfaulted owner and an unstopped session. CI compiles
+the harness; actual inference requires explicit `--actual PLAN CAPTURE`.
+
+The controlled run on track0 observed2129 active compact rows and passed those
+conditions. Full WORD120, Source26 and quota matched the separately recorded
+old completion under the experimental shared-claim protocol byte for byte.
+One concurrent pair establishes the observed lifecycle and output regression;
+it is not a stress survey or a handwriting-quality result. The independent
+capture auditor also rejects seven damaged payloads:
+
+```
+dotnet run --project tools/LegacyGlobalNoCandidateConcurrency.Probe -c Release -- --actual PLAN capture.json
+python -I -B tools/LegacyGlobalNoCandidateConcurrency.Probe/audit_output.py capture.json report.json --baseline OLD_CAPTURE
+```
+
+The separate experimental augmentation harness passed five actual zero-eligible
+lifecycle scenarios (success, cross-thread old completion, old failure, new quote
+reentry failure and protocol fault). The actual eligible branch and its complete
+allocation envelope remain unverified and are not enabled by this concurrency fix.

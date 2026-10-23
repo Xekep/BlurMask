@@ -194,6 +194,8 @@ jobs:
           mkdir -p .artifacts
           dotnet run --project tools/LegacyRussianFirstDegenerate.Probe -c Release -- models tools/LegacyRussianFirstDegenerate.Probe/normalized-controls.json .artifacts/legacy-russian-first-degenerate-managed.json
           python -I -B tools/LegacyRussianFirstDegenerate.Probe/audit_output.py models tools/LegacyRussianFirstDegenerate.Probe/normalized-controls.json .artifacts/legacy-russian-first-degenerate-managed.json
+      - name: Russian global source-completion concurrency harness (compile only)
+        run: dotnet build tools/LegacyGlobalNoCandidateConcurrency.Probe -c Release
       - name: Russian packed lexicon and bounded candidate decoding
         run: dotnet run --project tools/LegacyLexicon.Probe -c Release
       - name: Russian segmented word mapping and ambiguity guards

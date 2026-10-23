@@ -9,7 +9,7 @@ public sealed class LegacyFreshMainGlobalNoCandidateSourceCompletion
     private readonly LegacyLibraryGlobalTextPublicationScope scope;
     private LegacyOrdinaryGraphSourceReference[] references=[];
     private LegacyNativeInkPositionRange[] ranges=[];
-    private bool started;
+    private int started;
     public LegacyFreshMainGlobalPlainRecognitionResult Source {get;}
     public LegacyFreshMainGlobalPublishedFirstAlternativeSnapshot Snapshot {get;}
     public LegacyNativePublishedWordNode Word {get;}
@@ -63,7 +63,7 @@ public sealed class LegacyFreshMainGlobalNoCandidateSourceCompletion
     }
     internal void Run(Span<byte> leading,Span<byte> trailing,CancellationToken token)
     {
-        Validate(token);if(started)throw new InvalidOperationException("Entered live V68 cannot restart.");started=true;
+        Validate(token);if(Interlocked.CompareExchange(ref started,1,0)!=0)throw new InvalidOperationException("Entered live V68 cannot restart.");
         try
         {
             int evaluations=Source.CachedMainGroupEvaluations;
