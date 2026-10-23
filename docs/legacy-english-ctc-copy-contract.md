@@ -523,3 +523,24 @@ preserves the exact sources and reports. This completes the bounded successful
 failure cleanup, actual service installation and caller origin, matrix import,
 the complete constructor and recognition readiness remain unproved. No SDK
 instructions or recognition runs execute in these static certificates.
+
+`audit_english_ctc_service_registration.py` narrows the service-installation
+assumption. It follows004920's first actual descriptor argument through core
+slot0, the037D60 thunk and complete0387A0 registration body, then the real037F50
+lookup. Four otherwise-empty registry shapes cover zero through three existing
+table levels. Successful default allocator callbacks create the missing tables
+and24-byte entry at indices[0,4,9]; subsequent lookup returns229C00. Entry metadata
+has11 defined bytes and13 untouched malloc bytes, which remain unknown. The
+allocator arithmetic includes the newly reached24/128/512-byte requests;
+allocator accounting counters are outside this registry certificate.
+
+Sixteen controls reject altered dispatch/descriptor data, out-of-scope populated
+slots, invalid allocation results, undefined entry reads and invalid writes.
+The18-item `root-service73-registration-frozen-manifest-20261023.json`, SHA256
+`21458190a681b1dd3b546d2c840215b087acaaf2f5d9e128c0cd9e665d268118`,
+preserves complete Ghidra ranges, raw instruction checks, reports and controls.
+The wrapper returned1 after producing the exports, whose347/5/717-byte bodies
+were independently validated. This proves conditional registration when004920
+is called with the default environment. It does not establish that the selected
+CTC caller invokes that module entry, arbitrary populated registry behavior,
+other service registrations, allocation failure cleanup or runtime readiness.
