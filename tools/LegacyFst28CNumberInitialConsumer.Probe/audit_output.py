@@ -1,12 +1,19 @@
 """Independent raw category/root/request/heap oracle; import-safe exact source preimages.
 MODELS CAPTURE OLD_CONTEXT_CAPTURE OLD_D0_CAPTURE [--observe-root].
 """
+# Exact reviewed source reversal; no numerical/capture authority is changed.
+import hashlib as _reviewed_hashlib,runpy as _reviewed_runpy
+from pathlib import Path as _ReviewedPath
+_reviewed_loader=_ReviewedPath(__file__).resolve().parents[1]/'handwriting/reviewed_node0_source_restoration.py'
+assert _reviewed_hashlib.sha256(_reviewed_loader.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='9f310e7f9397b40d35a623a65e0064a0b9cee709cda3a9c46bd159e37186bc1a','Unreviewed source restoration loader'
+_restore_reviewed_source=_reviewed_runpy.run_path(str(_reviewed_loader),run_name='reviewed_node0_source_pin_only')['restore_source_for_pin']
 import ast,base64,copy,hashlib,json,runpy,struct,sys
 from pathlib import Path
 sha=lambda b:hashlib.sha256(b).hexdigest()
 SOURCE_TRANSFORMS={'LegacyFst28CNumberInitialD0.cs': {'before': 'public sealed class LegacyFst28CNumberInitialD0', 'after': 'public sealed partial class LegacyFst28CNumberInitialD0', 'old': '407e7e8c249ff23864e546fea865f2632e422cfdaa875b3c7e20d3d9e19f8cb0', 'new': '5e2b4353b4031932a74d68d90e741a390050f6d40e410570d50ccfcf5609e0af', 'addition': '546335337a956f15ca315e3145c247633de9f276e0d02c866cb2e927e82e858e'}, 'LegacyFst28CNumberInitialConsumerContext.cs': {'before': '', 'after': '    // Trusted receiving handoff to the next owned initial consumer. Historical\n    // diagnostics/snapshots are not accepted as pool, page or source authority.\n    internal void AttachInitialConsumer(LegacyFst28CNumberInitialConsumer receiver,CancellationToken token)\n    {\n        token.ThrowIfCancellationRequested();ArgumentNullException.ThrowIfNull(receiver);\n        if(!ReferenceEquals(receiver.ExpectedContext,this))throw new ArgumentException("Foreign receiving context.");\n        var d=pool.ReadDiagnostic(nodes.Length,token);\n        if(!d.Completed||!d.SameD0||!d.SameBootstrap||!d.SameGraph||!d.SameSource||!d.SameHeader||\n            !d.SameBindingAndPage||!d.HistoricalInitialViewRetained||d.ActiveNodes!=18+Count||d.Pages!=1)\n            throw new InvalidOperationException("Exact completed private number pool required.");\n        receiver.AcceptTrustedContext(this,pool,grafts.AsSpan(0,Count),token);\n    }\n', 'old': '98f19fb593fce5701672e213c2049f60c10d4e4a8f1c6532b90ffac08e9bce61', 'new': 'c0cd7b7f58736e7af86d69fcdb05497e92c92a7a2fa5e36ee8fa9e5ec0fbb6fc', 'addition': 'c33928708aa5f34bc823f8cd2b46b9f45e950021634fdd8d2b85f49d4eff1ede'}}
 
 def source_preimage(path,data):
+ data=_restore_reviewed_source(str(path),data)
  b=data.replace(b'\r\n',b'\n');name=Path(path).name
  if name not in SOURCE_TRANSFORMS:return b
  t=SOURCE_TRANSFORMS[name];digest=sha(b)

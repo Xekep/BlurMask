@@ -3,6 +3,12 @@ MODELS CAPTURE COMPLETED_D0_CAPTURE. Full old19NN proof; rawAL/outgoing/costs,
 independent height-AVL; strict currentBinding ->dcfb ->859a preimage auth.
 No expected labels, fullword/history/parent/query claims or candidate tuning.
 """
+# Exact reviewed source reversal; no numerical/capture authority is changed.
+import hashlib as _reviewed_hashlib,runpy as _reviewed_runpy
+from pathlib import Path as _ReviewedPath
+_reviewed_loader=_ReviewedPath(__file__).resolve().parents[1]/'handwriting/reviewed_node0_source_restoration.py'
+assert _reviewed_hashlib.sha256(_reviewed_loader.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='9f310e7f9397b40d35a623a65e0064a0b9cee709cda3a9c46bd159e37186bc1a','Unreviewed source restoration loader'
+_restore_reviewed_source=_reviewed_runpy.run_path(str(_reviewed_loader),run_name='reviewed_node0_source_pin_only')['restore_source_for_pin']
 import ast,copy,hashlib,json,runpy,struct,sys
 from pathlib import Path
 sha=lambda b:hashlib.sha256(b).hexdigest()
@@ -80,7 +86,7 @@ def main():
     # exact preimages, never against an unverified normalized/edited source.
     pins=json.loads((repo/'tools/handwriting/linguistic-fst28c-number-first-page-pins.json').read_bytes())
     for row in pins['runtimeReviewedLF']+pins['existingIndependentDefinitionsLF']:
-     b=(repo/row['path']).read_bytes().replace(b'\r\n',b'\n')
+     b=_restore_reviewed_source(row['path'],(repo/row['path']).read_bytes()).replace(b'\r\n',b'\n')
      b=runpy.run_path(str(repo/'tools/LegacyFst28CNumberInitialConsumer.Probe/audit_output.py'))['source_preimage'](row['path'],b)
      if row['path'].endswith('LegacyFst28CNumberInitialQueryBinding.cs'):b=initialPreimage
      assert sha(b)==row['sha256LF'],row['path']

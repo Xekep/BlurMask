@@ -26,7 +26,7 @@ public delegate LegacyNativeWordHeapGrowthResult? LegacyNativeWordHeapGrowthProv
 /// <summary>Owned descriptor storage for 1f73d0/212ec0. Logical capacity may
 /// differ from retained backing allocation. New allocation bytes and opaque
 /// storage identity come from an explicit successful-growth provider.</summary>
-public sealed class LegacyNativeWordHeapDescriptor
+public sealed partial class LegacyNativeWordHeapDescriptor
 {
     private byte[] backing;
     private bool resizing;

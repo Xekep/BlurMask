@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 namespace InkRecognition;
 
 //First native PRIMARY materialization only. No204290, parent88 or completed node.
-internal sealed class LegacyEnglishCasePrimaryCompletion
+internal sealed partial class LegacyEnglishCasePrimaryCompletion
 {
     internal const long CompleteLogicalCeiling=127687945;
     internal const long AdditionalLogicalReserve=1048576;
@@ -126,6 +126,7 @@ internal sealed class LegacyEnglishCasePrimaryCompletion
         Charge(2*125*(88+80)+250*4);
         token.ThrowIfCancellationRequested();actual.RequirePrimaryCompletion(this,heap,policy,lease);
         pending=new(rows,alternatives,rowMasks,alternativeMasks,ordinals,descriptor.Count,count,contexts.NodeCount,3*count,payload,copyWork);
+        node0?.CompleteOwned(this,actual,heap,policy,lease,descriptor,rows,alternatives,rowMasks,alternativeMasks,ordinals,count,token);
     }
     private static ushort Identity(ushort symbol)=>symbol; //Pinned native1F8300; never caller supplied.
 }

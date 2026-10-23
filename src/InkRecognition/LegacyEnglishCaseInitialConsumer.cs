@@ -20,7 +20,7 @@ internal sealed partial class LegacyEnglishCaseInitialQueryPass
     }
 }
 // Complete first node0/span0 PRIMARY allocation prefix. No terminal/winner/history.
-internal sealed class LegacyEnglishCaseInitialConsumer
+internal sealed partial class LegacyEnglishCaseInitialConsumer
 {
     private readonly LegacyEnglishCaseInitialQueryPass pass;
     private readonly LegacyEnglishCaseInitialSourcePolicy policy;

@@ -131,6 +131,12 @@ jobs:
         run: python tools/check-workflow-shells.py --bash-script tools/ci/check-recognition-managed.sh .github/workflows/ci.yml
       - run: dotnet restore src/BlurMask/BlurMask.csproj
       - run: dotnet build src/BlurMask/BlurMask.csproj -c Release --no-restore -p:PublishAot=false -p:SelfContained=false
+      - name: Compile gated recognition drafts and check cancellation contract
+        shell: bash
+        run: |
+          dotnet build tools/LegacyEnglishCaseNode0Completion.Probe -c Release
+          dotnet build tools/LegacyFst28CNumberTrueLanguage.Probe -c Release
+          python -I -B tools/LegacyEnglishCaseNode0Completion.Probe/check_guard_payload.py --self-test
       - name: Portable stroke engine numerical goldens, model validation and ink history
         run: dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --ai-pen-test
       - name: Math token formatter and model guards

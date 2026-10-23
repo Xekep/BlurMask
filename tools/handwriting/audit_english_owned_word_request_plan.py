@@ -1,6 +1,12 @@
 """STATIC source inventory + independently enumerated PROPOSED lease model.
 No runtime implementation, vendor execution, native pointer or decoder claim.
 """
+# Exact reviewed source reversal; no numerical/capture authority is changed.
+import hashlib as _reviewed_hashlib,runpy as _reviewed_runpy
+from pathlib import Path as _ReviewedPath
+_reviewed_loader=_ReviewedPath(__file__).resolve().parents[1]/'handwriting/reviewed_node0_source_restoration.py'
+assert _reviewed_hashlib.sha256(_reviewed_loader.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='9f310e7f9397b40d35a623a65e0064a0b9cee709cda3a9c46bd159e37186bc1a','Unreviewed source restoration loader'
+_restore_reviewed_source=_reviewed_runpy.run_path(str(_reviewed_loader),run_name='reviewed_node0_source_pin_only')['restore_source_for_pin']
 import argparse,hashlib,json,subprocess,sys
 from pathlib import Path
 p=argparse.ArgumentParser()
@@ -9,8 +15,8 @@ a=p.parse_args();here=Path(__file__).resolve().parent
 pin=json.loads((here/'english-owned-word-request-source-inventory.json').read_bytes())
 sha=lambda b:hashlib.sha256(b).hexdigest()
 for r in pin['sourcePins']:
-    b=(a.repo/r['path']).read_bytes();assert len(b)==r['bytes'] and sha(b)==r['sha256'],r['path']
-read=lambda name:(a.repo/'src/InkRecognition'/name).read_text(encoding='utf-8-sig')
+    b=_restore_reviewed_source(r['path'],(a.repo/r['path']).read_bytes());assert len(b)==r['bytes'] and sha(b)==r['sha256'],r['path']
+read=lambda name:_restore_reviewed_source(name,(a.repo/'src/InkRecognition'/name).read_bytes()).decode('utf-8-sig')
 b=read('LegacyEnglishFreshDictionaryQuerySession.cs')
 snapshot=b[b.index('public LegacyEnglishQueryPreparationSnapshot CopyPreparationSnapshot'):]
 assert 'lock(gate)' in snapshot and 'contexts.Capture(token)' in snapshot

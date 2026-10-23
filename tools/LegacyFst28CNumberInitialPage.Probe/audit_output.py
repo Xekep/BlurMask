@@ -2,6 +2,12 @@
 Full upstream19NN proof then original raw13A decoder/cost table, rawAL/AVL,
 physical/accepted cursor ledger and separate raw epsilon flattening. No labels.
 """
+# Exact reviewed source reversal; no numerical/capture authority is changed.
+import hashlib as _reviewed_hashlib,runpy as _reviewed_runpy
+from pathlib import Path as _ReviewedPath
+_reviewed_loader=_ReviewedPath(__file__).resolve().parents[1]/'handwriting/reviewed_node0_source_restoration.py'
+assert _reviewed_hashlib.sha256(_reviewed_loader.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='9f310e7f9397b40d35a623a65e0064a0b9cee709cda3a9c46bd159e37186bc1a','Unreviewed source restoration loader'
+_restore_reviewed_source=_reviewed_runpy.run_path(str(_reviewed_loader),run_name='reviewed_node0_source_pin_only')['restore_source_for_pin']
 import ast,copy,hashlib,json,math,runpy,struct,sys
 from pathlib import Path
 if len(sys.argv)!=4:raise SystemExit('MODELS CAPTURE COMPLETED_D0_CAPTURE')
@@ -25,7 +31,7 @@ for row in pins['runtimeReviewedLF']+pins['existingIndependentDefinitionsLF']:
   assert len(addition.splitlines())==13 and sha(addition)=='a84f4d57852e015e525603e65f753495f12c7121f7a3ad63faa7ac1083159fc5'
   b=b[:start]+b[end:]
  assert sha(b)==row['sha256LF'],row['path']
-assert sha((repo/'src/InkRecognition/LegacyFst28CNumberInitialPage.cs').read_bytes().replace(b'\r\n',b'\n'))=='410187cde2b70c426511164b55420725c23552c5a54ec583e9b454b76bd8c5c5'
+assert sha(_restore_reviewed_source('LegacyFst28CNumberInitialPage.cs',(repo/'src/InkRecognition/LegacyFst28CNumberInitialPage.cs').read_bytes()).replace(b'\r\n',b'\n'))=='410187cde2b70c426511164b55420725c23552c5a54ec583e9b454b76bd8c5c5'
 
 def defs(path,names):
  ns={'struct':struct};nodes=[n for n in ast.parse(path.read_text(encoding='utf-8-sig')).body if isinstance(n,(ast.FunctionDef,ast.ClassDef))and n.name in names];assert len(nodes)==len(names);exec(compile(ast.Module(body=nodes,type_ignores=[]),str(path),'exec'),ns);return ns

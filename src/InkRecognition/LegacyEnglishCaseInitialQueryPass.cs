@@ -51,7 +51,7 @@ internal sealed partial class LegacyEnglishCaseInitialQueryPass
         {
             //Native sourceV80(-1) happens BEFORE first D0; serialized separately.
             var reset=Root.BeginInitializationAccess(Initializer,token);entered=true;
-            try{ResetAttempts++;Initializer.PlanForAudit.ResetFirstExecutionNode(stage=>{ResetCompletedStages++;observer?.Invoke(stage);},token);ResetCount++;observer?.Invoke("query:reset");token.ThrowIfCancellationRequested();Root.CompleteInitializationAccess(reset);}
+            try{ResetAttempts++;Initializer.PlanForAudit.ResetFirstExecutionNode(stage=>{ResetCompletedStages++;observer?.Invoke(stage);},token);ResetCount++;observer?.Invoke("query:reset");token.ThrowIfCancellationRequested();initialConsumer?.InitializeWholeNode(reset,token);Root.CompleteInitializationAccess(reset);}
             catch{Root.PoisonInitializationAccess(reset);throw;}
             observer?.Invoke("query:before-D0");token.ThrowIfCancellationRequested();
             D0=SpanSession.PrepareSpanCore(0,0,false,observer,token);observer?.Invoke("query:D0");token.ThrowIfCancellationRequested();

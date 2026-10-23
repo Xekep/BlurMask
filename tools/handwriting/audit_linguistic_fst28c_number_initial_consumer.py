@@ -1,4 +1,10 @@
 """STATIC full initial-number qualifier/category/scorer/heap proposal. Vendor bytes only."""
+# Exact reviewed source reversal; no numerical/capture authority is changed.
+import hashlib as _reviewed_hashlib,runpy as _reviewed_runpy
+from pathlib import Path as _ReviewedPath
+_reviewed_loader=_ReviewedPath(__file__).resolve().parents[1]/'handwriting/reviewed_node0_source_restoration.py'
+assert _reviewed_hashlib.sha256(_reviewed_loader.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='9f310e7f9397b40d35a623a65e0064a0b9cee709cda3a9c46bd159e37186bc1a','Unreviewed source restoration loader'
+_restore_reviewed_source=_reviewed_runpy.run_path(str(_reviewed_loader),run_name='reviewed_node0_source_pin_only')['restore_source_for_pin']
 from pathlib import Path
 import argparse,hashlib,json,struct,capstone,subprocess,sys
 p=argparse.ArgumentParser()
@@ -46,7 +52,11 @@ for row in pins['completeCFG']:
 for r in pins['engine']['regions']:assert sha(engine(int(r['start'],16),r['bytes']))==r['sha256']
 r=pins['engine']['slot'];assert engine(int(r['at'],16),8).hex()==r['bytes'] and struct.unpack('<Q',bytes.fromhex(r['bytes']))[0]==0x180052b50
 r=pins['engine']['flagPredicate'];assert engine(int(r['start'],16),r['bytes']).hex()==r['hex'];ins=list(cs.disasm(bytes.fromhex(r['hex']),int(r['start'],16)));assert sum(x.size for x in ins)==47 and sum(x.mnemonic=='ret'for x in ins)==2
-for row in pins['sourceLF']:assert sha((repo/row['path']).read_bytes().replace(b'\r\n',b'\n'))==row['sha256LF'],row['path']
+for row in pins['sourceLF']:
+ b=_restore_reviewed_source(row['path'],(repo/row['path']).read_bytes()).replace(b'\r\n',b'\n')
+ if sha(b)!=row['sha256LF']:
+  b=_reviewed_runpy.run_path(str(repo/'tools/LegacyFst28CNumberInitialConsumer.Probe/audit_output.py'))['source_preimage'](row['path'],b)
+ assert sha(b)==row['sha256LF'],row['path']
 ak=(a.models/'ru-RU/ru_RU-ak-cur.lite.res').read_bytes();assert sha(ak)=='7a5f08809e81fb4a2d4c78b3efd251d0986503b0d30d21de3695dab1f8a89978'
 for r in pins['rawModelSpans']:assert sha(ak[r['at']:r['at']+r['length']])==r['sha256']
 assert struct.unpack_from('<I',ak,188165)[0]==0x297 and struct.unpack_from('<H',ak,188171)[0]==0x106

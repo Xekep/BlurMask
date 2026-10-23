@@ -241,6 +241,20 @@ public sealed class LegacyFst28CNumberInitialConsumer
         if(Interlocked.CompareExchange(ref skippedLanguageCompletionClaim,1,0)!=0)
             throw new InvalidOperationException("This exact initial Number consumer already claimed node0 completion.");
     }
+    // The retained TRUE path shares the original four-byte completion CAS.
+    internal void ClaimTrueLanguageCompletion(LegacyFst28CNumberTrueLanguageSourceDraft receiver,CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(receiver);receiver.ValidateReceivingConsumer(this,token);
+        RequireCompleted();ValidateRetainedPool(token);
+        if(Interlocked.CompareExchange(ref skippedLanguageCompletionClaim,1,0)!=0)
+            throw new InvalidOperationException("This exact initial Number consumer already claimed node0 completion.");
+    }
+    internal void AttachTrueLanguageCompletion(LegacyFst28CNumberTrueLanguageSourceDraft receiver,CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(receiver);receiver.ValidateReceivingConsumer(this,token);
+        RequireCompleted();ValidateRetainedPool(token);
+        receiver.AcceptTrustedConsumer(this,pool!,heap!,token);
+    }
     internal bool ReadSkippedLanguageCompletionClaim()=>Volatile.Read(ref skippedLanguageCompletionClaim)!=0;
     // Trusted receiving read only; no snapshot grants completion authority.
     internal void AttachSkippedLanguageCompletion(LegacyFst28CNumberSkippedLanguageCompletion receiver,CancellationToken token)

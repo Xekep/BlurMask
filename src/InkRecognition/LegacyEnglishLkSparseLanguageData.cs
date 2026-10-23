@@ -7,7 +7,7 @@ namespace InkRecognition;
 public enum LegacyEnglishSparsePackedField{WordClasses,Order2Labels,Order3Labels,Order1Offsets,Order2Offsets}
 public readonly record struct LegacyEnglishSparseField(string Name,int Offset,int End,string Sha256);
 /// <summary>Actual English2D2/v101 DATA; no query/controller/masks owner.</summary>
-public sealed class LegacyEnglishLkSparseLanguageData
+public sealed partial class LegacyEnglishLkSparseLanguageData
 {
     internal const int AbsoluteStart=1252412,AbsoluteEnd=2832716;
     private readonly byte[] wire;

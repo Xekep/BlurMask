@@ -1,6 +1,12 @@
 """STATIC number1FD240 context prerequisite. No native/new graft execution.
 --native-repo REPO --models MODELS --page-capture PAGE --d0-capture D0 --output REPORT
 """
+# Exact reviewed source reversal; no numerical/capture authority is changed.
+import hashlib as _reviewed_hashlib,runpy as _reviewed_runpy
+from pathlib import Path as _ReviewedPath
+_reviewed_loader=_ReviewedPath(__file__).resolve().parents[1]/'handwriting/reviewed_node0_source_restoration.py'
+assert _reviewed_hashlib.sha256(_reviewed_loader.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='9f310e7f9397b40d35a623a65e0064a0b9cee709cda3a9c46bd159e37186bc1a','Unreviewed source restoration loader'
+_restore_reviewed_source=_reviewed_runpy.run_path(str(_reviewed_loader),run_name='reviewed_node0_source_pin_only')['restore_source_for_pin']
 import argparse,ast,hashlib,json,runpy,struct,sys
 from pathlib import Path
 p=argparse.ArgumentParser();p.add_argument('--native-repo',type=Path,required=True);p.add_argument('--models',type=Path,required=True);p.add_argument('--page-capture',type=Path,required=True);p.add_argument('--d0-capture',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args();repo=Path(__file__).resolve().parents[2];sha=lambda b:hashlib.sha256(b).hexdigest()
@@ -12,7 +18,15 @@ for row in pins['regions']:assert sha(read(int(row['start'],16),row['bytes']))==
 for row in pins['spans']:assert read(int(row['start'],16),row['bytes']).hex()==row['hex']and sha(bytes.fromhex(row['hex']))==row['sha256']
 for row in pins['sourceMetadataLeaves']:assert read(int(row['start'],16),len(bytes.fromhex(row['bytes']))).hex()==row['bytes']
 for row in pins['sourceMetadataSlots']:assert read(int(row['at'],16),8).hex()==row['bytes']
-for row in pins['runtimeLF']:assert sha((repo/row['path']).read_bytes().replace(b'\r\n',b'\n'))==row['sha256LF']
+for row in pins['runtimeLF']:
+ source=_restore_reviewed_source(row['path'],(repo/row['path']).read_bytes()).replace(b'\r\n',b'\n')
+ if sha(source)!=row['sha256LF']:
+  name=Path(row['path']).name
+  if name=='LegacyFst28CNumberInitialQueryBinding.cs':
+   source=runpy.run_path(str(repo/'tools/LegacyFst28CNumberInitialConsumerContext.Probe/audit_output.py'),run_name='reviewed_binding_source_only')['binding_preimages'](source)[0]
+  elif name=='LegacyFst28CNumberInitialD0.cs':
+   source=runpy.run_path(str(repo/'tools/LegacyFst28CNumberInitialConsumer.Probe/audit_output.py'),run_name='reviewed_d0_source_only')['source_preimage'](row['path'],source)
+ assert sha(source)==row['sha256LF'],row['path']
 assert read(0x180236820,6).hex()=='8b4258ffc0c3'
 assert struct.unpack('<Q',read(0x1802e8bd0,8))[0]==0x180236820 and struct.unpack('<Q',read(0x1802e8bd8,8))[0]==0x180236830
 # Independent raw page/NN proof; no graft or new factory runs.

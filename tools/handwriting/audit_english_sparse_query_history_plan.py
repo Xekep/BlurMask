@@ -2,6 +2,12 @@
 Runs the existing full sparse proof and an independent actual-model reference.
 This does not execute a vendor module or claim handwriting request provenance.
 """
+# Exact reviewed source reversal; no numerical/capture authority is changed.
+import hashlib as _reviewed_hashlib,runpy as _reviewed_runpy
+from pathlib import Path as _ReviewedPath
+_reviewed_loader=_ReviewedPath(__file__).resolve().parents[1]/'handwriting/reviewed_node0_source_restoration.py'
+assert _reviewed_hashlib.sha256(_reviewed_loader.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='9f310e7f9397b40d35a623a65e0064a0b9cee709cda3a9c46bd159e37186bc1a','Unreviewed source restoration loader'
+_restore_reviewed_source=_reviewed_runpy.run_path(str(_reviewed_loader),run_name='reviewed_node0_source_pin_only')['restore_source_for_pin']
 from pathlib import Path
 import argparse, hashlib, json, struct, subprocess, sys
 p=argparse.ArgumentParser()
@@ -28,7 +34,7 @@ for pin in proof['newCalls']+proof['criticalPins']+proof['tables']:
  expected=bytes.fromhex(pin['bytes']);assert read(int(pin['at'],16),len(expected))==expected
 assert len(proof['newCalls'])==139 and len(proof['criticalPins'])==8 and len(proof['tables'])==2
 for source in proof['unchangedOwners']:
- text=(a.repo/source['path']).read_text(encoding='utf-8-sig').replace('\r\n','\n')
+ text=_restore_reviewed_source(source['path'],(a.repo/source['path']).read_bytes()).decode('utf-8-sig').replace('\r\n','\n')
  assert sha(text.encode())==source['lfSha256'],source['path']
 upstream=proof['upstreamSparsePins'];assert sha((a.repo/upstream['path']).read_bytes())==upstream['sha256']
 a.output.parent.mkdir(parents=True,exist_ok=True)

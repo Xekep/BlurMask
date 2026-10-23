@@ -1,6 +1,12 @@
 """Read-only PE/native/source closure and CURRENT raw-field numeric evidence.
 No vendor execution, production decoder or borrowed old owner is claimed.
 """
+# Exact reviewed source reversal; no numerical/capture authority is changed.
+import hashlib as _reviewed_hashlib,runpy as _reviewed_runpy
+from pathlib import Path as _ReviewedPath
+_reviewed_loader=_ReviewedPath(__file__).resolve().parents[1]/'handwriting/reviewed_node0_source_restoration.py'
+assert _reviewed_hashlib.sha256(_reviewed_loader.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='9f310e7f9397b40d35a623a65e0064a0b9cee709cda3a9c46bd159e37186bc1a','Unreviewed source restoration loader'
+_restore_reviewed_source=_reviewed_runpy.run_path(str(_reviewed_loader),run_name='reviewed_node0_source_pin_only')['restore_source_for_pin']
 from pathlib import Path
 import argparse,hashlib,json,struct,subprocess,sys
 p=argparse.ArgumentParser()
@@ -24,7 +30,7 @@ for r in proof['unregisteredCompleteRegions']:
 for r in proof['calls']+proof['tables']:
  b=bytes.fromhex(r['bytes']);assert read(int(r['at'],16),len(b))==b
 for r in proof['unchangedPureKernelSources']:
- b=(a.repo/r['path']).read_bytes();assert len(b)==r['bytes'] and sha(b)==r['sha256'],r['path']
+ b=_restore_reviewed_source(r['path'],(a.repo/r['path']).read_bytes());assert len(b)==r['bytes'] and sha(b)==r['sha256'],r['path']
 # All body/call/leaf bytes above are reread from the actual PE, never ctypes.
 assert proof['fullBodies']==39 and len(proof['calls'])==259 and len(proof['unregisteredCompleteRegions'])==9 and len(proof['tables'])==7
 results=[];a.output.parent.mkdir(parents=True,exist_ok=True);stem='ewp-'+sha(str(a.output.resolve()).encode())[:12]

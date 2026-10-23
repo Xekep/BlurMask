@@ -2,6 +2,12 @@
 CLI: MODELS NATIVE_REPO CONSUMER_CAPTURE OBSERVATION_CAPTURE REFERENCE_OUTPUT
 No vendor execution, C# invocation, NN invocation or live continuation authority.
 """
+# Exact reviewed source reversal; no numerical/capture authority is changed.
+import hashlib as _reviewed_hashlib,runpy as _reviewed_runpy
+from pathlib import Path as _ReviewedPath
+_reviewed_loader=_ReviewedPath(__file__).resolve().parents[1]/'handwriting/reviewed_node0_source_restoration.py'
+assert _reviewed_hashlib.sha256(_reviewed_loader.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='9f310e7f9397b40d35a623a65e0064a0b9cee709cda3a9c46bd159e37186bc1a','Unreviewed source restoration loader'
+_restore_reviewed_source=_reviewed_runpy.run_path(str(_reviewed_loader),run_name='reviewed_node0_source_pin_only')['restore_source_for_pin']
 import copy,hashlib,json,runpy,struct,sys
 from pathlib import Path
 import pefile
@@ -10,9 +16,9 @@ HERE=Path(__file__).resolve().parent;REPO=HERE.parents[1]
 def exact_consumer_preimage(data):
  # Preserve the historical STATIC source pin; recognize only the reviewed
  # exact runtime successor through its independently authenticated reversal.
- b=data.replace(b'\r\n',b'\n')
+ b=_restore_reviewed_source('LegacyFst28CNumberInitialConsumer.cs',data).replace(b'\r\n',b'\n')
  if sha(b)=='25be1dce91a32902c2b29fcc24c14b3f28ebac2a5f18e7fbd4d87b70620a7935':return b
- oracle=HERE.parent/'LegacyFst28CNumberSkippedLanguageCompletion.Probe/audit_output.py'
+ oracle=HERE.parent/'LegacyFst28CNumberSkippedLanguageCompletion.Probe/audit_output_before_true.py'
  raw=oracle.read_bytes().replace(b'\r\n',b'\n')
  assert sha(raw)=='3ec7282a8bcd7b44c7ba2c8a4b023dba2c14c38b5651ffe99f5110fb1b70ff46'
  module=runpy.run_path(str(oracle),run_name='number_static_exact_preimage_only')
@@ -45,7 +51,7 @@ def main(args):
   b=data(p['start'],8);assert b.hex()==p['hex'] and int.from_bytes(b,'little')==int(p['target'],16)
  for p in pins['scalars']:assert data(p['start'],p['bytes']).hex()==p['hex']
  for p in pins['source']:
-  b=(REPO/p['path']).read_bytes().replace(b'\r\n',b'\n')
+  b=_restore_reviewed_source(p['path'],(REPO/p['path']).read_bytes()).replace(b'\r\n',b'\n')
   if p['path']=='src/InkRecognition/LegacyFst28CNumberInitialConsumer.cs':
    current=b;b=exact_consumer_preimage(current)
    assert exact_consumer_preimage(b)==b

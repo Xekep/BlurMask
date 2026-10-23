@@ -150,6 +150,17 @@ totals, not a complete allocation attribution, a worst-case certificate or an
 OS memory measurement. The observed visit counts also demonstrate why the
 unchanged production16 Mi limit cannot admit this implementation.
 
+A subsequent source expansion found concrete undercharges in these counters.
+The phase1 comparison coefficients128/96 are below successful-path lower
+bounds224/112 when the pinned scalar readers are expanded. Conditional
+per-comparison upper bounds are698/396 under the documented .NET10.0.12
+logical-operation convention. The accepted-FIRST writer's128 coefficient
+also fails: its5 primitive reads and11 primitive writes alone require at
+least224 such units, before slicing, copies and direct checks. The writer's
+complete upper bound is still open. Thus the recorded visit totals above
+are reproducible instrumentation values, not complete source-work bounds;
+the exact output comparisons remain valid independently.
+
 Full resource accounting, production admission and application integration
 remain unfinished. No default recognizer was switched and no RC was released
 from this diagnostic. Russian cursive quality has not been established by it.
@@ -169,3 +180,66 @@ payload counters must not be presented as actual process memory.
 | `root-en-node0-actual-diagnostic-frozen-manifest-20261023.json` | `3d3600aa5f7c7b4f11ddee57594e39f1a2b93c5354668776f38c451e66648353` |
 | `independent-en-node0-actual-diagnostic-review-frozen-manifest-20261023.json` | `064fe00186f44cae8a111313c18a8b49101f19566386deccef9811bc1ab2e4b3` |
 | `root-en-node0-memory-diagnostic-frozen-manifest-20261023.json` | `8e4652981a8c8a4bc31dc26ff9bbca06988af278d2db3ec2921011a4718baecc` |
+| `independent-en-phase1-compare-coefficients-frozen-manifest-20261023.json` | `3d17f9ff0643035c0d70fb64c1354c3d5eb84181270e62a208ee840013b1b218` |
+| `root-en-firstwriter-source-lowerbound-frozen-manifest-20261023.json` | `30c649729dab93a426594402785d26e31448a17fe276cbbfdfb0b0fccf15dd4a` |
+
+## Stored gated source and regression checkpoint
+
+The reviewed increment19 production source is now stored in `src/InkRecognition`,
+with its probe in `tools/LegacyEnglishCaseNode0Completion.Probe`. Diagnostic
+readiness bypasses and the64 Mi diagnostic ceiling are not imported. The
+application's recognizer selection is unchanged; the new internal entry remains
+closed. Storing this source is not enabling a finished engine.
+
+Increment18 restored the original NumericTables constructor, apart from its
+`partial` declaration. New immutable numeric handles are prepared explicitly by
+the new owner. Its separately reviewed diagnostic repeated all234 exact image
+comparisons, unchanged non-budget fields and lifecycle events, and token-aware
+cancellation guards. Increment19 additionally corrects the FIRST writer charge
+to1254 under the pinned successful-path source convention; whole-operation
+accounting and framework/AOT-pack equivalence remain unproved.
+
+The combined application and both new gated probes build successfully. The
+application's headless AI-pen checks pass using its configured .NET11 preview
+runtime. The initial attempt incorrectly forced .NET10 and failed at assembly
+loading; that failure is preserved separately. Library diagnostic execution
+used .NET10.0.12 and does not certify the application's .NET11 resource bounds.
+
+Historical source validators retain their existing hashes and expected outputs.
+An exact, independently reviewed source reversal recognizes only11 complete
+reviewed successors, then restores their authenticated historical preimages.
+Unknown edits still fail. The original skipped-language oracle is preserved
+as `audit_output_before_true.py`; its complete historical tool hash stays fixed.
+The portable hook checks pass62 positives and38 corruptions, separately from
+the original strict reversal's44 positives and116 corruptions.
+
+| Integration evidence | SHA256 |
+| --- | --- |
+| `global-en-fullnode-source-increment19-frozen-manifest-20261023.json` | `633157940ea39f226b38ab62a53ffb7d3434cacd9ae90833dbea0b3cb829aa36` |
+| `root-en-node0-inc18-actual-diagnostic-frozen-manifest-20261023.json` | `7a9425839303dc265a417e2db422436d2fba5f999c31ce49d1ad113e0ebecd62` |
+| `independent-en-inc18-source-and-diagnostic-review-frozen-manifest-20261023.json` | `db2d4ed7b46e974e383c217126ce17cc28b4d9dd4323da62301593e874b226b9` |
+| `root-independent-en-firstwriter-upper-v2-frozen-manifest-20261023.json` | `31bed506bd82e922e95ee541dfef2e52df2cf0cbd520adf5f1924afa368df94e` |
+| `independent-source-auditor-hooks-frozen-manifest-20261023.json` | `46a0ab54588117e1875bf240b1ac6742b7eb2fdb039b2f6052de884e08cebf00` |
+
+
+## Main integration verification limits
+
+The English pool STATIC audit and Number context STATIC audit pass against
+this integration. The English audit explicitly uses the pinned historical
+acoustic contract from4bb4e58; this does not validate the current scorer.
+The full initial-Number STATIC audit remains blocked by a pre-existing scorer
+source pin after refactor0510513:15 of16 source rows pass. The expected scorer
+hash remains unchanged. Its failure and exact historical diff are preserved;
+it is not counted as a passing check.
+
+The application and both gated probes build with zero warnings/errors. The
+configured-runtime headless application checks and the existing Number
+numerical oracle pass. CI now also compiles both gated drafts and checks the
+cancellation-contract negative controls. This checkpoint enables neither
+unfinished entry and provides no new Russian-cursive quality result or RC.
+
+| Verification evidence | SHA256 |
+| --- | --- |
+| `root-gated-recognition-main-verification-frozen-manifest-20261023.json` | `1fe8126605bf5254d5b1b809025836db4638d881cdc747bd51a0477403d76064` |
+| `independent-number-context-static-adapter-final-frozen-manifest-20261023.json` | `3189da29912eb2cffedca29148eea49692b0ada489a45559e1cc437a82fc9956` |
+| `independent-number-initial-scorer-stale-pin-frozen-manifest-20261023.json` | `012385c57dca4e686822e771c9905ce62f8fb16922f64f1116363f138725fc97` |

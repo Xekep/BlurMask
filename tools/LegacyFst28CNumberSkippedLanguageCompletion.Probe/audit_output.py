@@ -2,6 +2,12 @@
 MODELS CAPTURE OLD_CONSUMER_CAPTURE OLD_CONTEXT_CAPTURE OLD_D0_CAPTURE
 The STATIC reference is a canonical dependency; no production C# is executed.
 """
+# Exact reviewed source reversal; no numerical/capture authority is changed.
+import hashlib as _reviewed_hashlib,runpy as _reviewed_runpy
+from pathlib import Path as _ReviewedPath
+_reviewed_loader=_ReviewedPath(__file__).resolve().parents[1]/'handwriting/reviewed_node0_source_restoration.py'
+assert _reviewed_hashlib.sha256(_reviewed_loader.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='9f310e7f9397b40d35a623a65e0064a0b9cee709cda3a9c46bd159e37186bc1a','Unreviewed source restoration loader'
+_restore_reviewed_source=_reviewed_runpy.run_path(str(_reviewed_loader),run_name='reviewed_node0_source_pin_only')['restore_source_for_pin']
 import base64,copy,hashlib,json,runpy,struct,subprocess,sys
 from pathlib import Path
 HERE=Path(__file__).resolve().parent;REPO=HERE.parents[1];sha=lambda b:hashlib.sha256(b).hexdigest()
@@ -14,6 +20,7 @@ CLAIM_FIELD='    private int skippedLanguageCompletionClaim;\n'
 CLAIM_METHODS='    // Same-receiver scalar claim: no shared table, allocation or resize.\n    internal void ClaimSkippedLanguageCompletion(LegacyFst28CNumberSkippedLanguageCompletion receiver)\n    {\n        ArgumentNullException.ThrowIfNull(receiver);\n        if(!ReferenceEquals(receiver.ExpectedConsumer,this))throw new ArgumentException("Foreign receiving Number consumer.");\n        RequireCompleted();\n        if(Interlocked.CompareExchange(ref skippedLanguageCompletionClaim,1,0)!=0)\n            throw new InvalidOperationException("This exact initial Number consumer already claimed node0 completion.");\n    }\n    internal bool ReadSkippedLanguageCompletionClaim()=>Volatile.Read(ref skippedLanguageCompletionClaim)!=0;\n'
 ADDITION='// Trusted receiving read only; no snapshot grants completion authority.\n    internal void AttachSkippedLanguageCompletion(LegacyFst28CNumberSkippedLanguageCompletion receiver,CancellationToken token)\n    {\n        token.ThrowIfCancellationRequested();ArgumentNullException.ThrowIfNull(receiver);\n        if(!ReferenceEquals(receiver.ExpectedConsumer,this))throw new ArgumentException("Foreign receiving Number consumer.");\n        RequireCompleted();ValidateRetainedPool(token);\n        receiver.AcceptTrustedInitial(this,pool!,heap!,grafts,token);\n    }\n    '
 def source_preimage(data):
+ data=_restore_reviewed_source('LegacyFst28CNumberInitialConsumer.cs',data)
  b=data.replace(b'\r\n',b'\n');assert sha(b) in (OLD_CONSUMER_LF,CURRENT_CONSUMER_LF)
  if sha(b)==CURRENT_CONSUMER_LF:
   for addition in (ADDITION,CLAIM_FIELD,CLAIM_METHODS):

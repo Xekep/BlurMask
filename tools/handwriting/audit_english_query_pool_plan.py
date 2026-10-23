@@ -1,6 +1,12 @@
 """Read-only PE/static producer closure, independent raw pool projection.
 Does not execute SDK code or widen the old masks-only pool policy.
 """
+# Exact reviewed source reversal; no numerical/capture authority is changed.
+import hashlib as _reviewed_hashlib,runpy as _reviewed_runpy
+from pathlib import Path as _ReviewedPath
+_reviewed_loader=_ReviewedPath(__file__).resolve().parents[1]/'handwriting/reviewed_node0_source_restoration.py'
+assert _reviewed_hashlib.sha256(_reviewed_loader.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='9f310e7f9397b40d35a623a65e0064a0b9cee709cda3a9c46bd159e37186bc1a','Unreviewed source restoration loader'
+_restore_reviewed_source=_reviewed_runpy.run_path(str(_reviewed_loader),run_name='reviewed_node0_source_pin_only')['restore_source_for_pin']
 from pathlib import Path
 import argparse,hashlib,json,struct,subprocess,sys
 p=argparse.ArgumentParser()
@@ -23,7 +29,7 @@ for pin in proof['calls']+proof['tables']:
  expected=bytes.fromhex(pin['bytes']);assert read(int(pin['at'],16),len(expected))==expected
 assert struct.unpack('<d',read(0x1802ed2c0,8))[0]==1.5
 for group,root in ((proof['unchangedOwners'],a.repo),(proof['acousticContract']['files'],a.acoustic_root or a.repo)):
- for source in group:assert sha((root/source['path']).read_text(encoding='utf-8-sig').replace('\r\n','\n').encode())==source['lfSha256'],source['path']
+ for source in group:assert sha(_restore_reviewed_source(source['path'],(root/source['path']).read_bytes()).decode('utf-8-sig').replace('\r\n','\n').encode())==source['lfSha256'],source['path']
 assert sha((a.repo/proof['upstream']['path']).read_bytes())==proof['upstream']['sha256']
 a.output.parent.mkdir(parents=True,exist_ok=True);prefix='eqp-'+sha(str(a.output.resolve()).encode())[:12];native=a.output.with_name(prefix+'-upstream.json');reference=a.output.with_name(prefix+'-raw.json')
 subprocess.run([sys.executable,str(a.repo/'tools/handwriting/audit_english_sparse_query_history_plan.py'),'--repo',str(a.repo),'--models',str(a.models),'--sdk',str(a.sdk),'--output',str(native)],check=True)

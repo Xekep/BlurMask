@@ -48,17 +48,28 @@ public sealed class LegacyFst28CNumberInitialConsumerContext
     internal static LegacyFst28CNumberInitialConsumerContext CreateBounded(
         LegacyFst28CNumberInitialD0 d0,int byteBudget,int workBudget,
         CancellationToken token=default,Action<string>? checkpoint=null)
+        =>CreateCore(d0,byteBudget,workBudget,token,checkpoint,null);
+    internal static LegacyFst28CNumberInitialConsumerContext CreateRetainedForTrueLanguage(
+        LegacyFst28CNumberTrueLanguageSourceDraft receiver,CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();ArgumentNullException.ThrowIfNull(receiver);
+        receiver.RequireWholeAdmission(token); // No whole TRUE admission exists in this draft.
+        return CreateCore(receiver.ExpectedD0,LogicalByteEnvelope,WorkEnvelope,token,null,receiver);
+    }
+    private static LegacyFst28CNumberInitialConsumerContext CreateCore(
+        LegacyFst28CNumberInitialD0 d0,int byteBudget,int workBudget,CancellationToken token,
+        Action<string>? checkpoint,LegacyFst28CNumberTrueLanguageSourceDraft? receiver)
     {
         token.ThrowIfCancellationRequested();ArgumentNullException.ThrowIfNull(d0);
         if(byteBudget is <0 or >LogicalByteEnvelope)throw new ArgumentOutOfRangeException(nameof(byteBudget));
         if(workBudget is <0 or >WorkEnvelope)throw new ArgumentOutOfRangeException(nameof(workBudget));
         if(byteBudget<LogicalByteEnvelope||workBudget<WorkEnvelope)
             throw new InvalidDataException("Complete consumer pool/prefix/page/graft envelope required.");
-        ValidateOwner(d0,token);
+        ValidateOwner(d0,token);receiver?.RequireWholeAdmission(token);
         // This SAME authenticated header will be attached by the original
         // Binding core, not a new/equal-byte detached context container.
         var header=d0.Bootstrap.RetainInitialNumberHeaderIdentity(d0,token);
-        var pool=Pool.Create(d0,header);
+        var pool=Pool.Create(d0,header);receiver?.BeginPrivatePool(pool,token);
         void Checkpoint(string stage){token.ThrowIfCancellationRequested();checkpoint?.Invoke(stage);token.ThrowIfCancellationRequested();}
         try
         {
@@ -66,7 +77,9 @@ public sealed class LegacyFst28CNumberInitialConsumerContext
             var binding=LegacyFst28CNumberInitialQueryBinding.CreateForConsumerPool(d0,pool,token,
                 s=>Checkpoint("binding-"+s));
             Checkpoint("after-prefix");
-            var page=LegacyFst28CNumberInitialPage.CreateFirstNormalPage(binding,token);
+            var page=receiver is null
+                ?LegacyFst28CNumberInitialPage.CreateFirstNormalPage(binding,token)
+                :LegacyFst28CNumberInitialPage.CreateRetainedForTrueLanguage(binding,receiver,pool,token);
             Checkpoint("after-page");
             pool.BeginGraft(binding,page,token);
             var context=pool.OwnedContext;
@@ -120,7 +133,8 @@ public sealed class LegacyFst28CNumberInitialConsumerContext
             for(int i=0;i<page.Count;i++)
                 if(records[i].SourceRecord!=page.ReadRecord(i))throw new InvalidDataException("Historical source page changed.");
             Checkpoint("after-active-snapshot");pool.Complete(count,token);
-            Checkpoint("before-publish");return new(pool,records,page.Count,snapshot);
+            Checkpoint("before-publish");var result=new LegacyFst28CNumberInitialConsumerContext(pool,records,page.Count,snapshot);
+            receiver?.AcceptCompletedContext(result,pool,token);return result;
         }
         catch{pool.Poison();throw;}
     }
@@ -214,6 +228,24 @@ public sealed class LegacyFst28CNumberInitialConsumerContext
             if(Interlocked.CompareExchange(ref state,2,1)!=1||binding is not null)
                 throw new InvalidOperationException("Pool already attached or poisoned.");
             binding=value;
+        }
+        internal void ValidateRetainedSourceBinding(LegacyFst28CNumberTrueLanguageSourceDraft receiver,
+            LegacyFst28CNumberInitialQueryBinding value,CancellationToken token)
+        {
+            receiver.RequireWholeAdmission(token);
+            if(!ReferenceEquals(receiver.ExpectedD0,Owner)||!ReferenceEquals(value,binding)||
+                !ReferenceEquals(value.D0,Owner)||!value.RetainsExactHeaderIdentity(token)||
+                Volatile.Read(ref state)!=2||page is not null||context is null||context.NodeCount!=18)
+                throw new ArgumentException("Exact live private prefix before graft required.");
+        }
+        internal void ValidateRetainedSourcePage(LegacyFst28CNumberTrueLanguageSourceDraft receiver,
+            LegacyFst28CNumberInitialPage actualPage,CancellationToken token)
+        {
+            receiver.RequireWholeAdmission(token);
+            if(!ReferenceEquals(receiver.ExpectedD0,Owner)||!ReferenceEquals(actualPage,page)||
+                !ReferenceEquals(actualPage.Binding,binding)||Volatile.Read(ref state)!=4||context is null)
+                throw new ArgumentException("Exact completed retained Page/private pool required.");
+            actualPage.ValidateRetainedSourceReceiver(receiver,this,token);
         }
         internal void BeginGraft(LegacyFst28CNumberInitialQueryBinding value,LegacyFst28CNumberInitialPage actualPage,CancellationToken token)
         {

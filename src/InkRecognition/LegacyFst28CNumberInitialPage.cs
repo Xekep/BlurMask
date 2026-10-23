@@ -16,7 +16,7 @@ public readonly record struct LegacyFst28CNumberPageCursor(uint State, int Sourc
 /// <summary>One complete first normal page for the genuine constructor-only
 /// number source and initial typed prefix. Not a generic Query/Ready/paging,
 /// history consumer, accepted-text or number-recognition API.</summary>
-public sealed class LegacyFst28CNumberInitialPage
+public sealed partial class LegacyFst28CNumberInitialPage
 {
     public const int LogicalByteEnvelope=42288;
     public const int WorkEnvelope=165168;
@@ -54,11 +54,15 @@ public sealed class LegacyFst28CNumberInitialPage
     public bool HasGeneralQueryAuthority=>false;
     public int LogicalByteReservation=>LogicalByteEnvelope;
     public int WorkReservation=>WorkEnvelope;
-    private LegacyFst28CNumberInitialPage(Engine engine)
+    private LegacyFst28CNumberInitialPage(Engine engine,
+        LegacyFst28CNumberTrueLanguageSourceDraft? receiver=null,
+        LegacyFst28CNumberInitialConsumerContext.Pool? pool=null,CancellationToken token=default)
     {
         Binding=engine.Input.Binding; records=engine.Output; calls=engine.Calls; cursors=engine.FinalCursors;
         Count=engine.OutputCount;BackendCallCount=engine.CallCount;SourceFillCount=engine.FillCount;
         SourceRowsCopied=engine.RowsCopied;OuterDepthUsed=engine.DepthUsed;
+        retainedSource=engine.CloseForPublication(this,receiver,pool);
+        if(receiver is not null)receiver.AcceptPageSource(this,pool!,retainedSource!,token);
     }
     public LegacyFst28CNumberPageRecord ReadRecord(int ordinal)
     {if((uint)ordinal>=(uint)Count)throw new ArgumentOutOfRangeException(nameof(ordinal));return records[ordinal];}
@@ -87,6 +91,20 @@ public sealed class LegacyFst28CNumberInitialPage
     internal static LegacyFst28CNumberInitialPage CreateBounded(
         LegacyFst28CNumberInitialQueryBinding binding,int byteBudget,int workBudget,
         CancellationToken token=default,Action<string>? checkpoint=null)
+        =>CreateCore(binding,byteBudget,workBudget,token,checkpoint,null,null);
+    internal static LegacyFst28CNumberInitialPage CreateRetainedForTrueLanguage(
+        LegacyFst28CNumberInitialQueryBinding binding,LegacyFst28CNumberTrueLanguageSourceDraft receiver,
+        LegacyFst28CNumberInitialConsumerContext.Pool pool,CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();ArgumentNullException.ThrowIfNull(receiver);
+        receiver.RequireWholeAdmission(token); // Closed before any page/prefix claim.
+        receiver.ValidatePageRequest(binding,pool,token);
+        return CreateCore(binding,LogicalByteEnvelope,WorkEnvelope,token,null,receiver,pool);
+    }
+    private static LegacyFst28CNumberInitialPage CreateCore(
+        LegacyFst28CNumberInitialQueryBinding binding,int byteBudget,int workBudget,CancellationToken token,
+        Action<string>? checkpoint,LegacyFst28CNumberTrueLanguageSourceDraft? receiver,
+        LegacyFst28CNumberInitialConsumerContext.Pool? pool)
     {
         token.ThrowIfCancellationRequested();ArgumentNullException.ThrowIfNull(binding);
         if(byteBudget is <0 or >LogicalByteEnvelope)throw new ArgumentOutOfRangeException(nameof(byteBudget));
@@ -127,7 +145,7 @@ public sealed class LegacyFst28CNumberInitialPage
         if(Interlocked.CompareExchange(ref claim.Used,1,0)!=0)
             throw new InvalidOperationException("Initial binding page already issued or poisoned.");
         Checkpoint("after-claim");var engine=new Engine(input,token,Checkpoint);
-        engine.Run();Checkpoint("before-publish");return new(engine);
+        engine.Run();Checkpoint("before-publish");return new(engine,receiver,pool,token);
     }
     // Executing request frames are library-owned state reconstructed from the
     // immutable retained private prefix. This does not mutate its historical
@@ -153,7 +171,7 @@ public sealed class LegacyFst28CNumberInitialPage
         internal readonly int Slot=slot;
         internal readonly uint State=state;
     }
-    private sealed class SourceCursor
+    private sealed partial class SourceCursor
     {
         internal BackendOwner? Owner;
         internal readonly LegacyFst13AOutgoingRow[] Rows=new LegacyFst13AOutgoingRow[12];
@@ -172,7 +190,34 @@ public sealed class LegacyFst28CNumberInitialPage
         private readonly ulong[] sourceNodes=new ulong[16];
         private readonly CancellationToken token;
         private readonly Action<string> checkpoint;
+        private int closed;
         internal int OutputCount,CallCount,FillCount,RowsCopied,DepthUsed;
+        private void RequireOpen()
+        {if(Volatile.Read(ref closed)!=0)throw new InvalidOperationException("Initial Page engine is closed.");}
+        internal RetainedSourceState? CloseForPublication(LegacyFst28CNumberInitialPage page,
+            LegacyFst28CNumberTrueLanguageSourceDraft? receiver,LegacyFst28CNumberInitialConsumerContext.Pool? pool)
+        {
+            RequireOpen();
+            if(receiver is null)
+            {
+                if(pool is not null)throw new ArgumentException("No pool without a receiving owner.");
+                if(Interlocked.CompareExchange(ref closed,1,0)!=0)throw new InvalidOperationException("Engine close raced.");
+                return null; // Original public/historical paths retain no source ring.
+            }
+            receiver.RequireWholeAdmission(token);
+            if(pool is null)throw new ArgumentNullException(nameof(pool));
+            receiver.ValidatePageRequest(Input.Binding,pool,token);
+            if(!ReferenceEquals(Input.Context,pool.OwnedContext)||FillCount!=3)
+                throw new InvalidDataException("Exact live initial source/private pool required.");
+            // Capture actual references/scalar ONCE while still live; no callback
+            // or source operation occurs between this capture and one-way close.
+            var retained=new RetainedSourceState(page,receiver,pool,Input,ring,current,sourceNodes,FillCount&7);
+            if(Interlocked.CompareExchange(ref closed,1,0)!=0)throw new InvalidOperationException("Engine close raced.");
+            retained.MarkIssuedAfterEngineClose();
+            // Only now can the Page publish this holder. It does not retain
+            // the old Engine/token/delegate or permit the old engine to resume.
+            return retained;
+        }
         internal Engine(Input input,CancellationToken token,Action<string> checkpoint)
         {
             Input=input;this.token=token;this.checkpoint=checkpoint;
@@ -182,7 +227,7 @@ public sealed class LegacyFst28CNumberInitialPage
         }
         internal void Run()
         {
-            Walk(Input.Tag,0,0);
+            RequireOpen();Walk(Input.Tag,0,0);
             if(FillCount!=3||CallCount!=6||RowsCopied!=14||DepthUsed!=3||OutputCount>12||Input.Context.NodeCount!=18)
                 throw new InvalidDataException("Complete closed initial traversal differs.");
             for(int i=0;i<FillCount;i++)
@@ -194,7 +239,7 @@ public sealed class LegacyFst28CNumberInitialPage
         }
         private void Walk(ulong tag,int depth,int accumulated)
         {
-            token.ThrowIfCancellationRequested();if((uint)depth>=8)throw new InvalidDataException("Eight-level bound exceeded.");
+            RequireOpen();token.ThrowIfCancellationRequested();if((uint)depth>=8)throw new InvalidDataException("Eight-level bound exceeded.");
             for(int i=0;i<depth;i++)if(levels[i].Active&&levels[i].Query!.Tag==tag)
                 throw new InvalidDataException("Source traversal cycle.");
             var level=levels[depth];if(level.Query is not null)throw new InvalidDataException("Unsupported repeated level owner.");
@@ -228,7 +273,7 @@ public sealed class LegacyFst28CNumberInitialPage
         }
         private void Fill(Level level,int depth)
         {
-            token.ThrowIfCancellationRequested();if(CallCount>=6)throw new InvalidDataException("Backend call bound exceeded.");
+            RequireOpen();token.ThrowIfCancellationRequested();if(CallCount>=6)throw new InvalidDataException("Backend call bound exceeded.");
             var q=level.Query??throw new InvalidDataException("Missing executing query.");
             if(!ReferenceEquals(q.Header,Input.Header)||!ReferenceEquals(q.Cohort,Input.Cohort)||
                 !ReferenceEquals(q.InitialRequest,Input.Request)||q.AcceptedSkip is <0 or >12)

@@ -1,7 +1,7 @@
 namespace InkRecognition;
 
 /// <summary>Private same-English-source copies, not a language query endpoint.</summary>
-internal sealed class LegacyEnglishCaseInitializationNumericTables
+internal sealed partial class LegacyEnglishCaseInitializationNumericTables
 {
     private readonly Dictionary<string,byte[]> codes;
     private readonly int[] word;

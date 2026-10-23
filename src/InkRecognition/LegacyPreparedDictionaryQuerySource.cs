@@ -31,7 +31,7 @@ public sealed record LegacyPreparedDictionaryQueryPage(int ReturnedCount,
 /// including the native root-child skip. Native context allocation remains an
 /// explicit callback, and no dictionary state or final word winner is invented.
 /// </summary>
-public sealed class LegacyPreparedDictionaryQuerySource
+public sealed partial class LegacyPreparedDictionaryQuerySource
 {
     private readonly LegacyPackedLexicon lexicon;
     private readonly Slot[] slots = Enumerable.Range(0, 8).Select(_ => new Slot()).ToArray();

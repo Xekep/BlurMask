@@ -25,6 +25,17 @@ public sealed record LegacyAggregateDictionaryChild(LegacyAggregateDictionaryRea
         {
             if (query.ContextRoot != 0 && query.ContextRoot != contexts.ContainerIdentity)
                 throw new ArgumentException("Query context container differs from the dictionary's shared factory.");
+            // Read selects initialContexts for zero parent, and context0 for
+            // zero root; neither branch invokes either context callback.
+            // Keep the capturing implementation separate so this path does
+            // not construct its token frame or two unused delegates.
+            if (query.ParentContext == 0 || query.ContextRoot == 0)
+                return source.Read(query, auxiliary, null, null, clearExtraCosts, token);
+            return ReadWithContexts(query, auxiliary, clearExtraCosts, token);
+        }
+        LegacyPreparedDictionaryQueryPage ReadWithContexts(LegacyPreparedDictionaryQuery query, bool auxiliary,
+            bool clearExtraCosts, CancellationToken token)
+        {
             return source.Read(query, auxiliary,
                 (parent, symbol) => contexts.ResolveChild(parent, symbol, token),
                 contexts.LinkCreatedContext, clearExtraCosts, token);
