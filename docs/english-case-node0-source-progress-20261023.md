@@ -78,3 +78,44 @@ The initial IL inspector's overly strict assertion counted exception constructor
 as successful-path allocations. Its failed run is preserved in the IL packet;
 a separate diagnostic and classification identify every constructor and the
 immediate throw. No target code was loaded or executed by either inspector.
+
+## Later increment12 checkpoint
+
+The subsequent isolated increment12 source adds a private completed backing and
+a one-shot detached-data receipt draft. The receipt's publication and access
+path are still unfinished; the full entry still refuses and clears its pending
+state. The application does not use this draft.
+
+The private packed-reader redesign now has an independently checked linear
+source-work bound. Its current complete index reservation is34,660,456 logical
+operations, which still exceeds the draft16 Mi visit limit before other work.
+The limit has not been raised to make the check pass. Other whole-operation
+work and allocation bounds remain open.
+
+The exact increment12 library compiled in a fresh isolated tree:768 C# files,
+zero warnings and errors. It was not loaded or executed. Read-only inspection
+of that output confirmed previously unaccounted successful-path allocations:
+each actual bound dictionary read constructs one capturing object and two
+delegates, and each eligible auxiliary row constructs its terminal-consumer
+delegate. The delimiter traversal's two local-function frames are value types.
+These are object-site observations, not CLR byte, RSS or complete allocation
+bounds; the source accounting must explicitly cover them.
+
+Independent source reviews also established conditional bounds for seven new
+preparation-time dictionary lookups and the exact64-character ASCII fingerprint
+comparison. They apply to the pinned .NET10.0.12 sources under the documented
+logical-operation and intrinsic-leaf convention. They do not establish
+Native AOT pack equivalence or complete continuation admission.
+
+The committed skipped-language stage at `e87f9ee` separately passed all21 jobs
+in [CI run39933468306](https://github.com/Xekep/BlurMask/actions/runs/39933468306).
+That result does not cover the isolated incomplete continuation or establish
+better handwriting accuracy.
+
+| Later packet | SHA256 |
+| --- | --- |
+| `global-en-fullnode-source-increment12-frozen-manifest-20261023.json` | `1080c98639b2f781fcb502c8f8583fb90ac8fafdadc6fba80a4f90e2d36f3c1e` |
+| `root-en-node0-inc12-compile-only-frozen-manifest-20261023.json` | `1db9bace84b18982c42a61c061e95ab53bc89e9c8bce80a20eacb97bc56917df` |
+| `root-en-inc12-delegate-il-frozen-manifest-20261023.json` | `d1f8cc34ce7dff019efd0199699c7b290362817a2f996287671a8a7596be4c7f` |
+| `root-en-prepare-seven-lookups-v2-frozen-manifest-20261023.json` | `5748331c4072aa91565e48e319aae5f8865fadf240b164c89b3c12f11142a608` |
+| `root-independent-ascii64-source-review-frozen-manifest-20261023.json` | `8d273f1b8eb7a4a7bdaf10f7e1d969397b10145bc5a14d30fe8f796fc9f2c24d` |
