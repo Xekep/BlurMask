@@ -469,7 +469,8 @@ internal sealed class DrawingSession : IDisposable
         if (inferenceChanged) { _desktopAi.Pause(); _canvasAi.Pause(); _mathSolve?.Cancel(); }
         Settings = settings.CloneSettings();
         Program.Settings = settings.CloneSettings();
-        if (!settings.ExperimentalTextEngine || settings.AiMode!="math") AiExperimentalMathModels.Release();
+        if (!settings.ExperimentalTextEngine || settings.AiMode is not ("math" or "auto")) AiExperimentalMathModels.Release();
+        if (!settings.ExperimentalTextEngine || settings.AiMode!="auto") AiExperimentalRawContentModels.Release();
         if (inferenceChanged) { _desktopAi.Resume(); _canvasAi.Resume(); }
         if (_settingsWindow is null)
         { _hotkeys?.Dispose(); _hotkeys = DesktopInkNative.TryRegisterHotkeys(Toolbar, HandleShortcut, Settings); }

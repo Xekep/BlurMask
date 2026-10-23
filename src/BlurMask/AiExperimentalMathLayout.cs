@@ -8,8 +8,13 @@ internal static class AiExperimentalMathLayout
     // genuine ExperimentalMathResult; confidence deliberately absent.
     internal sealed record Candidate(string? LaTex,string? UnsupportedReason,int SyntaxNodes);
     internal static bool Enabled(string mode,bool experimental)=>mode=="math"&&experimental;
-    internal static bool CanApply(AiInkLayout.Result value,string mode,bool experimental)=>
-        value.Admission!=AiInkLayout.ResultAdmission.UncalibratedMath||Enabled(mode,experimental);
+    internal static bool CanApply(AiInkLayout.Result value,string mode,bool experimental,bool installedRawPack=false)=>
+        value.Admission switch
+        {
+            AiInkLayout.ResultAdmission.UncalibratedMath=>Enabled(mode,experimental),
+            AiInkLayout.ResultAdmission.ExperimentalClassifiedMath=>AiExperimentalAutoLayout.Enabled(mode,experimental,installedRawPack)&&value.ConfidenceForAdmission is null&&value.CategoryScore is >=.85f and <=1f,
+            _=>value.Admission==AiInkLayout.ResultAdmission.Scored
+        };
     internal static IReadOnlyList<AiInkLayout.Result> Recognize(IReadOnlyList<InkMark> strokes,
         Func<IReadOnlyList<InkStroke>,CancellationToken,Candidate?>? recognize=null,CancellationToken token=default,
         bool calculate=true,Func<string,CancellationToken,InkMath.Solver.MathSolution?>? solve=null)

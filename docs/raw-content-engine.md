@@ -48,14 +48,18 @@ original ink behind its unchanged live text, rather than the whole document.
 The inspected resource is stored at
 [`models/raw-content/raw-content2.res`](../models/raw-content/raw-content2.res).
 The exporter accepts its 4.5 fingerprint, rejecting unverified future profiles.
-Installers use a separately installed `.ikrraw` pack.
+Installers bundle `models/raw-content2.ikrraw` for the opt-in experimental AUTO
+route. It classifies the fragment before text/Math2 decoding; see
+[experimental AUTO routing](experimental-auto-math2-routing.md) for admission,
+limits and the actual diagnostic results. A separately installed user pack takes
+precedence over this bundled fallback.
 
 ```sh
 python tools/export-raw-content-model.py models/raw-content/raw-content2.res .artifacts/raw-content.ikrraw
 BlurMask --install-raw-content-model .artifacts/raw-content.ikrraw
 ```
 
-The same pack can be installed in Settings. Automatic AI mode then partitions
+The CLI installation route remains available. Automatic AI mode then partitions
 text and formulas before decoding. Explicit Text/Formula modes remain overrides.
 The pack lives at `<LocalApplicationData>/BlurMask/models/raw-content.ikrraw`.
 Install validates bounded size, checksum, profile and an actual CPU inference

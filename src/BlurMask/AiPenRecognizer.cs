@@ -53,6 +53,7 @@ internal sealed class AiPenRecognizer(InkDocument document, Func<string> recogni
                         ? AiExperimentalMathLayout.Recognize(strokes, token:cancellationToken)
                         : AiMathLayout.Recognize(strokes, cancellationToken: cancellationToken),
                     "text" => AiInkLayout.Recognize(strokes, cancellationToken: cancellationToken),
+                    "auto" when AiExperimentalAutoLayout.Enabled(mode,Program.Settings.ExperimentalTextEngine,AiRawContentModels.Installed) => AiExperimentalAutoLayout.Recognize(strokes, token:cancellationToken),
                     _ => AiAutomaticLayout.Recognize(strokes, cancellationToken: cancellationToken)
                 }, cancellationToken); }
             finally { Inference.Release(); }
@@ -70,7 +71,7 @@ internal sealed class AiPenRecognizer(InkDocument document, Func<string> recogni
                 bool calculationFailed=false;
                 foreach (var result in results)
                 {
-                    if(!AiExperimentalMathLayout.CanApply(result,recognitionMode(),Program.Settings.ExperimentalTextEngine))continue;
+                    if(!AiExperimentalMathLayout.CanApply(result,recognitionMode(),Program.Settings.ExperimentalTextEngine,AiRawContentModels.Installed))continue;
                     var bounds = result.Strokes.Select(s => s.Bounds).Aggregate((a, b) => a.Union(b));
                     AiTypesetLayout.Fit(result.Text, bounds, result.SizingText, document.Marks,
                         result.SizingComponents, result.PreparedFontSizeSamples);

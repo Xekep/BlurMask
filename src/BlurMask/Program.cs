@@ -17,6 +17,8 @@ internal static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        if (args.Length == 2 && args[0] == "--experimental-auto-ink-test") { AiExperimentalAutoChecks.RunActual(args[1]); return; }
+        if (args.Length is 1 or 2 && args[0] == "--experimental-auto-layout-test") { AiExperimentalAutoChecks.Run(args.Length==2?args[1]:null); return; }
         if (args.Length == 1 && args[0] == "--experimental-math-layout-test") { AiExperimentalMathChecks.Run(); return; }
         if (args.Length == 1 && args[0] == "--experimental-math-model-test") { AiExperimentalMathModels.VerifyBundled(); return; }
         if (args.Length == 2 && args[0] == "--experimental-math-ink-test") { AiExperimentalMathChecks.RunActual(args[1]); return; }

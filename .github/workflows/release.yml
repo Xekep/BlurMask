@@ -39,6 +39,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Experimental formula layout verification failed.' }
           & ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe --experimental-math-model-test | Out-Default
           if ($LASTEXITCODE -ne 0) { throw 'Bundled Math2 delivery verification failed.' }
+          & ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe --experimental-auto-layout-test './src/BlurMask/bin/Release/net11.0/win-x64/publish/models/raw-content2.ikrraw' | Out-Default
+          if ($LASTEXITCODE -ne 0) { throw 'Experimental AUTO routing/assets verification failed.' }
           & ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe --ai-pen-test | Out-Default
           if ($LASTEXITCODE -ne 0) { throw 'Bundled experimental recognition verification failed.' }
           & ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe --math-solver-test | Out-Default
@@ -82,6 +84,7 @@ jobs:
           bash ./tools/build.sh linux-x64 "${RELEASE_VERSION#v}"
           ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --experimental-math-layout-test
           ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --experimental-math-model-test
+          ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --experimental-auto-layout-test "$(dirname ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask)/models/raw-content2.ikrraw"
           ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --ai-pen-test
           export BLURMASK_TEST_GIAC="$PWD/src/BlurMask/bin/Release/net11.0/linux-x64/publish/runtimes/linux-x64/solver/icas"
           ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --math-solver-test
@@ -139,6 +142,7 @@ jobs:
           bash ./tools/build.sh "$RID" "${GITHUB_REF_NAME#v}"
           ./src/BlurMask/bin/Release/net11.0/$RID/publish/BlurMask --experimental-math-layout-test
           ./src/BlurMask/bin/Release/net11.0/$RID/publish/BlurMask --experimental-math-model-test
+          ./src/BlurMask/bin/Release/net11.0/$RID/publish/BlurMask --experimental-auto-layout-test "$(dirname ./src/BlurMask/bin/Release/net11.0/$RID/publish/BlurMask)/models/raw-content2.ikrraw"
           ./src/BlurMask/bin/Release/net11.0/$RID/publish/BlurMask --ai-pen-test
           export BLURMASK_TEST_GIAC="$PWD/src/BlurMask/bin/Release/net11.0/$RID/publish/runtimes/$RID/solver/icas"
           ./src/BlurMask/bin/Release/net11.0/$RID/publish/BlurMask --math-solver-test

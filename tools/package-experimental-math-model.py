@@ -2,6 +2,9 @@
 import argparse,hashlib,json,os,struct,subprocess,sys,tempfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
+import importlib.util
+_spec=importlib.util.spec_from_file_location('raw_bundle',ROOT/'tools/package-experimental-raw-content-model.py')
+_raw=importlib.util.module_from_spec(_spec);_spec.loader.exec_module(_raw)
 RAW_SHA='2dc179aadb1bce347bb1ebd57aa765d4c822d6ea12eca7593a8b9f1b89d53e8a'
 PACK_SHA='08226987e872d1d81b4c691659286ca4fe4c3e8ce55dda699fddd597340d3ed7'
 LABEL_SHA='4366c61258cd74b6520f654898f94b846cf772b5fdcd975b6a95a1cdaf154dce'
@@ -54,6 +57,7 @@ def verify(output,rid):
   if Path(leaf).name!=leaf or leaf in ('.','..'):raise ValueError('Unsafe runtime provenance leaf')
   value=read_bounded(native/leaf,100000000)
   if len(value)!=item['bytes']or sha(value)!=item['sha256']:raise ValueError('Incomplete runtime dependency: '+leaf)
+ _raw.verify(output)
  proof=json.loads((models/'math-model-provenance.json').read_bytes())
  if proof.get('rawSHA256')!=RAW_SHA or proof.get('pack')!=pack:raise ValueError('Bundled Math2 provenance differs')
  return pack
@@ -61,6 +65,7 @@ def verify(output,rid):
 def main():
  p=argparse.ArgumentParser(description=__doc__);p.add_argument('--output',type=Path,required=True);p.add_argument('--rid',choices=RUNTIMES,required=True);p.add_argument('--verify-only',action='store_true');a=p.parse_args()
  if not a.verify_only:
+  _raw.package(a.output)
   source=ROOT/'models/math2/math2-unwrapped.res';raw=read_bounded(source,18704269,18704269)
   if sha(raw)!=RAW_SHA:raise ValueError('Unreviewed Math2 source')
   dest=a.output/'models';dest.mkdir(parents=True,exist_ok=True)
@@ -69,7 +74,7 @@ def main():
    subprocess.run([sys.executable,'-I','-B',str(ROOT/'tools/export-ink-math-model.py'),str(source),'--output',str(pack)],check=True)
    info=check_pack(read_bounded(pack,64*1024*1024+48))
    (temp/'math2-unwrapped.res').write_bytes(raw)
-   proof=dict(scope='Experimental explicit manual math; uncalibrated; no auto admission',rawSHA256=RAW_SHA,pack=info)
+   proof=dict(scope='Experimental manual Math2 and classified AUTO; formula confidence=null, classification is not formula calibration',rawSHA256=RAW_SHA,pack=info)
    (temp/'math-model-provenance.json').write_bytes((json.dumps(proof,indent=2)+'\n').encode())
    for name in('math2-unwrapped.res','math2-mode0.ikrmath','math-model-provenance.json'):os.replace(temp/name,dest/name)
  info=verify(a.output,a.rid);print('PASS bundled experimental Math2 source/vocabulary/3graphs/ORT:',info['bytes'],'bytes; no inference')

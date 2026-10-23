@@ -84,7 +84,7 @@ internal static class AiExperimentalMathModels
     {if(!Available)throw new FileNotFoundException("Bundled Math2 assets/runtime are unavailable.");using var verified=LoadBundled(token);Console.WriteLine("Bundled Math2: actual raw source, vocabulary and3graph hashes validated; uncalibrated, no inference.");}
     private static AssetIdentity? ReadFailureSignature()
     {try{return ReadSignature();}catch(Exception e)when(Recoverable(e)){return null;}}
-    private static bool Recoverable(Exception e)=>e is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException
+    private static bool Recoverable(Exception e)=>e is InvalidDataException or IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException
         or DllNotFoundException or BadImageFormatException or EntryPointNotFoundException or NotSupportedException or FormatException;
     private static void DisposeLocked()
     {owner?.Dispose();owner=null;signature=null;Volatile.Write(ref failureIdentity,null);failed=false;Volatile.Write(ref releaseRequested,0);}

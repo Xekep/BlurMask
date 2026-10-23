@@ -365,6 +365,7 @@ internal sealed class DrawingToolbarWindow : Window
                 ? _session.Settings.ExperimentalTextEngine
                     ? AiExperimentalMathModels.Available ? "Формулы · экспериментально" : "Модель формул недоступна"
                     : AiMathRecognitionModels.Installed ? "Формулы · экспериментально" : "Модель формул не установлена"
+                : _session.Settings.ExperimentalTextEngine && _session.Settings.AiMode == "auto" ? "Авто · экспериментально"
                 : _session.Settings.ExperimentalTextEngine ? "Новый движок · отдельные слова"
                 : _session.Settings.AiMode == "auto" && AiMathRecognitionModels.Installed ? "Текст и формулы · автоматически"
                 : File.Exists(AiRecognitionModels.PathName) ? "English · экспериментально" : "Модель AI-пера не установлена");

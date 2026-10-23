@@ -7,7 +7,7 @@ namespace BlurMask;
 // Batch layout is separate from inference: pen lifts do not define character boundaries.
 internal static class AiInkLayout
 {
-    internal enum ResultAdmission { Scored, UncalibratedMath }
+    internal enum ResultAdmission { Scored, UncalibratedMath, ExperimentalClassifiedMath }
     internal sealed record Result(InkMark[] Strokes, InkMark Text, float Confidence = 1)
     {
         internal string? SizingText { get; set; }
@@ -16,8 +16,10 @@ internal static class AiInkLayout
         internal bool MathCalculationFailed { get; set; }
         internal bool ExperimentalCandidateScore { get; init; }
         internal ResultAdmission Admission { get; init; }
-        internal float? ConfidenceForAdmission => Admission==ResultAdmission.UncalibratedMath||!float.IsFinite(Confidence)?null:Confidence;
-        internal float AcceptanceThreshold => Admission==ResultAdmission.UncalibratedMath?float.PositiveInfinity:ExperimentalCandidateScore ? .5f : .85f;
+        // Classifier softmax, never formula recognition confidence.
+        internal float? CategoryScore { get; init; }
+        internal float? ConfidenceForAdmission => Admission!=ResultAdmission.Scored||!float.IsFinite(Confidence)?null:Confidence;
+        internal float AcceptanceThreshold => Admission!=ResultAdmission.Scored?float.PositiveInfinity:ExperimentalCandidateScore ? .5f : .85f;
     }
     private sealed class Group(InkMark stroke)
     {

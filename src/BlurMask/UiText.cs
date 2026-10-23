@@ -25,6 +25,8 @@ public static class UiText
     public static string ExitApp => T("Закрыть программу");
     internal static IReadOnlyDictionary<string, string[]> Translations { get; } = new Dictionary<string, string[]>
     {
+        ["Авто · экспериментально"] = ["Auto - experimental", "Auto - experimental", "Auto - experimentell"],
+        ["Авто · экспериментально: текст и формулы. Уверенность формул не оценена. Замену можно отменить."] = ["Auto - experimental: text and formulas. Formula confidence is not calibrated. Replacements can be undone.", "Auto - experimental : texte et formules. La confiance des formules n’est pas calibree. Les remplacements sont annulables.", "Auto - experimentell: Text und Formeln. Die Formelsicherheit ist nicht kalibriert. Ersetzungen lassen sich rueckgaengig machen."],
         ["Модель формул недоступна"] = ["Formula model is unavailable", "Modèle de formules indisponible", "Formelmodell nicht verfügbar"],
         ["Отдельные русские слова со словарём; формулы — в режиме «Формулы». Экспериментальное распознавание может ошибаться. Замену можно отменить."] =
             ["Russian words with a dictionary; formulas in Formulas mode. Experimental recognition can make mistakes. You can undo replacements.", "Mots russes avec dictionnaire ; formules en mode Formules. La reconnaissance expérimentale peut se tromper. Les remplacements sont annulables.", "Russische Wörter mit Wörterbuch; Formeln im Modus Formeln. Die experimentelle Erkennung kann Fehler machen. Ersetzungen lassen sich rückgängig machen."],

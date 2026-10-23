@@ -562,6 +562,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Experimental math injected layout/route guards failed.' }
           & $exe --experimental-math-model-test | Out-Default
           if ($LASTEXITCODE -ne 0) { throw 'Bundled experimental Math2 source/graphs/runtime verification failed.' }
+          & $exe --experimental-auto-layout-test (Join-Path (Split-Path $exe) 'models/raw-content2.ikrraw') | Out-Default
+          if ($LASTEXITCODE -ne 0) { throw 'Experimental AUTO routing/assets verification failed.' }
       - name: Native bundled Giac discovery and advanced mathematics
         shell: pwsh
         run: |
@@ -701,6 +703,7 @@ jobs:
           exe="src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask"
           "$exe" --experimental-math-layout-test
           "$exe" --experimental-math-model-test
+          "$exe" --experimental-auto-layout-test "$(dirname "$exe")/models/raw-content2.ikrraw"
       - name: Native bundled Giac discovery and advanced mathematics
         shell: bash
         run: |
@@ -874,6 +877,7 @@ jobs:
           exe="src/BlurMask/bin/Release/net11.0/${{ env.RID }}/publish/BlurMask"
           "$exe" --experimental-math-layout-test
           "$exe" --experimental-math-model-test
+          "$exe" --experimental-auto-layout-test "$(dirname "$exe")/models/raw-content2.ikrraw"
       - name: Native bundled Giac discovery and advanced mathematics
         shell: bash
         run: |
