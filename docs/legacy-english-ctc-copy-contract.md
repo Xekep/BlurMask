@@ -456,3 +456,23 @@ workspace-writing second pass or whole constructor. The9-item
 `root-ctc-aligned-allocator-frozen-manifest-20261023.json`, SHA256
 `00def6b2eb7a43f48e383bfa790223638b8578645a146644ad063e9244cfef4b`,
 preserves the source, composed reports and readonly inspection evidence.
+
+`audit_english_ctc_workspace_dispatch.py` composes both193A40 passes under
+these contracts. Eight cases retain the original constructor objects and return
+to1946C0 with success, the original stack pointer and restored nonvolatile
+registers. The second pass partitions one fresh aligned workspace among the
+input state and three recurrent states. All1280 metadata bytes/typed pointers,
+the complete workspace image, all140 ordered payload-store occurrences and
+unchanged readonly objects are checked. The payload comparison uses the separate
+scalar index certificates plus the two input bias writes; untouched bytes retain
+the independently established zero-fill.
+
+Twelve semantic controls reject altered dimensions, flags/counts, aliased states,
+changed workspace size/core table, NULL outside the successful-allocation contract,
+invalid workspace accesses and readonly writes. The21-item
+`root-ctc-workspace-dispatch-frozen-manifest-20261023.json`, SHA256
+`0fc0020d485242e1c763f826aed3629afa649644da5aff22bd907f6f64f74dd3`,
+retains the composed reports, sources and controls. Service73 registration and
+the actual selected caller origin remain assumptions;194980 and whole-constructor
+proof remain open. This is static initialization analysis, with no SDK execution,
+recognition run or runtime backend approval.
