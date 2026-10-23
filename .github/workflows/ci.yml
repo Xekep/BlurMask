@@ -260,7 +260,7 @@ jobs:
         shell: pwsh
         run: |
           $suffix = if ($IsWindows) { '.exe' } else { '' }
-          foreach ($project in @('LegacyFst23C.Probe', 'LegacyFst13AOutgoing.Probe', 'LegacyFst28CPrimaryMap.Probe', 'LegacyFst28CTargetPreparation.Probe', 'LegacyFst28CInitialState.Probe', 'LegacyFst28CFreshPrimaryControllerBootstrap.Probe', 'LegacyFst28CNumberSymbolMasks.Probe', 'LegacyFst28CNumberInitialD0.Probe', 'LegacyFst28CNumberInitialQueryBinding.Probe', 'LegacyFst28CNumberInitialPage.Probe', 'LegacyFst28CNumberInitialConsumerContext.Probe', 'LegacyFst28CNumberInitialConsumer.Probe', 'LegacyFullEnglishFirst.Probe', 'LegacyFullEnglishFirstConfidence.Probe', 'LegacyFullEnglishFirstController.Probe', 'LegacyFullEnglishFirstPrimary.Probe', 'LegacyFullEnglishFirstContext.Probe', 'LegacyFullEnglishFirstTerminal.Probe', 'LegacyFullEnglishFirstPlainText.Probe', 'LegacyFullEnglishFirstGlyphEmission.Probe', 'LegacyFullEnglishFirstSourceRecords.Probe', 'LegacyEnglishCaseMain.Probe', 'LegacyEnglishCaseInitialization.Probe', 'LegacyEnglishCaseInitialQuery.Probe', 'LegacyEnglishCaseInitialConsumer.Probe', 'LegacyEnglishCasePrimaryCompletion.Probe')) {
+          foreach ($project in @('LegacyFst23C.Probe', 'LegacyFst13AOutgoing.Probe', 'LegacyFst28CPrimaryMap.Probe', 'LegacyFst28CTargetPreparation.Probe', 'LegacyFst28CInitialState.Probe', 'LegacyFst28CFreshPrimaryControllerBootstrap.Probe', 'LegacyFst28CNumberSymbolMasks.Probe', 'LegacyFst28CNumberInitialD0.Probe', 'LegacyFst28CNumberInitialQueryBinding.Probe', 'LegacyFst28CNumberInitialPage.Probe', 'LegacyFst28CNumberInitialConsumerContext.Probe', 'LegacyFst28CNumberInitialConsumer.Probe', 'LegacyFst28CNumberSkippedLanguageCompletion.Probe', 'LegacyFullEnglishFirst.Probe', 'LegacyFullEnglishFirstConfidence.Probe', 'LegacyFullEnglishFirstController.Probe', 'LegacyFullEnglishFirstPrimary.Probe', 'LegacyFullEnglishFirstContext.Probe', 'LegacyFullEnglishFirstTerminal.Probe', 'LegacyFullEnglishFirstPlainText.Probe', 'LegacyFullEnglishFirstGlyphEmission.Probe', 'LegacyFullEnglishFirstSourceRecords.Probe', 'LegacyEnglishCaseMain.Probe', 'LegacyEnglishCaseInitialization.Probe', 'LegacyEnglishCaseInitialQuery.Probe', 'LegacyEnglishCaseInitialConsumer.Probe', 'LegacyEnglishCasePrimaryCompletion.Probe')) {
             $capture = switch ($project) {
               'LegacyFst23C.Probe' { 'legacy-fst23c' }
               'LegacyFst13AOutgoing.Probe' { 'legacy-fst13a-outgoing' }
@@ -274,6 +274,7 @@ jobs:
               'LegacyFst28CNumberInitialPage.Probe' { 'legacy-fst28c-number-initial-page' }
               'LegacyFst28CNumberInitialConsumerContext.Probe' { 'legacy-fst28c-number-initial-consumer-context' }
               'LegacyFst28CNumberInitialConsumer.Probe' { 'legacy-fst28c-number-initial-consumer' }
+              'LegacyFst28CNumberSkippedLanguageCompletion.Probe' { 'legacy-fst28c-number-node0-completion' }
               'LegacyFullEnglishFirstConfidence.Probe' { 'legacy-en-full-first-confidence' }
               'LegacyFullEnglishFirstController.Probe' { 'legacy-en-full-first-controller' }
               'LegacyFullEnglishFirstPrimary.Probe' { 'legacy-en-full-first-primary' }
@@ -318,6 +319,10 @@ jobs:
             }
             if ($project -eq 'LegacyFst28CNumberInitialConsumer.Probe') {
               python -I -B tools/LegacyFst28CNumberInitialConsumer.Probe/audit_output.py models ".artifacts/$capture-native.json" .artifacts/legacy-fst28c-number-initial-consumer-context-native.json .artifacts/legacy-fst28c-number-initial-d0-native.json
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            }
+            if ($project -eq 'LegacyFst28CNumberSkippedLanguageCompletion.Probe') {
+              python -I -B tools/LegacyFst28CNumberSkippedLanguageCompletion.Probe/audit_output.py models ".artifacts/$capture-native.json" .artifacts/legacy-fst28c-number-initial-consumer-native.json .artifacts/legacy-fst28c-number-initial-consumer-context-native.json .artifacts/legacy-fst28c-number-initial-d0-native.json
               if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
             }
             if ($project -eq 'LegacyEnglishCaseInitialConsumer.Probe') {

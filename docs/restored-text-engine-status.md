@@ -6,6 +6,15 @@ default recognizer.
 
 ## Development integration (2026-10-21)
 
+The [number node0 skipped-language completion](linguistic-fst28c-number-skipped-language-completion.md)
+now continues two genuine initial consumers through root alternatives, sorting,
+duplicate merging, quota and stored records; two language-required cases refuse
+before claim. Windows Managed/NativeAOT captures are byte-identical. Independent
+replay checks58 guards,15 exception witnesses,10 prepared cases,7 partial-mask
+merges,8 cleanup cases and38 corruptions. This is an internal historical node0
+stage with a logical reset receipt; live query, next-node, parent-history,
+accepted text, Russian cursive and application/default integration remain open.
+
 The [full English FIRST source720 producer](english-full-first-source-records-runtime-20261023.md)
 now joins completed B7 owners to private source categories, original parent
 coordinates and projected descriptor ranges. Managed/NativeAOT agree on all

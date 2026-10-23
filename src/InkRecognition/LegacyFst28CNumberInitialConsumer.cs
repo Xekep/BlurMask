@@ -29,6 +29,7 @@ public sealed class LegacyFst28CNumberInitialConsumer
     private LegacyNativeWordRecordHeap? heap;
     private ReadOnlyMemory<byte> historicalHeap;
     private Model? model;
+    private int skippedLanguageCompletionClaim;
     private int attached,state;
     private int qualified,attempts,acousticAccepted,heapAccepted,heapRejected,missingAlternates;
     public LegacyFst28CNumberInitialConsumerContext Context=>ExpectedContext;
@@ -231,6 +232,24 @@ public sealed class LegacyFst28CNumberInitialConsumer
     }
     private void RequireCompleted()
     {if(Volatile.Read(ref state)!=2)throw new InvalidOperationException("No completed owning initial heap.");}
+    // Same-receiver scalar claim: no shared table, allocation or resize.
+    internal void ClaimSkippedLanguageCompletion(LegacyFst28CNumberSkippedLanguageCompletion receiver)
+    {
+        ArgumentNullException.ThrowIfNull(receiver);
+        if(!ReferenceEquals(receiver.ExpectedConsumer,this))throw new ArgumentException("Foreign receiving Number consumer.");
+        RequireCompleted();
+        if(Interlocked.CompareExchange(ref skippedLanguageCompletionClaim,1,0)!=0)
+            throw new InvalidOperationException("This exact initial Number consumer already claimed node0 completion.");
+    }
+    internal bool ReadSkippedLanguageCompletionClaim()=>Volatile.Read(ref skippedLanguageCompletionClaim)!=0;
+    // Trusted receiving read only; no snapshot grants completion authority.
+    internal void AttachSkippedLanguageCompletion(LegacyFst28CNumberSkippedLanguageCompletion receiver,CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();ArgumentNullException.ThrowIfNull(receiver);
+        if(!ReferenceEquals(receiver.ExpectedConsumer,this))throw new ArgumentException("Foreign receiving Number consumer.");
+        RequireCompleted();ValidateRetainedPool(token);
+        receiver.AcceptTrustedInitial(this,pool!,heap!,grafts,token);
+    }
     public LegacyFst28CNumberInitialCandidate ReadCandidate(int index)
     {
         RequireCompleted();if((uint)index>=(uint)heap!.Count)throw new ArgumentOutOfRangeException(nameof(index));
