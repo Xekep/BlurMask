@@ -40,4 +40,25 @@ foreach(int activeCount in new[]{0,1,124,125}){
  for(int i=0;i<125;i++)for(int at=0;at<88;at++)if(rowsMask[i*88+at]!=(i<activeCount||at>=16&&at<24?(byte)255:(byte)0))throw new Exception("Primary row mask differsfrom actualproducer stores.");
  definednessCases++;
 }
-Console.WriteLine(JsonSerializer.Serialize(new{Scope="PREPARED generic-ring physical ownership only; no model/NN",Nodes=122,Transitions=121,Refusals=refusals,RetainedWindow=120,SourceEnd=156,RetainedEnd=125,FirstWriter=FirstWriterControls.Run(),DefinednessCases=definednessCases,LanguageAnchorControls=3,LanguageMaskRefusals=maskRefusals,NNCalls=0}));
+int graphSchedules=0,graphSpanSteps=0,graphScheduleRefusals=0;var graphScheduleTrace=new List<int[]>();
+void ScheduleRefuse(Action f){try{f();}catch(NotSupportedException){graphScheduleRefusals++;return;}throw new Exception("Expected bounded schedule refusal.");}
+for(int n=1;n<49;n++)for(int maximum=0;maximum<=Math.Min(n,7);maximum++)
+{
+ var arcs=new[]{new LegacyOrdinaryRecognitionGraph.Arc(0,(byte)maximum,0,0,0)};
+ int actual=LegacyEnglishCaseGraphSchedule.MaximumSpan(n,arcs,default);if(actual!=maximum)throw new Exception("Actual span extent differs.");
+ for(byte span=0;span<=actual;span++){
+  int previous=LegacyEnglishCaseGraphSchedule.PreviousNode(n,span);if(previous!=n-span-1)throw new Exception("Wrong initial/continuation predecessor.");
+  var next=LegacyEnglishCaseGraphSchedule.AfterSpan(n,span,span==actual);if(next!=(span==actual?(n+1,0):(n,span+1)))throw new Exception("Wrong D0/query close chronology.");graphScheduleTrace.Add([n,maximum,span,previous,next.Item1,next.Item2]);graphSpanSteps++;
+ }graphSchedules++;
+}
+ScheduleRefuse(()=>LegacyEnglishCaseGraphSchedule.MaximumSpan(49,[],default));
+ScheduleRefuse(()=>LegacyEnglishCaseGraphSchedule.MaximumSpan(1,[new(0,2,0,0,0)],default));
+ScheduleRefuse(()=>LegacyEnglishCaseGraphSchedule.MaximumSpan(8,[new(0,8,0,0,0)],default));
+ScheduleRefuse(()=>LegacyEnglishCaseGraphSchedule.PreviousNode(1,2));
+ScheduleRefuse(()=>LegacyEnglishCaseGraphSchedule.MaximumSpan(1,[],default));
+// Native clear3E writes even unproduced inactive rows, without promoting other bytes.
+var clearRing=new LegacyEnglishCaseNode0Ring(3,120,ledger,default);clearRing.EnableGraphCursor(default);clearRing.EnterGraphNode(1,default);
+var clearAlts=new byte[125*80];LegacyEnglishCaseGraphPrimaryDefinedness.Fill(1,clearAlts,clearRing.CurrentRowMask.AsSpan(0,125*88),clearRing.CurrentPrimaryMask);
+clearRing.ClearCurrent3e(default);
+for(int i=1;i<125;i++)for(int at=0;at<88;at++)if(clearRing.CurrentRowMask[i*88+at]!=(at>=16&&at<24||at>=62&&at<64?(byte)255:(byte)0))throw new Exception("Inactive row clear3E promoted unknown bytes.");
+Console.WriteLine(JsonSerializer.Serialize(new{Scope="PREPARED generic-ring physical ownership only; no model/NN",Nodes=122,Transitions=121,Refusals=refusals,RetainedWindow=120,SourceEnd=156,RetainedEnd=125,FirstWriter=FirstWriterControls.Run(),DefinednessCases=definednessCases,LanguageAnchorControls=3,LanguageMaskRefusals=maskRefusals,GraphScheduleTrace=graphScheduleTrace,GraphSchedules=graphSchedules,GraphSpanSteps=graphSpanSteps,GraphScheduleRefusals=graphScheduleRefusals,Inactive3eRows=124,NNCalls=0}));

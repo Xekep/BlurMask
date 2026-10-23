@@ -2,7 +2,7 @@ using System.Buffers.Binary;
 namespace InkRecognition;
 // Numeric-only internal join. Inputs are owned by node1 caller; prepared tests
 // may exercise this without claiming dictionary/source authority.
-internal static class LegacyEnglishCaseNode1Materialization
+internal static partial class LegacyEnglishCaseNode1Materialization
 {
     internal sealed record Images(byte[] Heap128,byte[] Rows88,byte[] Alternatives80,int Count,int InitialCount,LegacyNativeWordHeapDescriptor? LiveDescriptor=null,int[]? LivePrimaryOrdinals=null);
     internal static Images Build(LegacyNativeWordRecordHeap heap,LegacyNativeWordHeapPreparation preparation,

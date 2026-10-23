@@ -4,6 +4,14 @@ from pathlib import Path
 def validate(d):
  assert all(type(d[k]) is int for k in ["Nodes","Transitions","Refusals","RetainedWindow","SourceEnd","RetainedEnd","DefinednessCases","LanguageAnchorControls","LanguageMaskRefusals","NNCalls"])
  assert (d['Nodes'],d['Transitions'],d['Refusals'],d['RetainedWindow'],d['SourceEnd'],d['RetainedEnd'],d['DefinednessCases'],d['LanguageAnchorControls'],d['LanguageMaskRefusals'],d['NNCalls'])==(122,121,5,120,156,125,4,3,23,0)
+ trace=[];schedules=0
+ for n in range(1,49):
+  for maximum in range(min(n,7)+1):
+   schedules+=1
+   for span in range(maximum+1):trace.append([n,maximum,span,n-span-1,n+1 if span==maximum else n,0 if span==maximum else span+1])
+ assert d['GraphScheduleTrace']==trace and all(type(v)is int for row in d['GraphScheduleTrace']for v in row)
+ assert all(type(d[k])is int for k in ['GraphSchedules','GraphSpanSteps','GraphScheduleRefusals','Inactive3eRows'])
+ assert(d['GraphSchedules'],d['GraphSpanSteps'],d['GraphScheduleRefusals'],d['Inactive3eRows'])==(schedules,len(trace),5,124)
  cases=d['FirstWriter']['Cases'];assert len(cases)==64
  for n,c in enumerate(cases):
   assert all(type(c[k]) is int for k in ["Tag","Cost","Ordinal","Previous"])
@@ -27,6 +35,7 @@ if "--tamper" in sys.argv:
  changes=[lambda x:x.update(NNCalls=False),lambda x:x.update(DefinednessCases=4.0),lambda x:x.update(Nodes=121),lambda x:x.update(NNCalls=1),lambda x:x.update(DefinednessCases=3),lambda x:x["FirstWriter"]["Cases"].pop(),lambda x:x["FirstWriter"]["Cases"].append(copy.deepcopy(x["FirstWriter"]["Cases"][0]))]
  for key in ["Cost","Tag","Ordinal","Previous"]:changes.append(lambda x,k=key:x["FirstWriter"]["Cases"][0].update({k:False}))
  for key in ["Before","Parent","Language","After"]:changes.append(lambda x,k=key:x["FirstWriter"]["Cases"][0].update({k:"FF"+x["FirstWriter"]["Cases"][0][k][2:]}))
+ changes.extend([lambda x:x["GraphScheduleTrace"][0].__setitem__(3,-1),lambda x:x["GraphScheduleTrace"].pop(),lambda x:x.update(Inactive3eRows=0),lambda x:x.update(GraphScheduleRefusals=4)])
  for change in changes:
   bad=copy.deepcopy(d);change(bad)
   try:validate(bad)

@@ -190,6 +190,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
     internal void RequireNode1Query(LegacyEnglishFreshCaseMainSource.Node1QueryLease lease,LegacyNativeDelimiterQuery query)
     {
         RequireNode1(lease.Root,lease.Pass);
+        if(graphLoopActive){RequireGraphLoopQuery(lease,query);return;}
         if(!ReferenceEquals(node1Query,query)||lease.Span!=node1Span||
             (node1Span==0?(uint)node1Parent>=125:node1Parent!=-1||query.SourceTag!=(8UL<<40)||query.Request.Node!=0)||
             query.Request.Skip!=node1Skip||query.Request.Capacity!=128||query.Request.Parameter1c!=1||query.Request.Parameter20!=node1Span||query.Request.ContextRoot!=lease.Pass.Initializer.PlanForAudit.BindingForAudit.Contexts.ContainerIdentity)

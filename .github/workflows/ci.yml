@@ -152,6 +152,7 @@ jobs:
           mkdir -p .artifacts
           dotnet build tools/LegacyEnglishGraphCursor.Probe -c Release
           dotnet build tools/LegacyEnglishGraph.ActualEntry -c Release
+          dotnet build tools/LegacyEnglishGraphLoop.ActualEntry -c Release
           dotnet run --no-build --project tools/LegacyEnglishGraphCursor.Probe -c Release > .artifacts/english-graph-prepared.log
           python -I -B tools/LegacyEnglishGraphCursor.Probe/audit_prepared.py .artifacts/english-graph-prepared.log --tamper
       - name: English tagged history and known-word numerical records

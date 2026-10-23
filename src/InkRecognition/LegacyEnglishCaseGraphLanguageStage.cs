@@ -15,13 +15,14 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         // This entry currently joins the owning ordinary1F8D60 path only.
         // Its zeroed0..119 -> written88 prefix is fully defined. This theorem
         // does NOT apply to historical FIRST rows or arbitrary copied88 data.
-        ring.EnableGraphCursor(token);ring.EnterGraphNode(node,token);
+        if(!graphLoopActive)ring.EnableGraphCursor(token);ring.EnterGraphNode(node,token);
         ledger.CopyBytes(LegacyEnglishCaseNode0Ledger.Site.StoredBlocks,images.Rows88,ring.CurrentRows);
         ledger.CopyBytes(LegacyEnglishCaseNode0Ledger.Site.PrimaryBlocks,images.Alternatives80,ring.CurrentPrimary);
         ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.CurrentRowsMask,125*88);
         ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.CurrentPrimaryMask,125*80);
         LegacyEnglishCaseGraphPrimaryDefinedness.Fill(images.Count,images.Alternatives80,ring.CurrentRowMask.AsSpan(0,125*88),ring.CurrentPrimaryMask);
         ring.ClearNode0Counters(125,125);
+        if(graphLoopActive)ring.ClearCurrent3e(token); // actual21558D store even inactive primary rows
         ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,64);ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,128);
         var scope=new GraphLanguageScope(this,lease,node,images.LiveDescriptor,images.InitialCount,images.LivePrimaryOrdinals);graphLanguageScope=scope;
         try
@@ -39,7 +40,8 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             }
             if(executeFirst)
             {
-                RunGraphLanguageFirstOnly(scope,images.Count,categories,token);
+                if(!graphLoopActive||GraphLanguageRequired(scope,images.Count,token))RunGraphLanguageFirstOnly(scope,images.Count,categories,token);
+                else SealGraphEmptyLanguage(scope,token);
                 _=CompleteGraphPhase1(scope,scope.Ordinals,token);
                 scope.Lease.Pass.Initializer.PlanForAudit.ResetGraphNode(scope,token);
                 graphCompletedNode=LegacyEnglishCaseGraphNodeSnapshot.Capture(scope,token);

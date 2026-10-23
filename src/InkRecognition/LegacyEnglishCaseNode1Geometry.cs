@@ -186,7 +186,7 @@ internal sealed class LegacyEnglishCaseNode1GeometrySource
     internal void Validate(CancellationToken token)
     {Profile.Validate(token);if(!Owner.IsComplete||Owner.IsFaulted)throw new InvalidOperationException("Actual retained completed local source required.");}
 }
-internal sealed class LegacyEnglishCaseNode1Geometry
+internal sealed partial class LegacyEnglishCaseNode1Geometry
 {
     private const int Impossible=0x4000000;
     internal LegacyOrdinaryCursiveCandidateGraph ActualGraph=>source.Graph;

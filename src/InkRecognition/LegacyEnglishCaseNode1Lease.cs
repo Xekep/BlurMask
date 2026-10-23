@@ -58,13 +58,14 @@ public sealed partial class LegacyEnglishFreshCaseMainSource
     {lock(gate)if(ReferenceEquals(node1Owner,full)){faulted=true;node1Lease=null;busy=false;}}
     internal sealed class Node1QueryLease
     {
-        internal Node1QueryLease(LegacyEnglishFreshCaseMainSource root,LegacyEnglishCaseNode0Completion full,LegacyEnglishCaseInitialQueryPass pass,long version,LegacyPreparedDictionaryWorkingMap map,byte span=0)
-        {Root=root;Full=full;Pass=pass;Version=version;Map=map;Span=span;}
+        internal Node1QueryLease(LegacyEnglishFreshCaseMainSource root,LegacyEnglishCaseNode0Completion full,LegacyEnglishCaseInitialQueryPass pass,long version,LegacyPreparedDictionaryWorkingMap map,byte span=0,int node=1)
+        {Root=root;Full=full;Pass=pass;Version=version;Map=map;Span=span;Node=node;}
         internal readonly LegacyEnglishFreshCaseMainSource Root;
         internal readonly LegacyEnglishCaseNode0Completion Full;
         internal readonly LegacyEnglishCaseInitialQueryPass Pass;
         internal readonly long Version;
         internal readonly byte Span;
+        internal readonly int Node;
         internal readonly LegacyPreparedDictionaryWorkingMap Map;
     }
 }

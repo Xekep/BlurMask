@@ -56,10 +56,51 @@ nine field corruptions were rejected. Its frozen evidence packet SHA256 is
 This replay used no additional model forward and proves only the checked
 two-node path, not a general word recognizer.
 
-Still missing: the generic node/span loop beyond two nodes, connected later
-history/case processing, final207CB0 compact publication before terminal
+The two-node entry still lacks connected later history/case processing,
+final207CB0 compact publication before terminal
 selection2257/221840/21FFD0, a live result-query owner, and application text
 integration. Default recognition and the existing readiness guard are unchanged.
+
+## Generic node/span entry
+
+The additive `RunGraphFirstLoop` now uses one loop for2..49 actual nonempty
+nodes, retaining the same source, current ring, contexts and per-span D0/query
+lease. Within each node it processes every ascending span through the actual
+maximum, including empty intermediate spans, into the same heap. It reads
+ordinary parents from the primary125 prefix, while history references use
+the complete SourceEnd. It then applies the native language gate, phase1 and
+the actual per-node source reset.
+
+This entry is still FIRST-language-only: a reached later203690 terminal
+refuses. It also refuses node50 normalization, node120 intermediate
+publication, empty-node lifecycle and unsupported special prepasses. Final
+compact publication, terminal selection and application text output are not
+implemented by it. The earlier two-node entry keeps its existing domain.
+
+A separate pre-entry payload check bounds the additional logical live payload
+to32MiB, using the actual source's4096-arc cap and49-node limit. It includes
+geometry, selected-cost/container allowances, retained history, transient
+heap/materialization and pages/parents/metadata. The source/model budgets and
+old dynamic allocation/copy/visit limits remain additional. This is not a
+cumulative allocation, CPU, GC or process-RSS guarantee.
+
+Prepared controls cover363 schedules/1595 span transitions, five domain
+refusals and124 inactive rows whose native3E field is initialized without
+marking other unknown bytes as known; the expanded audit rejects19 corruptions.
+
+The generic entry also ran once on the unchanged original graph2/index4.
+Its full12-field GraphNode snapshot is identical to the independently checked
+two-node capture, including every row, heap slot, alternative, mask and ordinal.
+It measured373 query rows,48 pages,331 scores/allocations and two selected D0
+rows; these metrics exclude node0 query/scoring work. This proves the checked
+graph2 execution of the generic loop, not larger-word recognition. Capture
+SHA256: `655f50b9ad1dd993fb0ac51735504aac905b4500ae676b91bfe4c94f5c724e8d`.
+Source/entry packet SHA256:
+`384b043b9cc4f69d7a209d7016c8e826929c44cc652b1f14ed72a44a7b4eb24b`.
+
+`tools/LegacyEnglishGraphLoop.ActualEntry` preserves this distinct entry;
+its data-only `audit_graph2.py` compares a capture with the pinned earlier
+baseline. CI builds it without running model inference.
 
 ```sh
 dotnet build tools/LegacyEnglishGraphCursor.Probe -c Release
