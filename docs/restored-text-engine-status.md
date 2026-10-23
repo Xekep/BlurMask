@@ -51,6 +51,16 @@ cancellation controls. Existing English/Russian terminal checks remain exact.
 Rich glyph/WORD construction, source720 and finalized parent guides are still
 required; terminal symbols alone do not establish those results.
 
+The [full-FIRST rich glyph/WORD producer B6](full-english-first-plain-text-runtime-20261023.md)
+now builds same-owner40-byte glyph records and120-byte WORD components from B5.
+All141+100 inputs pass independent byte/reference/query replay and exact
+Managed/Native AOT parity:375 published components and1131 ordered class
+queries. Both zeroed and explicit-residue allocations are checked, together
+with hidden-symbol, fault, cancellation, concurrency and malformed-capture
+controls. Old English/Russian plain results remain exact. These components
+still require source720 and finalized parent-guide integration; they are not
+accepted text or evidence of improved handwriting accuracy.
+
 The [FIRST source/ending correction](legacy-first-source-ending-union-correction.md)
 now preserves the ancestor's category while combining its bounds with the
 original ending for ordinary140. Independent raw checks cover370 inputs and612
