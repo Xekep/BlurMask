@@ -332,3 +332,25 @@ The40-item frozen manifest
 `root-ctc-portable-layout-frozen-manifest-20261023.json`, SHA256
 `8de3ce1aff70ef57bbeb2276d8c2ce5feb23ce41c0facd1902b3bd4a49ac461d`,
 retains the pack, composed proof reports and corruption controls.
+
+## Default root allocator boundary
+
+`audit_english_ctc_default_allocator.py` traces the default memory table,
+initial service installation, slot18 callback, calloc thunk and pointer-preserving
+size accounting. It pins five complete registered functions, two explicitly
+unregistered five-byte thunks and four data regions. Given an initialized,
+unmodified ROOT environment and first-attempt allocation success, requests400
+and32 bytes reach `HeapAlloc` with flag8. That flag initializes memory to zero
+under the [documented Windows API contract](https://learn.microsoft.com/en-us/windows/win32/api/heapapi/nf-heapapi-heapalloc).
+The successful accounting path queries `HeapSize` and writes only environment/
+stack metadata, preserving the fresh allocation pointer.
+
+This narrows the allocation contract; it does not prove that the selected CTC
+caller uses that root environment, nor cover parent/custom allocator callbacks,
+out-of-memory recovery or later table replacement. Ordinary slot0 allocations
+remain distinct and are not thereby zero-initialized. Existing whole-constructor
+and loader predicates remain false. Four refusal controls check input integrity
+only, not semantic mutation coverage. The21-item frozen manifest
+`root-ctc-default-allocator-frozen-manifest-20261023.json`, SHA256
+`912c9cf1177c634863a8bbf0380004886000c4f20b13e284ad8cd1cc1eb43e5f`,
+retains the source, report, native body exports and failed write-audit draft.
