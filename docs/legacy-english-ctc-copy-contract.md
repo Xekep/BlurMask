@@ -230,6 +230,25 @@ manifest `root-ctc-matrix-metadata-dataflow-frozen-manifest-20261023.json`, SHA2
 `8bcef6d24929bcb9ce2e9589680c48c1f31f39602841d2212094e3907bf58f11`,
 retains the auditors, reports, controls, failed drafts and byte dependencies.
 
+`audit_english_ctc_matrix_blob_dataflow.py` extends that composition through
+the complete761-byte/222-instruction `193630` helper. Its48 declared-input
+cases bind quantized matrices and optional recurrent vectors to symbolic blob
+offsets, preserving the initializer's shared scratch views. Every read/write
+stays in the initialized448-byte metadata object; neither the blob nor scratch
+payload is dereferenced. The independent final-field image matches all420
+defined bytes, leaving28 padding bytes unclaimed. Eight corrupted row/layout/
+mode/alias/bounds/read controls are rejected.
+
+A separate arithmetic cross-check uses the serialized alignment8. The projected
+three incoming/recurrent layer footprints plus the output footprint total
+2,007,776 bytes, exactly the raw payload length after its nine FF padding bytes.
+This equality does not prove native role ordering, caller arguments, actual
+allocation separation or preservation of retained graph headers. Those flags
+remain false, and the application's CTC path is unchanged. The36-item frozen
+manifest `root-ctc-matrix-blob-dataflow-frozen-manifest-20261023.json`, SHA256
+`7918917440dfea2af683664aa7c8ade3f637849f1798084e21ab5b8d2a7d5ac0`,
+retains both composed reports, auditors, controls and dependencies.
+
 ## Selected106 initial-header projection
 
 `audit_english_ctc_selected_header.py` checks the complete8980-byte selected
