@@ -192,9 +192,9 @@ internal sealed class LegacyEnglishCaseNode1Geometry
     internal LegacyOrdinaryCursiveCandidateGraph ActualGraph=>source.Graph;
     internal LegacyInkAlphabet Alphabet=>Profile.Knowledge.Source.Alphabet;
     internal LegacyCursiveCategoryProfile Categories=>categories;
-    internal LegacyNativeWordAcousticGroupCosts CreateGroupCosts(int node,ushort arc,ReadOnlySpan<int> costs,CancellationToken token)
+    internal LegacyNativeWordAcousticGroupCosts CreateGroupCosts(int node,ushort arc,ReadOnlySpan<int> costs,CancellationToken token,byte expectedSpan=0)
     {
-        source.Validate(token);if(node!=1||source.Graph.GetNode(node)[arc].Span!=0||costs.Length!=220)throw new InvalidDataException("Same actual node1 span0/cache220 required.");
+        source.Validate(token);if(node!=1||source.Graph.GetNode(node)[arc].Span!=expectedSpan||costs.Length!=220)throw new InvalidDataException("Same actual node1 selected span/cache220 required.");
         var geometry=new int[24];Array.Fill(geometry,source.Separation[source.Graph.GetNode(node)[arc].GroupId]);return new(costs,geometry);
     }
     internal LegacyNativeHigherArcTransitionOperations Operations()=>LegacyNativeHigherArcTransitionOperations.ForOrdinaryConnections(connections,Calculate118,Validate140);

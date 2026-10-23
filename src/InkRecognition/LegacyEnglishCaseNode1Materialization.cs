@@ -7,7 +7,7 @@ internal static class LegacyEnglishCaseNode1Materialization
     internal sealed record Images(byte[] Heap128,byte[] Rows88,byte[] Alternatives80,int Count,int InitialCount);
     internal static Images Build(LegacyNativeWordRecordHeap heap,LegacyNativeWordHeapPreparation preparation,
         LegacyCursiveCategoryProfile categories,LegacySymbolContextFactory contexts,LegacyNativeStoredWordRecord[] parents,
-        LegacyInkAlphabet alphabet,CancellationToken token)
+        LegacyInkAlphabet alphabet,CancellationToken token,bool includeWholeStart=false)
     {
         token.ThrowIfCancellationRequested();var c=preparation.Configuration;
         if(heap.Capacity!=250||heap.Count>250||parents.Length!=125||c.PrimaryArcLimit230a!=125||c.PrimaryAlternativeCount2402!=2||c.SecondaryAlternativeCount2404!=1)
@@ -22,8 +22,8 @@ internal static class LegacyEnglishCaseNode1Materialization
             new(Label("\u0003"),120,false,0,0),new(H(8),H(10),H(12),Label("\ufffd")),null,1,new byte[80],new byte[250*80],[],token);
         // All parents below125 take PrimaryParent. No fabricated general-higher
         // geometry callback or secondary-parent reset service is supplied.
-        if(produced.Steps.Any(s=>s.Route!=LegacyNativePrimaryWordRecombinationRoute.PrimaryParent))
-            throw new NotSupportedException("Node1 scope requires the genuine ordinary primary-parent route.");
+        if(produced.Steps.Any(s=>s.Route!=LegacyNativePrimaryWordRecombinationRoute.PrimaryParent&&(!includeWholeStart||s.Route!=LegacyNativePrimaryWordRecombinationRoute.Root)))
+            throw new NotSupportedException("Node1 requires genuine primary-parent or explicitly owned root-start route.");
         var ordered=LegacyNativeWordAlternativeOrdering.Prepare(produced.HeapStorage128.Span,heap.Count,false,c,[0,0xc0e],false,new(2,produced.PrimaryStorage40.Span),null,token);
         var descriptor=new LegacyNativeWordHeapDescriptor(ordered.Heap.GetSlotStorageSnapshot().Span,250,ordered.Heap.Count,0,preparation.Limits[0]);
         if(!LegacyNativeWordQuotaController.Apply([descriptor],c,0,0,cancellationToken:token)||descriptor.Count>125||descriptor.AllocatedCapacity!=250)

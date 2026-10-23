@@ -7,6 +7,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
     private LegacyEnglishCaseInitialQueryPass? node1Pass;
     private LegacyNativeDelimiterQuery? node1Query;
     private int node1Skip,node1Parent=-1;
+    private byte node1Span;
     internal const long Node1AdditionalLogicalPayloadCeiling=32L*1024*1024;
     private static void PreflightNode1(LegacyEnglish119MainKnowledge knowledge,CancellationToken token)
     {
@@ -21,9 +22,17 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         long reserve=16L*1024*1024+8L*1024*1024+1024L*4096+125L*256+2L*1024*1024;
         if(reserve>Node1AdditionalLogicalPayloadCeiling)throw new InvalidDataException("Whole separate node1 payload reservation unavailable.");
     }
+    private static void PreflightNode1WholeStart(LegacyEnglish119MainKnowledge knowledge,CancellationToken token)
+    {
+        PreflightNode1(knowledge,token);var graph=knowledge.Owner.RetainCompletedD0Graph(token);
+        if(!graph.GetNode(1).Any(a=>a.Span==1&&a.PredecessorArcIndices.Span.Contains(-1)))
+            throw new NotSupportedException("Actual node1 root-start/span1 arc required before preparation; empty D0 is not substituted.");
+    }
     // Entry is separate from Run. OLD readiness and export gate stay closed.
     // This returns a primary continuation PREFIX, not a completed node/word.
-    internal LegacyEnglishCaseNode1Snapshot RunNode1(CancellationToken token=default)
+    internal LegacyEnglishCaseNode1Snapshot RunNode1(CancellationToken token=default)=>RunNode1Core(false,token);
+    internal LegacyEnglishCaseNode1Snapshot RunNode1OrdinarySpans(CancellationToken token=default)=>RunNode1Core(true,token);
+    private LegacyEnglishCaseNode1Snapshot RunNode1Core(bool includeWholeStart,CancellationToken token)
     {
         token.ThrowIfCancellationRequested();if(Interlocked.CompareExchange(ref phase,1,0)!=0)throw new InvalidOperationException("One owning node0/node1 invocation required.");
         thread=Environment.CurrentManagedThreadId;LegacyEnglishFreshCaseMainSource? root=null;
@@ -63,7 +72,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             var cell=new LegacyNativeWordTransitionCostCell(1,0);
             var kernel=LegacyNativeOrdinaryParentWordCandidates.ForEnglishNode1(geometry,contexts,
                 LegacyNativeWordAcousticRequestScorer.ForAlphabet(ReadNode1Thresholds(root.Knowledge),root.Source.Alphabet),cell);
-            int queryRows=0,scoring=0,accepted=0,queries=0;var frames=new List<LegacyEnglishCaseNode1QueryFrame>(625);using var observed=new MemoryStream();
+            int queryRows=0,scoring=0,accepted=0,queries=0;var frames=new List<LegacyEnglishCaseNode1QueryFrame>(includeWholeStart?630:625);using var observed=new MemoryStream();
             for(int p=0;p<125;p++)
             {
                 token.ThrowIfCancellationRequested();root.ValidateNode1(lease);var parent=parents[p].Record.Span;
@@ -76,7 +85,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                 node1Query=new(){SourceTag=tag.Value,Request=q};node1Parent=p;node1Skip=0;int pages=0;
                 while(true)
                 {
-                    if(++pages>5||++queries>625)throw new InvalidDataException("Node1 page count exceeded before query.");
+                    if(++pages>5||++queries>(includeWholeStart?630:625))throw new InvalidDataException("Node1 page count exceeded before query.");
                     var page=pass.Initializer.PlanForAudit.ReadNode1(lease,node1Query,token);
                     if(page.ReturnedCount is <0 or >128||page.Records.Length!=page.ReturnedCount*32||page.ReturnedCount>400-node1Skip||page.Records.Length>4*1024*1024-observed.Length)
                         throw new InvalidDataException("Bounded actual node1 page required.");
@@ -101,12 +110,56 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                 }
             }
             node1Query=null;node1Parent=-1;
-            var images=LegacyEnglishCaseNode1Materialization.Build(heap,h,categories,contexts,parents,root.Source.Alphabet,token);
+            if(includeWholeStart)
+            {
+                // Native2144F0 span loop: SAME live heap receives whole-start
+                // span1 AFTER ordinary span0, BEFORE20E6A0/order/quota.
+                root.EndNode1(lease);node1Span=1;
+                var wholeD0=pass.SpanSession.PrepareSpanCore(1,1,false,null,token);
+                var wholeSelected=wholeD0.CopySelectedRows();var wholeCosts=new Dictionary<ushort,LegacyNativeWordAcousticGroupCosts>();
+                foreach(var row in wholeSelected)
+                {
+                    token.ThrowIfCancellationRequested();if(row.Anchor!=1||row.Span!=1||row.Costs.Length!=220)throw new InvalidDataException("Actual node1 whole-start D0 rows required.");
+                    wholeCosts.Add(checked((ushort)row.ArcIndex),geometry.CreateGroupCosts(1,checked((ushort)row.ArcIndex),row.Costs,token,1));
+                }
+                selected=selected.Concat(wholeSelected).ToArray();
+                var wholeQualifier=new LegacyNativeWordSymbolQualifier(217,wholeCosts.Values.ToArray(),cancellationToken:token);
+                lease=root.BeginNode1WholeStart(this,pass,wholeD0,token);
+                var q=new LegacyPreparedDictionaryQuery{Capacity=128,ContextRoot=contexts.ContainerIdentity};
+                ulong tag=LegacyOrdinaryDictionaryQueryPreparation.ApplyInitial(q,new(0,0,false,false,120),1,1,0,false,token)
+                    ??throw new InvalidDataException("Owned ordinary whole-start initialization refused.");
+                node1Query=new(){SourceTag=tag,Request=q};node1Parent=-1;node1Skip=0;int pages=0;
+                var startup=new LegacyNativeOrdinaryWordStartup(geometry.ActualGraph,root.Source.Alphabet,categories,contexts,
+                    LegacyNativeWordAcousticRequestScorer.ForAlphabet(ReadNode1Thresholds(root.Knowledge),root.Source.Alphabet),cell,new byte[80]);
+                while(true)
+                {
+                    if(++pages>5||++queries>630)throw new InvalidDataException("Whole-start page bound exceeded before read.");
+                    var page=pass.Initializer.PlanForAudit.ReadNode1(lease,node1Query,token);
+                    if(page.ReturnedCount is <0 or >128||page.Records.Length!=page.ReturnedCount*32||page.ReturnedCount>400-node1Skip||page.Records.Length>4*1024*1024-observed.Length)
+                        throw new InvalidDataException("Bounded actual whole-start source page required.");
+                    for(int at=0;at<page.Records.Length;at+=32)
+                    {
+                        var row=page.Records.Span.Slice(at,32);ushort symbol=BinaryPrimitives.ReadUInt16LittleEndian(row[20..]);
+                        if(row[23]!=0||row[22]!=0||!LegacyNativeOrdinaryWordSymbols.Supports(root.Source.Alphabet,symbol)||row[4]!=1)
+                            throw new NotSupportedException("Reached nonordinary whole-start source row requires its separate producer.");
+                    }
+                    if((long)page.ReturnedCount*2*wholeCosts.Count>1048576L-scoring)throw new InvalidDataException("Remaining score attempts unavailable before root callbacks.");
+                    frames.Add(new(-1,node1Skip,tag,page.ReturnedCount));observed.Write(page.Records.Span);
+                    var result=startup.ProcessPage(page.Records.Span,1,1,0,wholeQualifier,new Dictionary<byte,uint>{{1,0xc0e}},
+                        (node,arc)=>node==1&&wholeCosts.TryGetValue(arc,out var cost)?cost:throw new InvalidDataException("Foreign whole-start cache lookup."),
+                        router,0,sourcePolicy.SuppressHeaderFlag,0,false,false,null,token);
+                    if(!result.Succeeded)throw new InvalidDataException("Actual whole-start page consumer failed.");
+                    queryRows+=page.ReturnedCount;scoring+=result.ScoringCalls;accepted+=result.AcceptedAllocations;
+                    node1Skip=checked(node1Skip+page.ReturnedCount);q.Skip=node1Skip;if(page.ReturnedCount==0)break;
+                }
+                node1Query=null;
+            }
+            var images=LegacyEnglishCaseNode1Materialization.Build(heap,h,categories,contexts,parents,root.Source.Alphabet,token,includeWholeStart);
             token.ThrowIfCancellationRequested();root.ValidateNode1(lease);root.EndNode1(lease);
             var resultSnapshot=new LegacyEnglishCaseNode1Snapshot(images,observed.ToArray(),queryRows,queries,scoring,accepted,selected.Length,
                 CopyNode1Parents(parents,false),CopyNode1Parents(parents,true),
                 selected.Select(r=>r.ArcIndex).ToArray(),selected.Select(r=>r.Costs.ToArray()).ToArray(),frames.ToArray(),contexts.CopyNodes().ToArray(),
-                ring.CurrentRowMask.AsSpan(0,125*88).ToArray(),ring.CurrentPrimaryMask.ToArray());
+                ring.CurrentRowMask.AsSpan(0,125*88).ToArray(),ring.CurrentPrimaryMask.ToArray(),includeWholeStart);
             pending=false;completedBacking=null;node1Pass=null;Volatile.Write(ref phase,2);return resultSnapshot;
         }
         catch
@@ -125,7 +178,9 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
     internal void RequireNode1Query(LegacyEnglishFreshCaseMainSource.Node1QueryLease lease,LegacyNativeDelimiterQuery query)
     {
         RequireNode1(lease.Root,lease.Pass);
-        if(!ReferenceEquals(node1Query,query)||(uint)node1Parent>=125||query.Request.Skip!=node1Skip||query.Request.Capacity!=128||query.Request.Parameter1c!=1||query.Request.Parameter20!=0||query.Request.ContextRoot!=lease.Pass.Initializer.PlanForAudit.BindingForAudit.Contexts.ContainerIdentity)
+        if(!ReferenceEquals(node1Query,query)||lease.Span!=node1Span||
+            (node1Span==0?(uint)node1Parent>=125:node1Parent!=-1||query.SourceTag!=(8UL<<40)||query.Request.Node!=0)||
+            query.Request.Skip!=node1Skip||query.Request.Capacity!=128||query.Request.Parameter1c!=1||query.Request.Parameter20!=node1Span||query.Request.ContextRoot!=lease.Pass.Initializer.PlanForAudit.BindingForAudit.Contexts.ContainerIdentity)
             throw new InvalidOperationException("Only this active parent continuation query is accepted.");
     }
     private static byte[] CopyNode1Parents(LegacyNativeStoredWordRecord[] parents,bool alternatives)
@@ -142,7 +197,8 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
 internal readonly record struct LegacyEnglishCaseNode1QueryFrame(int ParentOrdinal,int Skip,ulong SourceTag,int Returned);
 internal sealed class LegacyEnglishCaseNode1Snapshot
 {
-    internal string Scope=>"ordinary201270/node1-span0-primary-prefix/no-flag-prepass/no-node1-language-terminal";
+    private readonly bool wholeStart;
+    internal string Scope=>wholeStart?"ordinary201270+initial1FD240/node1-span0+span1-primary-prefix/no-flag-prepass/no-node1-language-terminal":"ordinary201270/node1-span0-primary-prefix/no-flag-prepass/no-node1-language-terminal";
     private readonly byte[] heap,rows,alternatives,queries,parentRows,parentAlternatives,parentRowMasks,parentAlternativeMasks;
     private readonly int[] selectedOrdinals;
     private readonly int[][] selectedCosts;
@@ -150,8 +206,8 @@ internal sealed class LegacyEnglishCaseNode1Snapshot
     private readonly LegacySymbolContextNode[] contexts;
     internal int Count{get;}internal int QueryRows{get;}internal int QueryPages{get;}internal int ScoringCalls{get;}internal int AcceptedAllocations{get;}internal int SelectedD0Rows{get;}
     internal LegacyEnglishCaseNode1Snapshot(LegacyEnglishCaseNode1Materialization.Images images,byte[] queries,int queryRows,int pages,int scoring,int accepted,int selected,
-        byte[] parentRows,byte[] parentAlternatives,int[] selectedOrdinals,int[][] selectedCosts,LegacyEnglishCaseNode1QueryFrame[] frames,LegacySymbolContextNode[] contexts,byte[] parentRowMasks,byte[] parentAlternativeMasks)
-    {this.parentRowMasks=parentRowMasks;this.parentAlternativeMasks=parentAlternativeMasks;this.parentRows=parentRows;this.parentAlternatives=parentAlternatives;this.selectedOrdinals=selectedOrdinals;this.selectedCosts=selectedCosts;this.frames=frames;this.contexts=contexts;heap=images.Heap128;rows=images.Rows88;alternatives=images.Alternatives80;this.queries=queries;Count=images.Count;QueryRows=queryRows;QueryPages=pages;ScoringCalls=scoring;AcceptedAllocations=accepted;SelectedD0Rows=selected;}
+        byte[] parentRows,byte[] parentAlternatives,int[] selectedOrdinals,int[][] selectedCosts,LegacyEnglishCaseNode1QueryFrame[] frames,LegacySymbolContextNode[] contexts,byte[] parentRowMasks,byte[] parentAlternativeMasks,bool wholeStart=false)
+    {this.wholeStart=wholeStart;this.parentRowMasks=parentRowMasks;this.parentAlternativeMasks=parentAlternativeMasks;this.parentRows=parentRows;this.parentAlternatives=parentAlternatives;this.selectedOrdinals=selectedOrdinals;this.selectedCosts=selectedCosts;this.frames=frames;this.contexts=contexts;heap=images.Heap128;rows=images.Rows88;alternatives=images.Alternatives80;this.queries=queries;Count=images.Count;QueryRows=queryRows;QueryPages=pages;ScoringCalls=scoring;AcceptedAllocations=accepted;SelectedD0Rows=selected;}
     internal byte[] CopyParentRowMasks()=>parentRowMasks.ToArray();internal byte[] CopyParentAlternativeMasks()=>parentAlternativeMasks.ToArray();
     internal byte[] CopyParentRows88()=>parentRows.ToArray();internal byte[] CopyParentAlternatives80()=>parentAlternatives.ToArray();
     internal int[] CopySelectedOrdinals()=>selectedOrdinals.ToArray();internal int[][] CopySelectedCosts()=>selectedCosts.Select(c=>c.ToArray()).ToArray();

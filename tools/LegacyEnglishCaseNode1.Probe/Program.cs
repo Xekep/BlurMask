@@ -8,6 +8,7 @@ var config=LegacyNativeWordControllerLimitPreparation.Prepare(LegacyNativeWordCo
 var preparation=LegacyNativeWordHeapPreparation.PrepareFresh([new(0,0,1),new(0xc0e,0,1)],config,0);
 if(preparation.Limits.Count!=1||preparation.Limits[0].PrimaryInitialCapacity20!=250)throw new InvalidDataException("Prepared actual shape125/250 required.");
 var maskControls=ParentMaskControls.Run();
+var rootControls=RootStartControls.Run(preparation,categories,alphabet);
 var controls=new List<object>();int refusals=0;
 foreach(int cost in new[]{-8192,-1,0,1,8192,123456,0x3ffffff})foreach(int increment in new[]{-100,0,100})
 {
@@ -30,7 +31,7 @@ foreach(int cost in new[]{-8192,-1,0,1,8192,123456,0x3ffffff})foreach(int increm
 // Explicit native rejection gates: disabled parent leaves all reused query fields unchanged.
 var invalid=new byte[88];invalid[33]=128;var untouched=new LegacyPreparedDictionaryQuery{Node=17,Skip=23};
 if(LegacyOrdinaryDictionaryQueryPreparation.ApplyContinuation(untouched,new(0,0,false,false,120),invalid,1,0,0,false)!=null||untouched.Node!=17||untouched.Skip!=23)throw new Exception("Rejected continuation mutated query.");refusals++;
-File.WriteAllText(output,JsonSerializer.Serialize(new{Scope="PREPARED numeric joins only; no actual graph/ink/NN/owner authority",Controls=controls,Refusals=refusals,NNCalls=0,ParentMaskControls=maskControls}));
+File.WriteAllText(output,JsonSerializer.Serialize(new{Scope="PREPARED numeric joins only; no actual graph/ink/NN/owner authority",Controls=controls,Refusals=refusals,NNCalls=0,ParentMaskControls=maskControls,RootStartControls=rootControls}));
 Console.WriteLine($"Prepared controls={controls.Count}, refusals={refusals}, NN=0");
 static void W16(byte[] b,int at,ushort v)=>BinaryPrimitives.WriteUInt16LittleEndian(b.AsSpan(at),v);
 static void W32(byte[] b,int at,int v)=>BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(at),v);

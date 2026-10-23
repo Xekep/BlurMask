@@ -54,8 +54,8 @@ internal static class ActualEntry
    if(post.CopySnapshots()[0].CopyDescriptors().Length!=1)throw new NotSupportedException("Actual fixture did not produce single descriptor; no fallback/skip.");
    Stage("main-local");var finalized=LegacyEnglish119FinalizedSingleSource.Prepare(post,token).Run(token);var local=LegacyEnglish119MainLocalCandidates.Prepare(finalized,table,token).Run(token);
    graphNodes=local.NodeCount;if(graphNodes<2)throw new NotSupportedException("Actual fixture graph has no node1; no prepared substitution.");var knowledge=LegacyEnglish119MainKnowledge.Create(local,token);
-   Stage("node1-prepare-model-index");owner=LegacyEnglishCaseNode0Completion.PrepareNode1(knowledge,numeric,cases,publication,token:token);
-   Stage("owning-node0-node1-run");var result=owner.RunNode1(token);Stage("capture");
+   Stage("node1-prepare-model-index");owner=LegacyEnglishCaseNode0Completion.PrepareNode1Spans(knowledge,numeric,cases,publication,token:token);
+   Stage("owning-node0-node1-run");var result=owner.RunNode1OrdinarySpans(token);Stage("capture");
    Save(output,new{Scope="ACTUAL_OWNING_ENGLISH_NODE1_ORDINARY_PREFIX_NOT_WORD_OR_QUALITY",Completed=true,InputSha,OriginalIndex=Index,RawPoints=rawPoints,RawStrokes=strokes.Length,Resolution=resolution,GraphNodes=graphNodes,ParentChildren=children,Stages=stages,
     PrefixScope=result.Scope, result.Count,result.QueryRows,result.QueryPages,result.ScoringCalls,result.AcceptedAllocations,result.SelectedD0Rows,
     Heap128=Hex(result.CopyHeap128()),Rows88=Hex(result.CopyRows88()),Alternatives80=Hex(result.CopyAlternatives80()),QueryRows32=Hex(result.CopyQueryRows32()),QueryFrames=result.CopyQueryFrames(),
