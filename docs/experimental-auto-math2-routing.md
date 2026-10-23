@@ -73,6 +73,16 @@ text region remained ink. The seven-stroke arithmetic sample returned `1+2=`
 and rendered `1+2=3`. Both produced valid peer DTOs with null formula confidence.
 These two diagnostics are not a handwriting accuracy benchmark or a claim of
 finished English/Russian text recognition. No labels or scores were tuned.
+Two additional unchanged procedural integral inputs exercised the complete
+default AUTO route, with all classifier/recognizer/solver delegates null and
+Giac disabled in memory. The 15-stroke input returned
+`\int _{1}^{10}x^{2}dx=333`; the 13-stroke input without `=` returned
+`\int _{1}^{10}X^{2}dX` without calculating an answer. Each result covered all
+original strokes, had null formula confidence and a valid peer DTO. The
+uppercase `X` in the second result is an observed recognition difference, not
+an exact-case accuracy success. These are procedural examples, not a human
+handwriting corpus. The reflection runner called the existing production
+default solver rather than the diagnostic command's suppressed CAS delegate.
 The native Windows/Linux/macOS workflow stages run the injected route guards
 and verify the bundled raw pack. Actual inference was not repeated on those
 platforms by these local checks.
