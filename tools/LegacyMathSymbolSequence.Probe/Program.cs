@@ -3,31 +3,89 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text.Json;
 
-if (args.Length != 3 || args[2] is not ("--prepared" or "--actual"))
-    throw new ArgumentException("MATH_AK OUTPUT (--prepared|--actual)");
+if (args.Length != 3 || args[2] is not ("--prepared" or "--actual" or "--score-controls"))
+    throw new ArgumentException("MATH_AK OUTPUT (--prepared|--actual|--score-controls)");
 if (File.Exists(args[1])) throw new IOException("Output must be fresh.");
 byte[] resource = File.ReadAllBytes(args[0]);
 string inputSha = Convert.ToHexStringLower(SHA256.HashData(resource));
 var forward = LegacyMathAkSymbolSequence.Read(resource, false);
 var backward = LegacyMathAkSymbolSequence.Read(resource, true);
+if (args[2] == "--score-controls")
+{
+    Type helper = typeof(LegacyMathAkSymbolSequence).Assembly.GetType("InkRecognition.LegacyMathSymbolSequenceCost", true)!;
+    MethodInfo accumulate = helper.GetMethod("AccumulateToken", BindingFlags.Static | BindingFlags.NonPublic)!;
+    float Token(float cost, float probability, int target, float factor) =>
+        (float)accumulate.Invoke(null, new object[] { cost, probability, target, factor })!;
+    float factor = forward.IgnoreFactor;
+    var cases = new List<object>();
+    foreach (var x in new (float Running, float Probability, int Target)[] {
+        (0,1,0), (0,.5f,0), (0,.5f,239), (0,.5f,240), (0,0,0),
+        (0,BitConverter.Int32BitsToSingle(0x00800000),0),
+        (0,BitConverter.Int32BitsToSingle(0x007fffff),0),
+        (0,BitConverter.Int32BitsToSingle(0x00800000),239), (0,-0f,0),
+        (0,BitConverter.Int32BitsToSingle(0x00800000)*64,239), (16777216,.5f,0), (0,1,239) })
+        cases.Add(new { running = x.Running, probability = x.Probability, target = x.Target,
+            result = Token(x.Running, x.Probability, x.Target, factor) });
+    var guards = new List<string>();
+    void Refuse(string name, Action action)
+    {
+        try { action(); }
+        catch (TargetInvocationException e) when (e.InnerException?.GetType() == typeof(ArgumentException))
+        { guards.Add(name); return; }
+        throw new InvalidDataException(name);
+    }
+    Refuse("negative-probability", () => Token(0,-.1f,0,factor));
+    Refuse("probability-above-one", () => Token(0,1.1f,0,factor));
+    Refuse("nan-probability", () => Token(0,float.NaN,0,factor));
+    Refuse("infinite-probability", () => Token(0,float.PositiveInfinity,0,factor));
+    Refuse("target-below-zero", () => Token(0,.5f,-1,factor));
+    Refuse("target-above240", () => Token(0,.5f,241,factor));
+    Refuse("zero-factor", () => Token(0,.5f,239,0));
+    Refuse("nan-factor", () => Token(0,.5f,239,float.NaN));
+    MethodInfo same = typeof(LegacyMathAkSymbolSequence.PreparedSymbols).GetMethod("SameSourceOrdinals", BindingFlags.Instance | BindingFlags.NonPublic)!;
+    var aliasA = forward.Prepare(new[] { 40 }); var aliasB = backward.Prepare(new[] { 118 });
+    if (!aliasA.CopyIds().SequenceEqual(aliasB.CopyIds()) || (bool)same.Invoke(aliasA,new object[] { aliasB })!)
+        throw new InvalidDataException("Different ordinals must not bind merely by equal mapped IDs.");
+    guards.Add("same-mapped-ids-not-source-identity");
+    if (!(bool)same.Invoke(aliasA,new object[] { backward.Prepare(new[] { 40 }) })!)
+        throw new InvalidDataException("Same source ordinals rejected.");
+    guards.Add("exact-source-ordinals-match");
+    float first = 0, second = 0;
+    for (int i = 0; i < 4096; i++) first = Token(first,0,0,factor);
+    float continuous = first;
+    for (int i = 0; i < 4096; i++) { continuous = Token(continuous,.9999f,0,factor); second = Token(second,.9999f,0,factor); }
+    float jointMean = continuous / 2f, separateMean = (first + second) / 2f;
+    if (jointMean == separateMean) throw new InvalidDataException("Synthetic order witness failed.");
+    File.WriteAllText(args[1], JsonSerializer.Serialize(new { inputSha, mode = "pure-rescore-controls",
+        actualNetworkForwards = 0, forward.IgnoreOrdinalCount, forward.IgnoreFactor,
+        backwardFactor = backward.IgnoreFactor, cases, guards,
+        ordered = new { countPerRecord = 4096, firstProbability = 0f, secondProbability = .9999f,
+            first, second, jointMean, separateMean } }, Options()));
+    Console.WriteLine($"PASS {cases.Count} scalar cases/{guards.Count} guards/ordered accumulation witness; 0 forwards.");
+    return;
+}
 if (args[2] == "--actual")
 {
     // Fixed source ordinals, not labels. No expected answer or selected output is fed back.
     int[] sourceOrdinals = [0, 1, 2];
     using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
     var results = new List<object>();
+    var predictions = new List<LegacyMathAkSymbolSequence.Prediction>();
     foreach (var model in new[] { forward, backward })
     {
         var prepared = model.Prepare(sourceOrdinals, timeout.Token);
         var prediction = model.Evaluate(prepared, timeout.Token);
+        predictions.Add(prediction);
         results.Add(new { model.ReverseInterior, ids = prepared.CopyIds(), prepared.FrameCount,
             targets = Enumerable.Range(0, prepared.FrameCount).Select(prepared.TargetId).ToArray(),
             probabilities = prediction.CopyProbabilities(),
             selectedTargetProbabilities = Enumerable.Range(0, prediction.FrameCount)
-                .Select(i => prediction.Probability(i, prediction.TargetId(i))).ToArray() });
+                .Select(i => prediction.Probability(i, prediction.TargetId(i))).ToArray(),
+            recordCost = model.ScoreRecord(prediction, timeout.Token) });
     }
     File.WriteAllText(args[1], JsonSerializer.Serialize(new { inputSha, mode = "actual-next-symbol-not-recognition",
-        actualNetworkForwards = 2, formulaConfidence = (float?)null, sourceOrdinals, results }, Options()));
+        actualNetworkForwards = 2, formulaConfidence = (float?)null, sourceOrdinals, results,
+        pairCost = LegacyMathAkSymbolSequence.ScorePair(predictions[0], predictions[1], timeout.Token) }, Options()));
     Console.WriteLine("Actual two-network primitive capture completed.");
     return;
 }

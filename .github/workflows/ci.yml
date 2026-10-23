@@ -158,6 +158,8 @@ jobs:
           dotnet run --project tools/LegacyMathSymbolSequence.Probe -c Release -- models/math/math-ak.res .artifacts/math-symbol-sequence-prepared.json --prepared
           python -I -B tools/LegacyMathSymbolSequence.Probe/audit_prepared.py models/math/math-ak.res .artifacts/math-symbol-sequence-prepared.json .artifacts/math-symbol-sequence-prepared-audit.json
           python -I -B tools/LegacyMathSymbolSequence.Probe/audit_raw_sequence.py . .artifacts/math-symbol-sequence-raw-audit.json
+          dotnet run --project tools/LegacyMathSymbolSequence.Probe -c Release -- models/math/math-ak.res .artifacts/math-symbol-sequence-cost.json --score-controls
+          python -I -B tools/LegacyMathSymbolSequence.Probe/audit_rescore.py models/math/math-ak.res .artifacts/math-symbol-sequence-cost.json .artifacts/math-symbol-sequence-cost-audit.json
       - name: Raw-content geometry, mixed segmentation and model guards
         run: dotnet run --project tools/InkRecognition.RawContent.Probe -c Release
       - name: Legacy integer network and Russian feature numerical controls

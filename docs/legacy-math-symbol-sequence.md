@@ -58,4 +58,9 @@ python -I -B tools/LegacyMathSymbolSequence.Probe/audit_raw_sequence.py . raw-au
 The separate `--actual` mode runs both real models on the fixed short sequence;
 outputs must use fresh paths. CI runs the prepared/raw controls.
 
-This primitive does not implement00F3C0's ignore-class239 factor/log08D200/floor/candidate cost aggregation, obtain actual candidate-symbol authority from00D9F0, execute the full13A5 grammar, or connect this legacy model to modern Math2/AUTO. It returns distributions for explicit prepared symbol sequences, not OCR confidence or an application-ready recognition result.
+The owned numerical cost API is described in
+[`legacy-math-symbol-sequence-rescore.md`](legacy-math-symbol-sequence-rescore.md).
+Actual candidate ownership from00D9F0, the full13A5 grammar and integration with
+modern Math2/AUTO remain incomplete. The primitive returns distributions and
+numerical costs for explicit prepared symbol sequences, not OCR confidence or
+an application-ready recognition result.

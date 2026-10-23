@@ -6,7 +6,7 @@ namespace InkRecognition;
 /// <summary>
 /// Owns the two observed integer-symbol language networks in the pinned Math AK.
 /// Source ordinals are the legacy symbol-table ordinals, not Unicode or LaTeX.
-/// This primitive provides next-symbol distributions, not recognition or rescore authority.
+/// Provides next-symbol distributions and their numerical cost, not recognition-candidate authority.
 /// </summary>
 public sealed class LegacyMathAkSymbolSequence
 {
@@ -14,12 +14,14 @@ public sealed class LegacyMathAkSymbolSequence
     public const int SymbolOrdinalCount = 290;
     public const int OutputCount = 241;
     public const int BoundaryId = 240;
+    public const int IgnoreId = 239;
     private const int ResourceBytes = 3685881;
     private const int PayloadBytes = 411488;
     private const string ResourceSha = "8c8d9c8ce93aa74820f30a592d77ec3fe382c930a72063d5ced48629f3c167c1";
     private readonly NativeNetwork network;
     private readonly float[] embeddings;
     private readonly int[] symbolMap;
+    private readonly float ignoreFactor;
 
     private LegacyMathAkSymbolSequence(bool reverse, NativeNetwork network, float[] embeddings, int[] symbolMap)
     {
@@ -27,9 +29,16 @@ public sealed class LegacyMathAkSymbolSequence
         this.network = network;
         this.embeddings = embeddings;
         this.symbolMap = symbolMap;
+        float ignoreCount = 0;
+        foreach (int id in symbolMap) if (id == IgnoreId) ignoreCount += 1f;
+        if (!(ignoreCount > 0)) throw new InvalidDataException("Missing ignore-class mapping.");
+        IgnoreOrdinalCount = (int)ignoreCount;
+        ignoreFactor = 1f / ignoreCount;
     }
 
     public bool ReverseInterior { get; }
+    public int IgnoreOrdinalCount { get; }
+    public float IgnoreFactor => ignoreFactor;
 
     /// <summary>
     /// Snapshots and authenticates the complete resource before reading any model field.
@@ -121,7 +130,7 @@ public sealed class LegacyMathAkSymbolSequence
             ids[i + 1] = symbolMap[ordinals[ReverseInterior ? ordinals.Length - 1 - i : i]];
         }
         cancellationToken.ThrowIfCancellationRequested();
-        return new PreparedSymbols(this, ids);
+        return new PreparedSymbols(this, ids, ordinals);
     }
 
     /// <summary>
@@ -146,12 +155,61 @@ public sealed class LegacyMathAkSymbolSequence
         return new Prediction(symbols, probabilities);
     }
 
+    /// <summary>
+    /// Unaveraged negative-log cost for this model's actual prediction. Ignore239 is
+    /// scaled before the smallest-normal floor; boundary240 is a separate class.
+    /// Uses portable MathF.Log, not a native CRT/FTZ bit-equivalence promise.
+    /// </summary>
+    public float ScoreRecord(Prediction prediction, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(prediction);
+        if (!ReferenceEquals(prediction.Symbols.Owner, this))
+            throw new ArgumentException("Foreign prediction.", nameof(prediction));
+        cancellationToken.ThrowIfCancellationRequested();
+        return Accumulate(prediction, 0f, cancellationToken);
+    }
+
+    /// <summary>
+    /// Math00F3C0's two-record mean: traverse forward then reverse, carrying one FP32
+    /// accumulator throughout, then divide by two. This omits the outer candidate's
+    /// cost multiplier, length policy, exclusions and selection authority.
+    /// </summary>
+    public static float ScorePair(Prediction forward, Prediction reverse,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(forward);
+        ArgumentNullException.ThrowIfNull(reverse);
+        if (forward.Symbols.Owner.ReverseInterior || !reverse.Symbols.Owner.ReverseInterior ||
+            !forward.Symbols.SameSourceOrdinals(reverse.Symbols))
+            throw new ArgumentException("Expected forward/reverse predictions for the same source ordinals.");
+        cancellationToken.ThrowIfCancellationRequested();
+        float cost = forward.Symbols.Owner.Accumulate(forward, 0f, cancellationToken);
+        cost = reverse.Symbols.Owner.Accumulate(reverse, cost, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        return cost / 2f;
+    }
+
+    private float Accumulate(Prediction prediction, float cost, CancellationToken cancellationToken)
+    {
+        for (int frame = 0; frame < prediction.FrameCount; frame++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            int target = prediction.TargetId(frame);
+            float probability = prediction.Probability(frame, target);
+            cost = LegacyMathSymbolSequenceCost.AccumulateToken(cost, probability, target, ignoreFactor);
+        }
+        return cost;
+    }
+
     public sealed class PreparedSymbols
     {
         private readonly int[] ids;
+        private readonly int[] sourceOrdinals;
         internal LegacyMathAkSymbolSequence Owner { get; }
         internal int[] Ids => ids;
-        internal PreparedSymbols(LegacyMathAkSymbolSequence owner, int[] ids) { Owner = owner; this.ids = ids; }
+        internal PreparedSymbols(LegacyMathAkSymbolSequence owner, int[] ids, int[] sourceOrdinals)
+        { Owner = owner; this.ids = ids; this.sourceOrdinals = sourceOrdinals; }
+        internal bool SameSourceOrdinals(PreparedSymbols other) => sourceOrdinals.AsSpan().SequenceEqual(other.sourceOrdinals);
         public int FrameCount => ids.Length - 1;
         public int SymbolCount => ids.Length - 2;
         public int[] CopyIds() => (int[])ids.Clone();
@@ -163,6 +221,7 @@ public sealed class LegacyMathAkSymbolSequence
     {
         private readonly float[] probabilities;
         private readonly PreparedSymbols symbols;
+        internal PreparedSymbols Symbols => symbols;
         internal Prediction(PreparedSymbols symbols, float[] probabilities) { this.symbols = symbols; this.probabilities = probabilities; }
         public int FrameCount => symbols.FrameCount;
         public int TargetId(int frame) => symbols.TargetId(frame);
