@@ -564,3 +564,29 @@ walk under the inherited packet/default-table/allocation conditions. It does
 not prove actual packet or environment origin, service installation by that
 caller, other packet branches, failure cleanup, weight import or complete
 recognition. Whole-constructor and runtime-readiness predicates remain false.
+
+`audit_english_ctc_caller_route.py` checks the local caller and ABI relations
+against eight complete PE function bodies (4,489 instructions) and45 decoded
+operand pins. Complete ranges and hashes are embedded; external export files
+cannot change the admitted bodies. The loader preserves incoming environment
+and packet pointers through10E410 to1941B0. Ignored early-return register
+restores have a checked straight-line POP-to-RET suffix, which cannot reach the
+later constructor call. Pointer identity remains conditional on Win64 callee
+preservation and valid callback/object contracts; it does not prove contents,
+freshness, disjointness or allocation success.
+
+The bundled5F header has version106. **If that version reaches the reader's
+actual version argument**, its branch uses1079AE directly;107E4C/106360 belongs
+to the older-version branch. A later107D6D call conditionally creates a temporary
+network for alignment conversion. Selector17 locally returns the table at229EE0,
+whose version leaf is the exact six-byte106DC0 body. The genuine outer selector,
+live stream/cursor, version-argument and environment origins, full packet lanes
+and weight import remain unproved. This corrects the older-route assumption
+without granting a live parser or recognition predicate.
+
+The independent42-item caller packet is frozen in
+`independent-ctc-caller-origin-frozen-manifest-20261023.json`, SHA256
+`58d173ba6a1e3a7eb29c5d4a27f51b4aff0e5726dde19b4436194f8d09179a2d`.
+The root replay embeds its authenticated body ranges and strengthens the
+early-return checks. Both passes only read/disassemble SDK bytes; no SDK
+instructions execute.
