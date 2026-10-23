@@ -21,6 +21,14 @@ var fixtures = new (string Input, string Cas)[]
     (@"\det\begin{matrix}1&2\\3&4\end{matrix}", "det([[1,2],[3,4]])"),
     (@"\frac{1}{2}+\sqrt{4}", "((1/2)+sqrt(4))"),
     ("-x^2", "(-1*(x^2))"), ("2x(x+1)", "((2*x)*(x+1))"),
+    ("3!^2", "(factorial(3)^2)"),
+    ("2^3!", "(2^factorial(3))"),
+    ("(2^3)!", "factorial((2^3))"),
+    ("-3!^2", "(-1*(factorial(3)^2))"),
+    ("(3!)!", "factorial(factorial(3))"),
+    ("2^{3}!", "factorial((2^3))"),
+    ("2^{2}!", "factorial((2^2))"),
+    ("2^3!^2", "(2^(factorial(3)^2))"),
     (@"\sqrt[3]{8}", "(8^(1/3))"),
     (@"\begin{cases}x+y=3\\x-y=1\end{cases}", "[[((x+y)=3)],[((x-y)=1)]]"),
     (@"\left\{\begin{matrix}x+y=3\\x-y=1\end{matrix}\right.", "[[((x+y)=3)],[((x-y)=1)]]"),
@@ -39,7 +47,7 @@ foreach (var (input, expected) in fixtures)
     var actual = new MathExpressionParser(input).Parse().Cas;
     if (actual != expected) throw new Exception($"Math grammar differs for {input}: {actual}");
 }
-foreach (var forbidden in new[] { @"\int_1^{10} dx^2", @"\int_1^{10} x dx_2", @"\int_1 x^2 dx", @"\system{whoami}", "read(\"secret\")", "x;system(1)", "x:=1", "__import__('os')", "x\0", new string('-', 4096) + "x", new string('-', 200) + "x", string.Join('^', Enumerable.Repeat("x", 200)), new string('(', 100) + "x" + new string(')', 100), "2+", @"\begin{matrix}1&2\\3\end{matrix}" })
+foreach (var forbidden in new[] { "3!!", "3!!!", @"\int_1^{10} dx^2", @"\int_1^{10} x dx_2", @"\int_1 x^2 dx", @"\system{whoami}", "read(\"secret\")", "x;system(1)", "x:=1", "__import__('os')", "x\0", new string('-', 4096) + "x", new string('-', 200) + "x", string.Join('^', Enumerable.Repeat("x", 200)), new string('(', 100) + "x" + new string(')', 100), "2+", @"\begin{matrix}1&2\\3\end{matrix}" })
 {
     try { new MathExpressionParser(forbidden).Parse(); throw new Exception("Unsafe/invalid input accepted: " + forbidden); }
     catch (FormatException) { }
@@ -111,6 +119,14 @@ var actualFixtures = new (string Input, string Expected)[]
     (@"\log_{2}{8}", "3"),
     ("log_{2}(8)", "3"),
     ("sin^{2}(x)+cos^{2}(x)", "1"),
+    ("3!^2", "36"),
+    ("2^3!", "64"),
+    ("(2^3)!", "40320"),
+    ("-3!^2", "-36"),
+    ("(3!)!", "720"),
+    ("2^{3}!", "40320"),
+    ("2^{2}!", "24"),
+    ("2^3!^2", "68719476736"),
     (@"\int_0^\infty e^{-x} dx", "1"),
     (@"\frac{\partial^2}{\partial x \partial y}x^2y^3", "6 x y^{2}"),
     (@"\frac{\partial^3}{\partial x^2 \partial y}x^3y^2", "12 x y"),

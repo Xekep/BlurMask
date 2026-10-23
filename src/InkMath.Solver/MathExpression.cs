@@ -118,11 +118,29 @@ internal sealed class MathExpressionParser
             if (value is not Variable variable || index is not Number number || number.Value.Any(c => !char.IsAsciiDigit(c)) || number.Value.Length > 3) throw new FormatException("Unsupported variable index.");
             value = Count(new Variable(variable.Name + "_" + number.Value));
         }
-        if (Take("^")) value = Count(new Binary("^", value, Take("{") ? Group("}") : Unary()));
-        while (Take("!")) value = Count(new Call("factorial", value));
+        // Factorial binds more tightly than a power, including on the base:
+        // 3!^2 == (3!)^2, while 2^3! == 2^(3!). Parentheses express (2^3)!.
+        value = Factorial(value);
+        if (Take("^"))
+        {
+            bool braced = Take("{");
+            value = Count(new Binary("^", value, braced ? Group("}") : Unary()));
+            // A factorial outside an explicit superscript belongs to the
+            // complete power: 2^{3}! == (2^3)!, unlike 2^3! == 2^(3!).
+            if (braced) value = Factorial(value);
+        }
         return value;
         }
         finally { _depth--; }
+    }
+    private Expression Factorial(Expression value)
+    {
+        if (!Take("!")) return value;
+        value = Count(new Call("factorial", value));
+        // Double factorial is not repeated ordinary factorial. The latter
+        // remains available explicitly as (3!)!, rather than misreading 3!!.
+        if (At("!")) throw new FormatException("Double factorial is unsupported.");
+        return value;
     }
     private Expression Argument() => Take("{") ? Group("}") : Take("(") ? Group(")") : Unary();
     private Expression ScriptArgument() => Take("{") ? Group("}") : Atom();

@@ -123,3 +123,22 @@ routes thirteen; one correctly decoded integral stays handwritten because the
 raw-content classifier falls below the confidence gate. A larger held-out corpus
 and recovered native search/context policies are still needed. Synthetic
 structural-token tests verify formatting only.
+
+
+### Factorial precedence regression check, 23 October 2026
+
+Factorial now applies to a power's base before exponentiation: `3!^2` parses
+as `(3!)^2` and computes36. Unbraced `2^3!` remains `2^(3!)`, computing64;
+`2^3!^2` is right-associative and computes68719476736. Explicit superscript
+boundaries retain their prior meaning: `2^{3}!` and `(2^3)!` both compute40320.
+Double/triple-factorial notation is unsupported and left unsolved; it is no
+longer silently interpreted as repeated ordinary factorial. `(3!)!` explicitly
+requests repeated factorial and still computes720.
+
+The original `3!^2` parser failure was reproduced before the fix. Final checks
+passed39 grammar translations,20 exact polynomial integrals and37 native Giac
+fixtures, plus invalid notation, injection, cancellation and child cleanup.
+This verifies calculation/parsing, not handwriting recognition or math-model
+admission. An independent source review also checked the braced-power cases.
+
+Evidence: `root-math-factorial-final-verification-frozen-manifest-20261023.json`, SHA256 `80156ab773285a64d177ffa5801c54268aee044ee8f9682bb0fa7ee88eacdd8f`, under `E:/BlurMask-build-artifacts-20261014/`.
