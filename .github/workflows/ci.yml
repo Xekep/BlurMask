@@ -154,6 +154,11 @@ jobs:
           dotnet build tools/LegacyEnglishGraph.ActualEntry -c Release
           dotnet run --no-build --project tools/LegacyEnglishGraphCursor.Probe -c Release > .artifacts/english-graph-prepared.log
           python -I -B tools/LegacyEnglishGraphCursor.Probe/audit_prepared.py .artifacts/english-graph-prepared.log --tamper
+      - name: English tagged history and known-word numerical records
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyEnglishTaggedWord.Probe -c Release -- models .artifacts/english-tagged-word.json
+          python -I -B tools/LegacyEnglishTaggedWord.Probe/audit_reference.py models .artifacts/english-tagged-word.json .artifacts/english-tagged-word-reference
       - name: Portable stroke engine numerical goldens, model validation and ink history
         run: dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --ai-pen-test
       - name: Math token formatter and model guards
