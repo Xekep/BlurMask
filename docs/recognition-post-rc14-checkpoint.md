@@ -77,3 +77,40 @@ augmentation. The positive INPUT-transform test remains required; disabling
 the guard, pretending candidates are absent, or replacing every positive
 sample with a refusal would not validate the missing configured owner path.
 Current-main CI must finish before claiming it is green.
+
+Run40071509924 on `eb2460e` subsequently finished:18/21 jobs passed. All three
+Build jobs stopped at the same INPUT-transform test/line34 above, independently
+confirmed in their macOS/Linux/Windows logs. Native AOT, all three formula-runtime
+ABI checks, local CAS, collaboration/PostgreSQL and the four installer jobs
+passed. This does not make the whole workflow green.
+
+## Next source reviews, not yet application integration
+
+Root reviewed the English CHAR successor's two new files and five existing-file
+deltas, then replayed its independent static/prepared controls with945 pinned
+dependencies verified before/after. Seven complete native bodies/26 operand
+pins passed. Prepared checks passed1024 reuse cases,7426 full40-byte records,
+10 source-processing/interner cases,128 flag combinations,292 failed prefixes
+and10 corruption controls. No owning CHAR execution or inference occurred.
+The endpoint-growth estimate remains unfinished; exact private per-step
+reservations are being derived before permitting an owning run. The reviewed
+source packet SHA256 is
+`15305f8cbf94de1679096f0c139ed4b786be5bce1b75a5ace4d820363b973730`;
+root evidence is `root-english-characters-source-review-20261024`.
+
+Review of the next original Math13A0 stage found an omitted native passthrough:
+172B48/172B4C/172B51 perform unsigned `(rowCount-3)>0x1ffd`, copying original
+rows outside3..8192 instead of smoothing them. The separate draft has been
+corrected without reducing the accepted16640-point source domain. It remains
+outside main and behind its pre-entry admission gate pending full source,
+allocation-site and boundary verification; this is not an executed13A0 result.
+
+Root also read the connected shared-WORD reuse successor's eight production
+files and replayed111 PE instruction pins plus28688 selected-slot event
+controls, verifying934 dependencies before/after. Review found an explicit
+allocation undercharge: a growing append List plus its final copy exceeds
+the reserved8N plan bytes. The separate successor uses a fixed-capacity List
+and12N+16 reservation; it needs a new compile/check before import. The prior
+source packet remains immutable and outside main. No live shared-WORD reuse
+or multiple-WORD result is claimed. Evidence:
+`root-shared-word-reuse-static-review-20261024`.
