@@ -15,8 +15,15 @@ for(int index=0;index<samples.Length;index++)
 {
  var residue=new LegacyMainConfiguredAlternativeResidue(new byte[120],new byte[72],new byte[40],new ushort[256],new byte[64],new byte[4],new byte[4],new byte[4],new byte[4]);
  var result=LegacyFreshMainConfiguredSingleLinePlainRecognition.Prepare(ak,lk,engine,l30,l50,samples[index],0,table,cases,publication).Run(residue,r=>new byte[r.RequiredBytes],new byte[20000*40]);
- var completed=LegacyFreshMainConfiguredNoCandidateSourceCompletion.Prepare(ak,result,norm,circles,new byte[4],new byte[4]);completed.Run();
- using var words=LegacyFreshMainWordSourceChoices.Prepare(ak,completed,table,publication,norm,circles);
+ bool enabledAugmentationRefused=false;
+ try{_ = LegacyFreshMainConfiguredNoCandidateSourceCompletion.Prepare(ak,result,norm,circles,new byte[4],new byte[4]);}
+ catch(NotSupportedException e)when(e.GetType()==typeof(NotSupportedException)&&e.Message=="Enabled219580 candidate augmentation cannot be omitted."){enabledAugmentationRefused=true;}
+ if(!enabledAugmentationRefused)throw new InvalidDataException("Exact enabled-bit8 NoCandidate refusal required before augmentation.");
+ var completed=LegacyFreshMainConfiguredWordAugmentation.Prepare(ak,result,table,norm,circles,residue);completed.Run();
+ if(!completed.IsTopV68Completed||completed.IsFaulted||!completed.SourcesMarkedComplete||
+    completed.EligibleCandidates!=2||completed.AppendedWords!=0||completed.DuplicateWords!=2||completed.UpdatedNewDuplicates!=0||completed.QuotaAfter!=2)
+  throw new InvalidDataException("Genuine fixed-fixture augmentation must complete the duplicate-only native mark/rank prefix.");
+ using var words=LegacyFreshMainWordSourceChoices.PrepareAugmented(ak,completed,table,publication,norm,circles);
  var choices=words.Publish(new byte[40],new byte[2040*4]);Reject(()=>LegacyFreshMainSourceLinePublication.PublishFresh(choices,new(true)));
  var lines=LegacyFreshMainSourceLinePublication.PublishFresh(choices);
  if(!ReferenceEquals(lines.WordChoices,choices)||lines.LineCount!=2||lines.Alternatives.Count!=2||lines.Alternatives[0].PreviousLineCount!=0||lines.Alternatives[1].PreviousLineCount!=1)throw new InvalidDataException("Native append counts lost.");

@@ -45,9 +45,16 @@ foreach(var raw in samples)
 {
  var residue=new LegacyMainConfiguredAlternativeResidue(new byte[120],new byte[72],new byte[40],new ushort[256],new byte[64],new byte[4],new byte[4],new byte[4],new byte[4]);
  var actual=LegacyFreshMainConfiguredSingleLinePlainRecognition.Prepare(ak,lk,engine,File.ReadAllBytes(args[8]),File.ReadAllBytes(args[9]),raw,0,table,cases,publication).Run(residue,r=>new byte[r.RequiredBytes],new byte[20000*40]);
- var completion=LegacyFreshMainConfiguredNoCandidateSourceCompletion.Prepare(ak,actual,norm,circles,new byte[4],new byte[4]);completion.Run();
+ bool enabledAugmentationRefused=false;
+ try{_ = LegacyFreshMainConfiguredNoCandidateSourceCompletion.Prepare(ak,actual,norm,circles,new byte[4],new byte[4]);}
+ catch(NotSupportedException e)when(e.GetType()==typeof(NotSupportedException)&&e.Message=="Enabled219580 candidate augmentation cannot be omitted."){enabledAugmentationRefused=true;}
+ if(!enabledAugmentationRefused)throw new InvalidDataException("Exact enabled-bit8 NoCandidate refusal required before augmentation.");
+ var completion=LegacyFreshMainConfiguredWordAugmentation.Prepare(ak,actual,table,norm,circles,residue);completion.Run();
+ if(!completion.IsTopV68Completed||completion.IsFaulted||!completion.SourcesMarkedComplete||
+    completion.EligibleCandidates!=2||completion.AppendedWords!=0||completion.DuplicateWords!=2||completion.UpdatedNewDuplicates!=0||completion.QuotaAfter!=2)
+  throw new InvalidDataException("Genuine fixed-fixture augmentation must complete the duplicate-only native mark/rank prefix.");
  var selected=LegacyFreshTextFieldInputContext.Prepare(LegacyFreshRawInkCurrentView.Prepare(actual.SourceDocument)).CreateSelectedCopy();
- using var words=LegacyFreshMainWordSourceChoices.PrepareSelectedInput(ak,completion,selected,table,publication,norm,circles);
+ using var words=LegacyFreshMainWordSourceChoices.PrepareAugmentedSelectedInput(ak,completion,selected,table,publication,norm,circles);
  var seed=words.DocumentSeed!;var identifier=seed.LibraryIdentifier38;
  if(seed.StringPool.Count!=0)throw new InvalidDataException("Result identifier was not retained before WORD publication.");
  var expected=LegacyLibraryUuidGenerator.FromPreparedState(identifier.Owner.InitialState).NextDistinct(new byte[16]);

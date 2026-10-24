@@ -16,14 +16,21 @@ for(int sample=0;sample<samples.Length;sample++)
  var configured=LegacyFreshMainConfiguredSingleLinePlainRecognition.Prepare(ak,lk,engine,line30,line50,samples[sample],0,table,cases,publication).Run(residue,r=>new byte[r.RequiredBytes],new byte[20000*40]);
  var rootInput=LegacyFreshTextFieldInputContext.Prepare(LegacyFreshRawInkCurrentView.Prepare(configured.SourceDocument));
  var selectedInput=rootInput.CreateSelectedCopy();
- var completion=LegacyFreshMainConfiguredNoCandidateSourceCompletion.Prepare(ak,configured,norm,circles,new byte[4],new byte[4]);
- Reject(()=>LegacyFreshMainWordSourceChoices.PrepareSelectedInput(ak,completion,selectedInput,table,publication,norm,circles));completion.Run();
+ bool enabledAugmentationRefused=false;
+ try{_ = LegacyFreshMainConfiguredNoCandidateSourceCompletion.Prepare(ak,configured,norm,circles,new byte[4],new byte[4]);}
+ catch(NotSupportedException e)when(e.GetType()==typeof(NotSupportedException)&&e.Message=="Enabled219580 candidate augmentation cannot be omitted."){enabledAugmentationRefused=true;}
+ if(!enabledAugmentationRefused)throw new InvalidDataException("Exact enabled-bit8 NoCandidate refusal required before augmentation.");
+ var completion=LegacyFreshMainConfiguredWordAugmentation.Prepare(ak,configured,table,norm,circles,residue);
+ Reject(()=>LegacyFreshMainWordSourceChoices.PrepareAugmentedSelectedInput(ak,completion,selectedInput,table,publication,norm,circles));completion.Run();
+ if(!completion.IsTopV68Completed||completion.IsFaulted||!completion.SourcesMarkedComplete||
+    completion.EligibleCandidates!=2||completion.AppendedWords!=0||completion.DuplicateWords!=2||completion.UpdatedNewDuplicates!=0||completion.QuotaAfter!=2)
+  throw new InvalidDataException("Genuine fixed-fixture augmentation must complete the duplicate-only native mark/rank prefix.");
  var actualIndices=configured.Alternatives.CopyActiveAlternatives().Select(a=>LegacyOwnedMainCandidateSource.FromConfigured(configured,a).WordHead18!.WordIndex).ToArray();
- using var owner=LegacyFreshMainWordSourceChoices.PrepareSelectedInput(ak,completion,selectedInput,table,publication,norm,circles);
+ using var owner=LegacyFreshMainWordSourceChoices.PrepareAugmentedSelectedInput(ak,completion,selectedInput,table,publication,norm,circles);
  if(!ReferenceEquals(owner.SelectedInputContext,selectedInput)||owner.NextSelectionId!=selectedInput.NextRegistryId||owner.CopyPendingSelections().Count!=0)throw new InvalidDataException("Native05F050 pending state is not bound to selected INPUT.");
- Reject(()=>LegacyFreshMainWordSourceChoices.PrepareSelectedInput(ak,completion,rootInput,table,publication,norm,circles));
- Reject(()=>LegacyFreshMainWordSourceChoices.PrepareSelectedInput(ak,completion,selectedInput,table,publication,norm,circles,new(true)));
- if(foreignInput is not null)Reject(()=>LegacyFreshMainWordSourceChoices.PrepareSelectedInput(ak,completion,foreignInput,table,publication,norm,circles));
+ Reject(()=>LegacyFreshMainWordSourceChoices.PrepareAugmentedSelectedInput(ak,completion,rootInput,table,publication,norm,circles));
+ Reject(()=>LegacyFreshMainWordSourceChoices.PrepareAugmentedSelectedInput(ak,completion,selectedInput,table,publication,norm,circles,new(true)));
+ if(foreignInput is not null)Reject(()=>LegacyFreshMainWordSourceChoices.PrepareAugmentedSelectedInput(ak,completion,foreignInput,table,publication,norm,circles));
  foreignInput=selectedInput;
  var initial=owner.WordViews.Select(word=>word.FlatReferences.Select(reference=>(Reference:reference,Record:owner.TopOwner.GlyphPool.CopyRecord(reference))).ToArray()).ToArray();
  Reject(()=>owner.Publish(new byte[39],new byte[2040*4]));Reject(()=>owner.Publish(new byte[40],new byte[2040*4],new(true)));
@@ -70,7 +77,7 @@ for(int sample=0;sample<samples.Length;sample++)
  w.WriteNumber("textId",textSelection.SelectionId);w.WriteNumber("afterTextNext",owner.NextSelectionId);w.WriteString("textName",textSelection.Name);WriteRanges("textRanges",textSelection.CopyRanges());w.WriteNumber("afterTextPending",owner.CopyPendingSelections().Count);w.WriteEndObject();
  foreach(var row in result.Source.Choices)
  {var copy=row.CopyScalarStorage48();copy[8]^=255;if(row.CopyScalarStorage48()[8]==copy[8])throw new InvalidDataException("WORD48 aliases its scalar snapshot.");}
- using(var failed=LegacyFreshMainWordSourceChoices.PrepareSelectedInput(ak,completion,selectedInput,table,publication,norm,circles))
+ using(var failed=LegacyFreshMainWordSourceChoices.PrepareAugmentedSelectedInput(ak,completion,selectedInput,table,publication,norm,circles))
  {Reject(()=>failed.Publish(new byte[40],[]));if(!failed.IsFaulted||failed.CopyPendingSelections().Count!=0)throw new InvalidDataException("Allocation refusal must poison its entered prefix before first CHAR registration.");Reject(()=>failed.Publish(new byte[40],new byte[2040*4]));}
  owner.Dispose();Reject(()=>owner.Publish(new byte[40],new byte[2040*4]));
 }

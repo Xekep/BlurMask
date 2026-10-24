@@ -6,6 +6,7 @@ internal sealed class LegacyConfiguredSourceCompletionReceipt
 {
     internal LegacyFreshMainConfiguredNoCandidateSourceCompletion? Legacy {get;}
     private readonly LegacyFreshMainConfiguredWordAugmentation? augmented;
+    internal LegacyFreshMainConfiguredWordAugmentation? Augmented=>augmented;
     private LegacyConfiguredSourceCompletionReceipt(LegacyFreshMainConfiguredNoCandidateSourceCompletion old)
     {Legacy=old;}
     private LegacyConfiguredSourceCompletionReceipt(LegacyFreshMainConfiguredWordAugmentation actual)

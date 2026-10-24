@@ -57,8 +57,15 @@ static class Witnesses
   {
    var residue=new LegacyMainConfiguredAlternativeResidue(new byte[120],new byte[72],new byte[40],new ushort[256],new byte[64],new byte[4],new byte[4],new byte[4],new byte[4]);
    var result=scope.Run(residue,r=>new byte[r.RequiredBytes],new byte[20000*40]);
-   var completion=LegacyFreshMainConfiguredNoCandidateSourceCompletion.Prepare(i.Ak,result,i.Normalization,i.Circles,new byte[4],new byte[4]);completion.Run();
-   var words=scope.PrepareWords(completion,i.Normalization,i.Circles).Publish(new byte[40],new byte[2040*4]);
+   bool enabledAugmentationRefused=false;
+ try{_ = LegacyFreshMainConfiguredNoCandidateSourceCompletion.Prepare(i.Ak,result,i.Normalization,i.Circles,new byte[4],new byte[4]);}
+ catch(NotSupportedException e)when(e.GetType()==typeof(NotSupportedException)&&e.Message=="Enabled219580 candidate augmentation cannot be omitted."){enabledAugmentationRefused=true;}
+ if(!enabledAugmentationRefused)throw new InvalidDataException("Exact enabled-bit8 NoCandidate refusal required before augmentation.");
+ var completion=LegacyFreshMainConfiguredWordAugmentation.Prepare(i.Ak,result,i.Table,i.Normalization,i.Circles,residue);completion.Run();
+ if(!completion.IsTopV68Completed||completion.IsFaulted||!completion.SourcesMarkedComplete||
+    completion.EligibleCandidates!=2||completion.AppendedWords!=0||completion.DuplicateWords!=2||completion.UpdatedNewDuplicates!=0||completion.QuotaAfter!=2)
+  throw new InvalidDataException("Genuine fixed-fixture augmentation must complete the duplicate-only native mark/rank prefix.");
+   var words=scope.PrepareAugmentedWords(completion,i.Normalization,i.Circles).Publish(new byte[40],new byte[2040*4]);
    using var owner=LegacyLibraryTextPublicationDocument.Prepare(scope,words);owner.BuildAndTransfer();
    var source=owner.ApplyToLibraryTarget().TargetRoot!;
    var value=LegacyLibraryTextDomTreeValue.CopyFrom(source);CheckCopies(value);

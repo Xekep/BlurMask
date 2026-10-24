@@ -110,6 +110,27 @@ public sealed class LegacyLibraryTextPublicationScope : IDisposable
         }
     }
 
+    public LegacyFreshMainWordSourceChoices PrepareAugmentedWords(
+        LegacyFreshMainConfiguredWordAugmentation actualCompletion,
+        LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,
+        CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(actualCompletion);
+        ArgumentNullException.ThrowIfNull(normalization);ArgumentNullException.ThrowIfNull(circles);
+        lock(gate)
+        {
+            Validate();token.ThrowIfCancellationRequested();actualCompletion.RequireCompleted(token);
+            if(result is null||!ReferenceEquals(actualCompletion.Sources.CandidateSource.ConfiguredResult,result)||
+                !ReferenceEquals(result.SourceDocument,Document)||!actualCompletion.IsTopV68Completed||actualCompletion.IsFaulted)
+                throw new ArgumentException("Successful augmented completion of this exact adopted raw invocation required.");
+            if(enteredWords)throw new InvalidOperationException("Adopted shared WORD publication is single-use.");
+            enteredWords=true;
+            try{return words=LegacyFreshMainWordSourceChoices.PrepareAdoptedAugmented(models.AcousticResource,actualCompletion,
+                shared,table,publication,normalization,circles,token);}
+            catch{faulted=true;throw;}
+        }
+    }
+
     internal void Validate()
     {lock(gate){ObjectDisposedException.ThrowIf(disposed,this);lease.Validate();if(faulted)throw new InvalidOperationException("Faulted publication scope.");}}
     internal LegacyMainSharedTextSourceState SharedState=>shared;

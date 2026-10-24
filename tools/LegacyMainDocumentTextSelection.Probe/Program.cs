@@ -14,8 +14,15 @@ for(int index=0;index<samples.Length;index++)
 {
  var residue=new LegacyMainConfiguredAlternativeResidue(new byte[120],new byte[72],new byte[40],new ushort[256],new byte[64],new byte[4],new byte[4],new byte[4],new byte[4]);
  var result=LegacyFreshMainConfiguredSingleLinePlainRecognition.Prepare(ak,lk,engine,l30,l50,samples[index],0,table,cases,publication).Run(residue,r=>new byte[r.RequiredBytes],new byte[20000*40]);
- var completed=LegacyFreshMainConfiguredNoCandidateSourceCompletion.Prepare(ak,result,norm,circles,new byte[4],new byte[4]);completed.Run();
- using var words=LegacyFreshMainWordSourceChoices.Prepare(ak,completed,table,publication,norm,circles);
+ bool enabledAugmentationRefused=false;
+ try{_ = LegacyFreshMainConfiguredNoCandidateSourceCompletion.Prepare(ak,result,norm,circles,new byte[4],new byte[4]);}
+ catch(NotSupportedException e)when(e.GetType()==typeof(NotSupportedException)&&e.Message=="Enabled219580 candidate augmentation cannot be omitted."){enabledAugmentationRefused=true;}
+ if(!enabledAugmentationRefused)throw new InvalidDataException("Exact enabled-bit8 NoCandidate refusal required before augmentation.");
+ var completed=LegacyFreshMainConfiguredWordAugmentation.Prepare(ak,result,table,norm,circles,residue);completed.Run();
+ if(!completed.IsTopV68Completed||completed.IsFaulted||!completed.SourcesMarkedComplete||
+    completed.EligibleCandidates!=2||completed.AppendedWords!=0||completed.DuplicateWords!=2||completed.UpdatedNewDuplicates!=0||completed.QuotaAfter!=2)
+  throw new InvalidDataException("Genuine fixed-fixture augmentation must complete the duplicate-only native mark/rank prefix.");
+ using var words=LegacyFreshMainWordSourceChoices.PrepareAugmented(ak,completed,table,publication,norm,circles);
  var choices=words.Publish(new byte[40],new byte[2040*4]);var lines=LegacyFreshMainSourceLinePublication.PublishFresh(choices);
  Reject(()=>LegacyFreshMainDocumentTextSelection.Prepare(lines,new(true)));
  var text=LegacyFreshMainDocumentTextSelection.Prepare(lines);Reject(()=>_=text.Selection);
@@ -28,7 +35,7 @@ for(int index=0;index<samples.Length;index++)
  WriteRanges("rootC0",text.CopyRanges());w.WriteNumber("textId",selection.SelectionId);w.WriteNumber("nextId",words.NextSelectionId);
  w.WriteNumber("prefixCount",choices.PendingSelections.Count);w.WriteStartArray("pending");foreach(var p in text.CopyPendingSelections()){w.WriteStartObject();w.WriteNumber("id",p.SelectionId);w.WriteString("name",p.Name);w.WriteNumber("code",p.OperationCode);w.WriteNumber("enabled",p.Enabled);w.WriteNumber("category",p.Category);w.WriteNumber("identity",p.CommandIdentity);w.WriteNumber("previous",p.PreviousCommandIdentity);WriteRanges("ranges",p.CopyRanges());w.WriteEndObject();}w.WriteEndArray();w.WriteEndObject();rangeCount+=text.CopyRanges().Length;
  var copy=text.CopyRanges();copy[0]=default;if(text.CopyRanges()[0]==default)throw new InvalidDataException("Root range snapshot aliases caller storage.");
- using(var badWords=LegacyFreshMainWordSourceChoices.Prepare(ak,completed,table,publication,norm,circles))
+ using(var badWords=LegacyFreshMainWordSourceChoices.PrepareAugmented(ak,completed,table,publication,norm,circles))
  {
   var badChoices=badWords.Publish(new byte[40],new byte[2040*4]);var badLines=LegacyFreshMainSourceLinePublication.PublishFresh(badChoices);
   var badText=LegacyFreshMainDocumentTextSelection.Prepare(badLines);var context=badChoices.PendingSelections[0].Owner;

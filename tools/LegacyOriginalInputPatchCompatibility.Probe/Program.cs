@@ -81,8 +81,15 @@ byte[] Storage(LegacyNativeInkPositionRange[] ranges){var b=new byte[ranges.Leng
  {
   var residue=new LegacyMainConfiguredAlternativeResidue(new byte[120],new byte[72],new byte[40],new ushort[256],new byte[64],new byte[4],new byte[4],new byte[4],new byte[4]);
   var result=scope.Run(residue,r=>new byte[r.RequiredBytes],new byte[20000*40]);
-  var completion=LegacyFreshMainConfiguredNoCandidateSourceCompletion.Prepare(ak,result,norm,circles,new byte[4],new byte[4]);completion.Run();
-  var words=scope.PrepareWords(completion,norm,circles).Publish(new byte[40],new byte[2040*4]);return(scope,words);
+  bool enabledAugmentationRefused=false;
+ try{_ = LegacyFreshMainConfiguredNoCandidateSourceCompletion.Prepare(ak,result,norm,circles,new byte[4],new byte[4]);}
+ catch(NotSupportedException e)when(e.GetType()==typeof(NotSupportedException)&&e.Message=="Enabled219580 candidate augmentation cannot be omitted."){enabledAugmentationRefused=true;}
+ if(!enabledAugmentationRefused)throw new InvalidDataException("Exact enabled-bit8 NoCandidate refusal required before augmentation.");
+ var completion=LegacyFreshMainConfiguredWordAugmentation.Prepare(ak,result,table,norm,circles,residue);completion.Run();
+ if(!completion.IsTopV68Completed||completion.IsFaulted||!completion.SourcesMarkedComplete||
+    completion.EligibleCandidates!=2||completion.AppendedWords!=0||completion.DuplicateWords!=2||completion.UpdatedNewDuplicates!=0||completion.QuotaAfter!=2)
+  throw new InvalidDataException("Genuine fixed-fixture augmentation must complete the duplicate-only native mark/rank prefix.");
+  var words=scope.PrepareAugmentedWords(completion,norm,circles).Publish(new byte[40],new byte[2040*4]);return(scope,words);
  }
  catch{scope.Dispose();throw;}
 }

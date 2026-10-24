@@ -7,7 +7,7 @@ for name,h in s['sourcePins'].items():
  if pathlib.Path(name).name in ('LegacyPreparedGlyphClassifier.cs','LegacyDynamicAcousticWeights.cs','LegacyDirectionalGlyphClassifier.cs'):
   import runpy
   helper=r/'tools/LegacyConfiguredTwoAltAugmentation.Probe/source_preimage.py'
-  assert hashlib.sha256(helper.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='7eeb9d593116ebe79d09f4896d689c9c14db24473e889cf26ae27992b4b9352d'
+  assert hashlib.sha256(helper.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='b0043024607fab81f9dbbc39185d603b55dc31bb5f42dcd75420b76227f3c533'
   data=runpy.run_path(str(helper))['restore'](pathlib.Path(name).name,data,h)
  if pathlib.Path(name).name=='LegacyOrdinaryGraphSourceRanges.cs':
   import runpy

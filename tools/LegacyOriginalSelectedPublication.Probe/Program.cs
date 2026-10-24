@@ -10,7 +10,7 @@ byte[] line30=File.ReadAllBytes(args[8]),line50=File.ReadAllBytes(args[9]);
 var models=LegacyFreshMainRecognitionContext.Load(ak,lk,engine,line30,line50);
 InkStroke[][] samples=[[new(new InkPoint[]{new(0,90),new(0,90),new(0,10),new(25,60),new(50,10),new(50,90)})],Word(0).Concat(Word(300)).ToArray(),Word(450).Concat(Word(0)).ToArray()];
 using var output=File.Create(args[10]);using var w=new Utf8JsonWriter(output);w.WriteStartObject();w.WriteStartArray("samples");
-int guards=0,totalWords=0,totalGlyphs=0,reused=0; LegacyFreshMainConfiguredNoCandidateSourceCompletion? foreignCompletion=null;
+int guards=0,totalWords=0,totalGlyphs=0,reused=0; LegacyFreshMainConfiguredWordAugmentation? foreignCompletion=null;
 var originals=samples.Select(raw=>{var d=LegacyOwnedRawInkDocument.Create(raw,default);var o=LegacyLibraryOriginalTextFieldBootstrap.Prepare(LegacyFreshRawInkCurrentView.Prepare(d),new[]{"left","right"});o.Run();return o;}).ToArray();
 for(int invocation=0;invocation<samples.Length*2;invocation++)
 
@@ -34,16 +34,23 @@ for(int invocation=0;invocation<samples.Length*2;invocation++)
  var configured=scope.Run(residue,r=>new byte[r.RequiredBytes],new byte[20000*40]);
  if(!ReferenceEquals(configured.SourceDocument,context.Document)||!ReferenceEquals(configured.InputOwner.SourceDocument,scope.Document)||scope.SharedState.Strings.Count!=0)
   throw new InvalidDataException("Recognition replaced the preimported raw document/3E.");
- var completion=LegacyFreshMainConfiguredNoCandidateSourceCompletion.Prepare(ak,configured,norm,circles,new byte[4],new byte[4]);
- Reject(()=>scope.PrepareWords(completion,norm,circles));completion.Run();
- if(foreignCompletion is not null)Reject(()=>scope.PrepareWords(foreignCompletion,norm,circles));
- Reject(()=>scope.PrepareWords(completion,norm,circles,new(true)));
+ bool enabledAugmentationRefused=false;
+ try{_ = LegacyFreshMainConfiguredNoCandidateSourceCompletion.Prepare(ak,configured,norm,circles,new byte[4],new byte[4]);}
+ catch(NotSupportedException e)when(e.GetType()==typeof(NotSupportedException)&&e.Message=="Enabled219580 candidate augmentation cannot be omitted."){enabledAugmentationRefused=true;}
+ if(!enabledAugmentationRefused)throw new InvalidDataException("Exact enabled-bit8 NoCandidate refusal required before augmentation.");
+ var completion=LegacyFreshMainConfiguredWordAugmentation.Prepare(ak,configured,table,norm,circles,residue);
+ Reject(()=>scope.PrepareAugmentedWords(completion,norm,circles));completion.Run();
+ if(!completion.IsTopV68Completed||completion.IsFaulted||!completion.SourcesMarkedComplete||
+    completion.EligibleCandidates!=2||completion.AppendedWords!=0||completion.DuplicateWords!=2||completion.UpdatedNewDuplicates!=0||completion.QuotaAfter!=2)
+  throw new InvalidDataException("Genuine fixed-fixture augmentation must complete the duplicate-only native mark/rank prefix.");
+ if(foreignCompletion is not null)Reject(()=>scope.PrepareAugmentedWords(foreignCompletion,norm,circles));
+ Reject(()=>scope.PrepareAugmentedWords(completion,norm,circles,new(true)));
  context.Dispose();if(context.ResourcesReleased)throw new InvalidDataException("Context prematurely released the publication lease.");
  Reject(()=>context.PrepareInput());
  var retainedRequest=context.Result.BoundRequest!;var retainedRequestRoot=retainedRequest.Root;
  var actualIndices=configured.Alternatives.CopyActiveAlternatives().Select(a=>LegacyOwnedMainCandidateSource.FromConfigured(configured,a).WordHead18!.WordIndex).ToArray();
- using var owner=scope.PrepareWords(completion,norm,circles);
- Reject(()=>scope.PrepareWords(completion,norm,circles));
+ using var owner=scope.PrepareAugmentedWords(completion,norm,circles);
+ Reject(()=>scope.PrepareAugmentedWords(completion,norm,circles));
  if(!ReferenceEquals(owner.DocumentSeed,seed)||!ReferenceEquals(owner.SelectionContext,seed.PendingSelections)||!ReferenceEquals(owner.Document,scope.Document)||
    !context.Result.CopyIdentifier38().AsSpan().SequenceEqual(seed.LibraryIdentifier38.CopyRawStorage16()))throw new InvalidDataException("Publication replaced the adopted seed/identifier/3E.");
  if(!ReferenceEquals(owner.OriginalSelectedInputContext,selectedInput)||owner.NextSelectionId!=selectedInput.State.NextRegistryId||owner.CopyPendingSelections().Count!=0)throw new InvalidDataException("Native05F050 pending state is not bound to selected INPUT.");
@@ -116,7 +123,7 @@ for(int invocation=0;invocation<samples.Length*2;invocation++)
  if(context.ResourcesReleased||!retainedString.ReadBytes().AsSpan().SequenceEqual(copiedString))throw new InvalidDataException("WORD disposal freed borrowed strings.");
  scope.Dispose();scope.Dispose();context.Dispose();
  if(!context.ResourcesReleased||!context.Result.CopyInputRangeStorage().AsSpan().SequenceEqual(retainedCopy)||!context.Result.CopyIdentifier38().AsSpan().SequenceEqual(uuidCopy))throw new InvalidDataException("Final child lease did not release storage or damaged detached snapshots.");
- Reject(()=>retainedString.ReadBytes());Reject(()=>seed.Validate(owner,default));Reject(()=>scope.PrepareWords(completion,norm,circles));Reject(()=>{_=retainedRequest.Root;});
+ Reject(()=>retainedString.ReadBytes());Reject(()=>seed.Validate(owner,default));Reject(()=>scope.PrepareAugmentedWords(completion,norm,circles));Reject(()=>{_=retainedRequest.Root;});
  if(copiedString.Length==0)throw new InvalidDataException("Actual copied scalar UTF8 required.");foreignCompletion=completion;
 }
 w.WriteEndArray();

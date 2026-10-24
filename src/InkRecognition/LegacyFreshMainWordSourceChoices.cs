@@ -150,6 +150,12 @@ public sealed class LegacyFreshMainWordSourceChoices : IDisposable
         LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token)
         =>PrepareCore(resource,LegacyConfiguredSourceCompletionReceipt.From(completion,token),shared.Selections.InputBinding?.Legacy,table,publication,normalization,circles,token,shared);
 
+    internal static LegacyFreshMainWordSourceChoices PrepareAdoptedAugmented(ReadOnlySpan<byte> resource,
+        LegacyFreshMainConfiguredWordAugmentation completion,LegacyMainSharedTextSourceState shared,
+        LegacyCursiveSeparationTable table,LegacyNativeTextPublicationData publication,
+        LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token)
+        =>PrepareCore(resource,LegacyConfiguredSourceCompletionReceipt.From(completion,token),shared.Selections.InputBinding?.Legacy,table,publication,normalization,circles,token,shared);
+
     public LegacyOwnedMainWordSourceChoicesResult Publish(ReadOnlySpan<byte> recordResidue40,
         ReadOnlySpan<byte> selectionResidue4,CancellationToken token=default)
     {

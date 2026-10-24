@@ -14,24 +14,31 @@ for(int sample=0;sample<samples.Length;sample++)
  var residue=new LegacyMainConfiguredAlternativeResidue(new byte[120],new byte[72],new byte[40],new ushort[256],new byte[64],new byte[4],new byte[4],new byte[4],new byte[4]);
  var configured=LegacyFreshMainConfiguredSingleLinePlainRecognition.Prepare(ak,lk,engine,File.ReadAllBytes(args[8]),File.ReadAllBytes(args[9]),samples[sample],0,table,cases,publication).Run(residue,r=>new byte[r.RequiredBytes],new byte[20000*40]);
  var alternatives=configured.Alternatives.CopyActiveAlternatives();if(alternatives.Length!=2)throw new InvalidDataException("Expected two retained actual alternatives.");
- var completion=LegacyFreshMainConfiguredNoCandidateSourceCompletion.Prepare(ak,configured,norm,circles,new byte[4],new byte[4]);
+ bool enabledAugmentationRefused=false;
+ try{_ = LegacyFreshMainConfiguredNoCandidateSourceCompletion.Prepare(ak,configured,norm,circles,new byte[4],new byte[4]);}
+ catch(NotSupportedException e)when(e.GetType()==typeof(NotSupportedException)&&e.Message=="Enabled219580 candidate augmentation cannot be omitted."){enabledAugmentationRefused=true;}
+ if(!enabledAugmentationRefused)throw new InvalidDataException("Exact enabled-bit8 NoCandidate refusal required before augmentation.");
+ var completion=LegacyFreshMainConfiguredWordAugmentation.Prepare(ak,configured,table,norm,circles,residue);
  var before=LegacyOwnedMainCandidateSource.FromConfigured(configured,alternatives[0]);
- Reject(()=>LegacyFreshMainTextSourceWrapper.PrepareCompletedConfiguredSources(ak,completion,before,table,publication,norm,circles));
+ Reject(()=>LegacyFreshMainTextSourceWrapper.PrepareCompletedAugmentedSources(ak,completion,before,table,publication,norm,circles));
  completion.Run();
- if(previousCandidate is not null)Reject(()=>LegacyFreshMainTextSourceWrapper.PrepareCompletedConfiguredSources(ak,completion,previousCandidate,table,publication,norm,circles));
+ if(!completion.IsTopV68Completed||completion.IsFaulted||!completion.SourcesMarkedComplete||
+    completion.EligibleCandidates!=2||completion.AppendedWords!=0||completion.DuplicateWords!=2||completion.UpdatedNewDuplicates!=0||completion.QuotaAfter!=2)
+  throw new InvalidDataException("Genuine fixed-fixture augmentation must complete the duplicate-only native mark/rank prefix.");
+ if(previousCandidate is not null)Reject(()=>LegacyFreshMainTextSourceWrapper.PrepareCompletedAugmentedSources(ak,completion,previousCandidate,table,publication,norm,circles));
  foreach(var alternative in alternatives)
  {
  var candidate=LegacyOwnedMainCandidateSource.FromConfigured(configured,alternative);var rawOwner=candidate.InputOwner;
  var original=candidate.CopyRawWordsInNativeHeadOrder().Select(p=>p.Publication.PublishedWord!.Word.FlatReferences.Select(r=>(Reference:r,Record:candidate.TopOwner.GlyphPool.CopyRecord(r))).ToArray()).ToArray();
- Reject(()=>LegacyFreshMainTextSourceWrapper.PrepareCompletedConfiguredSources(ak,completion,candidate,table,publication,norm,circles,new(true)));
- using var owner=LegacyFreshMainTextSourceWrapper.PrepareCompletedConfiguredSources(ak,completion,candidate,table,publication,norm,circles);
- if(!ReferenceEquals(owner.CompletedConfiguredSources,completion)||owner.CompletedSources is not null||!ReferenceEquals(owner.CandidateSource,candidate)||!ReferenceEquals(owner.WordSourceCollection.CandidateSource,candidate)||!ReferenceEquals(owner.WordSourceCollection.Word,candidate.WordHead18)||!completion.Sources.SharesSourceAllocation(owner.WordSourceCollection))throw new InvalidDataException("Configured wrapper duplicated26N allocation or lost selected candidate/WORD ownership.");
+ Reject(()=>LegacyFreshMainTextSourceWrapper.PrepareCompletedAugmentedSources(ak,completion,candidate,table,publication,norm,circles,new(true)));
+ using var owner=LegacyFreshMainTextSourceWrapper.PrepareCompletedAugmentedSources(ak,completion,candidate,table,publication,norm,circles);
+ if(!ReferenceEquals(owner.CompletedAugmentedSources,completion)||owner.CompletedConfiguredSources is not null||owner.CompletedSources is not null||!ReferenceEquals(owner.CandidateSource,candidate)||!ReferenceEquals(owner.WordSourceCollection.CandidateSource,candidate)||!ReferenceEquals(owner.WordSourceCollection.Word,candidate.WordHead18)||!completion.Sources.SharesSourceAllocation(owner.WordSourceCollection))throw new InvalidDataException("Configured wrapper duplicated26N allocation or lost selected candidate/WORD ownership.");
  Reject(()=>_=owner.Candidate);Reject(()=>_=owner.WordSourceCollection.Candidate);
  Reject(()=>owner.Publish(new byte[39],new byte[2040*4]));Reject(()=>owner.Publish(new byte[40],new byte[2040*4],new CancellationToken(true)));
  var words=owner.Publish(new byte[40],new byte[2040*4]);Reject(()=>owner.Publish(new byte[40],new byte[2040*4]));
  var prefix=owner.WordSourceCollection;byte[] prefixBytes=prefix.CopySourceStorage26();
  if(prefixBytes.Length>0){byte saved=prefixBytes[0];prefixBytes[0]^=255;if(prefix.CopySourceStorage26()[0]!=saved)throw new InvalidDataException("Word source storage aliases returned bytes.");}
- Reject(()=>completion.SourcesFor(candidate,new(true)));
+ Reject(()=>LegacyFreshMainTextSourceWrapper.PrepareCompletedAugmentedSources(ak,completion,candidate,table,publication,norm,circles,new(true)));
  w.WriteStartObject();w.WriteNumber("sample",sample);w.WriteNumber("line",candidate.Sampled.Owner.SourceLineId);w.WriteNumber("alternative",Array.IndexOf(alternatives,alternative));w.WriteNumber("secondaryOrdinal",alternative.Terminal.Selection.SecondaryOrdinal);w.WriteStartArray("counts");foreach(var stroke in rawOwner.SourceDocument.Strokes)w.WriteNumberValue(stroke.Points.Count);w.WriteEndArray();w.WriteStartArray("words");
  int wordIndex=0;
  foreach(var word in words)

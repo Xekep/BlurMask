@@ -110,6 +110,7 @@ public sealed class LegacyFreshMainTextSourceWrapper : IDisposable
     public LegacyOwnedMainWordSourceCollection WordSourceCollection {get;}
     public LegacyFreshMainNoCandidateSourceCompletion? CompletedSources {get;}
     public LegacyFreshMainConfiguredNoCandidateSourceCompletion? CompletedConfiguredSources {get;}
+    public LegacyFreshMainConfiguredWordAugmentation? CompletedAugmentedSources {get;}
     public LegacyOwnedMainCandidateSource CandidateSource {get;}
     private readonly Dictionary<int,LegacyOwnedMainTextSourcePayload> payloads;
     private bool disposed;
@@ -119,7 +120,8 @@ public sealed class LegacyFreshMainTextSourceWrapper : IDisposable
         LegacyFreshMainNoCandidateSourceCompletion? completedSources=null,
         LegacyFreshMainConfiguredNoCandidateSourceCompletion? completedConfiguredSources=null,
         LegacyOwnedMainWordSourceCollection? configuredSources=null,
-        LegacyMainSharedTextSourceState? sharedState=null)
+        LegacyMainSharedTextSourceState? sharedState=null,
+        LegacyFreshMainConfiguredWordAugmentation? completedAugmentedSources=null)
     {
         this.choices=choices;this.properties=properties;this.normalization=normalization;
         CandidateSource=choices.CandidateSource??LegacyOwnedMainCandidateSource.FromFirst(choices.Candidate,token);
@@ -131,6 +133,7 @@ public sealed class LegacyFreshMainTextSourceWrapper : IDisposable
         payloads=sharedState?.Payloads??[];
         CompletedSources=completedSources;
         CompletedConfiguredSources=completedConfiguredSources;
+        CompletedAugmentedSources=completedAugmentedSources;
         WordSourceCollection=configuredSources??completedSources?.Sources??LegacyOwnedMainWordSourceCollection.ExportBeforeWordAugmentation(Candidate,token);
     }
     public static LegacyFreshMainTextSourceWrapper Prepare(ReadOnlySpan<byte> resource,
@@ -168,6 +171,17 @@ public sealed class LegacyFreshMainTextSourceWrapper : IDisposable
             properties,normalization,token,completedConfiguredSources:actualCompletion,configuredSources:sources);
     }
 
+    public static LegacyFreshMainTextSourceWrapper PrepareCompletedAugmentedSources(ReadOnlySpan<byte> resource,
+        LegacyFreshMainConfiguredWordAugmentation actualCompletion,LegacyOwnedMainCandidateSource actualCandidate,
+        LegacyCursiveSeparationTable table,LegacyNativeTextPublicationData properties,
+        LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(actualCompletion);ArgumentNullException.ThrowIfNull(actualCandidate);
+        var sources=actualCompletion.SourcesFor(actualCandidate,token);
+        return new(LegacyFreshMainTextGlyphChoices.PrepareConfigured(resource,actualCandidate,table,properties,normalization,circles,token),
+            properties,normalization,token,configuredSources:sources,completedAugmentedSources:actualCompletion);
+    }
+
     internal static LegacyFreshMainTextSourceWrapper PrepareSpanWords(LegacyFreshMainTextGlyphChoices choices,
         LegacyFreshMainConfiguredNoCandidateSourceCompletion completion,LegacyMainSharedTextSourceState state,
         LegacyNativeTextPublicationData properties,LegacyNativeUnicodeNormalizationData normalization,CancellationToken token)
@@ -179,7 +193,7 @@ public sealed class LegacyFreshMainTextSourceWrapper : IDisposable
     {
         completion.Require(token);
         return new(choices,properties,normalization,token,completedConfiguredSources:completion.Legacy,
-            configuredSources:completion.Sources,sharedState:state);
+            configuredSources:completion.Sources,sharedState:state,completedAugmentedSources:completion.Augmented);
     }
 
     internal void BeginSpanPublication(ReadOnlySpan<byte> record40,ReadOnlySpan<byte> selection4,CancellationToken token)

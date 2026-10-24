@@ -3,7 +3,7 @@ Current3a default restoration and historical D0 static source are distinct scope
 """
 import hashlib,json
 from pathlib import Path
-CONTRACTS_SHA256="42cea79e8c06d2aab6d2f4803425861fcd44d4750c3627b4af1f11b969908627"
+CONTRACTS_SHA256="822805289330fbd75d3542a516ac1754d90b44dd18bd21a033739c2ca99068a3"
 raw=Path(__file__).with_name('source_contracts.json').read_bytes().replace(b'\r\n',b'\n')
 assert hashlib.sha256(raw).hexdigest()==CONTRACTS_SHA256
 TABLE=json.loads(raw)
