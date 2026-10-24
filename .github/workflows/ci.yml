@@ -306,6 +306,11 @@ jobs:
         run: |
           dotnet run --project tools/LegacyMathAkOriginalInput.Probe -c Release -- models tools/LegacyMathAkProcessedPrefix.Probe/fixtures.json .artifacts/math-original-input.json
           python -I -B tools/LegacyMathAkOriginalInput.Probe/audit_output.py . .artifacts/math-original-input.json .artifacts/math-original-input-audit.json
+      - name: Original Math operator geometry without inference
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyMathAkOperator13B6Geometry.Probe -c Release -- models tools/LegacyMathAkOperator13B6Geometry.Probe/fixtures.json .artifacts/math-operator-geometry.json
+          python -I -B tools/LegacyMathAkOperator13B6Geometry.Probe/audit_output.py . .artifacts/math-operator-geometry.json .artifacts/math-operator-geometry-audit.json
       - name: Original Math grammar, parsed reconstruction and AK terminal binding
         shell: bash
         run: |

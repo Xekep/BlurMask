@@ -1,0 +1,432 @@
+{
+  "cases": [
+    {
+      "name": "line4",
+      "input": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ]
+        ]
+      ],
+      "result": {
+        "spacing": 0.041999999433755875,
+        "rows": [
+          {
+            "skippedSmallBounds": false,
+            "indices": [
+              0,
+              3
+            ],
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                3.0,
+                0.0
+              ]
+            ],
+            "joinIntersectionBlend": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "diagonal5",
+      "input": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            4,
+            4
+          ]
+        ]
+      ],
+      "result": {
+        "spacing": 0.0559999980032444,
+        "rows": [
+          {
+            "skippedSmallBounds": false,
+            "indices": [
+              0,
+              4
+            ],
+            "points": [
+              [
+                2.384185791015625e-07,
+                2.384185791015625e-07
+              ],
+              [
+                4.0,
+                4.0
+              ]
+            ],
+            "joinIntersectionBlend": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "vertical5",
+      "input": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            4
+          ]
+        ]
+      ],
+      "result": {
+        "spacing": 0.0559999980032444,
+        "rows": [
+          {
+            "skippedSmallBounds": false,
+            "indices": [
+              0,
+              4
+            ],
+            "points": [
+              [
+                8.742277657347586e-08,
+                0.0
+              ],
+              [
+                -8.742277657347586e-08,
+                4.0
+              ]
+            ],
+            "joinIntersectionBlend": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "corner",
+      "input": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            2,
+            0
+          ],
+          [
+            2,
+            2
+          ]
+        ]
+      ],
+      "result": {
+        "spacing": 0.0279999990016222,
+        "rows": [
+          {
+            "skippedSmallBounds": false,
+            "indices": [
+              0,
+              1,
+              2
+            ],
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                2.0,
+                0.0
+              ],
+              [
+                2.0,
+                2.0
+              ]
+            ],
+            "joinIntersectionBlend": [
+              false
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "gentle",
+      "input": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0.01
+          ],
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0.01
+          ],
+          [
+            4,
+            0
+          ]
+        ]
+      ],
+      "result": {
+        "spacing": 0.0279999990016222,
+        "rows": [
+          {
+            "skippedSmallBounds": false,
+            "indices": [
+              0,
+              4
+            ],
+            "points": [
+              [
+                0.0,
+                0.004444444552063942
+              ],
+              [
+                4.0,
+                0.004444444552063942
+              ]
+            ],
+            "joinIntersectionBlend": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "closed-square",
+      "input": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      ],
+      "result": {
+        "spacing": 0.0139999995008111,
+        "rows": [
+          {
+            "skippedSmallBounds": false,
+            "indices": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                1.0,
+                0.0
+              ],
+              [
+                1.0,
+                1.0
+              ],
+              [
+                0.0,
+                1.0
+              ],
+              [
+                0.0,
+                0.0
+              ]
+            ],
+            "joinIntersectionBlend": [
+              false,
+              false,
+              false
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "single-origin",
+      "input": [
+        [
+          [
+            0,
+            0
+          ]
+        ]
+      ],
+      "result": {
+        "spacing": 0.009999999776482582,
+        "rows": [
+          {
+            "skippedSmallBounds": true,
+            "indices": null,
+            "points": null
+          }
+        ]
+      }
+    }
+  ],
+  "preparedJoinData": [
+    {
+      "name": "gap-intersect",
+      "segments": [
+        [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            1.1,
+            0.1
+          ],
+          [
+            1.1,
+            1.0
+          ]
+        ]
+      ],
+      "result": [
+        [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            1.0736842155456543,
+            0.02368420921266079
+          ],
+          [
+            1.1,
+            1.0
+          ]
+        ],
+        [
+          true
+        ]
+      ]
+    },
+    {
+      "name": "parallel",
+      "segments": [
+        [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            1.1,
+            0.0
+          ],
+          [
+            2.0,
+            0.0
+          ]
+        ]
+      ],
+      "result": [
+        [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            1.0473684072494507,
+            0.0
+          ],
+          [
+            2.0,
+            0.0
+          ]
+        ],
+        [
+          false
+        ]
+      ]
+    }
+  ],
+  "portableCRTScope": true,
+  "csharpExecution": false,
+  "networkForwards": 0
+}
