@@ -26,11 +26,13 @@ public sealed partial class LegacyFreshMainGlobalSourceBatchCompletion
     internal LegacyFreshMainGlobalPlainRecognitionResult TextSource(CancellationToken token){RequireCompleted(token);return source;}
     internal LegacyFreshMainGlobalPublishedFirstAlternativeSnapshot TextSnapshot(CancellationToken token){RequireCompleted(token);return snapshot;}
 
-    internal sealed class CompletedTextWords
+    internal sealed partial class CompletedTextWords
     {
         private readonly LegacyFreshMainGlobalSourceBatchCompletion owner;
         private readonly LegacyNativePlainWordSpanSnapshot[] owners;
         private readonly int[] ownerIndices,selected;
+        private readonly int[] firstPayloadOrdinals;
+        private readonly LegacyPreparedGlobalWordPayloadReuse.Plan[] reusePlans;
         private readonly LegacyNativeInkPositionRange[][] keys;
         private readonly int thread=Environment.CurrentManagedThreadId;
         private readonly long copyLimit;
@@ -175,11 +177,40 @@ public sealed partial class LegacyFreshMainGlobalSourceBatchCompletion
             EqualityEndpointReadBound=checked(pairBound+2L*(w-1)*totalKeyRows);
             if(EqualityEndpointReadBound>owner.maximumWork-owner.PreflightStructuralWork)
                 throw new NotSupportedException("WORD key equality extent exceeds remaining structural-work envelope before pair scans.");
+            Charge(checked(4L*w+16L*w));
+            firstPayloadOrdinals=new int[w];reusePlans=new LegacyPreparedGlobalWordPayloadReuse.Plan[w];
+            var payloadCounts=new int[w];Charge(checked(4L*w));
+            Action<ulong,byte[]>? equalityObserver=null;
+            ushort ignored=owner.source.Selection.Publication.Policy.Owner.Model.AcousticAlphabet.TryGetLabel("\u200d",out ushort joiner)?joiner:ushort.MaxValue;
             for(int i=0;i<keys.Length;i++)
             {
                 if(keys[i].Length==0)throw new NotSupportedException("Batch TEXT subset requires nonempty WORD keys after native lookahead.");
-                for(int j=0;j<i;j++)if(LegacyOwnedRawInkRangeOperations.Equal(keys[i],keys[j]))
-                    throw new NotSupportedException("Shared processed-WORD payload reconciliation requires a separate owner path.");
+                int first=i;
+                for(int j=0;j<i;j++)if(LegacyOwnedRawInkRangeOperations.Equal(keys[i],keys[j])){first=firstPayloadOrdinals[j];break;}
+                firstPayloadOrdinals[i]=first;
+                var currentRows=owners[ownerIndices[i]].Words;
+                if(first==i)
+                {payloadCounts[i]=currentRows.Count;reusePlans[i]=new([],[],currentRows.Count,selected[i]);continue;}
+                var firstOwner=owners[ownerIndices[first]];
+                bool sameSpan=firstOwner.Span==owners[ownerIndices[i]].Span;
+                long pairs=sameSpan?0:checked((long)currentRows.Count*firstOwner.Words.Count);
+                //Existing native equality has a hard131072 actual pool-read
+                //ceiling per call. Reserve all CopyRecord40 reads and both120
+                //snapshots BEFORE invoking it. Framework metadata excluded.
+                owner.DebitValidationLoops(checked(pairs*131072+currentRows.Count+1),token);
+                Charge(checked(pairs*(40L*131072+240)+8+16+12L*currentRows.Count+8L*(payloadCounts[first]+currentRows.Count)+8L*payloadCounts[first]));
+                if(pairs>0&&equalityReadSet is null)
+                {
+                    Charge(checked(92L+16L*TotalReferences));
+                    owner.DebitValidationLoops(checked(2L*TotalReferences+actualOwnerRows+owners.Length),token);
+                    equalityReadSet=new(this,owner.session.Ownership.GlyphPool,owners,TotalReferences);
+                    equalityObserver=equalityReadSet.Observe;
+                }
+                byte[] left=new byte[4],right=new byte[4];
+                var plan=LegacyPreparedGlobalWordPayloadReuse.Build(currentRows.Count,firstOwner.Words.Count,payloadCounts[first],sameSpan,selected[i],
+                    (current,original)=>LegacyNativeMainWordEquality.CompareWithReadObserver(owner.session.Ownership.GlyphPool,
+                        currentRows[current].CopyStorage(),firstOwner.Words[original].CopyStorage(),left,right,ignored,static label=>label,null,token,equalityObserver!),token);
+                reusePlans[i]=plan;payloadCounts[first]=plan.ResultChoiceCount;
             }
             EnumeratedCopyBytes=charged;
             void Charge(long bytes)
@@ -249,6 +280,10 @@ public sealed partial class LegacyFreshMainGlobalSourceBatchCompletion
             internal CompletedTextWords Owner{get;}
             internal int Ordinal{get;}
             internal WordCursor(CompletedTextWords owner,int ordinal){Owner=owner;Ordinal=ordinal;}
+            internal int FirstPayloadOrdinal(CancellationToken token)
+            {Owner.RequireCursor(this,token);return Owner.firstPayloadOrdinals[Ordinal];}
+            internal LegacyPreparedGlobalWordPayloadReuse.Plan ReusePlan(CancellationToken token)
+            {Owner.RequireCursor(this,token);return Owner.reusePlans[Ordinal];}
             internal LegacyNativePublishedWordNode ActualNode(CancellationToken token)
             {Owner.RequireCursor(this,token);return Owner.owner.binding.Nodes[Ordinal];}
             internal int SelectedIndex(CancellationToken token)

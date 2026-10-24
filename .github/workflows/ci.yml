@@ -347,6 +347,12 @@ jobs:
         run: dotnet run --project tools/LegacyGlobalWordAugmentation.OwnerDiagnostic -c Release -- --prepared .artifacts/global-augmentation-envelope.json
       - name: Global batch WORD ranges and publisher topology without inference
         run: dotnet run --project tools/LegacyMainGlobalBatch.Probe -c Release -- .artifacts/global-batch-prepared.json
+      - name: Shared WORD reuse and linked comparison without inference
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyWordPayloadReuse.Probe -c Release -- .artifacts/word-payload-reuse-prepared.json
+          dotnet run --project tools/LegacyMainWordEquality.Probe -c Release -- --prepared .artifacts/word-equality-prepared.json
+          python -I -B tools/LegacyMainWordEquality.Probe/audit_output.py .artifacts/word-equality-prepared.json
       - name: Global augmentation historical numeric replay harness (compile only)
         run: dotnet build tools/LegacyGlobalWordAugmentation.Probe -c Release
       - name: Completed augmentation source-position projection and API controls without inference

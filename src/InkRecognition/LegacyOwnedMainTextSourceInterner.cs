@@ -108,7 +108,7 @@ public sealed class LegacyOwnedMainTextSourceInterner
             throw new ArgumentException("Exact global WORD interner and original document required.");
         var value=InternCore(actual.CopyOriginalKey(),null,token,globalWordSource:actual);
         if(!ReferenceEquals(value.Node.FirstGlobalWordSource,actual))
-            throw new InvalidOperationException("Prepared, old or foreign WORD node cannot become a global payload.");
+            actual.Owner.RequireExistingWordIntern(value.Node,actual,token);
         return value;
     }
     private LegacyOwnedMainTextSourceInternResult InternCore(LegacyNativeInkPositionRange[] key,

@@ -12,6 +12,20 @@ public static class LegacyNativeMainWordEquality
         Span<byte> leftCallerStorage4, Span<byte> rightCallerStorage4,
         ushort actualIgnoredPrimaryLabel, Func<ushort, ushort>? actualPrimaryMapper2360 = null,
         Func<string, ushort>? actualControlLookup = null, CancellationToken token = default)
+        =>CompareCore(actualPool,leftWord120,rightWord120,leftCallerStorage4,rightCallerStorage4,actualIgnoredPrimaryLabel,actualPrimaryMapper2360,actualControlLookup,token,null);
+
+    internal static bool CompareWithReadObserver(LegacyNativeGlyphRecordPool actualPool,
+        ReadOnlySpan<byte> leftWord120, ReadOnlySpan<byte> rightWord120,
+        Span<byte> leftCallerStorage4, Span<byte> rightCallerStorage4,
+        ushort actualIgnoredPrimaryLabel, Func<ushort, ushort>? actualPrimaryMapper2360,
+        Func<string, ushort>? actualControlLookup, CancellationToken token, Action<ulong,byte[]> observer)
+        =>CompareCore(actualPool,leftWord120,rightWord120,leftCallerStorage4,rightCallerStorage4,actualIgnoredPrimaryLabel,actualPrimaryMapper2360,actualControlLookup,token,observer??throw new ArgumentNullException(nameof(observer)));
+
+    private static bool CompareCore(LegacyNativeGlyphRecordPool actualPool,
+        ReadOnlySpan<byte> leftWord120, ReadOnlySpan<byte> rightWord120,
+        Span<byte> leftCallerStorage4, Span<byte> rightCallerStorage4,
+        ushort actualIgnoredPrimaryLabel, Func<ushort, ushort>? actualPrimaryMapper2360,
+        Func<string, ushort>? actualControlLookup, CancellationToken token, Action<ulong,byte[]>? observer)
     {
         ArgumentNullException.ThrowIfNull(actualPool); token.ThrowIfCancellationRequested();
         if (leftWord120.Length != 120 || rightWord120.Length != 120 ||
@@ -69,7 +83,7 @@ public static class LegacyNativeMainWordEquality
         {
             token.ThrowIfCancellationRequested();
             if (++work > 131072) throw new NotSupportedException("Portable linked-WORD comparison work budget exceeded; cycles are unsupported.");
-            return actualPool.CopyRecord(reference, token);
+            var record=actualPool.CopyRecord(reference, token);observer?.Invoke(reference,record);return record;
         }
     }
     private static ushort U16(ReadOnlySpan<byte> bytes, int offset) => BinaryPrimitives.ReadUInt16LittleEndian(bytes[offset..]);

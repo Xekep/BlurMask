@@ -56,9 +56,26 @@ public sealed class LegacyFreshMainGlobalWordSourcePayload
         allChoices=new LegacyFreshMainGlobalWordSourceChoice[count];selectedChoice=selected;ChoiceCount=count;
         for(int i=0;i<count;i++)allChoices[i]=new(this,i);
     }
+    internal void AppendChoiceSlots(int resultCount)
+    {
+        if(allChoices is null||resultCount<allChoices.Length||resultCount>4095||
+            currentChoice!=allChoices.Length-1||allChoices.Any(c=>!c.IsComplete))
+            throw new InvalidOperationException("Completed same-parent WORD payload required before native reuse append.");
+        if(resultCount==allChoices.Length)return;
+        var next=new LegacyFreshMainGlobalWordSourceChoice[resultCount];allChoices.CopyTo(next,0);
+        for(int i=allChoices.Length;i<resultCount;i++)next[i]=new(this,i);
+        allChoices=next;ChoiceCount=resultCount;
+    }
+    internal LegacyFreshMainGlobalWordSourceChoice ChoiceAt(int index)
+    {
+        OriginalSource.Owner.Scope.Validate();
+        if(allChoices is null||(uint)index>=allChoices.Length||!allChoices[index].IsComplete)
+            throw new InvalidOperationException("Completed shared WORD choice required.");
+        return allChoices[index];
+    }
     internal void BeginChoice(int ordinal)
     {if(allChoices is null||ordinal!=currentChoice+1||(uint)ordinal>=allChoices.Length)throw new InvalidOperationException("Literal next275 WORD choice required.");currentChoice=ordinal;}
-    internal void CompleteChoice(){if(allChoices is null)throw new InvalidOperationException();CurrentChoice.Seal();allChoiceFlags|=CurrentChoice.Flags;Flags|=CurrentChoice.Flags;}
+    internal void CompleteChoice(bool aggregateParentFlags=true){if(allChoices is null)throw new InvalidOperationException();CurrentChoice.Seal();allChoiceFlags|=CurrentChoice.Flags;if(aggregateParentFlags)Flags|=CurrentChoice.Flags;}
     internal LegacyFreshMainGlobalWordSourcePayload(LegacyFreshMainGlobalWordSourceReceipt original,LegacyOwnedMainTextSourceNode node)
     {OriginalSource=original;Node=node;}
     internal void Append(LegacyFreshMainGlobalTextSourceChoice actual,CancellationToken token)

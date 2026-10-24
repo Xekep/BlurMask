@@ -107,6 +107,9 @@ public sealed partial class LegacyFreshMainGlobalWordTextPublication
         if(batchWords is not null)
         {
             if(!publishAll)throw new NotSupportedException("A completed source batch requires all275 publication per actual WORD.");
+            batchWords.ReservePreparationCopy(checked(12L*batchWords.Count),token);
+            publishedSourceSelectedIndices=new int[batchWords.Count];
+            publishedOriginalSources=new LegacyFreshMainGlobalWordSourceReceipt[batchWords.Count];
             batchSpans=new LegacyGlobalCompletedWordSpan[batchWords.Count];
             for(int i=0;i<batchSpans.Length;i++){batchSpans[i]=LegacyGlobalCompletedWordSpan.CaptureBatch(completion,i,token);batchSpans[i].Bind(this);}
             allWords=batchSpans[0];
@@ -255,7 +258,7 @@ public sealed partial class LegacyFreshMainGlobalWordTextPublication
     internal void RequireWordIntern(LegacyFreshMainGlobalWordSourceReceipt actual,CancellationToken token)
     {ValidateLive(token);if(stage!="word-intern"||!ReferenceEquals(actual,OriginalWordSource)||payload is not null)throw new ArgumentException("Current actual global WORD source receipt required.");}
     internal void RequireCharacterEntry(LegacyFreshMainGlobalTextSourceWrapper actual,CancellationToken token)
-    {ValidateLive(token);if(stage!="characters"||!ReferenceEquals(actual,Wrapper)||payload is null||!ReferenceEquals(payload.Node.FirstGlobalWordSource,OriginalWordSource))throw new ArgumentException("Initialized actual WORD parent required before CHAR entry.");}
+    {ValidateLive(token);if(stage!="characters"||!ReferenceEquals(actual,Wrapper)||payload is null||!IsCurrentPayloadSource())throw new ArgumentException("Initialized actual WORD parent required before CHAR entry.");}
     internal void VisitPositiveSource(LegacyFreshMainGlobalTextSourceWrapper actual,int index,CancellationToken token)
     {RequireCharacterEntry(actual,token);payload!.Flags&=~0x200000u;Record("positive:"+index);}
     internal void AppendCharacter(LegacyFreshMainGlobalTextSourceWrapper actual,LegacyFreshMainGlobalTextSourceChoice choice,CancellationToken token)
@@ -323,11 +326,12 @@ public sealed partial class LegacyFreshMainGlobalWordTextPublication
                     for(batchWordOrdinal=0;batchWordOrdinal<batchSpans!.Length;batchWordOrdinal++)
                     {
                         var actual=batchWords.Open(token);allWords=batchSpans[batchWordOrdinal];
-                        selectedWordIndex=actual.SelectedIndex(token);wordStorage=actual.ActualNode(token).Word.CopyStorage();
+                        currentPayloadFirstOrdinal=actual.FirstPayloadOrdinal(token);currentReusePlan=actual.ReusePlan(token);
+                        sourceSelectedWordIndex=actual.SelectedIndex(token);selectedWordIndex=sourceSelectedWordIndex;wordStorage=actual.ActualNode(token).Word.CopyStorage();
                         wordReferences=actual.ActualNode(token).Word.FlatReferences.ToArray();
                         originalWordSource=new(this);payload=null;characters=null;nextCharacter=-1;
                         PublishCurrentWord(allocator40,selection4,fault,token);
-                        publishedWords.Add(payload!);publishedSelectedIndices.Add(selectedWordIndex);documentLink=true;Record("document-word24:"+batchWordOrdinal);
+                        publishedWords.Add(payload!);publishedSelectedIndices.Add(selectedWordIndex);publishedSourceSelectedIndices![batchWordOrdinal]=sourceSelectedWordIndex;publishedOriginalSources![batchWordOrdinal]=OriginalWordSource;documentLink=true;Record("document-word24:"+batchWordOrdinal);
                         batchWords.Close(actual,token);
                     }
                     batchWords.Finish(token);
@@ -352,7 +356,7 @@ public sealed partial class LegacyFreshMainGlobalWordTextPublication
     private void PublishCurrentWord(ReadOnlySpan<byte> allocator40,ReadOnlySpan<byte> selection4,LegacyGlobalWordTextPreparedFault fault,CancellationToken token)
     {
                 stage="word-intern";var node=Scope.SharedState.Words.InternGlobalWord(OriginalWordSource,token);
-                if(!node.Inserted)throw new NotSupportedException("Only a fresh actual global WORD node is supported.");Record("word-intern");
+                if(!node.Inserted){ReconcileCurrentWord(node.Node,allocator40,selection4,fault,token);return;}Record("word-intern");
                 payload=new(OriginalWordSource,node.Node);Record("word-defaults");
                 if(allWords is null)payload.ChoiceCount=1;else payload.InitializeChoices(allWords.Count,selectedWordIndex);
                 Record("word-choice48");payload.Flags=(payload.Flags&~0x800000u)|0x200000;Record("word-initial-flags");
@@ -398,7 +402,7 @@ public sealed partial class LegacyFreshMainGlobalWordTextPublication
     public byte[] CopyDocumentWordLink24(){Scope.Validate();lock(gate){if(!documentLink)throw new InvalidOperationException("Document WORD link has not been appended.");if(publishedWords.Count!=1)throw new NotSupportedException("Use the complete actual WORD link vector.");return CopyDocumentWordLinks24();}}
     public byte[] CopyDocumentWordLinks24()
     {Scope.Validate();lock(gate){byte[] b=new byte[checked(24*publishedWords.Count)];for(int i=0;i<publishedWords.Count;i++)BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(24*i+16),publishedSelectedIndices[i]);return b;}}
-    public byte[] CopyDocumentChoice32(){Scope.Validate();lock(gate){if(!documentChoiceAllocated)throw new InvalidOperationException("Document choice has not been allocated.");byte[] b=new byte[32];uint flags=0;foreach(var word in publishedWords)flags|=word.ChoiceFlags&1023;BinaryPrimitives.WriteUInt32LittleEndian(b.AsSpan(8),flags);BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(24),publishedWords.Count);BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(28),publishedWords.Count);return b;}}
+    public byte[] CopyDocumentChoice32(){Scope.Validate();lock(gate){if(!documentChoiceAllocated)throw new InvalidOperationException("Document choice has not been allocated.");byte[] b=new byte[32];uint flags=0;for(int i=0;i<publishedWords.Count;i++)flags|=(allWords is null?publishedWords[i].ChoiceFlags:publishedWords[i].ChoiceAt(publishedSelectedIndices[i]).Flags)&1023;BinaryPrimitives.WriteUInt32LittleEndian(b.AsSpan(8),flags);BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(24),publishedWords.Count);BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(28),publishedWords.Count);return b;}}
     public bool HasDocumentWordLink{get{lock(gate)return documentLink;}}
     public bool HasTextReceipt{get{lock(gate)return text is not null;}}
     public int DocumentAlternativeCount{get{lock(gate)return documentChoiceAllocated?1:0;}}

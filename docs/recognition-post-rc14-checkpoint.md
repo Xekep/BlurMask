@@ -114,3 +114,32 @@ and12N+16 reservation; it needs a new compile/check before import. The prior
 source packet remains immutable and outside main. No live shared-WORD reuse
 or multiple-WORD result is claimed. Evidence:
 `root-shared-word-reuse-static-review-20261024`.
+
+## Corrected shared-WORD reuse integrated
+
+The two-file allocation correction (`083ebaff03e516a875d5c43ffd96172971085c5ea1c2a243112de25711f5d784`)
+has now been combined with the reviewed eight production files in main.
+The private queue authenticates equality inputs, retains separate original-TOP
+and shared-payload selected indices, and appends unmatched choices without
+registering the same WORD twice. Public linked equality retains its original
+entry point and scalar behavior. Its new observer overload is internal.
+
+Root verified1841 frozen pin records before/after import. Four existing-file
+preimages matched raw bytes; the fifth differed only by CRLF/LF, verified
+against its exact retained preimage before changing any source. The first
+strict raw-hash import attempt stopped before mutation and was preserved.
+
+All four current-main probe builds passed with zero warnings/errors. Prepared
+checks passed5847 reuse cases/40 guards/320 consumed-field bit controls,
+4096 original public linked-equality cases with independent Python comparison,
+7 range cases/64 publisher topologies/69 guards, and the existing all-WORD
+choice controls.895 source/tool/workflow pins were checked before/after.
+Evidence: `root-word-reuse-main-20261024`; no inference or vendor execution.
+CI now includes the reuse and original linked-equality prepared checks.
+
+This does not prove live equality-readset behavior on multiple recognized WORDs,
+native text formatting or application delivery. Those remain the next connected
+consumer/runtime checks. The prepared probe binary was pinned in the original
+source packet under AssemblyName `LegacyGlobalWordText.Probe`; a prior root
+report's wrong-name lookup was corrected in the separate immutable
+`root-shared-word-reuse-prepared-review-20261024` addendum.
