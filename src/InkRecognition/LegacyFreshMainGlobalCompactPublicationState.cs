@@ -52,7 +52,7 @@ internal sealed class LegacyFreshMainGlobalCompactPublicationState
             owner.Symbols.Geometry.CategoryOwner.Categories, invocation.Options.ContextSentinels24b8,
             invocation.LanguagePenalty2534, false, start, endingNode, reach.Nodes, reach.LanguageProbe,
             group => LegacyMainCompactGroupScores.FromGlobal(confidence.ReadGroup(group, token)),
-            Storage, Count, Starts, PrefixOwners, validate, token);
+            Storage, Count, Starts, PrefixOwners, validate, token, owner.Symbols.CopySourceHeaders());
         validate(token);
         if (published.Storage.Length != Storage.Length || published.Count < Count || published.Count > Storage.Length / 40 ||
             published.Starts.Length != Starts.Length || published.PrefixOwners.Length != Starts.Length)

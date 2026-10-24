@@ -46,7 +46,7 @@ public sealed class LegacyFreshMainGlobalCompactWordMaterialization
             Enumerable.Range(0, pass.NodeCount).Select(reachable.GetNodeSnapshot).ToArray(),
             reachable.HasLanguageContinuation, group => LegacyMainCompactGroupScores.FromGlobal(confidence.ReadGroup(group, token)),
             allocatorResidue40, 0, new int[pass.NodeCount + 1], new int[pass.NodeCount + 1],
-            pass.ValidateResultQueryLease, token);
+            pass.ValidateResultQueryLease, token, owner.Symbols.CopySourceHeaders());
         int selected = checked(published.Starts[pass.NodeCount - 1] + BinaryPrimitives.ReadUInt16LittleEndian(
             published.Nodes[^1].Records.Span.Slice(checked(terminal.Winner.Ordinal * 88 + 0x22), 2)));
         if ((uint)selected >= (uint)published.Count)

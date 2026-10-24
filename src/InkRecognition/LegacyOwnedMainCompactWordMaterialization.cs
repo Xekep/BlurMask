@@ -138,7 +138,7 @@ public sealed class LegacyOwnedMainCompactWordMaterialization
             configuredSecondary is not null,source.StartingNode,source.EndingNode,
             Enumerable.Range(0,source.EndingNode+1).Select(reachable.GetNodeSnapshot).ToArray(),reachable.HasLanguageContinuation,
             group=>LegacyMainCompactGroupScores.FromOld(confidence.ScoreGroup(group,cancellationToken)),
-            state.Storage,state.Count,state.Starts,state.PrefixOwners,source.Validate,cancellationToken);
+            state.Storage,state.Count,state.Starts,state.PrefixOwners,source.Validate,cancellationToken,owner.CopySourceHeaders());
         state.Commit(source,result.Storage,result.Count,result.Starts,result.PrefixOwners,cancellationToken);
         return new(reachable,result.Nodes);
     }

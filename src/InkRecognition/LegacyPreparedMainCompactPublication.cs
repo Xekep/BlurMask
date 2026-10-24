@@ -13,7 +13,7 @@ internal static class LegacyPreparedMainCompactPublication
         LegacyMainDirectWordNodeResult[] markedNodes,Func<int,ushort,CancellationToken,bool> hasLanguageContinuation,
         Func<int,LegacyMainCompactGroupScores> scoreGroup,ReadOnlySpan<byte> initialStorage,int initialCount,
         ReadOnlySpan<int> initialStarts,ReadOnlySpan<int> initialPrefixOwners,Action<CancellationToken> validate,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,ReadOnlySpan<uint> actualSourceHeaders)
     {
         int primary = configuration.PrimaryArcLimit230a;
                 var categories = new LegacyCursiveCategoryMapper(categoryProfile);
@@ -63,18 +63,23 @@ internal static class LegacyPreparedMainCompactPublication
                 }
             }
             Sort(candidates, contexts, cancellationToken);
-            int groupStart = 0;
+            int groupStart = 0, selectedDistinct = 0;
             for (int i = 0; i < candidates.Count; i++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var candidate = candidates[i];
                 if (i == 0 || candidate.GroupKey != candidates[i - 1].GroupKey || candidate.EndContext != candidates[i - 1].EndContext)
-                    groupStart = i;
-                bool forced = !hasLanguageContinuation(node, candidate.Ordinal, cancellationToken);
-                for (int prior = i - 1; prior >= groupStart; prior--)
-                    if (candidates[prior].Forced && candidates[prior].Context == candidate.Context) forced = false;
+                {groupStart = i;selectedDistinct = 0;}
+                var selectedFlags=LegacyPreparedMainPrimaryCompactFlags.Select(candidates,i,groupStart,selectedDistinct,
+                    configuration.PrimaryAlternativeCount2402,actualSourceHeaders,
+                    ()=>hasLanguageContinuation(node,candidate.Ordinal,cancellationToken),cancellationToken);
+                selectedDistinct=selectedFlags.SelectedDistinctAfter;
+                candidate.TerminalBit3=selectedFlags.TerminalBit3;
+                bool forced=selectedFlags.TerminalBit4;
                 candidate.Forced = forced;
-                int cost = unchecked(candidate.Cost + (forced ? forcedPenalty : 0));
+                //207CB0 applies the forced penalty only for a nonzero source header low classification.
+                bool applyForcedPenalty = forced && (actualSourceHeaders[(byte)(candidate.Tag >> 32)] & 0x1c) != 0;
+                int cost = unchecked(candidate.Cost + (applyForcedPenalty ? forcedPenalty : 0));
                 int at = (candidate.Ordinal * 2 + candidate.Alternative) * 40;
                 var entry = pools[node].AsSpan(at, 40);
                 int previousNode = unchecked(node - (sbyte)entry[0x1a] - 1);
@@ -95,7 +100,7 @@ internal static class LegacyPreparedMainCompactPublication
                 int parent = previousNode < 0 || reset ? -1 : CompactParent(previousNode,
                     U16(Alternative(previousNode, previousOrdinal, previousAlternative), 0x1c));
                 int terminalIndex = AppendFrame(frame, row, candidate.Tag, parent, cost, candidate.Increment,
-                    ushort.MaxValue, -1, false, forced, ScoreByte(node, row), node);
+                    ushort.MaxValue, candidate.Auxiliary, candidate.TerminalBit3, forced, ScoreByte(node, row), node);
                 BinaryPrimitives.WriteUInt16LittleEndian(entry[0x1c..], Relative(node, terminalIndex));
                 usedArcs[U16(row, 0x1c)] = true;
             }
@@ -343,7 +348,7 @@ internal static class LegacyPreparedMainCompactPublication
     }
 
     private sealed class Candidate(ushort ordinal, int alternative, int cost, int increment,
-        ulong tag, ulong context, int groupKey, uint endContext)
+        ulong tag, ulong context, int groupKey, uint endContext) : ILegacyMainPrimaryCompactFlagRow
     {
         public ushort Ordinal { get; } = ordinal;
         public int Alternative { get; } = alternative;
@@ -353,6 +358,12 @@ internal static class LegacyPreparedMainCompactPublication
         public ulong Context { get; } = context;
         public int GroupKey { get; } = groupKey;
         public uint EndContext { get; } = endContext;
+        //209095 empty-V58 fallback was admitted above only for row30==-1.
+        //20907F also tests original tag.bit41: only terminal tags set byte3=1.
+        //Byte4=0; other expansion producers remain refused.
+        public bool FallbackByte3 => (Tag & (1UL << 41)) != 0;
+        public int Auxiliary => -1;
+        public bool TerminalBit3 { get; set; }
         public bool Forced { get; set; }
     }
 
