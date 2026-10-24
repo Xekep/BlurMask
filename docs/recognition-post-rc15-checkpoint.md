@@ -624,7 +624,14 @@ for integration. Independent peer review passes native/source/recorded DATA and
 five extra corruptions, with the equal-key coverage limit explicit. Main proof:
 `root-english-source-indices-main-20261024/verification.json`; peer manifest
 SHA256 `1e4ece62367a094a7073e453c72c47a36dc516e1e590ddd702d2219dfcfaef65`.
-Three-OS CI for this integrated successor is still pending. Owning evidence:
+Specialized three-OS run40107616793 on5a1b362 now passes all13 stages.
+All three prepared captures are raw byte-exact across Windows/Linux/macOS;
+strict actual-DATA audits and prepared64/stored81 negatives match root.
+This is prepared/recorded-DATA coverage, not a new owning/NN run. Evidence:
+english-source-indices-three-os-verified-20261024/verification.json.
+This specialized success is distinct from broad CI40107616706: at this
+checkpoint root reports the macOS/Ubuntu broad RU step failed and other jobs
+remain in progress; no all-green claim is made. Owning evidence:
 `root-english-source-indices-owning-frozen-manifest-20261024.json`, SHA256
 `40980095f8fce9492ce50308b6e1c05fcfc6f96c37e435a0fbc7cbef2cb324a9`.
 
@@ -638,3 +645,33 @@ phrase NN331 is preserved as an error and corrected by
 `root-english-source-indices-metric-correction-20261024.json` (SHA256
 `1f6e27603a77f46a9bc17ad8cfeeff7c32316a2c784611c46dfc33479e20a591`).
 No capture, expected value or runtime source changed for this correction.
+
+
+FIRST AL prefix/SAME-live operand now has one reviewed ROOT owning observation:
+14 original cases,8 exact exception refusals and85 assertions under.NET10.0.12,
+CPU2/observed affinity3/45s in0.920s. Capture SHA256
+3611e7a4f2b150b8735adae05e3f38c404177133a20165d3dd2165675950396e.
+All14 literal labels match independent raw dictionary enumeration twice after
+caller-buffer A5overwrite, and each old header projection remains exact89fd,
+including one positive13B6/1390 case. FIRST/model evaluations remain zero.
+This does not exercise hidden private-state/thread/restart guards or recognition.
+Reviewed proof manifest:
+first276-al-owning-proof-reviewed-frozen-manifest-20261024.json
+SHA256 f086bf63a8f82ebd509daf4272516827fe710c0d5986837d32b88c52d08bc8a2.
+The4096 diagnostic formula is only a nominal numerical/header projection and
+omits guard/list/name/profile/serializer allocations; only the131072 UTF8 file
+cap is enforced after formatting. It is not a whole typed allocation/RSS bound.
+
+The next backend remains SOURCE/static/PURE. Independent root review ofcd02
+verifies1196 pins,12 complete native bodies,6 backend tables and16 alignments:
+immutable matrices/scales168914B are borrowed; scratch typed payload5120B
+uses native5135B allocation headroom. New receiver allocation initializes
+pointers/scalars, not input/hidden/output values or a successfulFIRST/cache.
+Separate kernel proof5f6e verifies eight complete bodies/six qualified PE
+extents and2223 modular-algebra controls, including iterator widths288/208,
+row advances576/208 and unsigned scales. It does not prove complete212
+normalization, initialized geometry, current108/bitsets/cache/request lineage,
+candidate authority or evaluator parity. Evidence:
+root-first276-backend-review-20261024/verification.json;
+root-first276-kernels-frozen-manifest-20261024.json
+SHA256 5f6ec9c381a62ac93aabe4f6d0a83b43392679af7c5a7d8f5d248309d728e5a9.

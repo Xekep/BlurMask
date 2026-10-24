@@ -47,7 +47,7 @@ internal sealed partial class LegacyMathAkOriginalInputContext
 
     //112 SOURCE-field bytes, excluding CLR headers/alignment. This number has
     //no relation to native108 descriptors. No arrays/delegates/cache are owned.
-    private sealed class FreshCommonWorkspace
+    private sealed partial class FreshCommonWorkspace
     {
         internal const long MaximumPayloadBytes=112+70;
         internal const long MaximumCopyBytes=116+2+4+28+48+98;

@@ -1,6 +1,6 @@
 """Strict frozen SOURCE14 DATA audit. Never runs a source stage or model."""
 from pathlib import Path
-import argparse,copy,hashlib,json
+import argparse,copy,hashlib,json,importlib.util
 D=Path(__file__).resolve().parent
 SUMMARY_SHA='064cb3c99e3c1c493fefc59d77a8e7c9bcbf2a90c77bffe1b59e9f4090009b2c'
 CAPTURE_SHA='89fdc6a8822cad6bfc45ca9f331c8ec7e5eb556d825a89b0b1c78261348d9d06'
@@ -26,11 +26,21 @@ def exact(a,b,path='/'):
 
 # Reviewed immutable FIRST retention successor. Historical SOURCE14 was NOT rerun.
 # Root profile DATA proves raw OLD tail unchanged; exact reversal below proves all
-# prior profile operators unchanged. CommonHeader/Segments retain their old pins.
+# prior profile operators unchanged. AL is reversed separately; Header partial
+# declaration restores its exact old pin. Segments remain byte-exact.
 PROFILE_SUCCESSOR_SHA='68675aead36585873cbb65035f1133802d9d0801fd82c91fe8c44170b4105e68'
 FIRST_OWNER_SHA='558b0555e122529afbe3ad050db03dc02814edb0f6bc4b86229c2502b1886638'
 PROFILE_RESTORE=[['public sealed partial class LegacyMathAkFeatureProfile\n', 'public sealed class LegacyMathAkFeatureProfile\n'], ['    private LegacyMathAkFeatureProfile(short[][] minimum, short[][] maximum, ProgramDescriptor program, LegacyMathAkShapePrototypes shapes, LegacyMathAkOriginalSmoothingPolicy smoothing, LegacyMathAkSource13A2Policy sampler, ushort freshCommonHeapCapacity, First276Program first276)\n    { this.minimum = minimum; this.maximum = maximum; this.program = program; ShapePrototypes = shapes; OriginalSmoothing = smoothing; Source13A2Policy = sampler; FreshCommonHeapCapacity = freshCommonHeapCapacity; this.first276 = first276; }\n', '    private LegacyMathAkFeatureProfile(short[][] minimum, short[][] maximum, ProgramDescriptor program, LegacyMathAkShapePrototypes shapes, LegacyMathAkOriginalSmoothingPolicy smoothing, LegacyMathAkSource13A2Policy sampler, ushort freshCommonHeapCapacity)\n    { this.minimum = minimum; this.maximum = maximum; this.program = program; ShapePrototypes = shapes; OriginalSmoothing = smoothing; Source13A2Policy = sampler; FreshCommonHeapCapacity = freshCommonHeapCapacity; }\n'], ['            //Separate FIRST owner, from THIS private authenticated capture.\n            //No caller-buffer reread, selected-tail calibration or model copy.\n            var first276 = First276Program.ReadAuthenticated(captured, token);\n', ''], ['            return new(minimum, maximum, program, shapes, smoothing, sampler, freshCommonHeapCapacity, first276);\n', '            return new(minimum, maximum, program, shapes, smoothing, sampler, freshCommonHeapCapacity);\n']]
+def al_contract(root):
+ path=root/'tools/LegacyMathAkFirstAlphabet.Probe/source_contract.py'
+ spec=importlib.util.spec_from_file_location('workspace_al_contract',path)
+ module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module);module.authenticate(root)
+ return module
+
 def authenticate_profile(root,raw):
+ # Restore ONLY the reviewed AL retention hook, then use the previous exact
+ # FIRST owner reversal down to historical3b74. No old-source pin is waived.
+ raw=al_contract(root).restore_profile(raw)
  assert H(raw)==PROFILE_SUCCESSOR_SHA,'Profile successor bytes'
  assert H((root/'src/InkRecognition/LegacyMathAkFirst276Program.cs').read_bytes().replace(b'\r\n',b'\n'))==FIRST_OWNER_SHA
  text=raw.decode('utf-8')
@@ -47,6 +57,8 @@ def reference(root):
  for name,sha in SOURCES.items():
   raw=(root/'src/InkRecognition'/name).read_bytes().replace(b'\r\n',b'\n')
   if name=='LegacyMathAkFeatureProfile.cs':authenticate_profile(root,raw)
+  elif name=='LegacyMathAkFreshCommonWorkspace.cs':
+   assert H(al_contract(root).restore_header(raw))==sha,name
   else:assert H(raw)==sha,name
  rows=[];guards=['pre-cancel-exact-token','null-original-refused']
  assert len(s['rows'])==14

@@ -1,0 +1,1307 @@
+{
+  "schema": "first276-al-source-actual-v1",
+  "resourceSHA": "8c8d9c8ce93aa74820f30a592d77ec3fe382c930a72063d5ced48629f3c167c1",
+  "fixtureSHA": "ce3505ffeb0014a62eacde7c2d4841a23dda5f704fb127820fac4c937134eacb",
+  "AlphabetBefore": {
+    "Count": 259,
+    "Labels": [
+      107,
+      65535,
+      202,
+      257,
+      65535,
+      65535,
+      65535,
+      65535,
+      65535,
+      65535,
+      70,
+      24,
+      0,
+      65535
+    ],
+    "RetainedPayload": 5875,
+    "ChargedCopies": 11782,
+    "ChargedSourceWork": 2839083
+  },
+  "AlphabetAfter": {
+    "Count": 259,
+    "Labels": [
+      107,
+      65535,
+      202,
+      257,
+      65535,
+      65535,
+      65535,
+      65535,
+      65535,
+      65535,
+      70,
+      24,
+      0,
+      65535
+    ],
+    "RetainedPayload": 5875,
+    "ChargedCopies": 11782,
+    "ChargedSourceWork": 2839083
+  },
+  "CallerOverwritten": true,
+  "cases": [
+    {
+      "name": "raw-one-large-no-square",
+      "data": {
+        "Version": 1,
+        "AlphabetCount": 259,
+        "SpecialLabels": [
+          107,
+          65535,
+          202,
+          257,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          70,
+          24,
+          0,
+          65535
+        ],
+        "Header": {
+          "Version": 1,
+          "WorkWords": 1,
+          "HeapCapacity": 10,
+          "Descriptor108Count": 0,
+          "TemporaryHeapCount": 0,
+          "ResultSlot16Count": 0,
+          "Hypothesis24Count": 0,
+          "FreeSlotCount": 0,
+          "PositiveDescriptor8Count": 0,
+          "Positive1390Count": 0,
+          "SegmentCount": 1,
+          "ChargedPayloadBytes": 182,
+          "ChargedCopyBytes": 296,
+          "ChargedStructuralWork": 898,
+          "HasFirstRequest": false,
+          "HasCandidateAuthority": false
+        },
+        "ProfileRetainedPayload": 5875,
+        "AdditionalPayload": 182,
+        "AdditionalCopies": 226,
+        "AdditionalSourceWork": 105755,
+        "KnownRequestNumericBytes": 17,
+        "OpaqueRequestBytes": 7,
+        "HasPreparedFirstReceiver": false,
+        "HasCandidateAuthority": false
+      }
+    },
+    {
+      "name": "raw-two",
+      "data": {
+        "Version": 1,
+        "AlphabetCount": 259,
+        "SpecialLabels": [
+          107,
+          65535,
+          202,
+          257,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          70,
+          24,
+          0,
+          65535
+        ],
+        "Header": {
+          "Version": 1,
+          "WorkWords": 1,
+          "HeapCapacity": 10,
+          "Descriptor108Count": 0,
+          "TemporaryHeapCount": 0,
+          "ResultSlot16Count": 0,
+          "Hypothesis24Count": 0,
+          "FreeSlotCount": 0,
+          "PositiveDescriptor8Count": 0,
+          "Positive1390Count": 0,
+          "SegmentCount": 1,
+          "ChargedPayloadBytes": 182,
+          "ChargedCopyBytes": 296,
+          "ChargedStructuralWork": 898,
+          "HasFirstRequest": false,
+          "HasCandidateAuthority": false
+        },
+        "ProfileRetainedPayload": 5875,
+        "AdditionalPayload": 182,
+        "AdditionalCopies": 226,
+        "AdditionalSourceWork": 105755,
+        "KnownRequestNumericBytes": 17,
+        "OpaqueRequestBytes": 7,
+        "HasPreparedFirstReceiver": false,
+        "HasCandidateAuthority": false
+      }
+    },
+    {
+      "name": "raw-three",
+      "data": {
+        "Version": 1,
+        "AlphabetCount": 259,
+        "SpecialLabels": [
+          107,
+          65535,
+          202,
+          257,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          70,
+          24,
+          0,
+          65535
+        ],
+        "Header": {
+          "Version": 1,
+          "WorkWords": 1,
+          "HeapCapacity": 10,
+          "Descriptor108Count": 0,
+          "TemporaryHeapCount": 0,
+          "ResultSlot16Count": 0,
+          "Hypothesis24Count": 0,
+          "FreeSlotCount": 0,
+          "PositiveDescriptor8Count": 0,
+          "Positive1390Count": 0,
+          "SegmentCount": 1,
+          "ChargedPayloadBytes": 182,
+          "ChargedCopyBytes": 296,
+          "ChargedStructuralWork": 898,
+          "HasFirstRequest": false,
+          "HasCandidateAuthority": false
+        },
+        "ProfileRetainedPayload": 5875,
+        "AdditionalPayload": 182,
+        "AdditionalCopies": 226,
+        "AdditionalSourceWork": 105755,
+        "KnownRequestNumericBytes": 17,
+        "OpaqueRequestBytes": 7,
+        "HasPreparedFirstReceiver": false,
+        "HasCandidateAuthority": false
+      }
+    },
+    {
+      "name": "line-four",
+      "data": {
+        "Version": 1,
+        "AlphabetCount": 259,
+        "SpecialLabels": [
+          107,
+          65535,
+          202,
+          257,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          70,
+          24,
+          0,
+          65535
+        ],
+        "Header": {
+          "Version": 1,
+          "WorkWords": 1,
+          "HeapCapacity": 10,
+          "Descriptor108Count": 0,
+          "TemporaryHeapCount": 0,
+          "ResultSlot16Count": 0,
+          "Hypothesis24Count": 0,
+          "FreeSlotCount": 0,
+          "PositiveDescriptor8Count": 0,
+          "Positive1390Count": 0,
+          "SegmentCount": 1,
+          "ChargedPayloadBytes": 182,
+          "ChargedCopyBytes": 296,
+          "ChargedStructuralWork": 898,
+          "HasFirstRequest": false,
+          "HasCandidateAuthority": false
+        },
+        "ProfileRetainedPayload": 5875,
+        "AdditionalPayload": 182,
+        "AdditionalCopies": 226,
+        "AdditionalSourceWork": 105755,
+        "KnownRequestNumericBytes": 17,
+        "OpaqueRequestBytes": 7,
+        "HasPreparedFirstReceiver": false,
+        "HasCandidateAuthority": false
+      }
+    },
+    {
+      "name": "curved-six",
+      "data": {
+        "Version": 1,
+        "AlphabetCount": 259,
+        "SpecialLabels": [
+          107,
+          65535,
+          202,
+          257,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          70,
+          24,
+          0,
+          65535
+        ],
+        "Header": {
+          "Version": 1,
+          "WorkWords": 1,
+          "HeapCapacity": 10,
+          "Descriptor108Count": 0,
+          "TemporaryHeapCount": 0,
+          "ResultSlot16Count": 0,
+          "Hypothesis24Count": 0,
+          "FreeSlotCount": 0,
+          "PositiveDescriptor8Count": 0,
+          "Positive1390Count": 0,
+          "SegmentCount": 4,
+          "ChargedPayloadBytes": 182,
+          "ChargedCopyBytes": 296,
+          "ChargedStructuralWork": 898,
+          "HasFirstRequest": false,
+          "HasCandidateAuthority": false
+        },
+        "ProfileRetainedPayload": 5875,
+        "AdditionalPayload": 182,
+        "AdditionalCopies": 226,
+        "AdditionalSourceWork": 105755,
+        "KnownRequestNumericBytes": 17,
+        "OpaqueRequestBytes": 7,
+        "HasPreparedFirstReceiver": false,
+        "HasCandidateAuthority": false
+      }
+    },
+    {
+      "name": "corner-five",
+      "data": {
+        "Version": 1,
+        "AlphabetCount": 259,
+        "SpecialLabels": [
+          107,
+          65535,
+          202,
+          257,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          70,
+          24,
+          0,
+          65535
+        ],
+        "Header": {
+          "Version": 1,
+          "WorkWords": 1,
+          "HeapCapacity": 10,
+          "Descriptor108Count": 0,
+          "TemporaryHeapCount": 0,
+          "ResultSlot16Count": 0,
+          "Hypothesis24Count": 0,
+          "FreeSlotCount": 0,
+          "PositiveDescriptor8Count": 0,
+          "Positive1390Count": 0,
+          "SegmentCount": 1,
+          "ChargedPayloadBytes": 182,
+          "ChargedCopyBytes": 296,
+          "ChargedStructuralWork": 898,
+          "HasFirstRequest": false,
+          "HasCandidateAuthority": false
+        },
+        "ProfileRetainedPayload": 5875,
+        "AdditionalPayload": 182,
+        "AdditionalCopies": 226,
+        "AdditionalSourceWork": 105755,
+        "KnownRequestNumericBytes": 17,
+        "OpaqueRequestBytes": 7,
+        "HasPreparedFirstReceiver": false,
+        "HasCandidateAuthority": false
+      }
+    },
+    {
+      "name": "bootstrap-final-index-only",
+      "data": {
+        "Version": 1,
+        "AlphabetCount": 259,
+        "SpecialLabels": [
+          107,
+          65535,
+          202,
+          257,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          70,
+          24,
+          0,
+          65535
+        ],
+        "Header": {
+          "Version": 1,
+          "WorkWords": 1,
+          "HeapCapacity": 10,
+          "Descriptor108Count": 0,
+          "TemporaryHeapCount": 0,
+          "ResultSlot16Count": 0,
+          "Hypothesis24Count": 0,
+          "FreeSlotCount": 0,
+          "PositiveDescriptor8Count": 0,
+          "Positive1390Count": 0,
+          "SegmentCount": 1,
+          "ChargedPayloadBytes": 182,
+          "ChargedCopyBytes": 296,
+          "ChargedStructuralWork": 898,
+          "HasFirstRequest": false,
+          "HasCandidateAuthority": false
+        },
+        "ProfileRetainedPayload": 5875,
+        "AdditionalPayload": 182,
+        "AdditionalCopies": 226,
+        "AdditionalSourceWork": 105755,
+        "KnownRequestNumericBytes": 17,
+        "OpaqueRequestBytes": 7,
+        "HasPreparedFirstReceiver": false,
+        "HasCandidateAuthority": false
+      }
+    },
+    {
+      "name": "expanded-near-square-fallback",
+      "data": {
+        "Version": 1,
+        "AlphabetCount": 259,
+        "SpecialLabels": [
+          107,
+          65535,
+          202,
+          257,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          70,
+          24,
+          0,
+          65535
+        ],
+        "Header": {
+          "Version": 1,
+          "WorkWords": 1,
+          "HeapCapacity": 10,
+          "Descriptor108Count": 0,
+          "TemporaryHeapCount": 0,
+          "ResultSlot16Count": 0,
+          "Hypothesis24Count": 0,
+          "FreeSlotCount": 0,
+          "PositiveDescriptor8Count": 0,
+          "Positive1390Count": 0,
+          "SegmentCount": 2,
+          "ChargedPayloadBytes": 182,
+          "ChargedCopyBytes": 296,
+          "ChargedStructuralWork": 898,
+          "HasFirstRequest": false,
+          "HasCandidateAuthority": false
+        },
+        "ProfileRetainedPayload": 5875,
+        "AdditionalPayload": 182,
+        "AdditionalCopies": 226,
+        "AdditionalSourceWork": 105755,
+        "KnownRequestNumericBytes": 17,
+        "OpaqueRequestBytes": 7,
+        "HasPreparedFirstReceiver": false,
+        "HasCandidateAuthority": false
+      }
+    },
+    {
+      "name": "prior-range-owner-retained",
+      "data": {
+        "Version": 1,
+        "AlphabetCount": 259,
+        "SpecialLabels": [
+          107,
+          65535,
+          202,
+          257,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          70,
+          24,
+          0,
+          65535
+        ],
+        "Header": {
+          "Version": 1,
+          "WorkWords": 1,
+          "HeapCapacity": 10,
+          "Descriptor108Count": 0,
+          "TemporaryHeapCount": 0,
+          "ResultSlot16Count": 0,
+          "Hypothesis24Count": 0,
+          "FreeSlotCount": 0,
+          "PositiveDescriptor8Count": 1,
+          "Positive1390Count": 1,
+          "SegmentCount": 10,
+          "ChargedPayloadBytes": 182,
+          "ChargedCopyBytes": 296,
+          "ChargedStructuralWork": 898,
+          "HasFirstRequest": false,
+          "HasCandidateAuthority": false
+        },
+        "ProfileRetainedPayload": 5875,
+        "AdditionalPayload": 182,
+        "AdditionalCopies": 226,
+        "AdditionalSourceWork": 105755,
+        "KnownRequestNumericBytes": 17,
+        "OpaqueRequestBytes": 7,
+        "HasPreparedFirstReceiver": false,
+        "HasCandidateAuthority": false
+      }
+    },
+    {
+      "name": "multi-strokes",
+      "data": {
+        "Version": 1,
+        "AlphabetCount": 259,
+        "SpecialLabels": [
+          107,
+          65535,
+          202,
+          257,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          70,
+          24,
+          0,
+          65535
+        ],
+        "Header": {
+          "Version": 1,
+          "WorkWords": 1,
+          "HeapCapacity": 10,
+          "Descriptor108Count": 0,
+          "TemporaryHeapCount": 0,
+          "ResultSlot16Count": 0,
+          "Hypothesis24Count": 0,
+          "FreeSlotCount": 0,
+          "PositiveDescriptor8Count": 0,
+          "Positive1390Count": 0,
+          "SegmentCount": 3,
+          "ChargedPayloadBytes": 182,
+          "ChargedCopyBytes": 296,
+          "ChargedStructuralWork": 898,
+          "HasFirstRequest": false,
+          "HasCandidateAuthority": false
+        },
+        "ProfileRetainedPayload": 5875,
+        "AdditionalPayload": 182,
+        "AdditionalCopies": 226,
+        "AdditionalSourceWork": 105755,
+        "KnownRequestNumericBytes": 17,
+        "OpaqueRequestBytes": 7,
+        "HasPreparedFirstReceiver": false,
+        "HasCandidateAuthority": false
+      }
+    },
+    {
+      "name": "raw-8191-smooth",
+      "data": {
+        "Version": 1,
+        "AlphabetCount": 259,
+        "SpecialLabels": [
+          107,
+          65535,
+          202,
+          257,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          70,
+          24,
+          0,
+          65535
+        ],
+        "Header": {
+          "Version": 1,
+          "WorkWords": 1,
+          "HeapCapacity": 10,
+          "Descriptor108Count": 0,
+          "TemporaryHeapCount": 0,
+          "ResultSlot16Count": 0,
+          "Hypothesis24Count": 0,
+          "FreeSlotCount": 0,
+          "PositiveDescriptor8Count": 0,
+          "Positive1390Count": 0,
+          "SegmentCount": 1,
+          "ChargedPayloadBytes": 182,
+          "ChargedCopyBytes": 296,
+          "ChargedStructuralWork": 898,
+          "HasFirstRequest": false,
+          "HasCandidateAuthority": false
+        },
+        "ProfileRetainedPayload": 5875,
+        "AdditionalPayload": 182,
+        "AdditionalCopies": 226,
+        "AdditionalSourceWork": 105755,
+        "KnownRequestNumericBytes": 17,
+        "OpaqueRequestBytes": 7,
+        "HasPreparedFirstReceiver": false,
+        "HasCandidateAuthority": false
+      }
+    },
+    {
+      "name": "raw-8192-smooth",
+      "data": {
+        "Version": 1,
+        "AlphabetCount": 259,
+        "SpecialLabels": [
+          107,
+          65535,
+          202,
+          257,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          70,
+          24,
+          0,
+          65535
+        ],
+        "Header": {
+          "Version": 1,
+          "WorkWords": 1,
+          "HeapCapacity": 10,
+          "Descriptor108Count": 0,
+          "TemporaryHeapCount": 0,
+          "ResultSlot16Count": 0,
+          "Hypothesis24Count": 0,
+          "FreeSlotCount": 0,
+          "PositiveDescriptor8Count": 0,
+          "Positive1390Count": 0,
+          "SegmentCount": 1,
+          "ChargedPayloadBytes": 182,
+          "ChargedCopyBytes": 296,
+          "ChargedStructuralWork": 898,
+          "HasFirstRequest": false,
+          "HasCandidateAuthority": false
+        },
+        "ProfileRetainedPayload": 5875,
+        "AdditionalPayload": 182,
+        "AdditionalCopies": 226,
+        "AdditionalSourceWork": 105755,
+        "KnownRequestNumericBytes": 17,
+        "OpaqueRequestBytes": 7,
+        "HasPreparedFirstReceiver": false,
+        "HasCandidateAuthority": false
+      }
+    },
+    {
+      "name": "raw-8193-passthrough",
+      "data": {
+        "Version": 1,
+        "AlphabetCount": 259,
+        "SpecialLabels": [
+          107,
+          65535,
+          202,
+          257,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          70,
+          24,
+          0,
+          65535
+        ],
+        "Header": {
+          "Version": 1,
+          "WorkWords": 58,
+          "HeapCapacity": 10,
+          "Descriptor108Count": 0,
+          "TemporaryHeapCount": 0,
+          "ResultSlot16Count": 0,
+          "Hypothesis24Count": 0,
+          "FreeSlotCount": 0,
+          "PositiveDescriptor8Count": 0,
+          "Positive1390Count": 0,
+          "SegmentCount": 1845,
+          "ChargedPayloadBytes": 182,
+          "ChargedCopyBytes": 296,
+          "ChargedStructuralWork": 898,
+          "HasFirstRequest": false,
+          "HasCandidateAuthority": false
+        },
+        "ProfileRetainedPayload": 5875,
+        "AdditionalPayload": 182,
+        "AdditionalCopies": 226,
+        "AdditionalSourceWork": 105755,
+        "KnownRequestNumericBytes": 17,
+        "OpaqueRequestBytes": 7,
+        "HasPreparedFirstReceiver": false,
+        "HasCandidateAuthority": false
+      }
+    },
+    {
+      "name": "raw-16384-passthrough",
+      "data": {
+        "Version": 1,
+        "AlphabetCount": 259,
+        "SpecialLabels": [
+          107,
+          65535,
+          202,
+          257,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          70,
+          24,
+          0,
+          65535
+        ],
+        "Header": {
+          "Version": 1,
+          "WorkWords": 116,
+          "HeapCapacity": 10,
+          "Descriptor108Count": 0,
+          "TemporaryHeapCount": 0,
+          "ResultSlot16Count": 0,
+          "Hypothesis24Count": 0,
+          "FreeSlotCount": 0,
+          "PositiveDescriptor8Count": 0,
+          "Positive1390Count": 0,
+          "SegmentCount": 3689,
+          "ChargedPayloadBytes": 182,
+          "ChargedCopyBytes": 296,
+          "ChargedStructuralWork": 898,
+          "HasFirstRequest": false,
+          "HasCandidateAuthority": false
+        },
+        "ProfileRetainedPayload": 5875,
+        "AdditionalPayload": 182,
+        "AdditionalCopies": 226,
+        "AdditionalSourceWork": 105755,
+        "KnownRequestNumericBytes": 17,
+        "OpaqueRequestBytes": 7,
+        "HasPreparedFirstReceiver": false,
+        "HasCandidateAuthority": false
+      }
+    }
+  ],
+  "guards": [
+    {
+      "Name": "profile-pre-cancel",
+      "Type": "System.OperationCanceledException",
+      "Param": null,
+      "TokenMatches": true
+    },
+    {
+      "Name": "profile-null-span",
+      "Type": "System.ArgumentException",
+      "Param": "resource",
+      "TokenMatches": null
+    },
+    {
+      "Name": "profile-truncated",
+      "Type": "System.ArgumentException",
+      "Param": "resource",
+      "TokenMatches": null
+    },
+    {
+      "Name": "profile-hash-refusal",
+      "Type": "System.IO.InvalidDataException",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "caller-A5-overwrite-retained",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "special-index-negative",
+      "Type": "System.ArgumentOutOfRangeException",
+      "Param": "ordinal",
+      "TokenMatches": null
+    },
+    {
+      "Name": "special-index-past",
+      "Type": "System.ArgumentOutOfRangeException",
+      "Param": "ordinal",
+      "TokenMatches": null
+    },
+    {
+      "Name": "source-pre-cancel",
+      "Type": "System.OperationCanceledException",
+      "Param": null,
+      "TokenMatches": true
+    },
+    {
+      "Name": "source-null",
+      "Type": "System.ArgumentNullException",
+      "Param": "original",
+      "TokenMatches": null
+    },
+    {
+      "Name": "version-raw-one-large-no-square",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "count-labels-raw-one-large-no-square",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "request-opacity-raw-one-large-no-square",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "ledger-raw-one-large-no-square",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "no-FIRST-raw-one-large-no-square",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "header-W-raw-one-large-no-square",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "version-raw-two",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "count-labels-raw-two",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "request-opacity-raw-two",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "ledger-raw-two",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "no-FIRST-raw-two",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "header-W-raw-two",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "version-raw-three",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "count-labels-raw-three",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "request-opacity-raw-three",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "ledger-raw-three",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "no-FIRST-raw-three",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "header-W-raw-three",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "version-line-four",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "count-labels-line-four",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "request-opacity-line-four",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "ledger-line-four",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "no-FIRST-line-four",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "header-W-line-four",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "version-curved-six",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "count-labels-curved-six",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "request-opacity-curved-six",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "ledger-curved-six",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "no-FIRST-curved-six",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "header-W-curved-six",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "version-corner-five",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "count-labels-corner-five",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "request-opacity-corner-five",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "ledger-corner-five",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "no-FIRST-corner-five",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "header-W-corner-five",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "version-bootstrap-final-index-only",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "count-labels-bootstrap-final-index-only",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "request-opacity-bootstrap-final-index-only",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "ledger-bootstrap-final-index-only",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "no-FIRST-bootstrap-final-index-only",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "header-W-bootstrap-final-index-only",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "version-expanded-near-square-fallback",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "count-labels-expanded-near-square-fallback",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "request-opacity-expanded-near-square-fallback",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "ledger-expanded-near-square-fallback",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "no-FIRST-expanded-near-square-fallback",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "header-W-expanded-near-square-fallback",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "version-prior-range-owner-retained",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "count-labels-prior-range-owner-retained",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "request-opacity-prior-range-owner-retained",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "ledger-prior-range-owner-retained",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "no-FIRST-prior-range-owner-retained",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "header-W-prior-range-owner-retained",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "version-multi-strokes",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "count-labels-multi-strokes",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "request-opacity-multi-strokes",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "ledger-multi-strokes",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "no-FIRST-multi-strokes",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "header-W-multi-strokes",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "version-raw-8191-smooth",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "count-labels-raw-8191-smooth",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "request-opacity-raw-8191-smooth",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "ledger-raw-8191-smooth",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "no-FIRST-raw-8191-smooth",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "header-W-raw-8191-smooth",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "version-raw-8192-smooth",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "count-labels-raw-8192-smooth",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "request-opacity-raw-8192-smooth",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "ledger-raw-8192-smooth",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "no-FIRST-raw-8192-smooth",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "header-W-raw-8192-smooth",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "version-raw-8193-passthrough",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "count-labels-raw-8193-passthrough",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "request-opacity-raw-8193-passthrough",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "ledger-raw-8193-passthrough",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "no-FIRST-raw-8193-passthrough",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "header-W-raw-8193-passthrough",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "version-raw-16384-passthrough",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "count-labels-raw-16384-passthrough",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "request-opacity-raw-16384-passthrough",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "ledger-raw-16384-passthrough",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "no-FIRST-raw-16384-passthrough",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    },
+    {
+      "Name": "header-W-raw-16384-passthrough",
+      "Type": "assertion",
+      "Param": null,
+      "TokenMatches": null
+    }
+  ],
+  "successfulProfiles": 1,
+  "hashRejectedProfiles": 1,
+  "owningSourceCalls": 14,
+  "preentrySourceRequests": 2,
+  "firstCalls": 0,
+  "modelEvaluations": 0,
+  "processedGraphAuthority": false,
+  "matcherRequestAuthority": false,
+  "maximumCaptureBytes": 131072
+}

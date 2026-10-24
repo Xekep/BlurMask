@@ -7,6 +7,10 @@ oracle=importlib.util.module_from_spec(spec);spec.loader.exec_module(oracle)
 def main():
  p=argparse.ArgumentParser(description=__doc__);p.add_argument('root',type=Path);p.add_argument('capture',type=Path);p.add_argument('report',type=Path);p.add_argument('--selftest',action='store_true');a=p.parse_args()
  assert not a.report.exists()
+ # AL is an exact authenticated semantic addition; old capture/raw oracle unchanged.
+ contractPath=a.root/'tools/LegacyMathAkFirstAlphabet.Probe/source_contract.py'
+ spec=importlib.util.spec_from_file_location('first276_al_source_contract',contractPath)
+ contract=importlib.util.module_from_spec(spec);spec.loader.exec_module(contract);contract.authenticate(a.root)
  pins=json.loads((D/'source-pins.json').read_text('utf-8'))
  for name,sha in pins.items():assert hashlib.sha256((a.root/'src/InkRecognition'/name).read_bytes().replace(b'\r\n',b'\n')).hexdigest()==sha,name
  raw=(a.root/'models/math/math-ak.res').read_bytes();b=a.capture.read_bytes();assert len(b)<=262144
