@@ -220,3 +220,24 @@ not process RSS. No neural or vendor execution occurred. Graph construction and
 actual FIRST276 request issuance remain subsequent stages. Evidence:
 `root-math13a2-monotone-owning-20261024` (capture SHA256
 `82e35c3398885f3b07d6d834dff5331e1044df03b4673a1b937cf1bd051dd64c`).
+
+The sampler source, fresh diagnostic and portable independent oracle are now
+integrated. Root current-main library/probe and app builds pass without warnings
+or errors; canonical DATA auditing reproduces the original report byte-exact.
+The three-OS source workflow retains its five prior stages and adds the sampler
+as a sixth stage. Its new cross-platform results are not yet established.
+
+Source publication chronology also now has a bounded producer readset. One
+changed-helper owning pass on the same original input completed in4.349s after
+945 pin checks, CPU2/affinity3, .NET10.0.12 and45s watchdog. It exported379 actual
+allocated groups/615 stored ranges and retained association/chain receipts.
+An exact precharged payload delta714884 gives1755186/4194304 diagnostic bytes.
+After removing only the new readset and subtracting that derived delta, every
+prior `0dd` field/type/value matches; acoustic evaluations remain374. Neither
+extra word boundaries nor handwriting quality are inferred. Independent
+association replay and any missing scorer-input channels remain subsequent work.
+The initial launcher process failed at the fresh-output-directory guard before
+source model/NN entry; it is preserved separately. The corrected launcher made
+one genuine changed-source invocation. Evidence:
+`root-source-producer-readset-actual-v2-20261024` (capture SHA256
+`000534d7d3e50dd405743a7f1449abb92eae371ecfc995f5f58f5e54664eb17f`).

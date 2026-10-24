@@ -1,0 +1,61 @@
+{
+  "hashDomain": "Exact bytes with CRLF replaced by LF only; no other whitespace normalization",
+  "files": [
+    {
+      "relative": "tools/LegacyCursiveBaseline.Probe/reference_controls.py",
+      "lfSha256": "e5e16bf4d731615d816347eb02d7176dce0fd12e2208da9c7a7cd5561538f193"
+    },
+    {
+      "relative": "tools/LegacyCursiveFilters.Probe/reference_controls.py",
+      "lfSha256": "dd157c6ecd6419a798ebec6d5b36a6cb92892574755dd68b343711a1451c84b3"
+    },
+    {
+      "relative": "tools/LegacyCursiveHorizontal.Probe/reference_controls.py",
+      "lfSha256": "8e3724fbc8db1679263e9193c7fe2a5b4a4bbc164ef69b979d5893fed62afa37"
+    },
+    {
+      "relative": "tools/LegacyCursiveLimit.Probe/reference_controls.py",
+      "lfSha256": "47010d0a9eff9d9327529ebe76fbecb0f76c0ae75b4e74b7532ec5a7ab163051"
+    },
+    {
+      "relative": "tools/LegacyCursiveLoops.Probe/reference_controls.py",
+      "lfSha256": "394dee160086f7b952191100de4f4f8d3a2ad559f7e2f79fbb86c57e688393a8"
+    },
+    {
+      "relative": "tools/LegacyCursiveOverride.Probe/reference_controls.py",
+      "lfSha256": "bf3c7c5547974ded2b6bac82592f1067759b7964ce0474ab4d2e7055107fbcec"
+    },
+    {
+      "relative": "tools/LegacyCursiveProducer.Probe/reference_controls.py",
+      "lfSha256": "3d54abcc2aac68e82bb8fbbdb2f9b9d484bb52d2c69cbd5fbaa9b1f9ea2de8a3"
+    },
+    {
+      "relative": "tools/LegacyMathAkOperator13A0.Probe/fixtures.json",
+      "lfSha256": "ce3505ffeb0014a62eacde7c2d4841a23dda5f704fb127820fac4c937134eacb"
+    },
+    {
+      "relative": "tools/LegacyMathAkOperator13A0.Probe/reference_13a0.py",
+      "lfSha256": "3da1fd850621d7e9092d76326b55cc03d51b9d92e9fc6c93882e2c043efed6fa"
+    },
+    {
+      "relative": "tools/LegacyMathAkOperator13B6.Probe/reference_connected.py",
+      "lfSha256": "bf23a1f2b2fc3162ad4a5501aec61dcd5dffe539a142778749d607598df752db"
+    },
+    {
+      "relative": "tools/LegacyMathAkOperator13B6Geometry.Probe/reference_geometry.py",
+      "lfSha256": "b2a632458fd161565c63844fa9eada958ada5b24ecaaf551a20d8ac78b12bad6"
+    },
+    {
+      "relative": "tools/LegacyMathAkProcessedPrefix.Probe/reference_bootstrap.py",
+      "lfSha256": "b879c0204031276a8a213b141f3db424eba70a8edd170d7daecb27dd7bb9f3ce"
+    },
+    {
+      "relative": "tools/LegacyMathAkProcessedPrefix.Probe/reference_prefix.py",
+      "lfSha256": "61fd185b05adb330bc933cddfe8b092ab30ad73c0b1dd335f9d75181a67447ab"
+    },
+    {
+      "relative": "tools/LegacyOrientationSmoothing.Probe/reference_controls.py",
+      "lfSha256": "5831b5717d30ba868440797de630d8f624f0a76e46ff2d56a58cfecda126c866"
+    }
+  ]
+}

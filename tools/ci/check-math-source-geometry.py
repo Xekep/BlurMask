@@ -31,18 +31,20 @@ def run(stage, command, timeout):
 
 projects = ["LegacyMathAkProcessedPrefix.Probe", "LegacyMathAkOriginalInput.Probe",
             "LegacyMathAkOperator13B6Geometry.Probe", "LegacyMathAkOperator13B6.Probe",
-            "LegacyMathAkOperator13A0.Probe"]
+            "LegacyMathAkOperator13A0.Probe", "LegacyMathAkOperator13A2.Probe"]
 for name in projects:
     project = root / "tools" / name
     run(name + "-build", ["dotnet", "build", str(project / (name + ".csproj")),
         "-c", "Release", "--artifacts-path", str(artifacts), "--disable-build-servers",
         "-p:UseSharedCompilation=false", "-m:1"], 360)
     fixture = root / "tools" / projects[0] / "fixtures.json" if name == projects[1] else project / "fixtures.json"
+    if name == "LegacyMathAkOperator13A2.Probe":
+        fixture = root / "tools" / "LegacyMathAkOperator13A0.Probe" / "fixtures.json"
     capture, report = output / (name + ".json"), output / (name + "-audit.json")
     run(name + "-scalar", ["dotnet", str(artifacts / "bin" / name / "release" / (name + ".dll")),
         str(root / "models"), str(fixture), str(capture)], 45)
     oracle_args = [str(root), str(capture), str(report)]
-    if name == projects[-1]:
+    if name in ["LegacyMathAkOperator13A0.Probe", "LegacyMathAkOperator13A2.Probe"]:
         oracle_args = [str(root), str(root / "models"), str(fixture), str(capture), str(report)]
     run(name + "-oracle", [sys.executable, "-I", "-B", str(project / "audit_output.py"), *oracle_args], 45)
-print("PASS five scalar geometry stages and independent oracles; no inference")
+print("PASS six scalar geometry stages and independent oracles; no inference")

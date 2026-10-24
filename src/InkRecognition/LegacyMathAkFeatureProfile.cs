@@ -15,9 +15,10 @@ public sealed class LegacyMathAkFeatureProfile
     private readonly short[][] minimum, maximum;
     private readonly ProgramDescriptor program;
     internal LegacyMathAkOriginalSmoothingPolicy OriginalSmoothing { get; }
+    internal LegacyMathAkSource13A2Policy Source13A2Policy { get; }
     public LegacyMathAkShapePrototypes ShapePrototypes { get; }
-    private LegacyMathAkFeatureProfile(short[][] minimum, short[][] maximum, ProgramDescriptor program, LegacyMathAkShapePrototypes shapes, LegacyMathAkOriginalSmoothingPolicy smoothing)
-    { this.minimum = minimum; this.maximum = maximum; this.program = program; ShapePrototypes = shapes; OriginalSmoothing = smoothing; }
+    private LegacyMathAkFeatureProfile(short[][] minimum, short[][] maximum, ProgramDescriptor program, LegacyMathAkShapePrototypes shapes, LegacyMathAkOriginalSmoothingPolicy smoothing, LegacyMathAkSource13A2Policy sampler)
+    { this.minimum = minimum; this.maximum = maximum; this.program = program; ShapePrototypes = shapes; OriginalSmoothing = smoothing; Source13A2Policy = sampler; }
     public int CalibrationPayloadBytes => 4772;
     public string SourceFingerprint => LegacyMathMixed107RawResource.ResourceFingerprint;
     public ProgramDescriptor Program => program;
@@ -98,9 +99,10 @@ public sealed class LegacyMathAkFeatureProfile
                 }
             }
             var shapes = LegacyMathAkShapePrototypes.ReadAuthenticated(captured, token);
+            var sampler = LegacyMathAkSource13A2Policy.ReadAuthenticated(captured);
             Boundary("calibrated", observer, token);
             Boundary("publish", observer, token);
-            return new(minimum, maximum, program, shapes, smoothing);
+            return new(minimum, maximum, program, shapes, smoothing, sampler);
         }
         finally { CryptographicOperations.ZeroMemory(captured); }
     }
