@@ -54,6 +54,14 @@ public sealed partial class LegacyEnglish119MainLocalCandidates
         {Require(token);if(first<0||last<first)throw new NotSupportedException("Forward owned span required.");return source.PreflightGraphWordForward((uint)first,(uint)last,token);}
         internal LegacyOrdinaryGraphSourceRanges.GraphWordDiagnosticInputs CopyDiagnosticInputs(CancellationToken token)
         {Require(token);var data=source.CopyGraphWordDiagnosticInputs(token);Require(token);return data;}
+        //Direct1AA470 ordinary branch: preserve the same canonical source arc
+        //and call normal1A9AE0 mode0. Higher originalLast/overlay is not guessed.
+        internal LegacyOrdinaryGraphSourceReference[] ReadOrdinary140(int node,ushort arc,CancellationToken token)
+        {
+            Require(token);
+            var result=source.ResolveCandidateWithResiduals(node,arc,token);
+            Require(token);return result;
+        }
         internal LegacyOrdinaryGraphSourceReference[] ReadMode2(int first,int last,CancellationToken token)
         {
             Require(token);

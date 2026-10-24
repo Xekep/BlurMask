@@ -207,6 +207,12 @@ jobs:
           dotnet run --project tools/LegacyEnglishTopScalars.Probe -c Release -- .artifacts/en-top-scalars-prepared.json
           python -I -B tools/LegacyEnglishTopScalars.Probe/audit_output.py .artifacts/en-top-scalars-prepared.json .artifacts/en-top-scalars-prepared-audit.json --tamper
           dotnet build tools/LegacyEnglishTop.ActualEntry -c Release
+      - name: English ordinary glyph refresh and selection (prepared only)
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyEnglishGlyphRefresh.Probe -c Release -- .artifacts/en-glyph-refresh-prepared.json
+          python -I -B tools/LegacyEnglishGlyphRefresh.Probe/audit_output.py .artifacts/en-glyph-refresh-prepared.json
+          dotnet build tools/LegacyEnglishGlyphUtf8.ActualEntry -c Release
       - name: Original Math AK source geometry and independent rounding controls
         shell: bash
         run: |

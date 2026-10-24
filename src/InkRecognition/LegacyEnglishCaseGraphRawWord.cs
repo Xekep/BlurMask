@@ -100,6 +100,8 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         if(graphTopRequested)PrepareGraphTop(stage,publisher,pool,winner,token);
         if(graphWordSourceRequested)CompleteGraphWordSource(stage,published,pool,publisher,ordinary,operations,token);
         if(graphTopRequested)graphTopOwner!.Complete(token);
+        if(graphGlyphChoicesRequested)CompleteGraphGlyphChoices(stage,published,publisher,pool,ordinary,token);
+        if(graphGlyphNormalization is not null)CompleteGraphGlyphUtf8(stage,pool,token);
         var words=new List<GraphPlainWordData>();
         for(var node=publisher.Head;node is not null;node=node.Next)
         {token.ThrowIfCancellationRequested();if(words.Count==4096)throw new InvalidDataException("Bounded published words required.");
