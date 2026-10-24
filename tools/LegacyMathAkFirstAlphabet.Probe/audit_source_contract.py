@@ -18,5 +18,8 @@ refuse('old-profile-without-AL','LegacyMathAkFeatureProfile.cs',m.restore_profil
 refuse('old-header-without-partial','LegacyMathAkFreshCommonWorkspace.cs',m.restore_header)
 refuse('new-prefix-friend-changed','LegacyMathAkFirst276Alphabet.cs',lambda b:b.replace(b'LegacyMathAkFirstAlphabet.Probe',b'Foreign.Probe',1))
 refuse('false-FIRST-status-changed','LegacyMathAkFirst276SourceBinding.cs',lambda b:b.replace(b'17,7,false,false',b'17,7,true,false',1))
-assert len(controls)==9
-a.report.write_bytes((json.dumps(dict(PASS=True,scope='Pure exact source addition/refusal controls; no profile/source/NN execution',sourcePins=5,controls=controls,profileCalls=0,sourceCalls=0,NN=0),indent=2)+chr(10)).encode('utf-8'));print('PASS9 exact source-contract refusals')
+refuse('pre-model-profile','LegacyMathAkFeatureProfile.cs',m.restore_model_profile)
+refuse('pre-model-binding','LegacyMathAkFirst276SourceBinding.cs',m.restore_model_binding)
+refuse('model-bank-guard-changed','LegacyMathAkFirst276ModelStorage.cs',lambda b:b.replace(b'bank is<0 or>2',b'bank is<0 or>3',1))
+assert len(controls)==13
+a.report.write_bytes((json.dumps(dict(PASS=True,scope='Pure exact source addition/refusal controls; no profile/source/NN execution',sourcePins=6,controls=controls,profileCalls=0,sourceCalls=0,NN=0),indent=2)+chr(10)).encode('utf-8'));print('PASS13 exact source-contract refusals')

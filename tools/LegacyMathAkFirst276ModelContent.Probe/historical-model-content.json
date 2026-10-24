@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "resourceSHA": "8c8d9c8ce93aa74820f30a592d77ec3fe382c930a72063d5ced48629f3c167c1",
+  "resourceBytes": 3685881,
+  "profileSuccesses": 1,
+  "profileHashRefusals": 1,
+  "callerOverwriteByte": 165,
+  "sameProfileAcrossPasses": true,
+  "before": [
+    "fcc43e726ef7475ccf872f2ca08d7b2b65b04b0dcd4f50c26d26af0239627bf4",
+    "3e5b739cff6c482e332dcdbb8f8d95a2e75a6286001839e210b44402a1519195",
+    "9515510a22d849dc46015f9a76ad9484036193006fb495e0dcccc66245f011d1"
+  ],
+  "after": [
+    "fcc43e726ef7475ccf872f2ca08d7b2b65b04b0dcd4f50c26d26af0239627bf4",
+    "3e5b739cff6c482e332dcdbb8f8d95a2e75a6286001839e210b44402a1519195",
+    "9515510a22d849dc46015f9a76ad9484036193006fb495e0dcccc66245f011d1"
+  ],
+  "scalarCalls": 222637,
+  "wireBytes": 337828,
+  "knownLoopArrayPayloadBytes": 1360,
+  "callerOverwriteBytes": 3685881,
+  "maximumCaptureBytes": 8192,
+  "calibrationPayloadBytes": 4772,
+  "hasCandidateAuthority": false,
+  "guards": [
+    {
+      "Name": "prepare-pre-cancel",
+      "Type": "OperationCanceledException",
+      "Parameter": null,
+      "TokenMatched": true
+    },
+    {
+      "Name": "empty-resource",
+      "Type": "ArgumentException",
+      "Parameter": "resource",
+      "TokenMatched": false
+    },
+    {
+      "Name": "negative-index-0",
+      "Type": "ArgumentOutOfRangeException",
+      "Parameter": "index",
+      "TokenMatched": false
+    },
+    {
+      "Name": "past-end-index-0",
+      "Type": "ArgumentOutOfRangeException",
+      "Parameter": "index",
+      "TokenMatched": false
+    },
+    {
+      "Name": "negative-index-1",
+      "Type": "ArgumentOutOfRangeException",
+      "Parameter": "index",
+      "TokenMatched": false
+    },
+    {
+      "Name": "past-end-index-1",
+      "Type": "ArgumentOutOfRangeException",
+      "Parameter": "index",
+      "TokenMatched": false
+    },
+    {
+      "Name": "negative-index-2",
+      "Type": "ArgumentOutOfRangeException",
+      "Parameter": "index",
+      "TokenMatched": false
+    },
+    {
+      "Name": "past-end-index-2",
+      "Type": "ArgumentOutOfRangeException",
+      "Parameter": "index",
+      "TokenMatched": false
+    },
+    {
+      "Name": "negative-bank",
+      "Type": "ArgumentOutOfRangeException",
+      "Parameter": "bank",
+      "TokenMatched": false
+    },
+    {
+      "Name": "past-end-bank",
+      "Type": "ArgumentOutOfRangeException",
+      "Parameter": "bank",
+      "TokenMatched": false
+    },
+    {
+      "Name": "scalar-pre-cancel",
+      "Type": "OperationCanceledException",
+      "Parameter": null,
+      "TokenMatched": true
+    },
+    {
+      "Name": "wiped-resource-hash",
+      "Type": "InvalidDataException",
+      "Parameter": null,
+      "TokenMatched": false
+    }
+  ],
+  "geometryCalls": 0,
+  "sourceCalls": 0,
+  "firstCalls": 0,
+  "NN": 0
+}

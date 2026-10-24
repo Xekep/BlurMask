@@ -57,7 +57,7 @@ internal sealed partial class LegacyMathAkOriginalInputContext
             return First276SourceBinding.ReadInside(owner,this,profile,sampled!,segments!,words,token);
         }
     }
-    private sealed class First276SourceBinding
+    private sealed partial class First276SourceBinding
     {
         //Five refs40 + embedded typed operand ref8 + four I32s16 +three I64s24.
         internal const long BindingPayloadBytes=88;
