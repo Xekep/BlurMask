@@ -97,7 +97,9 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             outputs[i]=new(flush.Current,flush.Filtered,flush.Protocol,flush.Rows.Length/72,bytes,flush.Origins.ToArray(),
                 outcome.CompletedWord,outcome.Span,outcome.Succeeded,outcome.Published?.WordIndex);
         }
+        if(graphTopRequested)PrepareGraphTop(stage,publisher,pool,winner,token);
         if(graphWordSourceRequested)CompleteGraphWordSource(stage,published,pool,publisher,ordinary,operations,token);
+        if(graphTopRequested)graphTopOwner!.Complete(token);
         var words=new List<GraphPlainWordData>();
         for(var node=publisher.Head;node is not null;node=node.Next)
         {token.ThrowIfCancellationRequested();if(words.Count==4096)throw new InvalidDataException("Bounded published words required.");

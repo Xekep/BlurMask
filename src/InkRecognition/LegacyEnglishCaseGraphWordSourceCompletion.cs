@@ -186,6 +186,13 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             int First(int n,ushort a){estimate.Request();Require(token,true);return unchecked((int)graph.GetNode(n)[a].StartContextId);}
             int Last(int n,ushort a){estimate.Request();Require(token,true);return unchecked((int)graph.GetNode(n)[a].EndContextId);}
         }
+        internal void RequireCompletedForTop(LegacyNativePlainWordPublisher expectedPublisher,LegacyNativeGlyphRecordPool expectedPool,CancellationToken token)
+        {
+            owner.RequireGraphPublication(stage,token);
+            if(state!=2||!ReferenceEquals(owner.graphWordSourceSession,this)||
+                !ReferenceEquals(publisher,expectedPublisher)||!ReferenceEquals(pool,expectedPool))
+                throw new InvalidOperationException("Same successful source callback required by TOP.");
+        }
         private void RequireSelectedNonCheckbox(LegacyNativePublishedWordNode head,CancellationToken token)
         {
             //Native13D000 enters rewrite only for actual selected single-ref,

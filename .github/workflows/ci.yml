@@ -201,6 +201,12 @@ jobs:
           dotnet run --project tools/LegacyEnglishWordSource.Probe -c Release -- .artifacts/en-word-source-prepared.json
           python -I -B tools/LegacyEnglishWordSource.Probe/audit_output.py .artifacts/en-word-source-prepared.json tools/LegacyMainWordRanking.Probe/audit_output.py tools/LegacyMainSpanScores.Probe/audit_output.py .artifacts/en-word-source-prepared-audit.json
           dotnet build tools/LegacyEnglishWordSource.ActualEntry -c Release
+      - name: English first TOP scalar prepared controls (actual entry build only)
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyEnglishTopScalars.Probe -c Release -- .artifacts/en-top-scalars-prepared.json
+          python -I -B tools/LegacyEnglishTopScalars.Probe/audit_output.py .artifacts/en-top-scalars-prepared.json .artifacts/en-top-scalars-prepared-audit.json --tamper
+          dotnet build tools/LegacyEnglishTop.ActualEntry -c Release
       - name: Original Math AK source geometry and independent rounding controls
         shell: bash
         run: |
