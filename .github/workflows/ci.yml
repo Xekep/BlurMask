@@ -180,6 +180,13 @@ jobs:
           python -I -B tools/LegacyMainPrimaryCompactFlags.Probe/generate_controls.py .artifacts/primary-flags-input.json
           dotnet run --project tools/LegacyMainPrimaryCompactFlags.Probe -c Release -- .artifacts/primary-flags-input.json .artifacts/primary-flags-output.json
           python -I -B tools/LegacyMainPrimaryCompactFlags.Probe/audit_output.py .artifacts/primary-flags-input.json .artifacts/primary-flags-output.json
+      - name: English final compact publication and terminal prepared controls
+        shell: bash
+        run: |
+          python -I -B tools/LegacyEnglishGraphCompact.Probe/generate_controls.py . .artifacts/en-finalcompact-input.json
+          dotnet run --project tools/LegacyEnglishGraphCompact.Probe -c Release -- models/en-US/en_US-ak-cur.lite.res .artifacts/en-finalcompact-input.json .artifacts/en-finalcompact-output.json
+          python -I -B tools/LegacyEnglishGraphCompact.Probe/audit_output.py models/en-US/en_US-ak-cur.lite.res .artifacts/en-finalcompact-input.json .artifacts/en-finalcompact-output.json --tamper
+          dotnet build tools/LegacyEnglishGraphCompact.ActualEntry -c Release
       - name: Original Math AK source geometry and independent rounding controls
         shell: bash
         run: |

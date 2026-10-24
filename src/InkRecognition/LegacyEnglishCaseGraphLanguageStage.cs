@@ -43,6 +43,9 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                 if(!graphLoopActive||GraphLanguageRequired(scope,images.Count,token))RunGraphLanguageFirstOnly(scope,images.Count,categories,token);
                 else SealGraphEmptyLanguage(scope,token);
                 _=CompleteGraphPhase1(scope,scope.Ordinals,token);
+                // Native215DDE207CB0 precedes the following215E92 sourceV80.
+                if(graphFinalCompactRequested&&node==ring.ActualNodeCount-1)
+                {scope.SealCompactPhase();RunGraphFinalCompact(scope,token);}
                 scope.Lease.Pass.Initializer.PlanForAudit.ResetGraphNode(scope,token);
                 graphCompletedNode=LegacyEnglishCaseGraphNodeSnapshot.Capture(scope,token);
             }
@@ -91,6 +94,20 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         {Require();if(acceptedClosed!=1||initializedN<0||initializedN>OriginalCountT||!owner.graphLanguageFirstOnly)throw new InvalidOperationException("Completed canonical FIRST-only helper prefix required.");firstOnlyPatternSealed=1;}
         internal void RequireFirstOnlyPattern()
         {Require();if(firstOnlyPatternSealed!=1||initializedN<0||initializedN>OriginalCountT)throw new NotSupportedException("Canonical accepted FIRST writer-mask provenance has not been sealed.");}
+        private int compactPhaseReady;
+        internal void SealCompactPhase()
+        {
+            RequirePhase1();RequireFirstOnlyPattern();
+            if(!owner.graphFinalCompactRequested||node!=Ring.ActualNodeCount-1||nodeEndReset!=0||compactPhaseReady!=0)
+                throw new InvalidOperationException("One actual LAST phase1 completion before V80 required.");
+            compactPhaseReady=1;
+        }
+        internal void RequireCompactPhase()
+        {
+            RequirePhase1();
+            if(compactPhaseReady!=1||nodeEndReset!=0||!owner.graphFinalCompactRequested||node!=Ring.ActualNodeCount-1)
+                throw new InvalidOperationException("Same sealed LAST phase1 before following V80 required.");
+        }
         internal void RequireCompletedNode()
         {RequirePhase1();if(Volatile.Read(ref nodeEndReset)!=1)throw new InvalidOperationException("Actual pernode endreset must precede detached capture.");}
         internal void ClaimEndReset(LegacyEnglishCaseInitializationPlan plan)

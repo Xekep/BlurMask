@@ -13,8 +13,9 @@ internal static class LegacyPreparedMainCompactReachability
     internal static Result Run(LegacyNativeWordControllerConfiguration configuration,int maximumAtoms,
         int startingNode,int endingNode,Func<int,LegacyMainDirectWordNodeResult> actualSnapshot,
         LegacyNativeDelimiterQuerySource actualReader,ulong contextRoot,Action<CancellationToken> validate,
-        bool configuredSecondary,CancellationToken cancellationToken)
+        bool configuredSecondary,CancellationToken cancellationToken,int maximumPagesPerProbe=int.MaxValue)
     {
+        if(maximumPagesPerProbe<1)throw new ArgumentOutOfRangeException(nameof(maximumPagesPerProbe));
         int primaryLimit = configuration.PrimaryArcLimit230a;
         int lastNode = endingNode;
         //222.VA0/151FF0 ->21B.V30/1A75D0=min(node+1, graph8).
@@ -142,8 +143,11 @@ internal static class LegacyPreparedMainCompactReachability
             request.Request.Flags24 = 0x100;
             request.Request.Flags26 = 0; //Fresh ordinary graph kind0: no special input16 flags.
             request.Request.Skip = 0;
+            int probePages=0;
             while (true)
             {
+                token.ThrowIfCancellationRequested();
+                if(probePages++==maximumPagesPerProbe)throw new NotSupportedException("Explicit publication query-page bound exceeded.");
                 var page = reader.Read(request, token);
                 counters.Calls += page.BackendCalls;
                 if (page.ReturnedCount <= 0) return false;

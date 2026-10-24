@@ -116,3 +116,9 @@ and requires a fresh output path. The successful diagnostic above was run from
 the immutable reviewed build; the portable project is separately compiled.
 CI builds this entry without executing it. It does not accept caller-selected
 expected labels, silently substitute synthetic rows or open the application.
+
+The separate [LAST compact/terminal producer](legacy-english-final-compact.md)
+now continues this same owning FIRST-only graph through compact publication
+and terminal selection before the following native V80 reset. Its observed
+two-node result has been independently checked. It does not yet construct an
+English WORD or provide application transcription.

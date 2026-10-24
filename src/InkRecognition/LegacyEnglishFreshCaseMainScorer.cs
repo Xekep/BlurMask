@@ -2,7 +2,7 @@ namespace InkRecognition;
 
 /// <summary>Actual case-M MAIN costs on the same completed graph. No supplied
 ///vectors, borrowed independent-scorer costs or word/controller authority.</summary>
-public sealed class LegacyEnglishFreshCaseMainScorer
+public sealed partial class LegacyEnglishFreshCaseMainScorer
 {
     private readonly LegacyEnglishMainAcousticInputs inputs;
     private LegacyEnglishMainInkSnapshot ink=null!;

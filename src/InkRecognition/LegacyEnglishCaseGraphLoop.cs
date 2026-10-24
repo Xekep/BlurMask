@@ -4,6 +4,8 @@ using System.Runtime.CompilerServices;
 namespace InkRecognition;
 internal sealed partial class LegacyEnglishCaseNode0Completion
 {
+    private LegacyEnglishCaseNode1Geometry? graphLoopGeometry;
+    private LegacyEnglishCaseInitialSourcePolicy? graphLoopSourcePolicy;
     private bool graphLoopActive;
     private GraphLoopMetrics graphLoopMetrics;
     internal readonly record struct GraphLoopMetrics(int Nodes,int CompletedNodes,long QueryRows,long QueryPages,long ScoringCalls,long AcceptedAllocations,long SelectedD0Rows);
@@ -15,11 +17,12 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
     // One current-node/span owner. Nodes>=50 need native normalization;
     // >=120 also need intermediate publication before physical ring reuse.
     // Those services are not silently omitted from this bounded successor.
-    internal LegacyEnglishCaseGraphNodeSnapshot RunGraphFirstLoop(CancellationToken token=default)
+    internal LegacyEnglishCaseGraphNodeSnapshot RunGraphFirstLoop(CancellationToken token=default)=>RunGraphFirstLoopCore(false,token);
+    private LegacyEnglishCaseGraphNodeSnapshot RunGraphFirstLoopCore(bool finalCompact,CancellationToken token)
     {
         token.ThrowIfCancellationRequested();primary.RequireGraphLoop(this,token);
         if(Interlocked.CompareExchange(ref phase,1,0)!=0)throw new InvalidOperationException("One owning graph run required.");
-        thread=Environment.CurrentManagedThreadId;graphLoopActive=true;
+        thread=Environment.CurrentManagedThreadId;graphLoopActive=true;graphFinalCompactRequested=finalCompact;
         LegacyEnglishFreshCaseMainSource? root=null;
         try
         {
@@ -29,8 +32,9 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             var graph=pass.Initializer.PlanForAudit.BindingForAudit.Graph;
             if(graph.NodeCount is <2 or >49)throw new NotSupportedException("Current graph loop admits2..49 nodes; native50-node normalization and120-slot publication remain separate.");
             var geometry=LegacyEnglishCaseNode1Geometry.Prepare(LegacyEnglishCaseNode1GeometryProfile.Prepare(root.Knowledge,token),token);
-            var categories=geometry.Categories;var contexts=pass.Initializer.PlanForAudit.BindingForAudit.Contexts;
+            graphLoopGeometry=geometry;var categories=geometry.Categories;var contexts=pass.Initializer.PlanForAudit.BindingForAudit.Contexts;
             var sourcePolicy=LegacyEnglishCaseInitialSourcePolicy.Prepare(root.Knowledge,root.NumericOwner,128L*1024*1024,token);
+            graphLoopSourcePolicy=sourcePolicy;
             var scorer=LegacyNativeWordAcousticRequestScorer.ForAlphabet(ReadNode1Thresholds(root.Knowledge),root.Source.Alphabet);
             var cell=new LegacyNativeWordTransitionCostCell(1,0);
             var ordinary=LegacyNativeOrdinaryParentWordCandidates.ForEnglishNode1(geometry,contexts,scorer,cell);
@@ -135,7 +139,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             if(root is not null)root.FaultNode1(this);pending=false;completedBacking=null;pendingReceipt=null;activeStage=null;
             primary.FaultNode0Completion(this);Volatile.Write(ref phase,3);throw;
         }
-        finally{graphLoopActive=false;graphLoopQuery=null;graphLoopLease=null;graphLanguageScope=null;graphControllerValues=null;graphControllerMask=null;graphCompletedNode=null;node1Pass=null;thread=0;}
+        finally{graphLoopSourcePolicy=null;graphLoopGeometry=null;graphLoopActive=false;graphLoopQuery=null;graphLoopLease=null;graphLanguageScope=null;graphControllerValues=null;graphControllerMask=null;graphCompletedNode=null;node1Pass=null;thread=0;}
     }
     internal void RequireGraphLoopSpan(int node,byte span)
     {if(!graphLoopActive||graphLoopNode!=node||graphLoopSpan!=span||Volatile.Read(ref phase)!=1||thread!=Environment.CurrentManagedThreadId)throw new InvalidOperationException("Same active graph loop/node/span required.");}

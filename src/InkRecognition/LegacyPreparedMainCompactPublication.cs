@@ -158,10 +158,9 @@ internal static class LegacyPreparedMainCompactPublication
                 if (!usedArcs[arc]) continue;
                 var current = Score(node, arc);
                 var emitted = new Dictionary<ushort, int>();
-                foreach (var candidate in current.Candidates.Span)
+                foreach (ushort symbol in current.CandidateSymbols.Span)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    ushort symbol = candidate.Symbol;
                     if (symbol == ushort.MaxValue) break;
                     if (reserved.Contains(symbol)) continue;
                     int delta = QuantizedScore(current.ReadNormalizedCandidateWeight(symbol, cancellationToken));
