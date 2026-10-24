@@ -157,3 +157,42 @@ counts are independently recomputed. This does not prove arbitrary topology,
 live authority from DATA or actual multiple-WORD success. No unchanged
 inference retry was performed. Evidence: `root-structured-consumer-actual-20261024`
 and `root-structured-strict-audit-review-20261024`.
+
+## RC17 publication and subsequent isolated work
+
+RC17 is tagged at `ab40b07`, including positioned WORD delivery from `e34a5d6`.
+Release workflow `40087131594` passed all seven jobs and published22 assets at
+2026-10-24T10:52:29Z. Root downloaded the Windows installer and checksum:
+64483279 bytes, SHA256
+`e9494dba64dd38af4e5c566635d0d4ccc32cefc8b2570fe426e9bbd2661e4881`.
+No local installer/desktop launch was performed. Evidence:
+`rc17-published-verification-20261024`.
+
+The separate e34 main CI completed with all native application, installer,
+Wayland, collaboration, CAS and three formula-ABI jobs passing. Three expanded
+Build jobs still fail at the known required219580 INPUT augmentation boundary;
+this is not an all-green main CI. The independent source geometry workflow
+passed all six jobs. Native positioned layout/font checks passed on all three
+desktop platforms; see `positioned-word-delivery.md` for their exact scope.
+
+After the release snapshot, the English all275 WORD/TEXT harness first failed
+on the repeated fixed refresh reservation. That immutable failure is retained.
+Root reviewed the additive same-pool cold/warm allocation successor and narrow
+private CHAR re-entry correction, checked1977 pin records and exact six compiler
+deltas, and ran prepared checks followed by one changed-source owning pass.
+The same fixed original three-point input completed CHAR/WORD/TEXT in1.366s,
+CPU2/affinity3, .NET10.0.12 and45s outer watchdog. Document application and host
+admission were not executed. Independent full WORD/TEXT DATA auditing is still
+pending; neither language quality nor global readiness follows from this run.
+This successor is isolated and excluded from RC17. Evidence:
+`root-english-text-refresh-budget-actual-20261024`.
+
+The private Math13A2 sampler remains isolated and unwired. Root reviewed its
+source and replayed287 source/dependency pins,16 complete numeric routine pairs
+(5284 instructions), six exceptional branch spans and syntactic loop controls.
+An additive reference correction now covers finite Float32 overflow, giving24
+synthetic limiter controls; root also checked its exact46-byte operand witness.
+No owning sampler execution or additional neural request was made. These are
+source/static/PURE checks, not a complete recognizer. Evidence:
+`root-math13a2-final-source-review-20261024` and
+`root-math13a2-finite-overflow-review-20261024`.
