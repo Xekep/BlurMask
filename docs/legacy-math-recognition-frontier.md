@@ -44,8 +44,11 @@ checks. The [source-bound1F numerical network](legacy-math-ak-temporal-network.m
 now evaluates those inputs with exact modular arithmetic and network-local
 probability/cost channels. One controlled actual forward matched the independent
 reference. The [source-bound spatial prefix](legacy-math-ak-spatial-features.md)
-now supplies the selected2F model's204 inputs, independently checked without
-evaluating a model. Three further selected-source feature families and the
+now supplies the selected2F model's204 inputs. The
+[selected2F numerical network](legacy-math-ak-spatial2f-network.md) also matched
+an independent complete integer replay on one fixed actual forward. A
+[shared immutable feature profile](legacy-math-ak-feature-profile.md) now keeps
+all four calibration pairs once for repeated geometry subsets. Three further selected-source feature families and the
 unified AL classifier remain missing. The selected source owns five networks;
 the six-model raw catalog also includes a separate first-vector source.
 The next implementation is that same-source feature/classifier/shortlist

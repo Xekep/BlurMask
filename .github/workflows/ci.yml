@@ -212,6 +212,11 @@ jobs:
         run: |
           dotnet run --project tools/LegacyMathAkSelectedModels.Probe -c Release -- . .artifacts/math-selected-models.json
           python -I -B tools/LegacyMathAkSelectedModels.Probe/audit_output.py . .artifacts/math-selected-models.json
+      - name: Shared mathematical feature profile without inference
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyMathAkFeatureProfile.Probe -c Release -- . .artifacts/math-feature-profile.json
+          python -I -B tools/LegacyMathAkFeatureProfile.Probe/audit_output.py . .artifacts/math-feature-profile.json .artifacts/math-feature-profile-audit.json
       - name: Original Math selected2F synthetic numerical and ownership controls
         shell: bash
         run: |

@@ -132,7 +132,7 @@ public sealed partial class LegacyMathAkSourceGeometry
         Array.Copy(temporal, 210, values, 0, 10);
         for (int i = 0; i < spatial.Length; i++)
         {
-            int minimum = calibrationMinimum[220 + i], range = calibrationMaximum[220 + i] - minimum;
+            int minimum = profile.MinimumAt(0, 220 + i), range = profile.MaximumAt(0, 220 + i) - minimum;
             values[10 + i] = range == 0 ? spatial[i] : unchecked((short)(((spatial[i] - minimum) << 11) / range - 1024));
         }
         values[202] = 1024; values[203] = 1024;

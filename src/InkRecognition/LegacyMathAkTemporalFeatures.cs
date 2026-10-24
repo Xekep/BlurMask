@@ -134,8 +134,8 @@ public sealed partial class LegacyMathAkSourceGeometry
         //three baseline outputs stay zero for the explicit absent-guide branch.
         for (int i = 0; i < 217; i++)
         {
-            int range = calibrationMaximum[i] - calibrationMinimum[i];
-            if (range != 0) features[i] = unchecked((short)(((features[i] - calibrationMinimum[i]) << 11) / range - unit));
+            int range = profile.MaximumAt(0, i) - profile.MinimumAt(0, i);
+            if (range != 0) features[i] = unchecked((short)(((features[i] - profile.MinimumAt(0, i)) << 11) / range - unit));
         }
         //010EA0 actual full-source start/end fields are+1f;212.V90 quantizer10.
         features[220] = unit; features[221] = unit;

@@ -1,6 +1,4 @@
-using System.Buffers.Binary;
 using System.Numerics;
-using System.Security.Cryptography;
 
 namespace InkRecognition;
 
@@ -13,11 +11,11 @@ public sealed partial class LegacyMathAkSourceGeometry
 {
     public const int MaximumStrokes = 64;
     public const int MaximumPoints = 16_384;
-    private const int SourceProgram = 1_005_996;
     private readonly Vector2[][] original;
     private readonly LegacyInkPoint[][] normalized;
     private readonly int[] ends;
-    private readonly short[] calibrationMinimum, calibrationMaximum;
+    private readonly LegacyMathAkFeatureProfile profile;
+    public LegacyMathAkFeatureProfile FeatureProfile => profile;
     public int StrokeCount => original.Length;
     public int PointCount { get; }
     public int NormalizationTarget => 8192;
@@ -28,10 +26,10 @@ public sealed partial class LegacyMathAkSourceGeometry
     public Vector2 OriginalMaximum { get; }
     public float AppliedScale { get; }
     private LegacyMathAkSourceGeometry(Vector2[][] original, LegacyInkPoint[][] normalized,
-        int[] ends, int count, Vector2 minimum, Vector2 maximum, float scale, short[] calibrationMinimum, short[] calibrationMaximum)
+        int[] ends, int count, Vector2 minimum, Vector2 maximum, float scale, LegacyMathAkFeatureProfile profile)
     {
         this.original = original; this.normalized = normalized; this.ends = ends;
-        this.calibrationMinimum = calibrationMinimum; this.calibrationMaximum = calibrationMaximum;
+        this.profile = profile;
         PointCount = count; OriginalMinimum = minimum; OriginalMaximum = maximum; AppliedScale = scale;
     }
 
@@ -42,10 +40,19 @@ public sealed partial class LegacyMathAkSourceGeometry
     /// </summary>
     public static LegacyMathAkSourceGeometry CreateActual(ReadOnlySpan<byte> actualResource,
         IReadOnlyList<Vector2[]> strokes, CancellationToken token = default)
+        => CreateCore(actualResource, null, strokes, token);
+    internal static LegacyMathAkSourceGeometry CreateFromProfile(LegacyMathAkFeatureProfile profile,
+        IReadOnlyList<Vector2[]> strokes, CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(profile);
+        return CreateCore(ReadOnlySpan<byte>.Empty, profile, strokes, token);
+    }
+    private static LegacyMathAkSourceGeometry CreateCore(ReadOnlySpan<byte> actualResource,
+        LegacyMathAkFeatureProfile? existingProfile, IReadOnlyList<Vector2[]> strokes, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(strokes);
         token.ThrowIfCancellationRequested();
-        if (actualResource.Length != LegacyMathMixed107RawResource.ResourceBytes)
+        if (existingProfile is null && actualResource.Length != LegacyMathMixed107RawResource.ResourceBytes)
             throw new ArgumentException("Exact actual Math AK resource required.", nameof(actualResource));
         int strokeCount = strokes.Count;
         if (strokeCount is < 1 or > MaximumStrokes)
@@ -61,78 +68,58 @@ public sealed partial class LegacyMathAkSourceGeometry
                 throw new ArgumentException("Nonempty bounded source strokes required.", nameof(strokes));
             total += row.Length; borrowed[i] = row;
         }
-        byte[] captured = actualResource.ToArray();
-        try
+        //A shared profile skips all resource hashing and calibration decoding.
+        var profile = existingProfile ?? LegacyMathAkFeatureProfile.PrepareActual(actualResource, token);
+        var owned = new Vector2[strokeCount][];
+        var result = new LegacyInkPoint[strokeCount][];
+        var cumulative = new int[strokeCount];
+        Vector2 minimum = new(float.MaxValue), maximum = new(-float.MaxValue);
+        int end = 0;
+        for (int s = 0; s < strokeCount; s++)
         {
             token.ThrowIfCancellationRequested();
-            if (!Convert.ToHexString(SHA256.HashData(captured)).Equals(
-                LegacyMathMixed107RawResource.ResourceFingerprint, StringComparison.OrdinalIgnoreCase))
-                throw new InvalidDataException("Actual Math AK fingerprint required.");
-            token.ThrowIfCancellationRequested();
-            //173F0 reads mode10, mode11, range12 from this same13A5 payload.
-            //Only the actual base-tail program is admitted; no generic defaults.
-            if (captured[SourceProgram] != 1 || captured[SourceProgram + 1] != 1 ||
-                BinaryPrimitives.ReadUInt16LittleEndian(captured.AsSpan(SourceProgram + 2, 2)) != 8192)
-                throw new InvalidDataException("Actual source normalization program differs.");
-            var owned = new Vector2[strokeCount][];
-            var result = new LegacyInkPoint[strokeCount][];
-            var cumulative = new int[strokeCount];
-            Vector2 minimum = new(float.MaxValue), maximum = new(-float.MaxValue);
-            int end = 0;
-            for (int s = 0; s < strokeCount; s++)
+            var row = new Vector2[borrowed[s].Length];
+            for (int i = 0; i < row.Length; i++)
             {
-                token.ThrowIfCancellationRequested();
-                var row = new Vector2[borrowed[s].Length];
-                for (int i = 0; i < row.Length; i++)
-                {
-                    if ((i & 255) == 0) token.ThrowIfCancellationRequested();
-                    Vector2 point = borrowed[s][i];
-                    if (!float.IsFinite(point.X) || !float.IsFinite(point.Y) ||
-                        MathF.Abs(point.X) > 1_000_000_000f || MathF.Abs(point.Y) > 1_000_000_000f)
-                        throw new ArgumentException("Finite bounded source coordinates required.", nameof(strokes));
-                    row[i] = point;
-                    //Literal ordered scalar comparisons, retaining original order.
-                    if (point.X <= minimum.X) minimum.X = point.X;
-                    if (maximum.X < point.X) maximum.X = point.X;
-                    if (point.Y <= minimum.Y) minimum.Y = point.Y;
-                    if (maximum.Y < point.Y) maximum.Y = point.Y;
-                }
-                owned[s] = row; end += row.Length; cumulative[s] = end;
+                if ((i & 255) == 0) token.ThrowIfCancellationRequested();
+                Vector2 point = borrowed[s][i];
+                if (!float.IsFinite(point.X) || !float.IsFinite(point.Y) ||
+                    MathF.Abs(point.X) > 1_000_000_000f || MathF.Abs(point.Y) > 1_000_000_000f)
+                    throw new ArgumentException("Finite bounded source coordinates required.", nameof(strokes));
+                row[i] = point;
+                //Literal ordered scalar comparisons, retaining original order.
+                if (point.X <= minimum.X) minimum.X = point.X;
+                if (maximum.X < point.X) maximum.X = point.X;
+                if (point.Y <= minimum.Y) minimum.Y = point.Y;
+                if (maximum.Y < point.Y) maximum.Y = point.Y;
             }
-            float width = maximum.X - minimum.X, height = maximum.Y - minimum.Y;
-            //Native00FB90 initializes scale1 and only recomputes when BOTH
-            //extents are nonzero. A horizontal/vertical line is not rescaled.
-            float scale = 1f;
-            if (width != 0f && height != 0f)
-            {
-                scale = 8192f / width;
-                float yScale = 8192f / height;
-                if (yScale <= scale) scale = yScale;
-            }
-            if (!float.IsFinite(scale)) throw new NotSupportedException("Source scale outside finite subset.");
-            for (int s = 0; s < strokeCount; s++)
-            {
-                var row = new LegacyInkPoint[owned[s].Length];
-                for (int i = 0; i < row.Length; i++)
-                {
-                    if ((i & 255) == 0) token.ThrowIfCancellationRequested();
-                    float x = (owned[s][i].X - minimum.X) * scale + 0f;
-                    float y = (owned[s][i].Y - minimum.Y) * scale + 0f;
-                    row[i] = new(RoundToSourceShort(x), RoundToSourceShort(y));
-                }
-                result[s] = row;
-            }
-            token.ThrowIfCancellationRequested();
-            var minimum412 = new short[412]; var maximum412 = new short[412];
-            for (int i = 0; i < 412; i++)
-            {
-                minimum412[i] = BinaryPrimitives.ReadInt16LittleEndian(captured.AsSpan(1_006_085 + i * 2, 2));
-                maximum412[i] = BinaryPrimitives.ReadInt16LittleEndian(captured.AsSpan(1_006_909 + i * 2, 2));
-            }
-            token.ThrowIfCancellationRequested();
-            return new(owned, result, cumulative, total, minimum, maximum, scale, minimum412, maximum412);
+            owned[s] = row; end += row.Length; cumulative[s] = end;
         }
-        finally { CryptographicOperations.ZeroMemory(captured); }
+        float width = maximum.X - minimum.X, height = maximum.Y - minimum.Y;
+        //Native00FB90 initializes scale1 and only recomputes when BOTH
+        //extents are nonzero. A horizontal/vertical line is not rescaled.
+        float scale = 1f;
+        if (width != 0f && height != 0f)
+        {
+            scale = 8192f / width;
+            float yScale = 8192f / height;
+            if (yScale <= scale) scale = yScale;
+        }
+        if (!float.IsFinite(scale)) throw new NotSupportedException("Source scale outside finite subset.");
+        for (int s = 0; s < strokeCount; s++)
+        {
+            var row = new LegacyInkPoint[owned[s].Length];
+            for (int i = 0; i < row.Length; i++)
+            {
+                if ((i & 255) == 0) token.ThrowIfCancellationRequested();
+                float x = (owned[s][i].X - minimum.X) * scale + 0f;
+                float y = (owned[s][i].Y - minimum.Y) * scale + 0f;
+                row[i] = new(RoundToSourceShort(x), RoundToSourceShort(y));
+            }
+            result[s] = row;
+        }
+        token.ThrowIfCancellationRequested();
+        return new(owned, result, cumulative, total, minimum, maximum, scale, profile);
     }
     private static short RoundToSourceShort(float value)
     {

@@ -9,9 +9,11 @@ public sealed class LegacyMathAkSelectedModels
     [(1007739,0x1f,222),(1151097,0x2f,204),(1289175,0x3f,279),
      (1459255,0x4f,279),(1629111,0x5f,223)];
     private readonly ModelData[] models;
+    private readonly LegacyMathAkFeatureProfile profile;
+    public LegacyMathAkFeatureProfile FeatureProfile => profile;
     private readonly IReadOnlyList<ModelDescriptor> descriptors;
-    private LegacyMathAkSelectedModels(ModelData[] models, ModelDescriptor[] descriptors)
-    { this.models = models; this.descriptors = Array.AsReadOnly(descriptors); }
+    private LegacyMathAkSelectedModels(ModelData[] models, ModelDescriptor[] descriptors, LegacyMathAkFeatureProfile profile)
+    { this.profile = profile; this.models = models; this.descriptors = Array.AsReadOnly(descriptors); }
     public IReadOnlyList<ModelDescriptor> Models => descriptors;
     public int RetainedWeightBytes => 761370;
     public bool HasCandidateAuthority => false;
@@ -60,8 +62,13 @@ public sealed class LegacyMathAkSelectedModels
             description[i] = new(expected.Start, expected.Kind, expected.Inputs,
                 snapshot.FirstStride, snapshot.SecondStride);
         }
-        token.ThrowIfCancellationRequested(); return new(data, description);
+        //Independently authenticated private startup snapshot, never post-hash
+        //reads from a caller array. Both owners require the exact same fingerprint.
+        var profile = LegacyMathAkFeatureProfile.PrepareActual(resource, token);
+        token.ThrowIfCancellationRequested(); return new(data, description, profile);
     }
+    public LegacyMathAkSourceGeometry CreateGeometry(IReadOnlyList<System.Numerics.Vector2[]> strokes,
+        CancellationToken token = default) => profile.CreateGeometry(strokes, token);
     public LegacyMathAkTemporalNetwork BindTemporal(LegacyMathAkSourceGeometry source,
         CancellationToken token = default)
     {

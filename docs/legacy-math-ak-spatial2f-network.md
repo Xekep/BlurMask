@@ -20,4 +20,22 @@ dotnet LegacyMathAkSpatialNumeric.Probe.dll REPOSITORY FRESH_CAPTURE
 python -I -B tools/LegacyMathAkSpatialNumeric.Probe/audit_output.py CAPTURE FRESH_REPORT
 python -I -B tools/LegacyMathAkSpatialNumeric.Probe/audit_native.py SDK_REPOSITORY FRESH_REPORT
 ```
-Base3350e7b plus the exact frozen SharedFive2813d688 packet are dependencies. This packet contains NEW SpatialNetwork/probe/doc, with additive selected-owner and temporal conversion forwarding changes relative to that packet. Main files remain untouched.
+Base3350e7b plus the exact frozen SharedFive2813d688 packet are dependencies. This packet contains NEW SpatialNetwork/probe/doc, with additive selected-owner and temporal conversion forwarding changes relative to that packet.
+
+## Root actual regression after integration
+
+Root built the current library with the shared immutable feature profile and ran
+one fixed actual2F forward on the original three-point geometry above. The
+independent Python replay derived all204 features from original geometry and
+calibration, then independently computed all200 dots,201 hidden values,257 raw
+outputs,257 Q15 probabilities and257 costs from the authenticated original model
+and static PE tables. Every integer channel matched exactly; six capture
+corruptions were rejected. Source/model/binary pins were checked before and after
+the CPU2, affinity3,30-second watchdog invocation. No vendor code was executed.
+This proves that fixed numerical case, not alphabet expansion, grammar or OCR
+quality. Evidence is `root-math-shared-spatial2f-actual-20261024` in the external
+artifact store. The explicit independent command is:
+
+```
+python -I -B tools/LegacyMathAkSpatialNumeric.Probe/audit_actual.py --actual-replay REPOSITORY CAPTURE FRESH_REPORT
+```
