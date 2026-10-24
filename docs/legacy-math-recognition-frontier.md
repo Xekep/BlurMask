@@ -40,7 +40,10 @@ The [original XY normalization prerequisite](legacy-math-ak-source-geometry.md)
 is implemented separately with bounded input and independent rounding controls.
 The [single-stroke unguided temporal prefix](legacy-math-ak-temporal-features.md)
 now produces the selected1F model's222 inputs with independent source-derived
-checks. It does not provide classifier output or the other feature families.
+checks. The [source-bound1F numerical network](legacy-math-ak-temporal-network.md)
+now evaluates those inputs with exact modular arithmetic and network-local
+probability/cost channels. One controlled actual forward matched the independent
+reference. The other feature families and unified AL classifier remain missing.
 The next implementation is that same-source feature/classifier/shortlist
 producer; grammar matching and tree materialization remain after it. Neither
 modern LaTeX/Math2 DOM nor caller-supplied scores can substitute for those
