@@ -143,3 +143,28 @@ consumer/runtime checks. The prepared probe binary was pinned in the original
 source packet under AssemblyName `LegacyGlobalWordText.Probe`; a prior root
 report's wrong-name lookup was corrected in the separate immutable
 `root-shared-word-reuse-prepared-review-20261024` addendum.
+
+## English CHAR owning frontier
+
+Root reviewed the dynamic range successor and independently replayed147 budget
+boundaries,1024 neutral growth cases and12 corruption controls. The previous
+prepared numeric object matched exactly after removing only the two newly
+declared observation fields; the unchanged old auditor also passed.1867 pin
+records were verified before/after. Evidence:
+`root-english-range-ledger-review-20261024`.
+
+One fixed original-index4 owning CHAR attempt then reached real character
+initialization and refused a reservation in `GraphCharacterContext.ReadPrior`:
+`Node0 cumulative payload exhausted before allocation.` It finished in1.609s
+under CPU2/affinity3/45seconds;2183 pin records were checked before/after.
+There was no timeout, fallback or automatic inference retry. The runtime copy
+differs from the reviewed source only by its diagnostic friend declaration.
+The initial root runner's argument-slice assertion failed before any dotnet
+invocation; that separate preflight failure is preserved.
+
+Failure capture SHA256:
+`636b58aa42495365ba8646198ba610f6c84b60896d3a49be9b528b262d804fbf`,
+under `root-english-char-actual-v2-20261024`. This is a failure receipt, not
+successful CHAR/quality evidence. The9MiB continuation ceiling remains intact;
+the next work is a concrete bound for both actual source reads and their
+allocation sites, rather than increasing the ceiling or omitting the reads.
