@@ -10,6 +10,7 @@ namespace InkRecognition;
 internal sealed class LegacyMathAkProcessedStrokePrefix
 {
     private readonly LegacyMathAkSourceGeometry originalOwner;
+    private readonly LegacyMathAkOriginalInputFrame originalInput;
     private readonly Vector2[][] points;
     private readonly int[][] originalPointIndices;
     private readonly int[] originalStrokeIndices;
@@ -19,13 +20,15 @@ internal sealed class LegacyMathAkProcessedStrokePrefix
     internal int ExpandedStrokeCount { get; }
     internal int PointCount { get; }
     internal LegacyMathAkSourceGeometry OriginalOwner => originalOwner;
+    internal LegacyMathAkOriginalInputFrame OriginalInput => originalInput;
     internal bool HasProcessedGraphAuthority => false;
     internal bool HasMatcherRequestAuthority => false;
 
-    private LegacyMathAkProcessedStrokePrefix(LegacyMathAkSourceGeometry owner,
+    private LegacyMathAkProcessedStrokePrefix(LegacyMathAkOriginalInputFrame input,
         Vector2[][] points, int[][] indices, int[] strokeIndices, float scale, int expanded, int count)
     {
-        originalOwner = owner; this.points = points; originalPointIndices = indices;
+        originalInput = input; originalOwner = input.OriginalOwner;
+        this.points = points; originalPointIndices = indices;
         originalStrokeIndices = strokeIndices; EstimatedScale = scale;
         ExpandedStrokeCount = expanded; PointCount = count;
     }
@@ -37,7 +40,8 @@ internal sealed class LegacyMathAkProcessedStrokePrefix
         token.ThrowIfCancellationRequested();
         //The sole input is a genuine geometry owner with its authenticated shared
         //profile. Copy ORIGINAL float input, never normalized short coordinates.
-        Vector2[][] rows = original.CopyOriginalStrokes(token);
+        var input = LegacyMathAkOriginalInputFrame.CreateFresh(original, token);
+        Vector2[][] rows = input.CopyOriginalStrokes(token);
         if (rows.Length is < 1 or > LegacyMathAkSourceGeometry.MaximumStrokes)
             throw new InvalidOperationException("Original source stroke invariant failed.");
         int originalCount = 0;
@@ -106,7 +110,7 @@ internal sealed class LegacyMathAkProcessedStrokePrefix
 
         }
         token.ThrowIfCancellationRequested();
-        return new(original, rows, indices, strokeIndices, scale, expanded, resultCount);
+        return new(input, rows, indices, strokeIndices, scale, expanded, resultCount);
     }
 
     private static int CountInitialPoints(Vector2[] row)
