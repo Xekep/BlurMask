@@ -293,6 +293,12 @@ jobs:
         run: |
           python -I -B tools/LegacyAugmentedText.ActualEntry/write_plan.py . .artifacts/augmented-text-plan.json
           dotnet run --project tools/LegacyAugmentedText.ActualEntry -c Release -- --validate-plan .artifacts/augmented-text-plan.json .artifacts/augmented-text-plan-audit.json
+      - name: All ordinary WORD choice controls and diagnostic plan without inference
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyAllWordChoices.Prepared -c Release -- .artifacts/all-word-choices-prepared.json
+          python -I -B tools/LegacyAllWordChoices.ActualEntry/write_plan.py . .artifacts/all-word-choices-plan.json
+          dotnet run --project tools/LegacyAllWordChoices.ActualEntry -c Release -- --validate-plan .artifacts/all-word-choices-plan.json .artifacts/all-word-choices-plan-audit.json
       - name: Russian packed lexicon and bounded candidate decoding
         run: dotnet run --project tools/LegacyLexicon.Probe -c Release
       - name: Russian segmented word mapping and ambiguity guards

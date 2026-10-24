@@ -29,7 +29,13 @@ public sealed class LegacyFreshMainGlobalWordSourcePayload
     public LegacyOwnedMainTextSourceNode Node{get;}
     private readonly List<LegacyFreshMainGlobalWordCharacterLink> links=[];
     private LegacyNativeInkPositionRange[] ordinary=[];
-    internal int LinkCount=>links.Count;
+    private LegacyFreshMainGlobalWordSourceChoice[]? allChoices;
+    private int currentChoice=-1,selectedChoice;
+    private uint allChoiceFlags;
+    internal int LinkCount=>allChoices is null?links.Count:currentChoice<0?0:CurrentChoice.LinkCount;
+    private LegacyFreshMainGlobalWordSourceChoice CurrentChoice=>allChoices![currentChoice];
+    internal uint CurrentChoiceFlags=>allChoices is null?ChoiceFlags:CurrentChoice.Flags;
+    internal uint AllChoiceFlags=>allChoices is null?ChoiceFlags:allChoiceFlags;
     public long SelectionId{get;internal set;}=long.MaxValue;
     public LegacyOwnedFreshTextSelection? Selection{get;internal set;}
     public uint Flags{get;internal set;}
@@ -39,8 +45,20 @@ public sealed class LegacyFreshMainGlobalWordSourcePayload
     public ulong Field00=>0;
     public long Field40=>-1;
     public int Field48=>-1;
-    public IReadOnlyList<LegacyFreshMainGlobalWordCharacterLink> CopyCharacterLinks(){OriginalSource.Owner.Scope.Validate();return Array.AsReadOnly(links.ToArray());}
-    public LegacyNativeInkPositionRange[] CopyOrdinaryRanges(){OriginalSource.Owner.Scope.Validate();return ordinary.ToArray();}
+    public IReadOnlyList<LegacyFreshMainGlobalWordCharacterLink> CopyCharacterLinks(){OriginalSource.Owner.Scope.Validate();return allChoices is null?Array.AsReadOnly(links.ToArray()):allChoices[selectedChoice].CopyCharacterLinks();}
+    public LegacyNativeInkPositionRange[] CopyOrdinaryRanges(){OriginalSource.Owner.Scope.Validate();return allChoices is null?ordinary.ToArray():allChoices[selectedChoice].CopyOrdinaryRanges();}
+    internal LegacyNativeInkPositionRange[] CopyCurrentOrdinaryRanges()=>allChoices is null?ordinary.ToArray():CurrentChoice.CopyOrdinaryRanges();
+    public IReadOnlyList<LegacyFreshMainGlobalWordSourceChoice> CopyWordChoices()
+    {OriginalSource.Owner.Scope.Validate();return allChoices is null?throw new NotSupportedException("All275 choice publication was not requested."):Array.AsReadOnly(allChoices.ToArray());}
+    internal void InitializeChoices(int count,int selected)
+    {
+        if(allChoices is not null||links.Count!=0||count is<1 or>4095||(uint)selected>=count)throw new InvalidOperationException("Fresh bounded all-WORD payload required.");
+        allChoices=new LegacyFreshMainGlobalWordSourceChoice[count];selectedChoice=selected;ChoiceCount=count;
+        for(int i=0;i<count;i++)allChoices[i]=new(this,i);
+    }
+    internal void BeginChoice(int ordinal)
+    {if(allChoices is null||ordinal!=currentChoice+1||(uint)ordinal>=allChoices.Length)throw new InvalidOperationException("Literal next275 WORD choice required.");currentChoice=ordinal;}
+    internal void CompleteChoice(){if(allChoices is null)throw new InvalidOperationException();CurrentChoice.Seal();allChoiceFlags|=CurrentChoice.Flags;Flags|=CurrentChoice.Flags;}
     internal LegacyFreshMainGlobalWordSourcePayload(LegacyFreshMainGlobalWordSourceReceipt original,LegacyOwnedMainTextSourceNode node)
     {OriginalSource=original;Node=node;}
     internal void Append(LegacyFreshMainGlobalTextSourceChoice actual,CancellationToken token)
@@ -50,6 +68,12 @@ public sealed class LegacyFreshMainGlobalWordSourcePayload
         if(!ReferenceEquals(source.Owner,parent.Wrapper)||!actual.Payload.IsComplete||
             !ReferenceEquals(actual.Payload.Node.FirstGlobalSource,actual.Payload.Source)||
             !ReferenceEquals(actual.Payload.Owner,parent.Wrapper))throw new ArgumentException("Actual complete same-wrapper CHAR source required.");
+        if(allChoices is not null)
+        {
+            CurrentChoice.Append(actual,token);
+            if(currentChoice==selectedChoice)ChoiceFlags=CurrentChoice.Flags;
+            return;
+        }
         if(source.IsOrdinarySource)
             ordinary=parent.RangeOperations.Union(ordinary,actual.Payload.Source.CopyRanges(token),token);
         links.Add(new(actual));var rows=actual.Payload.CopyRecords(token);
@@ -57,7 +81,7 @@ public sealed class LegacyFreshMainGlobalWordSourcePayload
         ChoiceFlags|=rows[actual.Marker].Flags;
     }
     public byte[] CopyChoiceScalar48()
-    {OriginalSource.Owner.Scope.Validate();byte[] b=new byte[48];BinaryPrimitives.WriteUInt32LittleEndian(b.AsSpan(8),ChoiceFlags);BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(24),links.Count);BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(28),links.Count);return b;}
+    {OriginalSource.Owner.Scope.Validate();if(allChoices is not null)return allChoices[selectedChoice].CopyScalar48();byte[] b=new byte[48];BinaryPrimitives.WriteUInt32LittleEndian(b.AsSpan(8),ChoiceFlags);BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(24),links.Count);BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(28),links.Count);return b;}
 }
 
 public sealed class LegacyFreshMainGlobalTextSelectionReceipt

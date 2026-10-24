@@ -13,7 +13,9 @@ public sealed class LegacyFreshMainGlobalTextSourceWrapper
     private readonly LegacyNativeInkPositionRange[] original,wordClip;
     private readonly LegacyNativeSelectedInkRange[] inputs;
     private readonly byte[][] descriptors;
-    private readonly ulong[] references;
+    private ulong[] references;
+    private LegacyGlobalCompletedWordSpan.Cursor? spanCursor;
+    private LegacyNativePlainWordRecord CurrentWordRecord=>spanCursor?.Word??ActualCompletion.Word.Word;
     private readonly LegacyOwnedRawInkRangeOperations operations;
     private readonly Dictionary<int,LegacyFreshMainGlobalTextSourcePayload> payloads=[];
     private readonly List<string> trace=[];
@@ -152,6 +154,27 @@ public sealed class LegacyFreshMainGlobalTextSourceWrapper
             Choices.ClaimSourceWrapper(this,token);reservedWordParent=actual;
         }
     }
+    internal void BeginSpanWord(LegacyFreshMainGlobalWordTextPublication parent,LegacyGlobalCompletedWordSpan.Cursor cursor,CancellationToken token)
+    {
+        lock(gate)
+        {
+            Validate(token);parent.RequireSpanCursor(this,cursor,token);
+            if(!ReferenceEquals(reservedWordParent,parent)||spanCursor is not null||
+                (cursor.Ordinal==0?entered:!completed)||currentSelection is not null||currentSource is not null)
+                throw new InvalidOperationException("Reserved next all-WORD cursor required.");
+            spanCursor=cursor;references=cursor.Word.FlatReferences.ToArray();
+            completed=false;firstPassComplete=false;nextSelection=0;
+        }
+    }
+    internal void CloseSpanWord(LegacyFreshMainGlobalWordTextPublication parent,LegacyGlobalCompletedWordSpan.Cursor cursor,CancellationToken token)
+    {
+        lock(gate)
+        {
+            parent.RequireSpanCursor(this,cursor,token);
+            if(!completed||!ReferenceEquals(spanCursor,cursor))throw new InvalidOperationException("Complete same all-WORD cursor required.");
+            spanCursor=null;
+        }
+    }
     internal LegacyFreshMainGlobalTextSourceWord PublishIntoWord(LegacyFreshMainGlobalWordTextPublication actual,
         ReadOnlySpan<byte> allocator40,ReadOnlySpan<byte> selection4,int preparedCharFailure,CancellationToken token)
         =>PublishCore(allocator40,selection4,preparedCharFailure,token,actual);
@@ -172,7 +195,13 @@ public sealed class LegacyFreshMainGlobalTextSourceWrapper
     {
         lock(gate)
         {
-            ValidatePreclaim(token);
+            if(spanCursor is null)ValidatePreclaim(token);
+            else
+            {
+                Validate(token);if(wordParent is null)throw new InvalidOperationException("Private all-WORD parent required.");
+                wordParent.RequireSpanCursor(this,spanCursor,token);
+                if(completed)throw new InvalidOperationException("All-WORD cursor cannot repeat.");
+            }
             if(!ReferenceEquals(reservedWordParent,wordParent))throw new InvalidOperationException("This wrapper belongs to a reserved native-order WORD publication.");
             wordParent?.RequireCharacterEntry(this,token);
             if(allocator40.Length!=40||selection4.Length%4!=0||selection4.Length>65536*4)
@@ -182,7 +211,7 @@ public sealed class LegacyFreshMainGlobalTextSourceWrapper
             entered=true;trace.Add("claim");
             try
             {
-                byte[] beforeWord=ActualCompletion.Word.Word.CopyStorage();int nn=ActualCompletion.Source.CachedMainGroupEvaluations;
+                byte[] beforeWord=CurrentWordRecord.CopyStorage();int nn=ActualCompletion.Source.CachedMainGroupEvaluations;
                 //Native028902 initializes this at each alternative; LineId is
                 //still read from its actual group/descriptor producer.
                 lineOffset=0;int n=references.Length;var pool=Choices.Emitter.TopOwner.GlyphPool;
@@ -243,8 +272,8 @@ public sealed class LegacyFreshMainGlobalTextSourceWrapper
                     wordParent?.AppendCharacter(this,output[^1],token);
                     currentSelection=null;currentSource=null;trace.Add("glyph-complete:"+i);
                 }
-                if(!ActualCompletion.Word.Word.CopyStorage().AsSpan().SequenceEqual(beforeWord)||
-                    !ActualCompletion.Word.Word.FlatReferences.SequenceEqual(references)||ActualCompletion.Snapshot.SourcePolicy.Owner.AcousticEvaluations!=nn)
+                if(!CurrentWordRecord.CopyStorage().AsSpan().SequenceEqual(beforeWord)||
+                    !CurrentWordRecord.FlatReferences.SequenceEqual(references)||ActualCompletion.Snapshot.SourcePolicy.Owner.AcousticEvaluations!=nn)
                     throw new InvalidOperationException("Source wrapping changed actual WORD references or reran NN.");
                 Validate(token);completed=true;trace.Add("complete");return new(this,output.ToArray(),ordinaryRanges,sourceFlags,selectedFlags);
             }

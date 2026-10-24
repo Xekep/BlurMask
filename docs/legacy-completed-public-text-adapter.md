@@ -88,8 +88,10 @@ UTF8 bytes, existing bounded range arrays and scalar counters/reasons. Public
 calls allocate no diagnostic holder. No returned DATA can issue a source or
 completion. Whole-process memory/RSS is not established by these payload counts.
 
-The selected TOP route is still distinct from all275 WORD alternatives. Complete
-WORD-choice publication, the remaining recognition branches, English dictionary
+The selected TOP route is still distinct from all275 WORD alternatives.
+The [bounded all275 publication path](legacy-all275-word-publication.md) now
+publishes all current ordinary WORD choices separately, while this adapter still
+uses its selected-only route. Broader WORD-choice publication, remaining recognition branches, English dictionary
 integration and representative Russian/English cursive quality remain unfinished.
 This change does not claim complete engine reconstruction, new Native AOT/Linux
 runtime verification, or release readiness for those unfinished parts.
