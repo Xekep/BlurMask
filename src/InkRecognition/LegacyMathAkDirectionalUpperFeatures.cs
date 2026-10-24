@@ -10,26 +10,14 @@ public sealed partial class LegacyMathAkSourceGeometry
     /// profile calibration. This issues input features, never predictions/trees.</summary>
     public DirectionalUpperFeatures PrepareUnguidedSingleStrokeDirectionalUpper(
         CancellationToken token = default)
+        => PrepareDirectionalUpperCore(PrepareDirectionalFrame(token), token);
+
+    private DirectionalUpperFeatures PrepareDirectionalUpperCore(DirectionalFrame frame, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        if (StrokeCount != 1 || PointCount is < 2 or > 4096)
-            throw new NotSupportedException("Single whole stroke with2..4096 points required.");
-        LegacyInkPoint[] points = normalized[0];
-        var first = points[0]; bool hasExtent = false;
-        foreach (var point in points)
-        { token.ThrowIfCancellationRequested(); if (point != first) hasExtent = true; }
-        if (!hasExtent) throw new NotSupportedException("Degenerate2B1 feature branch is outside this bounded subset.");
-        //00FB90 has already projected the genuine source. B4D10 then prepares
-        //directional coordinates/resampling100; encoded source88=1 omits unit.
-        var strokes = new[] { new LegacyInkStroke(points) };
-        var samples = LegacyDirectionalResampling.Prepare(strokes, 100, false, token);
-        int count = samples.CumulativePhysicalLengths.Length;
-        if (count is < 1 or > 255)
-            throw new NotSupportedException("Actual2B1 borrowed byte-index consumers require1..255 prepared samples.");
-        var direction = LegacyDirectional2B1Landmarks.Extract(samples.Strokes, token);
-        var intersections = LegacyDirectionalIntersections.Extract(samples, 10, token);
-        var global = LegacyDirectionalStatistics.Extract(samples.Strokes, samples.Width, samples.Height,
-            samples.PhysicalArcLength, direction.Flags.Span, intersections.Flags.Span, intersections.SelfLoopCount, token);
+        var samples = frame.Samples; var direction = frame.Direction;
+        var intersections = frame.Intersections; var global = frame.Global;
+        int count = frame.Count;
         //A111 bit14=0/bit15=1 selects upper BCDB0 coordinate quantiles5x5.
         var memberships = LegacySpatialWindows.Partition(samples.Strokes[0].Points,
             samples.Width, samples.Height, 5, 5, true, token);

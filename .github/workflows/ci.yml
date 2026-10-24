@@ -260,6 +260,11 @@ jobs:
         run: |
           dotnet run --project tools/LegacyMathAkDirectionalUpperNumeric.Probe -c Release -- . .artifacts/math-5f-prepared.json
           python -I -B tools/LegacyMathAkDirectionalUpperNumeric.Probe/audit_output.py .artifacts/math-5f-prepared.json .artifacts/math-5f-prepared-audit.json
+      - name: Original Math shared directional preparation without inference
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyMathAkDirectionalBundle.Probe -c Release -- . .artifacts/math-directional-bundle.json
+          python -I -B tools/LegacyMathAkDirectionalBundle.Probe/audit_output.py . .artifacts/math-directional-bundle.json .artifacts/math-directional-bundle-audit.json
       - name: Original Math grammar, parsed reconstruction and AK terminal binding
         shell: bash
         run: |

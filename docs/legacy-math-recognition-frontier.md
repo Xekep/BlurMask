@@ -54,6 +54,9 @@ and [source-bound3F numerical view](legacy-math-ak-directional3f-network.md)
 now also match independent original-geometry and numerical references. The selected4F quantile-grid and selected5F upper-direction features and their networks also match independent original-geometry replays. All five fixed numerical views are checked, but the
 unified AL classifier remains missing. The selected source owns five networks;
 the six-model raw catalog also includes a separate first-vector source.
+The [directional feature bundle](legacy-math-ak-directional-bundle.md) now
+prepares the common3F/4F/5F geometry once, preserving all three independent
+feature results without retaining intermediate samples in the output.
 The next implementation is that same-source feature/classifier/shortlist
 producer; grammar matching and tree materialization remain after it. Neither
 modern LaTeX/Math2 DOM nor caller-supplied scores can substitute for those
