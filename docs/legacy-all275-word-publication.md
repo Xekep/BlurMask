@@ -5,7 +5,8 @@ current ordinary275 WORD records from one genuine completed source/augmentation.
 The selected279 ordinal is preserved. One wrapper, shared CHAR interner, WORD
 source and TEXT transaction cover all choices; neither a second TOP nor a new
 recognition pass is manufactured. `Prepare` retains the selected-only route.
-The public app adapter has not yet switched to this new entry.
+The public experimental app adapter now uses this entry; see the separate
+[nine-recording integration evidence](legacy-completed-public-text-adapter.md).
 
 The private span factory captures the actual publisher list and its row object
 identities from the current completed binding. A private sequential cursor is
@@ -81,5 +82,6 @@ The portable prepared tool performs409 controls without inference. The actual
 entry requires explicit `--actual` or `--actual-final-failure`, an authenticated
 11-file plan and a fresh output directory. `--validate-plan` checks inputs and
 Unicode tables only. The source recording lacks pen-up metadata; no pen lifts
-were invented. Broader alternatives, multi-TOP/multiword handling, public
-integration and representative Russian/English cursive accuracy remain unfinished.
+were invented. The public experimental adapter is integrated separately; broader
+alternatives, multi-TOP/multiword handling and representative Russian/English
+cursive accuracy remain unfinished.

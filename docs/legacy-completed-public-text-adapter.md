@@ -2,8 +2,9 @@
 
 The existing experimental-text setting now loads the resource-complete Russian
 adapter. It performs one recognition run on the original selected document,
-completes the live word source and publishes CHAR/WORD/TEXT before extracting
-text. It no longer concatenates the earlier raw-word snapshot on this path.
+completes the live word source and publishes all admitted ordinary275 WORD
+choices through CHAR/WORD/TEXT before extracting the selected TOP's text.
+It no longer concatenates the earlier raw-word snapshot on this path.
 The setting's default remains unchanged. The historical eight-resource API is
 explicitly documented as raw-only and is retained for existing diagnostics.
 
@@ -69,6 +70,39 @@ ran35 prepared policy/coverage/delivery controls, and verified all ten compiled
 app resource payloads. The nineteen resource/recording pins also match committed
 Git bytes, independently of working-tree line endings.
 
+## All275 integration after the selected-only baseline
+
+The adapter now calls `PrepareAllWords`, publishes once and requires completion
+of all choices before replacement. The selected TOP's character links are still
+the output; there is no maximum-mass selection, selected-only fallback or second
+source run. Per-alternative admission/range/array limits can now refuse the whole
+request, in which case the host keeps the ink. Public2second deadline, threshold,
+full original coverage and external cancellation semantics are unchanged.
+
+Root reviewed source packet `7366c257...`, then ran one public invocation for
+each of the same nine original recordings under CPU2/affinity3 and a45second
+process watchdog. All1987 frozen source/resource/runtime pins matched before
+and after. Every case completed both actual WORD choices, retained selected
+ordinal0 under TOPcount1 and passed full original coverage. There were no new
+deadline or alternative-admission refusals and no additional acoustic evaluations.
+
+Accepted cases remained0/3/6, all «да»; six were rejected by the existing glyph
+score threshold. Text, native score bits, frames, all14 captured glyphs, acoustic
+counts and original ranges match the earlier selected-only capture exactly.
+This is integration evidence, not improved cursive quality. The independent raw
+AK/coverage/policy auditor also rejected12 corrupted captures, including new
+all-choice count/mode, selected ordinal and enumerated-array-envelope controls.
+Capture SHA256:
+`f928cc5c559390e76b890f2da5fd0695a431aa54c37d1deed106a09542e93ce0`.
+Evidence: `root-public-all275-nine-20261024`.
+
+Observed calls took248..1208ms in this diagnostic run with the bounded
+FirstChance observer. These are neither controlled speedup evidence nor a
+general latency guarantee. Root then rebuilt the merged app/library/probes with
+zero warnings/errors, ran37 prepared guards, validated all19 input/resource pins
+and verified the ten Russian resources in the app PE without executing it.
+Native AOT/Linux runtime behavior is not established by that managed build.
+
 ## Reproduction and incomplete work
 
 `ExperimentalCompletedGlobalText.Probe --prepared REPORT` runs host-policy,
@@ -89,9 +123,9 @@ calls allocate no diagnostic holder. No returned DATA can issue a source or
 completion. Whole-process memory/RSS is not established by these payload counts.
 
 The selected TOP route is still distinct from all275 WORD alternatives.
-The [bounded all275 publication path](legacy-all275-word-publication.md) now
-publishes all current ordinary WORD choices separately, while this adapter still
-uses its selected-only route. Broader WORD-choice publication, remaining recognition branches, English dictionary
+The [bounded all275 publication path](legacy-all275-word-publication.md) is now
+this adapter's entry; extraction still follows its unchanged selected TOP.
+Broader WORD-choice publication, remaining recognition branches, English dictionary
 integration and representative Russian/English cursive quality remain unfinished.
 This change does not claim complete engine reconstruction, new Native AOT/Linux
 runtime verification, or release readiness for those unfinished parts.

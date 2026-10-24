@@ -6,7 +6,7 @@ using System.Text;
 namespace InkRecognition;
 
 /// <summary>Opt-in host adapter for the actual Russian global dictionary path.
-/// Only ordinary single-WORD output is admitted. Candidate scores remain
+/// Only ordinary single-TOP output is admitted; all actual275 WORD choices are published. Candidate scores remain
 /// uncalibrated; unsupported/uncertain requests return no replacement.</summary>
 public sealed class ExperimentalGlobalTextRecognizer : IStrokeTextRecognizer
 {
@@ -39,7 +39,7 @@ public sealed class ExperimentalGlobalTextRecognizer : IStrokeTextRecognizer
         var caseData=LegacyNativeCaseData.Load(caseStream);var textData=LegacyNativeTextPublicationData.Load(publicationStream);
         token.ThrowIfCancellationRequested();return new(context,table,caseData,textData);
     }
-    /// <summary>Opt-in actual completed source and selected-TOP TEXT route.
+    /// <summary>Opt-in actual completed source, all275 WORD choices and selected-TOP TEXT route.
     /// Resource bytes authenticate the same native Unicode tables; no alternate fallback.</summary>
     public static ExperimentalGlobalTextRecognizer Load(ReadOnlySpan<byte> acoustic,ReadOnlySpan<byte> linguistic,
         ReadOnlySpan<byte> engine,ReadOnlySpan<byte> line30,ReadOnlySpan<byte> line50,
@@ -147,11 +147,11 @@ public sealed class ExperimentalGlobalTextRecognizer : IStrokeTextRecognizer
             var actual=scope.CompleteSources(new byte[400],new byte[4],new byte[4],token);
             wrapper=LegacyFreshMainGlobalTextSourceWrapper.Prepare(scope,actual,completedAcoustic!,publication,normalization!,circles!,token);
         }
-        if(diagnostic is not null)diagnostic.Stage="text";
-        var parent=LegacyFreshMainGlobalWordTextPublication.Prepare(wrapper,token);
+        if(diagnostic is not null)diagnostic.Stage="all275-text";
+        var parent=LegacyFreshMainGlobalWordTextPublication.PrepareAllWords(wrapper,token);
         parent.Publish(new byte[40],new byte[8160],token);
         var binding=wrapper.ActualCompletion;binding.Validate(token);
-        if(!parent.IsComplete||parent.AlternativeCount!=1||!ReferenceEquals(binding.Source,source)||
+        if(!parent.IsComplete||!parent.PublishesAllWordChoices||parent.WordSource.ChoiceCount<1||parent.AlternativeCount!=1||!ReferenceEquals(binding.Source,source)||
             !ReferenceEquals(binding.Word.Word.Pool,session.Ownership.GlyphPool))return Empty();
         var originalWord=parent.OriginalWordSource.CopyOriginalKey();
         bool coversFull=HasFullOriginalCoverage(document,originalWord,token);
@@ -160,6 +160,8 @@ public sealed class ExperimentalGlobalTextRecognizer : IStrokeTextRecognizer
             diagnostic.Stage="coverage";diagnostic.FullCoverage=coversFull;
             diagnostic.WordOriginalRanges=originalWord;diagnostic.FullInputRanges=FullOriginalInput(document,token);
             diagnostic.SelectedTopCount=parent.AlternativeCount;diagnostic.Actual275PayloadCount=parent.ActualWordPayloadCount;
+            diagnostic.AllWordChoicesPublished=parent.PublishesAllWordChoices;diagnostic.PublishedWordChoiceCount=parent.WordSource.ChoiceCount;
+            diagnostic.SelectedWordOrdinal=parent.SelectedWordIndex;diagnostic.AllWordEnumeratedArrayEnvelopeBytes=parent.AllWordEnumeratedArrayEnvelopeBytes;
         }
         if(!coversFull){if(diagnostic is not null)diagnostic.Reason="partial-original-WORD-coverage";return Empty();}
         var refs=binding.Word.Word.FlatReferences;var links=parent.WordSource.CopyCharacterLinks();
@@ -245,6 +247,9 @@ internal sealed class ExperimentalCompletedTextDiagnostic
     internal bool Utf8CaptureTruncated;
     internal bool FullCoverage;
     internal int SelectedTopCount,Actual275PayloadCount;
+    internal bool AllWordChoicesPublished;
+    internal int PublishedWordChoiceCount,SelectedWordOrdinal;
+    internal long AllWordEnumeratedArrayEnvelopeBytes;
     internal LegacyNativeInkPositionRange[] WordOriginalRanges=[],FullInputRanges=[];
     internal List<ExperimentalCompletedGlyphDiagnostic> Glyphs=[];
 }

@@ -20,6 +20,9 @@ def check(x):
   expected=[{'First':3,'Last':((n-1)<<16)|0xff05}]
   assert d['FullCoverage']is True and d['WordOriginalRanges']==d['FullInputRanges']==expected
   assert d['SelectedTopCount']==1 and 1<=d['Actual275PayloadCount']<=4096
+  assert d['AllWordChoicesPublished']is True and type(d['PublishedWordChoiceCount'])is int
+  assert d['PublishedWordChoiceCount']==d['Actual275PayloadCount']==2 and d['SelectedWordOrdinal']==0
+  assert type(d['AllWordEnumeratedArrayEnvelopeBytes'])is int and 0<d['AllWordEnumeratedArrayEnvelopeBytes']<=128*1024*1024
   assert s['ExperimentalCandidateScore']is True and not d['Utf8CaptureTruncated']
   assert 1<=len(d['Glyphs'])<=128 and len(s['FirstChance'])<=256
   parts=[];scores=[];total=0
@@ -46,10 +49,12 @@ def check(x):
  return dict(status='PASS_DATA_ONLY',samples=9,acceptedIndices=accepted,scoreRejectedIndices=rejected,sourceInvocations=9,noAdditionalAcousticEvaluations=True,fullOriginalCoverage=9,rawAlphabetGlyphsExact=glyphs,observedMinMilliseconds=min(times),observedMaxMilliseconds=max(times),scope='Fixed nine-recording completed public2s path; no targets/OCR accuracy or general latency claim')
 x=json.loads(C.read_bytes());report=check(x);negative=[]
 mutations=[('extra-inference',lambda q:q['Samples'][0]['Completed'].__setitem__('SourceInvocations',2)),('extra-acoustic',lambda q:q['Samples'][0]['Completed'].__setitem__('CurrentAcousticEvaluations',999)),('missing-tail',lambda q:q['Samples'][0]['Completed']['WordOriginalRanges'][0].__setitem__('Last',3)),('text-not-current',lambda q:q['Samples'][0].__setitem__('Text','x')),('confidence-bits',lambda q:q['Samples'][0].__setitem__('ScoreBits',0)),('native-score-bits',lambda q:q['Samples'][0]['Completed']['Glyphs'][0].__setitem__('NativeScore16Bits',0)),('reject-reason',lambda q:q['Samples'][1]['Completed'].__setitem__('Reason','accepted')),('top-vs-payload',lambda q:q['Samples'][0]['Completed'].__setitem__('SelectedTopCount',2))]
+mutations += [('all-choice-mode',lambda q:q['Samples'][0]['Completed'].__setitem__('AllWordChoicesPublished',False)),('all-choice-count',lambda q:q['Samples'][0]['Completed'].__setitem__('PublishedWordChoiceCount',1)),('changed-selected-word',lambda q:q['Samples'][0]['Completed'].__setitem__('SelectedWordOrdinal',1)),('enumerated-envelope',lambda q:q['Samples'][0]['Completed'].__setitem__('AllWordEnumeratedArrayEnvelopeBytes',129*1024*1024))]
 for name,mutate in mutations:
  bad=copy.deepcopy(x);mutate(bad)
  try:check(bad)
  except (AssertionError,KeyError):negative.append(name)
  else:raise AssertionError('Corruption accepted: '+name)
 report['tamperControls']=negative;report['captureSHA256']=hashlib.sha256(C.read_bytes()).hexdigest()
+report['allWordChoicesPublished']=9;report['wordChoiceCounts']=[s['Completed']['PublishedWordChoiceCount']for s in x['Samples']]
 O.write_text(json.dumps(report,indent=2),encoding='utf-8');print(json.dumps(report))
