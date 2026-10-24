@@ -254,7 +254,7 @@ internal static class OriginalGlobalLiveSchedulerOracle
                     owner.Categories.Categories, invocation.Options.ContextSentinels24b8, invocation.LanguagePenalty2534,
                     false, nextNode, node, reach.Nodes, reach.LanguageProbe,
                     group => LegacyMainCompactGroupScores.FromGlobal(confidence.ReadGroup(group)),
-                    compact, count, starts, prefix, Validate, default);
+                    compact, count, starts, prefix, Validate, default, headers);
                 publications.Add(new(nextNode, node, before, reach, published));
                 for (int prior = nextNode; prior <= node; prior++) buffers[prior].ApplyCompactPublication(policy, published.Nodes[prior], default);
                 compact = published.Storage; count = published.Count; starts = published.Starts; prefix = published.PrefixOwners; nextNode = node + 1;

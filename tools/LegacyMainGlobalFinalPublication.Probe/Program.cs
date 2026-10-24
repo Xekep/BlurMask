@@ -72,7 +72,7 @@ foreach (int fixture in new[] { 31, 35, 60, 1, 0 })
         referencePolicy.Owner.Contexts, model.AcousticAlphabet, referencePolicy.Owner.Symbols.Geometry.CategoryOwner.Categories,
         referenceInvocation.Options.ContextSentinels24b8, referenceInvocation.LanguagePenalty2534, false, reference.NextNode,
         pass.NodeCount - 1, reach.Nodes, reach.LanguageProbe, g => LegacyMainCompactGroupScores.FromGlobal(referenceConfidence.ReadGroup(g)),
-        reference.Compact, reference.Count, reference.Starts, reference.Prefix, Validate, default);
+        reference.Compact, reference.Count, reference.Starts, reference.Prefix, Validate, default, referencePolicy.Services.CopySourceHeaders());
     if (final.RecordCount2470 != expected.Count || final.QueryChecks != reach.Counters.Checks || final.BackendCalls != reach.Counters.Calls ||
         !final.CopyCompactStorage().AsSpan().SequenceEqual(expected.Storage) || !final.CopyNodeStarts2478().AsSpan().SequenceEqual(expected.Starts) ||
         !final.CopyPrefixOwners2488().AsSpan().SequenceEqual(expected.PrefixOwners)) throw new Exception("Independent final complete pool/lifecycle differs.");
