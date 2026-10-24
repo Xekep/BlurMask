@@ -48,7 +48,10 @@ now supplies the selected2F model's204 inputs. The
 [selected2F numerical network](legacy-math-ak-spatial2f-network.md) also matched
 an independent complete integer replay on one fixed actual forward. A
 [shared immutable feature profile](legacy-math-ak-feature-profile.md) now keeps
-all four calibration pairs once for repeated geometry subsets. Three further selected-source feature families and the
+all four calibration pairs once for repeated geometry subsets. The
+[selected3F directional temporal features](legacy-math-ak-directional3f-features.md)
+and [source-bound3F numerical view](legacy-math-ak-directional3f-network.md)
+now also match independent original-geometry and numerical references. Two further selected-source feature families and the
 unified AL classifier remain missing. The selected source owns five networks;
 the six-model raw catalog also includes a separate first-vector source.
 The next implementation is that same-source feature/classifier/shortlist

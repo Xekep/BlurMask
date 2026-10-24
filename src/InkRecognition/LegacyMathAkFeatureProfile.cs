@@ -95,6 +95,18 @@ public sealed class LegacyMathAkFeatureProfile
     private const string SourceFingerprintValue = LegacyMathMixed107RawResource.ResourceFingerprint;
     public LegacyMathAkSourceGeometry CreateGeometry(IReadOnlyList<Vector2[]> strokes,
         CancellationToken token = default) => LegacyMathAkSourceGeometry.CreateFromProfile(this, strokes, token);
+    internal short[] ComposeUnguidedDirectionalTemporal(ReadOnlySpan<int> global,
+        IReadOnlyList<int[]> windows, CancellationToken token)
+    {
+        //BF090 calibrates only the274-column prefix with THIS supplied3F pair;
+        //baseline mask7 adds three channels afterwards. No calibration clone.
+        Span<int> absentGuide = stackalloc int[9]; absentGuide.Clear();
+        short[] full = LegacySaturatedDirectionalFeatureAssembly.Compose(global, windows,
+            absentGuide, false, minimum[1].AsSpan(0, 274), maximum[1].AsSpan(0, 274), token);
+        var values = new short[279]; full.AsSpan(0, 277).CopyTo(values);
+        values[277] = 1024; values[278] = 1024;
+        token.ThrowIfCancellationRequested(); return values;
+    }
     internal short MinimumAt(int family, int index) => minimum[family][index];
     internal short MaximumAt(int family, int index) => maximum[family][index];
 }

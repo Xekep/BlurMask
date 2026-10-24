@@ -75,6 +75,25 @@ public sealed class LegacyMathAkSelectedModels
         ArgumentNullException.ThrowIfNull(source); token.ThrowIfCancellationRequested();
         return new(source, this);
     }
+    public LegacyMathAkDirectionalTemporalNetwork BindDirectionalTemporal(LegacyMathAkSourceGeometry source,
+        CancellationToken token = default)
+    {
+        ArgumentNullException.ThrowIfNull(source); token.ThrowIfCancellationRequested();
+        if (!ReferenceEquals(source.FeatureProfile, profile))
+            throw new ArgumentException("Exact shared model feature-profile owner required.", nameof(source));
+        return new(source, this);
+    }
+    internal (int[] Dots, short[] Hidden, int[] Raw) EvaluateDirectionalTemporal(
+        LegacyMathAkSourceGeometry source, LegacyMathAkSourceGeometry.DirectionalTemporalFeatures features,
+        CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        if (!ReferenceEquals(source.FeatureProfile, profile) || !source.OwnsDirectionalTemporalFeatures(features))
+            throw new ArgumentException("Exact privately issued source/profile features required.", nameof(features));
+        ModelData model = models[2];
+        return LegacyMathAkTemporalNetwork.RunModel(features.CopyValues(), model.First,
+            model.Second, model.Scales, model.FirstStride, model.SecondStride, token);
+    }
     public LegacyMathAkSpatialNetwork BindSpatial(LegacyMathAkSourceGeometry source,
         CancellationToken token = default)
     {
