@@ -68,6 +68,23 @@ public sealed class LegacyMathAkSelectedModels
         ArgumentNullException.ThrowIfNull(source); token.ThrowIfCancellationRequested();
         return new(source, this);
     }
+    public LegacyMathAkSpatialNetwork BindSpatial(LegacyMathAkSourceGeometry source,
+        CancellationToken token = default)
+    {
+        ArgumentNullException.ThrowIfNull(source); token.ThrowIfCancellationRequested();
+        return new(source, this);
+    }
+    internal (int[] Dots, short[] Hidden, int[] Raw) EvaluateSpatial(
+        LegacyMathAkSourceGeometry source, LegacyMathAkSourceGeometry.SpatialFeatures features,
+        CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        if (!source.OwnsSpatialFeatures(features))
+            throw new ArgumentException("Exact privately issued source feature owner required.", nameof(features));
+        ModelData model = models[1];
+        return LegacyMathAkTemporalNetwork.RunModel(features.CopyValues(), model.First,
+            model.Second, model.Scales, model.FirstStride, model.SecondStride, token);
+    }
     internal (int[] Dots, short[] Hidden, int[] Raw) EvaluateTemporal(
         LegacyMathAkSourceGeometry source, LegacyMathAkSourceGeometry.TemporalFeatures features,
         CancellationToken token)

@@ -92,6 +92,8 @@ public sealed class LegacyMathAkTemporalNetwork
         token.ThrowIfCancellationRequested();
         return new(numerical, converted.Probability, converted.Costs);
     }
+    internal static (int[] Probability, int[] Costs) ConvertNetworkRaw(ReadOnlySpan<int> raw, CancellationToken token)
+        => ConvertRaw(raw, token);
     private static (int[] Probability, int[] Costs) ConvertRaw(ReadOnlySpan<int> raw, CancellationToken token)
     {
         //011BF0: AL sigmoid-specialFFFF chooses212.V50. E69F0 true Q15
