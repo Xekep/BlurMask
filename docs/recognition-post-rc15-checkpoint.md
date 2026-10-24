@@ -348,7 +348,11 @@ callgraph equivalence claim. Evidence:
 The segment bridge is integrated into main. Probe and application builds passed
 with zero warnings/errors, and the canonical DATA audit reproduced its original
 report byte-for-byte. The existing three-OS workflow now includes a seventh
-scalar stage; remote validation of this added stage is still pending.
+scalar stage. Run40095018698 on5fd0da2 passed all six jobs; the three scalar
+artifacts each contain21 successful stages. Root independently re-audited the
+new-stage DATA from all three OS; reports match exactly (89feaa2780043482),
+without repeating source/model execution. Evidence:
+`math13a2-segments-three-os-verified-20261024/verification.json`.
 
 Independent FIRST preparation review checked193 pins, the complete5468B loader,
 22 raw trailer fields and784 additional PURE controls. It found no blocker in
@@ -356,3 +360,14 @@ the conditional fresh-preparation claim; cached receivers can bypass that
 preparation, so this does not prove universal10C/10D zeros or a live workspace.
 Evidence: `independent-first276-preparation-review-frozen-manifest-20261024.json`
 (SHA256 `8f2d42dedd1798f03e708375688eef7f0e2c416b85606d3be67eb21acf780ee9`).
+
+A separate root static primitive proof pins the complete Text212 V90 quantizer
+0EBB60 body (288B): F32 times1024, signed32 truncation toward zero, then low16
+storage, without saturation or an inserted bias. The actual FIRST header has
+276 inputs and quantizer10. Pure checking compares196627 ordinary scalars to an
+independent raw-bit rational oracle, plus831 slice-placement cases and6 explicit
+unsupported exceptional-domain refusals. This is not observed native execution
+parity or a live FIRST212/213 factory/lifetime/feature-order proof; MXCSR FTZ/DAZ
+and exceptional conversion parity remain unsupported. Evidence:
+`root-first276-quantizer-proof-frozen-manifest-20261024.json`
+(SHA256 `2fb9f420b5d5eba3dff9ae3c6e4994b4e6324bd13eea094d7a27cccde1963528`).
