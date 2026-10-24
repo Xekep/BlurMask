@@ -46,6 +46,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             }
             graphWordPublicationData=parent.CompleteWord(token);
             if(graphTextPublicationRequested)graphTextPublicationData=parent.CompleteText(token);
+            if(graphPostTextCoverageRequested)graphPostTextCoverageData=parent.CompletePostTextCoverage(token);
             //Future021AB0/NULL projection/TEXT must be called HERE while the
             //same CHAR context/StringPool/Selections are live, never on result DATA.
         }
@@ -115,6 +116,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             Document=stage.Lease.Root.Knowledge.Owner.Owner.Owner.Parent.CreateGraphRawDocument(stage,token);
             Selections=LegacyOwnedFreshTextSourceContext.Prepare(Document,token);words=LegacyOwnedMainTextSourceInterner.Prepare(Document,token);
             operations=LegacyOwnedRawInkRangeOperations.Prepare(Document);
+            if(owner.graphPostTextCoverageRequested)PreparePostTextState(token);
             if(owner.graphTextPublicationRequested)PrepareTextInputs(token); //native028771, before WORD source/intern.
             var source=owner.graphWordSourceData??throw new InvalidOperationException("Actual private source completion required.");
             var root=new[]{new LegacyNativeInkPositionRange(LegacyNativeInkPosition.Pack(0,0,3,Document.Strokes[0].Points.Count),
@@ -148,6 +150,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         {
             Require(token);if(wordNode is null||finished||current!=-1||ordinal!=next||(uint)ordinal>=(uint)Count)throw new InvalidOperationException("Next exact275 choice required.");
             current=ordinal;firstPassNext=0;links=new(span.Words[current].FlatReferences.Count);ordinary=[];choiceFlags=0;trace.Add("word-choice48:"+current);
+            if(owner.graphPostTextCoverageRequested)BeginPostTextChoice(token);
         }
         internal IReadOnlyList<ulong> CurrentReferences(CancellationToken token)
         {Require(token);if(current!=next||current<0)throw new InvalidOperationException("Current275 cursor required.");return span.Words[current].FlatReferences;}
@@ -181,11 +184,13 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             if((uint)marker>=(uint)rows.Count)throw new NotSupportedException("Actual selected CHAR marker unavailable.");
             choiceFlags=LegacyFreshMainGlobalWordSourceChoice.FoldFlags(choiceFlags,rows[marker].Flags,rows[marker].Flags);
             var b=new byte[24];BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(16),marker);links.Add(new(payload.Node.Identity,marker,b));
+            if(owner.graphPostTextCoverageRequested)RetainPostTextLink(payload,marker,token);
         }
         internal void Close(CancellationToken token)
         {
             Require(token);var context=owner.graphCharacterContext??throw new InvalidOperationException("Actual CHAR context required.");context.RequireCompleted(token);
             if(current!=next||links is null||links.Count!=CurrentReferences(token).Count)throw new InvalidOperationException("Every current275 CHAR link required.");
+            if(owner.graphPostTextCoverageRequested)SealPostTextChoice(token);
             output[current]=new(current,choiceFlags,Pairs(ordinary),LegacyFreshMainGlobalWordSourceChoice.EncodeScalar48(choiceFlags,links.Count),links.ToArray(),owner.graphCharacters!);
             trace.Add("word-choice-complete:"+current);current=-1;next++;links=null;
         }
