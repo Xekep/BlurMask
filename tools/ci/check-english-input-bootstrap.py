@@ -27,9 +27,14 @@ def run(stage, command, timeout):
         raise SystemExit(f"{stage} failed; see {output / (stage + '.log')}")
 
 
+run("original-input-source-contracts", [sys.executable, "-I", "-B", str(root / "tools" /
+    "LegacyEnglishOriginalInput.ActualEntry" / "source_contract.py"), str(root),
+    str(output / "original-input-source-contracts.json")], 45)
+
 for name in ("LegacyEnglishEarlySelected.Probe", "LegacyEnglishEarlySelected.ActualEntry",
              "LegacyEnglishSelectedSources.Probe", "LegacyEnglishSelectedSources.ActualEntry",
-             "LegacyEnglishSourceIndices.Probe", "LegacyEnglishSourceIndices.ActualEntry"):
+             "LegacyEnglishSourceIndices.Probe", "LegacyEnglishSourceIndices.ActualEntry",
+             "LegacyEnglishOriginalInput.ActualEntry"):
     run(name + "-build", ["dotnet", "build", str(root / "tools" / name),
         "-c", "Release", "--artifacts-path", str(output / "build"),
         "--disable-build-servers", "-p:UseSharedCompilation=false", "-m:1"], 360)
@@ -56,4 +61,9 @@ fixtures = root / "tools" / name / "fixtures"
 run("source-indices-stored-actual-data", [sys.executable, "-I", "-B", str(root / "tools" /
     name / "audit.py"), "--actual", str(fixtures / "selected-prior.json"),
     str(fixtures / "source-indices-actual.json"), str(output / "source-indices-actual-audit.json"), "--tamper"], 45)
-print("PASS model-free bootstrap/selected/neutral-index helpers +stored actual DATA; three ActualEntries built only")
+name = "LegacyEnglishOriginalInput.ActualEntry"
+fixtures = root / "tools" / name / "fixtures"
+run("original-input-stored-actual-data", [sys.executable, "-I", "-B", str(root / "tools" / name / "audit.py"),
+    str(fixtures / "prior-source-indices.json"), str(fixtures / "original-input-actual.json"),
+    str(fixtures / "original-raw-index4.json"), str(output / "original-input-actual-audit.json"), "--tamper", "--fixed-slice"], 45)
+print("PASS model-free bootstrap/selected/neutral-index helpers +stored actual DATA; four ActualEntries built only")

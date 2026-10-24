@@ -90,6 +90,17 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         private GraphEarlySelectedInputReceipt(GraphWordPublicationContext parent,int points,CancellationToken token)
         {
             this.parent=parent;this.points=points;
+            var sourceParent=parent.Stage.Lease.Root.Knowledge.Owner.Owner.Owner.Parent;
+            var pre=sourceParent.OriginalInputContext;
+            if(pre is not null)
+            {
+                pre.Require(sourceParent,token);
+                if(!ReferenceEquals(pre.Document,parent.Document)||pre.Points!=points)throw new InvalidOperationException("Exact pre-NN raw document required.");
+                view=pre.View;original=pre.Original;originalState=pre.OriginalState;input=pre.Input;
+                selected=pre.Selected;selectedState=pre.SelectedState;
+            }
+            else
+            {
             view=LegacyFreshRawInkCurrentView.Prepare(parent.Document,token);
             original=LegacyLibraryOriginalTextFieldBootstrap.Prepare(view,[FieldId],token);
             originalState=original.Run(token);
@@ -100,7 +111,8 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             selectedState=selected.Run(token);
             if(!selectedState.Succeeded||selectedState.IsFaulted||selectedState.Registry.Count!=1)
                 throw new InvalidOperationException("Actual selected raw/DOM clone failed; no replacement permitted.");
-            binding=LegacyLibrarySelectedInputBinding.FromOriginal(selected);
+            }
+            binding=pre is null?LegacyLibrarySelectedInputBinding.FromOriginal(selected):pre.Binding;
             Pending=LegacyOwnedFreshTextSourceContext.PrepareSelectedBinding(binding);
             if(!Matches(Pending)||Pending.NextSelectionId!=selectedState.NextRegistryId||Pending.CopyPendingSelections().Count!=0)
                 throw new InvalidOperationException("Original selected Next must precede all pending registrations.");

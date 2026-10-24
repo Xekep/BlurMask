@@ -1,0 +1,138 @@
+{
+  "Scope": "EXACT_REVIEWED_OPTIN_SOURCE_AND_HISTORICAL_DEFAULT_PREIMAGE_ONLY_NOT_SDK_OR_RUNTIME_EQUIVALENCE",
+  "Base": "81e3be6298da50adbf04f0cdc1d1617dc890543c",
+  "Sources": [
+    {
+      "Relative": "src/InkRecognition/LegacyEnglishOriginalInputContext.cs",
+      "Kind": "NEW",
+      "SuccessorLF": "d53a84cb08ee9f624dcaf6b69f8b11d87225d03a2a025dbd81882c31395dbf3e"
+    },
+    {
+      "Relative": "src/InkRecognition/LegacyEnglishOriginalInputBudget.cs",
+      "Kind": "NEW",
+      "SuccessorLF": "f37f61adf43aa33ba4dc54fbc9793034366cb2977582df8d1e8aafca4288ec22"
+    },
+    {
+      "Relative": "src/InkRecognition/LegacyEnglishCaseGraphGlyphGeometry.cs",
+      "Kind": "OLD",
+      "SuccessorLF": "5731fb085f7e012bbb4fb1e044bcd60e727a5358606d8529a54e409de63dd867",
+      "PreimageLF": "d8e80765ddc7669e8a340c9430632f52b7a399a50f88518135b4d6ce2abf50d6",
+      "HistoricalReference": "reference/LegacyEnglishCaseGraphGlyphGeometry.cs.txt",
+      "Reverse": [
+        {
+          "Start": 11460,
+          "End": 11707,
+          "SuccessorSlice": "f(originalInputContext is not null)\n        {\n            stage.Owner.RequireOriginalInputRoute(stage,this,token);\n            originalInputContext.BeginPublication(this,token);\n            return originalInputContext.Document;\n        }\n        i",
+          "OldSlice": ""
+        }
+      ]
+    },
+    {
+      "Relative": "src/InkRecognition/LegacyEnglishCaseGraphEarlySelectedInput.cs",
+      "Kind": "OLD",
+      "SuccessorLF": "2756dca22ce3ffe214b1d66c288f307b0b0f045fa84b970f30c47ecf23519ddc",
+      "PreimageLF": "50d70c9974f010a13603f7af02b060f9d8b9b0019f007d4fb8fa507ef7d240a1",
+      "HistoricalReference": "reference/LegacyEnglishCaseGraphEarlySelectedInput.cs.txt",
+      "Reverse": [
+        {
+          "Start": 6610,
+          "End": 7228,
+          "SuccessorSlice": "ar sourceParent=parent.Stage.Lease.Root.Knowledge.Owner.Owner.Owner.Parent;\n            var pre=sourceParent.OriginalInputContext;\n            if(pre is not null)\n            {\n                pre.Require(sourceParent,token);\n                if(!ReferenceEquals(pre.Document,parent.Document)||pre.Points!=points)throw new InvalidOperationException(\"Exact pre-NN raw document required.\");\n                view=pre.View;original=pre.Original;originalState=pre.OriginalState;input=pre.Input;\n                selected=pre.Selected;selectedState=pre.SelectedState;\n            }\n            else\n            {\n            v",
+          "OldSlice": ""
+        },
+        {
+          "Start": 8071,
+          "End": 8085,
+          "SuccessorSlice": "}\n            ",
+          "OldSlice": ""
+        },
+        {
+          "Start": 8093,
+          "End": 8105,
+          "SuccessorSlice": "pre is null?",
+          "OldSlice": ""
+        },
+        {
+          "Start": 8161,
+          "End": 8173,
+          "SuccessorSlice": ":pre.Binding",
+          "OldSlice": ""
+        }
+      ]
+    },
+    {
+      "Relative": "src/InkRecognition/LegacyEnglishCaseGraphCharacters.cs",
+      "Kind": "OLD",
+      "SuccessorLF": "3ace98f53f98c6cf695458bbb32a4e1df1db9445b007b2bbe11ef64cd556f811",
+      "PreimageLF": "605c5391a2f05d3d6897da2428e65af38642eaa0f51419a2d5f609601ce829b7",
+      "HistoricalReference": "reference/LegacyEnglishCaseGraphCharacters.cs.txt",
+      "Reverse": [
+        {
+          "Start": 2504,
+          "End": 2547,
+          "SuccessorSlice": "primary.RequireOriginalInputContext(token);",
+          "OldSlice": ""
+        },
+        {
+          "Start": 3933,
+          "End": 3959,
+          "SuccessorSlice": "\n        {\n            try",
+          "OldSlice": ""
+        },
+        {
+          "Start": 3993,
+          "End": 4063,
+          "SuccessorSlice": "}\n            finally{primary.ReleaseOriginalInputContext();}\n        ",
+          "OldSlice": ""
+        },
+        {
+          "Start": 18664,
+          "End": 18686,
+          "SuccessorSlice": "\n        private reado",
+          "OldSlice": "="
+        },
+        {
+          "Start": 18687,
+          "End": 18696,
+          "SuccessorSlice": "ly bool o",
+          "OldSlice": "e"
+        },
+        {
+          "Start": 18697,
+          "End": 18706,
+          "SuccessorSlice": "nsStrings",
+          "OldSlice": "()"
+        },
+        {
+          "Start": 20139,
+          "End": 20398,
+          "SuccessorSlice": ";\n            var origin=stage.Lease.Root.Knowledge.Owner.Owner.Owner.Parent.OriginalInputContext;\n            ownsStrings=origin is null;\n            Strings=origin is null?new():origin.BorrowStrings(stage.Lease.Root.Knowledge.Owner.Owner.Owner.Parent,token)",
+          "OldSlice": ""
+        },
+        {
+          "Start": 33001,
+          "End": 33016,
+          "SuccessorSlice": "if(ownsStrings)",
+          "OldSlice": ""
+        }
+      ]
+    }
+  ],
+  "Fixtures": [
+    {
+      "Relative": "fixtures/original-input-actual.json",
+      "Bytes": 31945,
+      "RawSHA256": "b8dcb809a6c0b4be5bb5b6afe71b30d58202c0ded67d2c4d661d18bc548794b3"
+    },
+    {
+      "Relative": "fixtures/original-raw-index4.json",
+      "Bytes": 154,
+      "RawSHA256": "115dbb6ca0d8fff88b6f3c9c79324f16fc8ab420331543b581c3ab07937c29e6"
+    },
+    {
+      "Relative": "fixtures/prior-source-indices.json",
+      "Bytes": 31343,
+      "RawSHA256": "fef0f39bf0fb118a8d6fa60f8d534f3a46864ab29df0b8588d4966eb10af31c8"
+    }
+  ]
+}

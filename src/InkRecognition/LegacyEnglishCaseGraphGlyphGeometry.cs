@@ -151,6 +151,12 @@ public sealed partial class LegacyEnglish119ParentSubmission
         stage.Owner.RequireGraphPublication(stage,token);
         if(!ReferenceEquals(stage.Lease.Root.Knowledge.Owner.Owner.Owner.Parent,this))
             throw new InvalidOperationException("Exact owning English original parent required.");
+        if(originalInputContext is not null)
+        {
+            stage.Owner.RequireOriginalInputRoute(stage,this,token);
+            originalInputContext.BeginPublication(this,token);
+            return originalInputContext.Document;
+        }
         int points=0;
         lock(gate)
         {

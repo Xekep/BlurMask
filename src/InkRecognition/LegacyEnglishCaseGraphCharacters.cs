@@ -25,7 +25,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
     internal GraphCharactersResult RunGraphFirstCharacters(LegacyNativeUnicodeNormalizationData normalization,
         CancellationToken token=default,Action<GraphMainConfidenceObservation>? observer=null,bool captureSourceInputs=false)
     {
-        ArgumentNullException.ThrowIfNull(normalization);primary.RequireGraphLoop(this,token);
+        ArgumentNullException.ThrowIfNull(normalization);primary.RequireGraphLoop(this,token);primary.RequireOriginalInputContext(token);
         if(graphCharactersRequested)throw new InvalidOperationException("One same-owner CHAR publication required.");
         graphCharactersRequested=true;
         try
@@ -38,7 +38,11 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                 graphCharacterTreeRoot,(graphCharacterTree??throw new InvalidOperationException("No completed CHAR tree.")).ToArray(),
                 (graphCharacterCommands??throw new InvalidOperationException("No completed CHAR registration prefix.")).Select(x=>x with{SourcePairs=x.SourcePairs.ToArray()}).ToArray());
         }
-        finally{graphCharacterContext?.Dispose();}
+        finally
+        {
+            try{graphCharacterContext?.Dispose();}
+            finally{primary.ReleaseOriginalInputContext();}
+        }
     }
     private void CompleteGraphCharacterPass(GraphLanguageScope stage,LegacyNativeGlyphRecordPool pool,IReadOnlyList<ulong> refs,
         List<(ulong Key,byte[] Source,uint Bits,int Visited)> progress,CancellationToken token)
@@ -230,7 +234,8 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         internal LegacyOwnedRawInkDocument Document{get;}
         internal LegacyOwnedMainTextSourceInterner Interner{get;}
         internal LegacyOwnedFreshTextSourceContext Selections{get;}
-        internal LegacyNativeUtf8StringPool Strings{get;}=new();
+        internal LegacyNativeUtf8StringPool Strings{get;}
+        private readonly bool ownsStrings;
         internal LegacyNativeTextPublicationData Properties{get;}
         internal LegacyNativeUnicodeNormalizationData Normalization{get;}
         internal LegacyInkAlphabet Alphabet{get;}
@@ -251,6 +256,9 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             LegacyOwnedRawInkDocument document,LegacyOwnedRawInkRangeOperations operations,LegacyNativeInkPositionRange[] original,IReadOnlyList<GraphCharacterRange> produced,CancellationToken token)
         {
             this.owner=owner;Stage=stage;Pool=pool;this.geometryIdentity=geometryIdentity;Document=document;this.operations=operations;this.original=original;this.produced=produced;
+            var origin=stage.Lease.Root.Knowledge.Owner.Owner.Owner.Parent.OriginalInputContext;
+            ownsStrings=origin is null;
+            Strings=origin is null?new():origin.BorrowStrings(stage.Lease.Root.Knowledge.Owner.Owner.Owner.Parent,token);
             Interner=LegacyOwnedMainTextSourceInterner.Prepare(document,token);Selections=owner.graphWordPublicationContext?.Selections??LegacyOwnedFreshTextSourceContext.Prepare(document,token);
             Properties=stage.Lease.Pass.Initializer.PlanForAudit.ReadGraphGlyphPublication(stage,token);Normalization=owner.graphGlyphNormalization!;Alphabet=stage.Lease.Root.Source.Alphabet;
             header=Alphabet.CopySerializedHeader();ranges=produced.Select(x=>x.Clipped.ToArray()).ToArray();skipped=new bool[produced.Count];positive=Enumerable.Repeat(true,produced.Count).ToArray();joiner=produced.Select(x=>x.Joiner).ToArray();inputs=document.CopySelectedInputs();
@@ -391,7 +399,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             }
             RequireCompleted(token);return output.ToArray();
         }
-        public void Dispose(){if(disposed)return;disposed=true;Strings.Dispose();}
+        public void Dispose(){if(disposed)return;disposed=true;if(ownsStrings)Strings.Dispose();}
     }
     internal sealed class GraphCharacterPayload
     {

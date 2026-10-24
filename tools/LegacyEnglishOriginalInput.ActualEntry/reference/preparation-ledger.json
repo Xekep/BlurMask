@@ -1,0 +1,238 @@
+{
+  "Unit": "logical managed payload/explicit copy/source visits; excludes CLR object headers/GC/JIT/CPU/RSS and unchanged Parent model stages",
+  "CoefficientsOrder": [
+    "constant",
+    "N",
+    "P",
+    "N*N"
+  ],
+  "Rows": [
+    {
+      "Name": "raw Snapshot",
+      "Payload": [
+        512,
+        64,
+        8,
+        0
+      ],
+      "Copy": [
+        512,
+        128,
+        32,
+        0
+      ],
+      "Visits": [
+        512,
+        256,
+        128,
+        0
+      ]
+    },
+    {
+      "Name": "OwnedRawInkDocument.Create/Select/map",
+      "Payload": [
+        1024,
+        256,
+        8,
+        0
+      ],
+      "Copy": [
+        2048,
+        512,
+        32,
+        0
+      ],
+      "Visits": [
+        4096,
+        1024,
+        64,
+        0
+      ]
+    },
+    {
+      "Name": "CurrentView.Prepare/curves",
+      "Payload": [
+        2048,
+        256,
+        8,
+        0
+      ],
+      "Copy": [
+        4096,
+        512,
+        32,
+        0
+      ],
+      "Visits": [
+        4096,
+        256,
+        64,
+        0
+      ]
+    },
+    {
+      "Name": "OriginalBootstrap",
+      "Payload": [
+        32768,
+        64,
+        0,
+        0
+      ],
+      "Copy": [
+        65536,
+        128,
+        0,
+        0
+      ],
+      "Visits": [
+        163840,
+        64,
+        0,
+        0
+      ]
+    },
+    {
+      "Name": "SelectedField except export",
+      "Payload": [
+        32768,
+        512,
+        24,
+        0
+      ],
+      "Copy": [
+        65536,
+        1024,
+        64,
+        0
+      ],
+      "Visits": [
+        163840,
+        512,
+        64,
+        0
+      ]
+    },
+    {
+      "Name": "identity export",
+      "Payload": [
+        1024,
+        256,
+        0,
+        0
+      ],
+      "Copy": [
+        2048,
+        512,
+        0,
+        0
+      ],
+      "Visits": [
+        4096,
+        512,
+        0,
+        4
+      ]
+    },
+    {
+      "Name": "2C1/2DA import +fixed origin guards/empty cleanup",
+      "Payload": [
+        120648,
+        0,
+        0,
+        0
+      ],
+      "Copy": [
+        241296,
+        0,
+        0,
+        0
+      ],
+      "Visits": [
+        10999676,
+        128,
+        96,
+        0
+      ]
+    }
+  ],
+  "Sum": {
+    "Payload": [
+      190792,
+      1408,
+      48,
+      0
+    ],
+    "Copy": [
+      381072,
+      2816,
+      160,
+      0
+    ],
+    "Visits": [
+      11340156,
+      2752,
+      416,
+      4
+    ]
+  },
+  "FrameUpper": [
+    {
+      "File": "LegacyLibraryTextProcessingContext.cs",
+      "WholeFileTokenUpper": 2467,
+      "FrameMultiplicity": 96,
+      "Visits": 2131488
+    },
+    {
+      "File": "LegacyLibraryTextDomArena.cs",
+      "WholeFileTokenUpper": 3505,
+      "FrameMultiplicity": 197,
+      "Visits": 6214365
+    },
+    {
+      "File": "LegacyLibrarySelectedInputBinding.cs",
+      "WholeFileTokenUpper": 815,
+      "FrameMultiplicity": 8,
+      "Visits": 58680
+    },
+    {
+      "File": "LegacyNativeUtf8StringPool.cs",
+      "WholeFileTokenUpper": 367,
+      "FrameMultiplicity": 1,
+      "Visits": 3303
+    },
+    {
+      "File": "LegacyEnglishOriginalInputContext.cs",
+      "WholeFileTokenUpper": 1279,
+      "FrameMultiplicity": 32,
+      "Visits": 368352
+    },
+    {
+      "File": "LegacyEnglishOriginalInputBudget.cs",
+      "WholeFileTokenUpper": 171,
+      "FrameMultiplicity": 16,
+      "Visits": 24624
+    }
+  ],
+  "ContextPayload": 120648,
+  "ContextCopy": 241296,
+  "ContextVisits": 10999676,
+  "ReserveN": 256,
+  "ReserveP": 4096,
+  "ReserveFixedFullDomain": true,
+  "SuccessRefund": false,
+  "DefaultOverhead": {
+    "EveryParentReferenceBytes": 8,
+    "EveryCharacterContextBooleanBytes": 1
+  },
+  "ImportedNames": 35,
+  "NameKeys": 41,
+  "NameDictionaryOperations": 86,
+  "NameDictionaryCapacitySequence": [
+    3,
+    7,
+    17,
+    37,
+    89
+  ],
+  "OneFieldDomNodes": 10
+}
