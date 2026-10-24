@@ -10,6 +10,9 @@ on:
       - 'tools/LegacyMathAk*/**'
       - 'tools/LegacyOrientationSmoothing.Probe/**'
       - 'tools/ci/check-math-source-geometry.py'
+      - 'tools/ci/check-structured-word-delivery.py'
+      - 'tools/LegacyCompletedPostTextWork.Probe/**'
+      - 'tools/LegacyCompletedStructuredWords.Audit/**'
       - '.github/workflows/recognition-source.yml'
   pull_request:
     paths:
@@ -19,6 +22,9 @@ on:
       - 'tools/LegacyMathAk*/**'
       - 'tools/LegacyOrientationSmoothing.Probe/**'
       - 'tools/ci/check-math-source-geometry.py'
+      - 'tools/ci/check-structured-word-delivery.py'
+      - 'tools/LegacyCompletedPostTextWork.Probe/**'
+      - 'tools/LegacyCompletedStructuredWords.Audit/**'
       - '.github/workflows/recognition-source.yml'
   workflow_dispatch:
 
@@ -30,6 +36,32 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  structured:
+    name: Structured WORD delivery / ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            11.0.100-preview.7.26381.103
+            10.0.x
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python tools/ci/check-structured-word-delivery.py .artifacts/structured-word-delivery
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: structured-word-delivery-${{ matrix.os }}
+          path: |
+            .artifacts/structured-word-delivery/*.json
+            .artifacts/structured-word-delivery/*.log
   scalar:
     name: Scalar source / ${{ matrix.os }}
     strategy:

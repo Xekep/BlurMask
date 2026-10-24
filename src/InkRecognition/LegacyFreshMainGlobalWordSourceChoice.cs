@@ -12,6 +12,7 @@ public sealed class LegacyFreshMainGlobalWordSourceChoice
     public uint Flags{get;private set;}
     public bool IsComplete{get;private set;}
     internal int LinkCount=>links.Count;
+    internal int OrdinaryRangeCount=>ordinary.Length;
     internal LegacyFreshMainGlobalWordSourceChoice(LegacyFreshMainGlobalWordSourcePayload payload,int ordinal)
     {this.payload=payload;WordOrdinal=ordinal;}
     internal void Append(LegacyFreshMainGlobalTextSourceChoice choice,CancellationToken token)

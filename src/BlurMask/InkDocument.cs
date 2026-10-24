@@ -360,6 +360,7 @@ internal sealed class InkDocument
     public List<InkMark> Marks { get; private set; } = [];
     // Presentation ink is local and never enters saved/shared documents or undo history.
     public List<InkMark> FadingMarks { get; } = [];
+    private readonly List<InkMark[]> recognizedFadingGroups=[];
     public InkMark? Preview { get; set; }
     public bool CanUndo => _undo.Count > 0 || FadingMarks.Count > 0;
     public bool CanRedo => _redo.Count > 0;
@@ -403,22 +404,58 @@ internal sealed class InkDocument
         else Marks.Insert(Math.Clamp(first, 0, Marks.Count), result);
         Commit(); return true;
     }
+    internal bool ReplaceRecognizedBatch(IReadOnlyList<InkMark> strokes,IReadOnlyList<InkMark> output)
+    {
+        if(HasActiveEdit||strokes.Count==0||output.Count is<1 or>128||
+            strokes.Any(m=>!Marks.Contains(m)&&!FadingMarks.Contains(m))||
+            output.Select(m=>m.Id).Distinct().Count()!=output.Count)return false;
+        var ids=strokes.Select(m=>m.Id).ToHashSet();
+        if(output.Any(m=>m.FadeSeconds!=output[0].FadeSeconds)||recognizedFadingGroups.Any(g=>g.Any(m=>ids.Contains(m.Id))&&!g.All(m=>ids.Contains(m.Id))))return false;
+        if(output.Any(m=>Marks.Concat(FadingMarks).Any(old=>old.Id==m.Id&&!ids.Contains(old.Id))))return false;
+        int first=Marks.FindIndex(m=>ReferenceEquals(m,strokes[0]));
+        BeginEdit();Marks.RemoveAll(m=>ids.Contains(m.Id));FadingMarks.RemoveAll(m=>ids.Contains(m.Id));
+        int at=Math.Clamp(first,0,Marks.Count);
+        foreach(var mark in output){if(mark.FadeSeconds>0)Append(mark);else Marks.Insert(at++,mark);}
+        var visibleFading=FadingMarks.ToHashSet();
+        recognizedFadingGroups.RemoveAll(g=>g.All(m=>!visibleFading.Contains(m)));
+        if(output.Count>1&&output[0].FadeSeconds>0)recognizedFadingGroups.Add(output.ToArray());
+        Commit();return true;
+    }
     private void Append(InkMark mark)
     {
         if (mark.FadeSeconds > 0)
         {
             mark.StartFading();
-            if (FadingMarks.Count >= 5000) FadingMarks.RemoveAt(0);
+            if (FadingMarks.Count >= 5000) RemoveFadingGeneration(FadingMarks[0]);
             FadingMarks.Add(mark);
         }
         else Marks.Add(mark);
     }
-    internal void ExpireFading(long now) => FadingMarks.RemoveAll(m => m.FadeOpacity(now) <= 0);
-    public void Clear() { BeginEdit(); Marks.Clear(); FadingMarks.Clear(); Commit(); }
+    private void RemoveFadingGeneration(InkMark mark)
+    {
+        var group=recognizedFadingGroups.FirstOrDefault(g=>g.Contains(mark));
+        if(group is null){FadingMarks.Remove(mark);return;}
+        var members=group.ToHashSet();FadingMarks.RemoveAll(members.Contains);
+        recognizedFadingGroups.Remove(group);
+    }
+    internal void ExpireFading(long now)
+    {
+        //An emitted WORD group expires as one generation. A missing old
+        //reference also revokes its peers; manual replacements are not adopted.
+        if(recognizedFadingGroups.Count==0){FadingMarks.RemoveAll(m=>m.FadeOpacity(now)<=0);return;}
+        var visible=FadingMarks.ToHashSet();var expired=new HashSet<InkMark>();
+        recognizedFadingGroups.RemoveAll(group=>
+        {
+            if(!group.Any(m=>!visible.Contains(m)||m.FadeOpacity(now)<=0))return false;
+            expired.UnionWith(group);return true;
+        });
+        FadingMarks.RemoveAll(m=>expired.Contains(m)||m.FadeOpacity(now)<=0);
+    }
+    public void Clear() { BeginEdit(); Marks.Clear(); FadingMarks.Clear();recognizedFadingGroups.Clear(); Commit(); }
     public void Undo()
     {
         Cancel();
-        if (FadingMarks.Count > 0) { FadingMarks.RemoveAt(FadingMarks.Count - 1); Notify(); return; }
+        if (FadingMarks.Count > 0) { RemoveFadingGeneration(FadingMarks[^1]); Notify(); return; }
         if (_undo.Count == 0) return;
         var edit = _undo[^1];
         _undo.RemoveAt(_undo.Count - 1);

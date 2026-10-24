@@ -767,6 +767,14 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Bundled experimental Math2 source/graphs/runtime verification failed.' }
           & $exe --experimental-auto-layout-test (Join-Path (Split-Path $exe) 'models/raw-content2.ikrraw') | Out-Default
           if ($LASTEXITCODE -ne 0) { throw 'Experimental AUTO routing/assets verification failed.' }
+      - name: Positioned WORD layout and offscreen fonts
+        shell: pwsh
+        run: python tools/ci/check-positioned-word-layout.py ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe .artifacts/positioned-word-layout
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: positioned-word-layout-windows
+          path: .artifacts/positioned-word-layout/
       - name: Native bundled Giac discovery and advanced mathematics
         shell: pwsh
         run: |
@@ -907,6 +915,13 @@ jobs:
           "$exe" --experimental-math-layout-test
           "$exe" --experimental-math-model-test
           "$exe" --experimental-auto-layout-test "$(dirname "$exe")/models/raw-content2.ikrraw"
+      - name: Positioned WORD layout and offscreen fonts
+        run: xvfb-run -a python tools/ci/check-positioned-word-layout.py ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask .artifacts/positioned-word-layout
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: positioned-word-layout-linux
+          path: .artifacts/positioned-word-layout/
       - name: Native bundled Giac discovery and advanced mathematics
         shell: bash
         run: |
@@ -1081,6 +1096,13 @@ jobs:
           "$exe" --experimental-math-layout-test
           "$exe" --experimental-math-model-test
           "$exe" --experimental-auto-layout-test "$(dirname "$exe")/models/raw-content2.ikrraw"
+      - name: Positioned WORD layout and offscreen fonts
+        run: python tools/ci/check-positioned-word-layout.py ./src/BlurMask/bin/Release/net11.0/${{ env.RID }}/publish/BlurMask .artifacts/positioned-word-layout
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: positioned-word-layout-macos
+          path: .artifacts/positioned-word-layout/
       - name: Native bundled Giac discovery and advanced mathematics
         shell: bash
         run: |

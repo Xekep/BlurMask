@@ -43,6 +43,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Experimental AUTO routing/assets verification failed.' }
           & ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe --ai-pen-test | Out-Default
           if ($LASTEXITCODE -ne 0) { throw 'Bundled experimental recognition verification failed.' }
+          python tools/ci/check-positioned-word-layout.py ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe .artifacts/positioned-word-layout
+          if ($LASTEXITCODE -ne 0) { throw 'Positioned WORD layout/font verification failed.' }
           & ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe --math-solver-test | Out-Default
           if ($LASTEXITCODE -ne 0) { throw 'Portable bundled solver discovery failed.' }
           Compress-Archive -Path "src\BlurMask\bin\Release\net11.0\win-x64\publish\*" -DestinationPath BlurMask-win-x64.zip
@@ -86,6 +88,7 @@ jobs:
           ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --experimental-math-model-test
           ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --experimental-auto-layout-test "$(dirname ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask)/models/raw-content2.ikrraw"
           ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --ai-pen-test
+          xvfb-run -a python tools/ci/check-positioned-word-layout.py ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask .artifacts/positioned-word-layout
           export BLURMASK_TEST_GIAC="$PWD/src/BlurMask/bin/Release/net11.0/linux-x64/publish/runtimes/linux-x64/solver/icas"
           ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --math-solver-test
           dotnet run --project tools/InkMath.Solver.Probe -c Release -- "$BLURMASK_TEST_GIAC"
@@ -144,6 +147,7 @@ jobs:
           ./src/BlurMask/bin/Release/net11.0/$RID/publish/BlurMask --experimental-math-model-test
           ./src/BlurMask/bin/Release/net11.0/$RID/publish/BlurMask --experimental-auto-layout-test "$(dirname ./src/BlurMask/bin/Release/net11.0/$RID/publish/BlurMask)/models/raw-content2.ikrraw"
           ./src/BlurMask/bin/Release/net11.0/$RID/publish/BlurMask --ai-pen-test
+          python tools/ci/check-positioned-word-layout.py ./src/BlurMask/bin/Release/net11.0/$RID/publish/BlurMask .artifacts/positioned-word-layout
           export BLURMASK_TEST_GIAC="$PWD/src/BlurMask/bin/Release/net11.0/$RID/publish/runtimes/$RID/solver/icas"
           ./src/BlurMask/bin/Release/net11.0/$RID/publish/BlurMask --math-solver-test
           dotnet run --project tools/InkMath.Solver.Probe -c Release -- "$BLURMASK_TEST_GIAC"

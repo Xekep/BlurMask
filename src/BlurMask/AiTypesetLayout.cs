@@ -88,6 +88,33 @@ internal static class AiTypesetLayout
         mark.AddPoint(new(ink.Left + output.Bounds.Width * uniform, top + height));
     }
 
+    //Display policy for detached WORD runs. Actual prepared line height and
+    //baseline are used; this is not a recovered native font-face selection.
+    internal static double? PositionedDesiredFontSize(double sourceXHeight,double referenceXHeight)
+    {
+        if(!double.IsFinite(sourceXHeight)||sourceXHeight<=0||!double.IsFinite(referenceXHeight)||referenceXHeight<=0)return null;
+        double value=64*sourceXHeight/referenceXHeight;return double.IsFinite(value)&&value>0?value:null;
+    }
+    internal static bool FitPositioned(InkMark mark,Rect ink,LegacyCompletedGlobalTextWords.PreparedLine line)
+    {
+        var reference=Measure("x",mark.Font,64);
+        if(reference is null||reference.Bounds.Height<=0)return false;
+        if(PositionedDesiredFontSize(line.XHeight,reference.Bounds.Height) is not{} desired)return false;
+        mark.FontSize=Math.Clamp(desired,8,300);
+        var glyph=Measure(mark.Text,mark.Font,mark.FontSize);
+        if(glyph is null||glyph.Bounds.Width<=0||glyph.Bounds.Height<=0)return false;
+        double scale=desired/mark.FontSize;
+        double baseline=line.OriginY+(ink.Left-line.OriginX)*Math.Tan(line.Angle);
+        double top=baseline-(glyph.Baseline-glyph.Bounds.Top)*scale;
+        double width=glyph.Bounds.Width*scale,height=glyph.Bounds.Height*scale;
+        var local=new Rect(ink.Left,top,width,height);
+        var world=local.TransformToAABB(mark.Transform);
+        if(!double.IsFinite(world.Left)||!double.IsFinite(world.Top)||!double.IsFinite(world.Right)||!double.IsFinite(world.Bottom)||
+            world.Left< -CanvasGeometry.CoordinateLimit||world.Top< -CanvasGeometry.CoordinateLimit||
+            world.Right>CanvasGeometry.CoordinateLimit||world.Bottom>CanvasGeometry.CoordinateLimit)return false;
+        mark.Points[0]=local.TopLeft;mark.AddPoint(local.BottomRight);return true;
+    }
+
     internal static (double Height, double Baseline)? WritingBody(IReadOnlyList<Rect>? components)
     {
         if (components is null || components.Count is < 2 or > 256) return null;

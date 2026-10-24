@@ -8,7 +8,7 @@ namespace InkRecognition;
 /// <summary>Opt-in host adapter for the actual Russian global dictionary path.
 /// Only ordinary single-TOP output is admitted; all actual275 WORD choices are published. Candidate scores remain
 /// uncalibrated; unsupported/uncertain requests return no replacement.</summary>
-public sealed class ExperimentalGlobalTextRecognizer : IStrokeTextRecognizer
+public sealed partial class ExperimentalGlobalTextRecognizer : IPositionedStrokeTextRecognizer
 {
     private readonly LegacyFreshMainRecognitionContext context;
     private readonly LegacyCursiveSeparationTable separation;
@@ -19,6 +19,7 @@ public sealed class ExperimentalGlobalTextRecognizer : IStrokeTextRecognizer
     private readonly LegacyNativeCircledPayloadData? circles;
     internal bool UsesCompletedPublication=>completedAcoustic is not null;
     public string Language=>"ru-RU";
+    public bool ProducesPositionedWordRuns=>completedAcoustic is not null;
     private ExperimentalGlobalTextRecognizer(LegacyFreshMainRecognitionContext context,
         LegacyCursiveSeparationTable separation,LegacyNativeCaseData cases,LegacyNativeTextPublicationData publication,
         byte[]? acoustic=null,LegacyNativeUnicodeNormalizationData? normalization=null,LegacyNativeCircledPayloadData? circles=null)
@@ -135,12 +136,14 @@ public sealed class ExperimentalGlobalTextRecognizer : IStrokeTextRecognizer
         bool needsAugmentation=HasActiveAugmentation(compact,count,token);
         if(diagnostic is not null){diagnostic.Stage="completion";diagnostic.Route=needsAugmentation?"augmentation":"old-no-candidate";}
         LegacyFreshMainGlobalTextSourceWrapper wrapper;
-        if(needsAugmentation)
+        bool usesBatch=needsAugmentation||source.RawWordsInNativeHeadOrder.Count>1;
+        if(usesBatch)
         {
-            var actual=LegacyFreshMainGlobalWordAugmentation.Prepare(completedAcoustic!,source,new byte[400],token);
+            var actual=LegacyFreshMainGlobalSourceBatchCompletion.Prepare(scope,source,completedAcoustic!,new byte[400],token:token);
             actual.Run(new byte[120],new byte[40],new ushort[256],new byte[64],new byte[72],
                 new byte[4],new byte[4],new byte[4],new byte[4],token);
-            wrapper=LegacyFreshMainGlobalTextSourceWrapper.Prepare(scope,actual,completedAcoustic!,publication,normalization!,circles!,token);
+            wrapper=LegacyFreshMainGlobalTextSourceWrapper.PrepareBatch(scope,actual,completedAcoustic!,publication,normalization!,circles!,token);
+            if(diagnostic is not null&&!needsAugmentation)diagnostic.Route="batch-zero-eligible";
         }
         else
         {
@@ -150,6 +153,7 @@ public sealed class ExperimentalGlobalTextRecognizer : IStrokeTextRecognizer
         if(diagnostic is not null)diagnostic.Stage="all275-text";
         var parent=LegacyFreshMainGlobalWordTextPublication.PrepareAllWords(wrapper,token);
         parent.Publish(new byte[40],new byte[8160],token);
+        if(usesBatch)return ReadCompletedBatch(parent,source,snapshot,diagnostic,token);
         var binding=wrapper.ActualCompletion;binding.Validate(token);
         if(!parent.IsComplete||!parent.PublishesAllWordChoices||parent.WordSource.ChoiceCount<1||parent.AlternativeCount!=1||!ReferenceEquals(binding.Source,source)||
             !ReferenceEquals(binding.Word.Word.Pool,session.Ownership.GlyphPool))return Empty();
@@ -199,7 +203,11 @@ public sealed class ExperimentalGlobalTextRecognizer : IStrokeTextRecognizer
             throw new InvalidOperationException("TEXT publication must reuse the same acoustic evaluations.");
         token.ThrowIfCancellationRequested();int nodes=source.Selection.Publication.CopyNodeStarts2478().Length-1;
         if(diagnostic is not null){diagnostic.Stage="admitted";diagnostic.Reason="accepted";}
-        return new(text.ToString(),score,nodes){ExperimentalCandidateScore=true};
+        var selectedText=text.ToString();
+        var lineGeometry=LegacyCompletedGlobalTextWords.DecodePreparedLine(parent.CopySourceLines56());
+        var run=new PositionedWordRun(selectedText,score,RecognizedWordInkBounds.FromOriginalRanges(snapshot,originalWord,token),lineGeometry,originalWord);
+        token.ThrowIfCancellationRequested();
+        return new(selectedText,score,nodes){ExperimentalCandidateScore=true,WordRuns=Array.AsReadOnly(new[]{run}),WordRunsCoverFullInput=true};
         }
         finally
         {
@@ -249,6 +257,7 @@ internal sealed class ExperimentalCompletedTextDiagnostic
     internal int SelectedTopCount,Actual275PayloadCount;
     internal bool AllWordChoicesPublished;
     internal int PublishedWordChoiceCount,SelectedWordOrdinal;
+    internal int[] SourceSelectedOrdinals=[],PayloadSelectedOrdinals=[],Source275Counts=[],ProcessedChoiceCounts=[];
     internal long AllWordEnumeratedArrayEnvelopeBytes;
     internal LegacyNativeInkPositionRange[] WordOriginalRanges=[],FullInputRanges=[];
     internal List<ExperimentalCompletedGlyphDiagnostic> Glyphs=[];

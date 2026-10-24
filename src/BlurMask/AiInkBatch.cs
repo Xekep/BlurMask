@@ -6,7 +6,7 @@ namespace BlurMask;
 // a crossbar, word or formula without treating typeset glyphs as pen strokes.
 internal sealed class AiInkBatch(InkDocument document)
 {
-    private sealed record Rendered(InkMark Mark, InkMark[] Sources, string Value, double FontSize, Point[] Points);
+    private sealed record Rendered(InkMark[] Marks,InkMark[] Sources,string[] Values,double[] FontSizes,Point[][] Points);
     private readonly List<InkMark> _strokes = [];
     private readonly List<Rendered> _rendered = [];
 
@@ -36,7 +36,7 @@ internal sealed class AiInkBatch(InkDocument document)
     {
         Prune();
         var visible = document.Marks.Concat(document.FadingMarks).ToHashSet();
-        var retained = _rendered.Where(context => visible.Contains(context.Mark) && !context.Sources.Any(visible.Contains))
+        var retained = _rendered.Where(context => context.Marks.All(visible.Contains) && !context.Sources.Any(visible.Contains))
             .SelectMany(context => context.Sources).ToHashSet();
         return _strokes.Where(source => visible.Contains(source) || retained.Contains(source)).ToArray();
     }
@@ -50,29 +50,29 @@ internal sealed class AiInkBatch(InkDocument document)
         var targets = new List<InkMark>(); var consumed = new List<Rendered>();
         foreach (var context in _rendered)
         {
-            if (!document.Marks.Contains(context.Mark) && !document.FadingMarks.Contains(context.Mark)) continue;
+            if (!context.Marks.All(m=>document.Marks.Contains(m)||document.FadingMarks.Contains(m))) continue;
             if (context.Sources.Any(source => document.Marks.Contains(source) || document.FadingMarks.Contains(source))) continue;
             if (!context.Sources.Any(sources.Contains)) continue;
             // A partial reclassification must not delete a complete live word.
             if (!context.Sources.All(sources.Contains)) return false;
-            targets.Add(context.Mark); consumed.Add(context);
+            targets.AddRange(context.Marks); consumed.Add(context);
         }
         var represented = consumed.SelectMany(context => context.Sources).ToHashSet();
         targets.AddRange(result.Strokes.Where(source => !represented.Contains(source)));
-        // Avoid adding identical history entries when another nearby component
-        // causes an already recognized word to be evaluated again.
-        if (targets.Count == 1 && targets[0].Tool == InkTool.Text && targets[0].Same(result.Text)) return true;
-        if (!document.ReplaceRecognized(targets, result.Text)) return false;
-        // Keep bounded prior associations for document undo/redo. They share
-        // the same capped original ink; only visible generations enter inference.
-        _rendered.Add(new(result.Text, current.Where(sources.Contains).ToArray(), result.Text.Text, result.Text.FontSize, result.Text.Points.ToArray()));
+        var output=result.PositionedWords is{Length:>0} positioned?positioned.Select(w=>w.Mark).ToArray():[result.Text];
+        if(output.Length>128||output.Distinct().Count()!=output.Length)return false;
+        if(targets.Count==output.Length&&targets.Zip(output).All(pair=>pair.First.Tool==InkTool.Text&&pair.First.Same(pair.Second)))return true;
+        bool replaced=result.PositionedWords is null?document.ReplaceRecognized(targets,result.Text):document.ReplaceRecognizedBatch(targets,output);
+        if(!replaced)return false;
+        _rendered.Add(new(output,current.Where(sources.Contains).ToArray(),output.Select(m=>m.Text).ToArray(),
+            output.Select(m=>m.FontSize).ToArray(),output.Select(m=>m.Points.ToArray()).ToArray()));
         if (_rendered.Count > 100) _rendered.RemoveAt(0);
         return true;
     }
 
     private void Prune()
     {
-        _rendered.RemoveAll(context => context.Mark.Text != context.Value || context.Mark.FontSize != context.FontSize || !context.Mark.Points.SequenceEqual(context.Points));
+        _rendered.RemoveAll(context=>context.Marks.Where((mark,i)=>mark.Text!=context.Values[i]||mark.FontSize!=context.FontSizes[i]||!mark.Points.SequenceEqual(context.Points[i])).Any());
     }
 
     internal void Clear() { _strokes.Clear(); _rendered.Clear(); }

@@ -73,7 +73,13 @@ internal sealed class AiPenRecognizer(InkDocument document, Func<string> recogni
                 {
                     if(!AiExperimentalMathLayout.CanApply(result,recognitionMode(),Program.Settings.ExperimentalTextEngine,AiRawContentModels.Installed))continue;
                     var bounds = result.Strokes.Select(s => s.Bounds).Aggregate((a, b) => a.Union(b));
-                    AiTypesetLayout.Fit(result.Text, bounds, result.SizingText, document.Marks,
+                    if(result.PositionedWords is{Length:>0} positioned)
+                    {
+                        bool ready=true;
+                        foreach(var word in positioned)ready&=AiTypesetLayout.FitPositioned(word.Mark,word.SourceBounds,word.Line);
+                        if(!ready)continue;
+                    }
+                    else AiTypesetLayout.Fit(result.Text, bounds, result.SizingText, document.Marks,
                         result.SizingComponents, result.PreparedFontSizeSamples);
                     if(_batch.Apply(result)&&result.MathCalculationFailed)calculationFailed=true;
                 }

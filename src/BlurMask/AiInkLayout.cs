@@ -5,12 +5,13 @@ using InkRecognition;
 namespace BlurMask;
 
 // Batch layout is separate from inference: pen lifts do not define character boundaries.
-internal static class AiInkLayout
+internal static partial class AiInkLayout
 {
     internal enum ResultAdmission { Scored, UncalibratedMath, ExperimentalClassifiedMath }
     internal sealed record Result(InkMark[] Strokes, InkMark Text, float Confidence = 1)
     {
         internal string? SizingText { get; set; }
+        internal PositionedWord[]? PositionedWords {get;init;}
         internal Rect[]? SizingComponents { get; init; }
         internal LegacyFontSizeTextSample[]? PreparedFontSizeSamples { get; init; }
         internal bool MathCalculationFailed { get; set; }
@@ -63,6 +64,18 @@ internal static class AiInkLayout
             row.Sort((a, b) => a.Bounds.X.CompareTo(b.Bounds.X));
             var bounds = row.Select(g => g.Bounds).Aggregate((a, b) => a.Union(b));
             if (bounds.Width < 2 || bounds.Height < 2 || bounds.Left < -100000 || bounds.Top < -100000 || bounds.Right > 100000 || bounds.Bottom > 100000) continue;
+            if(recognizer is IPositionedStrokeTextRecognizer {ProducesPositionedWordRuns:true})
+            {
+                var ordered=strokes.Where(row.SelectMany(g=>g.Strokes).ToHashSet().Contains).ToArray();
+                try
+                {
+                    var positioned=RecognizePositioned(ordered,recognizer,cancellationToken);
+                    if(positioned is not null)results.Add(positioned);
+                }
+                catch(Exception error)when(error is ArgumentException or InvalidOperationException or NotSupportedException or InvalidDataException)
+                {cancellationToken.ThrowIfCancellationRequested();System.Diagnostics.Trace.WriteLine($"Positioned WORD layout: {error.Message}");}
+                continue;
+            }
             var value = new StringBuilder(); var uncertain = false; var confidence = 1f; var experimentalScore = false;
             var sizing = new List<Rect>(); var preparedSizes = new List<LegacyFontSizeTextSample>();
             bool completePreparedSizes = true;

@@ -27,7 +27,7 @@ internal static class AiAutomaticLayout
         }
         var text = AiInkLayout.Recognize(strokes, textRecognizer, cancellationToken).Where(r=>r.Admission==AiInkLayout.ResultAdmission.Scored).ToArray();
         var complete = text.SelectMany(r => r.Strokes).Distinct().Count() == strokes.Count;
-        if (complete && text.Length > 0 && text.All(r => r.Confidence >= r.AcceptanceThreshold && NaturalText(r.Text.Text))) return text;
+        if (complete && text.Length > 0 && text.All(r => r.Confidence >= r.AcceptanceThreshold && (r.PositionedWords is{Length:>1} positioned?positioned.All(w=>NaturalText(w.Mark.Text)):NaturalText(r.Text.Text)))) return text;
         cancellationToken.ThrowIfCancellationRequested();
         if (mathRecognizer is not null || AiMathRecognitionModels.Installed)
         {
@@ -40,7 +40,7 @@ internal static class AiAutomaticLayout
         }
         // Plain numeric input can still be computed with the text model alone.
         foreach (var result in text)
-            if (result.Confidence >= result.AcceptanceThreshold && Mathematical(result.Text.Text) && MathTypesetting.Supported(result.Text.Text))
+            if (result.PositionedWords is not{Length:>1} && result.Confidence >= result.AcceptanceThreshold && Mathematical(result.Text.Text) && MathTypesetting.Supported(result.Text.Text))
                 AiMathLayout.ApplySolvedResult(result, cancellationToken, mathSolver);
         return text.Where(r => r.Confidence >= r.AcceptanceThreshold).ToArray();
     }
@@ -64,7 +64,7 @@ internal static class AiAutomaticLayout
             if (decoded.Count == 0 || decoded.Any(r=>r.Admission!=AiInkLayout.ResultAdmission.Scored) || decoded.Any(r => !float.IsFinite(r.Confidence) || r.Confidence < r.AcceptanceThreshold) ||
                 decoded.SelectMany(r => r.Strokes).Distinct().Count() != members.Length) continue;
             foreach (var result in decoded)
-                if (Mathematical(result.Text.Text) && MathTypesetting.Supported(result.Text.Text))
+                if (result.PositionedWords is not{Length:>1} && Mathematical(result.Text.Text) && MathTypesetting.Supported(result.Text.Text))
                     AiMathLayout.ApplySolvedResult(result, token, mathSolver);
             results.AddRange(decoded); foreach (var i in region.StrokeIndices) used.Add(i);
         }

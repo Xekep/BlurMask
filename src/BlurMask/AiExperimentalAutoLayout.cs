@@ -64,7 +64,7 @@ internal static class AiExperimentalAutoLayout
                 var actual=decoded.SelectMany(r=>r.Strokes).ToArray();
                 if(actual.Length!=members.Length||actual.Distinct().Count()!=members.Length||actual.Any(s=>!members.Contains(s)))continue;
                 foreach(var result in decoded)
-                    if(AiAutomaticLayout.Mathematical(result.Text.Text)&&MathTypesetting.Supported(result.Text.Text))
+                    if(result.PositionedWords is not{Length:>1}&&AiAutomaticLayout.Mathematical(result.Text.Text)&&MathTypesetting.Supported(result.Text.Text))
                         AiMathLayout.ApplySolvedResult(result,token,solve);
                 token.ThrowIfCancellationRequested();results.AddRange(decoded);
             }

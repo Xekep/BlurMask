@@ -7,6 +7,9 @@ public sealed record TextRecognition(string Text, float Confidence, int Frames)
     /// <summary>Experimental native scores are candidate scores,
     /// not calibrated recognition probabilities. Hosts must label this mode.</summary>
     public bool ExperimentalCandidateScore { get; init; }
+    /// <summary>Optional ordered detached WORDs; multiple runs do not advertise flat Text.</summary>
+    public IReadOnlyList<PositionedWordRun>? WordRuns { get; init; }
+    public bool WordRunsCoverFullInput { get; init; }
     /// <summary>Optional actual recognized-range geometry for font matching.
     /// Heights and horizontal coordinates must use the same units as input ink.
     /// A decoder without prepared containing-line x-height leaves this absent;

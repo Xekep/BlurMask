@@ -9,6 +9,7 @@ public sealed class LegacyFreshMainGlobalWordSourceReceipt
     private readonly LegacyNativeInkPositionRange[] ranges;
     internal LegacyFreshMainGlobalWordSourceReceipt(LegacyFreshMainGlobalWordTextPublication owner)
     {Owner=owner;ranges=owner.Wrapper.ActualCompletion.CopyRanges();}
+    internal int OriginalRangeCount=>ranges.Length;
     public LegacyNativeInkPositionRange[] CopyOriginalKey(){Owner.Scope.Validate();return ranges.ToArray();}
 }
 
@@ -103,6 +104,7 @@ public sealed class LegacyFreshMainGlobalWordSourcePayload
 
 public sealed class LegacyFreshMainGlobalTextSelectionReceipt
 {
+    internal int RangeCount=>ranges.Length;
     public LegacyFreshMainGlobalWordTextPublication Owner{get;}
     private readonly LegacyNativeInkPositionRange[] ranges;
     public LegacyOwnedFreshTextSelection? Selection{get;internal set;}

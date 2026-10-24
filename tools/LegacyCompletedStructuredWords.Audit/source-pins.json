@@ -1,0 +1,26 @@
+{
+  "lfSuccessors": {
+    "LegacyCompletedGlobalTextWords.cs": "108ccc87f95c921b138c47a111565cd7b40c7569f4e0ebb20713b7f47278c7c4",
+    "LegacyCompletedBatchSelectedWords.cs": "d67062a29a32402dabe87a21187f2127ae0d1d8be37f50fbae124aab38af1a53",
+    "LegacyFreshMainGlobalWordTextPublication.CompletedWords.cs": "7a13961c19a6109e49350519125766e0d1fae5571f792e2c1c122336016661bf",
+    "LegacyFreshMainGlobalWordTextPublication.PostText.cs": "4b1cad5adc256629d1f21d18ddc126e42cee5e6e4ac6e165e0745a21eae20f17",
+    "PositionedWordRun.cs": "74f9d1aced125c00540d877c14911f98e38ec007a7213dceeffa1913d1fe924b",
+    "LegacyFreshMainGlobalWordSourceChoice.cs": "e4bdcdb5cc02c6c21f06ad2bcb621ef0a3a2e78028cb1549a92ce8cefac8e120",
+    "LegacyFreshMainGlobalWordSourceReceipt.cs": "68b65aefb1299f8290e25dd3edfca0135a81f7e6cf727653ebfcce26a1b6f354"
+  },
+  "exactOwnGetterReversals": {
+    "LegacyFreshMainGlobalWordSourceChoice.cs": {
+      "removeExactly": [
+        "    internal int OrdinaryRangeCount=>ordinary.Length;\n"
+      ],
+      "oldLfSha256": "4299a35b4fad81ed65df041446c9ea53e02c5b716dd5cdb5cf2e3938d2695645"
+    },
+    "LegacyFreshMainGlobalWordSourceReceipt.cs": {
+      "removeExactly": [
+        "    internal int OriginalRangeCount=>ranges.Length;\n",
+        "    internal int RangeCount=>ranges.Length;\n"
+      ],
+      "oldLfSha256": "2c0c73238cc9f8ee60bb1595861873b67448443a2fffb68a27f19a781ff90bf8"
+    }
+  }
+}
