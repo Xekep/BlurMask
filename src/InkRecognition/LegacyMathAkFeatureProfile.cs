@@ -16,9 +16,12 @@ public sealed class LegacyMathAkFeatureProfile
     private readonly ProgramDescriptor program;
     internal LegacyMathAkOriginalSmoothingPolicy OriginalSmoothing { get; }
     internal LegacyMathAkSource13A2Policy Source13A2Policy { get; }
+    //2 logical scalar bytes per authenticated profile, not calibration payload.
+    //Native tail13A4+32, distinct from Program.GridScale and FIRST13A4.
+    internal ushort FreshCommonHeapCapacity { get; }
     public LegacyMathAkShapePrototypes ShapePrototypes { get; }
-    private LegacyMathAkFeatureProfile(short[][] minimum, short[][] maximum, ProgramDescriptor program, LegacyMathAkShapePrototypes shapes, LegacyMathAkOriginalSmoothingPolicy smoothing, LegacyMathAkSource13A2Policy sampler)
-    { this.minimum = minimum; this.maximum = maximum; this.program = program; ShapePrototypes = shapes; OriginalSmoothing = smoothing; Source13A2Policy = sampler; }
+    private LegacyMathAkFeatureProfile(short[][] minimum, short[][] maximum, ProgramDescriptor program, LegacyMathAkShapePrototypes shapes, LegacyMathAkOriginalSmoothingPolicy smoothing, LegacyMathAkSource13A2Policy sampler, ushort freshCommonHeapCapacity)
+    { this.minimum = minimum; this.maximum = maximum; this.program = program; ShapePrototypes = shapes; OriginalSmoothing = smoothing; Source13A2Policy = sampler; FreshCommonHeapCapacity = freshCommonHeapCapacity; }
     public int CalibrationPayloadBytes => 4772;
     public string SourceFingerprint => LegacyMathMixed107RawResource.ResourceFingerprint;
     public ProgramDescriptor Program => program;
@@ -100,9 +103,13 @@ public sealed class LegacyMathAkFeatureProfile
             }
             var shapes = LegacyMathAkShapePrototypes.ReadAuthenticated(captured, token);
             var sampler = LegacyMathAkSource13A2Policy.ReadAuthenticated(captured);
+            //Full private snapshot SHA already authenticated above. Actual
+            //tail13A4 frame1005964..1791853; native1D7C0 reads this ushort
+            //into receiver+32, clone1B150 retains it,009500 copies it to P+58.
+            ushort freshCommonHeapCapacity = H(1790683);
             Boundary("calibrated", observer, token);
             Boundary("publish", observer, token);
-            return new(minimum, maximum, program, shapes, smoothing, sampler);
+            return new(minimum, maximum, program, shapes, smoothing, sampler, freshCommonHeapCapacity);
         }
         finally { CryptographicOperations.ZeroMemory(captured); }
     }

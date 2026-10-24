@@ -1,0 +1,110 @@
+{
+  "scope": "Immutable DATA projection, not issuer",
+  "resourceSHA": "8c8d9c8ce93aa74820f30a592d77ec3fe382c930a72063d5ced48629f3c167c1",
+  "fixtureSHA": "ce3505ffeb0014a62eacde7c2d4841a23dda5f704fb127820fac4c937134eacb",
+  "baselineCaptureSHAs": [
+    "82e35c3398885f3b07d6d834dff5331e1044df03b4673a1b937cf1bd051dd64c",
+    "7f0f020fa3ae6745946a41f68de211a94d6205b4284e2d04876ed0111b4e069b",
+    "13165d436aaa37a75a949bd8c8fa17a826e34d3cbaa5876a17a6283b69985df4"
+  ],
+  "rows": [
+    {
+      "name": "raw-one-large-no-square",
+      "markerCount": 1,
+      "segmentCount": 1,
+      "descriptor8Count": 0,
+      "range1390Count": 0
+    },
+    {
+      "name": "raw-two",
+      "markerCount": 1,
+      "segmentCount": 1,
+      "descriptor8Count": 0,
+      "range1390Count": 0
+    },
+    {
+      "name": "raw-three",
+      "markerCount": 1,
+      "segmentCount": 1,
+      "descriptor8Count": 0,
+      "range1390Count": 0
+    },
+    {
+      "name": "line-four",
+      "markerCount": 1,
+      "segmentCount": 1,
+      "descriptor8Count": 0,
+      "range1390Count": 0
+    },
+    {
+      "name": "curved-six",
+      "markerCount": 4,
+      "segmentCount": 4,
+      "descriptor8Count": 0,
+      "range1390Count": 0
+    },
+    {
+      "name": "corner-five",
+      "markerCount": 1,
+      "segmentCount": 1,
+      "descriptor8Count": 0,
+      "range1390Count": 0
+    },
+    {
+      "name": "bootstrap-final-index-only",
+      "markerCount": 1,
+      "segmentCount": 1,
+      "descriptor8Count": 0,
+      "range1390Count": 0
+    },
+    {
+      "name": "expanded-near-square-fallback",
+      "markerCount": 2,
+      "segmentCount": 2,
+      "descriptor8Count": 0,
+      "range1390Count": 0
+    },
+    {
+      "name": "prior-range-owner-retained",
+      "markerCount": 10,
+      "segmentCount": 10,
+      "descriptor8Count": 1,
+      "range1390Count": 1
+    },
+    {
+      "name": "multi-strokes",
+      "markerCount": 3,
+      "segmentCount": 3,
+      "descriptor8Count": 0,
+      "range1390Count": 0
+    },
+    {
+      "name": "raw-8191-smooth",
+      "markerCount": 1,
+      "segmentCount": 1,
+      "descriptor8Count": 0,
+      "range1390Count": 0
+    },
+    {
+      "name": "raw-8192-smooth",
+      "markerCount": 1,
+      "segmentCount": 1,
+      "descriptor8Count": 0,
+      "range1390Count": 0
+    },
+    {
+      "name": "raw-8193-passthrough",
+      "markerCount": 1845,
+      "segmentCount": 1845,
+      "descriptor8Count": 0,
+      "range1390Count": 0
+    },
+    {
+      "name": "raw-16384-passthrough",
+      "markerCount": 3689,
+      "segmentCount": 3689,
+      "descriptor8Count": 0,
+      "range1390Count": 0
+    }
+  ]
+}

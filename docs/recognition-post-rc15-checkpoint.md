@@ -439,7 +439,7 @@ CHAR before updating its WORD. The earlier01FD40 WORDbit24 fold still belongs
 before that selection loop. The first compiled successor0e4134d7 is preserved
 and must not be executed as an owning proof. A source correction restores this
 order and adds native/source and read-only own-library IL chronology checks;
-it still needs a newly frozen build and root owning verification. Existing
+its subsequent frozen build and root owning verification are recorded below. Existing
 shared immutable Main/Global helpers do not have the mutable-prefix defect.
 Evidence: `independent-en-selected-sources-review-frozen-manifest-20261024.json`
 (SHA256 `6342005f1e02dd71da0b06e538288047ec3afac48647dfa14152baa8958bed4a`).
@@ -462,5 +462,46 @@ execution occurred. Capture SHA256:
 `89fdc6a8822cad6bfc45ca9f331c8ec7e5eb556d825a89b0b1c78261348d9d06`.
 Evidence: `root-math-fresh-workspace-owning-frozen-manifest-20261024.json`
 (SHA256 `fb834ab69a8c8a525ee2c5d775cf3149a72d0534776ddc80b0616c2b430a97ce`).
-Portable integration and independent scoped review remain pending at this
-checkpoint; no default-path or recognition-quality change is claimed.
+The portable integration and independent scoped review are recorded below;
+no default-path or recognition-quality change is claimed.
+
+Independent header review5d2480cf subsequently checked all1252 compile pins,
+unchanged old Claim/Live/operator bodies, the raw U16 reader/native stores,
+all14 DATA headers and five additional strict corruptions. It found no concrete
+blocker within the private header scope. Missing postclaim fault/race execution
+and whole native failure/allocator equivalence remain outside that evidence.
+
+The corrected English selected-source successor is now genuinely executed once.
+Root reviewed its complete source, OLD2 diffs, actual harness, independent DATA
+auditor, fixed input, known masks and reservations before execution. Preflight
+checked1912 frozen pin records,921 compiler entries,914 precompile entries and
+909 current-main entries. The actual fixed-index4 run completed in1.693s
+including DATA audit under CPU2/affinity3/.NET10.0.12/45s, with954 runtime pins
+checked before and after, no retry. The entire priorbeaef5 capture remains exact;
+only SelectedSources is added:1 CHAR,1 selected link,0 reached raw-kind lookups,
+21 refused corruptions. The owning pipeline still performs331 neural scoring
+calls; the new selected-source stage adds none. DocumentApplied remains false.
+CHAR/WORD ordering rests on separate PE/source/compiled-IL checks, not inferred
+from this final-value capture or unexecuted cancellation-prefix controls.
+Lower Field40 masks and the WORD template remain unknown DATA. This does not
+prove native frontend-selected lineage,020920, document application or cursive
+quality. Capture SHA256:
+`530dfb0a0d59b18d23e51b7a89677ba1ab6cb237b3ea07550bb36d08d1828818`.
+Evidence: `root-english-selected-sources-order-owning-frozen-manifest-20261024.json`
+(SHA256 `6994a848fa08fc2b26d3b70e514a5e014dc246e4d1c4286505a12cdafe9e18a6`).
+
+Both increments are integrated into main from frozen portable packets57c999ff
+and53c1cab6. Production C# and probe sources were byte-exact to the reviewed
+isolated builds at import; the two workflow path-filter additions were merged
+without overwriting the Math step. The root Math helper passed its three stages
+in102.727s: build, hash-only plan and stored-DATA audit with28 corruptions.
+It does not regenerate the14-case owning capture. The extended English helper
+passed four tool builds and four model-free/auditor stages in112.821s; both
+ActualEntry tools are build-only. Both English prepared captures are byte-exact
+to their original proofs, including the new read-only IL chronology test.
+The canonical actual DATA report is also byte-exact, with no owning/NN repeat.
+The combined Release application build passed in61.552s. Builds report zero
+warnings/errors. Root used CPU2/affinity3; the desktop app was not launched.
+Evidence: `root-math-fresh-workspace-main-20261024` and
+`root-english-selected-sources-main-20261024`. Three-OS checks are pending push;
+the broader configured2ALT/219580 INPUT-transform frontier is still unresolved.

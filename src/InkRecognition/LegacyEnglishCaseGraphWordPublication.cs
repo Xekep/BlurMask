@@ -47,6 +47,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             graphWordPublicationData=parent.CompleteWord(token);
             if(graphTextPublicationRequested)graphTextPublicationData=parent.CompleteText(token);
             if(graphPostTextCoverageRequested)graphPostTextCoverageData=parent.CompletePostTextCoverage(token);
+            if(graphSelectedSourcesRequested)graphSelectedSourcesData=parent.CompleteSelectedSources(token);
             if(graphOriginalSelectedRequested)graphEarlySelectedInputData=parent.CopyEarlySelectedInputData(token);
             //Future021AB0/NULL projection/TEXT must be called HERE while the
             //same CHAR context/StringPool/Selections are live, never on result DATA.

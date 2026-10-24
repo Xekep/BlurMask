@@ -11,9 +11,11 @@ on:
       - 'tools/LegacyOrientationSmoothing.Probe/**'
       - 'tools/LegacyCursive*/**'
       - 'tools/ci/check-math-source-geometry.py'
+      - 'tools/ci/check-math-fresh-workspace.py'
       - 'tools/ci/check-structured-word-delivery.py'
       - 'tools/ci/check-english-input-bootstrap.py'
       - 'tools/LegacyEnglishEarlySelected*/**'
+      - 'tools/LegacyEnglishSelectedSources*/**'
       - 'tools/LegacyCompletedPostTextWork.Probe/**'
       - 'tools/LegacyCompletedStructuredWords.Audit/**'
       - '.github/workflows/recognition-source.yml'
@@ -26,9 +28,11 @@ on:
       - 'tools/LegacyOrientationSmoothing.Probe/**'
       - 'tools/LegacyCursive*/**'
       - 'tools/ci/check-math-source-geometry.py'
+      - 'tools/ci/check-math-fresh-workspace.py'
       - 'tools/ci/check-structured-word-delivery.py'
       - 'tools/ci/check-english-input-bootstrap.py'
       - 'tools/LegacyEnglishEarlySelected*/**'
+      - 'tools/LegacyEnglishSelectedSources*/**'
       - 'tools/LegacyCompletedPostTextWork.Probe/**'
       - 'tools/LegacyCompletedStructuredWords.Audit/**'
       - '.github/workflows/recognition-source.yml'
@@ -113,6 +117,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install numpy
+      - run: python tools/ci/check-math-fresh-workspace.py .artifacts/math-fresh-workspace
       - run: python tools/ci/check-math-source-geometry.py .artifacts/math-source-geometry
       - uses: actions/upload-artifact@v4
         if: always()
@@ -121,3 +126,5 @@ jobs:
           path: |
             .artifacts/math-source-geometry/*.json
             .artifacts/math-source-geometry/*.log
+            .artifacts/math-fresh-workspace/*.json
+            .artifacts/math-fresh-workspace/*.log

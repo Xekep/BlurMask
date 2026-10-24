@@ -73,7 +73,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
 
     //All capabilities are private. Output is scalars only; no bootstrap,
     //selected owner, registry entry, mutable DOM or range issuer escapes.
-    private sealed class GraphEarlySelectedInputReceipt
+    private sealed partial class GraphEarlySelectedInputReceipt
     {
         private const string FieldId="english-field";
         private readonly GraphWordPublicationContext parent;

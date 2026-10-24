@@ -60,6 +60,10 @@ internal sealed partial class LegacyMathAkOriginalInputContext
         internal int OriginalCount=>originalStarts.Length-1;
         internal int TotalMembership=>totalMembership;
         internal int RequiredWorkWords=>(segments.Length>>5)+1;
+        //NEW private nested source join only: never accepts an exported DATA
+        //record, and does not expose the actual sampled backing or owner.
+        internal bool MatchesSampled(Source13A2Output actual,CancellationToken token)
+        { Validate(token);return ReferenceEquals(sampled,actual); }
         //RequiredWorkWords is metadata. At zero native slots no query mask is
         //allocated. Existing13B6 masks do not become a complete108B pool here.
         internal void Validate(CancellationToken token)
