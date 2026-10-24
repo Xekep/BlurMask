@@ -52,7 +52,7 @@ all four calibration pairs once for repeated geometry subsets. The
 [selected3F directional temporal features](legacy-math-ak-directional3f-features.md)
 and [source-bound3F numerical view](legacy-math-ak-directional3f-network.md)
 now also match independent original-geometry and numerical references. The selected4F quantile-grid and selected5F upper-direction features and their networks also match independent original-geometry replays. All five fixed numerical views are checked, but the
-unified AL classifier remain missing. The selected source owns five networks;
+unified AL classifier remains missing. The selected source owns five networks;
 the six-model raw catalog also includes a separate first-vector source.
 The next implementation is that same-source feature/classifier/shortlist
 producer; grammar matching and tree materialization remain after it. Neither
