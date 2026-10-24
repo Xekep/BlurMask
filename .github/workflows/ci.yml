@@ -240,6 +240,16 @@ jobs:
         run: |
           dotnet run --project tools/LegacyMathAkDirectionalNumeric.Probe -c Release -- . .artifacts/math-3f-prepared.json
           python -I -B tools/LegacyMathAkDirectionalNumeric.Probe/audit_output.py .artifacts/math-3f-prepared.json .artifacts/math-3f-prepared-audit.json
+      - name: Original Math selected4F quantile features and independent reference
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyMathAkDirectionalSpatial.Probe -c Release -- . .artifacts/math-4f-features.json
+          python -I -B tools/LegacyMathAkDirectionalSpatial.Probe/audit_output.py . .artifacts/math-4f-features.json .artifacts/math-4f-features-audit.json
+      - name: Original Math selected4F synthetic numerical and ownership controls
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyMathAkDirectionalSpatialNumeric.Probe -c Release -- . .artifacts/math-4f-prepared.json
+          python -I -B tools/LegacyMathAkDirectionalSpatialNumeric.Probe/audit_output.py .artifacts/math-4f-prepared.json .artifacts/math-4f-prepared-audit.json
       - name: Original Math grammar, parsed reconstruction and AK terminal binding
         shell: bash
         run: |

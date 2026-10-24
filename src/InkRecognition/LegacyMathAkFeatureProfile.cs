@@ -107,6 +107,18 @@ public sealed class LegacyMathAkFeatureProfile
         values[277] = 1024; values[278] = 1024;
         token.ThrowIfCancellationRequested(); return values;
     }
+    internal short[] ComposeUnguidedDirectionalSpatial(ReadOnlySpan<int> global,
+        IReadOnlyList<int[]> windows, CancellationToken token)
+    {
+        //BFF40 calibrates only the274-column prefix with THIS supplied4F pair;
+        //baseline mask7 adds three channels afterwards. No calibration clone.
+        Span<int> absentGuide = stackalloc int[9]; absentGuide.Clear();
+        short[] full = LegacySaturatedDirectionalFeatureAssembly.Compose(global, windows,
+            absentGuide, true, minimum[2].AsSpan(0, 274), maximum[2].AsSpan(0, 274), token);
+        var values = new short[279]; full.AsSpan(0, 277).CopyTo(values);
+        values[277] = 1024; values[278] = 1024;
+        token.ThrowIfCancellationRequested(); return values;
+    }
     internal short MinimumAt(int family, int index) => minimum[family][index];
     internal short MaximumAt(int family, int index) => maximum[family][index];
 }

@@ -1,0 +1,90 @@
+[
+  {
+    "module": "MyScriptText.dll",
+    "moduleSHA256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+    "start": "0x180260fd0",
+    "bytes": 192,
+    "sha256": "db88702e24d4ac761fb778dca068606627c3a8b25e1ff614410c963fa627e26f",
+    "role": "48literalhidden"
+  },
+  {
+    "module": "MyScriptText.dll",
+    "moduleSHA256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+    "start": "0x180260a50",
+    "bytes": 1408,
+    "sha256": "f05ff672e4399147c00eb9eb48a17ea4dc15e3f71a541d0508d84bbc4d618470",
+    "role": "352EXP"
+  },
+  {
+    "module": "MyScriptText.dll",
+    "moduleSHA256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+    "start": "0x1802ba338",
+    "bytes": 8,
+    "sha256": "a7867156e0aa3e3331ddd1c07f1c612bc6d3b47dd92697b2b5b0338dfff851c5",
+    "role": "212V78"
+  },
+  {
+    "module": "MyScriptText.dll",
+    "moduleSHA256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+    "start": "0x18004a2d0",
+    "bytes": 3,
+    "sha256": "b6cbececf1b07e74f37d57710c68c31f0b92cb08d51093252b321b07542e177b",
+    "role": "completeV78ret0"
+  },
+  {
+    "module": "MyScriptText.dll",
+    "moduleSHA256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+    "start": "0x1802ba388",
+    "bytes": 8,
+    "sha256": "96fcfc95788114b182c6267993d6f177a83069163b79c709277192ad8ed6b0ae",
+    "role": "212C8"
+  },
+  {
+    "module": "MyScriptText.dll",
+    "moduleSHA256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+    "start": "0x1800ebd10",
+    "bytes": 14,
+    "sha256": "0fa734d4c96834a0a191ed585720f3e5eccafaddf0def5cb6eae3f64e849ef74",
+    "role": "completeQ15getter"
+  },
+  {
+    "module": "MyScriptText.dll",
+    "moduleSHA256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+    "start": "0x180249de0",
+    "bytes": 65,
+    "sha256": "847f8b69134d88d14718b5bf38ff52cf2e3679a42a71569b3caae14e50084efe",
+    "role": "completeHidden"
+  },
+  {
+    "module": "MyScriptText.dll",
+    "moduleSHA256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+    "start": "0x1800ef640",
+    "bytes": 102,
+    "sha256": "6b9ef700ee454b5bbb0b069abb5029984ae91ea7adbc8ef2da277a478af27bc6",
+    "role": "mode0dot"
+  },
+  {
+    "module": "MyScriptText.dll",
+    "moduleSHA256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+    "start": "0x1800ef6b0",
+    "bytes": 138,
+    "sha256": "0a99e907ce557cabc456d35b3c33f7e3118bfc85289cd3d6b5aff4a90155b3e3",
+    "role": "mode1dot"
+  },
+  {
+    "module": "MyScript2D.dll",
+    "moduleSHA256": "c633012619b4db77a73de117913d4d1eac6f5c340156bfe054f246cfe3701afd",
+    "start": "0x180074290",
+    "bytes": 8196,
+    "sha256": "01c4ba5cde6506d2a4e1ab37e0bb91624c5282392cd1b289bea8b02219365c1f",
+    "role": "2049log"
+  },
+  {
+    "module": "MyScript2D.dll",
+    "moduleSHA256": "c633012619b4db77a73de117913d4d1eac6f5c340156bfe054f246cfe3701afd",
+    "start": "0x18005ea70",
+    "bytes": 78,
+    "sha256": "5b98dcc59b7ed720b98d98c99a74becec035c1b7694ce9f5cd034e11a465fe3d",
+    "role": "completeFixedLog"
+  }
+]

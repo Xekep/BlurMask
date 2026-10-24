@@ -1,0 +1,285 @@
+{
+  "textSHA": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+  "mathSHA": "c633012619b4db77a73de117913d4d1eac6f5c340156bfe054f246cfe3701afd",
+  "textRegions": {
+    "1800b5760": [
+      {
+        "start": "0x1800b5760",
+        "endExclusive": "0x1800b5a11",
+        "bytes": 689,
+        "sha256": "dfb4963f5520b55471f786ae2d3ea7122d4e7e146ea881d2d372cf054f02da10"
+      }
+    ],
+    "1800b5d00": [
+      {
+        "start": "0x1800b5d00",
+        "endExclusive": "0x1800b5d89",
+        "bytes": 137,
+        "sha256": "0a7ca434f7c4c209a7471a80d8baa5a876f9d88c2a43646b2745913befe58fbc"
+      }
+    ],
+    "1800b5d90": [
+      {
+        "start": "0x1800b5d90",
+        "endExclusive": "0x1800b5e19",
+        "bytes": 137,
+        "sha256": "021ccfbf15034dee716cdba9fb6d2b5a2d595ede85103ae9fe57bb40091970d1"
+      }
+    ],
+    "1800bf090": [
+      {
+        "start": "0x1800bf090",
+        "endExclusive": "0x1800bff31",
+        "bytes": 3745,
+        "sha256": "6c975519f5056a7d5bb8bfca3ebdf7dec67214cf39f92b08d0ffbea9e41ce404"
+      }
+    ],
+    "1800be270": [
+      {
+        "start": "0x1800be270",
+        "endExclusive": "0x1800be614",
+        "bytes": 932,
+        "sha256": "56454de1c8e0468a64e8e670f78269740aba378fe8773ce7e30b6329a3defc54"
+      }
+    ],
+    "1800bd520": [
+      {
+        "start": "0x1800bd520",
+        "endExclusive": "0x1800bd865",
+        "bytes": 837,
+        "sha256": "6c96899c89ac351f04bed619b24fbf89838912ad3a0cce2d1b6c6c743303059a"
+      }
+    ],
+    "1800bedf0": [
+      {
+        "start": "0x1800bedf0",
+        "endExclusive": "0x1800bf08e",
+        "bytes": 670,
+        "sha256": "0cf4fafa5eae36589d861afe0b4f30505ca978a2c756d53a1bf7dc7fe47ad85d"
+      }
+    ],
+    "1800bc120": [
+      {
+        "start": "0x1800bc120",
+        "endExclusive": "0x1800bc27a",
+        "bytes": 346,
+        "sha256": "6a3a5af7a7aed9074f02fe2da50464362d32d0eb8a29271c7bd85877edbda58b"
+      }
+    ],
+    "1800be620": [
+      {
+        "start": "0x1800be620",
+        "endExclusive": "0x1800be8ab",
+        "bytes": 651,
+        "sha256": "3874bafb65ee2125e4020077523750a8f35e3c780387168866cd11200e4767ac"
+      }
+    ],
+    "1800b4af0": [
+      {
+        "start": "0x1800b4af0",
+        "endExclusive": "0x1800b4d10",
+        "bytes": 544,
+        "sha256": "38bbd96c6928192046b1a487fc653cea57662726053d0366575dbc39b268717b"
+      }
+    ],
+    "1800b4d10": [
+      {
+        "start": "0x1800b4d10",
+        "endExclusive": "0x1800b4dca",
+        "bytes": 186,
+        "sha256": "af6703f91d22764af977426e699892aedcbb12f16b5363d789392a9c785d64e8"
+      },
+      {
+        "start": "0x1800b4dd0",
+        "endExclusive": "0x1800b4fa7",
+        "bytes": 471,
+        "sha256": "e83d7b545b3857d12aeca641226c8a6a7d3d13b77c7ec0237f28c2c972354380"
+      },
+      {
+        "start": "0x1800b4fb0",
+        "endExclusive": "0x1800b5686",
+        "bytes": 1750,
+        "sha256": "2698bbf074aca4e739623a02d8cc528605d3e2444cb85e4967320410fb214db0"
+      }
+    ],
+    "1800bc280": [
+      {
+        "start": "0x1800bc280",
+        "endExclusive": "0x1800bc646",
+        "bytes": 966,
+        "sha256": "b805947576444d61eee9c6e34c2159b76601eed68f091111b279906635b1c7bc"
+      }
+    ],
+    "1800bc650": [
+      {
+        "start": "0x1800bc650",
+        "endExclusive": "0x1800bc894",
+        "bytes": 580,
+        "sha256": "c9b1745e2d9f4b9370f50857228f178717f3671ed3b0fea0675f6070f816082f"
+      }
+    ],
+    "1800bc8a0": [
+      {
+        "start": "0x1800bc8a0",
+        "endExclusive": "0x1800bc9d8",
+        "bytes": 312,
+        "sha256": "de8274af7584eb5e12ede96b2c7ee320d22d80cda100082e308e35ef9e697f82"
+      }
+    ],
+    "1800bc9e0": [
+      {
+        "start": "0x1800bc9e0",
+        "endExclusive": "0x1800bcc12",
+        "bytes": 562,
+        "sha256": "15f685a4c1ba6e4943f5774725debe0c23001197efb4f632b8df4067f11b9f37"
+      }
+    ],
+    "1800b5c20": [
+      {
+        "start": "0x1800b5c20",
+        "endExclusive": "0x1800b5cf5",
+        "bytes": 213,
+        "sha256": "5c1b8588489e1eb2882441ce12fc6f9e0df74e12e69c8eb1589b9e27c95486eb"
+      }
+    ],
+    "1800b6270": [
+      {
+        "start": "0x1800b6270",
+        "endExclusive": "0x1800b6bbf",
+        "bytes": 2383,
+        "sha256": "5cd3fc68c49358ee73e404c9e8dac5fe8a2900ed7f4caea6a8ab59625ae871dc"
+      }
+    ],
+    "1800bb720": [
+      {
+        "start": "0x1800bb720",
+        "endExclusive": "0x1800bc11f",
+        "bytes": 2559,
+        "sha256": "0879df1d0d916015dec1189035216c82e74e87c13bcd9730e5c69a1df2f78e92"
+      }
+    ],
+    "1800bff40": [
+      {
+        "start": "0x1800bff40",
+        "endExclusive": "0x1800c0d92",
+        "bytes": 3666,
+        "sha256": "48f389563dc7d9d9561558128a258d83832cb5d47da9c8746ea8e97c77ce785e"
+      }
+    ],
+    "1800bd870": [
+      {
+        "start": "0x1800bd870",
+        "endExclusive": "0x1800bdc05",
+        "bytes": 917,
+        "sha256": "f570e701b1961fe9987fc7e5710dd37a55c5782c4525dade81762c4cab77bcf3"
+      }
+    ],
+    "1800b82c0": [
+      {
+        "start": "0x1800b82c0",
+        "endExclusive": "0x1800b8653",
+        "bytes": 915,
+        "sha256": "7f62a67eca2c48e1cd3e44f4d624da6fd9195d99932059600efeb1f9edf7eadc"
+      }
+    ],
+    "1800bd280": [
+      {
+        "start": "0x1800bd280",
+        "endExclusive": "0x1800bd51a",
+        "bytes": 666,
+        "sha256": "a06f7a16ab3c3272236782a3137c8e9f192d509f1d81597526e65dfe444d4ee6"
+      }
+    ],
+    "1800bcdb0": [
+      {
+        "start": "0x1800bcdb0",
+        "endExclusive": "0x1800bd279",
+        "bytes": 1225,
+        "sha256": "97a8146a8cc71c3327bb400d9a8d3488a8d3aa57797268deb79e2cd20426ebf1"
+      }
+    ],
+    "1800b7840": [
+      {
+        "start": "0x1800b7840",
+        "endExclusive": "0x1800b7cd4",
+        "bytes": 1172,
+        "sha256": "662f71c1e9b93ffefa86aa385d3d57c489a7098a6ae39998199f42342c6db9d5"
+      }
+    ],
+    "1800b7760": [
+      {
+        "start": "0x1800b7760",
+        "endExclusive": "0x1800b7836",
+        "bytes": 214,
+        "sha256": "ddbf4200c389cab18f0f5c5b70cc8ebfe0bb5390fa93af573e7c5864f1fa5a42"
+      }
+    ],
+    "1800bcc20": [
+      {
+        "start": "0x1800bcc20",
+        "endExclusive": "0x1800bcd20",
+        "bytes": 256,
+        "sha256": "02e3ffe3fc3a13b0d48b2b4a57df117f1550281d828e0efa251641b86901e8b5"
+      }
+    ]
+  },
+  "mathRegions": [
+    {
+      "start": "0x18000caf0",
+      "bytes": 10142,
+      "sha256": "b75761f5b5393ed59f24f2b8c1d5bdb53c308e5932e37df9b3851d5569d24aa0",
+      "role": "actual slot object construction"
+    },
+    {
+      "start": "0x180010ea0",
+      "bytes": 3104,
+      "sha256": "a44c3d13a09b781a919a96f62ffd3501293c78008f4b6422d0baf902ccdcfe93",
+      "role": "same source feature/output routing"
+    },
+    {
+      "start": "0x1800173f0",
+      "bytes": 5468,
+      "sha256": "2434a5b9a4918857cae2439229a301366327ab742ff393a182296bb91cd1142f",
+      "role": "source program wire reader"
+    },
+    {
+      "start": "0x1800170b0",
+      "bytes": 826,
+      "sha256": "c0fc8b8f3c34f3387aa347ea29b47b875e3905d6dc1a5d7779daaedbbf8d91b9",
+      "role": "pernetwork calibration and backend wire reader"
+    }
+  ],
+  "tables": [
+    {
+      "at": "0x1802b6b80",
+      "bytes": "0300000000000000af02000003000000ffffffff00000000c06a2b80010000000000000000000000",
+      "label": "2AF descriptor"
+    },
+    {
+      "at": "0x1802b6ac0",
+      "bytes": "f068088001000000106b2b8001000000f86a2b8001000000",
+      "label": "2AF factory"
+    },
+    {
+      "at": "0x1802b6b10",
+      "bytes": "f0560b8001000000806b2b800100000060570b8001000000205a0b8001000000a05a0b8001000000205b0b8001000000a05b0b8001000000205c0b8001000000005d0b8001000000905d0b8001000000205e0b8001000000b05e0b8001000000305f0b8001000000",
+      "label": "2AF virtual dispatch"
+    },
+    {
+      "at": "0x1802b7f00",
+      "bytes": "0300000000000000b102000003000000ffffffff00000000687a2b80010000000000000000000000",
+      "label": "2B1 descriptor"
+    },
+    {
+      "at": "0x1802b7a68",
+      "bytes": "80d4088001000000a0752b8001000000487f2b8001000000",
+      "label": "2B1 factory"
+    },
+    {
+      "at": "0x1802b75a0",
+      "bytes": "f0de0b8001000000007f2b800100000070e20b800100000020e60b8001000000b0e80b800100000050eb0b8001000000f03f0b8001000000f0ed0b800100000090f00b800100000040ff0b8001000000a00d0c800100000060b50b8001000000901c0c8001000000",
+      "label": "2B1 virtual dispatch"
+    }
+  ],
+  "scope": "Actual selected4F279: A111 quantile primary4x4, upper5x5 preparation not read by BFF40; supplied calibration family2."
+}

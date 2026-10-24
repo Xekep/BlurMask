@@ -51,7 +51,7 @@ an independent complete integer replay on one fixed actual forward. A
 all four calibration pairs once for repeated geometry subsets. The
 [selected3F directional temporal features](legacy-math-ak-directional3f-features.md)
 and [source-bound3F numerical view](legacy-math-ak-directional3f-network.md)
-now also match independent original-geometry and numerical references. Two further selected-source feature families and the
+now also match independent original-geometry and numerical references. The selected4F quantile-grid features and its network also match an independent original-geometry replay. One further selected-source feature family and the
 unified AL classifier remain missing. The selected source owns five networks;
 the six-model raw catalog also includes a separate first-vector source.
 The next implementation is that same-source feature/classifier/shortlist
