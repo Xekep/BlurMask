@@ -21,15 +21,33 @@ prevents sibling re-entry; an entered failure retains the prefix and faults the
 owner. The source-prefix object itself still does not claim V68 completion.
 This does not implement0283B0 acceptance, a global graph result, or app layout.
 
-Three real raw inputs produce six distinct linked WORDs and three actual
-comparisons. After completion both selected sessions can still refresh and
-publish their20 glyph choices. The independent audit verifies unequal labels
-directly from linked pool rows, all120 payload bytes, both279 ordinal mappings,
-unchanged flat references, absence of active bit8 rows and score channels with
-4ULP tolerance for system exponential implementations. These actual fixtures
-exercise two distinct selected groups; prepared ranking controls separately
-cover duplicate merging, pruning and special modes. Neither suite certifies
-handwriting accuracy or final text acceptance.
+The test distinguishes its two actual input domains. Zero-bit8 inputs retain
+the linked-label/ranking/full120-byte/source/glyph checks, including 4ULP score
+tolerance and all five lifecycle guards. Positive-bit8 inputs require two exact
+pre-entry `NotSupportedException` refusals with message `Enabled219580 candidate
+augmentation cannot be omitted.` No completion owner or completion `Run` may
+exist. Both WORD payloads, references, selected live nodes, source storage and
+the entire glyph pool must remain unchanged. Bad-resource and bad-residue
+guards must still refuse independently. The Python auditor derives the branch
+from the actual compact bytes, rather than trusting a declared branch.
+
+After the literal compact-flag correction, one root invocation of the same
+three generated inputs produced 8,920 active compact rows, including 66 bit8
+rows. All three inputs correctly refused the no-candidate completion path;
+zero successful completions were exercised. The report explicitly records
+`ZeroBit8CompletionExercised=false`. This supersedes the earlier pre-correction
+fixture coverage of three comparisons and postcompletion glyph choices; it
+does not establish their current owning execution. Those assertions remain in
+the zero-bit8 test domain and are not replaced with fabricated zero flags.
+
+The capture SHA256 is
+`1d5c033440e93f7d6c2d94ee0ba3f11e9be76486b28eade4354d15cea40ee426`.
+Root verified 1,139 source/model/runtime/binary pins before/after, with two
+logical processors/affinity3 and a 45-second watchdog. Independent audit and
+three synthetic schema-domain controls with 25 rejection mutations passed.
+Completion `Run` count zero is not a claim of zero neural inference: the
+original recognition stages genuinely execute. Neither domain certifies
+handwriting quality, candidate augmentation, or final text acceptance.
 
 Probe arguments: `AK LK engine separation case publication line30 line50
 normalization circles capture.json`. Audit: `python
