@@ -51,8 +51,10 @@ Source90's closed-label numerical branch remains unverified and refuses in
 this audit. Actual count/fill invocation counts and intermediate72-byte walk
 buffers are not exported; consumed walk channels are checked through the
 resulting pool and counters. Private lifecycle checks are source-reviewed,
-not established by detached DATA. TOP273, TEXT/UTF8 and public admission are
-still to be connected.
+not established by detached DATA. The later
+[first TOP owner](legacy-english-top-first-owner.md) retains this same live
+publication through source completion. Full TEXT/UTF8 and public admission
+remain unconnected.
 
 The first diagnostic actual call failed because an early node0 observer read
 geometry created only later. The observer was restored; optional separation
