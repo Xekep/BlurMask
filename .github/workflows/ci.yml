@@ -276,6 +276,14 @@ jobs:
         run: |
           dotnet run --project tools/LegacyMathAkShape.Probe -c Release -- . .artifacts/math-shape299.json
           python -I -B tools/LegacyMathAkShape.Probe/audit_output.py . .artifacts/math-shape299.json
+      - name: Original Math unified classifier prepared adjustment without inference
+        # Only numerical DATA and genuine prototype geometry; no learned forwards.
+        # The opt-in --actual branch is compiled by this project but never run here.
+        # Keep the connected classifier separate from the grammar producer below.
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyMathAkUnifiedClassifier.Probe -c Release -- . .artifacts/math-unified-prepared.json
+          python -I -B tools/LegacyMathAkUnifiedClassifier.Probe/audit_output.py . .artifacts/math-unified-prepared.json
       - name: Original Math grammar, parsed reconstruction and AK terminal binding
         shell: bash
         run: |
