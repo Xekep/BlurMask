@@ -113,3 +113,22 @@ pins before/after. Its failure capture SHA256 is
 `275eedaf9238ecb8758b6719ed284bc914287bed0659805c40345657c02b1b98`.
 The residual association is the next implementation frontier. Neither failure
 was replaced, and this result does not claim completed multiword TEXT.
+
+An experimental successor outside main then connected residual association to
+the same original session's private overlay. One unchanged-input invocation
+reached three residual inputs/nine emitted rows and one merge, with no newly
+allocated higher source. That last observation includes either an existing
+higher source or a matching base source; it is not exclusively a cache hit.
+The completed association reserved 15,900 structural loop units and 13,477
+copied-payload units under the existing caps. These are reservations rather
+than measured CPU work, CLR allocations or RSS. Validation counted 93 loop
+bodies; original cached/current MAIN evaluations both remained 374.
+
+After about 4.81 seconds the invocation refused at the same batch stage:
+`Actual emitted candidate source span changed`. Capture SHA256:
+`86345425de9bf02018c92f6a52f3de93d62820bf1420db126ebe6ac03623617e`.
+All 1,135 source/resource/runtime/binary pins matched before/after, using two
+logical processors/affinity3 and the same 45-second watchdog. The earlier
+failures remain immutable. Native candidate-span adoption/boundary behavior
+must be understood before changing that invariant. This is no successful
+sentence, completed multiword TEXT, app/default integration or quality claim.
