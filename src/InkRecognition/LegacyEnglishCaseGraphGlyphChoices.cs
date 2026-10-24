@@ -61,6 +61,11 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,copies);
         stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,work);
         if(graphGlyphGeometryRequested)graphGlyphGeometryContext=GraphGlyphGeometryContext.Issue(this,stage,publisher,pool,token);
+        // Fresh same-pool readiness is private; exported snapshots never issue it.
+        stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,32768);
+        stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,65536);
+        stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,4096);
+        var dispatch=new GraphGlyphRefreshDispatch(pool,refs.Count,token);
         var progress=new List<(ulong Key,byte[] Source,uint Bits,int Visited)>(refs.Count);
         //024F30 first pass: complete every actual reference's refresh BEFORE
         //any selection. No detached WORD image is used as source authority.
@@ -76,6 +81,10 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             int first=checked((int)arc.StartContextId),last=checked((int)arc.EndContextId);
             _=ranges.Preflight(first,last,token);
             graphGlyphGeometryContext?.BeginReference(reference,token);
+            GraphGlyphRefreshDispatch.Receipt receipt;
+            bool wasReady=dispatch.TryRead(pool,key,token,out receipt);
+            if(!wasReady)
+            {
             var count=ranges.ReadOrdinary140(address.Node,address.Arc,token);var fill=ranges.ReadOrdinary140(address.Node,address.Arc,token);
             if(count.Length==0||!count.AsSpan().SequenceEqual(fill))throw new InvalidDataException("Source count/fill changed.");
             byte[] source=GraphWordSourceNumerics.Encode26(fill,token);
@@ -91,8 +100,13 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             RequireGraphPublication(stage,token);
             //024F30 first pass: own refresh precedes projection/WORD clipping;
             //ALL references finish these steps before the selection loop below.
-            graphGlyphGeometryContext?.Project(reference,fill,token);
-            progress.Add((key,source,bits,visited));
+                receipt=new(fill,source,bits,visited);
+                dispatch.Remember(pool,key,receipt,token);
+            }
+            // Dispatcher13C6E0 skips frontendV90 on an already-ready owner,
+            // but024F30 still projects every actual reference and later selects it.
+            graphGlyphGeometryContext?.Project(reference,receipt.Fill,token);
+            progress.Add((key,receipt.Source,receipt.Bits,wasReady?0:receipt.Visited));
         }
         if(graphGlyphGeometryRequested)graphGlyphGeometryData=graphGlyphGeometryContext!.Finish(refs.Count,token);
         var output=new GraphGlyphChoiceData[refs.Count];
