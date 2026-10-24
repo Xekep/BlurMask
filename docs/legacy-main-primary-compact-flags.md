@@ -10,6 +10,24 @@ The prepared probe covers 5,760 flag decisions, independent probe replies, all 1
 
 The shared compact-materialization Python oracle now composes this same independent flag model. It previously omitted terminal bit 3 and retained the obsolete forced-flag rule, causing CI to disagree with the corrected publisher at compact byte 72. Source headers are reconstructed from the authenticated linguistic resource; the fresh alternative quota is 2, separate from the arc limit. Replay of the preserved actual 2,129-record capture checks every compact and beam/pool byte without another inference. A separately labelled prepared allocator variation checks the canonical A7-residue policy; it is not an actual execution capture. The repair packet is `e812668b794a1868da91e6f77902db5ee6f0a17f05b156d38c7b80f65e31ca19`.
 
+CI run `40069000098` exposed the same obsolete primary-flag rule in the
+separate configured-secondary oracle. That oracle now composes the same native
+flag selector and authenticated headers/quota, preserving its secondary marking,
+emission and terminal-selection checks. No production code changed. One current
+configured-secondary invocation produced 1,591 records, eight carrying bit 3,
+and two distinct selected identities. The independent oracle checked all 163,840
+compact bytes, 144,832 beam/primary/secondary bytes, 256 selected bytes and ten
+ownership/lifecycle guards. The old oracle reproduced the CI mismatch at byte 72
+on this same capture; the corrected oracle rejected separate flag, secondary-row
+and selected-index corruptions without additional inference.
+
+Capture SHA256:
+`3b64bb15eb6715fe724a129a416c63d76a956afad05d1ebbb4ff43549ff71ed4`.
+The single invocation took about 1.32 seconds with two logical processors,
+affinity3 and a 45-second watchdog; all 1,074 source/resource/runtime/binary pins
+matched before/after. This verifies compact publication and selection, not final
+text or handwriting accuracy.
+
 Root additionally ran one unchanged Russian recording through a diagnostic copy of the genuine owning source. It produced 2,129 compact records, including 16 with bit 3 set. An independent reader rebuilt the raw linguistic queries, flag decisions, frame normalization, sorting and complete buffers: 163,840 compact bytes and 189,824 beam/alternative bytes. The trace contains 897 primary decisions, 58 probe answers and 1,794 frames. Cached-score inspection did not cause another acoustic evaluation. This route has actual source header low classification 8, so the separately corrected cost condition leaves its numbers unchanged. The run used two CPUs and a 45-second outer watchdog; the observed process time is not a latency guarantee.
 
 This confirms actual eligibility, not recognition quality. The diagnostic stops before no-candidate completion, word augmentation and final text publication. Old zero-bit captures came from the defective writer and cannot establish that the corrected branch is unreachable. The existing no-candidate completion must continue to refuse positive eligible candidates until the owning augmentation path is connected. No acceptance threshold, default engine or model changed. Full Russian and English handwriting support remains unfinished.

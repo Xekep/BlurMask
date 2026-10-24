@@ -32,6 +32,13 @@ for item in tree.body:
     elif isinstance(item,ast.Assign) and any(isinstance(t,ast.Name) and t.id in names for t in item.targets):selected.append(item)
 ns={'struct':struct};exec(compile(ast.Module(body=selected,type_ignores=[]),str(source),'exec'),ns)
 normalize=ns['normalize']
+#Compose the independent native2093A8..209512 primary flag decision.
+#Secondary emission/marking/selection below remain independently reconstructed.
+flags_source=root/'tools/LegacyMainPrimaryCompactFlags.Probe/audit_output.py'
+flags_tree=ast.parse(flags_source.read_text(encoding='utf-8-sig'))
+flags_namespace={}
+exec(compile(ast.Module(body=[x for x in flags_tree.body if isinstance(x,ast.FunctionDef) and x.name=='choose'],type_ignores=[]),str(flags_source),'exec'),flags_namespace)
+choose_flags=flags_namespace['choose']
 def read_alphabet(data):
     # Standalone resource parser: CI must not depend on ignored PE research.
     at=99;fields=struct.unpack_from('<8H',data,at);at+=16
@@ -67,6 +74,16 @@ p=37+size+1;assert u32(d,p)==0x1000000 and u32(d,p+4)==nodes_count
 cw=d[p+8];children=d[p+9:p+9+((nodes_count*cw+31)//32)*4];child_start=array('I',[1])
 for n in range(nodes_count):child_start.append(child_start[-1]+bits(children,cw,n))
 assert child_start[-1]==nodes_count
+#Authenticated fresh092990 source header and quota2402. The quota is distinct
+#from the configured primary arc limit; the secondary count does not change it.
+prefix=606964
+name=bytes(v^(0x14,0x12,0x19,0x77)[i&3] for i,v in enumerate(lk[prefix+24:prefix+80]))
+assert name.split(b'\0',1)[0]==b'ru_RU-lk-text.lite.lex' and not any(name[name.index(0):])
+order=u32(lk,2513123+90);assert order in (1,2,3)
+has_children=child_start[2]!=child_start[1]
+kind=0x800 if has_children and b'subword' in name.split(b'\0',1)[0] else 0xc00
+source_headers=[0,2|((order*4)&0x1c)|(0x20 if has_children else 0)|kind]
+quota=2
 rows=[bytearray(base64.b64decode(n['rows'])) for n in c['inputNodes']]
 pools=[bytearray(base64.b64decode(n['alternatives'])) for n in c['inputNodes']]
 secondary=[bytearray(base64.b64decode(n['secondary'])) for n in c['inputNodes']]
@@ -212,13 +229,13 @@ def write(tag,coord,parent,cost,inc,symbol,alt,flags,value,aux):
     at=count*40;assert at+40<=len(storage)
     struct.pack_into('<QQiiiHHBB',storage,at,tag,coord,parent,wrap(cost),wrap(inc),symbol,alt,flags,value)
     w32(storage,at+36,aux);count+=1;return count-1
-def append(items,row,n,tag,parent,cost,inc,alternative,forced,value):
+def append(items,row,n,tag,parent,cost,inc,alternative,forced,value,bit3=False):
     for index,(symbol,kind,coord) in enumerate(items):
         final=index==len(items)-1;terminal6=False
         if final:
             terminal6=symbol in (N+1,N+2) or not(u16(row,24)!=n and row[5]&128) and symbol not in(special_e2,closed,knowledge) and symbol<65515 and row[26]&63!=startmap[symbol]
         parent=write(tag,coord,parent,cost,inc,symbol,alternative if final else 65535,
-            (kind&7)|(64 if terminal6 else 0)|(16 if final and forced else 0),value,-1)
+            (kind&7)|(64 if terminal6 else 0)|(8 if final and bit3 else 0)|(16 if final and forced else 0),value,-1)
     return parent
 def pool(n,o,k):return memoryview(pools[n])[(o*2+k)*40:(o*2+k+1)*40]
 def beam(n,o):return memoryview(rows[n])[o*88:(o+1)*88]
@@ -251,18 +268,22 @@ for n in range(len(rows)):
             if last<=left:return
             first=left
     if candidates:sort(0,len(candidates)-1)
-    group=[]
-    for item in candidates:
-        if group and (item['key'],item['end'])!=(group[-1]['key'],group[-1]['end']):group=[]
-        r=beam(n,item['o']);p=pool(n,item['o'],item['k']);forced=not continuation(r,n)
-        if any(prior['forced'] and prior['ctx']==item['ctx'] for prior in group):forced=False
-        item['forced']=forced;group.append(item)
+    flag_rows=[dict(Tag=x['tag'],Context=x['ctx'],Auxiliary=-1,Fallback=bool(x['tag']&(1<<41)),Bit3=False,Bit4=False) for x in candidates]
+    group_start=0;selected_distinct=0
+    for index,item in enumerate(candidates):
+        if index==0 or (item['key'],item['end'])!=(candidates[index-1]['key'],candidates[index-1]['end']):
+            group_start=index;selected_distinct=0
+        r=beam(n,item['o']);p=pool(n,item['o'],item['k'])
+        decision=choose_flags(flag_rows,index,group_start,selected_distinct,quota,source_headers,lambda:continuation(r,n))
+        bit3=decision['TerminalBit3'];forced=decision['TerminalBit4'];selected_distinct=decision['SelectedDistinctAfter']
+        item['forced']=forced
+        flag_rows[index]['Bit3']=bit3;flag_rows[index]['Bit4']=forced
         pn=n-s8(p,26)-1;po=u16(p,24);pa=p[27]&127;reset=bool(p[31]&32);assert pn<n and not p[31]&128
         prev_ctx=0 if pn<0 or reset else u64(pool(pn,po,pa),16)
         parent=-1 if pn<0 or reset else previous(pn,u16(pool(pn,po,pa),28))
         glyph=p[31]&31
         if not reset and pn>=0 and po>=primary:glyph=(glyph-(beam(pn,po)[33]&63))&255
-        terminal=append(frame(n,r,item['ctx'],prev_ctx,glyph),r,n,item['tag'],parent,item['cost']+(penalty if forced else 0),item['inc'],65535,forced,score_byte(n,r))
+        terminal=append(frame(n,r,item['ctx'],prev_ctx,glyph),r,n,item['tag'],parent,item['cost']+(penalty if forced and source_headers[(item['tag']>>32)&255]&0x1c else 0),item['inc'],65535,forced,score_byte(n,r),bit3)
         w16(p,28,terminal-starts[n]);used.add(u16(r,28))
     for o in range(limits[n]):
         r=beam(n,o)
