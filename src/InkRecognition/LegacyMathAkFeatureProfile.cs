@@ -119,6 +119,43 @@ public sealed class LegacyMathAkFeatureProfile
         values[277] = 1024; values[278] = 1024;
         token.ThrowIfCancellationRequested(); return values;
     }
+    internal short[] ComposeUnguidedDirectionalUpper(ReadOnlySpan<int> global,
+        int[][] cells, int physicalArc, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        if (global.Length != 17 || cells.Length != 25 || physicalArc < 0)
+            throw new ArgumentException("Actual17 globals/25upper cells/nonnegative arc required.");
+        var values = new short[223]; int at = 0; values[at++] = 1024;
+        unchecked
+        {
+            for (int i = 0; i < 17; i++)
+            {
+                token.ThrowIfCancellationRequested(); int v = global[i];
+                values[at++] = UpperClamp(i switch {2 => (v * 2048 - 2048) / 5 - 1024,
+                    3 => v * 2048 / 3072 - 1024, 8 => v * 2,
+                    >= 9 and <= 15 => v * 2048 / 3 - 1024, _ => v * 2048 / 1024 - 1024});
+            }
+            int denominator = physicalArc / 20; //C0DA0: arc / ((5+5)*2), before each division.
+            foreach (var cell in cells)
+            {
+                token.ThrowIfCancellationRequested();
+                if (cell is null || cell.Length != 8) throw new ArgumentException("Eight upper direction masses required.");
+                for (int i = 0; i < 8; i++) values[at++] = TransformUpperMass(cell[i], denominator);
+            }
+            //F0 active starts calibration at1; only218-prefix is calibrated.
+            for (int i = 1; i < 218; i++)
+            {
+                token.ThrowIfCancellationRequested(); int range = maximum[3][i] - minimum[3][i];
+                if (range != 0) values[i] = UpperClamp((values[i] - minimum[3][i]) * 2048 / range - 1024);
+            }
+        }
+        values[218] = values[219] = values[220] = -1024;
+        values[221] = values[222] = 1024;
+        token.ThrowIfCancellationRequested(); return values;
+    }
+    private static short TransformUpperMass(int mass, int denominator)
+        => denominator == 0 ? (short)0 : UpperClamp(unchecked((mass << 11) / denominator - 1024));
+    private static short UpperClamp(int value) => (short)Math.Clamp(value, short.MinValue, short.MaxValue);
     internal short MinimumAt(int family, int index) => minimum[family][index];
     internal short MaximumAt(int family, int index) => maximum[family][index];
 }

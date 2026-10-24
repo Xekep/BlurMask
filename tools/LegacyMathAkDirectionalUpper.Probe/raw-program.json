@@ -1,0 +1,93 @@
+{
+  "fields": [
+    {
+      "name": "mask",
+      "at": 1006019,
+      "format": "H",
+      "value": 41233
+    },
+    {
+      "name": "global",
+      "at": 1006021,
+      "format": "I",
+      "value": 1974271
+    },
+    {
+      "name": "baseline",
+      "at": 1006025,
+      "format": "I",
+      "value": 7
+    },
+    {
+      "name": "spatial",
+      "at": 1006033,
+      "format": "I",
+      "value": 925695
+    },
+    {
+      "name": "target",
+      "at": 1006041,
+      "format": "I",
+      "value": 100
+    },
+    {
+      "name": "gridScale",
+      "at": 1006045,
+      "format": "I",
+      "value": 10
+    },
+    {
+      "name": "primaryColumns",
+      "at": 1006055,
+      "format": "h",
+      "value": 4
+    },
+    {
+      "name": "primaryRows",
+      "at": 1006057,
+      "format": "h",
+      "value": 4
+    },
+    {
+      "name": "upperColumns",
+      "at": 1006061,
+      "format": "h",
+      "value": 5
+    },
+    {
+      "name": "upperRows",
+      "at": 1006063,
+      "format": "h",
+      "value": 5
+    },
+    {
+      "name": "source88",
+      "at": 1006065,
+      "format": "B",
+      "value": 1
+    },
+    {
+      "name": "source89",
+      "at": 1006066,
+      "format": "B",
+      "value": 2
+    }
+  ],
+  "calibrationStart": 1628211,
+  "calibrationCount": 223,
+  "minimumAt": 1628214,
+  "maximumAt": 1628660,
+  "minimumSHA256": "2c876a59b91390991d6fef570abfef4351864fbe7b9cd504e354c97207af6132",
+  "maximumSHA256": "673453eb5d2fff3ef4369604865484b9c6b15dcff8a80a6a4c65900a65a5d451",
+  "modelStart": 1629111,
+  "modelKind": 95,
+  "sourceProgram": 1005996,
+  "upperMask": {
+    "at": 1006037,
+    "value": 255
+  },
+  "separate2AEMask": {
+    "at": 1006067,
+    "value": 0
+  }
+}

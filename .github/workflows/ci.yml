@@ -250,6 +250,16 @@ jobs:
         run: |
           dotnet run --project tools/LegacyMathAkDirectionalSpatialNumeric.Probe -c Release -- . .artifacts/math-4f-prepared.json
           python -I -B tools/LegacyMathAkDirectionalSpatialNumeric.Probe/audit_output.py .artifacts/math-4f-prepared.json .artifacts/math-4f-prepared-audit.json
+      - name: Original Math selected5F upper directions and independent reference
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyMathAkDirectionalUpper.Probe -c Release -- . .artifacts/math-5f-features.json
+          python -I -B tools/LegacyMathAkDirectionalUpper.Probe/audit_output.py . .artifacts/math-5f-features.json .artifacts/math-5f-features-audit.json
+      - name: Original Math selected5F synthetic numerical and ownership controls
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyMathAkDirectionalUpperNumeric.Probe -c Release -- . .artifacts/math-5f-prepared.json
+          python -I -B tools/LegacyMathAkDirectionalUpperNumeric.Probe/audit_output.py .artifacts/math-5f-prepared.json .artifacts/math-5f-prepared-audit.json
       - name: Original Math grammar, parsed reconstruction and AK terminal binding
         shell: bash
         run: |
