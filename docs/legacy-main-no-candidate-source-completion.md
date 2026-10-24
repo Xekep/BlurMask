@@ -77,5 +77,11 @@ python -I -B tools/LegacyGlobalNoCandidateConcurrency.Probe/audit_output.py capt
 
 The separate experimental augmentation harness passed five actual zero-eligible
 lifecycle scenarios (success, cross-thread old completion, old failure, new quote
-reentry failure and protocol fault). The actual eligible branch and its complete
-allocation envelope remain unverified and are not enabled by this concurrency fix.
+reentry failure and protocol fault). These are historical captures from before
+the primary compact flag correction. Track0 now produces eligible records and
+cannot be used to repeat the no-candidate concurrency test unchanged. That test
+still requires a genuine source with no eligible records; input flags must not
+be patched to manufacture one. The separately implemented
+[owning augmentation path](legacy-global-word-augmentation.md) now has a bounded
+positive actual entry. It does not turn the old no-candidate owner into an
+eligible-word handler or establish a complete allocation/RSS guarantee.

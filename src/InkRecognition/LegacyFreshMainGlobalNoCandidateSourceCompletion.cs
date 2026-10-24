@@ -52,7 +52,8 @@ public sealed class LegacyFreshMainGlobalNoCandidateSourceCompletion
         if(span.Words.Count!=1||span.SelectedNodes.Count!=1||span.SelectedOrdinals[0]!=0)
             throw new NotSupportedException("This live global route restores one actual275 payload and one279 selection.");
         var snapshot=LegacyFreshMainGlobalPublishedFirstAlternativeSnapshot.Capture(source.Selection,session,source.Publications,allocation400,token);
-        scope.Validate();return new(scope,source,snapshot,word);
+        scope.Validate();var completion=new LegacyFreshMainGlobalNoCandidateSourceCompletion(scope,source,snapshot,word);
+        session.ClaimSourceCompletion(completion,false,token);return completion;
     }
     internal static void RequireNoActiveAugmentation(ReadOnlySpan<byte> compact,int count,CancellationToken token)
     {
@@ -85,7 +86,7 @@ public sealed class LegacyFreshMainGlobalNoCandidateSourceCompletion
             if(Snapshot.SourcePolicy.Owner.AcousticEvaluations!=evaluations)throw new InvalidOperationException("Live source completion cannot reevaluate NN.");
             IsTopV68Completed=true;
         }
-        catch{IsFaulted=true;throw;}
+        catch{IsFaulted=true;Source.Session!.FaultSourceCompletion(this);throw;}
     }
     private void ExportSource(CancellationToken token)
     {
@@ -107,7 +108,7 @@ public sealed class LegacyFreshMainGlobalNoCandidateSourceCompletion
     }
     internal void Validate(CancellationToken token)
     {
-        scope.Validate();token.ThrowIfCancellationRequested();Source.Selection.Publication.Validate(token);
+        scope.Validate();token.ThrowIfCancellationRequested();Source.Session!.RequireSourceCompletion(this,token);Source.Selection.Publication.Validate(token);
         if(IsFaulted||!Source.PublicationCompleted||!ReferenceEquals(Word,Source.Session!.Ownership.WordPublisher.Head))
             throw new InvalidOperationException("The exact live completed global source/list must remain current.");
     }

@@ -7,7 +7,7 @@ public readonly record struct LegacyNativeWordSourceSpan(int First, int Last);
 /// <summary>Owned WORD276120-byte linked-reference builder13f110/180/1f0/
 ///260/410/370/4a0/520/7b0. Pool identity remains the TOP273 owner. No string,
 /// guessed Unicode or fabricated source endpoints replace its references.</summary>
-public sealed class LegacyNativeWordBuilder
+public sealed partial class LegacyNativeWordBuilder
 {
     private readonly byte[] data;
     public LegacyNativeGlyphRecordPool Pool { get; }

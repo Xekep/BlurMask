@@ -3,7 +3,7 @@ namespace InkRecognition;
 /// <summary>Actual global21FE30: derive packet from real initial WORD120,
 /// write it before217DB0, execute218560, publish positive symbol spans, reset
 /// WORD and acknowledge only the actual typed callback result.</summary>
-public sealed class LegacyFreshMainGlobalGlyphExecutionSession
+public sealed partial class LegacyFreshMainGlobalGlyphExecutionSession
 {
     private readonly LegacyNativeWordBuilder word;
     private readonly byte[] initialWord;

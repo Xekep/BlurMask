@@ -56,7 +56,7 @@ public sealed class LegacyNativePublishedWordNode
 /// <summary>279.virtual10/1416b0 plain prepend branch and275/13fe20 plain
 /// word interning, with geometry finalization/order and auxiliary output
 /// explicitly disabled. Source-span callbacks remain actual caller data.</summary>
-public sealed class LegacyNativePlainWordPublisher
+public sealed partial class LegacyNativePlainWordPublisher
 {
     private sealed class InterningState
     {
