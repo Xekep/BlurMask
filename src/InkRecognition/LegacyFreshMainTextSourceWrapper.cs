@@ -173,6 +173,15 @@ public sealed class LegacyFreshMainTextSourceWrapper : IDisposable
         LegacyNativeTextPublicationData properties,LegacyNativeUnicodeNormalizationData normalization,CancellationToken token)
         =>new(choices,properties,normalization,token,completedConfiguredSources:completion,configuredSources:completion.Sources,sharedState:state);
 
+    internal static LegacyFreshMainTextSourceWrapper PrepareSpanWords(LegacyFreshMainTextGlyphChoices choices,
+        LegacyConfiguredSourceCompletionReceipt completion,LegacyMainSharedTextSourceState state,
+        LegacyNativeTextPublicationData properties,LegacyNativeUnicodeNormalizationData normalization,CancellationToken token)
+    {
+        completion.Require(token);
+        return new(choices,properties,normalization,token,completedConfiguredSources:completion.Legacy,
+            configuredSources:completion.Sources,sharedState:state);
+    }
+
     internal void BeginSpanPublication(ReadOnlySpan<byte> record40,ReadOnlySpan<byte> selection4,CancellationToken token)
     {ObjectDisposedException.ThrowIf(disposed,this);choices.BeginPublication(record40,selection4,token);}
 

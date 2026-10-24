@@ -58,7 +58,7 @@ public sealed class LegacyOwnedRussianOrdinaryGlyphProducer
     private LegacyOwnedRussianOrdinaryGlyphProducer(ReadOnlySpan<byte> resource,LegacyFreshCaseMainSourcePolicy? policy,
         LegacyOwnedFreshMainWordControllerPolicy? directPolicy,LegacyOwnedRussianMainGlyphConfidence confidence,
         LegacyCursiveSeparationTable table,LegacyOwnedRussianMainSourceSymbolCallbacks? sourceCallbacks,
-        LegacyNativeTextPublicationData? publication,CancellationToken token)
+        LegacyNativeTextPublicationData? publication,CancellationToken token,LegacyConfiguredSourceOperationDebit? debit=null)
     {
         casePolicy=policy;DirectPolicy=directPolicy;this.confidence=confidence;this.sourceCallbacks=sourceCallbacks;
         var controller=policy?.Controller??directPolicy??throw new ArgumentException("An actual owning source policy is required.");
@@ -89,7 +89,7 @@ public sealed class LegacyOwnedRussianOrdinaryGlyphProducer
         }
         else resolver=LegacyOwnedRussianGlyphSymbolResolver.Prepare(policy!.DictionaryOwner,
             policy.DictionaryOwner.Symbols.Preparation,token);
-        scoring=new(resource,controller,confidence,table,token);
+        scoring=new(resource,controller,confidence,table,token,debit:debit);
         //Engine053F20 writes the seven stored headers to8,A,C,E,10,12,14;
         //ALcount is separately1A. In particular headerE is178, not192.
         blank=U16(resource,99);unitScore=U16(resource,105);
@@ -100,6 +100,14 @@ public sealed class LegacyOwnedRussianOrdinaryGlyphProducer
         {ct.ThrowIfCancellationRequested();var rows=graph.GetNode(node);if(arc>=rows.Count)throw new ArgumentException("Prepared row arc escapes the actual owned graph node.");return rows[arc].GroupId;},
             ResolveOwnedSymbol,scoring.GetCache,scoring.CreateRequest);
         token.ThrowIfCancellationRequested();
+    }
+
+    internal static LegacyOwnedRussianOrdinaryGlyphProducer PrepareConfiguredAugmentation(ReadOnlySpan<byte> resource,
+        LegacyFreshCaseMainSourcePolicy policy,LegacyOwnedRussianMainGlyphConfidence confidence,
+        LegacyCursiveSeparationTable table,LegacyConfiguredSourceOperationDebit debit,CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(debit);debit.ReserveScoringScope(confidence,policy.Controller.Owner.MainLineSource,token);
+        return new(resource,policy,null,confidence,table,null,null,token,debit);
     }
 
     public static LegacyOwnedRussianOrdinaryGlyphProducer Prepare(ReadOnlySpan<byte> resource,

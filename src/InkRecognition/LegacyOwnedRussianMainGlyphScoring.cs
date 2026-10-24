@@ -27,7 +27,7 @@ public sealed class LegacyOwnedMainGlyphRefreshScores
 /// acoustic and geometry cache construction as ordinary216BC0. Immutable source
 /// snapshots make native preparation's3C2 last-group invalidation redundant;
 /// no sampler outputs or pool descriptors are mutated by this portable owner.</summary>
-public sealed class LegacyOwnedRussianMainGlyphScoring
+public sealed partial class LegacyOwnedRussianMainGlyphScoring
 {
     private readonly LegacyCursivePreparedInk ink;
     private readonly LegacyInkRange[][] ranges;
@@ -40,13 +40,17 @@ public sealed class LegacyOwnedRussianMainGlyphScoring
     private readonly Dictionary<int,LegacyNativeGlyphScoreCache> caches=[];
     private readonly object gate=new();
     private readonly LegacyOwnedMainGlyphSourceMetadata? metadata;
+    //The original typed metadata and its checks remain intact. This nullable
+    //reference adds8 logical field bytes to EVERY scoring owner; null creates
+    //no default-path wrapper allocation. The private variant is NEW-file-only.
+    private readonly ConfiguredScoringScope? configuredScope;
     public LegacyOwnedRussianMainGlyphConfidence ConfidenceOwner {get;}
     public LegacyOwnedFreshMainWordControllerPolicy Controller {get;}
 
     internal LegacyOwnedRussianMainGlyphScoring(ReadOnlySpan<byte> resource,
         LegacyOwnedFreshMainWordControllerPolicy controller,LegacyOwnedRussianMainGlyphConfidence confidence,
         LegacyCursiveSeparationTable table,CancellationToken token,
-        LegacyOwnedMainGlyphSourceMetadata? metadata=null)
+        LegacyOwnedMainGlyphSourceMetadata? metadata=null,LegacyConfiguredSourceOperationDebit? debit=null)
     {
         ArgumentNullException.ThrowIfNull(controller);ArgumentNullException.ThrowIfNull(confidence);
         ArgumentNullException.ThrowIfNull(table);token.ThrowIfCancellationRequested();
@@ -59,6 +63,7 @@ public sealed class LegacyOwnedRussianMainGlyphScoring
             Convert.ToHexString(SHA256.HashData(resource)),owner.SelectedSourceOwner.SourceFingerprint))
             throw new InvalidDataException("Same pinned main acoustic source required.");
         ConfidenceOwner=confidence;Controller=controller;this.metadata=metadata;
+        configuredScope=debit is null?null:CreateConfiguredScope(debit,metadata,token);
         var categoryOwner=LegacySourceSamplerCategoryOwner.ReadV10dSource(resource,0,token);
         if(categoryOwner.SamplerNodeOffset!=owner.SelectedSourceOwner.SamplerNodeOffset||
             categoryOwner.CategoryProfileOffset!=owner.SelectedSourceOwner.CategoryProfileOffset)
@@ -165,14 +170,24 @@ public sealed class LegacyOwnedRussianMainGlyphScoring
         lock(gate)
         {
             token.ThrowIfCancellationRequested();
+            var operation=configuredScope?.ReadOperation(this,token);
+            operation?.RequireOwner(ConfidenceOwner,token);
             if(caches.TryGetValue(group,out var cached))return cached;
-            var actual=ConfidenceOwner.ScoreGroup(group,token);var scores=actual.ActualAcousticScores;
-            var candidates=actual.Candidates.Span;
-            int geometry=LegacyCursiveGroupSeparationCost.Evaluate(ink,ranges[group],height,
-                separation.GapOffset,separation.Slope,separationTable,separation.MaximumCost,cancellationToken:token);
-            var result=LegacyMainGlyphScoringKernel.CreateCache(candidates,geometry,categories.Prototypes.Length,
-                blank,scores.Cache.FallbackCost,powerScale,bypass,token);
-            token.ThrowIfCancellationRequested();caches.Add(group,result);return result;
+            operation?.BeginGroup(ConfidenceOwner,group,token);bool succeeded=false;
+            try
+            {
+                var actual=operation is null?ConfidenceOwner.ScoreGroup(group,token):
+                    ConfidenceOwner.ScoreGroupWithConfiguredDebit(group,token,operation);
+                var scores=actual.ActualAcousticScores;
+                operation?.ConvertCache(actual.OwnedCandidates.Length,token);
+                var candidates=actual.Candidates.Span;
+                int geometry=LegacyCursiveGroupSeparationCost.Evaluate(ink,ranges[group],height,
+                    separation.GapOffset,separation.Slope,separationTable,separation.MaximumCost,cancellationToken:token);
+                var result=LegacyMainGlyphScoringKernel.CreateCache(candidates,geometry,categories.Prototypes.Length,
+                    blank,scores.Cache.FallbackCost,powerScale,bypass,token);
+                token.ThrowIfCancellationRequested();caches.Add(group,result);succeeded=true;return result;
+            }
+            finally{operation?.EndGroup(ConfidenceOwner,group,succeeded);}
         }
     }
     private static ushort U16(ReadOnlySpan<byte> bytes,int at)=>BinaryPrimitives.ReadUInt16LittleEndian(bytes[at..]);

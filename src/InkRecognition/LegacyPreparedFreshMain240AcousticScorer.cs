@@ -125,7 +125,10 @@ public sealed class LegacyPreparedFreshMain240AcousticScorer
     }
 
     public LegacyPreparedFreshMain240AcousticScores Score(int groupIndex,CancellationToken cancellationToken=default)
+        =>ScoreWithConfiguredDebit(groupIndex,cancellationToken,null);
+    internal LegacyPreparedFreshMain240AcousticScores ScoreWithConfiguredDebit(int groupIndex,CancellationToken cancellationToken,LegacyConfiguredSourceOperationDebit? debit)
     {
+        if(debit is not null)throw new ArgumentException("Configured LINE debit cannot use a single-glyph scorer.");
         cancellationToken.ThrowIfCancellationRequested();
         var normal=Source.NormalizeGroup(groupIndex,cancellationToken);var ranges=normal.Ranges.Span;
         if(normal.Strokes.Count>Policy.MaximumNormalizedStrokes)throw new NotSupportedException("Actual main pen-up cap exceeded.");

@@ -31,8 +31,15 @@ for(int sample=0;sample<samples.Length;sample++)
  var residue=new LegacyMainConfiguredAlternativeResidue(new byte[120],new byte[72],new byte[40],new ushort[256],new byte[64],new byte[4],new byte[4],new byte[4],new byte[4]);
  var configured=LegacyFreshMainConfiguredSingleLinePlainRecognition.Prepare(ak,lk,engine,line30,line50,samples[sample],0,table,cases,publication).Run(residue,r=>new byte[r.RequiredBytes],new byte[20000*40]);
  var selected=LegacyFreshTextFieldInputContext.Prepare(LegacyFreshRawInkCurrentView.Prepare(configured.SourceDocument)).CreateSelectedCopy();
- var completion=LegacyFreshMainConfiguredNoCandidateSourceCompletion.Prepare(ak,configured,norm,circles,new byte[4],new byte[4]);completion.Run();
- using var words=LegacyFreshMainWordSourceChoices.PrepareSelectedInput(ak,completion,selected,table,publication,norm,circles);
+ bool bit8Refused=false;
+ try{_ = LegacyFreshMainConfiguredNoCandidateSourceCompletion.Prepare(ak,configured,norm,circles,new byte[4],new byte[4]);}
+ catch(NotSupportedException e)when(e.Message=="Enabled219580 candidate augmentation cannot be omitted."){bit8Refused=true;guards++;}
+ if(!bit8Refused)throw new InvalidDataException("Original enabled-bit8 refusal was weakened or fixture changed.");
+ var completion=LegacyFreshMainConfiguredWordAugmentation.Prepare(ak,configured,table,norm,circles,residue);completion.Run();
+ if(!completion.IsTopV68Completed||completion.IsFaulted||!completion.SourcesMarkedComplete||
+    completion.EligibleCandidates!=2||completion.AppendedWords!=0||completion.DuplicateWords!=2||completion.UpdatedNewDuplicates!=0||completion.QuotaAfter!=2)
+  throw new InvalidDataException("Genuine configured duplicate augmentation did not complete its native mark/rank prefix.");
+ using var words=LegacyFreshMainWordSourceChoices.PrepareAugmentedSelectedInput(ak,completion,selected,table,publication,norm,circles);
  var seed=words.DocumentSeed??throw new InvalidDataException("Seed missing before WORD publication.");
  var initialVector=seed.CurrentTransforms;
  byte[] initial=seed.CopyInitialScalarStorage20();
@@ -61,7 +68,9 @@ for(int sample=0;sample<samples.Length;sample++)
     words.NextSelectionId!=next||!pending.SequenceEqual(text.CopyPendingSelections()))
   throw new InvalidDataException("Native selected INPUT transform/DAF prefix or prior snapshots differ.");
  var export=actual.SourceExport.Geometry;
- w.WriteStartObject();w.WriteNumber("sample",sample);w.WriteBase64String("seed20",initial);w.WriteNumber("tag",seed.SourceTag30);
+ w.WriteStartObject();w.WriteNumber("sample",sample);w.WriteBoolean("oldBit8Refusal",bit8Refused);w.WriteBoolean("sourceMarked",completion.SourcesMarkedComplete);
+ w.WriteNumber("eligible",completion.EligibleCandidates);w.WriteNumber("appended",completion.AppendedWords);w.WriteNumber("duplicates",completion.DuplicateWords);w.WriteNumber("updatedDuplicates",completion.UpdatedNewDuplicates);w.WriteNumber("quota",completion.QuotaAfter);
+ w.WriteBase64String("seed20",initial);w.WriteNumber("tag",seed.SourceTag30);
  w.WriteNumber("documentAlternatives",actual.DocumentAlternativeCountD8);w.WriteNumber("sourceLines",lines.LineCount);
  w.WriteNumber("transforms",actual.TransformCount110);w.WriteNumber("dafInputs",actual.DafInputCount);
  w.WriteBoolean("swapped",actual.VectorWasSwapped);w.WriteBoolean("followingStage",actual.FollowingStage026EF0Executed);
@@ -71,14 +80,14 @@ for(int sample=0;sample<samples.Length;sample++)
  w.WriteStartArray("fragments");foreach(var f in export.CopyFragments())
  {w.WriteStartArray();w.WriteNumberValue(f.SourceIndex);w.WriteNumberValue(f.PointCount);w.WriteNumberValue(f.FirstPoint);w.WriteNumberValue(f.LastPoint);w.WriteNumberValue(f.FirstFraction);w.WriteNumberValue(f.LastFraction);w.WriteBooleanValue(f.FirstClosed);w.WriteBooleanValue(f.LastClosed);w.WriteEndArray();}w.WriteEndArray();
  w.WriteNumber("pendingBefore",pending.Length);w.WriteNumber("pendingAfter",text.CopyPendingSelections().Count);w.WriteNumber("nextBefore",next);w.WriteNumber("nextAfter",words.NextSelectionId);w.WriteEndObject();totalMatrices+=export.MatricesResolved;
- using var oldWords=LegacyFreshMainWordSourceChoices.Prepare(ak,completion,table,publication,norm,circles);
+ using var oldWords=LegacyFreshMainWordSourceChoices.PrepareAugmented(ak,completion,table,publication,norm,circles);
  if(oldWords.DocumentSeed is not null)throw new InvalidDataException("Old API acquired a fake selected-input seed.");
  var oldChoices=oldWords.Publish(new byte[40],new byte[2040*4]);
  var oldText=LegacyFreshMainDocumentTextSelection.Prepare(LegacyFreshMainSourceLinePublication.PublishFresh(oldChoices));oldText.Register();
  var oldState=LegacyFreshMainDocumentSelectedSources.Prepare(LegacyFreshMainDocumentCharacterCoverage.Prepare(LegacyFreshMainDocumentSourceCoverage.Prepare(LegacyFreshMainDocumentLineConsistency.Apply(oldText))));
  var oldIndices=LegacyFreshMainDocumentSourceIndices.Prepare(oldState);oldIndices.Run();var oldCleanup=LegacyFreshMainDocumentControlCleanup.Prepare(oldIndices);oldCleanup.Run();
  Reject(()=>LegacyFreshMainDocumentInputTransforms.Apply(oldCleanup));
- using var faultWords=LegacyFreshMainWordSourceChoices.PrepareSelectedInput(ak,completion,selected,table,publication,norm,circles);
+ using var faultWords=LegacyFreshMainWordSourceChoices.PrepareAugmentedSelectedInput(ak,completion,selected,table,publication,norm,circles);
  var faultSeed=faultWords.DocumentSeed!;var faultInitial=faultSeed.CurrentTransforms;
  var faultCleanup=CreateCleanup(faultWords);
  if(!ReferenceEquals(faultInitial,faultSeed.CurrentTransforms))throw new InvalidDataException("Fault seed was detached before export.");

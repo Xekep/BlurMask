@@ -27,9 +27,16 @@ public static class LegacyDirectionalIntersections
         return Extract(samples.Strokes, samples.Width, samples.Height, samples.SourceStepFixed, gridScale, cancellationToken);
     }
 
+    internal static LegacyDirectionalIntersectionSet ExtractWithConfiguredDebit(LegacyDirectionalSamples samples,int gridScale,
+        CancellationToken token,LegacyConfiguredSourceOperationDebit? debit)
+        =>ExtractCore(samples.Strokes,samples.Width,samples.Height,samples.SourceStepFixed,gridScale,token,debit);
+
     public static LegacyDirectionalIntersectionSet Extract(IReadOnlyList<LegacyInkStroke> preparedStrokes,
         int geometryWidth, int geometryHeight, int sourceStepFixed, int gridScale = 10,
         CancellationToken cancellationToken = default)
+        =>ExtractCore(preparedStrokes,geometryWidth,geometryHeight,sourceStepFixed,gridScale,cancellationToken,null);
+    private static LegacyDirectionalIntersectionSet ExtractCore(IReadOnlyList<LegacyInkStroke> preparedStrokes,
+        int geometryWidth,int geometryHeight,int sourceStepFixed,int gridScale,CancellationToken cancellationToken,LegacyConfiguredSourceOperationDebit? debit)
     {
         ArgumentNullException.ThrowIfNull(preparedStrokes);
         if (preparedStrokes.Count is < 1 or > 15 || geometryWidth is < 1 or > 32768 || geometryHeight is < 1 or > 32768)
@@ -53,6 +60,7 @@ public static class LegacyDirectionalIntersections
         int cellSize = Math.Max(1, (step * gridScale + 512) >> 10);
         int columns = Math.Min(100, geometryWidth / cellSize + 4);
         int rows = Math.Min(100, geometryHeight / cellSize + 4);
+        debit?.Intersections(pointCount,checked(columns*rows),cancellationToken);
         var heads = new int[columns * rows]; Array.Fill(heads, -1);
         var segments = new List<Segment>(pointCount); int global = 0, loops = 0;
         for (int stroke = 0; stroke < preparedStrokes.Count; stroke++)
@@ -90,9 +98,11 @@ public static class LegacyDirectionalIntersections
                         if (flags[priorVertex] == 0) flags[priorVertex] = classification;
                         if (prior.Stroke != stroke) continue;
                         bool overlap = false;
+                        debit?.IntersectionInterval(Math.Max(0,currentVertex-priorVertex-1),cancellationToken);
                         for (int i = priorVertex + 1; i < currentVertex; i++)
                             if (flags[i] == 1) { overlap = true; break; }
                         if (overlap) continue;
+                        debit?.IntersectionInterval(Math.Max(0,currentVertex-priorVertex-1),cancellationToken);
                         for (int i = priorVertex + 1; i < currentVertex; i++)
                             if (flags[i] == 0) flags[i] = 1;
                         loops++;

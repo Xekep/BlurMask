@@ -8,8 +8,6 @@ namespace InkRecognition;
 /// linked-WORD ranking and score publication run once for that actual span.</summary>
 public sealed class LegacyFreshMainConfiguredNoCandidateSourceCompletion
 {
-    private sealed class Claim {internal int Entered;}
-    private static readonly ConditionalWeakTable<LegacyFreshMainPlainResultOwnership,Claim> claims=new();
     private readonly LegacyFreshMainGlyphUtf8Emission emission;
     private readonly LegacyOwnedMainCandidateSource[] candidates;
     private readonly LegacyNativePublishedWordNode[] heads;
@@ -27,6 +25,12 @@ public sealed class LegacyFreshMainConfiguredNoCandidateSourceCompletion
     public int InputWordCount {get;private set;}
     public int OutputWordCount {get;private set;}
     public int QuotaAfter {get;private set;}
+    internal void RequireCompleted(CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();if(!IsTopV68Completed||IsFaulted)throw new InvalidOperationException("Successful actual configured completion required.");
+        foreach(var candidate in candidates)candidate.Validate(token);
+        LegacyConfiguredSourceCompletionClaim.Require(candidates[0].TopOwner,this,true,token);
+    }
     internal LegacyOwnedMainWordSourceCollection SourcesFor(LegacyOwnedMainCandidateSource candidate,CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(candidate);token.ThrowIfCancellationRequested();
@@ -49,6 +53,7 @@ public sealed class LegacyFreshMainConfiguredNoCandidateSourceCompletion
         ArgumentNullException.ThrowIfNull(circles);token.ThrowIfCancellationRequested();
         if(leftCallerResidue4.Length!=4||rightCallerResidue4.Length!=4||leftCallerResidue4.Overlaps(rightCallerResidue4))
             throw new ArgumentException("Two separate complete scalar comparison residues required.");
+        using var preparation=LegacyConfiguredSourceCompletionClaim.Acquire(actualResult.Alternatives.TopOwner??throw new InvalidOperationException("Actual configured TOP required."),token);
         var alternatives=actualResult.Alternatives.CopyActiveAlternatives();
         if(!actualResult.Alternatives.IsComplete||actualResult.Alternatives.IsFaulted||alternatives.Length!=2)
             throw new NotSupportedException("Exactly two completed genuine configured alternatives required.");
@@ -93,14 +98,14 @@ public sealed class LegacyFreshMainConfiguredNoCandidateSourceCompletion
         {
             token.ThrowIfCancellationRequested();
             if(started)throw new InvalidOperationException("An entered configured source completion cannot be retried.");
+            using var preflight=LegacyConfiguredSourceCompletionClaim.Acquire(candidates[0].TopOwner,token);
             foreach(var candidate in candidates)candidate.Validate(token);
             var publisher=candidates[0].Ownership.WordPublisher;
             var span=publisher.CaptureSpan(Sources.Word,heads,token);
-            if(Interlocked.CompareExchange(ref claims.GetValue(candidates[0].TopOwner,static _=>new()).Entered,1,0)!=0)
-                throw new InvalidOperationException("This actual configured TOP already entered source completion.");
-            started=true;
+            preflight.Enter(this,false,token);started=true;preflight.Dispose();
             try
             {
+                LegacyConfiguredSourceCompletionClaim.MarkAfterCallback(candidates[0].TopOwner,this);
                 SourcesMarkedComplete=true;InputWordCount=span.Words.Count;
                 ushort ignored=emission.PrimaryAlphabet.TryGetLabel("\u200d",out ushort label)?label:ushort.MaxValue;
                 bool Compare(ReadOnlySpan<byte> left,ReadOnlySpan<byte> right)
@@ -116,9 +121,10 @@ public sealed class LegacyFreshMainConfiguredNoCandidateSourceCompletion
                 var scored=publisher.CaptureSpan(Sources.Word,heads,token);
                 var scores=LegacyPreparedMainSpanScorePublication.Normalize(scored.Words.Select(w=>w.CopyStorage()).ToArray(),token);
                 publisher.ApplySpanScores(scored,scores.Words,token);SpanScoresApplied=true;
-                CheckboxGuardVerified=true;token.ThrowIfCancellationRequested();IsTopV68Completed=true;
+                CheckboxGuardVerified=true;token.ThrowIfCancellationRequested();
+                LegacyConfiguredSourceCompletionClaim.Complete(candidates[0].TopOwner,this,token);IsTopV68Completed=true;
             }
-            catch{IsFaulted=true;throw;}
+            catch{IsFaulted=true;LegacyConfiguredSourceCompletionClaim.Poison(candidates[0].TopOwner,this);throw;}
         }
     }
 }

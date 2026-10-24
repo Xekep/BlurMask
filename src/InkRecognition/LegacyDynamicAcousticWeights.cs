@@ -18,6 +18,9 @@ public static class LegacyDynamicAcousticWeights
 {
     public static LegacyDynamicAcousticWeightResult Evaluate(IReadOnlyList<InkStroke> strokes,
         LegacyDynamicAcousticWeightProfile profile, CancellationToken cancellationToken = default)
+        =>EvaluateWithConfiguredDebit(strokes,profile,cancellationToken,null);
+    internal static LegacyDynamicAcousticWeightResult EvaluateWithConfiguredDebit(IReadOnlyList<InkStroke> strokes,
+        LegacyDynamicAcousticWeightProfile profile,CancellationToken cancellationToken,LegacyConfiguredSourceOperationDebit? debit)
     {
         ArgumentNullException.ThrowIfNull(strokes); cancellationToken.ThrowIfCancellationRequested();
         Validate(profile);
@@ -33,7 +36,8 @@ public static class LegacyDynamicAcousticWeights
                 if(!float.IsFinite(p.X)||!float.IsFinite(p.Y)||Math.Abs(p.X)>1e6f||Math.Abs(p.Y)>1e6f)
                     throw new ArgumentException("Finite bounded float geometry required.", nameof(strokes));
         }
-        var (points,owners)=Resample(strokes,profile.SampleCount,cancellationToken);
+        debit?.DynamicInput(sourceCount,cancellationToken);
+        var (points,owners)=Resample(strokes,profile.SampleCount,cancellationToken,debit);
         float minX=points[0].X,maxX=minX,minY=points[0].Y,maxY=minY;
         foreach(var p in points){minX=Math.Min(minX,p.X);maxX=Math.Max(maxX,p.X);minY=Math.Min(minY,p.Y);maxY=Math.Max(maxY,p.Y);}
         float extent=Math.Max(maxX-minX,maxY-minY);
@@ -83,18 +87,19 @@ public static class LegacyDynamicAcousticWeights
         return new((float)mean,1f-mode2,mode2,points.Length);
     }
 
-    private static (InkPoint[] Points,int[] Owners) Resample(IReadOnlyList<InkStroke> source,int target,CancellationToken token)
+    private static (InkPoint[] Points,int[] Owners) Resample(IReadOnlyList<InkStroke> source,int target,CancellationToken token,LegacyConfiguredSourceOperationDebit? debit)
     {
         float length=0;
         foreach(var stroke in source)
             for(int i=1;i<stroke.Points.Count;i++){float x=stroke.Points[i].X-stroke.Points[i-1].X,y=stroke.Points[i].Y-stroke.Points[i-1].Y;length+=Root(y*y+x*x);}
         float step=length/(target-1);
         var points=new List<InkPoint>();var owners=new List<int>();
-        void Add(InkPoint p,int owner){if(points.Count==4096)throw new ArgumentException("Resampled geometry exceeds 4096 points.");points.Add(p);owners.Add(owner);}
+        void Add(InkPoint p,int owner){debit?.DynamicPoint(token);if(points.Count==4096)throw new ArgumentException("Resampled geometry exceeds 4096 points.");points.Add(p);owners.Add(owner);}
         if(step==0)
         {
             for(int s=0;s<source.Count;s++)Add(source[s].Points[0],s);
-            return(points.ToArray(),owners.ToArray());
+            debit?.DynamicSamples(points.Count,token);
+        return(points.ToArray(),owners.ToArray());
         }
         float carry=0;
         for(int s=0;s<source.Count;s++)
@@ -124,6 +129,7 @@ public static class LegacyDynamicAcousticWeights
         }
         if(carry/step>.5f)Add(source[^1].Points[^1],source.Count-1);
         if(points.Count==0)throw new InvalidDataException("Unsupported empty native resampling result.");
+        debit?.DynamicSamples(points.Count,token);
         return(points.ToArray(),owners.ToArray());
     }
 

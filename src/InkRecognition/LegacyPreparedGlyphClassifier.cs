@@ -30,6 +30,14 @@ public sealed class LegacyPreparedGlyphClassifier
         ReadOnlySpan<short> context,short startBoundary,short endBoundary,
         bool includeBaselineFamilies,ReadOnlySpan<byte> enabledFamilySlots,float costMultiplier,
         ReadOnlySpan<byte> enabledClasses=default,CancellationToken cancellationToken=default)
+        =>ClassifyWithConfiguredDebit(preparedInk,orderedRanges,candidateMinimumX,sourceBaseline,sourceHeight,targetHeight,
+            maximumRangesBeforeMerge,context,startBoundary,endBoundary,includeBaselineFamilies,enabledFamilySlots,costMultiplier,enabledClasses,cancellationToken,null);
+    internal LegacyPreparedGlyphClassification ClassifyWithConfiguredDebit(LegacyCursivePreparedInk preparedInk,
+        ReadOnlySpan<LegacyInkRange> orderedRanges,float candidateMinimumX,float sourceBaseline,
+        float sourceHeight,short targetHeight,int maximumRangesBeforeMerge,
+        ReadOnlySpan<short> context,short startBoundary,short endBoundary,
+        bool includeBaselineFamilies,ReadOnlySpan<byte> enabledFamilySlots,float costMultiplier,
+        ReadOnlySpan<byte> enabledClasses,CancellationToken cancellationToken,LegacyConfiguredSourceOperationDebit? debit)
     {
         cancellationToken.ThrowIfCancellationRequested();
         if(enabledFamilySlots.Length!=7)throw new ArgumentException("Seven explicit enabled-family flags required.",nameof(enabledFamilySlots));
@@ -47,9 +55,9 @@ public sealed class LegacyPreparedGlyphClassifier
             }
             raw[i]=new(Array.AsReadOnly(points));
         }
-        var dynamic=LegacyDynamicAcousticWeights.Evaluate(raw,weights.DynamicProfile,cancellationToken);
-        var scores=classifier.Classify(geometry.Strokes,geometry.Baseline,context,startBoundary,endBoundary,
-            includeBaselineFamilies,cancellationToken);
+        var dynamic=LegacyDynamicAcousticWeights.EvaluateWithConfiguredDebit(raw,weights.DynamicProfile,cancellationToken,debit);
+        var scores=classifier.ClassifyWithConfiguredDebit(geometry.Strokes,geometry.Baseline,context,startBoundary,endBoundary,
+            includeBaselineFamilies,cancellationToken,debit);
         float[] resolved=weights.ResolveWeights(dynamic,cancellationToken);
         for(int i=0;i<7;i++)
         {

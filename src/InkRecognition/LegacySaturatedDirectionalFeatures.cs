@@ -12,6 +12,12 @@ public static class LegacySaturatedDirectionalFeatures
         ReadOnlySpan<short> spatialMinima, ReadOnlySpan<short> spatialMaxima,
         ReadOnlySpan<short> context, short startBoundary, short endBoundary,
         CancellationToken token = default)
+        =>ExtractWithConfiguredDebit(strokes,baseline,temporalMinima,temporalMaxima,spatialMinima,spatialMaxima,context,startBoundary,endBoundary,token,null);
+    internal static (short[] Temporal,short[] Spatial) ExtractWithConfiguredDebit(
+        IReadOnlyList<LegacyInkStroke> strokes,LegacyInkBaseline baseline,
+        ReadOnlySpan<short> temporalMinima,ReadOnlySpan<short> temporalMaxima,
+        ReadOnlySpan<short> spatialMinima,ReadOnlySpan<short> spatialMaxima,
+        ReadOnlySpan<short> context,short startBoundary,short endBoundary,CancellationToken token,LegacyConfiguredSourceOperationDebit? debit)
     {
         ArgumentNullException.ThrowIfNull(strokes); token.ThrowIfCancellationRequested();
         if (strokes.Count is < 1 or > 15 || baseline.Height <= 0 || context.Length != 28 ||
@@ -27,11 +33,14 @@ public static class LegacySaturatedDirectionalFeatures
             count += stroke.Points.Length;
         }
         if (count == 0) throw new ArgumentException("Nonempty source geometry required.");
+        debit?.DirectionalInput(count,strokes.Count,token);
         var samples = LegacyDirectionalResampling.Prepare(strokes, 100, false, token);
-        if (samples.Strokes.Sum(s => s.Points.Length) is < 1 or > 255)
+        int sampleCount=samples.Strokes.Sum(s => s.Points.Length);
+        if (sampleCount is < 1 or > 255)
             throw new ArgumentException("This actual2B1 facade admits1..255 prepared samples before byte-indexed consumers.");
+        debit?.DirectionalSamples(sampleCount,strokes.Count,token);
         var direction = LegacyDirectional2B1Landmarks.Extract(samples.Strokes, token);
-        var intersections = LegacyDirectionalIntersections.Extract(samples, 10, token);
+        var intersections = LegacyDirectionalIntersections.ExtractWithConfiguredDebit(samples, 10, token,debit);
         var global = LegacyDirectionalStatistics.Extract(samples.Strokes, samples.Width, samples.Height,
             samples.PhysicalArcLength, direction.Flags.Span, intersections.Flags.Span,
             intersections.SelfLoopCount, token);

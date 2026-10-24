@@ -18,8 +18,10 @@ public sealed class LegacyFreshMainWordSourceChoices : IDisposable
     private bool started;
     private bool disposed;
     public bool IsFaulted {get;private set;}
-    public LegacyFreshMainConfiguredNoCandidateSourceCompletion SourceCompletion {get;}
-    public LegacyOwnedMainWordSourceCollection Sources=>SourceCompletion.Sources;
+    private readonly LegacyConfiguredSourceCompletionReceipt completion;
+    // Preserved old API; augmented completion never fabricates NoCandidate.
+    public LegacyFreshMainConfiguredNoCandidateSourceCompletion SourceCompletion=>completion.Legacy??throw new InvalidOperationException("Augmented source completion has no NoCandidate owner.");
+    public LegacyOwnedMainWordSourceCollection Sources=>completion.Sources;
     public LegacyOwnedRawInkDocument Document=>Sources.Document;
     public LegacyFreshMainPlainResultOwnership TopOwner=>Sources.CandidateSource.TopOwner;
     public IReadOnlyList<LegacyOwnedMainSpanWordView> WordViews {get;}
@@ -31,14 +33,14 @@ public sealed class LegacyFreshMainWordSourceChoices : IDisposable
     public long NextSelectionId=>shared.Selections.NextSelectionId;
     public IReadOnlyList<LegacyOwnedFreshTextSelection> CopyPendingSelections()=>shared.Selections.CopyPendingSelections();
 
-    private LegacyFreshMainWordSourceChoices(ReadOnlySpan<byte> resource,LegacyFreshMainConfiguredNoCandidateSourceCompletion completion,
+    private LegacyFreshMainWordSourceChoices(ReadOnlySpan<byte> resource,LegacyConfiguredSourceCompletionReceipt completion,
         LegacyOwnedMainCandidateSource[] candidates,LegacyNativePublishedWordNode[] heads,
         LegacyNativePlainWordSpanSnapshot snapshot,LegacyCursiveSeparationTable table,
         LegacyNativeTextPublicationData publication,LegacyNativeUnicodeNormalizationData normalization,
         LegacyNativeCircledPayloadData circles,LegacyFreshTextFieldInputContext? selectedInput,CancellationToken token,
         LegacyMainSharedTextSourceState? adopted=null)
     {
-        SourceCompletion=completion;this.candidates=candidates;this.heads=heads;this.snapshot=snapshot;
+        this.completion=completion;this.candidates=candidates;this.heads=heads;this.snapshot=snapshot;
         publisher=candidates[0].Ownership.WordPublisher;
         words=snapshot.Words.Select((record,index)=>new LegacyOwnedMainSpanWordView(this,index,record)).ToArray();
         WordViews=Array.AsReadOnly(words);
@@ -58,7 +60,10 @@ public sealed class LegacyFreshMainWordSourceChoices : IDisposable
         LegacyFreshMainConfiguredNoCandidateSourceCompletion actualCompletedSources,LegacyCursiveSeparationTable table,
         LegacyNativeTextPublicationData publication,LegacyNativeUnicodeNormalizationData normalization,
         LegacyNativeCircledPayloadData circles,CancellationToken token=default)
-        =>PrepareCore(resource,actualCompletedSources,null,table,publication,normalization,circles,token);
+        {
+        ArgumentNullException.ThrowIfNull(actualCompletedSources);
+        return PrepareCore(resource,LegacyConfiguredSourceCompletionReceipt.From(actualCompletedSources,token),null,table,publication,normalization,circles,token);
+    }
 
     /// <summary>The same actual shared275 WORD source pipeline with the
     /// Text05F050 pending cursor derived from a retained selected INPUT/C22.
@@ -74,11 +79,29 @@ public sealed class LegacyFreshMainWordSourceChoices : IDisposable
         if(actualSelectedInput.Parent is null||
             !ReferenceEquals(actualSelectedInput.Document,actualCompletedSources.Sources.Document))
             throw new ArgumentException("Actual selected INPUT/C22 must retain this same original recognition document.");
-        return PrepareCore(resource,actualCompletedSources,actualSelectedInput,table,publication,normalization,circles,token);
+        return PrepareCore(resource,LegacyConfiguredSourceCompletionReceipt.From(actualCompletedSources,token),actualSelectedInput,table,publication,normalization,circles,token);
+    }
+
+    public static LegacyFreshMainWordSourceChoices PrepareAugmented(ReadOnlySpan<byte> resource,
+        LegacyFreshMainConfiguredWordAugmentation actualCompletedSources,LegacyCursiveSeparationTable table,
+        LegacyNativeTextPublicationData publication,LegacyNativeUnicodeNormalizationData normalization,
+        LegacyNativeCircledPayloadData circles,CancellationToken token=default)
+        =>PrepareCore(resource,LegacyConfiguredSourceCompletionReceipt.From(actualCompletedSources,token),null,table,publication,normalization,circles,token);
+
+    public static LegacyFreshMainWordSourceChoices PrepareAugmentedSelectedInput(ReadOnlySpan<byte> resource,
+        LegacyFreshMainConfiguredWordAugmentation actualCompletedSources,LegacyFreshTextFieldInputContext actualSelectedInput,
+        LegacyCursiveSeparationTable table,LegacyNativeTextPublicationData publication,
+        LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(actualCompletedSources);ArgumentNullException.ThrowIfNull(actualSelectedInput);
+        var receipt=LegacyConfiguredSourceCompletionReceipt.From(actualCompletedSources,token);
+        if(actualSelectedInput.Parent is null||!ReferenceEquals(actualSelectedInput.Document,receipt.Sources.Document))
+            throw new ArgumentException("Actual selected INPUT must retain the same configured raw document.");
+        return PrepareCore(resource,receipt,actualSelectedInput,table,publication,normalization,circles,token);
     }
 
     private static LegacyFreshMainWordSourceChoices PrepareCore(ReadOnlySpan<byte> resource,
-        LegacyFreshMainConfiguredNoCandidateSourceCompletion actualCompletedSources,
+        LegacyConfiguredSourceCompletionReceipt actualCompletedSources,
         LegacyFreshTextFieldInputContext? selectedInput,LegacyCursiveSeparationTable table,
         LegacyNativeTextPublicationData publication,LegacyNativeUnicodeNormalizationData normalization,
         LegacyNativeCircledPayloadData circles,CancellationToken token,LegacyMainSharedTextSourceState? adopted=null)
@@ -86,8 +109,7 @@ public sealed class LegacyFreshMainWordSourceChoices : IDisposable
         ArgumentNullException.ThrowIfNull(actualCompletedSources);ArgumentNullException.ThrowIfNull(table);
         ArgumentNullException.ThrowIfNull(publication);ArgumentNullException.ThrowIfNull(normalization);
         ArgumentNullException.ThrowIfNull(circles);token.ThrowIfCancellationRequested();
-        if(!actualCompletedSources.IsTopV68Completed||actualCompletedSources.IsFaulted)
-            throw new ArgumentException("Successfully completed actual configured shared-span source owner required.");
+        actualCompletedSources.Require(token);
         var source=actualCompletedSources.Sources.CandidateSource;
         var candidates=source.ConfiguredResult.Alternatives.CopyActiveAlternatives()
             .Select(a=>LegacyOwnedMainCandidateSource.FromConfigured(source.ConfiguredResult,a,token)).ToArray();
@@ -126,7 +148,7 @@ public sealed class LegacyFreshMainWordSourceChoices : IDisposable
         LegacyFreshMainConfiguredNoCandidateSourceCompletion completion,LegacyMainSharedTextSourceState shared,
         LegacyCursiveSeparationTable table,LegacyNativeTextPublicationData publication,
         LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token)
-        =>PrepareCore(resource,completion,shared.Selections.InputBinding?.Legacy,table,publication,normalization,circles,token,shared);
+        =>PrepareCore(resource,LegacyConfiguredSourceCompletionReceipt.From(completion,token),shared.Selections.InputBinding?.Legacy,table,publication,normalization,circles,token,shared);
 
     public LegacyOwnedMainWordSourceChoicesResult Publish(ReadOnlySpan<byte> recordResidue40,
         ReadOnlySpan<byte> selectionResidue4,CancellationToken token=default)
@@ -147,7 +169,7 @@ public sealed class LegacyFreshMainWordSourceChoices : IDisposable
                 var alternatives=new LegacyOwnedMainWordSourceAlternative[candidates.Length];
                 for(int i=0;i<candidates.Length;i++)
                 {
-                    var intern=i==0?first:shared.Words.InternWordSource(SourceCompletion.SourcesFor(candidates[i],token),token);
+                    var intern=i==0?first:shared.Words.InternWordSource(completion.SourcesFor(candidates[i],token),token);
                     if(!ReferenceEquals(intern.Node,first.Node))throw new InvalidDataException("Actual same-span WORD key did not reuse its source node.");
                     alternatives[i]=new(candidates[i],payload,!intern.Inserted);
                 }

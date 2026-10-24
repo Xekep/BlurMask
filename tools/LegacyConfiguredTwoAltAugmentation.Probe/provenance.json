@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "scope": "Stored ROOT original4 diagnostic only; not public RU/whole219580/quality/wholeNN. No target in CI.",
+  "fixtureSHA256": {
+    "raw-0.json": "588344b375eda97a5728a6d6c5707b2336a1dfc772358dbbc484a97244114f9c",
+    "raw-1.json": "df9ca71740d641c940a3b19dd6c43c1dbfb1661c2eaf95cac4982c07d47621b6",
+    "raw-2.json": "4ac7b743da6f9dad88f05594f4b995372ed6024ed3c5db1a9b8b1959315b4a19",
+    "raw-3.json": "cecbbc802eb96b90bfa822b85ad66107a9f624354bf9b578acf4effb991d48c6"
+  },
+  "sourceLF_SHA256": {
+    "src/InkRecognition/LegacyConfiguredSourceCompletionClaim.cs": "dc9467da23b6e56cef72df09f2630528099973cbaf81062e4e1b688586406768",
+    "src/InkRecognition/LegacyConfiguredSourceCompletionReceipt.cs": "17ebcc42fe4bad7e1ad62ae5a9561343142c577a946b47a460ecf9d5813159d5",
+    "src/InkRecognition/LegacyConfiguredSourceOperationDebit.cs": "3433ee105aa3af3c8db6ff2b3da9c5d58bbf01ddbbe4550448085a3475829a20",
+    "src/InkRecognition/LegacyConfiguredWordAugmentationEnvelope.cs": "045523bb2d5b8e2a83ad4a25e3127883dd671adb831afd166d14e11e243bb0e5",
+    "src/InkRecognition/LegacyDirectionalGlyphClassifier.cs": "d8299004931613549ec618d980cac20581e34661fd3d43d259f4ffda2ffb83ad",
+    "src/InkRecognition/LegacyDirectionalIntersections.cs": "6e5c3f011d44837060a540732194ac7fbf6f2e781b488851c94f637f107713f7",
+    "src/InkRecognition/LegacyDynamicAcousticWeights.cs": "ddc0960d746ed6294b918b75f59e5ec9adb13fbdf5e46b4910a5adc648d1f0d1",
+    "src/InkRecognition/LegacyFreshMainConfiguredNoCandidateSourceCompletion.cs": "54f447df79286dd9fba2893aa11448b2baa6acfd081898fbacd06274d2e8e9a1",
+    "src/InkRecognition/LegacyFreshMainConfiguredWordAugmentation.Diagnostic.cs": "ef80c86ddca2804adcc0a37925d185a68c26665670b6f51f304ff6b636963d47",
+    "src/InkRecognition/LegacyFreshMainConfiguredWordAugmentation.cs": "072cf7c9eaac44437c3e22678a654756a9c5989673c68513d8606f8806452d2f",
+    "src/InkRecognition/LegacyFreshMainTextSourceWrapper.cs": "162bebe703d8dc6514698ec1e2580fed29a3081b5f85a396ff5861da40ef1bc7",
+    "src/InkRecognition/LegacyFreshMainWordSourceChoices.cs": "39c69c2a4f50df822e15247f8c4479372eb83284bf37c468f67516c9713ac394",
+    "src/InkRecognition/LegacyOwnedRussianMainGlyphConfidence.cs": "39cd65a271cbbe7e7f78094bf7dc30c7d196c075b18317b22e4790a18fb15b1c",
+    "src/InkRecognition/LegacyOwnedRussianMainGlyphScoring.cs": "a0245e6ac5dbc1262aaafa8f8f1bd863aa681088262e581e5fb9f8b5acf70bbd",
+    "src/InkRecognition/LegacyOwnedRussianOrdinaryGlyphProducer.cs": "0ca23a5561ef3f0267ef770d9601731e6f52d8d8a690067ae654ca09d6f8e13a",
+    "src/InkRecognition/LegacyPreparedFreshMain240AcousticScorer.cs": "e555c198c2d5552e079880131deb199ced81a987e6414eb595a6019a3275a827",
+    "src/InkRecognition/LegacyPreparedFreshMainLine240AcousticScorer.cs": "79cbc4b11805f262ce8681dbe0c6182914ef4fc6d8ee91a9b6e66c26997daca3",
+    "src/InkRecognition/LegacyPreparedGlyphClassifier.cs": "08588aab1212e3696a0ea8ba28fd4730d9f0080f95e57f8e0e96c93fa1b8a895",
+    "src/InkRecognition/LegacySaturatedDirectionalFeatures.cs": "cda6d48eb0de3e04d76f7936590204eadc178a8322dbeba2f3b21c89272c8ae9"
+  },
+  "rootOwningManifestSHA256": "a7db57b4f1c164faa4e89977eebe12b35c543f99c5b6a5d35e0944bbf3229f34",
+  "rootVerificationSHA256": "e2040b33892815a4a35a77e21c94346d83986e8a7925cd347ac653a508105467",
+  "rootNegativeReceiptSHA256": "f426172ce319bd468e9d334440663f015049ea5a3da13f53375ee499fac7078f",
+  "rootActualCounts": {
+    "comparisons": 16,
+    "orderedGlyphReads": 60,
+    "events": [
+      51,
+      67,
+      63,
+      51
+    ],
+    "augmentationFourFamilyMissReservations": [
+      1,
+      4,
+      8,
+      1
+    ],
+    "wholePipelineNNCountInstrumented": false
+  },
+  "downstreamProjection": {
+    "duplicateFixtureIncluded": false,
+    "sha256": "4fb83f9a668a9ee55a851c5acdc72ad909eb3088612cb03f1987f8ff06e9fd1f",
+    "byteExactToPrior4fb83": true,
+    "proof": "ROOT verification and owning manifest bind unchanged compiled source/PDB/input and original3MB capture. Stored RAW audits do not re-prove full downstream transforms."
+  },
+  "positiveIntegrationVerification": {
+    "owningManifestSHA256": "46ad87b14cf2413b688247357064142cc7e2045ce66c99e9106ff4ac3bcb9c37",
+    "captureSHA256": "4fb83f9a668a9ee55a851c5acdc72ad909eb3088612cb03f1987f8ff06e9fd1f",
+    "fullDownstreamByteExact": true,
+    "fixedActualOwners": 4,
+    "swaps": 1024,
+    "failedExportPrefixes": 512,
+    "identityMatrices": 14,
+    "guards": 28,
+    "runtime": "10.0.12",
+    "processorCount": 2,
+    "observedAffinity": 3,
+    "scope": "One ROOT actual run of the explicit augmented positive entry, unchanged original output auditor; not whole engine or public RU quality. Broad CI remains independently required."
+  },
+  "compiledPDBManifestSHA256": "ea45563a932534ba911663297c6db79a5a64b2d2110b28e9e85188bd539d5df7",
+  "sourceManifestSHA256": "00f0e05b1e1516d66682ee7d8b0aa65627cbd529da68bef74e8b47bfd23c416a"
+}

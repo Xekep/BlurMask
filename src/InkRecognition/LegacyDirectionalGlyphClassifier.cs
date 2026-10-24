@@ -79,7 +79,12 @@ public sealed class LegacyDirectionalGlyphClassifier
     public LegacyDirectionalGlyphScores Classify(IReadOnlyList<LegacyInkStroke> glyph, LegacyInkBaseline baseline,
         ReadOnlySpan<short> context, short startBoundary, short endBoundary, bool includeBaselineFamilies = true,
         CancellationToken cancellationToken = default)
+        =>ClassifyWithConfiguredDebit(glyph,baseline,context,startBoundary,endBoundary,includeBaselineFamilies,cancellationToken,null);
+    internal LegacyDirectionalGlyphScores ClassifyWithConfiguredDebit(IReadOnlyList<LegacyInkStroke> glyph,LegacyInkBaseline baseline,
+        ReadOnlySpan<short> context,short startBoundary,short endBoundary,bool includeBaselineFamilies,
+        CancellationToken cancellationToken,LegacyConfiguredSourceOperationDebit? debit)
     {
+        if(debit is not null&&(!_actual2B1||!includeBaselineFamilies))throw new ArgumentException("Configured debit requires the existing actual2B1 classifier.");
         ArgumentNullException.ThrowIfNull(glyph); cancellationToken.ThrowIfCancellationRequested();
         if (glyph.Count is < 1 or > 256 || baseline.Height <= 0 || context.Length is not (0 or 28) ||
             startBoundary is not (-1024 or 1024) || endBoundary is not (-1024 or 1024))
@@ -105,15 +110,16 @@ public sealed class LegacyDirectionalGlyphClassifier
             if (!_actual2B1 || !LegacyMainPointGlyphFeatures.TryCreate(glyph, baseline, context,
                 startBoundary, endBoundary, cancellationToken, out inputs[0], out inputs[1]))
             {
+                debit?.BasicRaster(points,glyph.Count,cancellationToken);
                 inputs[0] = LegacyStrokeFeatures.ExtractInputWithBaseline(glyph, baseline, context, startBoundary, endBoundary, cancellationToken);
                 inputs[1] = LegacyRasterFeatures.ExtractInputWithBaseline(glyph, baseline, context, startBoundary, endBoundary, cancellationToken);
             }
         }
         if (_actual2B1)
         {
-            var directional = LegacySaturatedDirectionalFeatures.Extract(glyph, baseline,
+            var directional = LegacySaturatedDirectionalFeatures.ExtractWithConfiguredDebit(glyph, baseline,
                 _temporal.Minima.Span, _temporal.Maxima.Span, _spatial.Minima.Span, _spatial.Maxima.Span,
-                context, startBoundary, endBoundary, cancellationToken);
+                context, startBoundary, endBoundary, cancellationToken,debit);
             inputs[2] = directional.Temporal; inputs[3] = directional.Spatial;
         }
         else
@@ -125,6 +131,7 @@ public sealed class LegacyDirectionalGlyphClassifier
         }
         var scores = new LegacyAcousticFamilyScores?[7];
         var probabilities = new ReadOnlyMemory<int>?[7];
+        debit?.Neural(cancellationToken);
         for (int i = includeBaselineFamilies ? 0 : 2; i < 4; i++)
         {
             var family = _families[i];

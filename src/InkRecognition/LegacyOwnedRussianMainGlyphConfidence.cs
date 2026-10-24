@@ -10,7 +10,7 @@ public readonly record struct LegacyMainGlyphConfidenceCandidate(ushort Symbol,i
 /// the ordinary1BCBD0 scalar vectors, not a recognition winner or UTF8 publication.</summary>
 public sealed class LegacyOwnedRussianMainGlyphConfidence
 {
-    private readonly Func<int,CancellationToken,LegacyPreparedFreshMain240AcousticScores> score;
+    private readonly Func<int,CancellationToken,LegacyConfiguredSourceOperationDebit?,LegacyPreparedFreshMain240AcousticScores> score;
     private readonly Func<int,float> sourceProbability;
     private readonly LegacyMainConfidenceCalibration calibration;
     private readonly LegacyAcousticConfidenceLabelMap labels;
@@ -27,7 +27,7 @@ public sealed class LegacyOwnedRussianMainGlyphConfidence
     private LegacyOwnedRussianMainGlyphConfidence(ReadOnlySpan<byte> resource,
         LegacyRussianModelBundle model,LegacyOrdinaryCursiveCandidateGraph graph,
         LegacyFreshCaseRussianDictionaryPreparation? caseOwner,LegacyOwnedRussianDictionaryPreparation? directOwner,
-        Func<int,CancellationToken,LegacyPreparedFreshMain240AcousticScores> score,Func<int,float> sourceProbability,
+        Func<int,CancellationToken,LegacyConfiguredSourceOperationDebit?,LegacyPreparedFreshMain240AcousticScores> score,Func<int,float> sourceProbability,
         LegacyPreparedFreshMain240AcousticPolicy policy,float groupPowerScale,CancellationToken token)
     {
         token.ThrowIfCancellationRequested();Model=model;Graph=graph;CaseDictionaryOwner=caseOwner;DirectDictionaryOwner=directOwner;
@@ -53,7 +53,7 @@ public sealed class LegacyOwnedRussianMainGlyphConfidence
         var scorer=owner.CreateAcousticScorer(resource,token);var source=scorer.Source;
         if(!ReferenceEquals(owner.Graph,source.SourceRanges.Graph))throw new ArgumentException("Same sampled main graph required.");
         var original=source.Owner.Postprocessing.Input.Controller.Source;
-        return new(resource,owner.Model,owner.Graph,owner,null,scorer.Score,physical=>original.SourceStrokeProbabilities.Span[physical],scorer.Policy,scorer.CostScale,token);
+        return new(resource,owner.Model,owner.Graph,owner,null,scorer.ScoreWithConfiguredDebit,physical=>original.SourceStrokeProbabilities.Span[physical],scorer.Policy,scorer.CostScale,token);
     }
 
     public static LegacyOwnedRussianMainGlyphConfidence Prepare(ReadOnlySpan<byte> resource,
@@ -63,7 +63,7 @@ public sealed class LegacyOwnedRussianMainGlyphConfidence
         var scorer=owner.CreateAcousticScorer(resource,context,token);var source=scorer.Source;
         if(!ReferenceEquals(owner.Graph,source.SourceRanges.Graph))throw new ArgumentException("Same sampled main line graph required.");
         var original=source.Owner.Preparation.Input.Input.Input.Owner.Controller.Source;
-        return new(resource,owner.Model,owner.Graph,owner,null,scorer.Score,physical=>original.SourceStrokeProbabilities.Span[physical],scorer.Policy,scorer.CostScale,token);
+        return new(resource,owner.Model,owner.Graph,owner,null,scorer.ScoreWithConfiguredDebit,physical=>original.SourceStrokeProbabilities.Span[physical],scorer.Policy,scorer.CostScale,token);
     }
 
     /// <summary>Retain the actual DIRECT owner and its mask/scorer; no parallel
@@ -74,7 +74,7 @@ public sealed class LegacyOwnedRussianMainGlyphConfidence
         ArgumentNullException.ThrowIfNull(owner);token.ThrowIfCancellationRequested();
         var scorer=owner.CreateAcousticScorer(resource,token);var source=scorer.Source;
         var original=source.Owner.Postprocessing.Input.Controller.Source;
-        return new(resource,owner.Model,source.SourceRanges.Graph,null,owner,scorer.Score,
+        return new(resource,owner.Model,source.SourceRanges.Graph,null,owner,scorer.ScoreWithConfiguredDebit,
             physical=>original.SourceStrokeProbabilities.Span[physical],scorer.Policy,scorer.CostScale,token);
     }
 
@@ -84,17 +84,20 @@ public sealed class LegacyOwnedRussianMainGlyphConfidence
         ArgumentNullException.ThrowIfNull(owner);ArgumentNullException.ThrowIfNull(context);token.ThrowIfCancellationRequested();
         var scorer=owner.CreateAcousticScorer(resource,context,token);var source=scorer.Source;
         var original=source.Owner.Preparation.Input.Input.Input.Owner.Controller.Source;
-        return new(resource,owner.Model,source.SourceRanges.Graph,null,owner,scorer.Score,
+        return new(resource,owner.Model,source.SourceRanges.Graph,null,owner,scorer.ScoreWithConfiguredDebit,
             physical=>original.SourceStrokeProbabilities.Span[physical],scorer.Policy,scorer.CostScale,token);
     }
 
     /// <summary>Scores the actual graph group internally. No prepared replacement
     /// cache, probability, mask, alias list or owner88 channel is accepted.</summary>
     public LegacyOwnedRussianMainGlyphConfidenceGroup ScoreGroup(int groupIndex,CancellationToken token=default)
+        =>ScoreGroupWithConfiguredDebit(groupIndex,token,null);
+    internal LegacyOwnedRussianMainGlyphConfidenceGroup ScoreGroupWithConfiguredDebit(int groupIndex,CancellationToken token,LegacyConfiguredSourceOperationDebit? debit)
     {
+        debit?.RequireConfidence(this,groupIndex,token);
         token.ThrowIfCancellationRequested();
         if((uint)groupIndex>=(uint)Graph.Groups.Count)throw new ArgumentOutOfRangeException(nameof(groupIndex));
-        var actual=score(groupIndex,token);var candidates=actual.Cache.Candidates.Span;
+        var actual=score(groupIndex,token,debit);var candidates=actual.Cache.Candidates.Span;
         var result=EvaluateCandidates(candidates,actual.Glyph.Scores.FamilyProbabilities,
             ()=>sourceProbability(Graph.Groups[groupIndex].Ranges.Span[0].StrokeIndex),token);
         token.ThrowIfCancellationRequested();return new(this,groupIndex,result,actual);

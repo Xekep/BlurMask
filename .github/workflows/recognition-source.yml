@@ -23,6 +23,8 @@ on:
       - 'tools/LegacyEnglishOriginalInput*/**'
       - 'tools/LegacyCompletedPostTextWork.Probe/**'
       - 'tools/LegacyCompletedStructuredWords.Audit/**'
+      - 'tools/LegacyConfiguredTwoAltAugmentation.Probe/**'
+      - 'tools/ci/check-configured-two-alt-raw.py'
       - '.github/workflows/recognition-source.yml'
   pull_request:
     paths:
@@ -45,6 +47,8 @@ on:
       - 'tools/LegacyEnglishOriginalInput*/**'
       - 'tools/LegacyCompletedPostTextWork.Probe/**'
       - 'tools/LegacyCompletedStructuredWords.Audit/**'
+      - 'tools/LegacyConfiguredTwoAltAugmentation.Probe/**'
+      - 'tools/ci/check-configured-two-alt-raw.py'
       - '.github/workflows/recognition-source.yml'
   workflow_dispatch:
 
@@ -148,3 +152,30 @@ jobs:
             .artifacts/math-first276-al/data-audit-controls/*.json
             .artifacts/math-first276-model-storage/*.json
             .artifacts/math-first276-model-storage/*.log
+
+  configured-raw:
+    name: Configured RAW stored DATA / ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            11.0.100-preview.7.26381.103
+            10.0.x
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python tools/ci/check-configured-two-alt-raw.py .artifacts/configured-two-alt-raw
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: configured-two-alt-raw-${{ matrix.os }}
+          path: |
+            .artifacts/configured-two-alt-raw/*.json
+            .artifacts/configured-two-alt-raw/*.log

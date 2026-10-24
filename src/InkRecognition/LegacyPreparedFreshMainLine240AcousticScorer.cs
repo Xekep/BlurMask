@@ -69,14 +69,17 @@ public sealed class LegacyPreparedFreshMainLine240AcousticScorer
     }
 
     public LegacyPreparedFreshMain240AcousticScores Score(int groupIndex,CancellationToken cancellationToken=default)
+        =>ScoreWithConfiguredDebit(groupIndex,cancellationToken,null);
+    internal LegacyPreparedFreshMain240AcousticScores ScoreWithConfiguredDebit(int groupIndex,CancellationToken cancellationToken,LegacyConfiguredSourceOperationDebit? debit)
     {
+        debit?.RequireLine(Source,Context,cancellationToken);
         var normal=Source.NormalizeGroup(groupIndex,cancellationToken);var ranges=normal.Ranges.Span;
         if(normal.Strokes.Count>Policy.MaximumNormalizedStrokes)throw new NotSupportedException("Actual main pen-up cap exceeded.");
         var context=Context.GetContext(groupIndex,cancellationToken);
         var signs=LegacyCursiveGlyphBoundaryPolicy.Resolve(ranges,Source.Cuts.PreparedInk.StrokePointCounts.Span,0,false,false,cancellationToken);
-        var glyph=classifier.Classify(Source.Cuts.PreparedInk,ranges,Source.GetGroupMinimumX(groupIndex,cancellationToken),Source.Owner.SourceBaseline,
+        var glyph=classifier.ClassifyWithConfiguredDebit(Source.Cuts.PreparedInk,ranges,Source.GetGroupMinimumX(groupIndex,cancellationToken),Source.Owner.SourceBaseline,
             Source.Owner.SourceHeight,Source.Owner.AcousticTargetHeight,Source.Owner.SpanProfile.MaximumAtoms,context,signs.Start,signs.End,true,families,1,
-            masks.Primary.Span[..180],cancellationToken);
+            masks.Primary.Span[..180],cancellationToken,debit);
         var primitive=Source.GetPrimitiveScope(groupIndex,cancellationToken);
         var cacheContext=new LegacyOrdinaryAcousticCacheContext(Policy.PruneCandidates,false,(Policy.FrontendFlags&0x10)!=0,
             primitive.BoundaryAlignedSingleNormalizedStroke,primitive.EndpointFieldsAreZero,primitive.SourceStrokeProbability,false,ReadOnlyMemory<ushort>.Empty);
