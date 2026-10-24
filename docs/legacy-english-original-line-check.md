@@ -98,3 +98,18 @@ and execute no neural networks. The portable probe and audit run in managed CI.
 This corrects the missing point-feature branch. Successful sentence recognition
 and shared TEXT publication still require the unchanged drawing to pass the
 complete owning pipeline; the original failure above remains recorded.
+
+A single subsequent invocation with this source correction and the byte-identical
+drawing passed the previous point failure. The original source completed, with
+374 cached/current MAIN acoustic evaluations. It then explicitly refused at
+`batch-source-and-carried-rank`: `Actual residual217DB0 augmentation association
+remains separate`. The batch structural meter had counted 57 loop bodies;
+this is not a count of neural forwards or all CPU work. The unchanged-resource
+checks, cancellation guards and precompletion TEXT guard were preserved.
+
+This run took about 4.83 seconds, used two logical processors/affinity3 and the
+same 45-second outer watchdog, and verified 1,105 source/resource/runtime/binary
+pins before/after. Its failure capture SHA256 is
+`275eedaf9238ecb8758b6719ed284bc914287bed0659805c40345657c02b1b98`.
+The residual association is the next implementation frontier. Neither failure
+was replaced, and this result does not claim completed multiword TEXT.
