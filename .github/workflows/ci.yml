@@ -306,31 +306,8 @@ jobs:
         run: |
           dotnet run --project tools/LegacyMathAkUnifiedClassifier.Probe -c Release -- . .artifacts/math-unified-prepared.json
           python -I -B tools/LegacyMathAkUnifiedClassifier.Probe/audit_output.py . .artifacts/math-unified-prepared.json
-      - name: Original Math original-stroke prefix and provenance without inference
-        shell: bash
-        run: |
-          dotnet run --project tools/LegacyMathAkProcessedPrefix.Probe -c Release -- models tools/LegacyMathAkProcessedPrefix.Probe/fixtures.json .artifacts/math-processed-prefix.json
-          python -I -B tools/LegacyMathAkProcessedPrefix.Probe/audit_output.py . .artifacts/math-processed-prefix.json .artifacts/math-processed-prefix-audit.json
-      - name: Original Math fresh input identity and masks without inference
-        shell: bash
-        run: |
-          dotnet run --project tools/LegacyMathAkOriginalInput.Probe -c Release -- models tools/LegacyMathAkProcessedPrefix.Probe/fixtures.json .artifacts/math-original-input.json
-          python -I -B tools/LegacyMathAkOriginalInput.Probe/audit_output.py . .artifacts/math-original-input.json .artifacts/math-original-input-audit.json
-      - name: Original Math operator geometry without inference
-        shell: bash
-        run: |
-          dotnet run --project tools/LegacyMathAkOperator13B6Geometry.Probe -c Release -- models tools/LegacyMathAkOperator13B6Geometry.Probe/fixtures.json .artifacts/math-operator-geometry.json
-          python -I -B tools/LegacyMathAkOperator13B6Geometry.Probe/audit_output.py . .artifacts/math-operator-geometry.json .artifacts/math-operator-geometry-audit.json
-      - name: Original Math connected13B6 scalar ranges without inference
-        shell: bash
-        run: |
-          dotnet run --project tools/LegacyMathAkOperator13B6.Probe -c Release -- models tools/LegacyMathAkOperator13B6.Probe/fixtures.json .artifacts/math-connected-operator13b6.json
-          python -I -B tools/LegacyMathAkOperator13B6.Probe/audit_output.py . .artifacts/math-connected-operator13b6.json .artifacts/math-connected-operator13b6-audit.json
-      - name: Original Math source spline geometry and post-claim cancellation without inference
-        shell: bash
-        run: |
-          dotnet run --project tools/LegacyMathAkOperator13A0.Probe -c Release -- models tools/LegacyMathAkOperator13A0.Probe/fixtures.json .artifacts/math-source13a0.json
-          python -I -B tools/LegacyMathAkOperator13A0.Probe/audit_output.py . models tools/LegacyMathAkOperator13A0.Probe/fixtures.json .artifacts/math-source13a0.json .artifacts/math-source13a0-audit.json
+      # Five scalar Math stages and their independent oracles run on all three
+      # OSes in recognition-source.yml, outside this long INPUT/TEXT chain.
       - name: Original Math grammar, parsed reconstruction and AK terminal binding
         shell: bash
         run: |

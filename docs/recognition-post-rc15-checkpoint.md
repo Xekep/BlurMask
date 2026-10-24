@@ -34,6 +34,15 @@ lifecycle evidence, not full English text or handwriting-quality evidence.
 The successor remains outside RC15; independent CHAR DATA audit and integration
 review follow separately.
 
+Root subsequently replayed the frozen CHAR DATA auditor against that capture:
+37 pinned dependencies/inputs,39 corruption controls, one fresh node/command,
+160 record-template bytes and160 known-mask bytes checked. Actual reuse count
+is zero, so this does not prove a live reuse/cache hit. Line0 is joined to the
+authenticated finalized-source descriptor guard; native pointer contents and
+unexported command fields remain unknown. Evidence:
+`root-english-char-data-review-20261024`, auditor manifest
+`ee3678d77f54a8f8f04f4e08e28b0b4a035bd90bf2100bffb507128ff6d6f90b`.
+
 ## Structured WORD consumer review
 
 Root replayed941 frozen pins, seven native containing regions,8192 ordinary
@@ -61,3 +70,13 @@ passed, with905 source/tool/workflow pins checked before/after. The previous
 `7789ac7a581439041ca163ea64246bdd758040f88f0ba2c97a8f40b163cd9269`.
 Evidence: `root-math13a0-main-20261024`. The new no-inference checks are in CI;
 the known earlier INPUT-transform test frontier remains separate.
+
+The five scalar stages (processed prefix, original input, operator geometry,
+connected13B6 and source13A0) now have a separate three-OS workflow. Their
+steps moved out of the long INPUT/TEXT job; no assertions were removed. The
+portable driver passed all five local builds, scalar runs and independent
+oracles under CPU2/affinity3, including the two earlier stages not rebuilt by
+the initial three-project check. Evidence:
+`root-portable-math-source-20261024`. Cross-platform results are tracked by
+the separate `Recognition source geometry` workflow. It performs no inference
+or desktop launch and does not replace the remaining full-engine tests.
