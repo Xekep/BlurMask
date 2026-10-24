@@ -37,8 +37,9 @@ then two residual bytes per pair. On this typed fresh single-descriptor
 no-protocol graph, the successful forward1A9AE0 mode2 path equals its
 already verified mode0 path. Mode2's additional final-node protocol append
 is absent by the same constructor/source lifecycle proof used by the owned
-span-source service. Reverse/protocol spans and containing-span reuse across
-several WORD owners remain refused here.
+span-source service. Reverse/protocol spans and source publication across
+several WORD owners remain refused here. Native278 lookup uses exact First/Last
+equality; the earlier description of containing-span reuse was incorrect.
 
 The source pairs are projected through the actual original raw document and
 05AFA0 codec. That WORD collection clips each ordinary glyph's first-pass

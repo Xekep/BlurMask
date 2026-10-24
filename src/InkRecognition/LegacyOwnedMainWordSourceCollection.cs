@@ -41,8 +41,8 @@ public sealed class LegacyOwnedMainWordSourceCollection
         =>ReferenceEquals(references,other.references)&&ReferenceEquals(ranges,other.ranges);
 
     /// <summary>Bounded first fresh span-owner source export before219580's
-    /// alternative append. The exact one-WORD restriction avoids substituting
-    /// an exact-span dictionary for native278's containing-span ownership.</summary>
+    /// alternative append. Whole-chain augmentation, carried ranking quota and
+    /// publication remain separate from native278's exact First/Last lookup.</summary>
     public static LegacyOwnedMainWordSourceCollection ExportBeforeWordAugmentation(
         LegacyFreshMainCompletedFirstCandidate actualCandidate,CancellationToken token=default)
     {

@@ -11,7 +11,10 @@ fork creation order is never substituted for TOP order. Heads are validated
 against the identical publisher/fork owner, and overlapping or cyclic279
 lists are refused. The snapshot exposes read-only actual WORD records,
 their immutable flat-reference sidecars and original selected ordinals.
-Native278's general containing-span search is not implemented by this seam.
+Native278's142A50 lookup returns an existing owner only when both signed
+First and Last equal the requested key. Its end-group skip links do not admit
+containing spans. See [the exact-index correction](legacy-main-span-exact-index.md).
+This does not establish the remaining multiword ownership and ranking lifecycle.
 
 `ApplySpanRanking` accepts the separately verified ranking kernel's full
 120-byte output, payload-source permutation and old-index map. Every payload

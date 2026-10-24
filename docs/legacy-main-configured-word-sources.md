@@ -42,8 +42,9 @@ All active compact records in these fixtures have native augmentation bit8
 clear. These APIs provide the219580 source prefix and numeric diagnostics only.
 `IsTopV68Completed` remains false. Per-span augmentation, quota/ranking, final
 score normalization and complete V68 ownership require their separate owning
-stage. The one-WORD restriction also remains: native containing-span selection
-is not replaced with a fabricated exact-span result.
+stage. The one-WORD restriction also remains until the shared augmentation,
+ranking quota and publication lifecycle supports a whole WORD chain. Native278
+lookup itself uses [exact First/Last equality](legacy-main-span-exact-index.md).
 
 Run `tools/LegacyMainConfiguredWordSources.Probe` with the standard ten model
 arguments and an output JSON path, then run its `audit_output.py capture.json`.
