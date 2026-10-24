@@ -2,16 +2,13 @@ namespace InkRecognition;
 
 /// <summary>
 /// Source-bound base-tail1F numerical path only. It consumes privately issued
-/// temporal222 features; it is not the six-model259-label13A5 classifier.
+/// temporal222 features; it is not the selected-five259-label13A5 classifier.
 /// No grammar candidate/cache/workspace authority follows from these outputs.
 /// </summary>
 public sealed class LegacyMathAkTemporalNetwork
 {
     private readonly LegacyMathAkSourceGeometry source;
-    private readonly short[] first;
-    private readonly sbyte[] second;
-    private readonly byte[] scales;
-    private readonly int firstStride, secondStride;
+    private readonly LegacyMathAkSelectedModels models;
     //Exact48-entry Text180260FD0 table, independently checked against PE bytes.
     private static readonly int[] HiddenTable =
     {
@@ -20,44 +17,18 @@ public sealed class LegacyMathAkTemporalNetwork
         932,943,952,960,968,974,980,985,990,994,997,1000,
         1003,1005,1008,1010,1011,1013,1014,1015,1016,1017,1018,1018
     };
-    private LegacyMathAkTemporalNetwork(LegacyMathAkSourceGeometry source,
-        short[] first, sbyte[] second, byte[] scales, int firstStride, int secondStride)
-    { this.source = source; this.first = first; this.second = second; this.scales = scales;
-      this.firstStride = firstStride; this.secondStride = secondStride; }
+    internal LegacyMathAkTemporalNetwork(LegacyMathAkSourceGeometry source, LegacyMathAkSelectedModels models)
+    { this.source = source; this.models = models; }
 
-    /// <summary>Authenticates actual resource through the existing raw owner,
-    /// then privately owns only the fixed1F model. No caller model selection.</summary>
+    public LegacyMathAkSelectedModels ModelOwner => models;
+
+    /// <summary>Convenience factory. For many subsets prepare a shared selected
+    /// model owner once, then call its BindTemporal method for each source.</summary>
     public static LegacyMathAkTemporalNetwork PrepareActual(LegacyMathAkSourceGeometry source,
         ReadOnlySpan<byte> actualResource, CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(source); token.ThrowIfCancellationRequested();
-        using var raw = LegacyMathMixed107RawResource.LoadActualResource(actualResource, token);
-        var model = raw.Models.Single(m => m.OriginalStart == 1_007_739);
-        if (model.Kind != 0x1f || model.InputWidth != 222 || model.HiddenRows != 200 ||
-            model.OutputRows != 257 || model.Quantizer != 10 || model.Containing13A5Start != 1_005_980)
-            throw new InvalidDataException("Actual selected1F model contract differs.");
-        var snapshot = model.Capture(token);
-        short[] first = snapshot.CopyFirstWeights(token);
-        sbyte[] second = snapshot.CopySecondWeights(token);
-        byte[] scales = snapshot.CopyScales(token);
-        //Actual backend may read padded lanes. Zero weights make their values
-        //irrelevant without fabricating input/scratch padding authority.
-        for (int row = 0; row < 200; row++)
-        {
-            token.ThrowIfCancellationRequested();
-            for (int c = 222; c < snapshot.FirstStride; c++)
-                if (first[row * snapshot.FirstStride + c] != 0)
-                    throw new NotSupportedException("Nonzero first-layer padding.");
-        }
-        for (int row = 0; row < 257; row++)
-        {
-            token.ThrowIfCancellationRequested();
-            for (int c = 201; c < snapshot.SecondStride; c++)
-                if (second[row * snapshot.SecondStride + c] != 0)
-                    throw new NotSupportedException("Nonzero second-layer padding.");
-        }
-        token.ThrowIfCancellationRequested();
-        return new(source, first, second, scales, snapshot.FirstStride, snapshot.SecondStride);
+        return LegacyMathAkSelectedModels.PrepareActual(actualResource, token).BindTemporal(source, token);
     }
 
     /// <summary>Runs unmasked scalar modular dots and actual exponent10 hidden
@@ -68,7 +39,13 @@ public sealed class LegacyMathAkTemporalNetwork
         ArgumentNullException.ThrowIfNull(features); token.ThrowIfCancellationRequested();
         if (!source.OwnsTemporalFeatures(features))
             throw new ArgumentException("Exact privately issued source feature owner required.", nameof(features));
-        short[] input = features.CopyValues();
+        var result = models.EvaluateTemporal(source, features, token);
+        return new(this, result.Dots, result.Hidden, result.Raw);
+    }
+    internal static (int[] Dots, short[] Hidden, int[] Raw) RunModel(ReadOnlySpan<short> input,
+        ReadOnlySpan<short> first, ReadOnlySpan<sbyte> second, ReadOnlySpan<byte> scales,
+        int firstStride, int secondStride, CancellationToken token)
+    {
         var dots = new int[200]; var hidden = new short[201]; hidden[0] = 1024;
         for (int row = 0; row < dots.Length; row++)
         {
@@ -83,7 +60,7 @@ public sealed class LegacyMathAkTemporalNetwork
             raw[row] = Dot8(hidden, second, row * secondStride, scales[row + 1]);
         }
         token.ThrowIfCancellationRequested();
-        return new(this, dots, hidden, raw);
+        return (dots, hidden, raw);
     }
     private static int Dot16(ReadOnlySpan<short> input, ReadOnlySpan<short> weights, int at)
     {

@@ -200,6 +200,11 @@ jobs:
         run: |
           dotnet run --project tools/LegacyMathAkTemporalNumeric.Probe -c Release -- .artifacts/math-1f-prepared.json
           python -I -B tools/LegacyMathAkTemporalNumeric.Probe/audit_output.py . .artifacts/math-1f-prepared.json .artifacts/math-1f-prepared-audit.json
+      - name: Selected mathematical model ownership without inference
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyMathAkSelectedModels.Probe -c Release -- . .artifacts/math-selected-models.json
+          python -I -B tools/LegacyMathAkSelectedModels.Probe/audit_output.py . .artifacts/math-selected-models.json
       - name: Original Math grammar, parsed reconstruction and AK terminal binding
         shell: bash
         run: |

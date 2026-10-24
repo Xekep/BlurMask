@@ -18,10 +18,13 @@ remains in the network output. Unified259-label costs still require the other
 feature/model families and native combination/geometry policies. These results
 cannot issue grammar matches or candidate trees.
 
-The factory temporarily loads all six raw models, then detaches1F. Its retained
-weights/scales occupy143314 payload bytes; this is not a memory optimization or
-an RSS guarantee. The full classifier should share immutable model weights
-across source-subset evaluations. Result accessors return detached arrays.
+The factory now uses the [shared selected-five model owner](legacy-math-ak-selected-models.md).
+Prepare that owner once and bind each source geometry to it; the bindings copy
+no weights. The convenience factory retains all five selected models instead
+of its former143314-byte single1F payload. This is an intentional cost increase
+for that one-call path, not a memory reduction. The shared weights total761370
+payload bytes; preparation still temporarily decodes the six-model raw catalog.
+These payload figures are not RSS guarantees. Result accessors remain detached.
 
 Prepared controls cover8 synthetic dots,17 activation boundaries and771 numerical
 costs, with seven corrupted-output checks. The separate static audit verifies all
