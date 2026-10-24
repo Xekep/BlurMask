@@ -47,6 +47,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             graphWordPublicationData=parent.CompleteWord(token);
             if(graphTextPublicationRequested)graphTextPublicationData=parent.CompleteText(token);
             if(graphPostTextCoverageRequested)graphPostTextCoverageData=parent.CompletePostTextCoverage(token);
+            if(graphOriginalSelectedRequested)graphEarlySelectedInputData=parent.CopyEarlySelectedInputData(token);
             //Future021AB0/NULL projection/TEXT must be called HERE while the
             //same CHAR context/StringPool/Selections are live, never on result DATA.
         }
@@ -114,7 +115,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             TotalReferences=references;
             Reserve(checked(65536+Count*1024L+references*2048L),checked(131072+Count*2048L+references*4096L),checked(32768+references*512L));
             Document=stage.Lease.Root.Knowledge.Owner.Owner.Owner.Parent.CreateGraphRawDocument(stage,token);
-            Selections=LegacyOwnedFreshTextSourceContext.Prepare(Document,token);words=LegacyOwnedMainTextSourceInterner.Prepare(Document,token);
+            Selections=owner.graphOriginalSelectedRequested?PrepareEarlyOriginalSelected(token):LegacyOwnedFreshTextSourceContext.Prepare(Document,token);words=LegacyOwnedMainTextSourceInterner.Prepare(Document,token);
             operations=LegacyOwnedRawInkRangeOperations.Prepare(Document);
             if(owner.graphPostTextCoverageRequested)PreparePostTextState(token);
             if(owner.graphTextPublicationRequested)PrepareTextInputs(token); //native028771, before WORD source/intern.
@@ -211,7 +212,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         }
         internal LegacyOwnedFreshTextSelection? RegisterInto(LegacyOwnedFreshTextSourceContext actual,CancellationToken token)
         {
-            Require(token);if(finished||next!=Count||current!=-1||wordNode is null||!ReferenceEquals(actual,Selections)||!ReferenceEquals(actual.Document,Document)||actual.InputBinding is not null||(flags&0x200000)!=0)
+            Require(token);if(finished||next!=Count||current!=-1||wordNode is null||!ReferenceEquals(actual,Selections)||!ReferenceEquals(actual.Document,Document)||!MatchesGraphSelectionBinding(actual,token)||(flags&0x200000)!=0)
                 throw new InvalidOperationException("Actual all275 WORD registration prefix required.");
             return actual.CreateEnglishWordCore(this,token);
         }

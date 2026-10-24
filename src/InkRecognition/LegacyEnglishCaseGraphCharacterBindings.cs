@@ -15,7 +15,7 @@ public sealed partial class LegacyOwnedFreshTextSourceContext
     internal LegacyOwnedFreshTextSelection? CreateEnglishCharacter(LegacyEnglishCaseNode0Completion.GraphCharacterPayload actual,CancellationToken token)
     {
         actual.Context.RequireInitializing(actual,token);
-        if(!actual.Source.Ordinary||!ReferenceEquals(actual.Context.Selections,this)||!ReferenceEquals(actual.Context.Document,Document)||InputBinding is not null)
+        if(!actual.Source.Ordinary||!ReferenceEquals(actual.Context.Selections,this)||!ReferenceEquals(actual.Context.Document,Document)||!actual.Context.MatchesGraphSelectionBinding(this,token))
             throw new InvalidOperationException("Same fresh raw-original EN CHAR registration transaction required.");
         long output=-1;
         return CreateCore(actual.Source.CopyRanges(token),0,ref output,0,token);

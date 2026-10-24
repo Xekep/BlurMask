@@ -106,7 +106,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         {
             Require(token);owner.graphCharacterContext!.RequireCompleted(token);
             if(!finished||textPhase!=3||!ReferenceEquals(currentText,actual)||!ReferenceEquals(actual.Owner,this)||
-                !ReferenceEquals(selections,Selections)||!ReferenceEquals(selections.Document,Document)||selections.InputBinding is not null)
+                !ReferenceEquals(selections,Selections)||!ReferenceEquals(selections.Document,Document)||!MatchesGraphSelectionBinding(selections,token))
                 throw new InvalidOperationException("Exact current English raw-root TEXT receipt/selection context required.");
         }
     }

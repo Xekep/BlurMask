@@ -371,3 +371,38 @@ parity or a live FIRST212/213 factory/lifetime/feature-order proof; MXCSR FTZ/DA
 and exceptional conversion parity remain unsupported. Evidence:
 `root-first276-quantizer-proof-frozen-manifest-20261024.json`
 (SHA256 `2fb9f420b5d5eba3dff9ae3c6e4994b4e6324bd13eea094d7a27cccde1963528`).
+
+## Early English original-selected bootstrap after RC18
+
+An explicit internal same-context route now constructs original PAGE/INPUT and
+selected C20 from its private immutable raw document before CHAR/WORD/TEXT
+registration. It retains the actual view/original/selected/binding contexts and
+their C51 cursor, without late ID remapping or a caller-supplied receipt. The
+default/raw routes retain their prior binding guards. This bootstrap is after
+recognition: earlier native frontend-selected lineage is still unproved.
+
+Root reviewed NEW1/OLD4, complete helper/source reservations, mutation guards,
+fixed-input harness and both independent DATA auditors;972 frozen files,
+3 upstream manifests and951 runtime/source pins passed. ONE owning run completed in1.814s
+including audit, CPU2/affinity3/.NET10.0.12/45s, no retry. Capture SHA256:
+`beaef516f78e14ff9f01a0fdb7d5a9bb8746766b24858d7f6836218e6696cb91`.
+Every prior recognition/source/scorer/metrics/flags value remains exact. Only
+the literal PostText.RemainingFrontier transition and new EarlySelected DATA
+are admitted;32 corruptions are refused. Actual INPUT0/next1, pending-after-TEXT4
+and10+10 DOM cardinalities agree with the real model-free source protocol.
+DocumentApplied and public admission remain false; no quality gain is claimed.
+
+Main application and both tools build with zero warnings/errors. The prepared
+8-case/160-DOM/68072-byte capture is byte-exact to the reviewed isolated run,
+including14 exact refusals/16 copy checks/30 DATA corruptions. Canonical actual
+DATA audit report is byte-exact; owning/NN was not repeated for integration.
+Helper reservations are the exact five-row sum, not the earlier rounded draft;
+all limits remain unchanged. Evidence: `root-english-early-selected-main-20261024`,
+proof manifestf3bffcef and portable manifest1024a419. Remaining next work includes
+same-owner01FD40/020000, source guide provenance, later document application
+and verified RU/EN cursive/AUTO quality.
+
+Independent quantizer review4a97da6b verified the complete288B/68-instruction
+body,196627 ordinary scalars with a third raw-bit shift oracle,20000 additional
+raw patterns and831 slice placements. No blocker within the declared primitive
+scope; live evaluator identity/quantizer/scratch/order and FTZ/DAZ remain open.

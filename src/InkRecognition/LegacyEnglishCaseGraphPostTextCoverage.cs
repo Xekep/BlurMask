@@ -35,7 +35,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         private void PreparePostTextState(CancellationToken token)
         {
             owner.RequireGraphPublication(Stage,token);
-            if(!owner.graphTextPublicationRequested||postTextChoices is not null||Selections.InputBinding is not null)
+            if(!owner.graphTextPublicationRequested||postTextChoices is not null||!MatchesGraphSelectionBindingAtPreparation())
                 throw new InvalidOperationException("Fresh raw-document pending-TEXT preparation required.");
             //Array slots, one holder/choice, list+final link arrays, link holders,
             //and final diagnostic arrays. Logical payload, not CLR/RSS bytes.
@@ -93,7 +93,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             Require(token);var context=owner.graphCharacterContext??throw new InvalidOperationException("Live CHAR context required.");
             context.RequireCompleted(token);
             if(postTextFinished||!finished||textPhase!=4||textKey is null||textLines is null||textLineFrame is null||
-                postTextChoices is null||postTextLinks is not null||head.Next is not null||Selections.InputBinding is not null||
+                postTextChoices is null||postTextLinks is not null||head.Next is not null||!MatchesGraphSelectionBinding(Selections,token)||
                 textLines.Lines.Length!=1||textLines.NextWrapperLineOffset!=1)
                 throw new NotSupportedException("One completed raw pending-TEXT/one WORD/one line domain required.");
             textLineFrame.Require(Stage,token);
@@ -161,6 +161,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             postTextFinished=true;
             return new(SelectedOrdinal,1,Count,checkedLinks,Pairs(union),data,Selections.NextSelectionId,
                 pendingAfter.Count,false,"SAME_EN_LIVE_POST_TEXT_025E40_027670_0248D0_01C740_ORDINARY_LINE0",
+                owner.graphOriginalSelectedRequested?"Original-selected bootstrap retained;01FD40/020000 and document apply remain unissued.":
                 "Original-selected INPUT/C20 bootstrap,01FD40/020000 and document apply remain unissued.");
         }
     }

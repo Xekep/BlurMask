@@ -245,6 +245,10 @@ jobs:
           dotnet run --project tools/LegacyEnglishPostTextCoverage.Probe -c Release -- .artifacts/english-posttext-controls.json .artifacts/english-posttext-prepared.json
           python -I -B tools/LegacyEnglishPostTextCoverage.Probe/audit_output.py .artifacts/english-posttext-controls.json .artifacts/english-posttext-prepared.json .artifacts/english-posttext-audit.json
           dotnet build tools/LegacyEnglishPostTextCoverage.ActualEntry -c Release
+          dotnet build tools/LegacyEnglishEarlySelected.Probe -c Release --disable-build-servers -m:1 -p:UseSharedCompilation=false
+          dotnet build tools/LegacyEnglishEarlySelected.ActualEntry -c Release --disable-build-servers -m:1 -p:UseSharedCompilation=false
+          dotnet run --no-build --project tools/LegacyEnglishEarlySelected.Probe -c Release -- .artifacts/english-early-selected-prepared.json
+          python -I -B tools/LegacyEnglishEarlySelected.Probe/audit_output.py .artifacts/english-early-selected-prepared.json .artifacts/english-early-selected-prepared-audit.json
       - name: Original Math AK source geometry and independent rounding controls
         shell: bash
         run: |
