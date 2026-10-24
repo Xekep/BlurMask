@@ -68,6 +68,8 @@ public sealed class LegacyFreshMainGlobalSourceGeometry
     {foreach(var range in ranges[Group(node,arc,token)]){token.ThrowIfCancellationRequested();if(range.StartPoint!=0)return false;}return true;}
     public bool ReadAlphabetFlag(ushort symbol,CancellationToken token=default)
     {token.ThrowIfCancellationRequested();return Policy.Owner.Model.AcousticAlphabet.IsSymbolFlagged(symbol);}
+    internal int StoredBaseRangeCount(int node,ushort arc,CancellationToken token)
+        =>ranges[Group(node,arc,token)].Length;
     public LegacyInkRange[] CopyStoredGroupRanges(int node,ushort arc,CancellationToken token=default)
         =>ranges[Group(node,arc,token)].ToArray();
     internal bool StoredGroupRangesEqual(int group,ReadOnlySpan<LegacyInkRange> other,CancellationToken token)

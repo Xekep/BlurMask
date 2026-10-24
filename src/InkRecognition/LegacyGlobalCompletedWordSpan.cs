@@ -7,6 +7,8 @@ internal sealed class LegacyGlobalCompletedWordSpan
     private readonly LegacyGlobalCompletedTextSource binding;
     private readonly LegacyNativePlainWordPublisher publisher;
     private readonly LegacyNativePlainWordSpanSnapshot snapshot;
+    private readonly LegacyNativePublishedWordNode actualNode;
+    private readonly LegacyFreshMainGlobalSourceBatchCompletion.CompletedTextWords? batchWords;
     private readonly int thread=Environment.CurrentManagedThreadId;
     private LegacyFreshMainGlobalWordTextPublication? parent;
     private Cursor? current;
@@ -19,7 +21,7 @@ internal sealed class LegacyGlobalCompletedWordSpan
     internal long ReferenceArrayCopyBytes=>checked(8L*TotalReferences);
     private LegacyGlobalCompletedWordSpan(LegacyGlobalCompletedTextSource binding,CancellationToken token)
     {
-        this.binding=binding;binding.Validate(token);publisher=binding.Source.Session!.Ownership.WordPublisher;
+        this.binding=binding;binding.Validate(token);publisher=binding.Source.Session!.Ownership.WordPublisher;actualNode=binding.Word;
         publisher.RequireSoleActiveSourceHead(binding.Word);
         if(binding.Snapshot.ActiveAlternativeCount60!=1||binding.Word.Next is not null)
             throw new NotSupportedException("One actual TOP with one shared WORD span required for all275 publication.");
@@ -41,21 +43,54 @@ internal sealed class LegacyGlobalCompletedWordSpan
         TotalReferences=references;Require(token);
     }
     internal static LegacyGlobalCompletedWordSpan Capture(LegacyGlobalCompletedTextSource binding,CancellationToken token)=>new(binding,token);
+    private LegacyGlobalCompletedWordSpan(LegacyGlobalCompletedTextSource binding,int ordinal,CancellationToken token)
+    {
+        this.binding=binding;binding.Validate(token);publisher=binding.Source.Session!.Ownership.WordPublisher;
+        batchWords=binding.BatchWords??throw new ArgumentException("Exact private completed batch WORD queue required.");
+        actualNode=batchWords.NodeAt(ordinal,token);snapshot=batchWords.SpanAt(ordinal,token);SelectedIndex=actualNode.WordIndex;
+        if(snapshot.Words.Count is <1 or >4095||(uint)SelectedIndex>=snapshot.Words.Count||!ReferenceEquals(snapshot.Words[SelectedIndex],actualNode.Word))
+            throw new InvalidOperationException("Same actual ranked275/selected279 required.");
+        int references=0;foreach(var row in snapshot.Words)
+        {
+            token.ThrowIfCancellationRequested();
+            if(!ReferenceEquals(row.Pool,actualNode.Word.Pool)||row.FlatReferences.Count is <1 or >4096||row.FlatReferences.Count>65536-references)
+                throw new NotSupportedException("Bounded current ordinary275 reference uses required.");
+            references+=row.FlatReferences.Count;
+        }
+        TotalReferences=references;Require(token);
+    }
+    internal static LegacyGlobalCompletedWordSpan CaptureBatch(LegacyGlobalCompletedTextSource binding,int ordinal,CancellationToken token)=>new(binding,ordinal,token);
     internal void Bind(LegacyFreshMainGlobalWordTextPublication actual)
     {if(parent is not null||!ReferenceEquals(actual.Wrapper.ActualCompletion,binding))throw new ArgumentException("Private same-completion span parent required.");parent=actual;}
     internal void Require(CancellationToken token)
     {
         binding.Validate(token);
         if(poisoned)throw new InvalidOperationException("Entered all275 publication cursor is poisoned.");
-        if(thread!=Environment.CurrentManagedThreadId||!ReferenceEquals(publisher.Head,binding.Word)||binding.Word.WordIndex!=SelectedIndex)
+        if(thread!=Environment.CurrentManagedThreadId||(batchWords is null&&!ReferenceEquals(publisher.Head,actualNode))||actualNode.WordIndex!=SelectedIndex)
             throw new InvalidOperationException("Same current thread/completed source/TOP selected index required.");
-        publisher.RequireSoleActiveSourceHead(binding.Word);publisher.RequireLiveSpanRows(snapshot,token);
+        if(batchWords is null)publisher.RequireSoleActiveSourceHead(actualNode);else batchWords.Require(token);
+        batchWords?.DebitSnapshotValidation(snapshot,token);
+        publisher.RequireLiveSpanRows(snapshot,token);
     }
     internal IEnumerable<ulong> EnumerateReferences(CancellationToken token)
     {Require(token);foreach(var word in snapshot.Words)foreach(ulong reference in word.FlatReferences){token.ThrowIfCancellationRequested();yield return reference;}}
+    internal IEnumerable<(LegacyGlobalCompletedWordSpan? Span,int Word,int Offset,ulong Reference)> EnumerateIndexedReferences(CancellationToken token)
+    {
+        Require(token);
+        for(int word=0;word<snapshot.Words.Count;word++)for(int offset=0;offset<snapshot.Words[word].FlatReferences.Count;offset++)
+        {token.ThrowIfCancellationRequested();yield return(this,word,offset,snapshot.Words[word].FlatReferences[offset]);}
+    }
+    internal void RequireOwnedReference(LegacyFreshMainGlobalWordTextPublication actual,int word,int offset,ulong reference,CancellationToken token)
+    {
+        Require(token);
+        if(batchWords is null||!ReferenceEquals(parent,actual)||(uint)word>=(uint)snapshot.Words.Count||
+            (uint)offset>=(uint)snapshot.Words[word].FlatReferences.Count||snapshot.Words[word].FlatReferences[offset]!=reference)
+            throw new ArgumentException("Exact same completed batch275 WORD/reference position required.");
+    }
     internal Cursor Open(LegacyFreshMainGlobalWordTextPublication actual,CancellationToken token)
     {
         Require(token);if(!ReferenceEquals(parent,actual)||current is not null||next>=Count)throw new InvalidOperationException("Next private actual275 cursor required.");
+        if(batchWords is not null&&!batchWords.IsCurrentNode(actualNode,token))throw new InvalidOperationException("Current actual batch279 must precede its275 choice cursor.");
         current=new(this,next,snapshot.Words[next]);return current;
     }
     internal void Close(LegacyFreshMainGlobalWordTextPublication actual,Cursor cursor,CancellationToken token)

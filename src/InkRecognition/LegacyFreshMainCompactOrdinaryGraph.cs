@@ -26,12 +26,13 @@ public sealed class LegacyMainCompactOrdinaryGroup
         Flags04=f.Flags51;Flags05=f.Flags52;Flags06=f.Flags50;
         Bounds=source.Bounds;ranges=source.CopyRanges();
     }
+    internal int OwnedRangeCount=>ranges.Length;
     public LegacyInkRange[] CopyRanges()=>ranges.ToArray();
 }
 
 /// <summary>19C310's cumulative selector boundaries and ordered ushort data.
 /// Selector0 is the predecessor list; selector1..cap are outgoing span lists.
-/// Root sentinel−1 is represented by its nativeFFFF ordinal.</summary>
+/// Root sentinelв€’1 is represented by its nativeFFFF ordinal.</summary>
 public sealed class LegacyMainCompactOrdinaryArc
 {
     private readonly ushort[] ends,indices;
@@ -45,6 +46,7 @@ public sealed class LegacyMainCompactOrdinaryArc
     public ushort Extra1a {get;}
     public uint Scalar1cBits {get;}
     public int SelectorCount=>ends.Length;
+    internal int OwnedForwardSelectorEntryCount=>ends.Length>1?ends[1]-ends[0]:0;
     internal LegacyMainCompactOrdinaryArc(LegacyMainGraphAppendArc source,CancellationToken token)
     {
         GroupId=source.GroupId;Span=source.Span;Placement=source.Placement;Flags=source.Flags;
@@ -104,6 +106,40 @@ public sealed class LegacyMainCompactOrdinaryState
     }
     internal static LegacyMainCompactOrdinaryState FromState(LegacyMainGraphAppendState source,CancellationToken token=default)
     {ArgumentNullException.ThrowIfNull(source);token.ThrowIfCancellationRequested();return new(source,token);}
+    //Scalar-only admission over the exact immutable private arrays. No copied
+    //range path, selector, or diagnostic snapshot grants source authority.
+    internal (int MaximumPathRanges,long ScanWork,long SelectorEntries) BoundBatchForwardRanges(CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        if(nodes.Length is <1 or >4096||groups.Length>131072||CandidateCount>131072)
+            throw new NotSupportedException("Batch source graph scalar admission exceeded.");
+        long scan=1,total=0,arcs=0,selectorEntries=0;
+        for(int g=0;g<groups.Length;g++)
+        {
+            token.ThrowIfCancellationRequested();scan++;
+            if(groups[g].OwnedRangeCount>4096)throw new NotSupportedException("Batch source group range extent exceeded.");
+        }
+        for(int n=0;n<nodes.Length;n++)
+        {
+            token.ThrowIfCancellationRequested();scan++;int maximum=0;
+            foreach(var arc in nodes[n])
+            {
+                token.ThrowIfCancellationRequested();scan++;arcs++;
+                if(arc.GroupId>=(uint)groups.Length||arc.SelectorCount>9)
+                    throw new InvalidDataException("Batch source arc group/selector extent escaped its immutable owner.");
+                if(arc.Span==0)
+                {
+                    maximum=Math.Max(maximum,groups[(int)arc.GroupId].OwnedRangeCount);
+                    selectorEntries=checked(selectorEntries+arc.OwnedForwardSelectorEntryCount);
+                }
+            }
+            total=checked(total+maximum);
+        }
+        if(arcs!=CandidateCount)throw new InvalidDataException("Batch source candidate scalar count changed.");
+        //Successful DFS paths advance Node+1 and retain at most one arc per
+        //node. The existing resolver rejects before appending row4097.
+        return ((int)Math.Min(4096L,total),scan,selectorEntries);
+    }
     public IReadOnlyList<LegacyMainCompactOrdinaryArc> GetNode(int node)
     {if((uint)node>=(uint)nodes.Length)throw new ArgumentOutOfRangeException(nameof(node));return Array.AsReadOnly(nodes[node]);}
 }

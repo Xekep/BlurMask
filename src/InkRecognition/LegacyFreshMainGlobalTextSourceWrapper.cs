@@ -10,7 +10,8 @@ public sealed class LegacyFreshMainGlobalTextSourceWrapper
 {
     private static readonly ConditionalWeakTable<LegacyFreshMainGlobalTextGlyphChoices,LegacyFreshMainGlobalTextSourceWrapper> owners=new();
     private readonly object gate=new();
-    private readonly LegacyNativeInkPositionRange[] original,wordClip;
+    private readonly LegacyNativeInkPositionRange[] original;
+    private LegacyNativeInkPositionRange[] wordClip;
     private readonly LegacyNativeSelectedInkRange[] inputs;
     private readonly byte[][] descriptors;
     private ulong[] references;
@@ -57,6 +58,13 @@ public sealed class LegacyFreshMainGlobalTextSourceWrapper
     public static LegacyFreshMainGlobalTextSourceWrapper Prepare(LegacyLibraryGlobalTextPublicationScope scope,LegacyFreshMainGlobalWordAugmentation actual,ReadOnlySpan<byte> resource,LegacyNativeTextPublicationData properties,LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token=default)
     {
         var choices=LegacyFreshMainGlobalTextGlyphChoices.Prepare(scope,actual,resource,properties,normalization,circles,token);
+        var result=owners.GetValue(choices,c=>new(c,token));result.ValidatePreclaim(token);return result;
+    }
+    public static LegacyFreshMainGlobalTextSourceWrapper PrepareBatch(LegacyLibraryGlobalTextPublicationScope scope,
+        LegacyFreshMainGlobalSourceBatchCompletion actual,ReadOnlySpan<byte> resource,LegacyNativeTextPublicationData properties,
+        LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token=default)
+    {
+        var choices=LegacyFreshMainGlobalTextGlyphChoices.PrepareBatch(scope,actual,resource,properties,normalization,circles,token);
         var result=owners.GetValue(choices,c=>new(c,token));result.ValidatePreclaim(token);return result;
     }
     private void ValidateDomain(CancellationToken token)
@@ -140,7 +148,10 @@ public sealed class LegacyFreshMainGlobalTextSourceWrapper
         return unchecked(line+lineOffset);
     }
     public LegacyFreshMainGlobalTextSourceWord Publish(ReadOnlySpan<byte> allocator40,ReadOnlySpan<byte> selection4,CancellationToken token=default)
-        =>PublishCore(allocator40,selection4,0,token);
+    {
+        if(ActualCompletion.BatchWords is not null){Validate(token);throw new NotSupportedException("A completed source batch requires its one owning WORD/TEXT parent.");}
+        return PublishCore(allocator40,selection4,0,token);
+    }
     internal void ReserveForWord(LegacyFreshMainGlobalWordTextPublication actual,CancellationToken token)
     {
         lock(gate)
@@ -160,9 +171,10 @@ public sealed class LegacyFreshMainGlobalTextSourceWrapper
         {
             Validate(token);parent.RequireSpanCursor(this,cursor,token);
             if(!ReferenceEquals(reservedWordParent,parent)||spanCursor is not null||
-                (cursor.Ordinal==0?entered:!completed)||currentSelection is not null||currentSource is not null)
+                (cursor.Ordinal==0&&!parent.IsLaterBatchWord?entered:!completed)||currentSelection is not null||currentSource is not null)
                 throw new InvalidOperationException("Reserved next all-WORD cursor required.");
             spanCursor=cursor;references=cursor.Word.FlatReferences.ToArray();
+            if(cursor.Ordinal==0&&ActualCompletion.BatchWords is not null)wordClip=ActualCompletion.CopyRanges();
             completed=false;firstPassComplete=false;nextSelection=0;
         }
     }

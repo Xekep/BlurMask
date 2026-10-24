@@ -2,7 +2,7 @@ using System.Buffers.Binary;
 namespace InkRecognition;
 // Operational numeric envelope, not source-instruction/CLR/RSS certification.
 // Preflight is before entered/Claim. Dynamic counters run before loop growth.
-internal sealed class LegacyGlobalWordAugmentationEnvelope
+internal sealed partial class LegacyGlobalWordAugmentationEnvelope
 {
  internal const long WorkLimit=64L*1024*1024, CopyLimit=128L*1024*1024;
  internal readonly record struct Estimate(int Count,int Candidates,long Parents,long Lookahead,long Rows,long Requests,long Equalities,long EqualityRecords,long CopyBytes,int MaximumParentDepth,int CandidateStart,int CandidateEnd);

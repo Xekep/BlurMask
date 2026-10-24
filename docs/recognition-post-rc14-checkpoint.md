@@ -35,6 +35,37 @@ Local immutable evidence, outside release assets:
 `root-original-source-data-actual-20261024` and
 `root-higher-data-replay-20261024` under the build-artifact root.
 
+## Connected source integration and enriched replay
+
+The22 source4-through-higher-publication production successors have now been
+integrated into main, byte-exact to the previously executed owning library.
+All12 existing file preimages matched exactly;946 frozen packet dependencies
+were verified. The application adapter is not yet switched to this batch path.
+
+The combined current-main library and prepared probes built with zero warnings
+or errors. The new batch probe passed7 range cases,64 publisher topologies and
+69 guards. Existing augmentation-envelope, completed-source binding and all-WORD
+choice prepared probes also passed. The verification checked897 source/tool
+pins, plus the compiled library hash, before and after; no inference occurred.
+An initial runner used a project directory name instead of its declared
+AssemblyName. That terminal harness error is preserved; the follow-up used
+the declared names and the same compiled library, without restarting inference.
+
+A separate reviewed DATA replay now closes the previously missing Source26
+and line56 projection/layout checks on this capture. All689 original identities
+were derived from raw coordinates; smoothing and cut maps composed707 points
+into740. Nine retained higher ranges independently projected and merged into
+one26-byte source record, SHA256
+`c49f5fece115b6c0c1bded92165ecd2064ea6337f52a774cb350478cabaa5528`.
+All56 line bytes matched the original guide inputs, and12 additional corruption
+controls were rejected. All18 audit dependencies were verified before/after.
+
+Actual maps, memberships and guides are inputs to this scoped replay, not
+independently re-inferred NN geometry. Creating-merge provenance/OriginalLast,
+numeric refresh/ranking and multiple-WORD execution remain unverified. Local
+evidence: `root-enriched-data-replay-20261024` and
+`root-coherent-shared-text-followup-20261024` under the build-artifact root.
+
 ## CI frontier
 
 On `eb2460e`, the repaired configured-secondary compact oracle passed its

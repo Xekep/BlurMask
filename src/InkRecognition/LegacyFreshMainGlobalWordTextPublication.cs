@@ -35,7 +35,7 @@ public readonly record struct LegacyGlobalWordTextPrefix(string Stage,int WordNo
 /// <summary>Bounded native-order global1/oneWORD parent -> actual CHAR ->
 /// WORD -> source lines -> NULL-projected TEXT. No old configured owner,
 /// postcoverage split/238B0 or document/DOM adoption is manufactured.</summary>
-public sealed class LegacyFreshMainGlobalWordTextPublication
+public sealed partial class LegacyFreshMainGlobalWordTextPublication
 {
     private static readonly ConditionalWeakTable<LegacyFreshMainGlobalTextSourceWrapper,LegacyFreshMainGlobalWordTextPublication> owners=new();
     private readonly object gate=new();
@@ -46,10 +46,18 @@ public sealed class LegacyFreshMainGlobalWordTextPublication
     private readonly byte[][] descriptorBytes,guideBytes;
     private readonly Dictionary<ulong,LegacyNativeGlyphRecordNode> ownerSnapshots=[];
     private readonly Dictionary<ulong,int>? allWordReferenceCounts,allWordRefreshCandidates;
-    private readonly byte[] wordStorage,compactStorage;
-    private readonly ulong[] wordReferences;
-    private readonly LegacyGlobalCompletedWordSpan? allWords;
-    private readonly int selectedWordIndex,activeCompactCount;
+    private byte[] wordStorage;
+    private readonly byte[] compactStorage;
+    private ulong[] wordReferences;
+    private LegacyGlobalCompletedWordSpan? allWords;
+    private readonly LegacyGlobalCompletedWordSpan[]? batchSpans;
+    private readonly LegacyFreshMainGlobalSourceBatchCompletion.CompletedTextWords? batchWords;
+    private readonly List<LegacyFreshMainGlobalWordSourcePayload> publishedWords=[];
+    private readonly List<int> publishedSelectedIndices=[];
+    private int batchWordOrdinal=-1;
+    internal bool IsLaterBatchWord=>batchWords is not null&&batchWordOrdinal>0;
+    private int selectedWordIndex;
+    private readonly int activeCompactCount;
     private readonly LegacyNativeInkPositionRange[] textKey;
     internal LegacyOwnedRawInkRangeOperations RangeOperations{get;}
     private LegacyNativePublishedSourceLine[] lines=[];
@@ -61,17 +69,21 @@ public sealed class LegacyFreshMainGlobalWordTextPublication
     private int nextCharacter=-1;
     public LegacyFreshMainGlobalTextSourceWrapper Wrapper{get;}
     public LegacyLibraryGlobalTextPublicationScope Scope=>Wrapper.Scope;
-    public LegacyFreshMainGlobalWordSourceReceipt OriginalWordSource{get;}
-    public LegacyFreshMainGlobalWordSourcePayload WordSource=>payload??throw new InvalidOperationException("WORD source has not been interned.");
+    private LegacyFreshMainGlobalWordSourceReceipt originalWordSource;
+    public LegacyFreshMainGlobalWordSourceReceipt OriginalWordSource=>completed&&publishedWords.Count>1?throw new NotSupportedException("Use the completed batch WORD source vector."):originalWordSource;
+    public LegacyFreshMainGlobalWordSourcePayload WordSource=>completed&&publishedWords.Count>1?throw new NotSupportedException("Use the completed batch WORD source vector."):payload??throw new InvalidOperationException("WORD source has not been interned.");
+    public IReadOnlyList<LegacyFreshMainGlobalWordSourcePayload> CopyPublishedWordSources(){Scope.Validate();lock(gate)return Array.AsReadOnly(publishedWords.ToArray());}
     public LegacyFreshMainGlobalTextSelectionReceipt Text=>text??throw new InvalidOperationException("TEXT publication has not been entered.");
-    public int SelectedWordIndex=>selectedWordIndex;
+    public int SelectedWordIndex=>completed&&publishedWords.Count>1?throw new NotSupportedException("Use the actual batch WORD selected-index vector."):selectedWordIndex;
+    public int[] CopyPublishedWordSelectedIndices(){Scope.Validate();lock(gate)return publishedSelectedIndices.ToArray();}
     // Current selected TOP279 route;275 payload alternatives remain distinct.
     public int AlternativeCount=>Wrapper.ActualCompletion.Snapshot.ActiveAlternativeCount60;
-    public int ActualWordPayloadCount=>Wrapper.ActualWordPayloadCount;
+    public int ActualWordPayloadCount=>batchWords is not null&&batchWords.Count>1?throw new NotSupportedException("Actual275 payload counts belong to individual batch WORD owners."):Wrapper.ActualWordPayloadCount;
     public bool PublishesAllWordChoices=>allWords is not null;
-    public long AllWordNativeChoiceAndLinkLayoutBytes=>allWords?.NativeChoiceAndLinkLayoutBytes??0;
-    public long AllWordReferenceArrayCopyBytes=>allWords?.ReferenceArrayCopyBytes??0;
-    public byte[][] CopyActualWordPayloads120(CancellationToken token=default)=>Wrapper.CopyActualWordPayloads120(token);
+    public long AllWordNativeChoiceAndLinkLayoutBytes=>batchSpans?.Sum(s=>s.NativeChoiceAndLinkLayoutBytes)??allWords?.NativeChoiceAndLinkLayoutBytes??0;
+    public long AllWordReferenceArrayCopyBytes=>batchSpans?.Sum(s=>s.ReferenceArrayCopyBytes)??allWords?.ReferenceArrayCopyBytes??0;
+    public byte[][] CopyActualWordPayloads120(CancellationToken token=default)
+    {if(batchWords is not null&&batchWords.Count>1){Scope.Validate();throw new NotSupportedException("Actual275 payload frames belong to individual batch WORD owners.");}return Wrapper.CopyActualWordPayloads120(token);}
     public bool IsFaulted{get{lock(gate)return faulted;}}
     public bool IsComplete{get{lock(gate)return completed;}}
     public int LineCount{get{lock(gate)return lines.Length;}}
@@ -85,18 +97,24 @@ public sealed class LegacyFreshMainGlobalWordTextPublication
     private LegacyFreshMainGlobalWordTextPublication(LegacyFreshMainGlobalTextSourceWrapper wrapper,CancellationToken token,bool publishAll=false)
     {
         Wrapper=wrapper;wrapper.ValidatePreclaim(token);var completion=wrapper.ActualCompletion;
-        selectedWordIndex=completion.Word.WordIndex;
-        if(completion.Snapshot.ActiveAlternativeCount60!=1||completion.Word.Next is not null||selectedWordIndex!=0||
+        batchWords=completion.BatchWords;selectedWordIndex=completion.Word.WordIndex;
+        if(completion.Snapshot.ActiveAlternativeCount60!=1||(batchWords is null&&(completion.Word.Next is not null||selectedWordIndex!=0))||
             !ReferenceEquals(completion.Snapshot.WordHead18,completion.Word)||
             !ReferenceEquals(Scope.Seed,Scope.Context.Result.PublicationSeed)||
             !ReferenceEquals(Scope.Seed.PendingSelections,Scope.SharedState.Selections)||
             !ReferenceEquals(Scope.Seed.StringPool,wrapper.Choices.StringPool)||Scope.SharedState.Words.Count!=0)
             throw new NotSupportedException("Exact fresh one-alternative/one-choice WORD and original shared Seed required.");
-        allWords=publishAll?LegacyGlobalCompletedWordSpan.Capture(completion,token):null;
-        allWords?.Bind(this);
+        if(batchWords is not null)
+        {
+            if(!publishAll)throw new NotSupportedException("A completed source batch requires all275 publication per actual WORD.");
+            batchSpans=new LegacyGlobalCompletedWordSpan[batchWords.Count];
+            for(int i=0;i<batchSpans.Length;i++){batchSpans[i]=LegacyGlobalCompletedWordSpan.CaptureBatch(completion,i,token);batchSpans[i].Bind(this);}
+            allWords=batchSpans[0];
+        }
+        else{allWords=publishAll?LegacyGlobalCompletedWordSpan.Capture(completion,token):null;allWords?.Bind(this);}
         if(allWords is not null){allWordReferenceCounts=new();allWordRefreshCandidates=new();}
         wordStorage=completion.Word.Word.CopyStorage();wordReferences=completion.Word.Word.FlatReferences.ToArray();
-        OriginalWordSource=new(this);
+        originalWordSource=new(this);
         var selected=Scope.Document.CopySelectedInputs();var ops=LegacyOwnedRawInkRangeOperations.Prepare(Scope.Document);RangeOperations=ops;
         LegacyNativeInkPositionRange[] projected=[];
         for(int i=0;i<selected.Length;i++)
@@ -149,8 +167,10 @@ public sealed class LegacyFreshMainGlobalWordTextPublication
         compactStorage=compact;activeCompactCount=compactCount;
         if(compactCount<1||compactCount>compact.Length/40)throw new InvalidDataException("Actual active compact extent required.");
         var pool=completion.Source.Session!.Ownership.GlyphPool;
-        foreach(ulong reference in allWords is null?wordReferences:allWords.EnumerateReferences(token))
+        foreach(var entry in EnumerateAllReferences(token))
         {
+            ulong reference=entry.Reference;
+            if(unchecked((short)(reference>>24))<0)throw new NotSupportedException("Every batch WORD choice requires ordinary nonnegative source references before claim.");
             token.ThrowIfCancellationRequested();ulong ownerKey=LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(reference);
             if(allWords is not null)allWordReferenceCounts![ownerKey]=allWordReferenceCounts.GetValueOrDefault(ownerKey)+1;
             if(!ownerSnapshots.TryGetValue(ownerKey,out var owner)){owner=pool.CopyOwnerNode(ownerKey,token);ownerSnapshots.Add(ownerKey,owner);}
@@ -161,9 +181,14 @@ public sealed class LegacyFreshMainGlobalWordTextPublication
             for(int i=0;i<owner.Records.Length;i+=40)
                 if((BinaryPrimitives.ReadUInt16LittleEndian(owner.Records.Span.Slice(i+4))&7)!=0)
                     throw new NotSupportedException("The bounded parent admits ordinary scalar alternatives only.");
-            var source=wrapper.Choices.Refresh.SourceMetadata.Read(LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(reference),token);
-            if(allWords is not null&&source.IsHigherSource)throw new NotSupportedException("All275 publication currently requires ordinary base-source glyph owners.");
-            budget.AddSource(owner.Records.Length/40,compactCount,source.ReferenceCount,Scope.Document.ObjectCount);
+            var higher=batchWords is null?default:ReserveHigherMetadata(entry.Span!,entry.Word,entry.Offset,reference,token);
+            var source=wrapper.Choices.Refresh.SourceMetadata.Read(ownerKey,token);
+            if(allWords is not null&&source.IsHigherSource)
+            {
+                if(batchWords is null)throw new NotSupportedException("All275 publication currently requires ordinary base-source glyph owners.");
+                RequireHigherMetadata(higher,source,token);
+            }
+            if(batchWords is null)budget.AddSource(owner.Records.Length/40,compactCount,source.ReferenceCount,Scope.Document.ObjectCount);
             int matchingCompact=0;
             for(int row=starts[source.BaseNode];row<starts[source.BaseNode+1];row++)
             {
@@ -175,6 +200,11 @@ public sealed class LegacyFreshMainGlobalWordTextPublication
                 if(resolved.ExternalVariant!=0||resolved.EmittedSymbol is>=0xfff9 and<=0xfffc)
                     throw new NotSupportedException("Nonordinary compact replacement/control variants require a separate parent budget contract.");
             }
+            //The new batch uses the exact same three predicates as the
+            //refresh kernel, over its same private compact/source interval.
+            //Only those rows can append; unrelated source rows cannot emit
+            //alternatives here. Standalone's historical bound stays intact.
+            if(batchWords is not null)budget.AddSource(owner.Records.Length/40,matchingCompact,source.ReferenceCount,Scope.Document.ObjectCount);
             if(allWords is not null)
             {
                 if(allWordRefreshCandidates!.TryGetValue(ownerKey,out int prior)&&prior!=matchingCompact)throw new InvalidDataException("Same actual source owner must retain its compact candidate extent.");
@@ -211,7 +241,7 @@ public sealed class LegacyFreshMainGlobalWordTextPublication
         Scope.Validate();token.ThrowIfCancellationRequested();Wrapper.ValidatePreclaim(token);allWords?.Require(token);
         if(entered||Scope.SharedState.Words.Count!=0)throw new InvalidOperationException("Unused empty global WORD parent required.");
         var c=Wrapper.ActualCompletion;
-        if(c.Word.WordIndex!=selectedWordIndex||c.Word.Next is not null||!ReferenceEquals(c.Snapshot.WordHead18,c.Word)||
+        if(c.Word.WordIndex!=selectedWordIndex||(batchWords is null&&c.Word.Next is not null)||!ReferenceEquals(c.Snapshot.WordHead18,c.Word)||
             !c.Word.Word.CopyStorage().AsSpan().SequenceEqual(wordStorage)||!c.Word.Word.FlatReferences.SequenceEqual(wordReferences)||
             c.Source.Selection.Publication.RecordCount2470!=activeCompactCount||!c.Source.Selection.Publication.CopyCompactStorage().AsSpan().SequenceEqual(compactStorage))
             throw new InvalidOperationException("Actual WORD/compact source changed after whole-stage preflight.");
@@ -241,7 +271,7 @@ public sealed class LegacyFreshMainGlobalWordTextPublication
     internal void RequireTextRegistration(LegacyFreshMainGlobalTextSelectionReceipt actual,CancellationToken token)
     {ValidateLive(token);if(stage!="text-register"||!documentLink||WrapperLineOffset==0||!ReferenceEquals(actual,text))throw new ArgumentException("Actual WORD/source-lines prefix required before TEXT.");}
     private void ValidateLive(CancellationToken token)
-    {Scope.Validate();token.ThrowIfCancellationRequested();if(!entered||faulted||completed)throw new InvalidOperationException("Current entered successful global WORD publication required.");allWords?.Require(token);}
+    {Scope.Validate();token.ThrowIfCancellationRequested();if(!entered||faulted||completed)throw new InvalidOperationException("Current entered successful global WORD publication required.");allWords?.Require(token);batchWords?.Require(token);}
     public LegacyFreshMainGlobalWordTextPublication Publish(ReadOnlySpan<byte> allocator40,ReadOnlySpan<byte> selection4,CancellationToken token=default)
         =>PublishCore(allocator40,selection4,default,token);
     internal LegacyFreshMainGlobalWordTextPublication PublishPrepared(ReadOnlySpan<byte> allocator40,ReadOnlySpan<byte> selection4,LegacyGlobalWordTextPreparedFault fault,CancellationToken token=default)
@@ -263,7 +293,7 @@ public sealed class LegacyFreshMainGlobalWordTextPublication
             {
                 //Select retains actual initial owner rows plus every possible same-owner refresh append, bounded by pool2046.
                 //One retained ordinary range union per WORD <=sum source range terms; use R*P conservatively.
-                long r=allWords.TotalReferences;
+                long r=batchSpans is null?allWords.TotalReferences:batchSpans.Sum(s=>(long)s.TotalReferences);
                 long ownerClones=0;
                 foreach(var pair in allWordReferenceCounts!)
                 {
@@ -272,15 +302,55 @@ public sealed class LegacyFreshMainGlobalWordTextPublication
                     ownerClones=checked(ownerClones+40L*uses*upperRows);
                 }
                 long known=checked(ownerClones+r*selection4.Length+16L*r*PreflightMaximumProjectedRanges+
-                    8L*r+8L*allWords.Count+compactStorage.Length+ownerSnapshots.Values.Sum(n=>(long)n.Records.Length));
+                    8L*r+8L*(batchSpans is null?allWords.Count:batchSpans.Sum(s=>(long)s.Count))+compactStorage.Length+ownerSnapshots.Values.Sum(n=>(long)n.Records.Length));
                 if(known>MaximumAllChoiceEnumeratedArrays)throw new NotSupportedException("All275 enumerated retained-array envelope exceeds128MiB before claim.");
                 AllWordEnumeratedArrayEnvelopeBytes=known;
+                if(batchWords is not null)batchWords.ReservePublication(checked(known+120L*batchWords.Count+8L*r),token);
             }
             Wrapper.ReserveForWord(this,token);entered=true;
             try
             {
                 Record("reserved");barrier?.Wait(token);token.ThrowIfCancellationRequested();
                 documentChoiceAllocated=true;Record("document-choice32");
+                if(batchWords is null)
+                {
+                    PublishCurrentWord(allocator40,selection4,fault,token);
+                    publishedWords.Add(payload!);publishedSelectedIndices.Add(selectedWordIndex);documentLink=true;Record("document-word24");
+                }
+                else
+                {
+                    batchWords.Begin(token);
+                    for(batchWordOrdinal=0;batchWordOrdinal<batchSpans!.Length;batchWordOrdinal++)
+                    {
+                        var actual=batchWords.Open(token);allWords=batchSpans[batchWordOrdinal];
+                        selectedWordIndex=actual.SelectedIndex(token);wordStorage=actual.ActualNode(token).Word.CopyStorage();
+                        wordReferences=actual.ActualNode(token).Word.FlatReferences.ToArray();
+                        originalWordSource=new(this);payload=null;characters=null;nextCharacter=-1;
+                        PublishCurrentWord(allocator40,selection4,fault,token);
+                        publishedWords.Add(payload!);publishedSelectedIndices.Add(selectedWordIndex);documentLink=true;Record("document-word24:"+batchWordOrdinal);
+                        batchWords.Close(actual,token);
+                    }
+                    batchWords.Finish(token);
+                }
+                stage="source-lines";
+                int append=0;foreach(var input in lineInputs)if((input.Flags&15)!=3&&input.SourceLineId>=0)append=Math.Max(append,input.SourceLineId+1);
+                if(fault.LineAllocation){WrapperLineOffset=append;Record("source-line-allocation-refused");throw new NotSupportedException("Prepared native source-line allocation refusal retained wrapper offset update.");}
+                var published=LegacyNativeSourceLinePublication.Append(lines,0,lineInputs,guides,0,token);lines=published.Lines.ToArray();WrapperLineOffset=published.NextWrapperLineOffset;Record("source-lines");
+                text=new(this,textKey);stage="text-register";text.Selection=Scope.SharedState.Selections.CreateGlobalTextSelection(text,fault.Text,token);Record("text-registration-prefix");
+                if(text.Selection is null)throw new NotSupportedException("TEXT registration refused with its native counter/pending prefix retained.");
+                Record("text-registered");stage="complete";completed=true;return this;
+            }
+            catch{faulted=true;allWords?.Fault(this);if(batchWords is not null)batchWords.Fault();stage="fault";Wrapper.FaultReservedWord(this);Record("fault");throw;}
+        }
+    }
+    private IEnumerable<(LegacyGlobalCompletedWordSpan? Span,int Word,int Offset,ulong Reference)> EnumerateAllReferences(CancellationToken token)
+    {
+        if(batchSpans is not null){foreach(var span in batchSpans)foreach(var entry in span.EnumerateIndexedReferences(token))yield return entry;}
+        else if(allWords is not null){foreach(ulong reference in allWords.EnumerateReferences(token))yield return(null,-1,-1,reference);}
+        else foreach(ulong reference in wordReferences)yield return(null,-1,-1,reference);
+    }
+    private void PublishCurrentWord(ReadOnlySpan<byte> allocator40,ReadOnlySpan<byte> selection4,LegacyGlobalWordTextPreparedFault fault,CancellationToken token)
+    {
                 stage="word-intern";var node=Scope.SharedState.Words.InternGlobalWord(OriginalWordSource,token);
                 if(!node.Inserted)throw new NotSupportedException("Only a fresh actual global WORD node is supported.");Record("word-intern");
                 payload=new(OriginalWordSource,node.Node);Record("word-defaults");
@@ -317,16 +387,7 @@ public sealed class LegacyFreshMainGlobalWordTextPublication
                     var key=OriginalWordSource.CopyOriginalKey();bool same=key.Length==1&&SameCoordinate(key[0]);payload.Flags=(payload.Flags&~0x800000u)|(same?0x800000u:0);
                     Record("word-registration-prefix");if(selection is null)throw new NotSupportedException("WORD registration refused with its native counter/default prefix retained.");
                 }
-                Record("word-registered");documentLink=true;Record("document-word24");stage="source-lines";
-                int append=0;foreach(var input in lineInputs)if((input.Flags&15)!=3&&input.SourceLineId>=0)append=Math.Max(append,input.SourceLineId+1);
-                if(fault.LineAllocation){WrapperLineOffset=append;Record("source-line-allocation-refused");throw new NotSupportedException("Prepared native source-line allocation refusal retained wrapper offset update.");}
-                var published=LegacyNativeSourceLinePublication.Append(lines,0,lineInputs,guides,0,token);lines=published.Lines.ToArray();WrapperLineOffset=published.NextWrapperLineOffset;Record("source-lines");
-                text=new(this,textKey);stage="text-register";text.Selection=Scope.SharedState.Selections.CreateGlobalTextSelection(text,fault.Text,token);Record("text-registration-prefix");
-                if(text.Selection is null)throw new NotSupportedException("TEXT registration refused with its native counter/pending prefix retained.");
-                Record("text-registered");stage="complete";completed=true;return this;
-            }
-            catch{faulted=true;allWords?.Fault(this);stage="fault";Wrapper.FaultReservedWord(this);Record("fault");throw;}
-        }
+                Record("word-registered");
     }
     public string[] CopyTrace(){Scope.Validate();lock(gate)return trace.ToArray();}
     public LegacyGlobalWordTextPrefix[] CopyPrefixes(){Scope.Validate();lock(gate)return prefixes.ToArray();}
@@ -334,8 +395,10 @@ public sealed class LegacyFreshMainGlobalWordTextPublication
     public byte[][] CopyDescriptors(){Scope.Validate();return descriptorBytes.Select(d=>d.ToArray()).ToArray();}
     public byte[][] CopyGuides(){Scope.Validate();return guideBytes.Select(d=>d.ToArray()).ToArray();}
     public byte[] CopySourceLines56(){Scope.Validate();lock(gate)return LegacyFreshMainSourceLinePublication.Encode(lines);}
-    public byte[] CopyDocumentWordLink24(){Scope.Validate();lock(gate){if(!documentLink)throw new InvalidOperationException("Document WORD link has not been appended.");byte[] b=new byte[24];BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(16),SelectedWordIndex);return b;}}
-    public byte[] CopyDocumentChoice32(){Scope.Validate();lock(gate){if(!documentChoiceAllocated)throw new InvalidOperationException("Document choice has not been allocated.");byte[] b=new byte[32];if(documentLink){BinaryPrimitives.WriteUInt32LittleEndian(b.AsSpan(8),WordSource.ChoiceFlags&1023);BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(24),1);BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(28),1);}return b;}}
+    public byte[] CopyDocumentWordLink24(){Scope.Validate();lock(gate){if(!documentLink)throw new InvalidOperationException("Document WORD link has not been appended.");if(publishedWords.Count!=1)throw new NotSupportedException("Use the complete actual WORD link vector.");return CopyDocumentWordLinks24();}}
+    public byte[] CopyDocumentWordLinks24()
+    {Scope.Validate();lock(gate){byte[] b=new byte[checked(24*publishedWords.Count)];for(int i=0;i<publishedWords.Count;i++)BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(24*i+16),publishedSelectedIndices[i]);return b;}}
+    public byte[] CopyDocumentChoice32(){Scope.Validate();lock(gate){if(!documentChoiceAllocated)throw new InvalidOperationException("Document choice has not been allocated.");byte[] b=new byte[32];uint flags=0;foreach(var word in publishedWords)flags|=word.ChoiceFlags&1023;BinaryPrimitives.WriteUInt32LittleEndian(b.AsSpan(8),flags);BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(24),publishedWords.Count);BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(28),publishedWords.Count);return b;}}
     public bool HasDocumentWordLink{get{lock(gate)return documentLink;}}
     public bool HasTextReceipt{get{lock(gate)return text is not null;}}
     public int DocumentAlternativeCount{get{lock(gate)return documentChoiceAllocated?1:0;}}

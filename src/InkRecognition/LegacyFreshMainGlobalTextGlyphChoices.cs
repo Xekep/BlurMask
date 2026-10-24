@@ -93,6 +93,25 @@ public sealed class LegacyFreshMainGlobalTextGlyphChoices
         byte[] ownedResource=resource.ToArray();LegacyGlobalCompletedTextSource.ValidateAugmentationResource(scope,actual,ownedResource,token);
         return PrepareCompleted(scope,scope.BindAugmentedTextSource(actual,token),ownedResource,properties,normalization,circles,token);
     }
+    internal static LegacyFreshMainGlobalTextGlyphChoices PrepareBatch(LegacyLibraryGlobalTextPublicationScope scope,
+        LegacyFreshMainGlobalSourceBatchCompletion actual,ReadOnlySpan<byte> resource,LegacyNativeTextPublicationData properties,
+        LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(properties);ArgumentNullException.ThrowIfNull(normalization);ArgumentNullException.ThrowIfNull(circles);
+        actual.RequireCompleted(token);
+        if(!ReferenceEquals(scope,actual.TextScope(token))||resource.Length!=572763)throw new ArgumentException("Same original batch scope/resource required.");
+        var actualPublication=actual.TextSource(token).Selection.Publication;
+        //One shared Refresh clone of compact/starts, one projection map,
+        //header16 and three hash buffers (outer check and two existing bound
+        //Refresh checks). No resource/model clone or hash per WORD.
+        actual.ChargeTextPreparationCopy(checked(572763L+96+16+
+            actualPublication.BatchCompactAllocationLength+4L*actualPublication.BatchStartsLength+
+            54L*scope.Document.ObjectCount+16),token);
+        byte[] owned=resource.ToArray();
+        if(!Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(owned)).Equals(actual.TextSnapshot(token).SourcePolicy.Owner.Graph.Source.Source.SourceFingerprint,StringComparison.OrdinalIgnoreCase))
+            throw new ArgumentException("Same actual batch acoustic resource required before TEXT binding.");
+        return PrepareCompleted(scope,scope.BindBatchTextSource(actual,token),owned,properties,normalization,circles,token);
+    }
     private static LegacyFreshMainGlobalTextGlyphChoices PrepareCompleted(LegacyLibraryGlobalTextPublicationScope scope,LegacyGlobalCompletedTextSource binding,ReadOnlySpan<byte> resource,LegacyNativeTextPublicationData properties,LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(properties);ArgumentNullException.ThrowIfNull(normalization);ArgumentNullException.ThrowIfNull(circles);
@@ -120,6 +139,7 @@ public sealed class LegacyFreshMainGlobalTextGlyphChoices
         lock(gate)
         {
             Validate(token);
+            if(ActualCompletion.BatchWords is not null)throw new NotSupportedException("A completed source batch requires its one owning WORD/TEXT parent.");
             if(allocatedRecordStorage40.Length!=40||selectionAllocation4.Length%4!=0||selectionAllocation4.Length>65536*4)
                 throw new ArgumentException("Complete allocator40 and bounded whole selection4 allocation required.");
             if(entered)throw new InvalidOperationException("This global glyph-choice publication already entered.");

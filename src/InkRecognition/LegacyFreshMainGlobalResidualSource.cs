@@ -5,7 +5,7 @@ namespace InkRecognition;
 /// <summary>Ordinary1AC3C0 overlay on the actual shared global graph. Merged
 /// ranges belong to node-local higher sources; originalLast retains the base
 /// neural identity, live bbox, descriptor and assigned line.</summary>
-public sealed class LegacyFreshMainGlobalResidualSource
+public sealed partial class LegacyFreshMainGlobalResidualSource
 {
     private readonly List<Extra>[] extras;
     private readonly object gate=new();
@@ -39,6 +39,14 @@ public sealed class LegacyFreshMainGlobalResidualSource
         lock(gate){var s=Decode(reference,token);int count=Graph.State.GetNode(s.Node).Count;
             if(s.Arc<count)throw new NotSupportedException("Native base range allocation capacity is not represented.");
             return extras[s.Node][s.Arc-count].Capacity;}
+    }
+    internal int ReadHigherRangeCount(ulong reference,CancellationToken token)
+    {
+        lock(gate)
+        {
+            var s=Decode(reference,token);int count=Graph.State.GetNode(s.Node).Count;
+            return s.Arc<count?0:extras[s.Node][s.Arc-count].Ranges.Length;
+        }
     }
     public LegacyNativeResidualBounds ReadBounds(ulong reference,CancellationToken token=default)
     {var b=LegacyNativeResidualSource.Decode(ResolveBaseReference(reference,token));return Geometry.ReadBounds(b.Node,b.Arc,token);}

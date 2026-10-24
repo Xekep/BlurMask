@@ -17,6 +17,9 @@ public sealed class LegacyFreshMainGlobalFinalPublication
     public int NextNode2490 => NodeCount;
     public int PreviousRecordCount2470 { get; }
     public int RecordCount2470 => result.Count;
+    internal int BatchCompactAllocationLength=>result.Storage.Length;
+    internal int BatchStartsLength=>result.Starts.Length;
+    internal int BatchSnapshotDependencyPayload=>checked(result.Nodes[^1].Records.Length+result.Nodes[^1].PrimaryAlternatives.Length+result.Nodes[^1].SecondaryAlternatives.Length);
     public int PublicationCount { get; }
     public int QueryChecks { get; }
     public int BackendCalls { get; }

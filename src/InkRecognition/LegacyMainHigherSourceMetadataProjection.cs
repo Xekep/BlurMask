@@ -3,6 +3,20 @@ namespace InkRecognition;
 //Ordinary1AA470 higher-kind0 projection. Actual factories retain source ownership.
 internal static class LegacyMainHigherSourceMetadataProjection
 {
+    //Three reads bound one parent preflight and future refresh count/fill.
+    //Actual strides, not invented native/CLR layouts; no allocation here.
+    internal static (long Copy,long Loops) BoundThreeReads(int ranges)
+    {
+        if(ranges is <1 or >65536)throw new NotSupportedException("Bounded actual higher-kind0 range owner required.");
+        long n=ranges,row=System.Runtime.CompilerServices.Unsafe.SizeOf<Row>(),output=System.Runtime.CompilerServices.Unsafe.SizeOf<LegacyOrdinaryGraphSourceReference>();
+        //Ranges clone; conservative List/OrderBy buffers/map/output; RemoveAt
+        //row shifts; conditional framework sort-map store estimate. New26N
+        //refresh allocation/temp copies are charged once, not for every read.
+        long copied=checked(3*(12*n+8*row*n+16*n+8*output*n+row*n*(n-1)/2+16*n*(n+1))+128*n+1536);
+        //Own range/compaction/output loops; additionally reserve every possible
+        //RemoveAt shifted row. BCL sort/helper CPU is explicitly separate.
+        return(copied,checked(3*(3*n+n*(n-1)/2)));
+    }
     internal static LegacyOrdinaryGraphSourceReference[] Project(LegacySourcePointChronology prepared,
         LegacyOrdinarySourceInk original,LegacySourcePointKey[] keyRecords,
         LegacyInkRange[] actualRanges,CancellationToken token)

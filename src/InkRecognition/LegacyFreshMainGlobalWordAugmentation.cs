@@ -71,6 +71,7 @@ public sealed partial class LegacyFreshMainGlobalWordAugmentation
     private void Validate(CancellationToken token,bool claimed)
     {
         token.ThrowIfCancellationRequested();source.Selection.Publication.Validate(token);
+        if(batchScope is not null){batchScope.Require(this,token);return;}
         if(faulted||complete||!source.PublicationCompleted||!ReferenceEquals(source.Session,session)||!session.IsComplete||session.IsStopped||
             !ReferenceEquals(span,publisher.Head)||policy.Owner.AcousticEvaluations!=source.CachedMainGroupEvaluations)
             throw new InvalidOperationException("Same current completed global source/NN cache/WORD list required.");
@@ -81,6 +82,7 @@ public sealed partial class LegacyFreshMainGlobalWordAugmentation
         Span<byte> leadingScratch4,Span<byte> trailingScratch4,Span<byte> compareLeft4,Span<byte> compareRight4,
         CancellationToken token=default)
     {
+        if(batchScope is not null)throw new InvalidOperationException("Batch span workers cannot enter standalone Run.");
         Validate(token,false);
         if(wordAllocatorResidue120.Length!=120||glyphAllocatorResidue40.Length!=40||labelStackResidue256.Length!=256||
             requestResidue64.Length!=64||walkResidue72.Length!=72||leadingScratch4.Length!=4||trailingScratch4.Length!=4||
@@ -103,6 +105,18 @@ public sealed partial class LegacyFreshMainGlobalWordAugmentation
             _=LegacyFreshMainGlobalResultGlyphNormalization.Prepare(policy,token).ApplyPublished(snapshot,token);
             //Native frontend228: null v106 sampler preparation +21D last-group
             //invalidation only; immutable cached group snapshots have no such reuse hint.
+            var work=AugmentCurrentSpan(workingWord,recordStorage,labelsStorage,requestStorage,walkStorage,compareLeft4,compareRight4,envelope,token);
+            var result=RankCurrentSpan(work,LegacyPreparedMainWordRanking.InitialQuota(65535,65535,false),compareLeft4,compareRight4,envelope,token);
+            complete=true;return result;
+        }
+        catch{faulted=true;session.FaultSourceCompletion(this);throw;}
+    }
+    private readonly record struct SpanWork(int Candidates,int Appended,int Duplicates,int Updated);
+    private LegacyNativePublishedWordNode[] CurrentHeads=>batchScope?.Heads(this)??[span];
+    private SpanWork AugmentCurrentSpan(LegacyNativeWordBuilder workingWord,byte[] recordStorage,ushort[] labelsStorage,
+        byte[] requestStorage,byte[] walkStorage,Span<byte> compareLeft4,Span<byte> compareRight4,
+        LegacyGlobalWordAugmentationEnvelope envelope,CancellationToken token)
+    {
             var ranges=policy.Owner.Acoustic.Geometry.Context.Source;
             var counted=ranges.ResolveForwardWithResiduals((uint)span.Span.First,(uint)span.Span.Last,token);
             var filled=ranges.ResolveForwardWithResiduals((uint)span.Span.First,(uint)span.Span.Last,token);
@@ -122,7 +136,7 @@ public sealed partial class LegacyFreshMainGlobalWordAugmentation
                     Validate(token,true);var dry=walker.Run(index,minimum,false,ushort.MaxValue,[],token);controller24a0=0;
                     return new(dry.Status,dry.LastSourceKey);
                 },token);
-            int originalCount=publisher.CaptureSpan(span,[span],token).Words.Count,appended=0,duplicates=0,updated=0;
+            int originalCount=publisher.CaptureSpan(span,CurrentHeads,token).Words.Count,appended=0,duplicates=0,updated=0;
             foreach(int candidate in scan.CompactIndices)
             {
                 Validate(token,true);
@@ -134,15 +148,17 @@ public sealed partial class LegacyFreshMainGlobalWordAugmentation
                 int minimum=span.Span.First<0?-1:LegacyPreparedMainWordAugmentationCandidates.DecodeContextNode(span.Span.First);
                 var emission=walker.Run(candidate,minimum,true,65534,walkStorage,token);controller24a0=emission.Rows72.Length/72;
                 if(emission.Status==1||emission.Status==-1)throw new InvalidOperationException("Included direct-parent candidate failed actual emission.");
-                if(emission.ResidualReferences.Length!=0)throw new NotSupportedException("Actual residual217DB0 augmentation association remains separate.");
+                byte[] executionRows=emission.Rows72;
+                if(emission.ResidualReferences.Length!=0)
+                    executionRows=AssociateBatchResiduals(emission.Rows72,emission.ResidualReferences,token);
                 for(int at=0;at<emission.Rows72.Length;at+=72)
                     if(emission.Rows72[at+60]!=0)throw new NotSupportedException("Augmentation currently binds actual ordinary0 writer; protocol/higher source requires its own path.");
-                var before=publisher.CaptureSpan(span,[span],token);
+                var before=publisher.CaptureSpan(span,CurrentHeads,token);
                 foreach(var old in before.Words)foreach(ulong reference in old.FlatReferences)
                     if((BinaryPrimitives.ReadUInt16LittleEndian(session.Ownership.GlyphPool.CopyRecord(reference,token).AsSpan(4))&7)!=0)
                         throw new NotSupportedException("Original275 equality requires separate nonordinary token owner.");
                 word.ApplySpanAlternativeFlags30(emission.WordFlags,token);
-                var chain=LegacyMainOrdinaryGlyphChainKernel.Apply(word,emission.Rows72,[],policy.Owner.Graph.State.NodeCount,
+                var chain=LegacyMainOrdinaryGlyphChainKernel.Apply(word,executionRows,[],policy.Owner.Graph.State.NodeCount,
                     compact.Length/40,starts,compact,node=>policy.Owner.Graph.State.GetNode(node).Count,session.OrdinaryProducer.Produce,
                     static (_,_,_,_,_,_,_)=>throw new NotSupportedException("No protocol writer is substituted."),
                     ushort.MaxValue,uint.MaxValue,uint.MaxValue,false,recordStorage,labelsStorage,requestStorage,1,token);
@@ -150,8 +166,13 @@ public sealed partial class LegacyFreshMainGlobalWordAugmentation
                 var costs=LegacyPreparedMainAugmentedWordCosts.Calculate(compact,compact.Length/40,candidate,emission.LastDirectParentIndex,
                     LegacyPreparedMainWordAugmentationCandidates.DecodeContextNode(span.Span.First),LegacyPreparedMainWordAugmentationCandidates.DecodeContextNode(span.Span.Last),0x135,token);
                 byte[] candidateData=word.CopyStorage(token);word.SetRawScalars(costs.Score10,BinaryPrimitives.ReadSingleLittleEndian(candidateData.AsSpan(20)),costs.Cost18,costs.Cost1C,token);
-                if(word.GetSourceSpan(First,Last,token)!=span.Span)throw new InvalidDataException("Actual emitted candidate source span changed.");
-                before=publisher.CaptureSpan(span,[span],token);int match=-1;
+                //219580 chooses the existing275 target during its count-pass
+                //eligibility scan, BEFORE217DB0 can change glyph source keys.
+                //13FE20 receives that same target; it does not derive/re-key275
+                //from the post-association chain. No clipping or new279 node.
+                if(batchScope is not null)batchScope.RequireTargetOwner(this,publisher,span,token);
+                else if(word.GetSourceSpan(First,Last,token)!=span.Span)throw new InvalidDataException("Actual emitted candidate source span changed.");
+                before=publisher.CaptureSpan(span,CurrentHeads,token);int match=-1;
                 for(int i=0;i<before.Words.Count;i++)
                     if(Compare(session.Ownership.GlyphPool,before.Words[i].CopyStorage(),word.CopyStorage(token),compareLeft4,compareRight4,joiner,static label=>label,null,token)){match=i;break;}
                 if(match==-1){Validate(token,true);_=publisher.InternPlainWord(word,span.Span,out _,token);appended++;}
@@ -167,30 +188,33 @@ public sealed partial class LegacyFreshMainGlobalWordAugmentation
                 }
                 Validate(token,true);
             }
-            var current=publisher.CaptureSpan(span,[span],token);
-            //Copy explicit scratch because comparison delegates cannot capture ref-like spans.
-            byte[] left=compareLeft4.ToArray(),right=compareRight4.ToArray();
-            bool Equal(ReadOnlySpan<byte> a,ReadOnlySpan<byte> b){envelope.Equality();return LegacyNativeMainWordEquality.Compare(session.Ownership.GlyphPool,a,b,left,right,joiner,static label=>label,null,token);}
-            var ranked=LegacyPreparedMainWordRanking.Rank(current.Words.Select(w=>w.CopyStorage()).ToArray(),current.SelectedOrdinals.ToArray(),
-                LegacyPreparedMainWordRanking.InitialQuota(65535,65535,false),false,Equal,token);
-            publisher.ApplySpanRanking(current,ranked.Words,ranked.OutputSourceOrdinals,ranked.OldToNew,token);
-            current=publisher.CaptureSpan(span,[span],token);var scored=LegacyPreparedMainSpanScorePublication.Normalize(current.Words.Select(w=>w.CopyStorage()).ToArray(),token);
-            publisher.ApplySpanScores(current,scored.Words,token);Validate(token,true);
-            var result=new Result(scan.CompactIndices.Length,appended,duplicates,updated,ranked.QuotaAfter,sourceReferences,sourceStorage26,publisher.CaptureSpan(span,[span],token).Words.Select(w=>w.CopyStorage()).ToArray());
-            if(controller24a0!=0)throw new InvalidOperationException("Native shared row scratch must be cleared afteraugmentation.");
-            complete=true;return result;
-        }
-        catch{faulted=true;session.FaultSourceCompletion(this);throw;}
+            return new(scan.CompactIndices.Length,appended,duplicates,updated);
         bool Compare(LegacyNativeGlyphRecordPool pool,ReadOnlySpan<byte> a,ReadOnlySpan<byte> b,Span<byte> l,Span<byte> r,ushort ignored,Func<ushort,ushort> mapper,Func<string,ushort>? lookup,CancellationToken ct)
         {envelope.Equality();return LegacyNativeMainWordEquality.Compare(pool,a,b,l,r,ignored,mapper,lookup,ct);}
-        int First(int node,ushort arc){envelope.Request();Validate(token,true);return unchecked((int)policy.Owner.Graph.State.GetNode(node)[arc].StartContextId);}
-        int Last(int node,ushort arc){envelope.Request();Validate(token,true);return unchecked((int)policy.Owner.Graph.State.GetNode(node)[arc].EndContextId);}
+        int First(int node,ushort arc){envelope.Request();Validate(token,true);var actual=ResolveAugmentationBoundary(node,arc,token);return unchecked((int)policy.Owner.Graph.State.GetNode(actual.Node)[actual.Arc].StartContextId);}
+        int Last(int node,ushort arc){envelope.Request();Validate(token,true);var actual=ResolveAugmentationBoundary(node,arc,token);return unchecked((int)policy.Owner.Graph.State.GetNode(actual.Node)[actual.Arc].EndContextId);}
         bool ClassWord(ushort flags,byte[] old)
         {
             if(BinaryPrimitives.ReadUInt16LittleEndian(old.AsSpan(48))!=flags||unchecked((short)flags)<0)return false;
             uint[] headers=policy.Owner.Symbols.CopySourceHeaders();if(flags>=headers.Length)throw new NotSupportedException("Actual WORD source header ordinal required.");
             return(headers[flags]&0x1c)!=0;
         }
+    }
+    private Result RankCurrentSpan(SpanWork work,int carriedQuota,Span<byte> compareLeft4,Span<byte> compareRight4,
+        LegacyGlobalWordAugmentationEnvelope envelope,CancellationToken token)
+    {
+            var current=publisher.CaptureSpan(span,CurrentHeads,token);
+            //Copy explicit scratch because comparison delegates cannot capture ref-like spans.
+            byte[] left=compareLeft4.ToArray(),right=compareRight4.ToArray();
+            bool Equal(ReadOnlySpan<byte> a,ReadOnlySpan<byte> b){envelope.Equality();return LegacyNativeMainWordEquality.Compare(session.Ownership.GlyphPool,a,b,left,right,joiner,static label=>label,null,token);}
+            var ranked=LegacyPreparedMainWordRanking.Rank(current.Words.Select(w=>w.CopyStorage()).ToArray(),current.SelectedOrdinals.ToArray(),
+                carriedQuota,false,Equal,token);
+            publisher.ApplySpanRanking(current,ranked.Words,ranked.OutputSourceOrdinals,ranked.OldToNew,token);
+            current=publisher.CaptureSpan(span,CurrentHeads,token);var scored=LegacyPreparedMainSpanScorePublication.Normalize(current.Words.Select(w=>w.CopyStorage()).ToArray(),token);
+            publisher.ApplySpanScores(current,scored.Words,token);Validate(token,true);
+            var result=new Result(work.Candidates,work.Appended,work.Duplicates,work.Updated,ranked.QuotaAfter,sourceReferences,sourceStorage26,publisher.CaptureSpan(span,CurrentHeads,token).Words.Select(w=>w.CopyStorage()).ToArray());
+            if(controller24a0!=0)throw new InvalidOperationException("Native shared row scratch must be cleared afteraugmentation.");
+            return result;
     }
     internal static byte[] EncodeSourceStorage26(LegacyOrdinaryGraphSourceReference[] references,CancellationToken token)
     {
