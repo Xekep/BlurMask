@@ -132,3 +132,30 @@ logical processors/affinity3 and the same 45-second watchdog. The earlier
 failures remain immutable. Native candidate-span adoption/boundary behavior
 must be understood before changing that invariant. This is no successful
 sentence, completed multiword TEXT, app/default integration or quality claim.
+
+A further experimental successor corrected that boundary check only for the
+private batch path. Native `219580` selects the existing 275 owner during its
+count pass, before residual association; its `13FE20` call receives that same
+owner rather than a newly derived post-association chain span. The successor
+therefore requires the exact current private worker, publisher and preexisting
+owner. Count-pass endpoint eligibility, the standalone equality guard and all
+source keys remain unchanged. Static PE/instruction checks and 20 prepared
+interner cases/200 checks passed; those prepared objects cannot issue a live
+source or TEXT owner.
+
+One byte-identical drawing invocation then completed the batch source stage,
+including six residual inputs, 17 emitted rows and two merges. No new higher
+source was allocated; cached/current MAIN evaluations both remained 374.
+Validation counted 772 structural loop bodies, with association reservations
+of 30,398 loop units and 25,857 copied-payload units. These still do not measure
+all CPU work, allocations or RSS. The invocation took about 4.88 seconds with
+two logical processors/affinity3 and a 45-second watchdog; all 1,113 pins matched
+before/after.
+
+It next refused at `batch-TEXT-prepare`: `All275 publication currently requires
+ordinary base-source glyph owners.` The preserved failure SHA256 is
+`0e17f51090cb7e2b0b7c9481e2551e4d35a218491ae1410b3f2c372970fe621a`.
+The same-batch completion check and standalone-wrapper/Choices refusal checks
+passed before this stop. Associated-source publication into the owning WORD/TEXT
+path remains unfinished. These experimental changes remain outside main; this
+is not a completed sentence, Russian recognition improvement or app integration.
