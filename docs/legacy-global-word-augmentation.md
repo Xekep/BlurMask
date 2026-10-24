@@ -27,3 +27,12 @@ python -I -B tools/LegacyGlobalWordAugmentation.Probe/audit_prepared.py HISTORIC
 ```
 
 Actual diagnostics require an explicitly supplied pinned resource/input plan; neither probe defaults into model execution.
+# Numeric audit counter correction (2026-10-24)
+
+The observed positive replay performs two candidate equality comparisons and one
+ranking equality comparison: three in total. The earlier report incorrectly
+printed two for the aggregate counter. The independent audit now counts candidate
+calls explicitly and reports both phases separately. Full WORD120 bytes, costs,
+ranking, quota and all sixteen tamper checks are unchanged. This is a diagnostic
+report correction; it does not change recognition or the conservative work bound.
+

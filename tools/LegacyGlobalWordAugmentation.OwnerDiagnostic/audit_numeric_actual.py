@@ -46,7 +46,7 @@ def replay(a,trace,raw):
    result.append(u16(r,8));ref=u64(r,32)
   return result[::-1]
  words=[bytearray(base64.b64decode(x['Storage120'])) for x in before['Words']];word_symbols=[symbols(w,p0) for w in words]
- original=len(words);selected=[];details=[];new_live_refs=set();appended=duplicates=updated=0
+ original=len(words);selected=[];details=[];new_live_refs=set();appended=duplicates=updated=0;candidate_equality=0
  # The actual input has ordinary0 rows and an FFFA delimiter root. Reject rather
  # than pretending this covers nonordinary/unit/residual/closed-label branches.
  for index in range(starts[lastnode],starts[lastnode+1]):
@@ -74,7 +74,10 @@ def replay(a,trace,raw):
    secondary=(secondary-i32(row(last_parent),24)+(1<<31))%(1<<32)-(1<<31)
   cost=f(f(primary)/f(((lastnode+1-minimum)<<13)));score=f(-5*cost);cost1c=f(f(secondary)*f(1/8192))
   labels=[v[3] for v in chain[::-1]]
-  match=next((i for i,s in enumerate(word_symbols) if s==labels),None)
+  match=None
+  for i,s in enumerate(word_symbols):
+   candidate_equality+=1
+   if s==labels:match=i;break
   if match is not None:
    duplicates+=1
    # Native selected original payload is deliberately not improved by this call.
@@ -126,7 +129,7 @@ def replay(a,trace,raw):
  assert a['Result']['Candidates']==len(selected) and a['Result']['Appended']==appended and a['Result']['Duplicates']==duplicates and a['Result']['UpdatedNewDuplicates']==updated
  assert a['Result']['QuotaAfter']==quota and after['SelectedOrdinals']==selected_ordinals
  assert [w['FlatReferences'] for w in after['Words']]==[before['Words'][0]['FlatReferences'],details[-1]['flat']]
- return dict(status='PASS_DATA_ONLY',selected=selected,details=details,words120=len(expected),ordinaryEqualityComparisons=duplicates+1,quota=quota,maxExponentialULP=max(ulps),producerBoundary='actual pool descriptor/symbol/link/publication data; NN confidence/temporary duplicate records not independently reconstructed')
+ return dict(status='PASS_DATA_ONLY',selected=selected,details=details,words120=len(expected),ordinaryEqualityComparisons=candidate_equality+1,candidateEqualityComparisons=candidate_equality,rankingEqualityComparisons=1,quota=quota,maxExponentialULP=max(ulps),producerBoundary='actual pool descriptor/symbol/link/publication data; NN confidence/temporary duplicate records not independently reconstructed')
 if __name__=='__main__':
  if len(sys.argv)!=4:raise SystemExit('positive-capture.json corrected-raw-trace.json corrected-raw-capture.json')
  a,t,c=[json.loads(Path(x).read_bytes()) for x in sys.argv[1:]]
