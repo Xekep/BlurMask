@@ -109,3 +109,51 @@ partial declarations);37 positive/35 corruption controls passed. The older
 NumberD0 classifier pin predates the semantic pointlike fix and remains a
 separate documented frontier. This integration creates CHAR, not WORD/TEXT,
 and does not establish full English or Russian handwriting quality.
+
+## RC16 and subsequent source review
+
+RC16 is tagged at41128be. It includes the main English CHAR and mathematical
+source geometry changes above. The positioned app packet, English all275 WORD
+publication draft and Math13A2 metrics are excluded. Publication status must be
+checked separately from creation of the tag.
+
+Release40083256307 completed successfully with all seven jobs. RC16 was
+published at2026-10-24T09:53:13Z with22 assets. Root downloaded the Windows
+installer and its checksum and verified64424135 bytes, SHA256
+`96682133230b5a8b9cad7bff35ec77d3cf02790f598a0b68d63b926a6524c866`.
+The installer was not launched locally. Evidence:
+`rc16-published-verification-20261024`.
+
+Root reviewed the English WORD draft and its additive late-flag-fold correction.
+The corrected fold combines all choices after the loop, so a later ordinary
+reference cannot erase an earlier choice's bit21. Root authenticated1864 pin
+records and replayed512 CHAR folds,512 WORD folds,40 complete scalar rows and
+18 corruption controls. This is prepared scalar/registration evidence only;
+the owning WORD path has not run. TEXT guides, NULL-selected-input projection
+and owning lifecycle verification remain. Evidence:
+`root-english-word-source-review-20261024`.
+
+Root also reviewed the private Math13A2 metric source and replayed45 pins,
+the static native/resource audit and nine independent numeric controls.
+The helper remains uncompiled and unwired. The actual sampler is the Math-local
+297 implementation; the earlier Text-sampler hypothesis is withdrawn. No
+FIRST3F276 request or neural execution is established by these metric checks.
+Evidence: `root-math13a2-source-review-20261024`.
+
+The changed structured WORD consumer completed one root owning run on the same
+fixed original BRUSH0/0 input in4.254 seconds, CPU2/affinity3 and a45-second
+outer watchdog. Root checked925 pins before/after and compared888 library
+sources against the reviewed positioned packet. It produced one WORD with two
+choices and699 projected point reads, without additional acoustic evaluations.
+Its experimental glyph policy rejects the output; no handwriting-quality
+claim follows. The initial old-capture comparator refused a validation-counter
+delta13525 to14051; that failure is preserved. Root reviewed the additive strict
+DATA auditor and replayed33 pins and55 corruption controls successfully.
+The fixed one-TOP/one-owner/two-choice source accounts for the entire delta:
+27 checks from inherited WORD reuse and499 from the new reader. Every other
+prior field remains recursively type/value/key exact. Selected source and
+payload indices, pool score/policy, coverage, line and original bounds/read
+counts are independently recomputed. This does not prove arbitrary topology,
+live authority from DATA or actual multiple-WORD success. No unchanged
+inference retry was performed. Evidence: `root-structured-consumer-actual-20261024`
+and `root-structured-strict-audit-review-20261024`.
