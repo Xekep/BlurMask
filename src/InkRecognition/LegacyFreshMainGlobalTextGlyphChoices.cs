@@ -39,7 +39,10 @@ public sealed class LegacyFreshMainGlobalTextGlyphChoices
     private readonly LegacyFreshMainGlobalGlyphProjectionContext projection;
     private bool entered,faulted;
     private LegacyFreshMainGlobalTextSourceWrapper? sourceWrapper;
-    public LegacyFreshMainGlobalNoCandidateSourceCompletion Completion{get;}
+    internal LegacyGlobalCompletedTextSource ActualCompletion{get;}
+    public LegacyFreshMainGlobalNoCandidateSourceCompletion Completion=>ActualCompletion.LegacyCompletion??throw new InvalidOperationException("Completed augmentation has no NoCandidate authority.");
+    public int ActualWordPayloadCount=>ActualCompletion.Actual275PayloadCount(default);
+    public byte[][] CopyActualWordPayloads120(CancellationToken token=default)=>ActualCompletion.Copy275Payloads(token);
     public LegacyFreshMainGlobalOrdinaryGlyphRefresh Refresh{get;}
     public LegacyFreshMainGlobalGlyphUtf8Emission Emitter{get;}
     public LegacyOwnedRawInkDocument Document=>scope.Document;
@@ -50,14 +53,14 @@ public sealed class LegacyFreshMainGlobalTextGlyphChoices
     internal LegacyNativeUnicodeNormalizationData Normalization=>normalization;
     internal LegacyFreshMainGlobalGlyphProjectionContext Projection=>projection;
     private LegacyFreshMainGlobalTextGlyphChoices(LegacyLibraryGlobalTextPublicationScope scope,
-        LegacyFreshMainGlobalNoCandidateSourceCompletion completion,ReadOnlySpan<byte> resource,
+        LegacyGlobalCompletedTextSource completion,ReadOnlySpan<byte> resource,
         LegacyNativeTextPublicationData properties,LegacyNativeUnicodeNormalizationData normalization,
         LegacyNativeCircledPayloadData circles,CancellationToken token)
     {
-        this.scope=scope;Completion=completion;this.properties=properties;this.normalization=normalization;this.circles=circles;
+        this.scope=scope;ActualCompletion=completion;this.properties=properties;this.normalization=normalization;this.circles=circles;
         strings=scope.SharedState.Strings;header=resource.Slice(99,16).ToArray();
-        Refresh=LegacyFreshMainGlobalOrdinaryGlyphRefresh.Prepare(resource,completion,token);
-        Emitter=LegacyFreshMainGlobalGlyphUtf8Emission.Prepare(completion,normalization,circles,token);
+        Refresh=LegacyFreshMainGlobalOrdinaryGlyphRefresh.PrepareCompleted(resource,completion,token);
+        Emitter=LegacyFreshMainGlobalGlyphUtf8Emission.PrepareCompleted(completion,normalization,circles,token);
         projection=new(scope,completion,token);
         Validate(token);
     }
@@ -76,17 +79,36 @@ public sealed class LegacyFreshMainGlobalTextGlyphChoices
         //Validate resource even when a prior same-completion owner is cached.
         _=LegacyFreshMainGlobalOrdinaryGlyphRefresh.Prepare(acousticResource,actualCompletion,token);
         byte[] resource=acousticResource.ToArray();
-        var result=owners.GetValue(actualCompletion,_=>new(actualScope,actualCompletion,resource,properties,normalization,circles,token));
+        var binding=actualScope.BindLegacyTextSource(actualCompletion,token);
+        var result=owners.GetValue(actualCompletion,_=>PrepareCompleted(actualScope,binding,resource,properties,normalization,circles,token));
         if(!ReferenceEquals(result.scope,actualScope)||!ReferenceEquals(result.properties,properties)||
             !ReferenceEquals(result.normalization,normalization)||!ReferenceEquals(result.circles,circles))
             throw new ArgumentException("Existing same-completion publication cannot change its owner or Unicode data.");
         result.Validate(token);return result;
     }
+    public static LegacyFreshMainGlobalTextGlyphChoices Prepare(LegacyLibraryGlobalTextPublicationScope scope,LegacyFreshMainGlobalWordAugmentation actual,ReadOnlySpan<byte> resource,LegacyNativeTextPublicationData properties,LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(properties);ArgumentNullException.ThrowIfNull(normalization);ArgumentNullException.ThrowIfNull(circles);token.ThrowIfCancellationRequested();
+        if(resource.Length!=572763)throw new ArgumentException("Complete acoustic source resource required.");
+        byte[] ownedResource=resource.ToArray();LegacyGlobalCompletedTextSource.ValidateAugmentationResource(scope,actual,ownedResource,token);
+        return PrepareCompleted(scope,scope.BindAugmentedTextSource(actual,token),ownedResource,properties,normalization,circles,token);
+    }
+    private static LegacyFreshMainGlobalTextGlyphChoices PrepareCompleted(LegacyLibraryGlobalTextPublicationScope scope,LegacyGlobalCompletedTextSource binding,ReadOnlySpan<byte> resource,LegacyNativeTextPublicationData properties,LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(properties);ArgumentNullException.ThrowIfNull(normalization);ArgumentNullException.ThrowIfNull(circles);
+        binding.Validate(token);_=LegacyFreshMainGlobalOrdinaryGlyphRefresh.PrepareCompleted(resource,binding,token);
+        lock(binding.Gate)
+        {
+            var result=binding.ChoicesOwner??=new(scope,binding,resource,properties,normalization,circles,token);
+            if(!ReferenceEquals(result.properties,properties)||!ReferenceEquals(result.normalization,normalization)||!ReferenceEquals(result.circles,circles))throw new ArgumentException("Same completed source cannot replace Unicode/publication data.");
+            result.Validate(token);return result;
+        }
+    }
     internal void Validate(CancellationToken token)
     {
-        scope.Validate();Completion.Validate(token);
+        scope.Validate();ActualCompletion.Validate(token);
         if(faulted)throw new InvalidOperationException("Failed global glyph-choice publication cannot restart.");
-        if(!ReferenceEquals(scope.SourceCompletion,Completion)||!ReferenceEquals(strings,scope.Context.Strings)||
+        if(!ReferenceEquals(scope.ActualTextCompletion,ActualCompletion)||!ReferenceEquals(strings,scope.Context.Strings)||
             !ReferenceEquals(scope.SharedState.GlobalTopOwner,Emitter.TopOwner))
             throw new InvalidOperationException("Global source/string/TOP ownership changed.");
     }
@@ -101,7 +123,7 @@ public sealed class LegacyFreshMainGlobalTextGlyphChoices
             if(allocatedRecordStorage40.Length!=40||selectionAllocation4.Length%4!=0||selectionAllocation4.Length>65536*4)
                 throw new ArgumentException("Complete allocator40 and bounded whole selection4 allocation required.");
             if(entered)throw new InvalidOperationException("This global glyph-choice publication already entered.");
-            var references=Completion.Word.Word.FlatReferences.ToArray();
+            var references=ActualCompletion.Word.Word.FlatReferences.ToArray();
             if(references.Length is <1 or>4096)throw new NotSupportedException("Bounded nonempty actual WORD reference list required.");
             foreach(ulong reference in references)
                 if(unchecked((short)(reference>>24))<0)
@@ -109,7 +131,7 @@ public sealed class LegacyFreshMainGlobalTextGlyphChoices
             entered=true;
             try
             {
-                byte[] beforeWord=Completion.Word.Word.CopyStorage();int nn=Completion.Source.CachedMainGroupEvaluations;
+                byte[] beforeWord=ActualCompletion.Word.Word.CopyStorage();int nn=ActualCompletion.Source.CachedMainGroupEvaluations;
                 var positions=new Dictionary<ulong,LegacyFreshMainGlobalGlyphDocumentPositions>();
                 //Native024F30 first pass: ALL references before ANY selection/emission.
                 foreach(ulong reference in references)
@@ -136,9 +158,9 @@ public sealed class LegacyFreshMainGlobalTextGlyphChoices
                     if(records>65536||bytes>8_388_608)throw new NotSupportedException("Portable aggregate glyph publication budget exceeded.");
                     output.Add(new(this,reference,positions[key],selected.Selection,result));
                 }
-                if(!Completion.Word.Word.CopyStorage().AsSpan().SequenceEqual(beforeWord)||
-                    !Completion.Word.Word.FlatReferences.SequenceEqual(references)||
-                    Emitter.Completion.Snapshot.SourcePolicy.Owner.AcousticEvaluations!=nn)
+                if(!ActualCompletion.Word.Word.CopyStorage().AsSpan().SequenceEqual(beforeWord)||
+                    !ActualCompletion.Word.Word.FlatReferences.SequenceEqual(references)||
+                    Emitter.ActualCompletion.Snapshot.SourcePolicy.Owner.AcousticEvaluations!=nn)
                     throw new InvalidOperationException("Glyph-choice publication changed WORD references or performed extra NN.");
                 Validate(token);return output.AsReadOnly();
             }

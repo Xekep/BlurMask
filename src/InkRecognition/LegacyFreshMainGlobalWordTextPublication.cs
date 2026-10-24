@@ -63,7 +63,10 @@ public sealed class LegacyFreshMainGlobalWordTextPublication
     public LegacyFreshMainGlobalWordSourcePayload WordSource=>payload??throw new InvalidOperationException("WORD source has not been interned.");
     public LegacyFreshMainGlobalTextSelectionReceipt Text=>text??throw new InvalidOperationException("TEXT publication has not been entered.");
     public int SelectedWordIndex=>selectedWordIndex;
-    public int AlternativeCount=>1;
+    // Current selected TOP279 route;275 payload alternatives remain distinct.
+    public int AlternativeCount=>Wrapper.ActualCompletion.Snapshot.ActiveAlternativeCount60;
+    public int ActualWordPayloadCount=>Wrapper.ActualWordPayloadCount;
+    public byte[][] CopyActualWordPayloads120(CancellationToken token=default)=>Wrapper.CopyActualWordPayloads120(token);
     public bool IsFaulted{get{lock(gate)return faulted;}}
     public bool IsComplete{get{lock(gate)return completed;}}
     public int LineCount{get{lock(gate)return lines.Length;}}
@@ -72,7 +75,7 @@ public sealed class LegacyFreshMainGlobalWordTextPublication
     public int PreflightMaximumProjectedRanges{get;}
     private LegacyFreshMainGlobalWordTextPublication(LegacyFreshMainGlobalTextSourceWrapper wrapper,CancellationToken token)
     {
-        Wrapper=wrapper;wrapper.ValidatePreclaim(token);var completion=wrapper.Completion;
+        Wrapper=wrapper;wrapper.ValidatePreclaim(token);var completion=wrapper.ActualCompletion;
         selectedWordIndex=completion.Word.WordIndex;
         if(completion.Snapshot.ActiveAlternativeCount60!=1||completion.Word.Next is not null||selectedWordIndex!=0||
             !ReferenceEquals(completion.Snapshot.WordHead18,completion.Word)||
@@ -171,7 +174,7 @@ public sealed class LegacyFreshMainGlobalWordTextPublication
     {
         Scope.Validate();token.ThrowIfCancellationRequested();Wrapper.ValidatePreclaim(token);
         if(entered||Scope.SharedState.Words.Count!=0)throw new InvalidOperationException("Unused empty global WORD parent required.");
-        var c=Wrapper.Completion;
+        var c=Wrapper.ActualCompletion;
         if(c.Word.WordIndex!=selectedWordIndex||c.Word.Next is not null||!ReferenceEquals(c.Snapshot.WordHead18,c.Word)||
             !c.Word.Word.CopyStorage().AsSpan().SequenceEqual(wordStorage)||!c.Word.Word.FlatReferences.SequenceEqual(wordReferences)||
             c.Source.Selection.Publication.RecordCount2470!=activeCompactCount||!c.Source.Selection.Publication.CopyCompactStorage().AsSpan().SequenceEqual(compactStorage))

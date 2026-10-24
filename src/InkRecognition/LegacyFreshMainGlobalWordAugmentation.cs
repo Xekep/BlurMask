@@ -5,7 +5,7 @@ namespace InkRecognition;
 /// <summary>Owning fresh one-span global219580 ordinary/no-auxiliary branch,
 /// followed by actual275 ranking and mass publication. Never an app acceptance,
 /// imported byte route or replacement model/query service.</summary>
-public sealed class LegacyFreshMainGlobalWordAugmentation
+public sealed partial class LegacyFreshMainGlobalWordAugmentation
 {
     private readonly byte[] compact;
     private readonly int[] starts;

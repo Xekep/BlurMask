@@ -20,17 +20,17 @@ public sealed class LegacyFreshMainGlobalGlyphDocumentPositions
 //wrapper's shared mapping. Only per-source references and output ranges vary.
 internal sealed class LegacyFreshMainGlobalGlyphProjectionContext
 {
-    private readonly LegacyFreshMainGlobalNoCandidateSourceCompletion completion;
+    private readonly LegacyGlobalCompletedTextSource completion;
     private readonly LegacyNativeTextSourceInputMap map;
     private readonly LegacyNativeInkPositionRange[] original;
     internal LegacyLibraryGlobalTextPublicationScope Scope {get;}
     internal LegacyNativeInkPositionRange[] CopyOriginalRoot(CancellationToken token)
     {Scope.Validate();completion.Validate(token);return original.ToArray();}
     internal LegacyFreshMainGlobalGlyphProjectionContext(LegacyLibraryGlobalTextPublicationScope scope,
-        LegacyFreshMainGlobalNoCandidateSourceCompletion completion,CancellationToken token)
+        LegacyGlobalCompletedTextSource completion,CancellationToken token)
     {
         scope.Validate();completion.Validate(token);var document=scope.Document;
-        if(!ReferenceEquals(scope.SourceCompletion,completion)||
+        if(!ReferenceEquals(scope.ActualTextCompletion,completion)||
             !ReferenceEquals(completion.Source.Owner.SourceDocument,document))
             throw new ArgumentException("Exact global scope, document and completion required.");
         Scope=scope;this.completion=completion;

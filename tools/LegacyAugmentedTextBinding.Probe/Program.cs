@@ -1,0 +1,23 @@
+using InkRecognition;
+using System.Text.Json;
+using System.Buffers.Binary;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+if(args.Length!=4||args[0]!="--prepared")throw new ArgumentException("--prepared prior-positive-capture.json exact-track.json report.json; NO actual/NN branch");
+using var capture=JsonDocument.Parse(File.ReadAllBytes(args[1]));using var track=JsonDocument.Parse(File.ReadAllBytes(args[2]));
+byte[] refs26=Convert.FromBase64String(capture.RootElement.GetProperty("Result").GetProperty("Source26").GetString()!);
+if(refs26.Length is <26 or >4096*26||refs26.Length%26!=0)throw new InvalidDataException();int count=refs26.Length/26;
+var points=track.RootElement.GetProperty("points").EnumerateArray().Select(p=>new InkPoint(p[0].GetSingle(),-p[1].GetSingle())).ToArray();
+var doc=LegacyOwnedRawInkDocument.Create(new[]{new InkStroke(points)},default);var references=new LegacyNativeTextSourceReference[count];
+for(int i=0;i<count;i++){var b=refs26.AsSpan(i*24,24);references[i]=new(new(BinaryPrimitives.ReadInt32LittleEndian(b),BinaryPrimitives.ReadInt32LittleEndian(b[4..]),BinaryPrimitives.ReadInt32LittleEndian(b[8..])),new(BinaryPrimitives.ReadInt32LittleEndian(b[12..]),BinaryPrimitives.ReadInt32LittleEndian(b[16..]),BinaryPrimitives.ReadInt32LittleEndian(b[20..])),refs26[count*24+i*2],refs26[count*24+i*2+1]);}
+var map=new LegacyNativeTextSourceInputMap(doc.CopySelectedInputs(),[],0);
+LegacyNativeInkPositionRange[] original=[new(LegacyNativeInkPosition.Pack(0,0,3,points.Length),LegacyNativeInkPosition.Pack(0,points.Length-1,5,points.Length))];
+var projected=LegacyNativeTextSourcePositionPublication.Project(map,references,true,original);
+if(projected.Length!=1||projected[0]!=original[0])throw new Exception("This immutable actual source26 must project to exact unchanged original input");
+var cap=typeof(LegacyGlobalCompletedTextSource);
+if(cap.IsPublic||cap.GetConstructors(BindingFlags.Public|BindingFlags.Instance).Length!=0||cap.GetConstructors(BindingFlags.NonPublic|BindingFlags.Instance).Any(c=>!c.IsPrivate))throw new Exception("Closed capability constructor visibility");
+var choices=typeof(LegacyFreshMainGlobalTextGlyphChoices);if(choices.GetProperty("Completion")!.PropertyType!=typeof(LegacyFreshMainGlobalNoCandidateSourceCompletion))throw new Exception("Old public property type changed");
+if(!choices.GetMethods().Any(m=>m.Name=="Prepare"&&m.GetParameters().Any(p=>p.ParameterType==typeof(LegacyFreshMainGlobalWordAugmentation))))throw new Exception("Missing typed actualAug overload");
+if(choices.GetMethods().Any(m=>m.GetParameters().Any(p=>p.ParameterType==typeof(LegacyFreshMainGlobalWordAugmentation.Result))))throw new Exception("DATA Result ingress");
+if(typeof(LegacyFreshMainGlobalWordTextPublication).GetProperty("ActualWordPayloadCount") is null)throw new Exception("Missing actual275 metadata");
+File.WriteAllText(args[3],JsonSerializer.Serialize(new{Scope="PURE source-position projection and public API shape ONLY; actual completedAug/TEXT authority unexercised",NNCalls=0,SourceReferences=count,Points=points.Length,First=projected[0].First.Value,Last=projected[0].Last.Value,ClosedPrivateConstructors=true,OldPublicPropertyPreserved=true,TypedAugOverload=true,NoResultIngress=true,Actual275MetadataExposed=true,ReferenceStride=Unsafe.SizeOf<LegacyNativeTextSourceReference>(),InputStride=Unsafe.SizeOf<LegacyNativeSelectedInkRange>(),RangeStride=Unsafe.SizeOf<LegacyNativeInkPositionRange>()},new JsonSerializerOptions{WriteIndented=true}));

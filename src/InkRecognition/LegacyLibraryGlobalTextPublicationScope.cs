@@ -5,7 +5,7 @@ namespace InkRecognition;
 /// <summary>Pre-NN selected-input2DA/3E lifetime for a distinct actual global
 /// invocation. Completes the bounded live TOP.V68 source stage, without control
 /// import, CHAR/TEXT publication, document transport or acceptance.</summary>
-public sealed class LegacyLibraryGlobalTextPublicationScope : IDisposable
+public sealed partial class LegacyLibraryGlobalTextPublicationScope : IDisposable
 {
     private readonly object gate=new();
     private readonly LegacyLibraryTextProcessingLease lease;

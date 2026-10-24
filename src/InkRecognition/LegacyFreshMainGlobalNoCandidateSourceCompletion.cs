@@ -11,6 +11,7 @@ public sealed class LegacyFreshMainGlobalNoCandidateSourceCompletion
     private LegacyNativeInkPositionRange[] ranges=[];
     private int started;
     public LegacyFreshMainGlobalPlainRecognitionResult Source {get;}
+    internal LegacyLibraryGlobalTextPublicationScope TextScope=>scope;
     public LegacyFreshMainGlobalPublishedFirstAlternativeSnapshot Snapshot {get;}
     public LegacyNativePublishedWordNode Word {get;}
     public bool QuoteCleanupCompleted {get;private set;}

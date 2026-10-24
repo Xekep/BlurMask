@@ -8,7 +8,7 @@ public sealed class LegacyFreshMainGlobalWordSourceReceipt
     public LegacyFreshMainGlobalWordTextPublication Owner{get;}
     private readonly LegacyNativeInkPositionRange[] ranges;
     internal LegacyFreshMainGlobalWordSourceReceipt(LegacyFreshMainGlobalWordTextPublication owner)
-    {Owner=owner;ranges=owner.Wrapper.Completion.CopyRanges();}
+    {Owner=owner;ranges=owner.Wrapper.ActualCompletion.CopyRanges();}
     public LegacyNativeInkPositionRange[] CopyOriginalKey(){Owner.Scope.Validate();return ranges.ToArray();}
 }
 

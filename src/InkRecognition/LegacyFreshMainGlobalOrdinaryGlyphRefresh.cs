@@ -46,12 +46,13 @@ public sealed class LegacyFreshMainGlobalOrdinaryGlyphRefresh
     private readonly LegacyNativeGlyphRecordPool pool;
     private readonly LegacyFreshMainGlobalOrdinaryGlyphProducer producer;
     private int retainedReferences;
-    public LegacyFreshMainGlobalNoCandidateSourceCompletion Completion {get;}
+    internal LegacyGlobalCompletedTextSource ActualCompletion{get;}
+    public LegacyFreshMainGlobalNoCandidateSourceCompletion Completion=>ActualCompletion.LegacyCompletion??throw new InvalidOperationException("This owner uses completed augmentation; no NoCandidate authority exists.");
     public LegacyFreshMainGlobalGlyphSourceMetadata SourceMetadata {get;}
     public LegacyFreshMainGlobalGlyphScoring Scoring=>producer.Scoring;
-    private LegacyFreshMainGlobalOrdinaryGlyphRefresh(LegacyFreshMainGlobalNoCandidateSourceCompletion completion)
+    private LegacyFreshMainGlobalOrdinaryGlyphRefresh(LegacyGlobalCompletedTextSource completion)
     {
-        Completion=completion;var source=completion.Source;var session=source.Session!;
+        ActualCompletion=completion;var source=completion.Source;var session=source.Session!;
         pool=session.Ownership.GlyphPool;producer=session.OrdinaryProducer;
         SourceMetadata=session.Associations.Metadata;
         if(!ReferenceEquals(SourceMetadata.SourceOverlay,session.Associations.SourceOverlay)||
@@ -71,12 +72,29 @@ public sealed class LegacyFreshMainGlobalOrdinaryGlyphRefresh
         if(acousticResource.Length!=572763||!Convert.ToHexString(SHA256.HashData(acousticResource)).Equals(
             actualCompletedSources.Snapshot.SourcePolicy.Owner.Graph.Source.Source.SourceFingerprint,StringComparison.OrdinalIgnoreCase))
             throw new ArgumentException("The same actual acoustic source resource required.");
-        var result=owners.GetValue(actualCompletedSources,static c=>new(c));result.Validate(token);return result;
+        var binding=actualCompletedSources.TextScope.BindLegacyTextSource(actualCompletedSources,token);
+        var result=owners.GetValue(actualCompletedSources,_=>PrepareBound(binding,token));result.Validate(token);return result;
+    }
+    public static LegacyFreshMainGlobalOrdinaryGlyphRefresh Prepare(ReadOnlySpan<byte> resource,LegacyLibraryGlobalTextPublicationScope scope,LegacyFreshMainGlobalWordAugmentation actual,CancellationToken token=default)
+    {
+        token.ThrowIfCancellationRequested();if(resource.Length!=572763)throw new ArgumentException("Complete acoustic source resource required.");
+        byte[] ownedResource=resource.ToArray();LegacyGlobalCompletedTextSource.ValidateAugmentationResource(scope,actual,ownedResource,token);
+        return PrepareCompleted(ownedResource,scope.BindAugmentedTextSource(actual,token),token);
+    }
+    internal static LegacyFreshMainGlobalOrdinaryGlyphRefresh PrepareCompleted(ReadOnlySpan<byte> resource,LegacyGlobalCompletedTextSource binding,CancellationToken token)
+    {
+        binding.Validate(token);
+        if(resource.Length!=572763||!Convert.ToHexString(SHA256.HashData(resource)).Equals(binding.Snapshot.SourcePolicy.Owner.Graph.Source.Source.SourceFingerprint,StringComparison.OrdinalIgnoreCase))throw new ArgumentException("Same actual acoustic resource required.");
+        return PrepareBound(binding,token);
+    }
+    private static LegacyFreshMainGlobalOrdinaryGlyphRefresh PrepareBound(LegacyGlobalCompletedTextSource binding,CancellationToken token)
+    {
+        binding.Validate(token);lock(binding.Gate){var result=binding.RefreshOwner??=new(binding);result.Validate(token);return result;}
     }
     private void Validate(CancellationToken token)
     {
-        Completion.Validate(token);
-        if(!Completion.IsTopV68Completed||Completion.Source.Selection.Publication.Policy.Owner.AcousticEvaluations!=Completion.Source.CachedMainGroupEvaluations)
+        ActualCompletion.Validate(token);
+        if(!ActualCompletion.IsTopV68Completed||ActualCompletion.Source.Selection.Publication.Policy.Owner.AcousticEvaluations!=ActualCompletion.Source.CachedMainGroupEvaluations)
             throw new InvalidOperationException("Live completed global source and unchanged cached NN required.");
     }
     public LegacyFreshMainGlobalRefreshedGlyphOwner RefreshOwner(ulong canonicalOwnerKey,

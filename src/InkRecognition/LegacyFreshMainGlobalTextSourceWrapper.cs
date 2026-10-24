@@ -31,14 +31,17 @@ public sealed class LegacyFreshMainGlobalTextSourceWrapper
     public LegacyFreshMainGlobalTextGlyphChoices Choices{get;}
     public LegacyLibraryGlobalTextPublicationScope Scope=>Choices.Scope;
     public LegacyFreshMainGlobalNoCandidateSourceCompletion Completion=>Choices.Completion;
+    internal LegacyGlobalCompletedTextSource ActualCompletion=>Choices.ActualCompletion;
+    public int ActualWordPayloadCount=>Choices.ActualWordPayloadCount;
+    public byte[][] CopyActualWordPayloads120(CancellationToken token=default)=>Choices.CopyActualWordPayloads120(token);
     public LegacyOwnedMainTextSourceInterner CharacterInterner=>Scope.SharedState.Characters;
     public bool IsFaulted{get{lock(gate)return faulted;}}
     private LegacyFreshMainGlobalTextSourceWrapper(LegacyFreshMainGlobalTextGlyphChoices choices,CancellationToken token)
     {
         Choices=choices;choices.Validate(token);original=choices.Projection.CopyOriginalRoot(token);
-        wordClip=Completion.CopyRanges();inputs=Scope.Document.CopySelectedInputs();
-        references=Completion.Word.Word.FlatReferences.ToArray();operations=LegacyOwnedRawInkRangeOperations.Prepare(Scope.Document);
-        descriptors=Completion.Snapshot.SourcePolicy.Owner.Graph.Source.Source.CopyDescriptors();
+        wordClip=ActualCompletion.CopyRanges();inputs=Scope.Document.CopySelectedInputs();
+        references=ActualCompletion.Word.Word.FlatReferences.ToArray();operations=LegacyOwnedRawInkRangeOperations.Prepare(Scope.Document);
+        descriptors=ActualCompletion.Snapshot.SourcePolicy.Owner.Graph.Source.Source.CopyDescriptors();
         ValidateDomain(token);
     }
     public static LegacyFreshMainGlobalTextSourceWrapper Prepare(LegacyLibraryGlobalTextPublicationScope actualScope,
@@ -49,9 +52,14 @@ public sealed class LegacyFreshMainGlobalTextSourceWrapper
         var choices=LegacyFreshMainGlobalTextGlyphChoices.Prepare(actualScope,actualCompletion,acousticResource,properties,normalization,circles,token);
         var result=owners.GetValue(choices,c=>new(c,token));result.ValidatePreclaim(token);return result;
     }
+    public static LegacyFreshMainGlobalTextSourceWrapper Prepare(LegacyLibraryGlobalTextPublicationScope scope,LegacyFreshMainGlobalWordAugmentation actual,ReadOnlySpan<byte> resource,LegacyNativeTextPublicationData properties,LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token=default)
+    {
+        var choices=LegacyFreshMainGlobalTextGlyphChoices.Prepare(scope,actual,resource,properties,normalization,circles,token);
+        var result=owners.GetValue(choices,c=>new(c,token));result.ValidatePreclaim(token);return result;
+    }
     private void ValidateDomain(CancellationToken token)
     {
-        Scope.Validate();Completion.Validate(token);var shared=Scope.SharedState;var seed=Scope.Seed;
+        Scope.Validate();ActualCompletion.Validate(token);var shared=Scope.SharedState;var seed=Scope.Seed;
         if(!ReferenceEquals(shared.Document,Scope.Document)||!ReferenceEquals(shared.Strings,Choices.StringPool)||
             !ReferenceEquals(seed,Scope.Context.Result.PublicationSeed)||!ReferenceEquals(seed.StringPool,shared.Strings)||
             !ReferenceEquals(seed.PendingSelections,shared.Selections)||!ReferenceEquals(seed.InputBinding,Scope.Context.InputBinding)||
@@ -118,8 +126,8 @@ public sealed class LegacyFreshMainGlobalTextSourceWrapper
     internal int ReadSourceLine(LegacyFreshMainGlobalProcessedGlyphSource source,CancellationToken token)
     {
         RequireCurrentSource(source,token);if(unchecked((short)(source.Reference>>24))<0)return-1;
-        var graph=Completion.Snapshot.SourcePolicy.Owner.Graph;var metadata=source.OriginalPositions.Source;
-        if(!ReferenceEquals(metadata.Owner,Completion.Source.Session!.Associations.Metadata)||graph.State.NodeCount<=0||
+        var graph=ActualCompletion.Snapshot.SourcePolicy.Owner.Graph;var metadata=source.OriginalPositions.Source;
+        if(!ReferenceEquals(metadata.Owner,ActualCompletion.Source.Session!.Associations.Metadata)||graph.State.NodeCount<=0||
             (uint)metadata.AcousticGroupId>=(uint)graph.State.Groups.Count)
             throw new NotSupportedException("Actual nonempty global V68/V78 group source required.");
         ushort ordinal=graph.State.Groups[metadata.AcousticGroupId].DescriptorOrdinal;
@@ -174,7 +182,7 @@ public sealed class LegacyFreshMainGlobalTextSourceWrapper
             entered=true;trace.Add("claim");
             try
             {
-                byte[] beforeWord=Completion.Word.Word.CopyStorage();int nn=Completion.Source.CachedMainGroupEvaluations;
+                byte[] beforeWord=ActualCompletion.Word.Word.CopyStorage();int nn=ActualCompletion.Source.CachedMainGroupEvaluations;
                 //Native028902 initializes this at each alternative; LineId is
                 //still read from its actual group/descriptor producer.
                 lineOffset=0;int n=references.Length;var pool=Choices.Emitter.TopOwner.GlyphPool;
@@ -235,8 +243,8 @@ public sealed class LegacyFreshMainGlobalTextSourceWrapper
                     wordParent?.AppendCharacter(this,output[^1],token);
                     currentSelection=null;currentSource=null;trace.Add("glyph-complete:"+i);
                 }
-                if(!Completion.Word.Word.CopyStorage().AsSpan().SequenceEqual(beforeWord)||
-                    !Completion.Word.Word.FlatReferences.SequenceEqual(references)||Completion.Snapshot.SourcePolicy.Owner.AcousticEvaluations!=nn)
+                if(!ActualCompletion.Word.Word.CopyStorage().AsSpan().SequenceEqual(beforeWord)||
+                    !ActualCompletion.Word.Word.FlatReferences.SequenceEqual(references)||ActualCompletion.Snapshot.SourcePolicy.Owner.AcousticEvaluations!=nn)
                     throw new InvalidOperationException("Source wrapping changed actual WORD references or reran NN.");
                 Validate(token);completed=true;trace.Add("complete");return new(this,output.ToArray(),ordinaryRanges,sourceFlags,selectedFlags);
             }
