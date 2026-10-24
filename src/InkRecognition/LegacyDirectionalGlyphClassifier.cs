@@ -100,8 +100,14 @@ public sealed class LegacyDirectionalGlyphClassifier
         short[][] inputs = new short[4][];
         if (includeBaselineFamilies)
         {
-            inputs[0] = LegacyStrokeFeatures.ExtractInputWithBaseline(glyph, baseline, context, startBoundary, endBoundary, cancellationToken);
-            inputs[1] = LegacyRasterFeatures.ExtractInputWithBaseline(glyph, baseline, context, startBoundary, endBoundary, cancellationToken);
+            //Actual1111 MAIN dispatches00A9F0 for zero integer extent. The
+            //generic geometry API keeps its existing nondegenerate domain.
+            if (!_actual2B1 || !LegacyMainPointGlyphFeatures.TryCreate(glyph, baseline, context,
+                startBoundary, endBoundary, cancellationToken, out inputs[0], out inputs[1]))
+            {
+                inputs[0] = LegacyStrokeFeatures.ExtractInputWithBaseline(glyph, baseline, context, startBoundary, endBoundary, cancellationToken);
+                inputs[1] = LegacyRasterFeatures.ExtractInputWithBaseline(glyph, baseline, context, startBoundary, endBoundary, cancellationToken);
+            }
         }
         if (_actual2B1)
         {

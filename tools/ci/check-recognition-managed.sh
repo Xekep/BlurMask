@@ -1,4 +1,6 @@
 set -euo pipefail
+dotnet run --project tools/LegacyMainPointGlyphFeatures.Probe -c Release -- .artifacts/legacy-main-point-features.json
+python tools/LegacyMainPointGlyphFeatures.Probe/audit_output.py .artifacts/legacy-main-point-features.json
 python tools/LegacyDirectional2B1.Probe/reference_controls.py .artifacts/legacy-directional-2b1-controls.json
 dotnet run --project tools/LegacyDirectional2B1.Probe -c Release -- .artifacts/legacy-directional-2b1-controls.json
 dotnet run --project tools/LegacyRussianBundle.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json
