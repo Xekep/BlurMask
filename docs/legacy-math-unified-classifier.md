@@ -8,6 +8,30 @@ Integer costs are not confidence. `Confidence` is null and `HasGrammarCandidateA
 
 This primitive does not implement13A4 requested subset masks/cache, grammar matching, terminal ownership, candidate trees or complete ink recognition. It supplies no application default routing or handwriting accuracy claim. Existing five per-network kernels retain their documented modular arithmetic and unsupported INT_MIN/dynamic-range cases.
 
+## Fixed-resource request-mask analysis
+
+A separate static audit follows the actual grammar setup into the stored13A4
+v105 tail. It reads the complete sequential tail at1789568..1791853, rather
+than finding aliases by signature. Actual grammar terminal sets contain297
+entries and cover all258 real alphabet labels. The grammar also contains205
+prefix nodes. Before13A4 processing, virtual label256 is the sole unset bit.
+The stored13A4 field5A is256, so1B850 forces that bit and produces259 set bits.
+
+This does not make virtual256 a possible classification:12950 independently
+forces its cost to0x4000000. The selected13A6 adjustment targets never contain
+256 and therefore cannot revive it. The stored fresh configuration's58 field
+is zero, selecting the unmasked model branch. Optional intersection is absent
+only under the independently traced fresh setup with processor180 initially
+null; this conclusion is not extended to arbitrary existing requests.
+
+The root replay checked17 complete PE regions,14 instruction operands, three
+registered bindings and10 corrupted-tail controls without loading vendor
+libraries or running learned models. Frozen analysis manifest SHA256:
+`0b5c1a01079a9e7fc9501023a17fb7fdf81875430fb66c8487fdac530ff61209`.
+This establishes a fixed-resource default-mask result. It does not issue a
+typed request or substitute for the missing processed-source subset/cache
+producer, its original-point mapping, geometry, or grammar ownership.
+
 ## Prepared verification
 
 From the repository root:
