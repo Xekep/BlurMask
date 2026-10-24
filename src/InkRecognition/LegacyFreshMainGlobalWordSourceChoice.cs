@@ -20,6 +20,7 @@ public sealed class LegacyFreshMainGlobalWordSourceChoice
         if(IsComplete)throw new InvalidOperationException("A completed275 choice cannot be appended.");
         if(choice.Payload.CopyAssignedScalars().Field40!=-1)throw new NotSupportedException("All275 CHAR source selection override requires separate native handling.");
         var parent=payload.OriginalSource.Owner;
+        payload.AppendOrdinaryHeader(choice,token); //native02572F precedes choice link append.
         if(choice.ProcessedSource.IsOrdinarySource)ordinary=parent.RangeOperations.Union(ordinary,choice.Payload.Source.CopyRanges(token),token);
         links.Add(new(choice));var rows=choice.Payload.CopyRecords(token);
         if((uint)choice.Marker>=rows.Count)throw new NotSupportedException("Actual per-WORD CHAR marker unavailable.");Flags=FoldFlags(Flags,rows[choice.Marker].Flags,rows[choice.Marker].Flags);

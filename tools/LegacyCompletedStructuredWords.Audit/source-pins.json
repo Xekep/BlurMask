@@ -5,8 +5,8 @@
     "LegacyFreshMainGlobalWordTextPublication.CompletedWords.cs": "7a13961c19a6109e49350519125766e0d1fae5571f792e2c1c122336016661bf",
     "LegacyFreshMainGlobalWordTextPublication.PostText.cs": "4b1cad5adc256629d1f21d18ddc126e42cee5e6e4ac6e165e0745a21eae20f17",
     "PositionedWordRun.cs": "74f9d1aced125c00540d877c14911f98e38ec007a7213dceeffa1913d1fe924b",
-    "LegacyFreshMainGlobalWordSourceChoice.cs": "e4bdcdb5cc02c6c21f06ad2bcb621ef0a3a2e78028cb1549a92ce8cefac8e120",
-    "LegacyFreshMainGlobalWordSourceReceipt.cs": "68b65aefb1299f8290e25dd3edfca0135a81f7e6cf727653ebfcce26a1b6f354"
+    "LegacyFreshMainGlobalWordSourceChoice.cs": "c89aea4f3e7b9370177ac901ecba61132768974cc7fa0f20e89a0678343f6be1",
+    "LegacyFreshMainGlobalWordSourceReceipt.cs": "db6adf45b23a9ca3d05b3b6d2e63e98fb50fc614d8c9b039b8eb407b1c78c5df"
   },
   "exactOwnGetterReversals": {
     "LegacyFreshMainGlobalWordSourceChoice.cs": {
@@ -22,5 +22,19 @@
       ],
       "oldLfSha256": "2c0c73238cc9f8ee60bb1595861873b67448443a2fffb68a27f19a781ff90bf8"
     }
+  },
+  "header30HistoricalPreimages": {
+    "LegacyFreshMainGlobalWordSourceChoice.cs": {
+      "Path": "historical-header30/LegacyFreshMainGlobalWordSourceChoice.cs.txt",
+      "LfSha256": "e4bdcdb5cc02c6c21f06ad2bcb621ef0a3a2e78028cb1549a92ce8cefac8e120"
+    },
+    "LegacyFreshMainGlobalWordSourceReceipt.cs": {
+      "Path": "historical-header30/LegacyFreshMainGlobalWordSourceReceipt.cs.txt",
+      "LfSha256": "68b65aefb1299f8290e25dd3edfca0135a81f7e6cf727653ebfcce26a1b6f354"
+    }
+  },
+  "header30CurrentFiles": {
+    "LegacyMainWordHeaderUnionBudget.cs": "a2401b1cc23a094f7d08604d1b97447b97446846f3cfd8c3fc46cfd75acb57ac",
+    "LegacyFreshMainGlobalWordTextPublication.WordHeader.cs": "1c36ffa4909f611ed5ee6fcf0377692508e08d957102c5e661a22b44837ca847"
   }
 }

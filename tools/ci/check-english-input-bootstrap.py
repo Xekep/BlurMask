@@ -28,7 +28,8 @@ def run(stage, command, timeout):
 
 
 for name in ("LegacyEnglishEarlySelected.Probe", "LegacyEnglishEarlySelected.ActualEntry",
-             "LegacyEnglishSelectedSources.Probe", "LegacyEnglishSelectedSources.ActualEntry"):
+             "LegacyEnglishSelectedSources.Probe", "LegacyEnglishSelectedSources.ActualEntry",
+             "LegacyEnglishSourceIndices.Probe", "LegacyEnglishSourceIndices.ActualEntry"):
     run(name + "-build", ["dotnet", "build", str(root / "tools" / name),
         "-c", "Release", "--artifacts-path", str(output / "build"),
         "--disable-build-servers", "-p:UseSharedCompilation=false", "-m:1"], 360)
@@ -45,4 +46,14 @@ run("selected-sources-model-free", ["dotnet", str(output / "build" / "bin" / nam
     "release" / (name + ".dll")), str(capture)], 45)
 run("selected-sources-independent-audit", [sys.executable, "-I", "-B", str(root / "tools" /
     name / "audit_output.py"), str(capture), str(output / "selected-sources-audit.json")], 45)
-print("PASS model-free bootstrap/selected-source helpers and readonly own-IL order; both ActualEntries built only")
+name = "LegacyEnglishSourceIndices.Probe"
+capture = output / "source-indices-prepared.json"
+run("source-indices-model-free", ["dotnet", str(output / "build" / "bin" / name /
+    "release" / (name + ".dll")), "--prepared", str(capture)], 45)
+run("source-indices-independent-audit", [sys.executable, "-I", "-B", str(root / "tools" /
+    name / "audit.py"), "--prepared", str(capture), str(output / "source-indices-prepared-audit.json"), "--tamper"], 45)
+fixtures = root / "tools" / name / "fixtures"
+run("source-indices-stored-actual-data", [sys.executable, "-I", "-B", str(root / "tools" /
+    name / "audit.py"), "--actual", str(fixtures / "selected-prior.json"),
+    str(fixtures / "source-indices-actual.json"), str(output / "source-indices-actual-audit.json"), "--tamper"], 45)
+print("PASS model-free bootstrap/selected/neutral-index helpers +stored actual DATA; three ActualEntries built only")

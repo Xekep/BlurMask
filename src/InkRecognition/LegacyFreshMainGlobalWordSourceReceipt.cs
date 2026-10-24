@@ -47,7 +47,7 @@ public sealed class LegacyFreshMainGlobalWordSourcePayload
     public long Field40=>-1;
     public int Field48=>-1;
     public IReadOnlyList<LegacyFreshMainGlobalWordCharacterLink> CopyCharacterLinks(){OriginalSource.Owner.Scope.Validate();return allChoices is null?Array.AsReadOnly(links.ToArray()):allChoices[selectedChoice].CopyCharacterLinks();}
-    public LegacyNativeInkPositionRange[] CopyOrdinaryRanges(){OriginalSource.Owner.Scope.Validate();return allChoices is null?ordinary.ToArray():allChoices[selectedChoice].CopyOrdinaryRanges();}
+    public LegacyNativeInkPositionRange[] CopyOrdinaryRanges(){OriginalSource.Owner.Scope.Validate();return ordinary.ToArray();}
     internal LegacyNativeInkPositionRange[] CopyCurrentOrdinaryRanges()=>allChoices is null?ordinary.ToArray():CurrentChoice.CopyOrdinaryRanges();
     public IReadOnlyList<LegacyFreshMainGlobalWordSourceChoice> CopyWordChoices()
     {OriginalSource.Owner.Scope.Validate();return allChoices is null?throw new NotSupportedException("All275 choice publication was not requested."):Array.AsReadOnly(allChoices.ToArray());}
@@ -92,11 +92,25 @@ public sealed class LegacyFreshMainGlobalWordSourcePayload
             if(currentChoice==selectedChoice)ChoiceFlags=CurrentChoice.Flags;
             return;
         }
-        if(source.IsOrdinarySource)
-            ordinary=parent.RangeOperations.Union(ordinary,actual.Payload.Source.CopyRanges(token),token);
+        AppendOrdinaryHeader(actual,token);
         links.Add(new(actual));var rows=actual.Payload.CopyRecords(token);
         if((uint)actual.Marker>=(uint)rows.Count)throw new NotSupportedException("Actual CHAR marker unavailable; no fallback row.");
         ChoiceFlags|=rows[actual.Marker].Flags;
+    }
+    //Same fresh WORD payload+30 across all275 and later reuse slots. Called
+    //only after the current choice/Field40/actual-source guards have passed.
+    internal void AppendOrdinaryHeader(LegacyFreshMainGlobalTextSourceChoice actual,CancellationToken token)
+    {
+        var parent=OriginalSource.Owner;var source=actual.ProcessedSource;
+        source.Owner.RequireCurrentSource(source,token);
+        if(!ReferenceEquals(source.Owner,parent.Wrapper)||!actual.Payload.IsComplete||
+            !ReferenceEquals(actual.Payload.Owner,parent.Wrapper)||!ReferenceEquals(actual.Payload.Node.FirstGlobalSource,actual.Payload.Source))
+            throw new InvalidOperationException("Actual initialized same-WORD CHAR append required.");
+        if(!source.IsOrdinarySource)return;
+        var key=actual.Payload.Node.Key;
+        var bound=LegacyMainWordHeaderUnionBudget.BeforeUnion(ordinary.Length,key.Length);
+        parent.ReserveWordHeaderUnion(bound,token);
+        ordinary=parent.RangeOperations.Union(ordinary,key,token);
     }
     public byte[] CopyChoiceScalar48()
     {OriginalSource.Owner.Scope.Validate();if(allChoices is not null)return allChoices[selectedChoice].CopyScalar48();byte[] b=new byte[48];BinaryPrimitives.WriteUInt32LittleEndian(b.AsSpan(8),ChoiceFlags);BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(24),links.Count);BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(28),links.Count);return b;}

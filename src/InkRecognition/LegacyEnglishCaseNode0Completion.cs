@@ -58,8 +58,8 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         var primary=LegacyEnglishCasePrimaryCompletion.Prepare(knowledge,numeric,cases,publication,maximumLogicalBytes,token);
         try
         {
-            ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,264+48);
-            ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,264+8);
+            ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,264+48+9); //source-index request bool+DATAref, before object allocation.
+            ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,264+8+9);
             var result=new LegacyEnglishCaseNode0Completion(primary,ledger,index,fresh);token.ThrowIfCancellationRequested();primary.AttachNode0Completion(result);return result;
         }
         catch{primary.FaultUnattachedNode0Preparation();throw;}

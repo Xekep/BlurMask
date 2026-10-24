@@ -48,6 +48,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             if(graphTextPublicationRequested)graphTextPublicationData=parent.CompleteText(token);
             if(graphPostTextCoverageRequested)graphPostTextCoverageData=parent.CompletePostTextCoverage(token);
             if(graphSelectedSourcesRequested)graphSelectedSourcesData=parent.CompleteSelectedSources(token);
+            if(graphSourceIndicesRequested)graphSourceIndicesData=parent.CompleteSourceIndices(token);
             if(graphOriginalSelectedRequested)graphEarlySelectedInputData=parent.CopyEarlySelectedInputData(token);
             //Future021AB0/NULL projection/TEXT must be called HERE while the
             //same CHAR context/StringPool/Selections are live, never on result DATA.
@@ -130,7 +131,12 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             output=new GraphWordChoiceData[Count];trace.Add("document-choice32");
         }
         internal static GraphWordPublicationContext Issue(LegacyEnglishCaseNode0Completion owner,GraphLanguageScope stage,
-            LegacyNativePlainWordPublisher publisher,LegacyNativeGlyphRecordPool pool,CancellationToken token)=>new(owner,stage,publisher,pool,token);
+            LegacyNativePlainWordPublisher publisher,LegacyNativeGlyphRecordPool pool,CancellationToken token)
+        {
+            stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,27);
+            stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,27);
+            return new(owner,stage,publisher,pool,token);
+        }
         private void Reserve(long payload,long copies,long visits)
         {Stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,payload);Stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,copies);Stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,visits);}
         internal void Require(CancellationToken token)
@@ -144,7 +150,9 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         {
             Require(token);if(wordNode is not null||current!=-1||next!=0||words.Count!=0)throw new InvalidOperationException("Fresh WORD source required.");
             var actual=words.InternEnglishWord(this,token);if(!actual.Inserted)throw new InvalidOperationException("Fresh WORD tree must insert.");
-            wordNode=actual.Node;trace.Add("word-intern");trace.Add("word-defaults");
+            wordNode=actual.Node;
+            if(owner.graphSourceIndicesRequested)InitializeWordHeader30(token);
+            trace.Add("word-intern");trace.Add("word-defaults");
         }
         internal LegacyOwnedMainTextSourceInternResult InternInto(LegacyOwnedMainTextSourceInterner actual,CancellationToken token)
         {Require(token);if(!ReferenceEquals(actual,words)||wordNode is not null||current!=-1||next!=0)throw new InvalidOperationException("Actual new WORD intern point required.");return actual.InternPrepared(originalKey,token);}
@@ -177,7 +185,9 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             if(source.Ordinary)
             {
                 Reserve(checked(1024+source.RangeCount*32L),checked(2048+source.RangeCount*64L),1024);
-                var key=source.CopyRanges(token);long n=checked((long)ordinary.Length+key.Length);
+                var key=source.CopyRanges(token);
+                if(owner.graphSourceIndicesRequested)AppendWordHeader30(payload,key,token);
+                long n=checked((long)ordinary.Length+key.Length);
                 Reserve(checked(4096+128*n),checked(8192+256*n+48*n*n),checked(4096+128*n*n));
                 ordinary=operations.Union(ordinary,key,token);
             }

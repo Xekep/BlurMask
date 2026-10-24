@@ -479,7 +479,7 @@ checked1912 frozen pin records,921 compiler entries,914 precompile entries and
 including DATA audit under CPU2/affinity3/.NET10.0.12/45s, with954 runtime pins
 checked before and after, no retry. The entire priorbeaef5 capture remains exact;
 only SelectedSources is added:1 CHAR,1 selected link,0 reached raw-kind lookups,
-21 refused corruptions. The owning pipeline still performs331 neural scoring
+21 refused corruptions. The owning pipeline still records331 page scoring
 calls; the new selected-source stage adds none. DocumentApplied remains false.
 CHAR/WORD ordering rests on separate PE/source/compiled-IL checks, not inferred
 from this final-value capture or unexecuted cancellation-prefix controls.
@@ -558,6 +558,83 @@ and the Release application build with zero warnings/errors. The actual profile
 capture remains byte-exact176d; no geometry/source/FIRST/NN or desktop app was
 executed. Independent portable review also passed seven adapter negatives.
 Main evidence: `root-first276-program-main-20261024/verification.json`.
-The three-OS CI for this new owner has not yet been verified. Evidence:
+The new owner then passed all four stages on Windows/Linux/macOS in
+specialized run40104344414 on63f8201 (all nine jobs successful). Root downloaded
+and independently audited each raw profile capture against the resource. Typed
+JSON DATA is identical on all three systems; raw captures are preserved:
+Windows102724B/176d6469, Linux and macOS96410B/9d5f8b0b. They are not claimed
+byte-exact across platforms and were never normalized. All remote6189-negative
+reports match the prior root result, apart from their correctly recorded raw
+capture hashes. An initial root cross-OS byte-identity assertion stopped before
+Ubuntu audit; that verifier assumption was corrected without changing any
+capture, source, golden or oracle. Evidence:
+`first276-program-three-os-verified-20261024/verification.json`.
+Original profile proof:
 `root-first276-program-profile-frozen-manifest-20261024.json`
 (SHA256 `eb4fb0b19cd4450e3df0e57cf9f09461558d9d224bd0bd04c939b09ffef6e582`).
+
+
+The configured2ALT augmentation remains SOURCE-only. Root verified the separate
+Prepare-lease correction12ac29bd and cancellable/reentrancy-safe claim9da4144e.
+The field-only TOP lineage is published after the single-use assembly Run;
+mutable reads occur under the proposed lease. Root then compiled the exact
+private State primitive and exercised18 guards, a genuinely contended monitor
+cancellation, sequential unentered preparations, nested refusal, cross-thread
+Dispose preservation, mark/complete/poison and exactly one concurrent winner.
+This neutral test creates no TOP/result/CWT-issued source capability and calls
+no model/recognition/NN API. It does not prove the actual old/new factory race
+or successful augmentation. Evidence: `root-configured-claim-state-frozen-manifest-20261024.json`
+SHA256 `88b6a076f3dc7301d982b2c457da72cd426dd105beb830ee213ac2b975ec821f`.
+The full cache/feature cost still requires live debits through the same retained
+scorer; a historical forward is not a cache hit. No main augmentation route is
+installed and no configured fixture/bit8 refusal has been waived.
+
+English020920 SOURCEv2 removes an additional sum-of-input-lengths surrogate:
+C21 Union bounds each input and actual intermediate output, allowing a duplicate
+or merge at65536 retained ranges. The separate preallocation sum is not an
+admission limit. Root verified all48 SOURCE pins and42 compiled manifest
+records,959 runtime/source pins and4700 precompile pins. Both compiled plans
+return with RuntimeCalls0/NN0. One root neutral prepared run passes real C21
+nonadjacent all-choice unions,65537 duplicate memberships/latest owner, ordered
+vectors, empty vectors, full-cap duplicate/merge and five exact bound refusals.
+It took0.403s under.NET10.0.12/CPU2/observed affinity3,1001pins unchanged.
+No English owner/model/NN runs in that neutral check. Evidence:
+`root-english-source-indices-prepared-20261024`; compiled manifest SHA256
+`7ef97c345f99a338a184aaffa55144ff029a44afb610c165d464203becc7b637`.
+
+After full source/harness/native/independent-oracle review, root ran ONE genuine
+same-live English source-index successor on the unchanged141/index4 raw input.
+The owning process completed in1.424s; strict DATA audit took0.258s, with1016
+pins unchanged before/after, .NET10.0.12/CPU2/observed parent+child affinity3/45s,
+no retry. Capture31343B SHA256:
+`fef0f39bf0fb118a8d6fa60f8d534f3a46864ab29df0b8588d4966eb10af31c8`.
+The whole530df predecessor is recursively type/value exact; only SourceIndices
+is added. One CHAR and one WORD produce two interval nodes, two vector nodes
+and two memberships with unchanged pending identities/cursor;81 corruptions
+refuse. ScoringCalls331 is unchanged, not zero; the new stage adds no learned
+forward. The real fixture still has equal ordinary keys; nonadjacent/reuse and
+full-cap behavior have only the stated neutral/SOURCE coverage. FrontendC20
+origin, guide producer, document application/public readiness and cursive
+quality remain open. Main integration now passes all13 English helper stages
+(131.616s), source current/historical audit and14 source corruptions, the
+structured-word helper (100.431s), and the Release application build (71.283s,
+zero warnings/errors). All three prepared captures remain raw byte-exact;
+stored530df/fef fixtures are unchanged. No owning/NN/app execution was repeated
+for integration. Independent peer review passes native/source/recorded DATA and
+five extra corruptions, with the equal-key coverage limit explicit. Main proof:
+`root-english-source-indices-main-20261024/verification.json`; peer manifest
+SHA256 `1e4ece62367a094a7073e453c72c47a36dc516e1e590ddd702d2219dfcfaef65`.
+Three-OS CI for this integrated successor is still pending. Owning evidence:
+`root-english-source-indices-owning-frozen-manifest-20261024.json`, SHA256
+`40980095f8fce9492ce50308b6e1c05fcfc6f96c37e435a0fbc7cbef2cb324a9`.
+
+
+Metric wording correction:331 is GraphLoopMetrics.ScoringCalls accumulated
+from page RequestScorer results, not the total neural forward count. The new
+SourceIndices code calls no neural evaluator; the recorded MAIN-confidence
+channel has three observations, while a whole-pipeline FIRST/context/MAIN
+forward counter was not instrumented. The earlier root proof manifest's scope
+phrase NN331 is preserved as an error and corrected by
+`root-english-source-indices-metric-correction-20261024.json` (SHA256
+`1f6e27603a77f46a9bc17ad8cfeeff7c32316a2c784611c46dfc33479e20a591`).
+No capture, expected value or runtime source changed for this correction.
