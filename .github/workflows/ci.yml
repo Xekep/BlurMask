@@ -190,6 +190,11 @@ jobs:
         run: |
           dotnet run --project tools/LegacyMathAkTemporal.Probe -c Release -- . .artifacts/math-ak-temporal.json
           python -I -B tools/LegacyMathAkTemporal.Probe/audit_output.py . .artifacts/math-ak-temporal.json .artifacts/math-ak-temporal-audit.json
+      - name: Original Math single-stroke spatial inputs and independent reference
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyMathAkSpatial.Probe -c Release -- . .artifacts/math-ak-spatial.json
+          python -I -B tools/LegacyMathAkSpatial.Probe/audit_output.py . .artifacts/math-ak-spatial.json .artifacts/math-ak-spatial-audit.json
       - name: Original Math fixed1F synthetic numerical and conversion controls
         shell: bash
         run: |

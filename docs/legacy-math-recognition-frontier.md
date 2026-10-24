@@ -43,7 +43,11 @@ now produces the selected1F model's222 inputs with independent source-derived
 checks. The [source-bound1F numerical network](legacy-math-ak-temporal-network.md)
 now evaluates those inputs with exact modular arithmetic and network-local
 probability/cost channels. One controlled actual forward matched the independent
-reference. The other feature families and unified AL classifier remain missing.
+reference. The [source-bound spatial prefix](legacy-math-ak-spatial-features.md)
+now supplies the selected2F model's204 inputs, independently checked without
+evaluating a model. Three further selected-source feature families and the
+unified AL classifier remain missing. The selected source owns five networks;
+the six-model raw catalog also includes a separate first-vector source.
 The next implementation is that same-source feature/classifier/shortlist
 producer; grammar matching and tree materialization remain after it. Neither
 modern LaTeX/Math2 DOM nor caller-supplied scores can substitute for those
