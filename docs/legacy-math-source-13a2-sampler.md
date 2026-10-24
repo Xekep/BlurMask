@@ -31,5 +31,8 @@ All nine C#/project files match the reviewed owning build exactly. The current
 main library/probe and app builds pass without warnings/errors; the portable
 DATA checker reproduces the root audit report byte-for-byte. No owning source
 or inference run was repeated for integration. The newly added sixth stage's
-three-OS CI results remain pending. Evidence: `root-math13a2-main-20261024` and
+three-OS CI passed in run40090425535: all18 build/scalar/oracle steps per OS,
+including14 sampler cases,86 guards and25 corruptions. Root checked the downloaded
+reports in `math13a2-three-os-verified-20261024/verification.json` without repeating
+inference. Evidence: `root-math13a2-main-20261024` and
 `root-math13a2-monotone-owning-20261024`.
