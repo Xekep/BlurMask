@@ -27,11 +27,13 @@ Every terminal name resolves through the same actual AK alphabet:259 labels,
 258 strings and one virtual entry without a string. This verifies resource
 membership, not acoustic recognition or grammar search.
 
-There is a concrete conversion gap before a classifier can be connected:
-the raw MLPs expose257 logical outputs, while initializer00CAF0 obtains259
+The raw MLPs expose257 logical outputs, while initializer00CAF0 obtains259
 from the actual alphabet and stores it as the later unified cost-sentinel
-index. Directly assigning raw outputs to alphabet labels or calling the
-virtual label256 that sentinel would skip native conversion/postprocessing.
+index. The [fixed selected-five classifier](legacy-math-unified-classifier.md)
+now composes that distinction with the262-slot cost projection. It covers the
+fresh unmasked, unguided single-stroke numerical branch; it does not yet bind
+an actual13A4 matcher request. Virtual label256 remains distinct from the
+unified sentinel259.
 
 Feature writer0327A0 also uses a different configured program from the English
 directional feature extractor. Its temporal/grid branches, calibrations and
@@ -51,18 +53,22 @@ an independent complete integer replay on one fixed actual forward. A
 all four calibration pairs once for repeated geometry subsets. The
 [selected3F directional temporal features](legacy-math-ak-directional3f-features.md)
 and [source-bound3F numerical view](legacy-math-ak-directional3f-network.md)
-now also match independent original-geometry and numerical references. The selected4F quantile-grid and selected5F upper-direction features and their networks also match independent original-geometry replays. All five fixed numerical views are checked, but the
-unified AL classifier remains missing. The selected source owns five networks;
+now also match independent original-geometry and numerical references. The selected4F quantile-grid and selected5F upper-direction features and their networks also match independent original-geometry replays. All five fixed numerical views and their
+unified AL projection are checked. The selected source owns five networks;
 the six-model raw catalog also includes a separate first-vector source.
 The [directional feature bundle](legacy-math-ak-directional-bundle.md) now
 prepares the common3F/4F/5F geometry once, preserving all three independent
 feature results without retaining intermediate samples in the output.
 The [shape299 primitive](legacy-math-ak-shape299.md) now derives30x7 features
 from the same private normalized geometry and compares them against the actual
-immutable13A6 prototypes. It grants no classifier authority; source eligibility,
-cost adjustment and the unified shortlist remain to be composed.
-The next implementation is that same-source classifier/shortlist
-producer; grammar matching and tree materialization remain after it. Neither
+immutable13A6 prototypes. The classifier now applies the selected prototype's
+cost adjustment and produces the unified shortlist. Prepared checks cover all39
+prototype entries; the one connected actual diagnostic selects a label with
+no prototypes, so those two scopes remain separate.
+The next connection requires the genuine processed source, matcher bitset,
+original-point/range mapping and13A4 subset cache. The separate first-vector
+source, remaining multi-stroke/guide branches, grammar matching and tree
+materialization are still required. Neither
 modern LaTeX/Math2 DOM nor caller-supplied scores can substitute for those
 original hypotheses and source ranges.
 
