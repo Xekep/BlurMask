@@ -196,3 +196,27 @@ No owning sampler execution or additional neural request was made. These are
 source/static/PURE checks, not a complete recognizer. Evidence:
 `root-math13a2-final-source-review-20261024` and
 `root-math13a2-finite-overflow-review-20261024`.
+
+The English pending WORD/TEXT DATA audit subsequently passed64 corruption
+controls after root source review and43 authenticated pins. It verifies both
+choices and CHAR reuse while explicitly treating the upstream guide as an input.
+The reviewed source is now integrated; current-main library/tools and app builds
+pass, with unchanged prepared outputs. This still excludes document application
+and public handwriting admission; see `legacy-english-owned-word-text.md`.
+
+Root also completed the first genuine fresh Math13A2 sampler run on the original
+14 fixtures in1.006s, CPU2/affinity3, .NET10.0.12 and45s watchdog. The source uses
+an exact strictly-monotone-X fast path: nonadjacent closed X intervals cannot
+overlap, so the original intersection search cannot write anything. Equal X or
+reversals use the unchanged original search. No source/point truncation, new
+arrays or limit increase was introduced. Root's interval proof checked388
+ordered Float32 rows/238378 pairs; separate review checked1024 rows/20328 pairs.
+The independent full numerical audit passed41101 points,5561 markers,86 guards
+and25 corruption controls in3.738s, with2825 pin records checked before/after.
+Raw-derived expected data was fixed before execution. Its inherited spline
+coordinate tolerance remains explicit; indices/ends/markers/ranges are exact.
+The largest observed sampler cumulative payload was10262884 logical bytes,
+not process RSS. No neural or vendor execution occurred. Graph construction and
+actual FIRST276 request issuance remain subsequent stages. Evidence:
+`root-math13a2-monotone-owning-20261024` (capture SHA256
+`82e35c3398885f3b07d6d834dff5331e1044df03b4673a1b937cf1bd051dd64c`).

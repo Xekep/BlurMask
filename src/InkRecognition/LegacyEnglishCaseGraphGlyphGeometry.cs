@@ -65,7 +65,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             if(source.References.Length is<1 or>4096||head.Span.First!=source.First||head.Span.Last!=source.Last)
                 throw new NotSupportedException("Same actual completed forward WORD source interval required.");
             var parent=stage.Lease.Root.Knowledge.Owner.Owner.Owner.Parent;
-            var document=parent.CreateGraphRawDocument(stage,token);
+            var document=owner.graphWordPublicationContext?.Document??parent.CreateGraphRawDocument(stage,token);
             Reserve(stage,source.References.Length,document.ObjectCount,0,token);
             var result=new GraphGlyphGeometryContext(owner,stage,publisher,pool,head,source,document);
             owner.graphGlyphGeometryContext=result;

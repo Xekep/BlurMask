@@ -44,7 +44,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         List<(ulong Key,byte[] Source,uint Bits,int Visited)> progress,CancellationToken token)
     {
         RequireGraphPublication(stage,token);
-        if(!graphCharactersRequested||graphCharacterContext is not null||refs.Count!=progress.Count||graphGlyphGeometryContext is null)
+        if(!GraphCharacterEntryAllowed(graphCharactersRequested,graphCharacterContext is not null,graphWordPublicationContext is not null,refs.Count==progress.Count,graphGlyphGeometryContext is not null))
             throw new InvalidOperationException("Exact completed private first-pass producer required.");
         long ownerRows=0;
         foreach(var reference in refs){token.ThrowIfCancellationRequested();ownerRows=checked(ownerRows+pool.ReadGraphRefreshOwnerCount(LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(reference),token));}
@@ -59,7 +59,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(65536+prefixRows*1024));
         stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(131072+prefixRows*2048));
         stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(16384+prefixRows*512));
-        var context=graphGlyphGeometryContext.CreateCharacterContext(stage,pool,token);graphCharacterContext=context;
+        var context=graphGlyphGeometryContext!.CreateCharacterContext(stage,pool,token);graphCharacterContext=context;
         context.Require(token);
         var choices=new GraphGlyphChoiceData[refs.Count];var utf8=new GraphGlyphUtf8Data[refs.Count];var chars=new GraphCharacterData[refs.Count];
         for(int i=0;i<refs.Count;i++)
@@ -75,9 +75,11 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             chars[i]=new(reference,result.Payload.Node.Identity,result.Inserted,source.Ordinary,Pairs(source.CopyRanges(token)),result.Payload.SelectionId,
                 result.Payload.LineId,result.Payload.Flags,result.Payload.Prior,result.Payload.PriorVisits,result.Marker,
                 rows.Select(x=>x.CopyStorage40()).ToArray(),rows.Select(x=>KnownCharacterRecord()).ToArray(),rows.Select(x=>x.Text!.ReadBytes()).ToArray());
+            graphWordPublicationContext?.AppendCharacter(source,result.Payload,result.Marker,token);
             context.End(source,token);
         }
         context.Complete(refs.Count,token);RequireGraphPublication(stage,token);
+        if(graphWordPublicationContext is not null)context.ReserveWordChoiceSnapshots(graphWordPublicationContext,token);
         graphGlyphChoices=choices;graphGlyphUtf8=utf8;graphCharacters=chars;graphCharacterNodes=context.CopyFinalPayloads(token);
         context.RequireCompleted(token);graphCharacterTreeRoot=context.Interner.RootIdentity;graphCharacterTree=context.Interner.CopyTree();
         graphCharacterCommands=context.Selections.CopyPendingSelections().Select(x=>new GraphCharacterCommandData(x.SelectionId,x.Name,x.CommandIdentity,x.PreviousCommandIdentity,Pairs(x.CopyRanges()))).ToArray();
@@ -167,7 +169,13 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         internal GraphCharacterContext CreateCharacterContext(GraphLanguageScope actual,LegacyNativeGlyphRecordPool actualPool,CancellationToken token)
         {
             RequireCharacterFirstPass(actual,actualPool,token);
-            if(owner.graphCharacterContext is not null)throw new InvalidOperationException("One same-cohort postpass required.");
+            if(owner.graphCharacterContext is not null)
+            {
+                var parent=owner.graphWordPublicationContext??throw new InvalidOperationException("One same-cohort postpass required.");
+                parent.RequireChoiceGeometry(this,document,actual,actualPool,token);
+                owner.graphCharacterContext.BeginWordChoice(parent,this,characterRanges,token);
+                return owner.graphCharacterContext;
+            }
             long count=0;foreach(var r in characterRanges)count=checked(count+r.Clipped.Length);
             if(count>4096)throw new NotSupportedException("Bounded total first-pass source ranges required.");
             // Initial private clones only. Later source operations reserve from
@@ -211,9 +219,10 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         internal GraphCharacterSource(GraphCharacterContext context,int index,GraphCharacterRange range,bool ordinary,LegacyNativeInkPositionRange[] key,
             LegacyNativeGlyphRecordOwner glyphs,LegacyPreparedGlyphAlternativeSelection selection)
         {Context=context;Index=index;Reference=range.Reference;Range=range;Ordinary=ordinary;this.key=key;Glyphs=glyphs;Selection=selection;}
+        internal int RangeCount=>key.Length;
         internal LegacyNativeInkPositionRange[] CopyRanges(CancellationToken token){Context.RequireCurrent(this,token);return key.ToArray();}
     }
-    internal sealed class GraphCharacterContext:IDisposable
+    internal sealed partial class GraphCharacterContext:IDisposable
     {
         private readonly LegacyEnglishCaseNode0Completion owner;
         internal GraphLanguageScope Stage{get;}
@@ -226,12 +235,12 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         internal LegacyNativeUnicodeNormalizationData Normalization{get;}
         internal LegacyInkAlphabet Alphabet{get;}
         private readonly byte[] header;
-        private readonly object geometryIdentity;
+        private object geometryIdentity;
         private readonly LegacyOwnedRawInkRangeOperations operations;
         private readonly LegacyNativeInkPositionRange[] original;
-        private readonly IReadOnlyList<GraphCharacterRange> produced;
-        private readonly LegacyNativeInkPositionRange[][] ranges;
-        private readonly bool[] skipped,positive,joiner;
+        private IReadOnlyList<GraphCharacterRange> produced;
+        private LegacyNativeInkPositionRange[][] ranges;
+        private bool[] skipped,positive,joiner;
         private readonly LegacyNativeSelectedInkRange[] inputs;
         private readonly Dictionary<int,GraphCharacterPayload> payloads=[];
         private GraphCharacterSource? current;
@@ -242,7 +251,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             LegacyOwnedRawInkDocument document,LegacyOwnedRawInkRangeOperations operations,LegacyNativeInkPositionRange[] original,IReadOnlyList<GraphCharacterRange> produced,CancellationToken token)
         {
             this.owner=owner;Stage=stage;Pool=pool;this.geometryIdentity=geometryIdentity;Document=document;this.operations=operations;this.original=original;this.produced=produced;
-            Interner=LegacyOwnedMainTextSourceInterner.Prepare(document,token);Selections=LegacyOwnedFreshTextSourceContext.Prepare(document,token);
+            Interner=LegacyOwnedMainTextSourceInterner.Prepare(document,token);Selections=owner.graphWordPublicationContext?.Selections??LegacyOwnedFreshTextSourceContext.Prepare(document,token);
             Properties=stage.Lease.Pass.Initializer.PlanForAudit.ReadGraphGlyphPublication(stage,token);Normalization=owner.graphGlyphNormalization!;Alphabet=stage.Lease.Root.Source.Alphabet;
             header=Alphabet.CopySerializedHeader();ranges=produced.Select(x=>x.Clipped.ToArray()).ToArray();skipped=new bool[produced.Count];positive=Enumerable.Repeat(true,produced.Count).ToArray();joiner=produced.Select(x=>x.Joiner).ToArray();inputs=document.CopySelectedInputs();
         }
@@ -391,6 +400,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         internal readonly LegacyOwnedMainTextSourceNode Node;
         internal readonly LegacyPreparedTextGlyphReuseRecord[] Initial;
         private readonly LegacyNativeInkPositionRange[] retainedRanges;
+        internal int RetainedRangeCount=>retainedRanges.Length;
         internal LegacyNativeInkPositionRange[] CopyRetainedRanges()=>retainedRanges.ToArray();
         internal LegacyPreparedMainTextGlyphReuse Reuse{get;private set;}=null!;
         internal long SelectionId{get;private set;}=-1;

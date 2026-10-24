@@ -29,44 +29,68 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         graphWordSourceSession!.RequireCompletedForTop(publisher,pool,token);
         var head=publisher.Head??throw new InvalidDataException("Actual selected WORD required.");
         publisher.RequireSoleActiveSourceHead(head);
-        var refs=head.Word.FlatReferences;
+        if(graphWordPublicationRequested)
+        {
+            CompleteGraphWordPublication(stage,compact,publisher,pool,ordinary,token);
+            return;
+        }
+        CompleteGraphGlyphChoiceRows(stage,compact,publisher,pool,ordinary,head.Word.FlatReferences,token);
+    }
+    private void CompleteGraphGlyphChoiceRows(GraphLanguageScope stage,LegacyPreparedMainCompactPublication.Result compact,
+        LegacyNativePlainWordPublisher publisher,LegacyNativeGlyphRecordPool pool,LegacyMainOrdinaryGlyphProductionOperations ordinary,
+        IReadOnlyList<ulong> refs,CancellationToken token)
+    {
+        RequireGraphPublication(stage,token);graphWordSourceSession!.RequireCompletedForTop(publisher,pool,token);
+        var head=publisher.Head??throw new InvalidDataException("Actual selected WORD required.");publisher.RequireSoleActiveSourceHead(head);
+        if(graphWordPublicationContext is not null)graphWordPublicationContext.RequireReferences(refs,token);
         if(refs.Count is<1 or>128)throw new NotSupportedException("Bounded ordinary glyph-reference domain required.");
         // Reserve a small issuer envelope before the private source receipt.
         stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,4096);
         var graph=stage.Lease.Pass.Initializer.PlanForAudit.BindingForAudit.Graph;
         var ranges=stage.Lease.Root.Knowledge.Owner.RetainGraphWordRanges(stage,token);
         if(graphCharactersRequested)graphCharacterSourceRanges=ranges;
-        long payload=65536,copies=131072,work=0;
-        // Preflight immutable endpoint/count bounds before DFS/pool/selection
-        // allocations. Charge every reference even when source keys duplicate.
-        foreach(ulong reference in refs)
+        //Only the authentic same-pool readiness receipt can skip217670 costs.
+        //No arrays are allocated by these two preflight scans. Base covers the
+        //per-choice progress/list metadata and bounded readonly wrappers.
+        stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(4096L+refs.Count*256L));
+        stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(8192L+refs.Count*512L));
+        stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(4096L+refs.Count*refs.Count*16L));
+        if(graphGlyphDispatch is null)
         {
-            ulong key=LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(reference);
-            var address=LegacyNativeResidualSource.Decode(key);
-            if((key&(1UL<<56))!=0||address.Node<0||address.Node>=graph.NodeCount||
-                unchecked((short)address.Arc)<0||address.Arc>=graph.GetNode(address.Node).Count)
-                throw new NotSupportedException("Higher/protocol owner needs genuine sourceV140 overlay issuer.");
-            var arc=graph.GetNode(address.Node)[address.Arc];
-            var bounds=ranges.Preflight(checked((int)arc.StartContextId),checked((int)arc.EndContextId),token);
-            int originalRows=pool.ReadGraphRefreshOwnerCount(key,token);
-            int repetitions=0;for(int j=0;j<refs.Count;j++)if(LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(refs[j])==key)repetitions++;
-            int nodeRows=checked(compact.Starts[address.Node+1]-compact.Starts[address.Node]);
-            int maximumRows=(int)Math.Min(2040L,checked(originalRows+(long)repetitions*nodeRows));
-            // Include every per-row scratch/header/request/cache callback allocation,
-            // full owner/selection/export clones, and worst insertion CopyTo shifts.
-            payload=checked(payload+bounds.Payload+1048576L+nodeRows*1024L+maximumRows*256L);
-            copies=checked(copies+bounds.Copies+2097152L+nodeRows*4096L+maximumRows*320L+2L*maximumRows*(maximumRows-1));
-            work=checked(work+16384L+nodeRows*128L+32L*maximumRows*maximumRows);
+            stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,32768);
+            stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,65536);
+            graphGlyphDispatch=new GraphGlyphRefreshDispatch(pool,128,token);
         }
+        var dispatch=graphGlyphDispatch;
+        long payload=0,copies=0,work=0;int cold=0,matchedTotal=0;
+        for(int i=0;i<refs.Count;i++)
+        {
+            token.ThrowIfCancellationRequested();ulong key=LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(refs[i]);
+            var address=LegacyNativeResidualSource.Decode(key);
+            if((key&(1UL<<56))!=0||address.Node<0||address.Node>=graph.NodeCount||unchecked((short)address.Arc)<0)
+                throw new NotSupportedException("Higher/protocol owner needs genuine source issuer.");
+            var arcs=graph.GetNode(address.Node);
+            if(address.Arc>=arcs.Count)throw new NotSupportedException("Actual same-source arc required.");
+            bool hit=dispatch.TryRead(pool,key,token,out _);bool earlier=false;
+            for(int j=0;j<i;j++){token.ThrowIfCancellationRequested();if(LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(refs[j])==key){earlier=true;break;}}
+            int originalRows=pool.ReadGraphRefreshOwnerCount(key,token);
+            if(hit||earlier)continue; //first cold occurrence alone performs count/fill/refresh.
+            var arc=arcs[address.Arc];var bounds=ranges.Preflight(checked((int)arc.StartContextId),checked((int)arc.EndContextId),token);
+            int first=compact.Starts[address.Node],end=compact.Starts[address.Node+1],matched=0;
+            if(first<0||end<first||end>compact.Storage.Length/40)throw new InvalidDataException("Complete private compact interval required.");
+            //Predicate scan is charged BEFORE its first row access; never inferred from its result.
+            stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked((long)(end-first)*128));
+            for(int at=first;at<end;at++){token.ThrowIfCancellationRequested();if(GraphRefreshMatches(compact.Storage.AsSpan(checked(at*40),40),key))matched++;}
+            var charge=GraphRefreshCharge(bounds.Payload,bounds.Copies,matched,originalRows);
+            payload=checked(payload+charge.Payload);copies=checked(copies+charge.Copies);work=checked(work+charge.Visits);
+            cold++;matchedTotal=checked(matchedTotal+matched);
+        }
+        graphGlyphAllocationProgress=new(refs.Count,cold,matchedTotal,stage.Ledger.Payload,payload,stage.Ledger.Copies,copies,stage.Ledger.Visits,work,false);
         stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,payload);
         stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,copies);
         stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,work);
+        graphGlyphAllocationProgress=graphGlyphAllocationProgress with{Reserved=true};
         if(graphGlyphGeometryRequested)graphGlyphGeometryContext=GraphGlyphGeometryContext.Issue(this,stage,publisher,pool,token);
-        // Fresh same-pool readiness is private; exported snapshots never issue it.
-        stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,32768);
-        stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,65536);
-        stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,4096);
-        var dispatch=graphGlyphDispatch??=new GraphGlyphRefreshDispatch(pool,128,token);
         var progress=new List<(ulong Key,byte[] Source,uint Bits,int Visited)>(refs.Count);
         //024F30 first pass: complete every actual reference's refresh BEFORE
         //any selection. No detached WORD image is used as source authority.
@@ -81,6 +105,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             var arc=graph.GetNode(address.Node)[address.Arc];
             int first=checked((int)arc.StartContextId),last=checked((int)arc.EndContextId);
             _=ranges.Preflight(first,last,token);
+            graphWordPublicationContext?.BeforeReference(reference,token);
             graphGlyphGeometryContext?.BeginReference(reference,token);
             GraphGlyphRefreshDispatch.Receipt receipt;
             bool wasReady=dispatch.TryRead(pool,key,token,out receipt);
@@ -121,6 +146,10 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             RequireGraphPublication(stage,token);ulong reference=refs[i];
             ulong key=LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(reference);var source=progress[i];
             if(source.Key!=key)throw new InvalidDataException("Reference chronology changed after refresh.");
+            int rowCount=pool.ReadGraphRefreshOwnerCount(key,token);
+            stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(2048L+rowCount*256L));
+            stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(4096L+rowCount*512L+4L*rowCount*rowCount));
+            stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(4096L+128L*rowCount*rowCount));
             var node=pool.CopyOwnerNode(key,token);
             var selected=LegacyPreparedGlyphAlternativeSelection.Select(node,
                 unchecked((uint)(int)(short)(reference>>40)),new byte[checked((node.Records.Length/40*3/2+2)*4)],0,token);
