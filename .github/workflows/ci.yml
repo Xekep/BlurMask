@@ -321,6 +321,11 @@ jobs:
         run: |
           dotnet run --project tools/LegacyMathAkOperator13B6Geometry.Probe -c Release -- models tools/LegacyMathAkOperator13B6Geometry.Probe/fixtures.json .artifacts/math-operator-geometry.json
           python -I -B tools/LegacyMathAkOperator13B6Geometry.Probe/audit_output.py . .artifacts/math-operator-geometry.json .artifacts/math-operator-geometry-audit.json
+      - name: Original Math connected13B6 scalar ranges without inference
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyMathAkOperator13B6.Probe -c Release -- models tools/LegacyMathAkOperator13B6.Probe/fixtures.json .artifacts/math-connected-operator13b6.json
+          python -I -B tools/LegacyMathAkOperator13B6.Probe/audit_output.py . .artifacts/math-connected-operator13b6.json .artifacts/math-connected-operator13b6-audit.json
       - name: Original Math grammar, parsed reconstruction and AK terminal binding
         shell: bash
         run: |

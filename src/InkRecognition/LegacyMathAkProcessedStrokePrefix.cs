@@ -38,9 +38,15 @@ internal sealed class LegacyMathAkProcessedStrokePrefix
     {
         ArgumentNullException.ThrowIfNull(original);
         token.ThrowIfCancellationRequested();
-        //The sole input is a genuine geometry owner with its authenticated shared
-        //profile. Copy ORIGINAL float input, never normalized short coordinates.
-        var input = LegacyMathAkOriginalInputFrame.CreateFresh(original, token);
+        return PrepareOriginalInput(LegacyMathAkOriginalInputFrame.CreateFresh(original, token), token);
+    }
+
+    internal static LegacyMathAkProcessedStrokePrefix PrepareOriginalInput(
+        LegacyMathAkOriginalInputFrame input, CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(input); token.ThrowIfCancellationRequested();
+        var original = input.OriginalOwner;
+        //Same fresh input frame was issued BEFORE bootstrap; no replacement IDs.
         Vector2[][] rows = input.CopyOriginalStrokes(token);
         if (rows.Length is < 1 or > LegacyMathAkSourceGeometry.MaximumStrokes)
             throw new InvalidOperationException("Original source stroke invariant failed.");
@@ -264,5 +270,48 @@ internal sealed class LegacyMathAkProcessedStrokePrefix
         for (int i = 0; i < rows.Length; i++)
         { token.ThrowIfCancellationRequested(); copy[i] = (T[])rows[i].Clone(); }
         token.ThrowIfCancellationRequested(); return copy;
+    }
+
+    //Trusted internal source reads: no public Memory/array alias to retained data.
+    internal sealed class OperatorSourceRow
+    {
+        private readonly LegacyMathAkProcessedStrokePrefix prefix;
+        private readonly Vector2[] points;
+        internal int Ordinal { get; }
+        private OperatorSourceRow(LegacyMathAkProcessedStrokePrefix prefix,int ordinal,Vector2[] points)
+        {this.prefix=prefix;Ordinal=ordinal;this.points=points;}
+        internal int Length => points.Length;
+        internal ReadOnlySpan<Vector2> Points => points;
+        internal void Validate(LegacyMathAkProcessedStrokePrefix expected,int ordinal)
+        {if(!ReferenceEquals(prefix,expected)||Ordinal!=ordinal)throw new InvalidOperationException("Foreign operator source row.");}
+        internal static OperatorSourceRow Capture(LegacyMathAkProcessedStrokePrefix prefix,int ordinal,CancellationToken token)
+        {
+            ArgumentNullException.ThrowIfNull(prefix);token.ThrowIfCancellationRequested();
+            if((uint)ordinal>=(uint)prefix.points.Length)throw new ArgumentOutOfRangeException(nameof(ordinal));
+            var copy=(Vector2[])prefix.points[ordinal].Clone();token.ThrowIfCancellationRequested();return new(prefix,ordinal,copy);
+        }
+    }
+    internal OperatorSourceRow CaptureOperatorRow(int ordinal,CancellationToken token) => OperatorSourceRow.Capture(this,ordinal,token);
+    internal int ReadOperatorStrokeCount(int ordinal)
+    {if((uint)ordinal>=(uint)points.Length)throw new ArgumentOutOfRangeException(nameof(ordinal));return points[ordinal].Length;}
+    internal int ReadOperatorFirstOriginalIndex(int ordinal)
+    { if((uint)ordinal>=(uint)points.Length)throw new ArgumentOutOfRangeException(nameof(ordinal));return originalPointIndices[ordinal][0]; }
+    internal int ReadOperatorLastOriginalIndex(int ordinal)
+    { if((uint)ordinal>=(uint)points.Length)throw new ArgumentOutOfRangeException(nameof(ordinal));return originalPointIndices[ordinal][^1]; }
+    internal Vector4[] CopyOperatorBounds(CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();var output=new Vector4[points.Length];
+        for(int s=0;s<points.Length;s++)
+        {
+            Vector2[] row=points[s];float x0=row[0].X,y0=row[0].Y,x1=x0,y1=y0;
+            foreach(var point in row)
+            {
+                token.ThrowIfCancellationRequested();
+                if(x1<=point.X)x1=point.X;if(y1<=point.Y)y1=point.Y;
+                if(x0>point.X)x0=point.X;if(y0>point.Y)y0=point.Y;
+            }
+            output[s]=new(x0,y0,x1,y1);
+        }
+        token.ThrowIfCancellationRequested();return output;
     }
 }

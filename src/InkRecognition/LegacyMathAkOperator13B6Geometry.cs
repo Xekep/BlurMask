@@ -41,40 +41,74 @@ internal sealed class LegacyMathAkOperator13B6Geometry
             if (row.Length == 0 || row.Length > prefix.PointCount - sum)
                 throw new InvalidOperationException("Owned prefix row invariant failed.");
             sum += row.Length;
-            //Actual0205B0 bbox early return. Missing is distinct from an
-            //empty backend. Fresh005C00 source138=.5; stored13B6 factor=.5.
-            float minX = row[0].X, maxX = minX, minY = row[0].Y, maxY = minY;
-            foreach (Vector2 p in row)
-            {
-                if (maxX <= p.X) maxX = p.X; if (maxY <= p.Y) maxY = p.Y;
-                if (minX > p.X) minX = p.X; if (minY > p.Y) minY = p.Y;
-            }
-            float threshold = prefix.EstimatedScale * 0.5f * 1f;
-            if (MathF.Abs(maxX - minX) < threshold && MathF.Abs(maxY - minY) < threshold)
-                continue;
-            int[] selected = Reduce(row, spacing, token);
-            indices[s] = selected;
-            if (selected.Length == 1) result[s] = new[] { row[0] };
-            else
-            {
-                var starts = new Vector2[selected.Length - 1];
-                var ends = new Vector2[starts.Length];
-                for (int i = 0; i < starts.Length; i++)
-                {
-                    token.ThrowIfCancellationRequested();
-                    Fit(row, selected[i], selected[i + 1], out starts[i], out ends[i], token);
-                }
-                result[s] = Join(starts, ends, token);
-            }
-            foreach (Vector2 p in result[s]!)
-                if (!float.IsFinite(p.X) || !float.IsFinite(p.Y))
-                    throw new NotSupportedException("Native operator13B6 geometry outside finite output subset.");
+            AnalyzeRowCore(row,spacing,prefix.EstimatedScale,token,out result[s],out indices[s]);
         }
         if (sum != prefix.PointCount) throw new InvalidOperationException("Owned prefix point count mismatch.");
         token.ThrowIfCancellationRequested(); return new(prefix, result, indices);
     }
 
-    private static int[] Reduce(Vector2[] points, float spacing, CancellationToken token)
+    //Same arithmetic, called only from genuine owned-prefix row captures.
+    private static void AnalyzeRowCore(ReadOnlySpan<Vector2> row,float spacing,float estimatedScale,
+        CancellationToken token,out Vector2[]? polyline,out int[]? selectedIndices)
+    {
+        //Actual0205B0 bbox early return. Missing is distinct from an
+        //empty backend. Fresh005C00 source138=.5; stored13B6 factor=.5.
+        float minX = row[0].X, maxX = minX, minY = row[0].Y, maxY = minY;
+        foreach (Vector2 p in row)
+        {
+            if (maxX <= p.X) maxX = p.X; if (maxY <= p.Y) maxY = p.Y;
+            if (minX > p.X) minX = p.X; if (minY > p.Y) minY = p.Y;
+        }
+        float threshold = estimatedScale * 0.5f * 1f;
+        if (MathF.Abs(maxX - minX) < threshold && MathF.Abs(maxY - minY) < threshold)
+        { polyline=null; selectedIndices=null; return; }
+        int[] selected = Reduce(row, spacing, token);
+        selectedIndices = selected;
+        if (selected.Length == 1) polyline = new[] { row[0] };
+        else
+        {
+            var starts = new Vector2[selected.Length - 1];
+            var ends = new Vector2[starts.Length];
+            for (int i = 0; i < starts.Length; i++)
+            {
+                token.ThrowIfCancellationRequested();
+                Fit(row, selected[i], selected[i + 1], out starts[i], out ends[i], token);
+            }
+            polyline = Join(starts, ends, token);
+        }
+        foreach (Vector2 p in polyline!)
+            if (!float.IsFinite(p.X) || !float.IsFinite(p.Y))
+                throw new NotSupportedException("Native operator13B6 geometry outside finite output subset.");
+    }
+
+    internal sealed class OperatorRow
+    {
+        private readonly LegacyMathAkProcessedStrokePrefix.OperatorSourceRow source;
+        private readonly Vector2[]? polyline;
+        private OperatorRow(LegacyMathAkProcessedStrokePrefix.OperatorSourceRow source,Vector2[]? polyline)
+        {this.source=source;this.polyline=polyline;}
+        internal bool WasSkipped => polyline is null;
+        internal ReadOnlySpan<Vector2> OriginalPoints => source.Points;
+        internal ReadOnlySpan<Vector2> FittedPoints => polyline;
+        internal void Validate(LegacyMathAkProcessedStrokePrefix expected,int ordinal) => source.Validate(expected,ordinal);
+        internal static OperatorRow Capture(LegacyMathAkProcessedStrokePrefix prefix,
+            LegacyMathAkProcessedStrokePrefix.OperatorSourceRow source,int ordinal,CancellationToken token)
+        {
+            ArgumentNullException.ThrowIfNull(prefix);ArgumentNullException.ThrowIfNull(source);token.ThrowIfCancellationRequested();
+            source.Validate(prefix,ordinal);
+            if(prefix.PointCount is <1 or >LegacyMathAkProcessedStrokePrefix.MaximumExpandedPoints)
+                throw new InvalidOperationException("Owned prefix cardinality invariant failed.");
+            float spacing=prefix.EstimatedScale/100f;
+            if(!(spacing>0)||!float.IsFinite(spacing))throw new NotSupportedException("Invalid operator spacing.");
+            AnalyzeRowCore(source.Points,spacing,prefix.EstimatedScale,token,out var polyline,out _);
+            token.ThrowIfCancellationRequested();return new OperatorRow(source,polyline);
+        }
+    }
+    internal static OperatorRow AnalyzeForOperator(LegacyMathAkProcessedStrokePrefix prefix,
+        LegacyMathAkProcessedStrokePrefix.OperatorSourceRow source,int ordinal,CancellationToken token)
+        => OperatorRow.Capture(prefix,source,ordinal,token);
+
+    private static int[] Reduce(ReadOnlySpan<Vector2> points, float spacing, CancellationToken token)
     {
         int n = points.Length;
         var previous = new int[n]; var next = new int[n]; var priority = new float[n];
@@ -142,7 +176,7 @@ internal sealed class LegacyMathAkOperator13B6Geometry
         return (float)Math.Sqrt((double)distanceSquared) * (MathF.Abs(folded) / halfPi + 0.25f);
     }
 
-    private static void Fit(Vector2[] row, int first, int last, out Vector2 a, out Vector2 b, CancellationToken token)
+    private static void Fit(ReadOnlySpan<Vector2> row, int first, int last, out Vector2 a, out Vector2 b, CancellationToken token)
     {
         if (first < 0 || last <= first || last >= row.Length)
             throw new InvalidOperationException("Selected fit interval invariant failed.");
