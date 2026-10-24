@@ -1,0 +1,26 @@
+# Fresh Math13A2 segment metadata
+
+The private bridge follows the genuine fresh original-input frame,139D/139F prefix,13B6 and13A0 stages, then the reviewed13A2 sampler. In the same phase2 context it constructs the native044000 segment tail before finishing phase3. An existing historical sampler result cannot resume this path. Existing13A0 and sampler factories are unchanged; the new internal diagnostic issues detached DATA only.
+
+Each sampled marker produces one privately owned semantic segment with an inclusive original-ID/sample range and a bbox plus arc-weighted center recomputed from sampled points. The native96B projection defines exactly49 byte positions:00..0F,18..20 and24..3B. Native range-pointer bytes10..17, padding21..23 and3C..5F remain unknown; diagnostic zeros there are masked placeholders. END is written to the previous segment when the following marker starts at0, then the last segment is finalized to1. Original-ID lists are represented by equivalent compressed offsets in fresh append order.
+
+RequiredWorkWords=(segmentCount>>5)+1 is metadata, including the extra word at exact32 boundaries. This is not an allocated query bitset or a complete108B-descriptor/16B-slot workspace. The existing private13B6 mask projection is not promoted to that workspace. FIRST13A4 request/cache ownership and the actual first3F276 feature path remain separate work; selected3F279 cannot substitute for them. No processed-graph, matcher, formula or application-routing authority is issued.
+
+The independent extra bridge reservation is B=152+48M+4(S+1) logical payload bytes and W=14M+5S+2C+21 loop/copy units, where M is sampled marker count, S original stroke count and C summed inclusive sample visits. It checks additional64MiB payload and64Mi work limits before arrays and charges loops/writes before mutation. The separate detached diagnostic reserves B=128+120M+4(S+1), W=320M+16S+128, each capped64Mi. These do not borrow or raise old13A032MiB, sampler128MiB or sampler-export64MiB operations. They are not CLR overhead/RSS/CPU-instruction/latency guarantees; very large upstream-admitted sources can be refused without truncation or retry. Every entered failure poisons the same consumed context.
+
+Root executed the exact compiled source once on the unchanged original14 scalar fixtures with no neural/vendor execution. All128 actual guards passed;5,561 segment records and nested sampler numerical arrays matched the independent scalar oracle. Every nested sampler object also exactly matched the previous14-case sampler capture82e35c33, without copying its old86 guard receipts into the new guard list. The largest observed bridge reservation was177,232 logical bytes and91,816 work units. The fresh capture SHA256 is7f0f020fa3ae6745946a41f68de211a94d6205b4284e2d04876ed0111b4e069b.
+
+Thirty DATA corruption controls and twelve ordinary numerical controls are separate PURE checks, not extra owning runs. They cover word boundaries0/1/2/31/32/33/63/64/65, weighted centers, signed zero, previous-END semantics, numeric bool refusal, range/membership/knownness/opaque-placeholder corruption and authority-promotion refusal. Discrete fields are exact; inherited13A0 spline/transcendental tolerance remains confined to coordinate-derived F32 values. Sampler site totals are bounded, not reconstructed from final outputs.
+
+The portable auditor authenticates its four direct sampler Python dependencies using exact bytes with CRLF replaced by LF only; the sampler verifies the inherited fourteen reference files. No other source whitespace or raw-resource normalization is used. C# library files, Program and csproj are byte-identical to the compiled owning receipt. The main-checkout probe and application builds both passed with zero warnings/errors; the canonical DATA audit reproduced the original report exactly. Integration verification did not repeat the owning/model run.
+
+`tools/ci/check-math-source-geometry.py` appends this seventh scalar build/run/oracle stage and retains all six previous stages. The existing recognition-source workflow already watches LegacyMathAk tools and runs the helper on Windows/Linux/macOS; it needs no additional workflow edit. The fixture is reused from LegacyMathAkOperator13A0.Probe, not duplicated.
+
+Portable commands after building the probe:
+
+```
+dotnet LegacyMathAkOperator13A2Segments.Probe.dll MODELS tools/LegacyMathAkOperator13A0.Probe/fixtures.json FRESH_CAPTURE
+python -I -B tools/LegacyMathAkOperator13A2Segments.Probe/audit_output.py ROOT MODELS FIXTURES FRESH_CAPTURE FRESH_REPORT
+```
+
+The native/proof/source receipts remain external immutable evidence:37a1ae24 native bridge,6ab8948e source/PURE,8bddadeb compile and the root-math13a2-segments-owning-20261024 runtime receipt. Integration preserves their bytes.
