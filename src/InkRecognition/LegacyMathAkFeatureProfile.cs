@@ -14,9 +14,10 @@ public sealed class LegacyMathAkFeatureProfile
 {
     private readonly short[][] minimum, maximum;
     private readonly ProgramDescriptor program;
+    internal LegacyMathAkOriginalSmoothingPolicy OriginalSmoothing { get; }
     public LegacyMathAkShapePrototypes ShapePrototypes { get; }
-    private LegacyMathAkFeatureProfile(short[][] minimum, short[][] maximum, ProgramDescriptor program, LegacyMathAkShapePrototypes shapes)
-    { this.minimum = minimum; this.maximum = maximum; this.program = program; ShapePrototypes = shapes; }
+    private LegacyMathAkFeatureProfile(short[][] minimum, short[][] maximum, ProgramDescriptor program, LegacyMathAkShapePrototypes shapes, LegacyMathAkOriginalSmoothingPolicy smoothing)
+    { this.minimum = minimum; this.maximum = maximum; this.program = program; ShapePrototypes = shapes; OriginalSmoothing = smoothing; }
     public int CalibrationPayloadBytes => 4772;
     public string SourceFingerprint => LegacyMathMixed107RawResource.ResourceFingerprint;
     public ProgramDescriptor Program => program;
@@ -56,6 +57,15 @@ public sealed class LegacyMathAkFeatureProfile
                     throw new InvalidDataException("Actual Math AK fingerprint required.");
             }
             Boundary("authenticated", observer, token);
+            //Same private authenticated snapshot, actual13A0 child265/v102.
+            if (BinaryPrimitives.ReadUInt32LittleEndian(captured.AsSpan(7301)) != 0x0101fe90 ||
+                BinaryPrimitives.ReadUInt32LittleEndian(captured.AsSpan(7305)) != 40 ||
+                BinaryPrimitives.ReadUInt32LittleEndian(captured.AsSpan(7309)) != 0x265 ||
+                BinaryPrimitives.ReadUInt32LittleEndian(captured.AsSpan(7313)) != 0x01020000)
+                throw new InvalidDataException("Actual original-source smoothing child differs.");
+            float F(int at) => BinaryPrimitives.ReadSingleLittleEndian(captured.AsSpan(at, 4));
+            var smoothing = new LegacyMathAkOriginalSmoothingPolicy(F(7317), F(7321), F(7325), F(7329),
+                F(7333), F(7337), F(7341), F(7345));
             //All field reads are from the same private authenticated snapshot.
             ushort H(int at) => BinaryPrimitives.ReadUInt16LittleEndian(captured.AsSpan(at, 2));
             uint I(int at) => BinaryPrimitives.ReadUInt32LittleEndian(captured.AsSpan(at, 4));
@@ -90,7 +100,7 @@ public sealed class LegacyMathAkFeatureProfile
             var shapes = LegacyMathAkShapePrototypes.ReadAuthenticated(captured, token);
             Boundary("calibrated", observer, token);
             Boundary("publish", observer, token);
-            return new(minimum, maximum, program, shapes);
+            return new(minimum, maximum, program, shapes, smoothing);
         }
         finally { CryptographicOperations.ZeroMemory(captured); }
     }

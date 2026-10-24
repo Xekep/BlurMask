@@ -7,9 +7,19 @@ public static class LegacyCubicStrokeSmoothing
 {
     public static LegacyCubicCoefficients[] Fit(ReadOnlySpan<float> values, ReadOnlySpan<double> lengths,
         double penalty, CancellationToken cancellationToken = default)
+        => FitCore(values, lengths, penalty, 4096, cancellationToken);
+
+    //Neutral numerical DATA only. The private same-source Math plan owns input
+    //and coefficients; this helper grants no source/candidate authority.
+    internal static LegacyCubicCoefficients[] FitOwnedMathSource(ReadOnlySpan<float> values,
+        ReadOnlySpan<double> lengths, double penalty, CancellationToken cancellationToken)
+        => FitCore(values, lengths, penalty, 8192, cancellationToken);
+
+    private static LegacyCubicCoefficients[] FitCore(ReadOnlySpan<float> values, ReadOnlySpan<double> lengths,
+        double penalty, int maximumPoints, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (values.Length is < 4 or > 4096 || lengths.Length != values.Length - 1 || !double.IsFinite(penalty) || penalty < 0)
+        if (values.Length < 4 || values.Length > maximumPoints || lengths.Length != values.Length - 1 || !double.IsFinite(penalty) || penalty < 0)
             throw new ArgumentException("Invalid prepared smoothing spline input.");
         for (int i = 0; i < values.Length; i++)
             if (!float.IsFinite(values[i]) || (i < lengths.Length && (!double.IsFinite(lengths[i]) || lengths[i] <= 0)))

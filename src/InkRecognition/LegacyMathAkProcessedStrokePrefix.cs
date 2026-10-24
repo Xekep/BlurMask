@@ -292,6 +292,8 @@ internal sealed class LegacyMathAkProcessedStrokePrefix
         }
     }
     internal OperatorSourceRow CaptureOperatorRow(int ordinal,CancellationToken token) => OperatorSourceRow.Capture(this,ordinal,token);
+    internal ReadOnlySpan<int> ReadOperatorOriginalIndexRow(int ordinal)
+    { if((uint)ordinal>=(uint)originalPointIndices.Length)throw new ArgumentOutOfRangeException(nameof(ordinal));return originalPointIndices[ordinal]; }
     internal int ReadOperatorStrokeCount(int ordinal)
     {if((uint)ordinal>=(uint)points.Length)throw new ArgumentOutOfRangeException(nameof(ordinal));return points[ordinal].Length;}
     internal int ReadOperatorFirstOriginalIndex(int ordinal)
