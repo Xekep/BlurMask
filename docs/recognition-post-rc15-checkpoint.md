@@ -503,7 +503,7 @@ The canonical actual DATA report is also byte-exact, with no owning/NN repeat.
 The combined Release application build passed in61.552s. Builds report zero
 warnings/errors. Root used CPU2/affinity3; the desktop app was not launched.
 Evidence: `root-math-fresh-workspace-main-20261024` and
-`root-english-selected-sources-main-20261024`. Three-OS checks are pending push;
+`root-english-selected-sources-main-20261024`. Three-OS results are recorded below;
 the broader configured2ALT/219580 INPUT-transform frontier is still unresolved.
 
 A post-commit Git-blob check found that default LF normalization changed the two
@@ -514,3 +514,50 @@ Root extracted the three staged auditor/data blobs into a fresh directory,
 checked byte identity and passed the14-case/86-guard/28-corruption DATA audit
 there. Evidence: `root-math-git-frozen-data-20261024`. No source or inference
 execution was repeated for this storage fix.
+
+Run40100834376 on77b38f8 then passed all nine specialized jobs across
+Windows/Linux/macOS. The earlier40100637004 failure is preserved: all three
+scalar jobs stopped at the raw count-summary hash after Git normalization;
+all English/structured jobs passed. No source/golden assertion was waived.
+Root downloaded the successful artifacts and independently re-audited the new
+English prepared DATA: all three captures are byte-exact (f4853614), all eight
+stages per OS pass, and the18-corruption reports match under JSON/LF text
+comparison. The Math header's three build/hash-plan/stored-DATA stages and
+the existing21 scalar stages pass per OS. Stored-header reports match the
+root strict audit including28 corruptions and original capture89fd/count064c
+hashes. Those reports replay historical DATA, not a new header owning run.
+The older21 scalar stages were not separately re-audited by this root check.
+Evidence: `selected-sources-three-os-verified-20261024` and
+`fresh-workspace-three-os-verified-20261024`. These specialized green jobs do
+not resolve the separate full-CI configured2ALT/219580 recognition frontier.
+
+An isolated FIRST276 immutable-program owner is now verified by an actual
+profile DATA load. It retains the separate109 wire program bytes and276+276
+calibration shorts from the same authenticated startup snapshot, with no weights,
+prepared evaluator/cache, geometry or AL/request authority. Root reviewed NEW1/
+OLD1, full harness/oracle, fixed raw/native provenance and fixed source ledger.
+One successful profile and one hash-rejected attempt completed in0.180s under
+.NET10.0.12/CPU2/observed parent+child affinity3/45s, without retry. All661 FIRST
+lanes,2386 existing tail calibration shorts and24 tail program fields match the
+independent raw decoder before and after overwriting the caller buffer;10 exact
+guards pass. Geometry/source/FIRST/NN call counters are zero. This is numeric
+resource loading, not model-free execution or recognition accuracy evidence.
+Capture102724B SHA256:
+`176d646950035eb513e7f9fba3a84737bcf0a8d09dab24d7061d3ef2f3144510`.
+Before/after verification covers5116 pins and909 library sources. Probe source
+was pinned after compilation and additionally matches its PortablePDB document
+checksum/DLL CodeView identity; no precompile harness checksum or library PDB
+is claimed. Separate prepared strict DATA controls refuse1370 corruptions;
+the earlier673 retained-value differences were not validator-refusal tests.
+Added per-profile1271 logical bytes/1365 copy bytes/5800 source units exclude
+CLR/GC/CPU/RSS. Existing4772 CalibrationPayloadBytes remains selected-tail-array
+payload only; source search found no production caller treating it as total
+profile allocation. Main integration now passes the four-stage portable helper
+(including6189 strict corruption controls), the historical header DATA audit,
+and the Release application build with zero warnings/errors. The actual profile
+capture remains byte-exact176d; no geometry/source/FIRST/NN or desktop app was
+executed. Independent portable review also passed seven adapter negatives.
+Main evidence: `root-first276-program-main-20261024/verification.json`.
+The three-OS CI for this new owner has not yet been verified. Evidence:
+`root-first276-program-profile-frozen-manifest-20261024.json`
+(SHA256 `eb4fb0b19cd4450e3df0e57cf9f09461558d9d224bd0bd04c939b09ffef6e582`).

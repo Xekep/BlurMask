@@ -23,12 +23,31 @@ def exact(a,b,path='/'):
   assert len(a)==len(b),(path,'length')
   for i,(x,y)in enumerate(zip(a,b,strict=True)):exact(x,y,path+str(i)+'/')
  else:assert a==b,(path,a,b)
+
+# Reviewed immutable FIRST retention successor. Historical SOURCE14 was NOT rerun.
+# Root profile DATA proves raw OLD tail unchanged; exact reversal below proves all
+# prior profile operators unchanged. CommonHeader/Segments retain their old pins.
+PROFILE_SUCCESSOR_SHA='68675aead36585873cbb65035f1133802d9d0801fd82c91fe8c44170b4105e68'
+FIRST_OWNER_SHA='558b0555e122529afbe3ad050db03dc02814edb0f6bc4b86229c2502b1886638'
+PROFILE_RESTORE=[['public sealed partial class LegacyMathAkFeatureProfile\n', 'public sealed class LegacyMathAkFeatureProfile\n'], ['    private LegacyMathAkFeatureProfile(short[][] minimum, short[][] maximum, ProgramDescriptor program, LegacyMathAkShapePrototypes shapes, LegacyMathAkOriginalSmoothingPolicy smoothing, LegacyMathAkSource13A2Policy sampler, ushort freshCommonHeapCapacity, First276Program first276)\n    { this.minimum = minimum; this.maximum = maximum; this.program = program; ShapePrototypes = shapes; OriginalSmoothing = smoothing; Source13A2Policy = sampler; FreshCommonHeapCapacity = freshCommonHeapCapacity; this.first276 = first276; }\n', '    private LegacyMathAkFeatureProfile(short[][] minimum, short[][] maximum, ProgramDescriptor program, LegacyMathAkShapePrototypes shapes, LegacyMathAkOriginalSmoothingPolicy smoothing, LegacyMathAkSource13A2Policy sampler, ushort freshCommonHeapCapacity)\n    { this.minimum = minimum; this.maximum = maximum; this.program = program; ShapePrototypes = shapes; OriginalSmoothing = smoothing; Source13A2Policy = sampler; FreshCommonHeapCapacity = freshCommonHeapCapacity; }\n'], ['            //Separate FIRST owner, from THIS private authenticated capture.\n            //No caller-buffer reread, selected-tail calibration or model copy.\n            var first276 = First276Program.ReadAuthenticated(captured, token);\n', ''], ['            return new(minimum, maximum, program, shapes, smoothing, sampler, freshCommonHeapCapacity, first276);\n', '            return new(minimum, maximum, program, shapes, smoothing, sampler, freshCommonHeapCapacity);\n']]
+def authenticate_profile(root,raw):
+ assert H(raw)==PROFILE_SUCCESSOR_SHA,'Profile successor bytes'
+ assert H((root/'src/InkRecognition/LegacyMathAkFirst276Program.cs').read_bytes().replace(b'\r\n',b'\n'))==FIRST_OWNER_SHA
+ text=raw.decode('utf-8')
+ for old,new in PROFILE_RESTORE:
+  assert old and text.count(old)==1,'exact reviewed Profile reversal'
+  text=text.replace(old,new,1)
+ assert H(text.encode('utf-8'))==SOURCES['LegacyMathAkFeatureProfile.cs'],'historical Profile restored exactly'
+
 def reference(root):
  p=D/'baseline-counts.json';assert H(p.read_bytes())==SUMMARY_SHA;s=load(p)
  assert s['resourceSHA']==RESOURCE_SHA and s['fixtureSHA']==FIXTURE_SHA
  p=root/'tools/LegacyMathAkOperator13A0.Probe/fixtures.json';assert H(p.read_bytes())==FIXTURE_SHA
  names=[x['name']for x in load(p)['cases']];assert len(names)==len(set(names))==14
- for name,sha in SOURCES.items():assert H((root/'src/InkRecognition'/name).read_bytes().replace(b'\r\n',b'\n'))==sha,name
+ for name,sha in SOURCES.items():
+  raw=(root/'src/InkRecognition'/name).read_bytes().replace(b'\r\n',b'\n')
+  if name=='LegacyMathAkFeatureProfile.cs':authenticate_profile(root,raw)
+  else:assert H(raw)==sha,name
  rows=[];guards=['pre-cancel-exact-token','null-original-refused']
  assert len(s['rows'])==14
  for name,row in zip(names,s['rows'],strict=True):

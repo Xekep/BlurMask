@@ -12,6 +12,7 @@ on:
       - 'tools/LegacyCursive*/**'
       - 'tools/ci/check-math-source-geometry.py'
       - 'tools/ci/check-math-fresh-workspace.py'
+      - 'tools/ci/check-math-first276-program.py'
       - 'tools/ci/check-structured-word-delivery.py'
       - 'tools/ci/check-english-input-bootstrap.py'
       - 'tools/LegacyEnglishEarlySelected*/**'
@@ -29,6 +30,7 @@ on:
       - 'tools/LegacyCursive*/**'
       - 'tools/ci/check-math-source-geometry.py'
       - 'tools/ci/check-math-fresh-workspace.py'
+      - 'tools/ci/check-math-first276-program.py'
       - 'tools/ci/check-structured-word-delivery.py'
       - 'tools/ci/check-english-input-bootstrap.py'
       - 'tools/LegacyEnglishEarlySelected*/**'
@@ -117,6 +119,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install numpy
+      - run: python tools/ci/check-math-first276-program.py .artifacts/math-first276-program
       - run: python tools/ci/check-math-fresh-workspace.py .artifacts/math-fresh-workspace
       - run: python tools/ci/check-math-source-geometry.py .artifacts/math-source-geometry
       - uses: actions/upload-artifact@v4
@@ -128,3 +131,5 @@ jobs:
             .artifacts/math-source-geometry/*.log
             .artifacts/math-fresh-workspace/*.json
             .artifacts/math-fresh-workspace/*.log
+            .artifacts/math-first276-program/*.json
+            .artifacts/math-first276-program/*.log

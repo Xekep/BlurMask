@@ -10,7 +10,7 @@ namespace InkRecognition;
 /// <summary>Once-authenticated immutable selected Math feature program and four
 /// calibration pairs. Geometry subsets share it without resource rehashing or
 /// calibration copies. It supplies features only, never model/candidate authority.</summary>
-public sealed class LegacyMathAkFeatureProfile
+public sealed partial class LegacyMathAkFeatureProfile
 {
     private readonly short[][] minimum, maximum;
     private readonly ProgramDescriptor program;
@@ -20,8 +20,8 @@ public sealed class LegacyMathAkFeatureProfile
     //Native tail13A4+32, distinct from Program.GridScale and FIRST13A4.
     internal ushort FreshCommonHeapCapacity { get; }
     public LegacyMathAkShapePrototypes ShapePrototypes { get; }
-    private LegacyMathAkFeatureProfile(short[][] minimum, short[][] maximum, ProgramDescriptor program, LegacyMathAkShapePrototypes shapes, LegacyMathAkOriginalSmoothingPolicy smoothing, LegacyMathAkSource13A2Policy sampler, ushort freshCommonHeapCapacity)
-    { this.minimum = minimum; this.maximum = maximum; this.program = program; ShapePrototypes = shapes; OriginalSmoothing = smoothing; Source13A2Policy = sampler; FreshCommonHeapCapacity = freshCommonHeapCapacity; }
+    private LegacyMathAkFeatureProfile(short[][] minimum, short[][] maximum, ProgramDescriptor program, LegacyMathAkShapePrototypes shapes, LegacyMathAkOriginalSmoothingPolicy smoothing, LegacyMathAkSource13A2Policy sampler, ushort freshCommonHeapCapacity, First276Program first276)
+    { this.minimum = minimum; this.maximum = maximum; this.program = program; ShapePrototypes = shapes; OriginalSmoothing = smoothing; Source13A2Policy = sampler; FreshCommonHeapCapacity = freshCommonHeapCapacity; this.first276 = first276; }
     public int CalibrationPayloadBytes => 4772;
     public string SourceFingerprint => LegacyMathMixed107RawResource.ResourceFingerprint;
     public ProgramDescriptor Program => program;
@@ -107,9 +107,12 @@ public sealed class LegacyMathAkFeatureProfile
             //tail13A4 frame1005964..1791853; native1D7C0 reads this ushort
             //into receiver+32, clone1B150 retains it,009500 copies it to P+58.
             ushort freshCommonHeapCapacity = H(1790683);
+            //Separate FIRST owner, from THIS private authenticated capture.
+            //No caller-buffer reread, selected-tail calibration or model copy.
+            var first276 = First276Program.ReadAuthenticated(captured, token);
             Boundary("calibrated", observer, token);
             Boundary("publish", observer, token);
-            return new(minimum, maximum, program, shapes, smoothing, sampler, freshCommonHeapCapacity);
+            return new(minimum, maximum, program, shapes, smoothing, sampler, freshCommonHeapCapacity, first276);
         }
         finally { CryptographicOperations.ZeroMemory(captured); }
     }
