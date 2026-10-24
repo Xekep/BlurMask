@@ -12,6 +12,8 @@ on:
       - 'tools/LegacyCursive*/**'
       - 'tools/ci/check-math-source-geometry.py'
       - 'tools/ci/check-structured-word-delivery.py'
+      - 'tools/ci/check-english-input-bootstrap.py'
+      - 'tools/LegacyEnglishEarlySelected*/**'
       - 'tools/LegacyCompletedPostTextWork.Probe/**'
       - 'tools/LegacyCompletedStructuredWords.Audit/**'
       - '.github/workflows/recognition-source.yml'
@@ -25,6 +27,8 @@ on:
       - 'tools/LegacyCursive*/**'
       - 'tools/ci/check-math-source-geometry.py'
       - 'tools/ci/check-structured-word-delivery.py'
+      - 'tools/ci/check-english-input-bootstrap.py'
+      - 'tools/LegacyEnglishEarlySelected*/**'
       - 'tools/LegacyCompletedPostTextWork.Probe/**'
       - 'tools/LegacyCompletedStructuredWords.Audit/**'
       - '.github/workflows/recognition-source.yml'
@@ -38,6 +42,32 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  english-input:
+    name: English input bootstrap / ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            11.0.100-preview.7.26381.103
+            10.0.x
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python tools/ci/check-english-input-bootstrap.py .artifacts/english-input-bootstrap
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: english-input-bootstrap-${{ matrix.os }}
+          path: |
+            .artifacts/english-input-bootstrap/*.json
+            .artifacts/english-input-bootstrap/*.log
   structured:
     name: Structured WORD delivery / ${{ matrix.os }}
     strategy:
