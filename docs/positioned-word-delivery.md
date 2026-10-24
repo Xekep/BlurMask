@@ -45,11 +45,20 @@ Russian cursive quality nor completion of English TEXT or full AUTO.
 
 Source and synthetic DATA checks run independently on three desktop operating
 systems through `recognition-source.yml`. Native AOT jobs and future releases
-also run layout and offscreen font checks. These new cross-platform checks must
-pass before their results can be claimed. Python replay tools require explicit
+also run layout and offscreen font checks. On commit `e34a5d6`, all six source
+geometry jobs passed in workflow `40084578466`. Native Windows, Linux and macOS
+artifacts from workflow `40084578428` each passed30 layout checks and19 real-font
+checks; their PNG SHA256 is identical:
+`dd6d134cf8004e7397be456e753102f75b9b47472537e2252bdf380c415cad41`.
+These checks make no model inference or handwriting-quality claim. The broader
+CI still rejects a separate INPUT test that omits required219580 augmentation;
+it is not an all-green CI result. Python replay tools require explicit
 SHA256 pins for any external actual captures; their synthetic fixtures contain
 no corpus, models or expected recognition labels.
 
 External root evidence: `root-positioned-app-main-20261024`,
 `root-structured-consumer-actual-20261024`,
-`root-structured-strict-audit-review-20261024`.
+`root-structured-strict-audit-review-20261024`,
+`positioned-word-native-platforms-20261024`,
+`structured-word-three-os-verified-20261024` and
+`math-source-e34-three-os-verified-20261024`.
