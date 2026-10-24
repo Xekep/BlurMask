@@ -15,7 +15,8 @@ internal static class AiRecognitionModels
     private static readonly Lazy<ExperimentalGlobalTextRecognizer> Experimental = new(() =>
         ExperimentalGlobalTextRecognizer.Load(ReadEmbedded("acoustic"), ReadEmbedded("linguistic"),
             ReadEmbedded("engine"), ReadEmbedded("spatial30"), ReadEmbedded("physical50"),
-            ReadEmbedded("separation"), ReadEmbedded("cases"), ReadEmbedded("publication")));
+            ReadEmbedded("separation"), ReadEmbedded("cases"), ReadEmbedded("publication"),
+            ReadEmbedded("normalization"), ReadEmbedded("circles")));
     private static byte[] ReadEmbedded(string name)
     {
         using var stream = typeof(AiRecognitionModels).Assembly.GetManifestResourceStream("BlurMask.ExperimentalInk." + name)

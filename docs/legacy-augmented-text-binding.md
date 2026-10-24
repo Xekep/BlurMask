@@ -17,8 +17,8 @@ new global weak-table authority was introduced.
 This implements the current selected TOP word route. Its active alternative count
 is read from the actual snapshot. All current WORD120 payloads are available
 separately as defensive metadata copies; that is not complete native TEXT
-enumeration of all word alternatives. The public AI-pen adapter still uses its
-earlier path and is the next integration step.
+enumeration of all word alternatives. The opt-in public AI-pen adapter now uses
+this completed route; see [the public adapter verification](legacy-completed-public-text-adapter.md).
 
 ## Verified actual scope
 

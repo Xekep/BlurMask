@@ -131,6 +131,14 @@ jobs:
         run: python tools/check-workflow-shells.py --bash-script tools/ci/check-recognition-managed.sh .github/workflows/ci.yml
       - run: dotnet restore src/BlurMask/BlurMask.csproj
       - run: dotnet build src/BlurMask/BlurMask.csproj -c Release --no-restore -p:PublishAot=false -p:SelfContained=false
+      - name: Completed text host policy, full-input coverage and embedded delivery without inference
+        shell: bash
+        run: |
+          mkdir -p .artifacts
+          dotnet run --project tools/ExperimentalCompletedGlobalText.Probe -c Release -- --prepared .artifacts/completed-text-policy.json
+          python -I -B tools/ExperimentalCompletedGlobalText.ActualBatch/write_plan.py . .artifacts/completed-text-plan.json
+          dotnet run --project tools/ExperimentalCompletedGlobalText.ActualBatch -c Release -- --validate-plan .artifacts/completed-text-plan.json .artifacts/completed-text-plan-audit.json
+          dotnet run --project tools/ExperimentalCompletedGlobalText.Resources -c Release -- src/BlurMask/bin/Release/net11.0/BlurMask.dll .artifacts/completed-text-plan.json .artifacts/completed-text-resources.json
       - name: Compile gated recognition drafts and check cancellation contract
         shell: bash
         run: |
