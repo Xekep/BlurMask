@@ -57,7 +57,11 @@ the six-model raw catalog also includes a separate first-vector source.
 The [directional feature bundle](legacy-math-ak-directional-bundle.md) now
 prepares the common3F/4F/5F geometry once, preserving all three independent
 feature results without retaining intermediate samples in the output.
-The next implementation is that same-source feature/classifier/shortlist
+The [shape299 primitive](legacy-math-ak-shape299.md) now derives30x7 features
+from the same private normalized geometry and compares them against the actual
+immutable13A6 prototypes. It grants no classifier authority; source eligibility,
+cost adjustment and the unified shortlist remain to be composed.
+The next implementation is that same-source classifier/shortlist
 producer; grammar matching and tree materialization remain after it. Neither
 modern LaTeX/Math2 DOM nor caller-supplied scores can substitute for those
 original hypotheses and source ranges.

@@ -14,8 +14,9 @@ public sealed class LegacyMathAkFeatureProfile
 {
     private readonly short[][] minimum, maximum;
     private readonly ProgramDescriptor program;
-    private LegacyMathAkFeatureProfile(short[][] minimum, short[][] maximum, ProgramDescriptor program)
-    { this.minimum = minimum; this.maximum = maximum; this.program = program; }
+    public LegacyMathAkShapePrototypes ShapePrototypes { get; }
+    private LegacyMathAkFeatureProfile(short[][] minimum, short[][] maximum, ProgramDescriptor program, LegacyMathAkShapePrototypes shapes)
+    { this.minimum = minimum; this.maximum = maximum; this.program = program; ShapePrototypes = shapes; }
     public int CalibrationPayloadBytes => 4772;
     public string SourceFingerprint => LegacyMathMixed107RawResource.ResourceFingerprint;
     public ProgramDescriptor Program => program;
@@ -86,9 +87,10 @@ public sealed class LegacyMathAkFeatureProfile
                     maximum[family][i] = (short)H(start + 3 + count * 2 + i * 2);
                 }
             }
+            var shapes = LegacyMathAkShapePrototypes.ReadAuthenticated(captured, token);
             Boundary("calibrated", observer, token);
             Boundary("publish", observer, token);
-            return new(minimum, maximum, program);
+            return new(minimum, maximum, program, shapes);
         }
         finally { CryptographicOperations.ZeroMemory(captured); }
     }
