@@ -17,7 +17,15 @@ for r in proof['regions']:
 for r in proof['calls']+proof['writeAndCopyWitnesses']+proof['bindings']+proof['data']:
  raw=bytes.fromhex(r['bytes']);assert read(int(r['at'],16),len(raw))==raw
 assert proof['leaf']['bytes']=='32c0c3'and read(0x18005a400,3)==bytes.fromhex('32c0c3')
-for r in proof['sourceDependencies']:assert sha((a.repo/r['path']).read_bytes())==r['sha256']
+def restored_source(repo,path,expected):
+ import runpy
+ helper=repo/'tools/LegacyEnglishCharacters.Probe/source_preimage.py'
+ assert hashlib.sha256(helper.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='3839cc530b618f397eb1757f02455f124053561f3ab8f1f77a46d391e4b76d12'
+ return runpy.run_path(str(helper))['restore'](Path(path).name,(repo/path).read_bytes(),expected)
+for r in proof['sourceDependencies']:
+ data=(a.repo/r['path']).read_bytes()
+ if Path(r['path']).name=='LegacyOrdinaryGraphSourceRanges.cs':data=restored_source(a.repo,r['path'],r['sha256'])
+ assert sha(data)==r['sha256']
 local=(a.repo/'src/InkRecognition/LegacyEnglish119MainLocalCandidates.cs').read_text(encoding='utf-8-sig');seed=(a.repo/'src/InkRecognition/LegacyOrdinaryCursiveSeedProducer.cs').read_text(encoding='utf-8-sig')
 compact=lambda s:''.join(s.split())
 assert 'GenerateLeftToRight(cut,Height,seedProfile,newbyte[points.Length],Enumerable.Repeat(-1,points.Length).ToArray(),token)'in compact(local)

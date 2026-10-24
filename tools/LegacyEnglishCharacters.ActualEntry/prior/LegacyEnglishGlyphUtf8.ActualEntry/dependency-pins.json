@@ -1,0 +1,8 @@
+{
+  "upstream/v5/audit_actual.py": "4c11f46afd854072caf81ef1323fa6acca59b0d536d22ff8657ce634e90c1f45",
+  "upstream/v5/dependency-pins.json": "e05a3bf2f0a55233673e05eefabf61f7407f64d95469aef0baafa8fe8c154d82",
+  "upstream/v5/reference/flush_native.py": "414dea44dbb836caa13f28ce70257f3aa1c047b34d3e64d91be3086b1f8f471e",
+  "upstream/v5/reference/old_raw_compact_oracle.py": "ed1326e3f0bcdf3ece754a1ab2d90c24cbe595f23b7ae530db6b2e808900a997",
+  "upstream/selection/reference_controls.py": "611c834b9aff303bfc1ae87cc6a7111bcbb44c7b1cee8d99ba8ac6aa477c7f89",
+  "test_projection.py": "c424194c35784c2d1a027c7564dcde332a5cdbf61915f0565dfb646ac9025fc9"
+}

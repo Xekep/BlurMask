@@ -80,3 +80,32 @@ the initial three-project check. Evidence:
 `root-portable-math-source-20261024`. Cross-platform results are tracked by
 the separate `Recognition source geometry` workflow. It performs no inference
 or desktop launch and does not replace the remaining full-engine tests.
+
+Workflow40080332676 on2b68983 completed successfully on Windows, Linux and
+macOS. Root downloaded all three artifacts and checked their15 successful
+build/scalar/oracle stages each, including the14-case/112-guard/18-corruption
+13A0 reports. Evidence: `math-source-three-os-verified-20261024`.
+
+## English CHAR integration in main
+
+The reviewed nine production files and portable tools are now integrated.
+Root verified1037 frozen pin records and every existing-file preimage before
+importing43 files. The existing shared-WORD interner branch is unchanged; its
+class declaration alone became partial. Other production bytes match the
+reviewed owning successor. One auditor's first-line comment was preserved
+from main to avoid an incidental encoding change.
+
+Current-main prepared and owning harness builds passed with zero warnings and
+errors. The owning harness was compiled only; no inference was repeated.
+Prepared output matches442d304e2b199da841f2253293b30e72e98aa6cdd209e817021aba00a8c2178c
+exactly. Numeric, dynamic-growth and source-restoration audits passed, as did
+the portable independent audit of the existingea0165 actual capture.
+921 source/tool/workflow pins were checked before/after. Evidence:
+`root-english-characters-main-20261024`.
+
+Historical source-pin JSON files remain unchanged. Source restoration accepts
+only exact reviewed complete SHA transitions (nonallocating getter reads and
+partial declarations);37 positive/35 corruption controls passed. The older
+NumberD0 classifier pin predates the semantic pointlike fix and remains a
+separate documented frontier. This integration creates CHAR, not WORD/TEXT,
+and does not establish full English or Russian handwriting quality.

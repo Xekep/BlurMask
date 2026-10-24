@@ -27,6 +27,15 @@ public sealed class LegacyOrdinaryCursiveSeedGraph
         return Array.AsReadOnly(nodes[nodeIndex]);
     }
 
+    // Same private immutable backing and bounds check as GetNode, without
+    // allocating a ReadOnlyCollection wrapper per source-DFS visit. No caller
+    // arrays, cache fields or public API changes; span cannot replace elements.
+    internal ReadOnlySpan<LegacyOrdinaryCursiveSeedArc> ReadSourceNode(int nodeIndex)
+    {
+        if ((uint)nodeIndex >= (uint)nodes.Length) throw new ArgumentOutOfRangeException(nameof(nodeIndex));
+        return nodes[nodeIndex];
+    }
+
     public static LegacyOrdinaryCursiveSeedGraph CreateSingleDeferred(LegacyOrdinaryCursiveSeedResult source,
         CancellationToken cancellationToken = default)
         => Create(source, true, cancellationToken);

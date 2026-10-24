@@ -223,6 +223,14 @@ jobs:
         run: |
           dotnet run --project tools/LegacyEnglishGlyphGeometry.Probe -c Release -- tools/LegacyEnglishGlyphGeometry.Probe/prepared-cases.json .artifacts/en-glyph-geometry-prepared.json
           python -I -B tools/LegacyEnglishGlyphGeometry.Probe/audit_output.py tools/LegacyEnglishGlyphGeometry.Probe/prepared-cases.json .artifacts/en-glyph-geometry-prepared.json
+      - name: English ordinary CHAR components and source reservations (prepared only)
+        run: |
+          python -I -B tools/LegacyEnglishCharacters.Probe/reference_reuse_controls.py models/text-unicode/legacy-text-publication-data.json .artifacts/english-char-reuse.json
+          python -I -B tools/LegacyEnglishCharacters.Probe/generate_source_controls.py .artifacts/english-char-source.json
+          dotnet run --project tools/LegacyEnglishCharacters.Probe -c Release -- models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json .artifacts/english-char-reuse.json .artifacts/english-char-source.json .artifacts/english-char-prepared.json
+          python -I -B tools/LegacyEnglishCharacters.Probe/audit_output.py .artifacts/english-char-reuse.json .artifacts/english-char-source.json .artifacts/english-char-prepared.json .artifacts/english-char-audit.json .artifacts/english-char-growth-audit.json
+          python -I -B tools/LegacyEnglishCharacters.Probe/test_source_preimage.py . .artifacts/english-char-source-pins-audit.json
+          dotnet build tools/LegacyEnglishCharacters.ActualEntry -c Release
       - name: Original Math AK source geometry and independent rounding controls
         shell: bash
         run: |

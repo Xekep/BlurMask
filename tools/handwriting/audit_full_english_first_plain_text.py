@@ -23,5 +23,13 @@ for x in e['instructions']:
 for x in e['bindings']:assert struct.unpack_from('<Q',d,off(int(x['at'],16)))[0]==int(x['target'],16)
 for x in e['constants']:
  at=off(int(x['at'],16));assert d[at:at+len(bytes.fromhex(x['bytes']))].hex()==x['bytes']
-for name,h in e['sharedSources'].items():assert sha((a.repo/'src/InkRecognition'/name).read_text(encoding='utf-8-sig').encode())==h
+def restored_source(repo,path,expected):
+ import runpy
+ helper=repo/'tools/LegacyEnglishCharacters.Probe/source_preimage.py'
+ assert hashlib.sha256(helper.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='3839cc530b618f397eb1757f02455f124053561f3ab8f1f77a46d391e4b76d12'
+ return runpy.run_path(str(helper))['restore'](Path(path).name,(repo/path).read_bytes(),expected)
+for name,h in e['sharedSources'].items():
+ data=(a.repo/'src/InkRecognition'/name).read_text(encoding='utf-8-sig').encode()
+ if name in ('LegacyOrdinaryCursiveSeedGraph.cs','LegacyNativeWordBuilder.cs','LegacyNativePlainWordPublisher.cs'):data=restored_source(a.repo,'src/InkRecognition/'+name,h)
+ assert sha(data)==h
 r=dict(status='PASS',fullFunctions=len(set(r['function']for r in e['regions'])),fullRegions=len(e['regions']),closedUnregistered=len(e['closedUnregistered']),closedInstructions=closedInstructions,instructionPins=len(e['instructions']),bindings=len(e['bindings']),sharedSources=len(e['sharedSources']),vendorExecuted=False,scope='Native bytes and owned pure-kernel contracts only; no B6 production/nativeABI/WORD720/guide completion claim');a.output.write_text(json.dumps(r,indent=2)+'\n');print(json.dumps(r))

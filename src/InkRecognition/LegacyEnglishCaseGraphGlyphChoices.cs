@@ -35,6 +35,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,4096);
         var graph=stage.Lease.Pass.Initializer.PlanForAudit.BindingForAudit.Graph;
         var ranges=stage.Lease.Root.Knowledge.Owner.RetainGraphWordRanges(stage,token);
+        if(graphCharactersRequested)graphCharacterSourceRanges=ranges;
         long payload=65536,copies=131072,work=0;
         // Preflight immutable endpoint/count bounds before DFS/pool/selection
         // allocations. Charge every reference even when source keys duplicate.
@@ -65,7 +66,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,32768);
         stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,65536);
         stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,4096);
-        var dispatch=new GraphGlyphRefreshDispatch(pool,refs.Count,token);
+        var dispatch=graphGlyphDispatch??=new GraphGlyphRefreshDispatch(pool,128,token);
         var progress=new List<(ulong Key,byte[] Source,uint Bits,int Visited)>(refs.Count);
         //024F30 first pass: complete every actual reference's refresh BEFORE
         //any selection. No detached WORD image is used as source authority.
@@ -109,6 +110,11 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             progress.Add((key,receipt.Source,receipt.Bits,wasReady?0:receipt.Visited));
         }
         if(graphGlyphGeometryRequested)graphGlyphGeometryData=graphGlyphGeometryContext!.Finish(refs.Count,token);
+        if(graphCharactersRequested)
+        {
+            CompleteGraphCharacterPass(stage,pool,refs,progress,token);
+            return;
+        }
         var output=new GraphGlyphChoiceData[refs.Count];
         for(int i=0;i<refs.Count;i++)
         {

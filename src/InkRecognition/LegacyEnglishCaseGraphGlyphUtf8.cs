@@ -24,6 +24,11 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
     private void CompleteGraphGlyphUtf8(GraphLanguageScope stage,LegacyNativeGlyphRecordPool pool,CancellationToken token)
     {
         RequireGraphPublication(stage,token);
+        if(graphCharactersRequested)
+        {
+            graphCharacterContext!.RequireCompleted(token);
+            return;
+        }
         var normalization=graphGlyphNormalization??throw new InvalidOperationException("Private glyph UTF8 request required.");
         var choices=graphGlyphChoices??throw new InvalidOperationException("All actual owners must be refreshed and selected first.");
         var alphabet=stage.Lease.Root.Source.Alphabet;byte[] header=alphabet.CopySerializedHeader();

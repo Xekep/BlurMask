@@ -46,7 +46,7 @@ public readonly record struct LegacyMainTextSourceTreeSnapshot(int Identity,int 
 /// <summary>Fresh01B4E0 ordered source-range interner, bound to one actual raw
 /// root document. Key comparison is exact InkC21.F8/081870: ordered unsigned64
 /// first/last pairs then unsigned count, with no sorting or geometric union.</summary>
-public sealed class LegacyOwnedMainTextSourceInterner
+public sealed partial class LegacyOwnedMainTextSourceInterner
 {
     private readonly List<LegacyOwnedMainTextSourceNode> inserted=[];
     private readonly object gate=new();

@@ -29,7 +29,7 @@ public readonly record struct LegacyPreparedTextGlyphReuseResult(bool Succeeded,
 /// <summary>Complete bounded021760 reuse kernel. Existing source-node records
 /// remain explicitly prepared inputs until024F30/01B4E0 are
 /// joined. Every production emission still resolves an actual same-TOP glyph.</summary>
-public sealed class LegacyPreparedMainTextGlyphReuse
+public sealed partial class LegacyPreparedMainTextGlyphReuse
 {
     private sealed class Row
     {

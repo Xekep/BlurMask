@@ -24,7 +24,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         return new(glyphs,x with{OriginalStrokePointCounts=x.OriginalStrokePointCounts.ToArray(),OriginalRoot=x.OriginalRoot.ToArray(),
             WordClip=x.WordClip.ToArray(),Glyphs=x.Glyphs.Select(g=>g with{OriginalDescriptor40=g.OriginalDescriptor40.ToArray(),ProjectedPairs=g.ProjectedPairs.ToArray(),WordClippedPairs=g.WordClippedPairs.ToArray()}).ToArray()});
     }
-    private sealed class GraphGlyphGeometryContext
+    private sealed partial class GraphGlyphGeometryContext
     {
         private readonly LegacyEnglishCaseNode0Completion owner;
         private readonly GraphLanguageScope stage;
@@ -97,7 +97,9 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             Reserve(stage,fill.Length,document.ObjectCount,wordClip.Length,token);
             var projected=ProjectCore(document,map,original,fill,token);
             var clipped=operations.Intersect(projected,wordClip,token);
-            Require(token);glyphs.Add(new(reference,pendingOriginal,pendingJoiner,Pairs(projected),Pairs(clipped)));pendingOriginal=null;
+            Require(token);
+            if(owner.graphCharactersRequested)RetainCharacterRanges(reference,pendingOriginal,pendingJoiner,projected,clipped,token);
+            glyphs.Add(new(reference,pendingOriginal,pendingJoiner,Pairs(projected),Pairs(clipped)));pendingOriginal=null;
         }
         internal GraphGlyphGeometrySnapshot Finish(int references,CancellationToken token)
         {

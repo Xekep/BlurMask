@@ -1,0 +1,11 @@
+# English owning CHAR stage
+
+This internal opt-in stage runs after the same English glyph geometry owner. It retains live source/pool identity through source processing, key interning, fresh CHAR registration or existing-key reuse, and emits detached historical prefixes, final nodes, tree and pending CHAR commands. It does not create TEXT, apply document commands, change defaults, or admit recognition quality.
+
+The fixed original141/index4 owning diagnostic succeeded once after the bounded ReadPrior successor: one fresh key, two glyph alternatives, one pending CHAR command. All twenty earlier canonical fields match the prior geometry diagnostic. The independent data audit checks complete records/masks, source pairs, selection, literal flags/defaults, tree and command links; 39 corruptions refuse. This capture does not exercise actual reuse or cache hits. The 1024 prepared reuse cases cover that numeric behavior separately.
+
+Source processing reserves its actual private ranges before every Begin; it makes no global normalized-range assumption and refunds nothing. ReadPrior preserves the two genuine count/fill calls, uses the once-owned graph arrays through an internal span accessor, and reserves both passes plus exact depth-dependent copy margins before allocation. Public GetNode is unchanged. The 9MiB continuation ceiling is unchanged. Payload accounting is a logical library convention, not CLR allocation or RSS certification.
+
+The source-only restoration helper accepts exact approved full SHA transitions only: SeedGraph accessor, five GraphSource private span reads, and historical partial declarations. Original source pins and recognition goldens remain unchanged. The older Number D0 diagnostic still pins the classifier before the semantic pointlike dispatch fix; that unrelated historical frontier is not silently adapted.
+
+Prepared CI runs no network inference. The owning ActualEntry is compiled only. Its explicit --actual-characters mode requires the pinned original input, resources, runtime and prior geometry; it is not invoked by CI. The portable audit_actual.py accepts capture, prior geometry/UTF8/TOP/source/compact, raw input, model root, authenticated source-gate witness, and fresh report, with optional --tamper. All unavailable live-owner/cancellation/budget observations are listed in its report.

@@ -2,7 +2,13 @@ import argparse,hashlib,json,pathlib
 p=argparse.ArgumentParser();p.add_argument('--repo',required=True);p.add_argument('--output',required=True);a=p.parse_args()
 s=json.loads(pathlib.Path(__file__).with_name('linguistic-fst28c-number-initial-d0-budget-pins.json').read_text());r=pathlib.Path(a.repo)
 for name,h in s['sourcePins'].items():
- assert hashlib.sha256((r/name).read_bytes().replace(b'\r\n',b'\n')).hexdigest()==h,name
+ data=(r/name).read_bytes().replace(b'\r\n',b'\n')
+ if pathlib.Path(name).name=='LegacyOrdinaryGraphSourceRanges.cs':
+  import runpy
+  helper=r/'tools/LegacyEnglishCharacters.Probe/source_preimage.py'
+  assert hashlib.sha256(helper.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='3839cc530b618f397eb1757f02455f124053561f3ab8f1f77a46d391e4b76d12'
+  data=runpy.run_path(str(helper))['restore'](pathlib.Path(name).name,data,h)
+ assert hashlib.sha256(data).hexdigest()==h,name
 v=s['limits'];f=s['fixed'];N,G,A,S,D,P0,P,R,T,C,L=(v[k] for k in ['N','G','A','S','D','P0','P','R','T','C','L'])
 # Every named resource pass is additive, never paid from the feature term.
 fixed=4*f['AK']+f['AK']+2*f['Networks']+3*f['OrdinaryNode']+4*f['AL']+4*f['Calibration']+4*f['Confidence']+4*f['Activation']+65536

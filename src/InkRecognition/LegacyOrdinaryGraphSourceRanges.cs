@@ -126,14 +126,14 @@ public sealed partial class LegacyOrdinaryGraphSourceRanges
             throw new NotSupportedException("Bounded ordinary forward graph context interval required.");
         var frames=new List<(int Node,int Ordinal)>();int visits=0;bool found=false;
         int firstNode=(int)(firstContext>>7);
-        for(int ordinal=0;ordinal<seedGraph.GetNode(firstNode).Count&&!found;ordinal++)
+        for(int ordinal=0;ordinal<seedGraph.ReadSourceNode(firstNode).Length&&!found;ordinal++)
         {
-            var arc=seedGraph.GetNode(firstNode)[ordinal];if(arc.StartContextId!=firstContext)continue;
+            var arc=seedGraph.ReadSourceNode(firstNode)[ordinal];if(arc.StartContextId!=firstContext)continue;
             frames.Clear();var stack=new Stack<(int Node,int Ordinal,int Child)>();stack.Push((firstNode,ordinal,-1));
             while(stack.Count!=0)
             {
                 cancellationToken.ThrowIfCancellationRequested();if(++visits>1_048_576)throw new ArgumentException("Source path visit budget exceeded.");
-                var frame=stack.Pop();var current=seedGraph.GetNode(frame.Node)[frame.Ordinal];
+                var frame=stack.Pop();var current=seedGraph.ReadSourceNode(frame.Node)[frame.Ordinal];
                 if(frame.Child==-1)
                 {
                     if(lastContext<current.EndContextId)continue;
@@ -145,7 +145,7 @@ public sealed partial class LegacyOrdinaryGraphSourceRanges
                 {
                     stack.Push((frame.Node,frame.Ordinal,frame.Child+1));
                     int next=current.SuccessorArcIndices.Span[frame.Child];
-                    if(frame.Node+1>=seedGraph.NodeCount||next<0||next>=seedGraph.GetNode(frame.Node+1).Count)
+                    if(frame.Node+1>=seedGraph.NodeCount||next<0||next>=seedGraph.ReadSourceNode(frame.Node+1).Length)
                         throw new InvalidDataException("Actual seed successor ownership required.");
                     stack.Push((frame.Node+1,next,-1));
                 }
@@ -153,7 +153,7 @@ public sealed partial class LegacyOrdinaryGraphSourceRanges
             }
         }
         if(!found)throw new InvalidDataException("Actual ordinary source path does not reach its requested ending context.");
-        var path=frames.Select(frame=>seeds.Seeds[seedGraph.GetNode(frame.Node)[frame.Ordinal].SeedGroupIndex].Atom.Range).ToArray();
+        var path=frames.Select(frame=>seeds.Seeds[seedGraph.ReadSourceNode(frame.Node)[frame.Ordinal].SeedGroupIndex].Atom.Range).ToArray();
         return ProjectOwnedRows(prepared,original,path,keys,cancellationToken);
     }
 

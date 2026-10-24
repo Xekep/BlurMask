@@ -1,0 +1,286 @@
+{
+  "Scope": "PREPARED_LITERAL_SOURCE_GEOMETRY_CONTROLS",
+  "Cases": [
+    {
+      "Id": "whole-one",
+      "PointCounts": [
+        5
+      ],
+      "WordReferences": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0
+        ]
+      ],
+      "GlyphReferences": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "Id": "open-partial",
+      "PointCounts": [
+        5
+      ],
+      "WordReferences": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0
+        ]
+      ],
+      "GlyphReferences": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "Id": "degenerate",
+      "PointCounts": [
+        5
+      ],
+      "WordReferences": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0
+        ]
+      ],
+      "GlyphReferences": [
+        [
+          0,
+          0,
+          2,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "Id": "fractions",
+      "PointCounts": [
+        5
+      ],
+      "WordReferences": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0
+        ]
+      ],
+      "GlyphReferences": [
+        [
+          0,
+          0,
+          1,
+          0,
+          0,
+          3,
+          100,
+          50
+        ]
+      ]
+    },
+    {
+      "Id": "cross-object",
+      "PointCounts": [
+        3,
+        2
+      ],
+      "WordReferences": [
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      ],
+      "GlyphReferences": [
+        [
+          0,
+          0,
+          1,
+          0,
+          1,
+          0,
+          100,
+          0
+        ]
+      ]
+    },
+    {
+      "Id": "narrow-wordclip",
+      "PointCounts": [
+        5
+      ],
+      "WordReferences": [
+        [
+          0,
+          0,
+          1,
+          0,
+          0,
+          3,
+          0,
+          0
+        ]
+      ],
+      "GlyphReferences": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "Id": "duplicate-ordered",
+      "PointCounts": [
+        5
+      ],
+      "WordReferences": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0
+        ]
+      ],
+      "GlyphReferences": [
+        [
+          0,
+          0,
+          2,
+          0,
+          0,
+          2,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          2,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "Id": "first-point-closed",
+      "PointCounts": [
+        5
+      ],
+      "WordReferences": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0
+        ]
+      ],
+      "GlyphReferences": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "Id": "single-point-object",
+      "PointCounts": [
+        1
+      ],
+      "WordReferences": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ],
+      "GlyphReferences": [
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      ]
+    }
+  ]
+}
