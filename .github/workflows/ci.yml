@@ -213,6 +213,11 @@ jobs:
           dotnet run --project tools/LegacyEnglishGlyphRefresh.Probe -c Release -- .artifacts/en-glyph-refresh-prepared.json
           python -I -B tools/LegacyEnglishGlyphRefresh.Probe/audit_output.py .artifacts/en-glyph-refresh-prepared.json
           dotnet build tools/LegacyEnglishGlyphUtf8.ActualEntry -c Release
+      - name: English ordinary source geometry (prepared only)
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyEnglishGlyphGeometry.Probe -c Release -- tools/LegacyEnglishGlyphGeometry.Probe/prepared-cases.json .artifacts/en-glyph-geometry-prepared.json
+          python -I -B tools/LegacyEnglishGlyphGeometry.Probe/audit_output.py tools/LegacyEnglishGlyphGeometry.Probe/prepared-cases.json .artifacts/en-glyph-geometry-prepared.json
       - name: Original Math AK source geometry and independent rounding controls
         shell: bash
         run: |

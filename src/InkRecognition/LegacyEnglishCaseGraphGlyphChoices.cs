@@ -60,6 +60,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,payload);
         stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,copies);
         stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,work);
+        if(graphGlyphGeometryRequested)graphGlyphGeometryContext=GraphGlyphGeometryContext.Issue(this,stage,publisher,pool,token);
         var progress=new List<(ulong Key,byte[] Source,uint Bits,int Visited)>(refs.Count);
         //024F30 first pass: complete every actual reference's refresh BEFORE
         //any selection. No detached WORD image is used as source authority.
@@ -74,6 +75,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             var arc=graph.GetNode(address.Node)[address.Arc];
             int first=checked((int)arc.StartContextId),last=checked((int)arc.EndContextId);
             _=ranges.Preflight(first,last,token);
+            graphGlyphGeometryContext?.BeginReference(reference,token);
             var count=ranges.ReadOrdinary140(address.Node,address.Arc,token);var fill=ranges.ReadOrdinary140(address.Node,address.Arc,token);
             if(count.Length==0||!count.AsSpan().SequenceEqual(fill))throw new InvalidDataException("Source count/fill changed.");
             byte[] source=GraphWordSourceNumerics.Encode26(fill,token);
@@ -86,8 +88,13 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                 (symbol,end,ct)=>{RequireGraphPublication(stage,ct);return new(cache.ReadRequestCost(ordinary.CreateRequest(address.Node,address.Arc,symbol,end),ct));});
             int visited=LegacyNativeOrdinaryGlyphRefreshKernel.Apply(pool,key,compact.Storage,
                 compact.Starts[address.Node],compact.Starts[address.Node+1],key,operations,new byte[40],token);
-            RequireGraphPublication(stage,token);progress.Add((key,source,bits,visited));
+            RequireGraphPublication(stage,token);
+            //024F30 first pass: own refresh precedes projection/WORD clipping;
+            //ALL references finish these steps before the selection loop below.
+            graphGlyphGeometryContext?.Project(reference,fill,token);
+            progress.Add((key,source,bits,visited));
         }
+        if(graphGlyphGeometryRequested)graphGlyphGeometryData=graphGlyphGeometryContext!.Finish(refs.Count,token);
         var output=new GraphGlyphChoiceData[refs.Count];
         for(int i=0;i<refs.Count;i++)
         {

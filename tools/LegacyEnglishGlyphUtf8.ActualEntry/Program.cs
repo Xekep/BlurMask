@@ -21,7 +21,8 @@ internal static class ActualEntry
  };
  internal static int Run(string[] args)
  {
-  if(args.Length!=4||args[0]!="--actual-glyph-utf8")throw new ArgumentException("--actual-glyph-utf8 <models> <pinned-141-raw-json> <fresh-output-json>");
+  if(args.Length!=4||args[0] is not("--actual-glyph-utf8" or "--actual-glyph-geometry"))throw new ArgumentException("--actual-glyph-utf8|--actual-glyph-geometry <models> <pinned-141-raw-json> <fresh-output-json>");
+  bool includeGeometry=args[0]=="--actual-glyph-geometry";
   string models=args[1],input=args[2],output=args[3];if(File.Exists(output))throw new IOException("Fresh output path required.");
   using var stop=new CancellationTokenSource(TimeSpan.FromSeconds(60));var token=stop.Token;var clock=Stopwatch.StartNew();string stage="pins";
   var stages=new List<string>(16);void Stage(string value){token.ThrowIfCancellationRequested();stage=value;if(stages.Count==32)throw new InvalidDataException("Stage log bound exceeded.");stages.Add(value);}
@@ -60,9 +61,17 @@ internal static class ActualEntry
    void Observe(LegacyEnglishCaseNode0Completion.GraphMainConfidenceObservation value)
    {token.ThrowIfCancellationRequested();if(vector10.Count>=64)throw new InvalidDataException("Bounded diagnostic group observations required.");vector10.Add(value);}
    using var normalizationStream=new MemoryStream(Load("text-unicode/legacy-normalization-data.json"),false);var normalization=LegacyNativeUnicodeNormalizationData.Load(normalizationStream);
-   Stage("owning-generic-graph-run");var graphResult=owner.RunGraphFirstGlyphUtf8(normalization,token,Observe,captureSourceInputs:true);Stage("capture");var metrics=owner.GraphLoopDiagnostics;
+   Stage("owning-generic-graph-run");LegacyEnglishCaseNode0Completion.GraphGlyphGeometrySnapshot? geometry=null;
+   LegacyEnglishCaseNode0Completion.GraphGlyphUtf8Result graphResult;
+   if(includeGeometry){var value=owner.RunGraphFirstGlyphGeometry(normalization,token,Observe,captureSourceInputs:true);geometry=value.Geometry;graphResult=value.Glyphs;}
+   else graphResult=owner.RunGraphFirstGlyphUtf8(normalization,token,Observe,captureSourceInputs:true);
+   Stage("capture");var metrics=owner.GraphLoopDiagnostics;
+   if(geometry is null)
    Save(output,new{Scope="ACTUAL_OWNING_ENGLISH_ORDINARY_GLYPH_REFRESH_SELECTION_UTF8_DATA_NO_TEXT_ADMISSION",Completed=true,InputSha,OriginalIndex=Index,RawPoints=rawPoints,RawStrokes=strokes.Length,Resolution=resolution,GraphNodes=graphNodes,ParentChildren=children,Stages=stages,
-    Metrics=metrics,SourceCompletion=graphResult.Choices.Top.Source,Top=graphResult.Choices.Top.Top,GlyphChoices=graphResult.Choices.Glyphs,GlyphUtf8=graphResult.Glyphs,Vector10=vector10,NoExpectedLabels=true,Admission="NONE",GlobalReadinessGateUnchanged=true,TimeoutMs=60000});return 0;
+    Metrics=metrics,SourceCompletion=graphResult.Choices.Top.Source,Top=graphResult.Choices.Top.Top,GlyphChoices=graphResult.Choices.Glyphs,GlyphUtf8=graphResult.Glyphs,Vector10=vector10,NoExpectedLabels=true,Admission="NONE",GlobalReadinessGateUnchanged=true,TimeoutMs=60000});
+   else
+   Save(output,new{Scope="ACTUAL_OWNING_ENGLISH_GLYPH_SOURCE_GEOMETRY_DATA_NO_CHAR_TEXT_ADMISSION",Completed=true,InputSha,OriginalIndex=Index,RawPoints=rawPoints,RawStrokes=strokes.Length,Resolution=resolution,GraphNodes=graphNodes,ParentChildren=children,Stages=stages,
+    Metrics=metrics,SourceCompletion=graphResult.Choices.Top.Source,Top=graphResult.Choices.Top.Top,GlyphChoices=graphResult.Choices.Glyphs,GlyphUtf8=graphResult.Glyphs,Vector10=vector10,Geometry=geometry,CHARCreated=false,NoExpectedLabels=true,Admission="NONE",GlobalReadinessGateUnchanged=true,TimeoutMs=60000});return 0;
   }
   catch(Exception error)
   {
