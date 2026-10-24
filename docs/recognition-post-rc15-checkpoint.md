@@ -443,3 +443,24 @@ it still needs a newly frozen build and root owning verification. Existing
 shared immutable Main/Global helpers do not have the mutable-prefix defect.
 Evidence: `independent-en-selected-sources-review-frozen-manifest-20261024.json`
 (SHA256 `6342005f1e02dd71da0b06e538288047ec3afac48647dfa14152baa8958bed4a`).
+
+The isolated fresh Math workspace header now has a genuine root owning result.
+It seeds a separate private early claim before the untouched original-context
+claim, joins the actual13B6/13A0/sampler/segment sequence and binds W from those
+same owned segments. Its heap policy is parsed once from authenticated tail
+13A4+32 (resource1790683), rather than inferred from an unrelated grid scale.
+Zero common-pool counts remain distinct from positive13B6 descriptor8/1390
+results; this diagnostic creates no FIRST request, descriptor108 or evaluator.
+After full source/harness/oracle review,1254 pins and907 library sources were
+checked before and after one14-fixture run. It completed in2.638s under the
+45s watchdog, CPU2/affinity3/.NET10.0.12, without retry. Independent DATA checking
+passed86 observed guards,5561 segment counts and the one positive1390 case.
+Header charges are182 logical payload bytes,296 copied bytes and898 structural
+units; they are not process memory or complete transitive execution costs.
+The27 negative DATA controls are separate prepared checks. No neural or vendor
+execution occurred. Capture SHA256:
+`89fdc6a8822cad6bfc45ca9f331c8ec7e5eb556d825a89b0b1c78261348d9d06`.
+Evidence: `root-math-fresh-workspace-owning-frozen-manifest-20261024.json`
+(SHA256 `fb834ab69a8c8a525ee2c5d775cf3149a72d0534776ddc80b0616c2b430a97ce`).
+Portable integration and independent scoped review remain pending at this
+checkpoint; no default-path or recognition-quality change is claimed.
