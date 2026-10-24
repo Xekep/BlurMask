@@ -505,3 +505,12 @@ warnings/errors. Root used CPU2/affinity3; the desktop app was not launched.
 Evidence: `root-math-fresh-workspace-main-20261024` and
 `root-english-selected-sources-main-20261024`. Three-OS checks are pending push;
 the broader configured2ALT/219580 INPUT-transform frontier is still unresolved.
+
+A post-commit Git-blob check found that default LF normalization changed the two
+frozen Math JSON blobs in7f3e278, although their working-tree audits passed.
+Path-specific `-text` attributes now preserve the original count-summary and
+historical capture bytes; no capture/hash/golden was normalized or relaxed.
+Root extracted the three staged auditor/data blobs into a fresh directory,
+checked byte identity and passed the14-case/86-guard/28-corruption DATA audit
+there. Evidence: `root-math-git-frozen-data-20261024`. No source or inference
+execution was repeated for this storage fix.

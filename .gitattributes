@@ -3,3 +3,5 @@
 *.ico binary
 models/**/*.res binary
 models/ru-RU/legacy-engine-profile.json -text
+tools/LegacyMathAkFreshWorkspace.Probe/baseline-counts.json -text
+tools/LegacyMathAkFreshWorkspace.Probe/historical-source14.json -text
