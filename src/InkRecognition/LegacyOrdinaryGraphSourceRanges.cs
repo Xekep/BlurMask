@@ -3,7 +3,7 @@ namespace InkRecognition;
 /// <summary>Ordinary no-protocol21B.virtual120 mode0 forward source range path.
 /// Owns the seed/candidate graphs; reconstructs actual source metadata rather
 /// than treating the acoustic group's normalized ranges as raw source points.</summary>
-public sealed class LegacyOrdinaryGraphSourceRanges
+public sealed partial class LegacyOrdinaryGraphSourceRanges
 {
     private readonly LegacyOrdinaryCursiveSeedResult seeds;
     private readonly LegacyOrdinaryCursiveSeedGraph seedGraph;

@@ -195,6 +195,12 @@ jobs:
           dotnet run --project tools/LegacyEnglishGraphCompact.Probe -c Release -- models/en-US/en_US-ak-cur.lite.res .artifacts/en-finalcompact-input.json .artifacts/en-finalcompact-output.json
           python -I -B tools/LegacyEnglishGraphCompact.Probe/audit_output.py models/en-US/en_US-ak-cur.lite.res .artifacts/en-finalcompact-input.json .artifacts/en-finalcompact-output.json --tamper
           dotnet build tools/LegacyEnglishGraphCompact.ActualEntry -c Release
+      - name: English ordinary WORD source and ranking prepared controls
+        shell: bash
+        run: |
+          dotnet run --project tools/LegacyEnglishWordSource.Probe -c Release -- .artifacts/en-word-source-prepared.json
+          python -I -B tools/LegacyEnglishWordSource.Probe/audit_output.py .artifacts/en-word-source-prepared.json tools/LegacyMainWordRanking.Probe/audit_output.py tools/LegacyMainSpanScores.Probe/audit_output.py .artifacts/en-word-source-prepared-audit.json
+          dotnet build tools/LegacyEnglishWordSource.ActualEntry -c Release
       - name: Original Math AK source geometry and independent rounding controls
         shell: bash
         run: |

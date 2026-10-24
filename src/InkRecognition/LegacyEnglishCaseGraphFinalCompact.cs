@@ -91,6 +91,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                     checked((ushort)stage.Ring.SourceEndAt(stage.CurrentNode)),sources,new(125,false,false,false,false,0),0,contexts,token);
                 var mask=new byte[checked(published.Count*40)];
                 for(int i=0;i<mask.Length;i++)mask[i]=i%40 is 34 or 35?(byte)0:(byte)255;
+                if(graphConfidenceScorer is not null)graphRawWord=BuildGraphRawWord(stage,published,winner,token);
                 int contextCount=contexts.NodeCount;
                 if(contextCount>16384)throw new NotSupportedException("Explicit detached compact context-export bound exceeded.");
                 stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(contextCount*192L));

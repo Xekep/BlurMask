@@ -18,7 +18,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
     // >=120 also need intermediate publication before physical ring reuse.
     // Those services are not silently omitted from this bounded successor.
     internal LegacyEnglishCaseGraphNodeSnapshot RunGraphFirstLoop(CancellationToken token=default)=>RunGraphFirstLoopCore(false,token);
-    private LegacyEnglishCaseGraphNodeSnapshot RunGraphFirstLoopCore(bool finalCompact,CancellationToken token)
+    private LegacyEnglishCaseGraphNodeSnapshot RunGraphFirstLoopCore(bool finalCompact,CancellationToken token,bool captureMainConfidence=false)
     {
         token.ThrowIfCancellationRequested();primary.RequireGraphLoop(this,token);
         if(Interlocked.CompareExchange(ref phase,1,0)!=0)throw new InvalidOperationException("One owning graph run required.");
@@ -26,6 +26,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         LegacyEnglishFreshCaseMainSource? root=null;
         try
         {
+            if(captureMainConfidence)graphConfidenceScorer=primary.AttachGraphMainConfidence(this,ledger,token);
             _=primary.Run(token:token);
             if(!pending||ring is null||completedBacking is null||activeStage is not null)throw new InvalidOperationException("Same completed node0 private state required.");
             node1Pass=primary.Node1Pass(this);var pass=node1Pass;root=pass.Root;

@@ -63,6 +63,8 @@ public sealed partial class LegacyEnglishFreshCaseMainScorer
         int[] neural=LegacyEnglishMainOnlyAcousticScorer.CombineCore(networks,features.Dynamic.Mode2Weight,primary,inputs.Knowledge,token);Check("score:ensemble");
         var result=kernel.Build(neural,features,span,token);Check("score:cache");
         float power=span==0?1f:(float)Math.Pow(span+1,(double)inputs.Knowledge.CachePower);
-        token.ThrowIfCancellationRequested();return new(features,networks,neural,new(group,span,result,power));
+        token.ThrowIfCancellationRequested();var scores=new LegacyEnglishMainArcScores(group,span,result,power);
+        mainConfidenceCapture?.Observe(features,networks,scores,token);
+        return new(features,networks,neural,scores);
     }
 }
