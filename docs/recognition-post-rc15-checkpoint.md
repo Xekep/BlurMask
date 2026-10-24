@@ -406,3 +406,12 @@ Independent quantizer review4a97da6b verified the complete288B/68-instruction
 body,196627 ordinary scalars with a third raw-bit shift oracle,20000 additional
 raw patterns and831 slice placements. No blocker within the declared primitive
 scope; live evaluator identity/quantizer/scratch/order and FTZ/DAZ remain open.
+
+The independent English input CI gate passed on Windows/Linux/macOS in run
+40096532861 (e22a734), four stages per OS, ActualEntry build-only. All downloaded
+model-free captures are byte-identical to the root prepared capture (f0beb13d).
+Independent DATA audit reports match CI after CRLF-to-LF text normalization
+(d273b848); no capture normalization or owning/NN rerun occurred. The first root
+report comparison incorrectly required raw cross-OS report bytes and failed on
+LF/CRLF alone; its artifacts remain preserved. Evidence:
+`english-early-selected-three-os-verified-v2-20261024/verification.json`.
