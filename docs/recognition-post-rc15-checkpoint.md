@@ -415,3 +415,31 @@ Independent DATA audit reports match CI after CRLF-to-LF text normalization
 report comparison incorrectly required raw cross-OS report bytes and failed on
 LF/CRLF alone; its artifacts remain preserved. Evidence:
 `english-early-selected-three-os-verified-v2-20261024/verification.json`.
+
+## Static FIRST packing and selected-source review
+
+The configured fresh FIRST route is now statically linked to slot2/WHICH1,
+record168 and raw model3F8702..177650. Its prepared evaluator is type0x212
+with quantizer10; the alternate preparation branch creates0x213. These are
+distinct types, not interchangeable receipts. The actual010EA0 packing copies
+274 already prepared SHORT values through V88, then quantizes only two F32
+boundary values through V90 at offset274. Treating all276 inputs as floats
+would apply the wrong conversion. Calibration belongs to the same FIRST slot,
+not the separate279-input tail model. Complete feature values, live evaluator
+issuance, scratch/cache lifetime and neural execution remain unproved.
+Root reviewed84 frozen static pins and the3-pin counter-ID supplement; no
+vendor binary was executed. Evidence:
+`math-first276-configured-linkage-static-frozen-manifest-20261024.json`
+(SHA256 `925263d3e7d062f2a5e488abb04fc1eaea5f0511062b77d2355bc3041ab25ea0`)
+and supplement `d30be3d3080dda256ecfd8b08edda74e0cf76c651aca4f2ba89544bc453f7d98`.
+
+Independent selected-source review found a real ordering defect in the isolated
+English successor before any owning execution:020000 updates every selected
+CHAR before updating its WORD. The earlier01FD40 WORDbit24 fold still belongs
+before that selection loop. The first compiled successor0e4134d7 is preserved
+and must not be executed as an owning proof. A source correction restores this
+order and adds native/source and read-only own-library IL chronology checks;
+it still needs a newly frozen build and root owning verification. Existing
+shared immutable Main/Global helpers do not have the mutable-prefix defect.
+Evidence: `independent-en-selected-sources-review-frozen-manifest-20261024.json`
+(SHA256 `6342005f1e02dd71da0b06e538288047ec3afac48647dfa14152baa8958bed4a`).
