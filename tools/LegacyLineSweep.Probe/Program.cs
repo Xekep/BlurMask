@@ -77,8 +77,9 @@ foreach(var scenario in new[]{(Rows:1,Reverse:false),(Rows:2,Reverse:false),(Row
         Require(frames.Lines.Count==rows && frames.StrokeLineIndices.Span.IndexOf(-1)<0,"Inferred ordinary fixture lost rows/strokes.");
         Require(frames.Lines.Zip(frames.Lines.Skip(1)).All(p=>p.First.Deskewed.Line.Baseline<p.Second.Deskewed.Line.Baseline),"Native mean-Y materialization must preserve top-down rows for translated fixtures.");
         // Actual2B1/1111 features replaced the historical2B0 cost54456.
-        // The distinct inferred frames retain exact profile-specific costs.
-        int expectedCost=offset switch{5789=>53251,11421 or 187976=>53281,_=>throw new InvalidOperationException("Unexpected line profile.")};
+        // Mixed MAIN normalization matches LegacyOrdinaryLineScale.Probe;
+        // identical scorer inputs give a final р edge of 19163 for the latter profiles.
+        int expectedCost=offset switch{5789=>53251,11421 or 187976=>53266,_=>throw new InvalidOperationException("Unexpected line profile.")};
         foreach(var frame in frames.Lines)
         {
             var ink=frame.Deskewed.Strokes.Select(s=>new InkStroke(s)).ToArray();
