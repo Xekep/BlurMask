@@ -20,8 +20,8 @@ public sealed partial class LegacyMathAkFeatureProfile
     //Native tail13A4+32, distinct from Program.GridScale and FIRST13A4.
     internal ushort FreshCommonHeapCapacity { get; }
     public LegacyMathAkShapePrototypes ShapePrototypes { get; }
-    private LegacyMathAkFeatureProfile(short[][] minimum, short[][] maximum, ProgramDescriptor program, LegacyMathAkShapePrototypes shapes, LegacyMathAkOriginalSmoothingPolicy smoothing, LegacyMathAkSource13A2Policy sampler, ushort freshCommonHeapCapacity, First276Program first276, FirstAlphabetPrefix firstAlphabet, First276ModelData firstModelData)
-    { this.minimum = minimum; this.maximum = maximum; this.program = program; ShapePrototypes = shapes; OriginalSmoothing = smoothing; Source13A2Policy = sampler; FreshCommonHeapCapacity = freshCommonHeapCapacity; this.first276 = first276; this.firstAlphabet = firstAlphabet; this.firstModelData = firstModelData; }
+    private LegacyMathAkFeatureProfile(short[][] minimum, short[][] maximum, ProgramDescriptor program, LegacyMathAkShapePrototypes shapes, LegacyMathAkOriginalSmoothingPolicy smoothing, LegacyMathAkSource13A2Policy sampler, ushort freshCommonHeapCapacity, First276Program first276, FirstAlphabetPrefix firstAlphabet, First276ModelData firstModelData, First276InputPolicy firstInputPolicy)
+    { this.minimum = minimum; this.maximum = maximum; this.program = program; ShapePrototypes = shapes; OriginalSmoothing = smoothing; Source13A2Policy = sampler; FreshCommonHeapCapacity = freshCommonHeapCapacity; this.first276 = first276; this.firstAlphabet = firstAlphabet; this.firstModelData = firstModelData; this.firstInputPolicy = firstInputPolicy; }
     public int CalibrationPayloadBytes => 4772;
     public string SourceFingerprint => LegacyMathMixed107RawResource.ResourceFingerprint;
     public ProgramDescriptor Program => program;
@@ -112,9 +112,10 @@ public sealed partial class LegacyMathAkFeatureProfile
             var first276 = First276Program.ReadAuthenticated(captured, token);
             var firstAlphabet = FirstAlphabetPrefix.ReadAuthenticated(captured, token);
             var firstModelData = First276ModelData.ReadAuthenticated(captured, token);
+            var firstInputPolicy = First276InputPolicy.ReadAuthenticated(captured, token);
             Boundary("calibrated", observer, token);
             Boundary("publish", observer, token);
-            return new(minimum, maximum, program, shapes, smoothing, sampler, freshCommonHeapCapacity, first276, firstAlphabet, firstModelData);
+            return new(minimum, maximum, program, shapes, smoothing, sampler, freshCommonHeapCapacity, first276, firstAlphabet, firstModelData, firstInputPolicy);
         }
         finally { CryptographicOperations.ZeroMemory(captured); }
     }

@@ -4,6 +4,14 @@ The full text engine is not restored. Russian cursive and automatic replacement
 are not ready for general use. The restored main pipeline is not the app's
 default recognizer.
 
+## Fresh math input checkpoint (2026-10-25)
+
+[Fresh FIRST276 initialization](math-first276-input-initialization.md) now produces
+12 independently verified276-SHORT vectors from the original14 owning fixtures;
+two cases retain their explicit point-domain refusal. The original Storage14
+AL/header capture stays byte-exact. Network evaluation, normalization and
+shortlist integration remain unfinished; this is not a recognition-ready engine.
+
 ## Development integration (2026-10-21)
 
 The [English node0 and retained number source checkpoint](english-case-node0-source-progress-20261023.md)

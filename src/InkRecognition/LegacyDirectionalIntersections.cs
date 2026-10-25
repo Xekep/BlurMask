@@ -35,8 +35,14 @@ public static class LegacyDirectionalIntersections
         int geometryWidth, int geometryHeight, int sourceStepFixed, int gridScale = 10,
         CancellationToken cancellationToken = default)
         =>ExtractCore(preparedStrokes,geometryWidth,geometryHeight,sourceStepFixed,gridScale,cancellationToken,null);
+    internal static LegacyDirectionalIntersectionSet ExtractWithStructuralDebit(LegacyDirectionalSamples samples,int gridScale,
+        CancellationToken token,ILegacyDirectionalStructuralDebit operationDebit)
+    {
+        ArgumentNullException.ThrowIfNull(operationDebit);
+        return ExtractCore(samples.Strokes,samples.Width,samples.Height,samples.SourceStepFixed,gridScale,token,null,operationDebit);
+    }
     private static LegacyDirectionalIntersectionSet ExtractCore(IReadOnlyList<LegacyInkStroke> preparedStrokes,
-        int geometryWidth,int geometryHeight,int sourceStepFixed,int gridScale,CancellationToken cancellationToken,LegacyConfiguredSourceOperationDebit? debit)
+        int geometryWidth,int geometryHeight,int sourceStepFixed,int gridScale,CancellationToken cancellationToken,LegacyConfiguredSourceOperationDebit? debit,ILegacyDirectionalStructuralDebit? operationDebit=null)
     {
         ArgumentNullException.ThrowIfNull(preparedStrokes);
         if (preparedStrokes.Count is < 1 or > 15 || geometryWidth is < 1 or > 32768 || geometryHeight is < 1 or > 32768)
@@ -61,6 +67,7 @@ public static class LegacyDirectionalIntersections
         int columns = Math.Min(100, geometryWidth / cellSize + 4);
         int rows = Math.Min(100, geometryHeight / cellSize + 4);
         debit?.Intersections(pointCount,checked(columns*rows),cancellationToken);
+        operationDebit?.BeforeGrid(pointCount,checked(columns*rows),cancellationToken);
         var heads = new int[columns * rows]; Array.Fill(heads, -1);
         var segments = new List<Segment>(pointCount); int global = 0, loops = 0;
         for (int stroke = 0; stroke < preparedStrokes.Count; stroke++)
@@ -99,10 +106,12 @@ public static class LegacyDirectionalIntersections
                         if (prior.Stroke != stroke) continue;
                         bool overlap = false;
                         debit?.IntersectionInterval(Math.Max(0,currentVertex-priorVertex-1),cancellationToken);
+                        operationDebit?.BeforeInterval(Math.Max(0,currentVertex-priorVertex-1),cancellationToken);
                         for (int i = priorVertex + 1; i < currentVertex; i++)
                             if (flags[i] == 1) { overlap = true; break; }
                         if (overlap) continue;
                         debit?.IntersectionInterval(Math.Max(0,currentVertex-priorVertex-1),cancellationToken);
+                        operationDebit?.BeforeInterval(Math.Max(0,currentVertex-priorVertex-1),cancellationToken);
                         for (int i = priorVertex + 1; i < currentVertex; i++)
                             if (flags[i] == 0) flags[i] = 1;
                         loops++;

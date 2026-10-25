@@ -1,0 +1,120 @@
+[
+  {
+    "root": "probe",
+    "path": "inputs/sampler14.json",
+    "bytes": 5200103,
+    "sha256": "82e35c3398885f3b07d6d834dff5331e1044df03b4673a1b937cf1bd051dd64c"
+  },
+  {
+    "root": "probe",
+    "path": "inputs/segments14.json",
+    "bytes": 6839390,
+    "sha256": "7f0f020fa3ae6745946a41f68de211a94d6205b4284e2d04876ed0111b4e069b"
+  },
+  {
+    "root": "probe",
+    "path": "inputs/old-al14.json",
+    "bytes": 32605,
+    "sha256": "3611e7a4f2b150b8735adae05e3f38c404177133a20165d3dd2165675950396e"
+  },
+  {
+    "root": "probe",
+    "path": "inputs/old-header14.json",
+    "bytes": 11991,
+    "sha256": "89fdc6a8822cad6bfc45ca9f331c8ec7e5eb556d825a89b0b1c78261348d9d06"
+  },
+  {
+    "root": "probe",
+    "path": "inputs/fixtures.json",
+    "bytes": 4242,
+    "sha256": "ce3505ffeb0014a62eacde7c2d4841a23dda5f704fb127820fac4c937134eacb"
+  },
+  {
+    "root": "repo",
+    "path": "tools/LegacyEnglishMainAcoustic.Probe/reference_features.py",
+    "bytes": 14426,
+    "sha256": "023902f49e0d6a2d4a7ab8680d028fbbcce978455db88a9cf77ad5984fecc7c6"
+  },
+  {
+    "root": "repo",
+    "path": "tools/LegacyEnglishMainAcoustic.Probe/native-2b1-default-tables.json",
+    "variants": [
+      {
+        "bytes": 15559,
+        "sha256": "b5c0c76682a216d5b1304d41b93af8fa61883ee00b075f553a1164c173dd65a0",
+        "encoding": "historical CRLF working copy"
+      },
+      {
+        "bytes": 14413,
+        "sha256": "717c4c75b872a1ad9a5c2b5bfe36a6a06652b3b5c78969848ef4cab04691b7e1",
+        "encoding": "existing canonical LF Git blob"
+      }
+    ]
+  },
+  {
+    "root": "repo",
+    "path": "tools/LegacyDirectionalCoordinates.Probe/reference_controls.py",
+    "bytes": 6189,
+    "sha256": "2802db2d1296593be27f06b4c4a151ff6ea8014e49153273d1acd16cfa1cbbcf"
+  },
+  {
+    "root": "repo",
+    "path": "tools/LegacyDirectional2B1.Probe/reference_landmarks.py",
+    "bytes": 1100,
+    "sha256": "7f73e4aaaad80a46c6b35a3974c449aef00f29deff025916eb847ecfbfdb86a1"
+  },
+  {
+    "root": "repo",
+    "path": "tools/LegacyIntersection.Probe/reference_controls.py",
+    "bytes": 6983,
+    "sha256": "c789a636bf807d93bf087c6c4ce102d513875ebdde038ebf14aaf5265a765e5a"
+  },
+  {
+    "root": "repo",
+    "path": "tools/LegacyDirectionalStatistics.Probe/reference_controls.py",
+    "bytes": 3197,
+    "sha256": "66c56c0c3371c06e9d814b37a7c9bcf1d959e2daa81d6ce9e26ec1d8d03d5c64"
+  },
+  {
+    "root": "repo",
+    "path": "tools/LegacyDirectionalWindow.Probe/reference_controls.py",
+    "bytes": 5515,
+    "sha256": "10fd141321da03d955d4af217263499b8d03e16facc0638c3afa5fcbfbf74ca8"
+  },
+  {
+    "root": "repo",
+    "path": "tools/LegacySpatialStatistics.Probe/reference_controls.py",
+    "bytes": 4267,
+    "sha256": "e051ae9895402b09afc128fd75962a3da9b9169e5cdf2203880af99ea253c860"
+  },
+  {
+    "root": "repo",
+    "path": "tools/LegacyDirectionalBaseline.Probe/reference_controls.py",
+    "bytes": 2016,
+    "sha256": "39c53bf509812e8fc74e8324b51f3206e027374b300c7a0197023cde94730bc6"
+  },
+  {
+    "root": "repo",
+    "path": "models/math/math-ak.res",
+    "bytes": 3685881,
+    "sha256": "8c8d9c8ce93aa74820f30a592d77ec3fe382c930a72063d5ced48629f3c167c1"
+  },
+  {
+    "root": "probe",
+    "path": "Program.cs",
+    "bytes": 5547,
+    "sha256": "1d654c464eb6a65769780c158b0e0afd670862c5a97b6342fb6384aebfe72097"
+  },
+  {
+    "root": "probe",
+    "path": "oracle_parts.py",
+    "bytes": 5056,
+    "sha256": "471ea2fe4dc1bccafb413b88c435cded563975108deb3e5cc7ce60c0b88bbcc4"
+  },
+  {
+    "root": "probe",
+    "path": "historical-input14.json",
+    "bytes": 67504,
+    "sha256": "611b16034d577fc30a4e0625d2ae24892ceb06be24e300058044d8a84041df44"
+  }
+]

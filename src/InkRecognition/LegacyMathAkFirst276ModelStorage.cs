@@ -216,7 +216,7 @@ internal sealed partial class LegacyMathAkOriginalInputContext
             }
             catch{storage?.Poison();binding.state=-1;throw;}
         }
-        private sealed class First276ExclusiveStorage
+        private sealed partial class First276ExclusiveStorage
         {
             //Genuine private AL binding retained; neither DATA nor a count/hash
             //can mint this. Profile retains immutable matrices; no array escapes.

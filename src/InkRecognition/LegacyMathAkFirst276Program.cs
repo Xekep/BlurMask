@@ -20,7 +20,7 @@ public sealed partial class LegacyMathAkFeatureProfile
         byte CoordinatePrefix,byte BoundaryPair,byte Mode,ushort CalibrationWidth,ushort ModelInputWidth,
         int ModelStart,int ModelEnd,int Parent13A5Start,int Parent13A5End,byte Source58);
 
-    private sealed class First276Program
+    private sealed partial class First276Program
     {
         private readonly byte[] program;
         private readonly short[] minimum,maximum;

@@ -42,7 +42,7 @@ def authenticate_profile(root,raw):
  # FIRST owner reversal down to historical3b74. No old-source pin is waived.
  raw=al_contract(root).restore_profile(raw)
  assert H(raw)==PROFILE_SUCCESSOR_SHA,'Profile successor bytes'
- assert H((root/'src/InkRecognition/LegacyMathAkFirst276Program.cs').read_bytes().replace(b'\r\n',b'\n'))==FIRST_OWNER_SHA
+ assert H(al_contract(root).restore_feature_policy('LegacyMathAkFirst276Program.cs',(root/'src/InkRecognition/LegacyMathAkFirst276Program.cs').read_bytes()))==FIRST_OWNER_SHA
  text=raw.decode('utf-8')
  for old,new in PROFILE_RESTORE:
   assert old and text.count(old)==1,'exact reviewed Profile reversal'

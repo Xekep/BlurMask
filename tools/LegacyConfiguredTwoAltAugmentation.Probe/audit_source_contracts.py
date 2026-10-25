@@ -7,7 +7,7 @@ provenance=json.loads((tool/'provenance.json').read_text());contracts=json.loads
 sp=importlib.util.spec_from_file_location('configured_source_preimage',tool/'source_preimage.py');m=importlib.util.module_from_spec(sp);sp.loader.exec_module(m)
 h=lambda b:hashlib.sha256(b).hexdigest()
 rows=[];negative=[];successorViews=[]
-extraNames={'LegacyConfiguredSourceCompletionReceipt.cs','LegacyFreshMainWordSourceChoices.cs','LegacyFreshMainTextSourceWrapper.cs'}
+extraNames={'LegacyDirectionalIntersections.cs','LegacyConfiguredSourceCompletionReceipt.cs','LegacyFreshMainWordSourceChoices.cs','LegacyFreshMainTextSourceWrapper.cs'}
 legacyDefaultNames=set(contracts['allowedExpected'])-{'LegacyConfiguredSourceCompletionReceipt.cs','LegacyLibraryTextPublicationScope.cs'}
 for rel,expected in provenance['sourceLF_SHA256'].items():
     data=(root/rel).read_bytes().replace(b'\r\n',b'\n');observed=h(data)
@@ -27,7 +27,7 @@ for rel,expected in provenance['sourceLF_SHA256'].items():
             except AssertionError:negative.append(name+':'+label)
             else:raise AssertionError(('accepted source change',name,label))
         rows.append(dict(path=rel,currentLF_SHA256=observed,priorReviewedLF_SHA256=expected,restoredCurrent3aSHA256=target))
-assert len(rows)==13 and len(negative)==26 and len(successorViews)==3
+assert len(rows)==13 and len(negative)==26 and len(successorViews)==4
 name='LegacyDirectionalGlyphClassifier.cs';historical='374e84422ad49bf0b2f970960cc940032d2c246ec9bd03b96d9d397603fda57e'
 current='c3da6b4f675c335911da5c6c08c3f8ce80c7bef9c59a9432966eb86511bea0cd'
 data=(root/'src/InkRecognition'/name).read_bytes();assert h(m.restore(name,data,current))==current
@@ -61,4 +61,4 @@ assert 'LegacyFreshMainConfiguredWordAugmentation.Prepare(ak,configured,table,no
 assert 'PrepareRawDiagnostic(' not in probe
 assert probe.index('if(!bit8Refused)')<probe.index('LegacyFreshMainConfiguredWordAugmentation.Prepare(')
 out.write_text(json.dumps(dict(scope='All19 exact reviewed sources and13 full source restorations; source proof, not a new semantic/runtime/NN test',sourceFiles=20,priorReviewedSourceFiles=19,newScopeSourceSHA256=h(scope.replace(b'\r\n',b'\n')),defaultSourceRestorations=rows,sourceNegatives=negative,historicalPointlikeSource=dict(current=current,historical=historical,currentNumericOrBudgetEquivalenceClaimed=False),publicBroadProbeUnchanged=False,explicitAugmentedPositiveEntry=True,publicGlobalRouteUnchanged=True,typedAdoptedAugmentedScopeRestored=True,successorSourceViews=successorViews,originalCompiledProvenanceUnchanged=True,rawOptInOnly=True,targetExecutions=0),indent=2)+'\n',encoding='utf-8')
-print('PASS19prior/3exactsuccessorviews+scope/13defaultrestorations/27negatives;historical374distinct;0target')
+print('PASS19prior/4exactsuccessorviews+scope/13defaultrestorations/27negatives;historical374distinct;0target')

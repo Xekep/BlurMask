@@ -12,7 +12,10 @@ def main():
  spec=importlib.util.spec_from_file_location('first276_al_source_contract',contractPath)
  contract=importlib.util.module_from_spec(spec);spec.loader.exec_module(contract);contract.authenticate(a.root)
  pins=json.loads((D/'source-pins.json').read_text('utf-8'))
- for name,sha in pins.items():assert hashlib.sha256((a.root/'src/InkRecognition'/name).read_bytes().replace(b'\r\n',b'\n')).hexdigest()==sha,name
+ for name,sha in pins.items():
+  source=(a.root/'src/InkRecognition'/name).read_bytes().replace(b'\r\n',b'\n')
+  if name in contract.FEATURE_POLICY_SOURCES:source=contract.restore_feature_policy(name,source)
+  assert hashlib.sha256(source).hexdigest()==sha,name
  raw=(a.root/'models/math/math-ak.res').read_bytes();b=a.capture.read_bytes();assert len(b)<=262144
  def pairs(ps):
   d={}

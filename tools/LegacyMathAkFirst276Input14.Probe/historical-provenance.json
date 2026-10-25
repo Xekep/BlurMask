@@ -1,0 +1,53 @@
+{
+  "Scope": "Historical ROOT-run provenance, not a live issuer/native engine/evaluator parity claim",
+  "SourceProposalManifestSHA256": "35e6864fe9f7cbe58464055b49d3e38229a6445d61dab62da1e129d0971bee37",
+  "RootCompiledManifestSHA256": "76420b2d4788d73a7609ae48b4ea3258a152fb7bf412a1d6ce5daf6701a28d4b",
+  "HistoricalCaptureSHA256": "611b16034d577fc30a4e0625d2ae24892ceb06be24e300058044d8a84041df44",
+  "ProgramSHA256": "1d654c464eb6a65769780c158b0e0afd670862c5a97b6342fb6384aebfe72097",
+  "ProductionPrivateSourceManifestSHA256": "7addb04b48882a7c4a116a47a19148c3c1ff025e222202583925da7814bfa373",
+  "RuntimeProof": {
+    "PASS": true,
+    "targetAttempts": 1,
+    "NNCalls": 0,
+    "runtime": "10.0.12",
+    "processorCount": 2,
+    "observedChildAffinity": 3,
+    "exitCode": 0,
+    "seconds": 0.9992854000302032,
+    "auditExitCode": 0,
+    "completeInputCases": 12,
+    "expectedDomainRefusals": 2,
+    "captureSHA256": "611b16034d577fc30a4e0625d2ae24892ceb06be24e300058044d8a84041df44",
+    "scope": "One14case actual owning run;12 exact276 inputs,2 original point-domain refusals; no evaluator/model outputs/recognition quality",
+    "pinsBeforeAfter": 5088
+  },
+  "SourcePDBRuntimeProof": "ROOT compiled frozen manifest binds reviewed927 library plus exact unchanged Program, PDB/build/runtime artifacts; historical runtime proof below is copied as values, not reproduced by this package",
+  "HistoricalBuildPDBPins": [
+    {
+      "name": "InkRecognition.pdb",
+      "bytes": 1378580,
+      "sha256": "6ff8e66171966dd8b277a22fdd39d70dda9026dff5d4b627ea4c9ca0b055b4a6"
+    },
+    {
+      "name": "LegacyMathAkFirst276Program.Probe.pdb",
+      "bytes": 12732,
+      "sha256": "56aff17612a831fc7e27573b7a770d382ef46a836a4de5ef0feba94cc73d8810"
+    },
+    {
+      "name": "InkRecognition.dll",
+      "bytes": 5260800,
+      "sha256": "e3d62f6c3ebc5873a4626160990694077bc4ee96569d4f037f9e905feec68a8d"
+    },
+    {
+      "name": "LegacyMathAkFirst276Program.Probe.dll",
+      "bytes": 22528,
+      "sha256": "d099da6f1907d74c7e43e914da060f417e41cb8034f700be922d004e16144e47"
+    },
+    {
+      "name": "pdb-audit.json",
+      "bytes": 416138,
+      "sha256": "d08382694558e40554c471e07e64ea1c6fee327a821b923f9cd88a04b60583e1"
+    }
+  ],
+  "RootVerificationSHA256": "8e65045c94a87273e8b11396bac9da3464c552c2e2fbd9d4416fe87216d6305f"
+}
