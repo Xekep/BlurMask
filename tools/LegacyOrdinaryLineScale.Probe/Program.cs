@@ -47,8 +47,10 @@ foreach(int rows in new[]{1,2})
         var frames=LegacyPrepared2e3LineFrames.Infer(scaleSource,line30,line50,LegacyAutomaticLineProfile.ReadResourceNode(acoustic,offset),5,.75f);
         Require(frames.Lines.Count==rows && frames.StrokeLineIndices.Span.IndexOf(-1)<0,"Inferred ordinary fixture lost rows/strokes.");
         // Actual2B1/1111 features replaced the historical2B0 cost54456.
-        // The distinct inferred frames retain exact profile-specific costs.
-        int expectedCost=offset switch{5789=>53251,11421 or 187976=>53281,_=>throw new InvalidOperationException("Unexpected line profile.")};
+        // Mixed MAIN normalization excludes the standalone sigmoid channel.
+        // For the latter profiles the final р edge is19163 rather than19178;
+        // raw NN/Q15 replay and the returned lexical-choice sums verify this delta.
+        int expectedCost=offset switch{5789=>53251,11421 or 187976=>53266,_=>throw new InvalidOperationException("Unexpected line profile.")};
         foreach(var frame in frames.Lines)
         {
             var ink=frame.Deskewed.Strokes.Select(s=>new InkStroke(s)).ToArray();
