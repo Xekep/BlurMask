@@ -9,8 +9,10 @@ default recognizer.
 [Fresh FIRST276 initialization](math-first276-input-initialization.md) now produces
 12 independently verified276-SHORT vectors from the original14 owning fixtures;
 two cases retain their explicit point-domain refusal. The original Storage14
-AL/header capture stays byte-exact. Network evaluation, normalization and
-shortlist integration remain unfinished; this is not a recognition-ready engine.
+AL/header capture stays byte-exact. The [partial numerical checkpoint](math-first276-numerical-prefix.md)
+also verifies the hidden layer and post-exponential outputs against independent
+integer equations. Normalization and shortlist integration remain unfinished;
+this is not a recognition-ready engine.
 
 ## Development integration (2026-10-21)
 

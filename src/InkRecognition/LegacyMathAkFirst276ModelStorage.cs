@@ -34,7 +34,7 @@ public sealed partial class LegacyMathAkFeatureProfile
             bytes=checked(bytes+b);copies=checked(copies+c);work=checked(work+w);
         }
     }
-    private sealed class First276ModelData
+    private sealed partial class First276ModelData
     {
         private readonly short[] first;
         private readonly sbyte[] second;

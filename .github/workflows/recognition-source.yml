@@ -16,6 +16,7 @@ on:
       - 'tools/ci/check-math-first276-al.py'
       - 'tools/ci/check-math-first276-model-storage.py'
       - 'tools/ci/check-math-first276-input14.py'
+      - 'tools/ci/check-math-first276-numerical14.py'
       - 'tools/ci/check-structured-word-delivery.py'
       - 'tools/ci/check-english-input-bootstrap.py'
       - 'tools/LegacyEnglishEarlySelected*/**'
@@ -41,6 +42,7 @@ on:
       - 'tools/ci/check-math-first276-al.py'
       - 'tools/ci/check-math-first276-model-storage.py'
       - 'tools/ci/check-math-first276-input14.py'
+      - 'tools/ci/check-math-first276-numerical14.py'
       - 'tools/ci/check-structured-word-delivery.py'
       - 'tools/ci/check-english-input-bootstrap.py'
       - 'tools/LegacyEnglishEarlySelected*/**'
@@ -137,6 +139,7 @@ jobs:
       - run: python tools/ci/check-math-first276-al.py .artifacts/math-first276-al
       - run: python tools/ci/check-math-first276-model-storage.py .artifacts/math-first276-model-storage
       - run: python tools/ci/check-math-first276-input14.py .artifacts/math-first276-input14
+      - run: python tools/ci/check-math-first276-numerical14.py .artifacts/math-first276-numerical14
       - run: python tools/ci/check-math-fresh-workspace.py .artifacts/math-fresh-workspace
       - run: python tools/ci/check-math-source-geometry.py .artifacts/math-source-geometry
       - uses: actions/upload-artifact@v4
@@ -157,6 +160,8 @@ jobs:
             .artifacts/math-first276-model-storage/*.log
             .artifacts/math-first276-input14/*.json
             .artifacts/math-first276-input14/*.log
+            .artifacts/math-first276-numerical14/*.json
+            .artifacts/math-first276-numerical14/*.log
 
   configured-raw:
     name: Configured RAW stored DATA / ${{ matrix.os }}

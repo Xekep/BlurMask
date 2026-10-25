@@ -5,7 +5,9 @@ internal sealed partial class LegacyMathAkOriginalInputContext
     //NEW owning route; it refuses at the first unported evaluator/shortlist
     //boundary after feature initialization. No historical Context resumes.
     internal static void PrepareFreshFirstInputBoundary(LegacyMathAkSourceGeometry original,
-        CancellationToken token=default)
+        CancellationToken token=default)=>PrepareFreshFirstInputCore(original,false,token);
+    private static void PrepareFreshFirstInputCore(LegacyMathAkSourceGeometry original,bool numerical,
+        CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(original);token.ThrowIfCancellationRequested();Require13A0Admission();
         int s=original.StrokeCount,n=original.PointCount,p=checked(n+4*s);
@@ -26,17 +28,17 @@ internal sealed partial class LegacyMathAkOriginalInputContext
             context.Preflight(token);context.RunFresh13B6(token);header.JoinAfterActual13B6(token);
             context.Run13A0(budget,null,null,token);var sampled=context.Run13A2Sampler(token);
             var segments=context.Build13A2Segments(sampled,token);header.BindWords(sampled,segments,token);
-            header.RunFirstInputInside(token);
+            header.RunFirstInputInside(token,numerical);
             throw new InvalidOperationException("Unimplemented FIRST boundary unexpectedly returned.");
         }
         catch{header?.Poison();context.phase=-1;throw;}
     }
     private sealed partial class FreshCommonWorkspace
     {
-        internal void RunFirstInputInside(CancellationToken token)
+        internal void RunFirstInputInside(CancellationToken token,bool numerical)
         {
             RequireFirstAlphabet(owner,profile,sampled!,segments!,token);
-            First276SourceBinding.RunInputInside(owner,this,profile,sampled!,segments!,words,token);
+            First276SourceBinding.RunInputInside(owner,this,profile,sampled!,segments!,words,numerical,token);
         }
         internal void RequireFreshInputSeed(CancellationToken token)
         {
@@ -47,10 +49,10 @@ internal sealed partial class LegacyMathAkOriginalInputContext
     }
     private sealed partial class First276SourceBinding
     {
-        private const long InputEntrySourceUpper=1696; //SOURCE upper pending feature-helper closure; unadmitted.
+        private const long InputEntrySourceUpper=1760; //SOURCE upper pending feature-helper closure; unadmitted.
         internal static void RunInputInside(LegacyMathAkOriginalInputContext owner,FreshCommonWorkspace header,
             LegacyMathAkFeatureProfile profile,Source13A2Output sampled,Source13A2SegmentFrame segments,
-            int words,CancellationToken token)
+            int words,bool numerical,CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
             long priorBytes=segments.ChargedBytes,priorWork=segments.ChargedWork;
@@ -68,7 +70,7 @@ internal sealed partial class LegacyMathAkOriginalInputContext
                 storage=First276ExclusiveStorage.CreateInside(binding,checked(priorBytes+fixedBytes),
                     fixedCopies,checked(priorWork+fixedWork),token);
                 producer=First276FreshInputProducer.Create(binding,storage,token);
-                producer.Run(token);
+                producer.Run(token,numerical);
                 throw new InvalidOperationException("Missing FIRST continuation unexpectedly returned.");
             }
             catch{producer?.Poison();storage?.Poison();binding.state=-1;throw;}
@@ -89,11 +91,11 @@ internal sealed partial class LegacyMathAkOriginalInputContext
         {
             //180 named field bytes; native descriptor108 is a typed adapter,
             //NOT this class layout. Native68..6B are never read/promoted.
-            private const int FieldBytes=180,FailureDataBytes=634;
-            private const long CreateSourceUpper=5954,ConstructorTokenUpper=331,ChargeSourceUpper=136;
+            private const int FieldBytes=188,FailureDataBytes=634;
+            private const long CreateSourceUpper=5954,ConstructorTokenUpper=339,ChargeSourceUpper=136;
             private const long RequireSourceUpper=1496,RawReadSourceUpper=2002,BeginSourceUpper=104;
-            private const long AddSourceUpper=1660,CacheSourceUpper=180,QuerySourceUpper=291;
-            private const long SortSourceUpper=11972,GatherSourceUpper=309,BoundarySourceUpper=24449,RunSourceUpper=199;
+            private const long AddSourceUpper=1660,CacheSourceUpper=180,QuerySourceUpper=294;
+            private const long SortSourceUpper=11972,GatherSourceUpper=309,BoundarySourceUpper=24457,RunSourceUpper=205;
             private readonly First276SourceBinding binding;
             private readonly First276ExclusiveStorage storage;
             private readonly int n,w,m,rangeLimit,segmentLimit,thread,keyWordOffset;
@@ -139,7 +141,7 @@ internal sealed partial class LegacyMathAkOriginalInputContext
                 this.binding=binding;this.storage=storage;this.n=n;this.w=w;this.m=m;
                 this.rangeLimit=rangeLimit;this.segmentLimit=segmentLimit;
                 thread=Environment.CurrentManagedThreadId;keyWordOffset=0;state=0;requests=0;cached=0;
-                selectedCount=0;rangeCount=0;descriptorCount=1;featureCount=0;featurePreparedCount=0;minX=0;minY=0;maxX=0;maxY=0;
+                selectedCount=0;rangeCount=0;descriptorCount=1;featureCount=0;featurePreparedCount=0;numericalPhase=0;numericalC0=0;minX=0;minY=0;maxX=0;maxY=0;
                 this.bytes=bytes;this.copies=copies;this.work=work;
                 candidates=new int[20];selected=new int[m];offsets=new int[m+1];results=new int[entries];
                 key=new uint[w];keys=new uint[keyWords];valid=new byte[entries];ranges=new Source13A2NodeRange[m];
@@ -179,7 +181,7 @@ internal sealed partial class LegacyMathAkOriginalInputContext
                     throw new NotSupportedException("FIRST input requires the genuine fresh raw-stroke branch.");
                 return row;
             }
-            internal void Run(CancellationToken token)
+            internal void Run(CancellationToken token,bool numerical)
             {
                 token.ThrowIfCancellationRequested();
                 if(thread!=Environment.CurrentManagedThreadId||Interlocked.CompareExchange(ref state,1,0)!=0)
@@ -190,7 +192,7 @@ internal sealed partial class LegacyMathAkOriginalInputContext
                     for(int end=0;end<n;end++)
                     {
                         BeginEndpoint(token);int limit=m<end+1?m:end+1;
-                        for(int k=1;k<=limit;k++){AddSegment(end-k+1,k,token);Query(end,k,token);}
+                        for(int k=1;k<=limit;k++){AddSegment(end-k+1,k,token);Query(end,k,token,numerical);}
                     }
                     //Native pops the temporary108 before the subsequent search.
                     Charge(0,4,RunSourceUpper,token);descriptorCount=0;
@@ -228,7 +230,7 @@ internal sealed partial class LegacyMathAkOriginalInputContext
                 for(int i=0;i<w;i++)keys[at+i]=key[i];
                 results[slot]=-1;valid[slot]=1;cached++;return slot;
             }
-            private void Query(int end,int count,CancellationToken token)
+            private void Query(int end,int count,CancellationToken token,bool numerical)
             {
                 Charge(0,checked(4L*n+4L*m+84),checked(QuerySourceUpper*((long)n+21)+RequireSourceUpper),token);RequireProducer(token);
                 if(count>segmentLimit)throw new NotSupportedException("FIRST segment-limit result continuation remains unported.");
@@ -244,6 +246,7 @@ internal sealed partial class LegacyMathAkOriginalInputContext
                 //Native gathers up toM BEFORE testing receiver30; never truncate4.
                 if(rangeCount>rangeLimit)throw new NotSupportedException("FIRST range-cap result continuation remains unported.");
                 PrepareActualFirstFeatures(token);
+                if(numerical)FillNumericalPrefix(token);
                 StopAtBoundary(end,count,"Actual FIRST evaluator/shortlist continuation remains unported.",token);
             }
             private void SortSelected(int left,int right)
@@ -287,8 +290,10 @@ internal sealed partial class LegacyMathAkOriginalInputContext
             {
                 Charge(0,82+2*552,BoundarySourceUpper,token);
                 short[]? initialized=featureCount==276?storage.CopyFirst276Data(this,token):null;
+                First276NumericalDiagnosticData? numerical=numericalPhase==2?CopyNumericalData(token):null;
                 var data=new First276InputBoundaryData(end,count,selectedCount,rangeCount,w,cached,descriptorCount,
                     binding.owner.descriptorCount,binding.owner.resultCount,featureCount,bytes,copies,work,featureCount==276,false,initialized);
+                if(numerical is not null)throw new First276PartialNumericalBoundaryException(data,numerical);
                 throw new First276InputBoundaryException(message,data);
             }
             internal void Poison(){Interlocked.Exchange(ref state,-1);}

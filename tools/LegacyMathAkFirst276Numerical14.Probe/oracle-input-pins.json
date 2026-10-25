@@ -1,0 +1,8 @@
+{
+  "independentInputsSHA256": "dfd051a86bc9102a2013b67b6817b95898ad075918e20eb4314c81d23143f7f0",
+  "independentInputsProvenance": "Independent sampler82e/segments7f0 replay in35e686 proposal, verified against12 actual input vectors by ROOT611b capture; no new C# numeric capture input feeds expectations",
+  "hiddenLUTSHA256": "db88702e24d4ac761fb778dca068606627c3a8b25e1ff614410c963fa627e26f",
+  "expLUTSHA256": "f05ff672e4399147c00eb9eb48a17ea4dc15e3f71a541d0508d84bbc4d618470",
+  "rawResourceSHA256": "8c8d9c8ce93aa74820f30a592d77ec3fe382c930a72063d5ced48629f3c167c1",
+  "rawResourceBytes": 3685881
+}

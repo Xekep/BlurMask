@@ -10,13 +10,25 @@ def H(b):return hashlib.sha256(b.replace(b'\r\n',b'\n')).hexdigest()
 
 # Exact complete-source successor restoration before the unchanged historical
 # model/AL chains. No source-pin map or stored runtime DATA is rewritten.
-FEATURE_POLICY_CONTRACT_SHA256="1cdede02386b9ca78c9d49dedffa5198effd7a852b9af1c7966af5a5824875b9"
+FEATURE_POLICY_CONTRACT_SHA256="06d73e3e6578b48f6fdd8b26070be9d81e52c6ff354d1a8b222ee668479537c8"
 _feature_policy_raw=(D/'feature-policy-source-preimages.json').read_bytes().replace(b'\r\n',b'\n')
 assert hashlib.sha256(_feature_policy_raw).hexdigest()==FEATURE_POLICY_CONTRACT_SHA256
 FEATURE_POLICY_SOURCES=json.loads(_feature_policy_raw)['sources']
+FEATURE_POLICY_SUCCESSORS=json.loads(_feature_policy_raw)['successorSteps']
+NUMERICAL_SOURCE_COHORT=json.loads(_feature_policy_raw)['numericalSourceCohort']
 def restore_feature_policy(name,raw):
  assert type(name)is str and type(raw)is bytes and name in FEATURE_POLICY_SOURCES,('unknown feature-policy source',name)
  raw=raw.replace(b'\r\n',b'\n');row=FEATURE_POLICY_SOURCES[name]
+ # One exact numerical model-owner partial seam, before the unchanged
+ # feature-policy/model-retention/AL chain. No old row or pin is replaced.
+ successor=FEATURE_POLICY_SUCCESSORS.get(name+':'+H(raw))
+ if successor is not None:
+  assert successor['name']==name and H(raw)==successor['source']
+  for start,end,after,before in reversed(successor['edits']):
+   assert type(start)is int and type(end)is int and 0<=start<=end<=len(raw)
+   assert raw[start:end]==bytes.fromhex(after)
+   raw=raw[:start]+bytes.fromhex(before)+raw[end:]
+  assert H(raw)==successor['target']
  if H(raw)==row['target']:return raw
  assert H(raw)==row['source'],('unreviewed complete feature-policy source',name,H(raw))
  for start,end,after,before in reversed(row['edits']):
@@ -64,12 +76,26 @@ def restore_header(raw):
  text=text.replace(old,'private sealed class FreshCommonWorkspace',1);restored=text.encode('utf-8')
  assert H(restored)==PRE_AL_HEADER,'pre-AL header restored exactly'
  return restored
+def authenticate_numerical_cohort(root):
+ base=Path(root)/'src/InkRecognition';p=NUMERICAL_SOURCE_COHORT
+ connected=base/p['connectedFilename'];numerical=base/p['numericalFilename']
+ if numerical.exists():
+  assert connected.exists(), 'numeric cohort missing connected owner route'
+  assert H((base/p['modelStorageFilename']).read_bytes())==p['modelStorageSHA256'], 'numeric cohort model-owner seam differs'
+  assert H(connected.read_bytes())==p['connectedSHA256'], 'unreviewed numerical connected source'
+  assert H(numerical.read_bytes())==p['numericalSHA256'], 'unreviewed numerical fill source'
+ elif connected.exists():
+  assert H(connected.read_bytes())==p['inputOnlyConnectedSHA256'], 'unreviewed input-only/numerical source cohort'
+ # A historical six-source-only fixture has neither new route; it remains
+ # historical source proof and does not assert numerical cohort presence.
+
 def authenticate(root):
  root=Path(root);pins=json.loads((D/'source-pins.json').read_text('utf-8'));assert pins==EXPECTED_SOURCES,'exact reviewed source-pin map'
  for name,sha in pins.items():
   raw=(root/'src/InkRecognition'/name).read_bytes()
   if name in FEATURE_POLICY_SOURCES:raw=restore_feature_policy(name,raw)
   assert H(raw)==sha,('reviewed AL source pin',name)
+ authenticate_numerical_cohort(root)
  restore_profile((root/'src/InkRecognition/LegacyMathAkFeatureProfile.cs').read_bytes())
  restore_model_binding((root/'src/InkRecognition/LegacyMathAkFirst276SourceBinding.cs').read_bytes())
  restore_header((root/'src/InkRecognition/LegacyMathAkFreshCommonWorkspace.cs').read_bytes())
