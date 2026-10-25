@@ -10,12 +10,13 @@ def H(b):return hashlib.sha256(b.replace(b'\r\n',b'\n')).hexdigest()
 
 # Exact complete-source successor restoration before the unchanged historical
 # model/AL chains. No source-pin map or stored runtime DATA is rewritten.
-FEATURE_POLICY_CONTRACT_SHA256="06d73e3e6578b48f6fdd8b26070be9d81e52c6ff354d1a8b222ee668479537c8"
+FEATURE_POLICY_CONTRACT_SHA256="198981d60468080889b71e2b07ad85133ca8c6b46662583b06fa1864a280bff4"
 _feature_policy_raw=(D/'feature-policy-source-preimages.json').read_bytes().replace(b'\r\n',b'\n')
 assert hashlib.sha256(_feature_policy_raw).hexdigest()==FEATURE_POLICY_CONTRACT_SHA256
 FEATURE_POLICY_SOURCES=json.loads(_feature_policy_raw)['sources']
 FEATURE_POLICY_SUCCESSORS=json.loads(_feature_policy_raw)['successorSteps']
 NUMERICAL_SOURCE_COHORT=json.loads(_feature_policy_raw)['numericalSourceCohort']
+NORMALIZED_SOURCE_COHORT=json.loads(_feature_policy_raw)['normalizedSourceCohort']
 def restore_feature_policy(name,raw):
  assert type(name)is str and type(raw)is bytes and name in FEATURE_POLICY_SOURCES,('unknown feature-policy source',name)
  raw=raw.replace(b'\r\n',b'\n');row=FEATURE_POLICY_SOURCES[name]
@@ -78,6 +79,13 @@ def restore_header(raw):
  return restored
 def authenticate_numerical_cohort(root):
  base=Path(root)/'src/InkRecognition';p=NUMERICAL_SOURCE_COHORT
+ normalized=base/NORMALIZED_SOURCE_COHORT['normalizationFilename']
+ if normalized.exists():
+  p=NORMALIZED_SOURCE_COHORT
+  for filename,pin in [('connectedFilename','connectedSHA256'),('numericalFilename','numericalSHA256'),('modelStorageFilename','modelStorageSHA256'),('normalizationFilename','normalizationSHA256')]:
+   assert H((base/p[filename]).read_bytes())==p[pin], ('unreviewed normalized source cohort',p[filename])
+  return
+
  connected=base/p['connectedFilename'];numerical=base/p['numericalFilename']
  if numerical.exists():
   assert connected.exists(), 'numeric cohort missing connected owner route'

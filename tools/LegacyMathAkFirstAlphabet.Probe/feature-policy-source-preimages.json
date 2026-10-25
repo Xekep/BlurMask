@@ -73,5 +73,16 @@
     "numericalSHA256": "17abf415c591fa1ed27d4519fc6338a7e2bc0bf057b4ee5fb6a9484bf357db68",
     "modelStorageFilename": "LegacyMathAkFirst276ModelStorage.cs",
     "modelStorageSHA256": "ea6456e00ebe884994ead66fbcce0fb8411c8aad230dd166b79e56312526f307"
+  },
+  "normalizedSourceCohort": {
+    "inputOnlyConnectedSHA256": "8c0087cfe9ad2ef791593db57a84ddfc928a56cca50ad3a17d500424c7109ea9",
+    "connectedFilename": "LegacyMathAkFirst276ConnectedInput.cs",
+    "numericalFilename": "LegacyMathAkFirst276NumericalPrefix.Draft.cs",
+    "connectedSHA256": "29a3ac3a27687fdfe5954d69fb58f0e8b1eee1a920317b9de0523d157c90e3f2",
+    "numericalSHA256": "20ac2e7eab2ef98f564aa93d87e4daf970e6162b903ffe9ba455d5ab229e3b3f",
+    "modelStorageFilename": "LegacyMathAkFirst276ModelStorage.cs",
+    "modelStorageSHA256": "ea6456e00ebe884994ead66fbcce0fb8411c8aad230dd166b79e56312526f307",
+    "normalizationFilename": "LegacyMathAkFirst276Normalization.Draft.cs",
+    "normalizationSHA256": "1c6db640dce653fcddc94db94d5e87f76b57fb7a9696f74f5bb8da97d1d91201"
   }
 }

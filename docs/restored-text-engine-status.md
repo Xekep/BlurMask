@@ -11,8 +11,9 @@ default recognizer.
 two cases retain their explicit point-domain refusal. The original Storage14
 AL/header capture stays byte-exact. The [partial numerical checkpoint](math-first276-numerical-prefix.md)
 also verifies the hidden layer and post-exponential outputs against independent
-integer equations. Normalization and shortlist integration remain unfinished;
-this is not a recognition-ready engine.
+integer equations. The [selected unmasked normalization](math-first276-normalization.md)
+also passes independent integer comparisons. AL scoring and shortlist integration
+remain unfinished; this is not a recognition-ready engine.
 
 ## Development integration (2026-10-21)
 

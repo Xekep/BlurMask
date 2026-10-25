@@ -466,7 +466,7 @@ internal sealed partial class LegacyMathAkOriginalInputContext
 {
     // Explicit DRAFT route; original input-only route remains the default.
     internal static void PrepareFreshFirstNumericalBoundary(LegacyMathAkSourceGeometry original,
-        CancellationToken token=default)=>PrepareFreshFirstInputCore(original,true,token);
+        CancellationToken token=default)=>PrepareFreshFirstInputCore(original,1,token);
     private sealed partial class First276SourceBinding
     {
         private sealed partial class First276ExclusiveStorage
