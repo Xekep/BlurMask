@@ -24,6 +24,9 @@ on:
       - 'tools/LegacyEnglishSelectedSources*/**'
       - 'tools/LegacyEnglishSourceIndices*/**'
       - 'tools/LegacyEnglishOriginalInput*/**'
+      - 'tools/LegacyEnglishGraphLoop.ActualEntry/**'
+      - 'tools/LegacyEnglishGraphParentPredecessor.ActualEntry/**'
+      - 'tools/ci/check-english-graph-parent.py'
       - 'tools/LegacyCompletedPostTextWork.Probe/**'
       - 'tools/LegacyCompletedStructuredWords.Audit/**'
       - 'tools/LegacyConfiguredTwoAltAugmentation.Probe/**'
@@ -51,6 +54,9 @@ on:
       - 'tools/LegacyEnglishSelectedSources*/**'
       - 'tools/LegacyEnglishSourceIndices*/**'
       - 'tools/LegacyEnglishOriginalInput*/**'
+      - 'tools/LegacyEnglishGraphLoop.ActualEntry/**'
+      - 'tools/LegacyEnglishGraphParentPredecessor.ActualEntry/**'
+      - 'tools/ci/check-english-graph-parent.py'
       - 'tools/LegacyCompletedPostTextWork.Probe/**'
       - 'tools/LegacyCompletedStructuredWords.Audit/**'
       - 'tools/LegacyConfiguredTwoAltAugmentation.Probe/**'
@@ -85,6 +91,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: python tools/ci/check-english-input-bootstrap.py .artifacts/english-input-bootstrap
+      - run: python tools/ci/check-english-graph-parent.py .artifacts/english-graph-parent
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -92,6 +99,8 @@ jobs:
           path: |
             .artifacts/english-input-bootstrap/*.json
             .artifacts/english-input-bootstrap/*.log
+            .artifacts/english-graph-parent/*.json
+            .artifacts/english-graph-parent/*.log
   structured:
     name: Structured WORD delivery / ${{ matrix.os }}
     strategy:

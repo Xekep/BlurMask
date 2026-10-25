@@ -99,16 +99,53 @@ internal sealed partial class LegacyEnglishCaseInitialQueryPass
 internal static LegacyEnglishCaseInitialQueryPass PrepareNode1SpansPass(LegacyEnglish119MainKnowledge knowledge,LegacyEnglishLkFreshNumericBinding numeric,
         LegacyNativeCaseData cases,LegacyNativeTextPublicationData publication,long maximumLogicalBytes=128L*1024*1024,Action<string>? observer=null,CancellationToken token=default)
     {
+        var spanBounds=PrepareNode1SpansD0Bounds(knowledge,token);
         var pool=LegacyEnglishCaseExecutionPoolReceipt.Preflight(knowledge,numeric,maximumLogicalBytes,token);
         var initializer=LegacyEnglishCaseQueryInitialization.PrepareExecution(knowledge,numeric,cases,publication,pool,observer,token);var result=new LegacyEnglishCaseInitialQueryPass(initializer);bool claimed=false;
         try
         {
             result.Root.ClaimInitialQueryOwner(result,token);claimed=true;observer?.Invoke("execution:claimed");token.ThrowIfCancellationRequested();
             result.Scorer=LegacyEnglishFreshCaseMainScorer.Prepare(result.Root,token);observer?.Invoke("execution:scorer");token.ThrowIfCancellationRequested();
-            result.SpanSession=LegacyEnglishFreshCaseMainSpanSession.Prepare(result.Scorer,new(3,knowledge.Owner.CandidateCount),token);
+            result.SpanSession=LegacyEnglishFreshCaseMainSpanSession.Prepare(result.Scorer,spanBounds,token);
             observer?.Invoke("execution:prepared");token.ThrowIfCancellationRequested();return result;
         }
         catch{if(claimed){Volatile.Write(ref result.phase,3);result.Root.PoisonInitializationOwner(initializer);}throw;}
+    }
+
+    // Exact ordinary graph2..49 D0 schedule, validated before any execution/root claim.
+    // Larger graph node1-prefix preparation keeps its prior three-pass bound;
+    // the separate periodic continuation must prepare its own authenticated schedule.
+    private static LegacyEnglishMainD0Bounds PrepareNode1SpansD0Bounds(LegacyEnglish119MainKnowledge knowledge,CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(knowledge);token.ThrowIfCancellationRequested();
+        var local=knowledge.Owner;var graph=local.RetainCompletedD0Graph(token);
+        int preparations=3,selectedRows=local.CandidateCount;
+        if(graph.NodeCount is>=2 and<=49)
+        {
+            LegacyEnglishCaseNode0Completion.PreflightGraphLoopPayload(knowledge,token);
+            preparations=1;selectedRows=0; // The initial consumer executes node0/span0 exactly once.
+            for(int node=0;node<graph.NodeCount;node++)
+            {
+                token.ThrowIfCancellationRequested();var arcs=graph.GetNode(node);
+                if(arcs.Count is<1 or>1024)throw new NotSupportedException("Actual nonempty bounded graph D0 schedule required before claim.");
+                int maximum=0;
+                foreach(var arc in arcs)
+                {
+                    token.ThrowIfCancellationRequested();
+                    if(arc.Span>=8||arc.Span>node)throw new NotSupportedException("Actual bounded graph D0 span required before claim.");
+                    maximum=Math.Max(maximum,arc.Span);selectedRows=checked(selectedRows+1);
+                }
+                if(node!=0)preparations=checked(preparations+maximum+1);
+            }
+            if(selectedRows!=graph.CandidateCount||selectedRows!=local.CandidateCount||graph.NodeCount!=local.NodeCount||graph.Groups.Count!=local.GroupCount)
+                throw new InvalidDataException("Exact complete actual graph D0 row/dimension accounting required before claim.");
+        }
+        var bounds=new LegacyEnglishMainD0Bounds(preparations,selectedRows);
+        long d0Envelope=LegacyEnglishMainSpanSession.Preflight(local.GroupCount,local.NodeCount,local.CandidateCount,bounds);
+        long scoreEnvelope=LegacyEnglishMainInkSnapshot.Preflight(local.GroupCount,local.NodeCount,local.CandidateCount);
+        if(checked(d0Envelope+scoreEnvelope+1048576)>LegacyEnglishFreshCaseMainSource.CompleteLogicalEnvelopeUpperBytes)
+            throw new ArgumentException("Complete additive case envelope exceeded before claim.");
+        return bounds;
     }
 
 internal static LegacyEnglishCaseInitialConsumer PrepareNode1SpansConsumer(LegacyEnglish119MainKnowledge knowledge,LegacyEnglishLkFreshNumericBinding numeric,

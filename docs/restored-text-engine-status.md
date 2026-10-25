@@ -4,6 +4,14 @@ The full text engine is not restored. Russian cursive and automatic replacement
 are not ready for general use. The restored main pipeline is not the app's
 default recognizer.
 
+## Ordinary English graph checkpoint (2026-10-25)
+
+The [ordinary graph correction](english-graph-parent-correction.md) fixes the
+whole-graph D0 preparation count, previous-node argument and ordinary kind2
+outer gate. An original three-node fixture now completes the internal graph
+pass; the original two-node capture remains byte-exact. This is a FIRST-language
+and phase1 checkpoint, not final word publication or cursive accuracy evidence.
+
 ## Fresh math input checkpoint (2026-10-25)
 
 [Fresh FIRST276 initialization](math-first276-input-initialization.md) now produces

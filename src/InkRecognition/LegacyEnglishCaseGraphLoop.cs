@@ -106,14 +106,14 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                             for(int at=0;at<page.Records.Length;at+=32)
                             {
                                 var qrow=page.Records.Span.Slice(at,32);ushort label=BinaryPrimitives.ReadUInt16LittleEndian(qrow[20..]);
-                                if(qrow[23]!=0||qrow[22]!=0||qrow[4]!=1||!LegacyNativeOrdinaryWordSymbols.Supports(root.Source.Alphabet,label))
+                                if((qrow[23]&7) is not (0 or 2)||qrow[4]!=1||!LegacyNativeOrdinaryWordSymbols.Supports(root.Source.Alphabet,label))
                                     throw new NotSupportedException("Reached nonordinary query row requires its native producer.");
                             }
                             if((long)page.ReturnedCount*2*costs.Count>1048576-totalScores)throw new InvalidDataException("Whole graph scoring bound exceeded before callback.");
                             var headers=new Dictionary<byte,uint>{{1,0xc0e}};
                             LegacyNativeWordAcousticGroupCosts Lookup(int n,ushort a)=>n==node&&costs.TryGetValue(a,out var c)?c:throw new InvalidDataException("Foreign graph span cost lookup.");
                             var result=ordinal<0?startup.ProcessPage(page.Records.Span,checked((ushort)node),span,0,qualifier,headers,Lookup,router,0,sourcePolicy.SuppressHeaderFlag,0,false,false,null,token):
-                                ordinary.ProcessPage(page.Records.Span,checked((ushort)node),span,0,(ushort)ordinal,parent.Span,0,qualifier,headers,Lookup,
+                                ordinary.ProcessPage(page.Records.Span,checked((ushort)node),span,graphLoopPrevious,(ushort)ordinal,parent.Span,0,qualifier,headers,Lookup,
                                     (n,a)=>OwnedRows(n)[a].Record,router,0,false,sourcePolicy.SuppressHeaderFlag,0,false,false,null,token);
                             if(!result.Succeeded)throw new InvalidDataException("Actual ordinary graph page failed.");
                             totalRows+=page.ReturnedCount;totalScores+=result.ScoringCalls;totalAllocations+=result.AcceptedAllocations;
