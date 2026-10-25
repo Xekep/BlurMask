@@ -107,6 +107,7 @@ def cache(raw,strokes,mask,header,label,p,whole,zero):
 if len(sys.argv)!=4:raise ValueError('AK.res engine-profile.json output.json')
 ak=Path(sys.argv[1]).read_bytes();engine=json.loads(Path(sys.argv[2]).read_text());data=json.loads(Path(sys.argv[3]).read_text())
 actual_inputs=independent_actual2b1_inputs(ROOT,engine)
+mixed_prob=old['ru_main_mixed_oracle'](ROOT,ak)
 assert hashlib.sha256(ak).hexdigest()=='7a5f08809e81fb4a2d4c78b3efd251d0986503b0d30d21de3695dab1f8a89978'
 points=[[[f(v) for v in p] for p in stroke] for stroke in data['points']];activation=engine['activations']['hidden'];accepted=[];reference=-np.finfo(np.float32).max
 offset,lv,rv,maximum,maxwindow,blank,cutoff,retain,selector,pointmean,extended=struct.unpack_from('<3fBBHf4B',ak,195746)
@@ -148,7 +149,7 @@ for index,g in enumerate(data['groups']):
  reconstructed=actual_inputs(expected_normal,fixed(context),g['boundaries'])
  assert list(map(len,reconstructed))==[256,238,313,313]
  assert reconstructed==g['inputs'],('actual2B1_features',index)
- prob=[exp_prob(network(ak,n,inputs,activation)) for n,inputs in zip([195895,283697,367899,467101],reconstructed)]
+ prob=[mixed_prob(network(ak,n,inputs,activation)) for n,inputs in zip([195895,283697,367899,467101],reconstructed)]
  assert prob==g['probabilities'],('familyNN',index)
  dyn=dynamic(raw,profile_dynamic);np.testing.assert_allclose(g['weights'][:4],[dyn[2]]*4,rtol=1e-6,atol=1e-6)
  integers=costs([dict(probabilities=p,weight=f(g['weights'][i]))for i,p in enumerate(prob)]+[None]*3,1,data['mask'][:180])

@@ -3,7 +3,7 @@ using System.Numerics;
 namespace InkRecognition;
 
 /// <summary>Experimental legacy exponent-10 class score conversion, without candidate or language decoding.</summary>
-public static class LegacyClassScores
+public static partial class LegacyClassScores
 {
     private const int Bias = 4 * 1024 * 1024;
     private const int Threshold = (351 << 16) - Bias;

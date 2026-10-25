@@ -13,6 +13,7 @@ costs=definitions(ROOT/'tools/LegacyCostEnsemble.Probe/reference_controls.py')['
 read=definitions(ROOT/'tools/LegacyCaseAlphabetRanges.Probe/reference_controls.py')['read']
 def f(x):return float(np.float32(x))
 ak=Path(sys.argv[1]).read_bytes();lk=Path(sys.argv[2]).read_bytes();engine=json.loads(Path(sys.argv[3]).read_text());cases=json.loads(Path(sys.argv[4]).read_text())
+mixed_prob=nn['ru_main_mixed_oracle'](ROOT,ak)
 actual_inputs=old['independent_actual2b1_inputs'](ROOT,engine)
 assert hashlib.sha256(ak).hexdigest()=='7a5f08809e81fb4a2d4c78b3efd251d0986503b0d30d21de3695dab1f8a89978'
 assert hashlib.sha256(lk).hexdigest()=='d26ed08baf419361484958b3a04a5f740a228f4664f7e2643f43459223ef3e4e'
@@ -85,7 +86,7 @@ for case in cases:
   reconstructed=actual_inputs(expected,g['context'],g['boundaries'])
   assert list(map(len,reconstructed))==[256,238,313,313]
   assert reconstructed==g['inputs'],('actual2B1_features',groups)
-  probabilities=[exp_prob(network(ak,n,v,engine['activations']['hidden']))for n,v in zip([195895,283697,367899,467101],reconstructed)]
+  probabilities=[mixed_prob(network(ak,n,v,engine['activations']['hidden']))for n,v in zip([195895,283697,367899,467101],reconstructed)]
   assert probabilities==g['probabilities'],('NN',groups)
   dyn=dynamic(rawstrokes,weights_profile);np.testing.assert_allclose(g['weights'][:4],[dyn[2]]*4,rtol=1e-6,atol=1e-6)
   integer=costs([dict(probabilities=p,weight=f(g['weights'][i]))for i,p in enumerate(probabilities)]+[None]*3,1,mask[:180]);assert integer==g['integerCosts']

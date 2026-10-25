@@ -64,6 +64,8 @@ public sealed class LegacyRussianModelBundle
         // Raw21D/profile88=1,89=2: 2AF dispatches actual2B1, not the generic2B0 API.
         if (!acousticResource.Slice(195871, 16).SequenceEqual(new byte[] {1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0}))
             throw Invalid("Actual Russian1111/2B1 selector differs.");
+        if (acousticResource[566330] != 0 || !acousticResource.Slice(99, 5134).SequenceEqual(acousticResource.Slice(6219, 5134)))
+            throw Invalid("Fresh unmasked MAIN and matching selected AL are required for mixed conversion.");
         cancellationToken.ThrowIfCancellationRequested();
         if (engineProfile.Length is < 2 or > 128 * 1024) throw Invalid("Engine profile size outside bounds.");
         try
@@ -139,7 +141,7 @@ public sealed class LegacyRussianModelBundle
         new(_families, _initial, _activations, AcousticAlphabet, LexicalAlphabet, Lexicon, _temporal, _spatial, relatedFormMode);
 
     public LegacyDirectionalGlyphClassifier CreateGlyphClassifier() =>
-        LegacyDirectionalGlyphClassifier.CreateActual2B1(_families, _activations, _temporal, _spatial);
+        LegacyDirectionalGlyphClassifier.CreateActual2B1Mixed(_families, _activations, _temporal, _spatial, AcousticAlphabet, 0);
     public LegacyPreparedGlyphClassifier CreatePreparedGlyphClassifier() => new(CreateGlyphClassifier(), AcousticWeights);
     public LegacyContextWindowScorer CreateContextWindowScorer() => new(_initial, _activations);
 

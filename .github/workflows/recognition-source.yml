@@ -6,6 +6,13 @@ on:
     paths:
       - 'src/InkRecognition/**'
       - 'models/math/**'
+      - 'models/ru-RU/**'
+      - 'tools/LegacyMixedClassProbabilities.Probe/**'
+      - 'tools/LegacyMainConfidenceCalibration.Probe/**'
+      - 'tools/LegacyInk.Probe/**'
+      - 'tools/LegacyAcousticEnsemble.Probe/**'
+      - 'tools/handwriting/ru_main_mixed_probability.py'
+      - 'tools/ci/check-mixed-class-probabilities.py'
       - 'global.json'
       - 'tools/LegacyMathAk*/**'
       - 'tools/LegacyOrientationSmoothing.Probe/**'
@@ -36,6 +43,13 @@ on:
     paths:
       - 'src/InkRecognition/**'
       - 'models/math/**'
+      - 'models/ru-RU/**'
+      - 'tools/LegacyMixedClassProbabilities.Probe/**'
+      - 'tools/LegacyMainConfidenceCalibration.Probe/**'
+      - 'tools/LegacyInk.Probe/**'
+      - 'tools/LegacyAcousticEnsemble.Probe/**'
+      - 'tools/handwriting/ru_main_mixed_probability.py'
+      - 'tools/ci/check-mixed-class-probabilities.py'
       - 'global.json'
       - 'tools/LegacyMathAk*/**'
       - 'tools/LegacyOrientationSmoothing.Probe/**'
@@ -203,3 +217,32 @@ jobs:
           path: |
             .artifacts/configured-two-alt-raw/*.json
             .artifacts/configured-two-alt-raw/*.log
+
+  mixed-probabilities:
+    name: Mixed probabilities and calibration / ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    env:
+      DOTNET_PROCESSOR_COUNT: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            11.0.100-preview.7.26381.103
+            10.0.x
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -I -B tools/ci/check-mixed-class-probabilities.py .artifacts/mixed-class-probabilities
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mixed-class-probabilities-${{ matrix.os }}
+          path: |
+            .artifacts/mixed-class-probabilities/*.json
+            .artifacts/mixed-class-probabilities/*.log

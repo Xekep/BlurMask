@@ -46,6 +46,16 @@ def exp_prob(raw):
  sum_shift=max(0,total.bit_length()-1-6);divisor=total>>sum_shift
  value_shift=30-(maximum.bit_length()-1)
  return [min(32767,((x<<value_shift)&0xffffffff)//divisor>>((value_shift+sum_shift-15)&31)) for x in values]
+def ru_main_mixed_oracle(root, data):
+ # Function-only AST consumers intentionally omit module-level assignments.
+ # Keep loader imports/path local and bind the explicitly supplied repository.
+ import importlib.util
+ from pathlib import Path
+ path=Path(root)/'tools/handwriting/ru_main_mixed_probability.py'
+ spec=importlib.util.spec_from_file_location('checked_ru_main_mixed_probability',path)
+ module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+ return module.for_russian_main(data)
+
 def round_native(x):return int(x+(.5 if x>0 else -.5))
 IMP=0x4000000
 def cache_reference(raw,points,mask,labels,profile,whole,zero):
@@ -95,6 +105,7 @@ assert p['target']==100 and p['height']==40 and p['baseline']==90 and p['sourceP
 #rather than trusting the scorer's emitted dynamic weights/profile fields.
 dynamic_at=195771;count=struct.unpack_from('<H',data,dynamic_at)[0]
 dynamic=[count]+list(struct.unpack_from('<8f',data,dynamic_at+2))
+mixed_prob=ru_main_mixed_oracle(ROOT,data)
 networks=[195895,283697,367899,467101]
 for index,g in enumerate(p['acousticGroups']):
  vector_rows=g['inputs'];assert list(map(len,vector_rows))==[256,238,313,313]
@@ -102,7 +113,7 @@ for index,g in enumerate(p['acousticGroups']):
   #1F is the full256-channel stroke vector, without an invented leading
   #bias. The other three feature contracts do include their1024 first slot.
   assert (family==0 or vector[0]==1024) and vector[-30:-2]==[-1024]*28 and vector[-2:]==g['boundaries']
- probabilities=[exp_prob(network(data,n,inputs,engine['activations']['hidden'])) for n,inputs in zip(networks,vector_rows)]
+ probabilities=[mixed_prob(network(data,n,inputs,engine['activations']['hidden'])) for n,inputs in zip(networks,vector_rows)]
  assert probabilities==g['probabilities'],('NN',index)
  range0=p['normalized'][index]['ranges'][0];start,end=range0[1:]
  dyn=weights_ref([[list(map(f,row[:2])) for row in p['cutRows'][start:end]]],dynamic)

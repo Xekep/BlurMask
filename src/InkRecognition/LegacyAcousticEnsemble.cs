@@ -13,7 +13,13 @@ public sealed record LegacyAcousticFamilyScores(ReadOnlyMemory<int> Probability3
 public static class LegacyAcousticEnsemble
 {
     public static float[] Combine(IReadOnlyList<LegacyAcousticFamilyScores?> familySlots,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default) => CombineCore(familySlots, false, cancellationToken);
+
+    internal static float[] CombineMixed(IReadOnlyList<LegacyAcousticFamilyScores?> familySlots,
+        CancellationToken cancellationToken) => CombineCore(familySlots, true, cancellationToken);
+
+    private static float[] CombineCore(IReadOnlyList<LegacyAcousticFamilyScores?> familySlots,
+        bool allowUnitProbability, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(familySlots);
         if (familySlots.Count != 7) throw new ArgumentException("Supply the seven native family slots, with null for inactive families.");
@@ -28,7 +34,7 @@ public static class LegacyAcousticEnsemble
             width = count; active++;
             for (int i = 0; i < count; i++)
             {
-                if (family.Probability32768.Span[i] is < 0 or > 32767 ||
+                if (family.Probability32768.Span[i] < 0 || family.Probability32768.Span[i] > (allowUnitProbability ? 32768 : 32767) ||
                     !float.IsFinite(family.Centers.Span[i]) || !float.IsFinite(family.Slopes.Span[i]) || family.Slopes.Span[i] <= 0)
                     throw new ArgumentException("Expected quantized EXP probabilities and finite positive-slope calibration.");
             }

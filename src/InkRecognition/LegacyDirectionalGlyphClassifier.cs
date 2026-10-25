@@ -41,6 +41,7 @@ public sealed class LegacyDirectionalGlyphClassifier
     private readonly LegacyDirectionalCalibration _temporal, _spatial;
     private readonly LegacyInkActivations _activations;
     private readonly bool _actual2B1;
+    private readonly int _specialOutputLabel;
     public int OutputWidth { get; }
 
     public LegacyDirectionalGlyphClassifier(IReadOnlyList<LegacyDirectionalAcousticFamily> families,
@@ -52,11 +53,25 @@ public sealed class LegacyDirectionalGlyphClassifier
         LegacyDirectionalCalibration temporal, LegacyDirectionalCalibration spatial) =>
         new(families, activations, temporal, spatial, true);
 
+    // Only the authenticated fresh RU bundle supplies this actual AL and mask policy.
+    internal static LegacyDirectionalGlyphClassifier CreateActual2B1Mixed(
+        IReadOnlyList<LegacyDirectionalAcousticFamily> families, LegacyInkActivations activations,
+        LegacyDirectionalCalibration temporal, LegacyDirectionalCalibration spatial,
+        LegacyInkAlphabet alphabet, byte actualMaskPolicy)
+    {
+        ArgumentNullException.ThrowIfNull(alphabet);
+        if (actualMaskPolicy != 0) throw new NotSupportedException("Masked mixed conversion is not restored.");
+        byte[] header = alphabet.CopySerializedHeader();
+        if (header.Length != 16) throw new InvalidDataException("Actual AL header required.");
+        ushort label = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(header.AsSpan(6));
+        return new(families, activations, temporal, spatial, true, label == ushort.MaxValue ? -1 : label);
+    }
+
     private LegacyDirectionalGlyphClassifier(IReadOnlyList<LegacyDirectionalAcousticFamily> families,
         LegacyInkActivations activations, LegacyDirectionalCalibration temporal, LegacyDirectionalCalibration spatial,
-        bool actual2B1)
+        bool actual2B1, int specialOutputLabel = -1)
     {
-        _actual2B1 = actual2B1;
+        _actual2B1 = actual2B1; _specialOutputLabel = specialOutputLabel;
         ArgumentNullException.ThrowIfNull(families); ArgumentNullException.ThrowIfNull(activations);
         if (families.Count != 4) throw new ArgumentException("Exactly four matching acoustic families required.", nameof(families));
         int[] widths = [256,238,313,313]; ushort[] kinds = [0x1f,0x2f,0x3f,0x4f];
@@ -72,6 +87,8 @@ public sealed class LegacyDirectionalGlyphClassifier
             _families[i] = new(family.Network, family.Centers.ToArray(), family.Slopes.ToArray());
             validation[i] = new(new int[OutputWidth], _families[i].Centers, _families[i].Slopes);
         }
+        if (specialOutputLabel < -1 || specialOutputLabel >= OutputWidth || (specialOutputLabel >= 0 && !actual2B1))
+            throw new InvalidDataException("Actual AL special label is outside the network output mapping.");
         _ = LegacyAcousticEnsemble.Combine(validation);
         _activations = activations; _temporal = Snapshot(temporal); _spatial = Snapshot(spatial);
     }
@@ -135,12 +152,15 @@ public sealed class LegacyDirectionalGlyphClassifier
         for (int i = includeBaselineFamilies ? 0 : 2; i < 4; i++)
         {
             var family = _families[i];
-            var probability = LegacyClassScores.Convert(family.Network.Evaluate(inputs[i], _activations,
-                cancellationToken: cancellationToken), cancellationToken).Probability32768;
+            var actualRaw = family.Network.Evaluate(inputs[i], _activations, cancellationToken: cancellationToken);
+            ReadOnlyMemory<int> probability = _specialOutputLabel >= 0
+                ? LegacyClassScores.ConvertMixedProbabilities(actualRaw, _specialOutputLabel, cancellationToken)
+                : LegacyClassScores.Convert(actualRaw, cancellationToken).Probability32768;
             probabilities[i] = probability;
             scores[i] = new(probability, family.Centers, family.Slopes);
         }
-        return new(LegacyAcousticEnsemble.Combine(scores, cancellationToken), probabilities);
+        return new(_specialOutputLabel >= 0 ? LegacyAcousticEnsemble.CombineMixed(scores, cancellationToken)
+            : LegacyAcousticEnsemble.Combine(scores, cancellationToken), probabilities);
     }
 
     private static LegacyDirectionalCalibration Snapshot(LegacyDirectionalCalibration calibration)

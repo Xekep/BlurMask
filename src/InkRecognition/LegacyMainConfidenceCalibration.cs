@@ -55,7 +55,7 @@ public sealed class LegacyMainConfidenceCalibration
         CancellationToken cancellationToken=default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if(probability32768 is <0 or >32767)throw new ArgumentOutOfRangeException(nameof(probability32768));
+        if(probability32768 is <0 or >32768)throw new ArgumentOutOfRangeException(nameof(probability32768));
         float probability=probability32768*(1f/32768);
         double center=0, slope=.575;
         if(originalSymbol<SymbolCount && activeFamilyOrdinal<(uint)ActiveFamilyCount)

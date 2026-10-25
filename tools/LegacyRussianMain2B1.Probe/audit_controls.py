@@ -17,13 +17,13 @@ for offset in [367899,467101]:
   global pos
   n=columns*(rows-1);mat=np.frombuffer(network[pos:pos+n],dtype=np.int8).astype(np.int64).reshape(rows-1,columns);pos+=n;scale=list(network[pos:pos+rows]);pos+=rows;assert scale[0]==1;return mat,scale[1:]
  w1,s1=matrix(ni,nh);w2,s2=matrix(nh,no);assert pos==len(network);networks.append((ni,w1,s1,w2,s2))
-refs=definitions(ROOT/'tools/LegacyFreshMainAcoustic.Probe/audit_output.py');exp_prob=refs['exp_prob'];i32=lambda x:(int(x)+2**31)%2**32-2**31
+refs=definitions(ROOT/'tools/LegacyFreshMainAcoustic.Probe/audit_output.py');exp_prob=refs['exp_prob'];mixed_prob=refs['ru_main_mixed_oracle'](ROOT,raw);i32=lambda x:(int(x)+2**31)%2**32-2**31
 activation=profile['activations']['hidden']
 def evaluate(n,inputs):
  ni,w1,s1,w2,s2=n;assert len(inputs)==ni;hidden=[1024]
  for dot,scale in zip(w1@np.array(inputs,dtype=np.int64),s1):
   value=i32(i32(dot)*scale);index=abs(value)>>16;v=activation[index]if index<len(activation)else 1018;hidden.append(-v if value<=0 else v)
- return exp_prob([i32(i32(dot)*scale)for dot,scale in zip(w2@np.array(hidden,dtype=np.int64),s2)])
+ return mixed_prob([i32(i32(dot)*scale)for dot,scale in zip(w2@np.array(hidden,dtype=np.int64),s2)])
 data=json.loads(Path(sys.argv[2]).read_bytes());assert len(data['guards'])==19 and len(set(data['guards']))==19;assert len(data['cases'])==9;channels=0;rows=[]
 for case in data['cases']:
  first,second=reference(case['strokes']);vectors=[first+case['context']+[1024,-1024],second+case['context']+[1024,-1024]];assert vectors==case['inputs'],('actual2B1',case['id']);channels+=626

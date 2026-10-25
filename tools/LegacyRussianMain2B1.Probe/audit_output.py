@@ -10,6 +10,7 @@ def defs(path):
 refs=defs(ROOT/'tools/LegacyFreshMainAcoustic.Probe/audit_output.py');exp_prob=refs['exp_prob'];i32=refs['i32'];f=refs['f']
 weights_ref=defs(ROOT/'tools/LegacyDynamicWeights.Probe/reference_controls.py')['reference'];cost_ref=defs(ROOT/'tools/LegacyCostEnsemble.Probe/reference_controls.py')['reference']
 models=Path(sys.argv[1]);path=Path(sys.argv[2]);data=(models/'ru-RU/ru_RU-ak-cur.lite.res').read_bytes();assert hashlib.sha256(data).hexdigest()=='7a5f08809e81fb4a2d4c78b3efd251d0986503b0d30d21de3695dab1f8a89978'
+mixed_prob=refs['ru_main_mixed_oracle'](ROOT,data)
 profile=json.loads((models/'ru-RU/legacy-engine-profile.json').read_bytes());activation=profile['activations']['hidden']
 networks=[]
 for offset in [195895,283697,367899,467101]:
@@ -23,7 +24,7 @@ def evaluate(n,inputs):
  ni,w1,s1,w2,s2=n;assert len(inputs)==ni;hidden=[1024]
  for dot,scale in zip(w1@np.array(inputs,dtype=np.int64),s1):
   value=i32(i32(dot)*scale);index=abs(value)>>16;v=activation[index] if index<len(activation) else 1018;hidden.append(-v if value<=0 else v)
- return exp_prob([i32(i32(dot)*scale) for dot,scale in zip(w2@np.array(hidden,dtype=np.int64),s2)])
+ return mixed_prob([i32(i32(dot)*scale) for dot,scale in zip(w2@np.array(hidden,dtype=np.int64),s2)])
 dynamic=[struct.unpack_from('<H',data,195771)[0]]+list(struct.unpack_from('<8f',data,195773))
 samples=defs(ROOT/'tools/LegacyRussianMainAcoustic.Probe/audit_output.py')['samples']
 
