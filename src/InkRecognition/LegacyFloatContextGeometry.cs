@@ -40,7 +40,10 @@ public static class LegacyFloatContextGeometry
         if (rawWidth + 1f == 1f && rawHeight + 1f == 1f)
             return LegacyDegenerateFloatContextGeometry.ExtractValidated(strokes,lineHeight,horizontalReference,
                 verticalReference,minY,useMaximumX,cancellationToken);
-        float rasterScale = 127f / (Math.Max(rawWidth, rawHeight) + 1e-6f);
+        // Native1C8400 compares the rounded extent-plus-one fields, then
+        // uses the corresponding raw extent. Equal rounded fields keep width.
+        float rasterExtent = rawWidth + 1f < rawHeight + 1f ? rawHeight : rawWidth;
+        float rasterScale = 127f / (rasterExtent + 1e-6f);
         var raster = new bool[128 * 128]; var directions = new float[4];
         var perStroke = new float[3, 4]; float arc = 0, ySum = 0;
         float xBoundary = -float.MaxValue; int strokeIndex = 0;

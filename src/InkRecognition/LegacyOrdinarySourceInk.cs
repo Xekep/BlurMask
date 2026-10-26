@@ -66,7 +66,7 @@ public sealed class LegacyOrdinarySourceInk
             strokes[s]=new(retained.ToArray());rawIndices[s]=indices.ToArray();
         }
         int[] counts=strokes.Select(s=>s.Points.Count).ToArray();
-        var chronology=LegacySourcePointChronology.CreatePrepared(counts,keys.ToArray(),Enumerable.Range(0,keys.Count).ToArray());
+        var chronology=LegacySourcePointChronology.CreatePrepared(counts,keys.ToArray(),Enumerable.Range(0,keys.Count).ToArray(),sourceFactor:200);
         float[] probabilities=profile.EnclosureEnabled?LegacySourceStrokeEnclosure.Extract(strokes,cancellationToken):new float[strokes.Length];
         return new(strokes,rawIndices,probabilities,chronology,profile,originalCounts);
     }
