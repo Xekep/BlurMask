@@ -14,3 +14,5 @@ dotnet run --project tools/LegacyOrdinaryChronologyFactor.Probe -c Release -- to
 ```
 
 The fixture expectations were independently prepared before compiling the corrected library. Neither test uses model resources or executes vendor binaries.
+
+The historical D0 budget auditor retains its original source hashes and arithmetic. It reconstructs the two historical chronology source files only from these exact reviewed successors, verifies the reconstructed full hashes, and reports both identities. This is a historical source view, without a claim that its old runtime budget proves the corrected runtime. Both original Git preimages and both successors pass; eight corrupted-source or incorrect-target controls are refused.

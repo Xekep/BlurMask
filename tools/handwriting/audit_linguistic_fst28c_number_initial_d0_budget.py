@@ -1,9 +1,28 @@
 import argparse,hashlib,json,pathlib
+def restore_ordinary_chronology_source(name,data,expected):
+ # This auditor evaluates the historical D0 reservation, not the corrected
+ # ordinary-factor runtime. Admit only the two complete reviewed successors.
+ rows={
+  'LegacySourcePointChronology.cs':('2e7bf68330e2c2ad9f90ff33f8172f09ad1675b5e04f031686e05c7ac5e22143','31cf1a0e24f38a0bb0836d9adc91e8bd5259e37345d134b11ea950e09ffa8e2e',
+   b'        // Fresh native219 secondary16A130 initializes source+128 to200.\n        // Retain fractional265 map ticks through the later metadata lookup.\n        return new(counts,keys,Enumerable.Range(0,total).ToArray(),[],200);',
+   b'        return new(counts,keys,Enumerable.Range(0,total).ToArray(),[],1);'),
+  'LegacyOrdinarySourceInk.cs':('34bdda6179be10f2f6de2213b0cf6c230e6e48c81ab818859a4dcaacddcb8708','36abe3c77a43a16072fb005bb2fd1eae7331978a08d48e74efacfc8c0d9456e8',
+   b'Enumerable.Range(0,keys.Count).ToArray(),sourceFactor:200);',b'Enumerable.Range(0,keys.Count).ToArray());')}
+ current,historical,after,before=rows[name]
+ assert expected==historical,('Unreviewed historical target',name,expected)
+ if hashlib.sha256(data).hexdigest()==historical:return data
+ assert hashlib.sha256(data).hexdigest()==current,('Unreviewed chronology successor',name)
+ assert data.count(after)==1
+ restored=data.replace(after,before)
+ assert hashlib.sha256(restored).hexdigest()==historical
+ return restored
 p=argparse.ArgumentParser();p.add_argument('--repo',required=True);p.add_argument('--output',required=True);a=p.parse_args()
 s=json.loads(pathlib.Path(__file__).with_name('linguistic-fst28c-number-initial-d0-budget-pins.json').read_text());r=pathlib.Path(a.repo)
 restored=[]
 for name,h in s['sourcePins'].items():
  data=(r/name).read_bytes().replace(b'\r\n',b'\n');actual=hashlib.sha256(data).hexdigest()
+ if pathlib.Path(name).name in ('LegacySourcePointChronology.cs','LegacyOrdinarySourceInk.cs'):
+  data=restore_ordinary_chronology_source(pathlib.Path(name).name,data,h)
  if pathlib.Path(name).name in ('LegacyPreparedGlyphClassifier.cs','LegacyDynamicAcousticWeights.cs','LegacyDirectionalGlyphClassifier.cs'):
   import runpy
   helper=r/'tools/LegacyConfiguredTwoAltAugmentation.Probe/source_preimage.py'
