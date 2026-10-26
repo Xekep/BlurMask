@@ -1,0 +1,132 @@
+{
+  "files": {
+    "LegacyFreshMainGlobalWordTextPublication.cs": {
+      "candidateLfSha256": "5d1f8d47de5affa7dfba52a57a03e2a2afda75105431d60bddb246ad3021cd29",
+      "main930LfSha256": "ce65071e363bb958454c0ca6945d9e52c1ca171995592fdbe19d59e0f8af6031",
+      "inverseEdits": [
+        {
+          "old": "    private const long MaximumAllChoiceEnumeratedArrays=128L*1024*1024;\n    public long AllWordEnumeratedArrayEnvelopeBytes{get;private set;}\n    public int PreflightMaximumAlternativeRows{get;}\n    public int PreflightMaximumProjectedRanges{get;}\n    private LegacyFreshMainGlobalWordTextPublication(LegacyFreshMainGlobalTextSourceWrapper wrapper,CancellationToken token,bool publishAll=false)\n    {\n        Wrapper=wrapper;wrapper.ValidatePreclaim(token);var completion=wrapper.ActualCompletion;\n        batchWords=completion.BatchWords;selectedWordIndex=completion.Word.WordIndex;\n        if(completion.Snapshot.ActiveAlternativeCount60!=1||(batchWords is null&&(completion.Word.Next is not null||selectedWordIndex!=0))||\n            !ReferenceEquals(completion.Snapshot.WordHead18,completion.Word)||\n            !ReferenceEquals(Scope.Seed,Scope.Context.Result.PublicationSeed)||\n            !ReferenceEquals(Scope.Seed.PendingSelections,Scope.SharedState.Selections)||\n            !ReferenceEquals(Scope.Seed.StringPool,wrapper.Choices.StringPool)||Scope.SharedState.Words.Count!=0)\n            throw new NotSupportedException(\"Exact fresh one-alternative/one-choice WORD and original shared Seed required.\");\n        if(batchWords is not null)\n        {\n            if(!publishAll)throw new NotSupportedException(\"A completed source batch requires all275 publication per actual WORD.\");\n",
+          "new": "    private const long MaximumAllChoiceEnumeratedArrays=128L*1024*1024;\n    public long AllWordEnumeratedArrayEnvelopeBytes{get;private set;}\n    public int PreflightMaximumAlternativeRows{get;}\n    public int PreflightMaximumProjectedRanges{get;}\n    private LegacyFreshMainGlobalWordTextPublication(LegacyFreshMainGlobalTextSourceWrapper wrapper,CancellationToken token,bool publishAll=false)\n    {\n        Wrapper=wrapper;wrapper.ValidatePreclaim(token);var completion=wrapper.ActualCompletion;\n        batchWords=completion.BatchWords;selectedWordIndex=completion.Word.WordIndex;\n        if(completion.Snapshot.ActiveAlternativeCount60!=1||(batchWords is null&&(completion.Word.Next is not null||selectedWordIndex!=0&&!completion.HasActualRankedSingletonFacade))||\n            !ReferenceEquals(completion.Snapshot.WordHead18,completion.Word)||\n            !ReferenceEquals(Scope.Seed,Scope.Context.Result.PublicationSeed)||\n            !ReferenceEquals(Scope.Seed.PendingSelections,Scope.SharedState.Selections)||\n            !ReferenceEquals(Scope.Seed.StringPool,wrapper.Choices.StringPool)||Scope.SharedState.Words.Count!=0)\n            throw new NotSupportedException(\"Exact fresh one-alternative/one-choice WORD and original shared Seed required.\");\n        if(batchWords is not null)\n        {\n            if(!publishAll)throw new NotSupportedException(\"A completed source batch requires all275 publication per actual WORD.\");\n"
+        }
+      ]
+    },
+    "LegacyFreshMainGlobalWordSourceReceipt.cs": {
+      "candidateLfSha256": "db6adf45b23a9ca3d05b3b6d2e63e98fb50fc614d8c9b039b8eb407b1c78c5df",
+      "main930LfSha256": "db6adf45b23a9ca3d05b3b6d2e63e98fb50fc614d8c9b039b8eb407b1c78c5df",
+      "inverseEdits": []
+    },
+    "LegacyFreshMainGlobalWordSourceChoice.cs": {
+      "candidateLfSha256": "c89aea4f3e7b9370177ac901ecba61132768974cc7fa0f20e89a0678343f6be1",
+      "main930LfSha256": "c89aea4f3e7b9370177ac901ecba61132768974cc7fa0f20e89a0678343f6be1",
+      "inverseEdits": []
+    },
+    "LegacyFreshMainGlobalProcessedTextSources.cs": {
+      "candidateLfSha256": "a1bc2e8b66909fb9837f57954c322c3a6c8c98f6c57796e7c56719bd91a699bc",
+      "main930LfSha256": "a1bc2e8b66909fb9837f57954c322c3a6c8c98f6c57796e7c56719bd91a699bc",
+      "inverseEdits": []
+    },
+    "LegacyOwnedMainTextSourceInterner.cs": {
+      "candidateLfSha256": "e2ead5311b9f52bd49ccb68ec2d39fbc3027af7240425cae21d7d0ab9a2d9ed3",
+      "main930LfSha256": "e2ead5311b9f52bd49ccb68ec2d39fbc3027af7240425cae21d7d0ab9a2d9ed3",
+      "inverseEdits": []
+    },
+    "LegacyMainWordHeaderUnionBudget.cs": {
+      "candidateLfSha256": "a2401b1cc23a094f7d08604d1b97447b97446846f3cfd8c3fc46cfd75acb57ac",
+      "main930LfSha256": "a2401b1cc23a094f7d08604d1b97447b97446846f3cfd8c3fc46cfd75acb57ac",
+      "inverseEdits": []
+    },
+    "LegacyFreshMainGlobalWordTextPublication.WordHeader.cs": {
+      "candidateLfSha256": "1c36ffa4909f611ed5ee6fcf0377692508e08d957102c5e661a22b44837ca847",
+      "main930LfSha256": "1c36ffa4909f611ed5ee6fcf0377692508e08d957102c5e661a22b44837ca847",
+      "inverseEdits": []
+    }
+  },
+  "guards": {
+    "LegacyFreshMainGlobalWordTextPublication.cs": [
+      "private LegacyFreshMainGlobalWordSourceReceipt originalWordSource;",
+      "OriginalWordSource=>completed&&publishedWords.Count>1?",
+      "originalWordSource=new(this)",
+      "allWords=publishAll?LegacyGlobalCompletedWordSpan.Capture(completion,token):null",
+      "selectedWordIndex!=0&&!completion.HasActualRankedSingletonFacade",
+      "if(batchWords is null)",
+      "PublishCurrentWord(allocator40,selection4,fault,token)",
+      "publishedWords.Add(payload!);publishedSelectedIndices.Add(selectedWordIndex);documentLink=true;",
+      "if(allWords is null)payload.ChoiceCount=1;else payload.InitializeChoices(allWords.Count,selectedWordIndex)",
+      "if(allWords is null)\n                {\n                    characters=Wrapper.PublishIntoWord",
+      "payload.Flags|=payload.AllChoiceFlags",
+      "allWords?.Fault(this);if(batchWords is not null)batchWords.Fault();stage=\"fault\";Wrapper.FaultReservedWord(this)",
+      "if(!documentChoiceAllocated)throw",
+      "for(int i=0;i<publishedWords.Count;i++)flags|=(allWords is null?publishedWords[i].ChoiceFlags:publishedWords[i].ChoiceAt(publishedSelectedIndices[i]).Flags)&1023",
+      "WriteInt32LittleEndian(b.AsSpan(24),publishedWords.Count)",
+      "WriteInt32LittleEndian(b.AsSpan(28),publishedWords.Count)"
+    ],
+    "LegacyFreshMainGlobalWordSourceReceipt.cs": [
+      "ranges=owner.Wrapper.ActualCompletion.CopyRanges()",
+      "internal uint AllChoiceFlags=>allChoices is null?ChoiceFlags:allChoiceFlags;",
+      "ReferenceEquals(actual.Payload.Node.FirstGlobalSource,actual.Payload.Source)",
+      "ReferenceEquals(actual.Payload.Owner,parent.Wrapper)",
+      "if(allChoices is not null)",
+      "AppendOrdinaryHeader(actual,token)",
+      "links.Add(new(actual));var rows=actual.Payload.CopyRecords(token)",
+      "ChoiceFlags|=rows[actual.Marker].Flags",
+      "if(!source.IsOrdinarySource)return;",
+      "var key=actual.Payload.Node.Key;",
+      "LegacyMainWordHeaderUnionBudget.BeforeUnion(ordinary.Length,key.Length)",
+      "parent.ReserveWordHeaderUnion(bound,token)",
+      "ordinary=parent.RangeOperations.Union(ordinary,key,token)"
+    ],
+    "LegacyFreshMainGlobalProcessedTextSources.cs": [
+      "private readonly LegacyNativeInkPositionRange[] ranges;",
+      "this.ranges=ranges.ToArray();",
+      "return ranges.ToArray();"
+    ],
+    "LegacyOwnedMainTextSourceInterner.cs": [
+      "internal ReadOnlySpan<LegacyNativeInkPositionRange> Key=>ranges;",
+      "ranges=key;firstSource=source;",
+      "actual.Owner.RequireCurrentSource(actual,token)",
+      "ReferenceEquals(actual.Document,Document)",
+      "ReferenceEquals(actual.Owner.CharacterInterner,this)",
+      "InternCore(actual.CopyRanges(token),null,token,globalSource:actual)",
+      "Compare(key,current.Key)",
+      "result.Node.FirstGlobalSource is not{} first||!ReferenceEquals(first.Owner,actual.Owner)"
+    ],
+    "LegacyMainWordHeaderUnionBudget.cs": [
+      "retained<0||additional<0||retained>65536||additional>65536",
+      "long m=checked((long)retained+additional)"
+    ]
+  },
+  "reviewedChangedContracts": {
+    "LegacyFreshMainGlobalWordTextPublication.cs": {
+      "OriginalWordSource=new(this)": "Private backing field/property remains actual source; multiword accessor refuses ambiguity",
+      "payload.ChoiceCount=1;Record(\"word-choice48\")": "Selected-only count1 branch retained, all275 count explicit in other branch",
+      "payload.Flags|=payload.ChoiceFlags": "AllChoiceFlags equals ChoiceFlags when allChoices null; selected-only bits unchanged",
+      "catch{faulted=true;stage=\"fault\";Wrapper.FaultReservedWord(this)": "Fault now also poisons actual allWords/batch before same wrapper fault",
+      "if(documentLink){BinaryPrimitives.WriteUInt32LittleEndian(b.AsSpan(8),WordSource.ChoiceFlags&1023)": "Selected-only published count0/1 matches prior documentLink; scalar fields preserved"
+    },
+    "LegacyFreshMainGlobalWordSourceReceipt.cs": {
+      "ranges=owner.Wrapper.Completion.CopyRanges()": "Actual closed completed binding alias, not legacy coercion",
+      "ordinary=parent.RangeOperations.Union(ordinary,actual.Payload.Source.CopyRanges(token),token)": "Same private interned key as FirstGlobalSource.CopyRanges; exact AVL/key identity plus preunion budget"
+    }
+  },
+  "historical": {
+    "commit": "877d61504107fc6ece836d0e98abd12198fccc6d",
+    "ScopeLfSha256": "c92eb81a1702fa6ed0c262989f993f4350a5ddbb4cb5e999983f8404463167d5",
+    "SourceLfSha256": {
+      "LegacyFreshMainGlobalWordTextPublication.cs": "fe771f03179129050f49897a30fc8be21aa4007750563d775c366b6b44d48208",
+      "LegacyFreshMainGlobalTextSourceWrapper.cs": "11c0cd659edc195326e94c109bb5e81a557cd761babbbb0c4cfe5acdc8825ecb",
+      "LegacyOwnedMainTextSourceInterner.cs": "397f7e9acc8723e4f88e4f4e950850fb321676e4c27bec349743fd732a7b3902",
+      "LegacyOwnedFreshTextSourceContext.GlobalWordText.cs": "098dcbb7586af93b8218aa59992f91529b4439e5ab11cb7416e6f35966afbd8b",
+      "LegacyFreshMainGlobalWordSourceReceipt.cs": "6d5e5c92bfb7d478bea038990c06e34f48a9db5c29288887b7c29c0fa36cdb91"
+    },
+    "AllOriginalLiteralContractsPresent": true,
+    "AuditExecuted": false
+  },
+  "currentContractCohort": {
+    "LegacyFreshMainGlobalWordTextPublication.cs": "5d1f8d47de5affa7dfba52a57a03e2a2afda75105431d60bddb246ad3021cd29",
+    "LegacyFreshMainGlobalTextSourceWrapper.cs": "0d254c3fdc41a946f4be31ee7b8465b637ca9702e59b89238696c1ec0950f8a4",
+    "LegacyOwnedMainTextSourceInterner.cs": "e2ead5311b9f52bd49ccb68ec2d39fbc3027af7240425cae21d7d0ab9a2d9ed3",
+    "LegacyOwnedFreshTextSourceContext.GlobalWordText.cs": "098dcbb7586af93b8218aa59992f91529b4439e5ab11cb7416e6f35966afbd8b",
+    "LegacyFreshMainGlobalWordSourceReceipt.cs": "db6adf45b23a9ca3d05b3b6d2e63e98fb50fc614d8c9b039b8eb407b1c78c5df"
+  },
+  "meaning": "Source-only selected-only native order composed across actual PublishCore->PublishCurrentWord call; all275/batch distinct. No fabricated historical source path."
+}

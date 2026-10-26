@@ -27,6 +27,9 @@ internal sealed class LegacyFreshMainGlobalGlyphProjectionContext
     internal LegacyNativeInkPositionRange[] CopyOriginalRoot(CancellationToken token)
     {Scope.Validate();completion.Validate(token);return original.ToArray();}
     internal LegacyFreshMainGlobalGlyphProjectionContext(LegacyLibraryGlobalTextPublicationScope scope,
+        LegacyFreshMainGlobalSourceCompletion actual,CancellationToken token)
+        :this(scope,actual.Bind(scope,token),token){}
+    internal LegacyFreshMainGlobalGlyphProjectionContext(LegacyLibraryGlobalTextPublicationScope scope,
         LegacyGlobalCompletedTextSource completion,CancellationToken token)
     {
         scope.Validate();completion.Validate(token);var document=scope.Document;

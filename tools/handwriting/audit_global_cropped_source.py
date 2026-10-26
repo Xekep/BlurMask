@@ -3,11 +3,13 @@ Separate portable numerical oracle checks all produced coordinate bits.
 """
 from pathlib import Path
 import argparse,json,subprocess,sys
-p=argparse.ArgumentParser(description=__doc__);p.add_argument('output',type=Path);p.add_argument('--native-repo',type=Path,default=Path(__file__).resolve().parents[2]);p.add_argument('--capture',type=Path,required=True);a=p.parse_args()
+p=argparse.ArgumentParser(description=__doc__);p.add_argument('output',type=Path);p.add_argument('--native-repo',type=Path,default=Path(__file__).resolve().parents[2]);p.add_argument('--capture',type=Path,required=True);p.add_argument('--models',type=Path);p.add_argument('--child',type=Path);a=p.parse_args()
+if (a.models is None)!=(a.child is None):p.error('--models and --child must be supplied together')
+paired=[] if a.models is None else ['--models',str(a.models),'--child',str(a.child)]
 root=Path(__file__).resolve().parents[2];deps=[]
 for i,name in enumerate(('audit_global_geometric_numeric_closure.py','audit_global_raw_crop_leaf_dispatch.py')):
  out=a.output.with_name('gcs-native-'+str(i)+'.json');args=[sys.executable,str(a.native_repo/'tools/handwriting'/name),str(out),'--native-repo',str(a.native_repo)]
- if i==0:args+=['--capture',str(a.capture)]
+ if i==0:args+=['--capture',str(a.capture),*paired]
  subprocess.run(args,check=True);deps.append(json.loads(out.read_bytes()))
 s=(root/'src/InkRecognition/LegacyGlobalOrdinaryCroppedSource.cs').read_text(encoding='utf8')
 rules=('!actual.IsComplete||actual.IsFaulted','ReferenceEquals(pending[^1],actual.Text.Selection)',

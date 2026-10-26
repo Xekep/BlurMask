@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><AssemblyName>InkRecognition.Probe</AssemblyName><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
+    <BlurMaskPublicationDiagnostics Condition="'$(BlurMaskPublicationDiagnostics)' == ''">false</BlurMaskPublicationDiagnostics>
+    <IsPackable>false</IsPackable><IsPublishable>false</IsPublishable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup><Compile Include="Program.cs" /><ProjectReference Include="../../src/InkRecognition/InkRecognition.csproj" /></ItemGroup>
+  <Target Name="RequireExplicitPublicationDiagnosticFlavor" BeforeTargets="PrepareForBuild">
+    <Error Condition="'$(BlurMaskPublicationDiagnostics)' != 'true'" Text="This test entry requires -p:BlurMaskPublicationDiagnostics=true and a separate --artifacts-path." />
+    <Error Condition="'$(ArtifactsPath)' == ''" Text="Use a separate --artifacts-path for diagnostic builds." />
+  </Target>
+</Project>

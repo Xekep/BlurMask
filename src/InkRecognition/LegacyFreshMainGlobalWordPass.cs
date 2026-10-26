@@ -74,7 +74,8 @@ public sealed class LegacyFreshMainGlobalWordPass
     public LegacyFreshMainGlobalWordPassResult RunOwned(CancellationToken token=default)
     {
         var rows = publication is null ? scheduler.RunGlobal(token) : scheduler.RunGlobalWithIntermediatePublication(publication, token);
-        var result = new LegacyFreshMainGlobalWordPassResult(Policy, rows, token, publication?.State);
+        var result = new LegacyFreshMainGlobalWordPassResult(Policy, rows, token, publication?.State,
+            scheduler.RequireGlobalPublicationStorage(Policy));
         if (publication is not null) result.BindPublicationReader(scheduler.BindGlobalResultPublicationReader(result, token));
         return result;
     }
@@ -86,6 +87,14 @@ public sealed class LegacyFreshMainGlobalWordPassResult
 {
     private readonly LegacyMainDirectWordNodeResult[] nodes;
     private readonly LegacyFreshMainGlobalCaseSession.ResultQueryLease resultQueries;
+    private readonly LegacyFreshMainGlobalPublicationStorage? publicationStorage;
+    internal LegacyFreshMainGlobalPublicationStorage RequirePublicationStorage(CancellationToken token)
+    {
+        ValidateResultQueryLease(token);
+        if(publicationStorage is null||!publicationStorage.IsFor(Policy))
+            throw new InvalidOperationException("Actual producing GLOBAL scheduler allocator required.");
+        return publicationStorage;
+    }
     private int publicationStarted;
     private LegacyNativeDelimiterQuerySource? publicationReader;
     internal void BindPublicationReader(LegacyNativeDelimiterQuerySource reader)
@@ -114,12 +123,15 @@ public sealed class LegacyFreshMainGlobalWordPassResult
     public int NodeCount=>nodes.Length;
     internal LegacyFreshMainGlobalWordPassResult(LegacyFreshMainGlobalWordControllerPolicy policy,
         IReadOnlyList<LegacyMainDirectWordNodeResult> source,CancellationToken token,
-        LegacyFreshMainGlobalCompactPublicationState? intermediateState = null)
+        LegacyFreshMainGlobalCompactPublicationState? intermediateState = null,
+        LegacyFreshMainGlobalPublicationStorage? publicationStorage = null)
     {
         token.ThrowIfCancellationRequested();
         if(source.Count!=policy.Owner.Graph.State.NodeCount)throw new ArgumentException("Actual global source/node extent required.");
         if (intermediateState is not null && !ReferenceEquals(intermediateState.Policy, policy))
             throw new ArgumentException("Actual global intermediate pool/controller identity required.");
+        if(publicationStorage is not null&&!publicationStorage.IsFor(policy))throw new ArgumentException("Foreign GLOBAL publication storage.");
+        this.publicationStorage=publicationStorage;
         Policy=policy;nodes=source.Select(Copy).ToArray(); IntermediatePublicationState=intermediateState?.Copy();
         resultQueries=policy.Owner.CaptureResultQueryLease(token);
     }

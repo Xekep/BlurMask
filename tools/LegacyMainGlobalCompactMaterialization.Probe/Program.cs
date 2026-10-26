@@ -14,6 +14,7 @@ InkStroke V(float y)=>new(new InkPoint[]{new(0,y+10),new(0,y+90)});
 var mir=new InkStroke[]{M(0),new(new InkPoint[]{new(70,10),new(70,90),new(120,10),new(120,90)}),new(new InkPoint[]{new(140,90),new(140,10),new(180,10),new(190,20),new(190,40),new(180,50),new(140,50)})};
 var rows=new[]{V(0),new InkStroke(V(0).Points.Select(p=>new InkPoint(p.X+40,p.Y)).ToArray()),V(140),new InkStroke(V(140).Points.Select(p=>new InkPoint(p.X+40,p.Y)).ToArray())};
 int owners=0,guards=0;ulong identity=0x1000;
+var globalInputCapture=new GlobalPublicationInputCapture(ak,lk,args[3],args[4]);
 using var file=File.Create(args[7]);using var w=new Utf8JsonWriter(file);w.WriteStartArray();
 foreach(var raw in new[]{new[]{M(0),M(140)},new[]{M(0),M(250)},new[]{V(0),V(140)},new[]{V(0),V(250)},mir,mir.Concat(mir.Select(s=>new InkStroke(s.Points.Select(p=>new InkPoint(p.X,p.Y+160)).ToArray()))).ToArray(),rows,Enumerable.Range(0,14).Select(n=>new InkStroke(M(0).Points.Select(p=>new InkPoint(p.X+n*70,p.Y)).ToArray())).ToArray()})
 {
@@ -24,7 +25,7 @@ foreach(var raw in new[]{new[]{M(0),M(140)},new[]{M(0),M(250)},new[]{V(0),V(140)
     var costs=LegacyFreshMainGlobalGroupCosts.Prepare(ak,owner,table);var policy=LegacyFreshMainGlobalWordControllerPolicy.Prepare(ak,owner,costs,transitions);
     var confidence=LegacyFreshMainGlobalGlyphConfidence.Prepare(ak,owner);var terminal=LegacyFreshMainGlobalTerminalInvocation.Prepare(policy);
 
-    var pass=new LegacyFreshMainGlobalWordPass(ak,policy,r=>{byte[] bytes=new byte[r.RequiredBytes];r.PreviousStorage.Span.CopyTo(bytes);return new(bytes,++identity);}).RunOwned();
+    var pass=new LegacyFreshMainGlobalWordPass(ak,policy,r=>{byte[] bytes=new byte[r.RequiredBytes];r.PreviousStorage.Span.CopyTo(bytes);ulong id=++identity;globalInputCapture.Observe(r,id,bytes);return new(bytes,id);}).RunOwned();
     int evaluations=owner.AcousticEvaluations;var selected=terminal.Select(pass);
     byte[] residue=Enumerable.Repeat((byte)0xa7,4096*40).ToArray();
     Reject(()=>LegacyFreshMainGlobalCompactWordMaterialization.Materialize(ak,selected,null!,residue));
@@ -32,10 +33,12 @@ foreach(var raw in new[]{new[]{M(0),M(140)},new[]{M(0),M(250)},new[]{V(0),V(140)
     Reject(()=>LegacyFreshMainGlobalCompactWordMaterialization.Materialize(ak,selected,confidence,new byte[41]));
     Reject(()=>LegacyFreshMainGlobalCompactWordMaterialization.Materialize(new byte[ak.Length],selected,confidence,residue));
     Reject(()=>LegacyFreshMainGlobalCompactWordMaterialization.Materialize(ak,selected,confidence,residue,new(true)));
+    using var allocatorFrame=globalInputCapture.Begin();
     var materialized=LegacyFreshMainGlobalCompactWordMaterialization.Materialize(ak,selected,confidence,residue);
+    var allocatorInputs=allocatorFrame.Complete();
     Reject(()=>LegacyFreshMainGlobalCompactWordMaterialization.Materialize(ak,selected,confidence,residue));
     byte[] compact=materialized.CopyCompactStorage();int[] starts=materialized.CopyNodeStarts2478();
-    w.WriteStartObject();w.WriteNumber("factory",0x292);w.WriteNumber("maximumAtoms",graph.State.MaximumAtoms);
+    w.WriteStartObject();globalInputCapture.Write(w,allocatorInputs,policy.Configuration.PrimaryAlternativeCount2402);w.WriteNumber("factory",0x292);w.WriteNumber("maximumAtoms",graph.State.MaximumAtoms);
     w.WriteNumber("intermediatePublicationDistance",policy.MaximumParentDistance54);
     w.WriteNumber("count",materialized.RecordCount);w.WriteNumber("selected",materialized.SelectedRecordIndex);
     w.WriteNumber("winner",selected.Winner.Ordinal);w.WriteNumber("primary",policy.Configuration.PrimaryArcLimit230a);

@@ -16,7 +16,13 @@ for row in pins['regions']:
 for item in pins['bindings']:assert bins[item['module']].qwords(int(item['address'],16),1)[0]==int(item['value'],16)
 for item in pins['tables']:
  b=bins[item['module']];s=int(item['start'],16);raw=bytes.fromhex(item['hex']);assert b.data[b.off(s):b.off(s)+len(raw)]==raw and sha(raw)==item['sha256']
-for source in pins['sourceHashes']:assert sha((root/source['path']).read_text().encode())==source['lfSha256']
+from global_scope_facade_source_bridge import verify_scope_source,LEGACY_SCOPE_LF_SHA
+scope_bridge=None
+for source in pins['sourceHashes']:
+ if source['path']=='src/InkRecognition/LegacyLibraryGlobalTextPublicationScope.cs':
+  assert source['lfSha256']==LEGACY_SCOPE_LF_SHA,'Historical scope pin must remain unchanged'
+  scope_bridge=verify_scope_source(root,source['lfSha256'])
+ else:assert sha((root/source['path']).read_text().encode())==source['lfSha256']
 selected=(root/'src/InkRecognition/LegacyFreshMainGlobalDocumentSelectedSources.cs').read_text();start=selected.index('    internal static void ValidateMetadataBranch(');end=selected.index('    internal static uint ComputeWordMetadata',start)
 assert sha(selected[start:end].encode())==pins['unchangedScalarValidateSha256']
 source=(root/'src/InkRecognition/LegacyGlobalRawObjectKinds.cs').read_text()
@@ -42,5 +48,5 @@ assert source.index('Preflight(current.Curves.Count,points,current.Views.Count)'
 assert source.index('result.ValidateSlot(i)')<source.index('result.Validate(token);return result')
 assert source.index('source.CopyAssignedScalars()!=scalars')<source.index('bool needsKind=')
 assert 'public 'not in source and 'LegacyOwnedMainWordSourceChoicesResult'not in source and 'NativeLibrary.Load'not in source
-a.output.write_text(json.dumps(dict(status='PASS actual owned C49/base-kind receipt',nativeFunctions=14,nativeBodyRegions=15,instructions=6453,bindings=12,switchBytes=68,runtimeContracts=len(rules)+4,unchangedScalarMethod=pins['unchangedScalarValidateSha256'],nativeExecution=False,actualC25ObjectClaim=False,applicationQualityClaim=False),indent=2)+'\n')
+a.output.write_text(json.dumps(dict(status='PASS actual owned C49/base-kind receipt',nativeFunctions=14,nativeBodyRegions=15,instructions=6453,bindings=12,switchBytes=68,runtimeContracts=len(rules)+4,unchangedScalarMethod=pins['unchangedScalarValidateSha256'],nativeExecution=False,actualC25ObjectClaim=False,applicationQualityClaim=False,scopeSourceBridge=scope_bridge),indent=2)+'\n')
 print('PASS14 nativefunctions/15bodyregions/6453instructions/12bindings/68switchbytes +same-scope typed C49 receipt/contracts; scalar validator unchanged.')

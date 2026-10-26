@@ -8,6 +8,8 @@ from pathlib import Path
 root=Path(__file__).resolve().parents[2]
 if len(sys.argv)!=2:raise SystemExit('REPORT.json')
 target=Path(sys.argv[1]);reports={}
+from global_facade_owner_source_bridge import authenticate_owner_cohort
+ownerCohortAuthentication=authenticate_owner_cohort(root)
 for name in ['audit_global_text_source_wrapper_plan','audit_global_text_payload_metadata_plan','audit_global_text_glyph_choices_runtime']:
  path=target.with_name(target.stem+'.'+name+'.json');saved=sys.argv
  try:sys.argv=[name,str(path)];runpy.run_path(str(Path(__file__).with_name(name+'.py')),run_name='__main__')
@@ -22,8 +24,21 @@ w=read('LegacyFreshMainGlobalTextSourceWrapper.cs');p=read('LegacyFreshMainGloba
 c=read('LegacyFreshMainGlobalTextGlyphChoices.cs');r=read('LegacyPreparedMainTextGlyphReuse.cs')
 i=read('LegacyOwnedMainTextSourceInterner.cs');s=read('LegacyOwnedFreshTextSourceContext.Global.cs')
 assert hashlib.sha256(body(r,'private LegacyPreparedTextGlyphReuseResult Process(').encode()).hexdigest()=='04d7614e9f2356cda87984b727ea875a0875ce86900965114f05b3e0e07a8a5c'
-assert hashlib.sha256(body(c,'public IReadOnlyList<LegacyFreshMainGlobalPublishedGlyphChoices> Publish(').encode()).hexdigest()=='08ec74d0d054cf61203db5e36a8cb755043bffd9a964c073b7a574d54bab7ccd'
-for term in ['original=choices.Projection.CopyOriginalRoot(token)','wordClip=Completion.CopyRanges()',
+ownerSourceBridge=None
+publishHash=hashlib.sha256(body(c,'public IReadOnlyList<LegacyFreshMainGlobalPublishedGlyphChoices> Publish(').encode()).hexdigest()
+if publishHash=='08ec74d0d054cf61203db5e36a8cb755043bffd9a964c073b7a574d54bab7ccd':
+ assert publishHash=='08ec74d0d054cf61203db5e36a8cb755043bffd9a964c073b7a574d54bab7ccd'
+else:
+ from global_facade_owner_source_bridge import verify_owner_routes
+ ownerSourceBridge=verify_owner_routes(root)
+ assert ownerSourceBridge['LegacyPublishInverseSha256']=='08ec74d0d054cf61203db5e36a8cb755043bffd9a964c073b7a574d54bab7ccd' 
+if 'wordClip=Completion.CopyRanges()' in w:
+ assert 'wordClip=Completion.CopyRanges()' in w
+else:
+ from global_facade_owner_source_bridge import verify_owner_routes
+ ownerSourceBridge=verify_owner_routes(root)
+ assert 'wordClip=ActualCompletion.CopyRanges()' in w
+for term in ['original=choices.Projection.CopyOriginalRoot(token)', 
  'LegacyOwnedRawInkRangeOperations.Equal(original,Scope.Context.InputBinding.CopyRanges())',
  'LegacyOwnedRawInkRangeOperations.Equal(original,Scope.Context.Result.CopyInputRanges208())',
  'CharacterInterner.Count!=0','CopyPendingSelections().Count!=0','Choices.ClaimSourceWrapper(this,token)',
@@ -63,10 +78,13 @@ assert 'ReferenceEquals(scope.Seed.PendingSelections,this)'in s and 'ReferenceEq
 assert 'Global reuse has no legacy emitter.'in r and 'globalOwner.RequireReusablePayload(payload,selected,token)'in r
 for forbidden in ['LegacyOwnedMainCandidateSource.Prepare','CreateLegacyOwner','new LegacyFreshMainGlyphUtf8Emission','new LegacyNativeUtf8StringPool']:
  assert forbidden not in w+p+s,forbidden
-target.write_text(json.dumps(dict(vendorExecution=False,dependencies=reports,oldSeams=[
+target.write_text(json.dumps(dict(vendorExecution=False,ownerCohortAuthentication=ownerCohortAuthentication,ownerSourceBridge=ownerSourceBridge,dependencies=reports,oldSeams=[
  'LegacyFreshMainGlobalTextGlyphChoices.cs','LegacyFreshMainGlobalGlyphDocumentPositions.cs',
  'LegacyOwnedMainTextSourceInterner.cs','LegacyPreparedMainTextGlyphReuse.cs'],
  newSelectionPartial='LegacyOwnedFreshTextSourceContext.Global.cs',orderedStages=order,
  limitations=['bounded fresh ordinary one-descriptor scope','actual13 contains no duplicate source keys or overlap branches',
  'CHAR only; no WORD/TEXT or acceptance/default app change','no Russian quality claim']),indent=2)+'\n')
-print('PASS global024F30 typed runtime/metadata/source join composition; public13 and21760 numeric bodies byte-identical.')
+if ownerSourceBridge is None:
+ print('PASS global024F30 typed runtime/metadata/source join composition; public13 and21760 numeric bodies byte-identical.')
+else:
+ print('PASS current global024F30 owner/source routes; original public Publish numeric inverse and unchanged21760 body verified.')

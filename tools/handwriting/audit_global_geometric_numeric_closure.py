@@ -5,7 +5,9 @@ import argparse,hashlib,json,runpy,sys
 from pathlib import Path
 from capstone import Cs,CS_ARCH_X86,CS_MODE_64
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('output',type=Path)
-p.add_argument('--native-repo',type=Path,required=True);p.add_argument('--capture',type=Path,required=True);a=p.parse_args()
+p.add_argument('--native-repo',type=Path,required=True);p.add_argument('--capture',type=Path,required=True);p.add_argument('--models',type=Path);p.add_argument('--child',type=Path);a=p.parse_args()
+if (a.models is None)!=(a.child is None):p.error('--models and --child must be supplied together')
+paired=[] if a.models is None else ['--models',str(a.models),'--child',str(a.child)]
 root=a.native_repo.resolve();here=Path(__file__).resolve().parent
 dependencies={}
 for index,name in enumerate(['audit_uncovered_source_owner','audit_raw_ink_current_view']):
@@ -61,14 +63,19 @@ allowed={
  'MyScriptInk.dll:1800907e0':['0x1800ceab0'],
 }
 assert {k:v for k,v in external.items()if v}==allowed
-capture=a.capture.read_bytes();assert hashlib.sha256(capture).hexdigest()=='1f2d2f6e2bb57e6d249fc11325a5e9736f358a5cd9dce1fe2664dd8ecdebea58'
+capture=a.capture.read_bytes();pairedParentProof=None
+if a.models is None:
+ assert hashlib.sha256(capture).hexdigest()=='1f2d2f6e2bb57e6d249fc11325a5e9736f358a5cd9dce1fe2664dd8ecdebea58'
+else:
+ from global_current_parent_data_bridge import verify_current_parent
+ pairedParentProof=verify_current_parent(Path(__file__).resolve().parents[2],a.models,a.child,a.capture)
 d=json.loads(capture);links=[(s,l)for s in d['actual']for l in s['links']];assert len(d['actual'])==13 and len(links)==37
 selected=[int.from_bytes(bytes.fromhex(l['records'][l['marker']]['scalar40'])[8:12],'little')for s,l in links]
 assert sum((v&0x7000)==0x1000 for v in selected)==0
 assert sum((v&0x400)!=0 for v in selected)==0
 assert all(l['ordinary']and(l['metadataFlags']&0x10600000)==0 for s,l in links)
 assert sum(v==0x10000 for v in selected)==1
-report=dict(status='PASS STATIC bounded ordinary numerical dependency closure; no runtime port',vendorExecution=False,
+report=dict(status='PASS STATIC bounded ordinary numerical dependency closure; no runtime port',vendorExecution=False,pairedParentProof=pairedParentProof,
  dependencyReports=dependencies,
  functions=len(calls),bodyRanges=len(spec['regions']),linearBytes=sum(r['end']-r['start']for r in spec['regions']),
  pins=len(spec['pins']),bindings=len(spec['bindings']),directCallGraph=calls,classifiedExternalDirectEdges=allowed,

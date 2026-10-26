@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
+    <BlurMaskPublicationDiagnostics Condition="'$(BlurMaskPublicationDiagnostics)' == ''">false</BlurMaskPublicationDiagnostics>
+    <DefineConstants Condition="'$(BlurMaskPublicationDiagnostics)' == 'true'">$(DefineConstants);BLURMASK_PUBLICATION_DIAGNOSTICS</DefineConstants>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsAotCompatible>true</IsAotCompatible>
@@ -16,4 +18,14 @@
   <ItemGroup>
     <None Include="PACKAGE.md" Pack="true" PackagePath="/" />
   </ItemGroup>
+  <ItemGroup Condition="'$(BlurMaskPublicationDiagnostics)' == 'true'">
+    <Compile Include="../../tools/LegacyGlobalTextPublication.ScoreDiagnostic/Source/LegacyPublicationScoreTrace.Diagnostic.cs" Link="Diagnostics/LegacyPublicationScoreTrace.Diagnostic.cs" />
+    <Compile Include="../../tools/LegacyGlobalTextPublication.ScoreDiagnostic/Source/LegacyPublicationCandidateTrace.Diagnostic.cs" Link="Diagnostics/LegacyPublicationCandidateTrace.Diagnostic.cs" />
+  </ItemGroup>
+  <Target Name="RequirePublicationDiagnosticArtifacts" BeforeTargets="PrepareForBuild" Condition="'$(BlurMaskPublicationDiagnostics)' == 'true'">
+    <Error Condition="'$(ArtifactsPath)' == ''" Text="Publication diagnostics require an explicit separate --artifacts-path. This is a test-only build flavor." />
+  </Target>
+  <Target Name="RejectPublicationDiagnosticDistribution" BeforeTargets="Pack;Publish;GenerateNuspec" Condition="'$(BlurMaskPublicationDiagnostics)' == 'true'">
+    <Error Text="Publication diagnostic builds are test-only and cannot be packed or published." />
+  </Target>
 </Project>

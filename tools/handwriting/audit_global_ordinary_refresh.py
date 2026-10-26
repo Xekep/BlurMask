@@ -3,6 +3,8 @@ import hashlib,json,re,runpy,subprocess,sys
 from pathlib import Path
 if len(sys.argv)!=2:raise SystemExit('report.json')
 root=Path(__file__).resolve().parents[2];target=Path(sys.argv[1]);target.parent.mkdir(parents=True,exist_ok=True)
+from global_facade_owner_source_bridge import authenticate_owner_cohort
+ownerCohortAuthentication=authenticate_owner_cohort(root)
 baseline='532cdcf9d4defdf4b0c133407b35ff90a8494000'
 old=subprocess.check_output(['git','show',baseline+':src/InkRecognition/LegacyOwnedMainOrdinaryGlyphRefresh.cs'],cwd=root).decode('utf-8')
 def loop(code):
@@ -52,12 +54,18 @@ order=['progress.Add(canonicalOwnerKey,state);','var count=SourceMetadata.Read('
 positions=[refresh.index(v)for v in order];assert positions==sorted(positions)
 assert 'internal LegacyFreshMainGlobalOrdinaryGlyphProducer OrdinaryProducer=>ordinary;'in session
 assert 'return ResolveOwnedSymbol(symbol,0,node,arc,token);'in producer
-assert 'PrimaryAlphabet=>Completion.Snapshot.SourcePolicy.Owner.Model.AcousticAlphabet' in emission
+ownerSourceBridge=None
+if 'PrimaryAlphabet=>Completion.Snapshot.SourcePolicy.Owner.Model.AcousticAlphabet' in emission:
+ assert 'PrimaryAlphabet=>Completion.Snapshot.SourcePolicy.Owner.Model.AcousticAlphabet' in emission
+else:
+ from global_facade_owner_source_bridge import verify_owner_routes
+ ownerSourceBridge=verify_owner_routes(root)
+ assert 'PrimaryAlphabet=>ActualCompletion.Snapshot.SourcePolicy.Owner.Model.AcousticAlphabet' in emission
 assert 'if((glyph.Symbol.KindFlags&7)==4)'in emission
 assert 'TopOwner.GlyphPool.CopyRecord(glyph.Reference,token).AsSpan().SequenceEqual(glyph.ReadRecord())'in emission
 assert 'actualControlLabelLookup:text=>ReadControlLabel(text,token)'in emission
 assert 'return ushort.MaxValue;'in emission
-target.write_text(json.dumps(dict(noVendorExecution=True,baseline=baseline,
+target.write_text(json.dumps(dict(noVendorExecution=True,ownerCohortAuthentication=ownerCohortAuthentication,ownerSourceBridge=ownerSourceBridge,baseline=baseline,
     mechanicalCompactLoopSha256=digest,substitutions=['Span.AsSpan to Span.Slice','bound base source key',
     'scalar resolver delegate','score and cost delegates'],components=components,
     globalOrderedStages=order,scope='same actual postV68 global pool/acoustic AL/session/overlay; empty control2A/non-null empty alternate',

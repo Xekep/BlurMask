@@ -37,7 +37,9 @@ public sealed class LegacySourcePointChronology
         int[] counts=Counts(sourcePointCounts);int total=counts.Sum();
         var keys=new LegacySourcePointKey[total];int global=0;
         for(int s=0;s<counts.Length;s++)for(int p=0;p<counts[s];p++)keys[global++]=new(0,s,p);
-        return new(counts,keys,Enumerable.Range(0,total).ToArray(),[],1);
+        // Fresh native219 secondary16A130 initializes source+128 to200.
+        // Retain fractional265 map ticks through the later metadata lookup.
+        return new(counts,keys,Enumerable.Range(0,total).ToArray(),[],200);
     }
 
     /// <summary>

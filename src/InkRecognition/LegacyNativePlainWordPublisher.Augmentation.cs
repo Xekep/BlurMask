@@ -6,13 +6,21 @@ public sealed partial class LegacyNativePlainWordPublisher
     //219580 modifies fields of an ALREADY ADDED duplicate without creating279.
     // Snapshot is the current private275 list binding, never a payload clone issuer.
     internal void UpdateAugmentedDuplicate(LegacyNativePlainWordSpanSnapshot current,int ordinal,int originalCount,
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+        float score10,float cost18,float cost1c,ushort wordFlags30,CancellationToken token,LegacyPublicationScoreTrace? candidateTrace=null)
+#else
         float score10,float cost18,float cost1c,ushort wordFlags30,CancellationToken token)
+#endif
     {
         token.ThrowIfCancellationRequested();current.BeginApply(this,interning);
         if(released||!interning.Spans.TryGetValue(current.Span,out var words)||!current.RetainsNativeList(words)||
             words.Count!=current.Words.Count||words.Where((w,i)=>!ReferenceEquals(w,current.Words[i])).Any()||
             (uint)ordinal>=words.Count||originalCount<1||originalCount>words.Count||ordinal<originalCount)throw new InvalidOperationException("Current actual same-TOP275 duplicate required.");
         byte[] data=words[ordinal].CopyStorage();
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+        if(candidateTrace is not null&&candidateTrace.CandidateAdmitCurrent(pool))candidateTrace.CaptureUpdateBefore(data);
+#else
+#endif
         BinaryPrimitives.WriteSingleLittleEndian(data.AsSpan(16),score10);
         BinaryPrimitives.WriteSingleLittleEndian(data.AsSpan(24),cost18);
         BinaryPrimitives.WriteSingleLittleEndian(data.AsSpan(28),cost1c);
@@ -23,6 +31,10 @@ public sealed partial class LegacyNativePlainWordPublisher
         foreach(var node in current.SelectedNodes)
             if(node.WordIndex==ordinal)node.RebindWord(ordinal,replacement);
         words[ordinal]=replacement;
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+        if(candidateTrace is not null&&candidateTrace.CandidateAdmitCurrent(pool))candidateTrace.CaptureUpdateApplied(data);
+#else
+#endif
     }
     internal void RequireSoleActiveSourceHead(LegacyNativePublishedWordNode actual)
     {

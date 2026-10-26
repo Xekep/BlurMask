@@ -1,0 +1,1973 @@
+{
+  "Scope": "Synthetic map data only; no actual inputs/resources",
+  "Cases": [
+    {
+      "Name": "half-original",
+      "OriginalCounts": [
+        3
+      ],
+      "Steps": [
+        {
+          "Counts": [
+            5
+          ],
+          "Ticks": [
+            0,
+            100,
+            200,
+            300,
+            400
+          ],
+          "IncomingFactor": 200
+        }
+      ],
+      "ExpectedBefore": [
+        {
+          "Counts": [
+            5
+          ],
+          "Snapshot": {
+            "SourceFactor": 1,
+            "Map": [
+              0,
+              0,
+              1,
+              1,
+              2
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 1,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 2,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 3,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 4,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "ExpectedAfter": [
+        {
+          "Counts": [
+            5
+          ],
+          "Snapshot": {
+            "SourceFactor": 200,
+            "Map": [
+              0,
+              100,
+              200,
+              300,
+              400
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 1,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 100,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 2,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 3,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 100,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 4,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "Name": "near-boundaries",
+      "OriginalCounts": [
+        3
+      ],
+      "Steps": [
+        {
+          "Counts": [
+            7
+          ],
+          "Ticks": [
+            0,
+            1,
+            199,
+            200,
+            201,
+            399,
+            400
+          ],
+          "IncomingFactor": 200
+        }
+      ],
+      "ExpectedBefore": [
+        {
+          "Counts": [
+            7
+          ],
+          "Snapshot": {
+            "SourceFactor": 1,
+            "Map": [
+              0,
+              0,
+              0,
+              1,
+              1,
+              1,
+              2
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 1,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 2,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 3,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 4,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 5,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 6,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "ExpectedAfter": [
+        {
+          "Counts": [
+            7
+          ],
+          "Snapshot": {
+            "SourceFactor": 200,
+            "Map": [
+              0,
+              1,
+              199,
+              200,
+              201,
+              399,
+              400
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 1,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 199,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 2,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 1,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 3,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 4,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 199,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 5,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 1,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 6,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "Name": "two-physical",
+      "OriginalCounts": [
+        2,
+        3
+      ],
+      "Steps": [
+        {
+          "Counts": [
+            3,
+            4
+          ],
+          "Ticks": [
+            0,
+            100,
+            200,
+            400,
+            500,
+            600,
+            800
+          ],
+          "IncomingFactor": 200
+        }
+      ],
+      "ExpectedBefore": [
+        {
+          "Counts": [
+            3,
+            4
+          ],
+          "Snapshot": {
+            "SourceFactor": 1,
+            "Map": [
+              0,
+              0,
+              1,
+              2,
+              2,
+              3,
+              4
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 1,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 2,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 1,
+                "Point": 0,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  1,
+                  0
+                ]
+              },
+              {
+                "Stroke": 1,
+                "Point": 1,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  1,
+                  0
+                ]
+              },
+              {
+                "Stroke": 1,
+                "Point": 2,
+                "MetadataPointIndex": 3,
+                "KeyRecordIndex": 3,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  1,
+                  1
+                ]
+              },
+              {
+                "Stroke": 1,
+                "Point": 3,
+                "MetadataPointIndex": 4,
+                "KeyRecordIndex": 4,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  1,
+                  2
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "ExpectedAfter": [
+        {
+          "Counts": [
+            3,
+            4
+          ],
+          "Snapshot": {
+            "SourceFactor": 200,
+            "Map": [
+              0,
+              100,
+              200,
+              400,
+              500,
+              600,
+              800
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 1,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 100,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 2,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 1,
+                "Point": 0,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  1,
+                  0
+                ]
+              },
+              {
+                "Stroke": 1,
+                "Point": 1,
+                "MetadataPointIndex": 3,
+                "KeyRecordIndex": 3,
+                "RemainderByte": 100,
+                "Key": [
+                  0,
+                  1,
+                  1
+                ]
+              },
+              {
+                "Stroke": 1,
+                "Point": 2,
+                "MetadataPointIndex": 3,
+                "KeyRecordIndex": 3,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  1,
+                  1
+                ]
+              },
+              {
+                "Stroke": 1,
+                "Point": 3,
+                "MetadataPointIndex": 4,
+                "KeyRecordIndex": 4,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  1,
+                  2
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "Name": "identity-after-smoothing",
+      "OriginalCounts": [
+        3
+      ],
+      "Steps": [
+        {
+          "Counts": [
+            5
+          ],
+          "Ticks": [
+            0,
+            100,
+            200,
+            300,
+            400
+          ],
+          "IncomingFactor": 200
+        },
+        {
+          "Counts": [
+            5
+          ],
+          "Ticks": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "IncomingFactor": 1
+        }
+      ],
+      "ExpectedBefore": [
+        {
+          "Counts": [
+            5
+          ],
+          "Snapshot": {
+            "SourceFactor": 1,
+            "Map": [
+              0,
+              0,
+              1,
+              1,
+              2
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 1,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 2,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 3,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 4,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "Counts": [
+            5
+          ],
+          "Snapshot": {
+            "SourceFactor": 1,
+            "Map": [
+              0,
+              0,
+              1,
+              1,
+              2
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 1,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 2,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 3,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 4,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "ExpectedAfter": [
+        {
+          "Counts": [
+            5
+          ],
+          "Snapshot": {
+            "SourceFactor": 200,
+            "Map": [
+              0,
+              100,
+              200,
+              300,
+              400
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 1,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 100,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 2,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 3,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 100,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 4,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "Counts": [
+            5
+          ],
+          "Snapshot": {
+            "SourceFactor": 200,
+            "Map": [
+              0,
+              100,
+              200,
+              300,
+              400
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 1,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 100,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 2,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 3,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 100,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 4,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "Name": "insert-copies-prior",
+      "OriginalCounts": [
+        3
+      ],
+      "Steps": [
+        {
+          "Counts": [
+            5
+          ],
+          "Ticks": [
+            0,
+            100,
+            200,
+            300,
+            400
+          ],
+          "IncomingFactor": 200
+        },
+        {
+          "Counts": [
+            6
+          ],
+          "Ticks": [
+            0,
+            1,
+            1,
+            2,
+            3,
+            4
+          ],
+          "IncomingFactor": 1
+        }
+      ],
+      "ExpectedBefore": [
+        {
+          "Counts": [
+            5
+          ],
+          "Snapshot": {
+            "SourceFactor": 1,
+            "Map": [
+              0,
+              0,
+              1,
+              1,
+              2
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 1,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 2,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 3,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 4,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "Counts": [
+            6
+          ],
+          "Snapshot": {
+            "SourceFactor": 1,
+            "Map": [
+              0,
+              0,
+              0,
+              1,
+              1,
+              2
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 1,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 2,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 3,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 4,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 5,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "ExpectedAfter": [
+        {
+          "Counts": [
+            5
+          ],
+          "Snapshot": {
+            "SourceFactor": 200,
+            "Map": [
+              0,
+              100,
+              200,
+              300,
+              400
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 1,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 100,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 2,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 3,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 100,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 4,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "Counts": [
+            6
+          ],
+          "Snapshot": {
+            "SourceFactor": 200,
+            "Map": [
+              0,
+              100,
+              100,
+              200,
+              300,
+              400
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 1,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 100,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 2,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 100,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 3,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 4,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 100,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 5,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "Name": "second-fractional-compose",
+      "OriginalCounts": [
+        3
+      ],
+      "Steps": [
+        {
+          "Counts": [
+            5
+          ],
+          "Ticks": [
+            0,
+            100,
+            200,
+            300,
+            400
+          ],
+          "IncomingFactor": 200
+        },
+        {
+          "Counts": [
+            6
+          ],
+          "Ticks": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            8
+          ],
+          "IncomingFactor": 2
+        }
+      ],
+      "ExpectedBefore": [
+        {
+          "Counts": [
+            5
+          ],
+          "Snapshot": {
+            "SourceFactor": 1,
+            "Map": [
+              0,
+              0,
+              1,
+              1,
+              2
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 1,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 2,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 3,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 4,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "Counts": [
+            6
+          ],
+          "Snapshot": {
+            "SourceFactor": 1,
+            "Map": [
+              0,
+              0,
+              0,
+              0,
+              1,
+              2
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 1,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 2,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 3,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 4,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 5,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "ExpectedAfter": [
+        {
+          "Counts": [
+            5
+          ],
+          "Snapshot": {
+            "SourceFactor": 200,
+            "Map": [
+              0,
+              100,
+              200,
+              300,
+              400
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 1,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 100,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 2,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 3,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 100,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 4,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "Counts": [
+            6
+          ],
+          "Snapshot": {
+            "SourceFactor": 200,
+            "Map": [
+              0,
+              50,
+              100,
+              150,
+              200,
+              400
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 1,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 150,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 2,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 100,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 3,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 50,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 4,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 5,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  2
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "Name": "no-fraction-and-suffix",
+      "OriginalCounts": [
+        2,
+        2
+      ],
+      "Steps": [
+        {
+          "Counts": [
+            2,
+            2
+          ],
+          "Ticks": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "IncomingFactor": 1
+        }
+      ],
+      "ExpectedBefore": [
+        {
+          "Counts": [
+            2,
+            2
+          ],
+          "Snapshot": {
+            "SourceFactor": 1,
+            "Map": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 1,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 1,
+                "Point": 0,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  1,
+                  0
+                ]
+              },
+              {
+                "Stroke": 1,
+                "Point": 1,
+                "MetadataPointIndex": 3,
+                "KeyRecordIndex": 3,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  1,
+                  1
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "ExpectedAfter": [
+        {
+          "Counts": [
+            2,
+            2
+          ],
+          "Snapshot": {
+            "SourceFactor": 200,
+            "Map": [
+              0,
+              200,
+              400,
+              600
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "Stroke": 0,
+                "Point": 1,
+                "MetadataPointIndex": 1,
+                "KeyRecordIndex": 1,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "Stroke": 1,
+                "Point": 0,
+                "MetadataPointIndex": 2,
+                "KeyRecordIndex": 2,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  1,
+                  0
+                ]
+              },
+              {
+                "Stroke": 1,
+                "Point": 1,
+                "MetadataPointIndex": 3,
+                "KeyRecordIndex": 3,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  1,
+                  1
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "Name": "single-point",
+      "OriginalCounts": [
+        1
+      ],
+      "Steps": [
+        {
+          "Counts": [
+            1
+          ],
+          "Ticks": [
+            0
+          ],
+          "IncomingFactor": 200
+        }
+      ],
+      "ExpectedBefore": [
+        {
+          "Counts": [
+            1
+          ],
+          "Snapshot": {
+            "SourceFactor": 1,
+            "Map": [
+              0
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "ExpectedAfter": [
+        {
+          "Counts": [
+            1
+          ],
+          "Snapshot": {
+            "SourceFactor": 200,
+            "Map": [
+              0
+            ],
+            "Points": [
+              {
+                "Stroke": 0,
+                "Point": 0,
+                "MetadataPointIndex": 0,
+                "KeyRecordIndex": 0,
+                "RemainderByte": 0,
+                "Key": [
+                  0,
+                  0,
+                  0
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

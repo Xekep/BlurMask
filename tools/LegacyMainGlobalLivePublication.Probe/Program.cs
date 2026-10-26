@@ -11,6 +11,7 @@ var table = LegacyCursiveSeparationTable.Load(File.ReadAllBytes(args[2])); using
 var model = LegacyRussianModelBundle.Load(ak, lk, engine); byte[] line30 = File.ReadAllBytes(args[5]), line50 = File.ReadAllBytes(args[6]);
 
 int guards = 0; long comparedBytes = 0; int comparedContexts = 0; ulong allocationIdentity = 0x10000;
+var globalInputCapture=new GlobalPublicationInputCapture(ak,lk,args[3],args[4]);
 using var file = File.Create(args[7]); using var writer = new Utf8JsonWriter(file); writer.WriteStartArray();
 foreach (int physical in new[] { 31, 35, 60, 61, 1 })
 {
@@ -57,7 +58,9 @@ foreach (int physical in new[] { 31, 35, 60, 61, 1 })
     var pass = nativeGate
         ? LegacyFreshMainGlobalWordPass.CreateWithIntermediatePublication(ak, policy, Allocate, confidence, residue, Observe)
         : LegacyFreshMainGlobalWordPass.CreateWithPreparedPublicationAtNode(ak, policy, Allocate, confidence, residue, 2, Observe);
+    using var liveInputFrame=globalInputCapture.Begin();
     var result = pass.RunOwned();
+    var liveAllocatorInputs=liveInputFrame.Complete();
     var terminal = LegacyFreshMainGlobalTerminalInvocation.Prepare(policy).Select(result);
     var referencePolicy = FreshPolicy(); referencePolicy.Owner.LiveReadLog = [];
     var referencePublications = new List<OriginalGlobalLiveSchedulerOracle.Publication>();
@@ -117,6 +120,7 @@ foreach (int physical in new[] { 31, 35, 60, 61, 1 })
     }
 
     LegacyFreshMainGlobalCompactWordMaterialization? final = null;
+    GlobalPublicationInputCapture.Allocation[] finalAllocatorInputs=[];
     if (terminal.Winner.HasWinner)
     {
         Reject(() => LegacyFreshMainGlobalCompactWordMaterialization.MaterializeWithIntermediatePublication(new byte[ak.Length], terminal, confidence));
@@ -124,7 +128,9 @@ foreach (int physical in new[] { 31, 35, 60, 61, 1 })
             LegacyFreshMainGlobalGlyphConfidence.Prepare(ak, FreshPolicy().Owner)));
         Reject(() => LegacyFreshMainGlobalCompactWordMaterialization.MaterializeWithIntermediatePublication(ak, terminal, confidence, new(true)));
         byte[] originalPool = result.CopyIntermediateCompactStorage();
+        using var finalInputFrame=globalInputCapture.Begin();
         final = LegacyFreshMainGlobalCompactWordMaterialization.MaterializeWithIntermediatePublication(ak, terminal, confidence);
+        finalAllocatorInputs=finalInputFrame.Complete();
         Reject(() => _ = final.Reachability);
         if (!originalPool.AsSpan().SequenceEqual(result.CopyIntermediateCompactStorage()) ||
             result.NextCompactPublicationNode2490 != boundary || result.IntermediatePublicationCount != 1)
@@ -134,7 +140,7 @@ foreach (int physical in new[] { 31, 35, 60, 61, 1 })
         Reject(() => LegacyFreshMainGlobalCompactWordMaterialization.MaterializeWithIntermediatePublication(ak, terminal, confidence));
     }
     else Reject(() => LegacyFreshMainGlobalCompactWordMaterialization.MaterializeWithIntermediatePublication(ak, terminal, confidence));
-    writer.WriteStartObject(); writer.WriteNumber("factory", 0x292); writer.WriteString("publicationKind", "live");
+    writer.WriteStartObject();globalInputCapture.Write(writer,liveAllocatorInputs,policy.Configuration.PrimaryAlternativeCount2402); writer.WriteNumber("factory", 0x292); writer.WriteString("publicationKind", "live");
     writer.WriteBoolean("nativeGate", nativeGate); writer.WriteNumber("nodeCount", boundary);
     writer.WriteNumber("actualGraphNodeCount", result.NodeCount); writer.WriteNumber("maximumAtoms", graph.State.MaximumAtoms);
     writer.WriteNumber("intermediatePublicationDistance", policy.MaximumParentDistance54);
@@ -146,6 +152,7 @@ foreach (int physical in new[] { 31, 35, 60, 61, 1 })
     writer.WriteNumber("evaluations", owner.AcousticEvaluations); writer.WriteNumber("liveBackendReadLogCount", owner.LiveReadLog.Count);
     if (final is not null)
     {
+        GlobalPublicationInputCapture.WriteInputs(writer,"finalPublicationAllocatorInputs",liveAllocatorInputs.Concat(finalAllocatorInputs));
         writer.WriteNumber("finalCount", final.RecordCount); writer.WriteNumber("finalSelected", final.SelectedRecordIndex);
         writer.WriteBase64String("finalCompact", final.CopyCompactStorage()); WriteInts("finalStarts", final.CopyNodeStarts2478());
         WriteInts("finalPrefixOwners2488", final.CopyPrefixOwners2488()); writer.WriteNumber("finalWinner", terminal.Winner.Ordinal);
@@ -192,7 +199,7 @@ foreach (int physical in new[] { 31, 35, 60, 61, 1 })
 }
 writer.WriteEndArray(); writer.Flush(); Console.WriteLine($"PASS actual global LIVE/append; {guards} guards/{comparedBytes} full bytes/{comparedContexts} symbolic fields");
 LegacyMainDirectStorageAllocation Allocate(LegacyMainDirectStorageRequest r)
-{ var b = new byte[r.RequiredBytes]; r.PreviousStorage.Span.CopyTo(b); return new(b, ++allocationIdentity); }
+{ var b = new byte[r.RequiredBytes]; r.PreviousStorage.Span.CopyTo(b);ulong id=++allocationIdentity;globalInputCapture.Observe(r,id,b);return new(b,id); }
 void Reject(Action action)
 {
     try { action(); } catch (Exception e) when (e is ArgumentException or InvalidOperationException or NotSupportedException or OperationCanceledException) { guards++; return; }

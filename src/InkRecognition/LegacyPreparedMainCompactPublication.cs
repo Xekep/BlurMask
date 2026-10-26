@@ -13,9 +13,12 @@ internal static class LegacyPreparedMainCompactPublication
         LegacyMainDirectWordNodeResult[] markedNodes,Func<int,ushort,CancellationToken,bool> hasLanguageContinuation,
         Func<int,LegacyMainCompactGroupScores> scoreGroup,ReadOnlySpan<byte> initialStorage,int initialCount,
         ReadOnlySpan<int> initialStarts,ReadOnlySpan<int> initialPrefixOwners,Action<CancellationToken> validate,
-        CancellationToken cancellationToken,ReadOnlySpan<uint> actualSourceHeaders)
+        CancellationToken cancellationToken,ReadOnlySpan<uint> actualSourceHeaders,
+        LegacyFreshMainGlobalPublicationContext? globalLanguage=null)
     {
         int primary = configuration.PrimaryArcLimit230a;
+        if(globalLanguage is not null&&(!globalLanguage.IsFor(configuration,contexts)||configuredSecondary))
+            throw new ArgumentException("Actual GLOBAL language/publication context required.");
                 var categories = new LegacyCursiveCategoryMapper(categoryProfile);
         var policy = LegacyPreparedCompactWordContextPolicy.FromAlphabet(alphabet, false, false,
             contextSentinels);
@@ -42,8 +45,10 @@ internal static class LegacyPreparedMainCompactPublication
             prefixOwners[node] = startingNode - 1;
             var usedArcs = new bool[graph.GetNode(node).Count];
             var candidates = new List<Candidate>();
+            var publicationNode=globalLanguage?.PrepareNode(node,cancellationToken);
             for (ushort ordinal = 0; ordinal < primary; ordinal++)
             {
+                publicationNode?.Candidates.ResetOrdinal(cancellationToken);
                 for (int alternative = 0; alternative < 2; alternative++)
                 {
                     int at = (ordinal * 2 + alternative) * 40;
@@ -53,14 +58,51 @@ internal static class LegacyPreparedMainCompactPublication
                         throw new NotSupportedException("Unexpanded ordinary source1 fallback candidate required.");
                     int arc = U16(row, 0x1c);
                     ValidateArc(node, arc);
-                    //DIRECT2B7.V58=05A3F0 returns0. Fresh292's preceding V80
-                    //also resets its separate V58 cache; normal233090 query
-                    //slots never fill8FC0/8FC4. Thus LIVE and final233FC0 fetch
-                    //the same empty innerV58 and take209095's real fallback.
+                    ulong tag=U64(row,0);
+                    if(publicationNode is not null&&(tag&(1UL<<41))!=0)
+                    {
+                        var language=publicationNode.Language.EvaluateTerminal(node,tag,U16(row,0x24),cancellationToken);
+                        if(language.Accepted)
+                        {
+                            //A nonempty native language page suppresses original
+                            //fallback even when bounded207B00 rejects its row.
+                            int cost=unchecked(I32(pools[node],at)+I32(language.Record40.Span,0));
+                            int slot=publicationNode.Candidates.TryAllocate(cost,cancellationToken);
+                            if(slot!=0)
+                            {
+                                var candidate=publicationNode.Candidates.AdmittedRow(slot);
+                                BinaryPrimitives.WriteUInt16LittleEndian(candidate,ordinal);candidate[2]=(byte)alternative;
+                                BinaryPrimitives.WriteUInt16LittleEndian(candidate[3..],1);candidate[5]=0;
+                                BinaryPrimitives.WriteInt32LittleEndian(candidate[12..],I32(pools[node],at+4));
+                                BinaryPrimitives.WriteUInt64LittleEndian(candidate[24..],tag);
+                                BinaryPrimitives.WriteUInt64LittleEndian(candidate[32..],U64(pools[node],at+0x10));
+                                BinaryPrimitives.WriteInt32LittleEndian(candidate[40..],I32(row,0x34));
+                                BinaryPrimitives.WriteUInt32LittleEndian(candidate[44..],graph.GetNode(node)[arc].EndContextId);
+                                //Original tag56 is explicitly clear. Native
+                                //copies LM+24, never the distinct wordID+28.
+                                BinaryPrimitives.WriteInt32LittleEndian(candidate[48..],I32(language.Record40.Span,24));
+                            }
+                            continue;
+                        }
+                    }
+                    //Legacy non-GLOBAL callers retain their previous bounded
+                    //fallback path until their actual language owner is supplied.
+                    //GLOBAL's actual language owner above is distinct from
+                    //dictionary2B7.V58 and case292's continuation cache.
                     candidates.Add(new(ordinal, alternative, I32(pools[node], at), I32(pools[node], at + 4),
                         U64(row, 0), U64(pools[node], at + 0x10), I32(row, 0x34),
                         graph.GetNode(node)[arc].EndContextId));
                 }
+                //Native appends this ordinal's accepted heap after its direct
+                //fallback rows, then reuses the same heap for the next ordinal.
+                if(publicationNode is not null)
+                    for(int slot=1;slot<=publicationNode.Candidates.Count;slot++)
+                    {
+                        var candidate=publicationNode.Candidates.AdmittedRow(slot);
+                        candidates.Add(new(U16(candidate,0),candidate[2],I32(candidate,8),I32(candidate,12),
+                            U64(candidate,24),U64(candidate,32),I32(candidate,40),
+                            BinaryPrimitives.ReadUInt32LittleEndian(candidate[44..]),I32(candidate,48),candidate[3]!=0));
+                    }
             }
             Sort(candidates, contexts, cancellationToken);
             int groupStart = 0, selectedDistinct = 0;
@@ -347,7 +389,7 @@ internal static class LegacyPreparedMainCompactPublication
     }
 
     private sealed class Candidate(ushort ordinal, int alternative, int cost, int increment,
-        ulong tag, ulong context, int groupKey, uint endContext) : ILegacyMainPrimaryCompactFlagRow
+        ulong tag, ulong context, int groupKey, uint endContext,int auxiliary=-1,bool? fallbackByte3=null) : ILegacyMainPrimaryCompactFlagRow
     {
         public ushort Ordinal { get; } = ordinal;
         public int Alternative { get; } = alternative;
@@ -357,11 +399,11 @@ internal static class LegacyPreparedMainCompactPublication
         public ulong Context { get; } = context;
         public int GroupKey { get; } = groupKey;
         public uint EndContext { get; } = endContext;
-        //209095 empty-V58 fallback was admitted above only for row30==-1.
+        //209095 fallback was admitted above only for row30==-1.
         //20907F also tests original tag.bit41: only terminal tags set byte3=1.
-        //Byte4=0; other expansion producers remain refused.
-        public bool FallbackByte3 => (Tag & (1UL << 41)) != 0;
-        public int Auxiliary => -1;
+        //Language rows carry native byte3=1; other expansion producers remain refused.
+        public bool FallbackByte3 => fallbackByte3??(Tag & (1UL << 41)) != 0;
+        public int Auxiliary => auxiliary;
         public bool TerminalBit3 { get; set; }
         public bool Forced { get; set; }
     }

@@ -13,6 +13,11 @@ public sealed class LegacyFreshMainGlobalWordControllerPolicy
     public int MaximumParentDistance54=>120;
     public int FlagPrepassDistance58 {get;}
     public bool KnowledgeF5=>false;
+    //Closed fresh00C860/no-property GLOBAL factory: A4-qword clears AA;
+    //20C1C0 forwards that same AA into2540. This policy exposes no00E090,
+    //00E700(F0) or12D000D event ingress. Mutable/configured properties need
+    //their own actual prepared owner and cannot inherit this proof.
+    internal byte Knowledge2540=>0;
     public float SecondaryScaleEc=>0;
     public bool HasAssociatedSource=>false;
     public bool SchedulesSecondaryGroup1Fe740=>false;

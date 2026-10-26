@@ -7,3 +7,9 @@ tools/LegacyMathAkFreshWorkspace.Probe/baseline-counts.json -text whitespace=bla
 tools/LegacyMathAkFreshWorkspace.Probe/historical-source14.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 tools/LegacyEnglishOriginalInput.ActualEntry/fixtures/*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 tools/LegacyConfiguredTwoAltAugmentation.Probe/fixtures/*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# Preserve byte-authenticated independent oracle source across checkouts.
+tools/LegacyGlobalTextSourceWrapper.Probe/audit_output.py -text
+
+# Preserve exact bytes consumed by the conditional-source contract.
+src/InkRecognition/LegacyFreshMainGlobalWordTextPublication.cs -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

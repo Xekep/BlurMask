@@ -730,11 +730,11 @@ foreach ($case in $cases) {
     if ($LASTEXITCODE -ne 0) { throw 'LegacyMainGlobalGlyphFlush independent audit failed' }
   }
   if ($name -eq 'LegacyMainGlobalCompactMaterialization') {
-    python tools/LegacyMainGlobalCompactMaterialization.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-main-global-compact-materialization-native.json
+    python tools/LegacyMainGlobalCompactMaterialization.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-main-global-compact-materialization-native.json
     if ($LASTEXITCODE -ne 0) { throw 'LegacyMainGlobalCompactMaterialization independent audit failed' }
   }
   if ($name -eq 'LegacyMainGlobalLivePublication') {
-    python tools/LegacyMainGlobalLivePublication.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-main-global-live-publication-native.json
+    python tools/LegacyMainGlobalLivePublication.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-main-global-live-publication-native.json
     if ($LASTEXITCODE -ne 0) { throw 'LegacyMainGlobalLivePublication independent audit failed' }
   }
   if ($name -eq 'LegacyMainGlobalRepeatedPublication') {
@@ -742,7 +742,7 @@ foreach ($case in $cases) {
     if ($LASTEXITCODE -ne 0) { throw 'LegacyMainGlobalRepeatedPublication independent audit failed' }
   }
   if ($name -eq 'LegacyMainGlobalFinalPublication') {
-    python tools/LegacyMainGlobalFinalPublication.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res .artifacts/legacy-main-global-final-publication-native.json
+    python tools/LegacyMainGlobalFinalPublication.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json .artifacts/legacy-main-global-final-publication-native.json
     if ($LASTEXITCODE -ne 0) { throw 'LegacyMainGlobalFinalPublication independent audit failed' }
   }
   if ($name -eq 'LegacyMainGlobalSourceCallbacks') {
@@ -955,7 +955,7 @@ foreach ($case in $cases) {
     if ((Get-Content .artifacts/legacy-original-field-dom-native.json.stable.sha256) -ne (Get-Content .artifacts/legacy-original-field-dom-managed.json.stable.sha256)) { throw 'Original-selected document Managed/Native stable parity failed' }
   }
   if ($name -eq 'LegacyGlobalTextPublication') {
-    python -I tools/LegacyGlobalTextPublication.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-global-text-publication-native.json
+    python -B tools/LegacyGlobalTextPublication.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-global-text-publication-native.json .artifacts/publication-ci/diagnostic-trace.json .artifacts/publication-ci/diagnostic-no-trace.json
     if ($LASTEXITCODE -ne 0) { throw 'Global pre-NN publication native oracle failed' }
     if ((Get-FileHash .artifacts/legacy-global-text-publication-native.json).Hash -ne (Get-FileHash .artifacts/legacy-global-text-publication-managed.json).Hash) { throw 'Global pre-NN publication Managed/Native parity failed' }
   }

@@ -135,21 +135,12 @@ public sealed partial class ExperimentalGlobalTextRecognizer : IPositionedStroke
         var compact=source.Selection.Publication.CopyCompactStorage();int count=source.Selection.Publication.RecordCount2470;
         bool needsAugmentation=HasActiveAugmentation(compact,count,token);
         if(diagnostic is not null){diagnostic.Stage="completion";diagnostic.Route=needsAugmentation?"augmentation":"old-no-candidate";}
-        LegacyFreshMainGlobalTextSourceWrapper wrapper;
-        bool usesBatch=needsAugmentation||source.RawWordsInNativeHeadOrder.Count>1;
-        if(usesBatch)
-        {
-            var actual=LegacyFreshMainGlobalSourceBatchCompletion.Prepare(scope,source,completedAcoustic!,new byte[400],token:token);
-            actual.Run(new byte[120],new byte[40],new ushort[256],new byte[64],new byte[72],
-                new byte[4],new byte[4],new byte[4],new byte[4],token);
-            wrapper=LegacyFreshMainGlobalTextSourceWrapper.PrepareBatch(scope,actual,completedAcoustic!,publication,normalization!,circles!,token);
-            if(diagnostic is not null&&!needsAugmentation)diagnostic.Route="batch-zero-eligible";
-        }
-        else
-        {
-            var actual=scope.CompleteSources(new byte[400],new byte[4],new byte[4],token);
-            wrapper=LegacyFreshMainGlobalTextSourceWrapper.Prepare(scope,actual,completedAcoustic!,publication,normalization!,circles!,token);
-        }
+        // The same scope now owns the actual variable-WORD continuation for
+        // every positive source, including a genuinely zero-eligible batch.
+        var actual=scope.CompleteSources(new byte[400],new byte[4],new byte[4],token);
+        var wrapper=LegacyFreshMainGlobalTextSourceWrapper.Prepare(scope,actual,completedAcoustic!,publication,normalization!,circles!,token);
+        bool usesBatch=wrapper.ActualCompletion.BatchWords is not null;
+        if(diagnostic is not null&&!needsAugmentation)diagnostic.Route="batch-zero-eligible";
         if(diagnostic is not null)diagnostic.Stage="all275-text";
         var parent=LegacyFreshMainGlobalWordTextPublication.PrepareAllWords(wrapper,token);
         parent.Publish(new byte[40],new byte[8160],token);
@@ -192,7 +183,7 @@ public sealed partial class ExperimentalGlobalTextRecognizer : IPositionedStroke
                 if(diagnostic is not null)
                 {
                     float native=BitConverter.Int32BitsToSingle(BinaryPrimitives.ReadInt32LittleEndian(row.AsSpan(16)));
-                    diagnostic.Reason=!float.IsFinite(native)||native<.5f||native>1?"glyph-score-outside-half-to-one":"glyph-kind-or-text-policy";
+                    diagnostic.Reason=!float.IsFinite(native)||native<0||native>1?"glyph-score-outside-native-domain":"glyph-kind-or-text-policy";
                 }
                 return Empty();
             }
@@ -207,7 +198,7 @@ public sealed partial class ExperimentalGlobalTextRecognizer : IPositionedStroke
         var lineGeometry=LegacyCompletedGlobalTextWords.DecodePreparedLine(parent.CopySourceLines56());
         var run=new PositionedWordRun(selectedText,score,RecognizedWordInkBounds.FromOriginalRanges(snapshot,originalWord,token),lineGeometry,originalWord);
         token.ThrowIfCancellationRequested();
-        return new(selectedText,score,nodes){ExperimentalCandidateScore=true,WordRuns=Array.AsReadOnly(new[]{run}),WordRunsCoverFullInput=true};
+        return new(selectedText,score,nodes){ExperimentalCandidateScore=true,NativeSelectedText=true,WordRuns=Array.AsReadOnly(new[]{run}),WordRunsCoverFullInput=true};
         }
         finally
         {
@@ -233,12 +224,12 @@ public sealed partial class ExperimentalGlobalTextRecognizer : IPositionedStroke
         token.ThrowIfCancellationRequested();if(count<1||count>compact.Length/40)throw new InvalidDataException("Complete bounded active compact extent required.");
         for(int i=0;i<count;i++){token.ThrowIfCancellationRequested();if((compact[i*40+32]&8)!=0)return true;}return false;
     }
-    //Host policy is unchanged: native glyph+16 supplies an uncalibrated candidate, not probability.
+    //Native channel domain is structural; its value is not an acceptance probability.
     internal static bool TryAdmitSelectedGlyph(ReadOnlySpan<byte> record,string value,out float candidate)
     {
         candidate=0;if(record.Length!=40||(BinaryPrimitives.ReadUInt16LittleEndian(record[4..])&7)!=0)return false;
         float score=BitConverter.Int32BitsToSingle(BinaryPrimitives.ReadInt32LittleEndian(record[16..]));
-        if(!float.IsFinite(score)||score<.5f||score>1||string.IsNullOrWhiteSpace(value)||value.Any(char.IsWhiteSpace)||
+        if(!float.IsFinite(score)||score<0||score>1||string.IsNullOrWhiteSpace(value)||value.Any(char.IsWhiteSpace)||
             value.EnumerateRunes().Any(r=>Rune.GetUnicodeCategory(r) is UnicodeCategory.Control or UnicodeCategory.Format or UnicodeCategory.PrivateUse or UnicodeCategory.Surrogate))return false;
         candidate=score;return true;
     }

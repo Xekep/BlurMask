@@ -127,7 +127,11 @@ public sealed partial class LegacyNativePlainWordPublisher
     //13FE20 independently interns a WORD in an existing275 span owner. In
     //particular219580 must not allocate an extra279 list node when appending.
     internal LegacyNativePlainWordRecord InternPlainWord(LegacyNativeWordBuilder actualWord,
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+        LegacyNativeWordSourceSpan span,out int index,CancellationToken cancellationToken=default,LegacyPublicationScoreTrace? candidateTrace=null)
+#else
         LegacyNativeWordSourceSpan span,out int index,CancellationToken cancellationToken=default)
+#endif
     {
         ArgumentNullException.ThrowIfNull(actualWord);cancellationToken.ThrowIfCancellationRequested();
         if(released)throw new InvalidOperationException("A released279 publisher cannot append WORD payloads.");
@@ -138,11 +142,23 @@ public sealed partial class LegacyNativePlainWordPublisher
         if(words is not null)
             for(int i=0;i<words.Count;i++)if(words[i].HeadReference==actualWord.HeadReference){index=i;break;}
         LegacyNativePlainWordRecord record;
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+        if(index>=0)
+        {
+            record=words![index]; //Native exact64-bit head identity, not labels/costs.
+            if(candidateTrace is not null&&candidateTrace.CandidateAdmitCurrent(pool))candidateTrace.CaptureInternReused(index,chain);
+        }
+#else
         if(index>=0)record=words![index]; //Native exact64-bit head identity, not labels/costs.
+#endif
         else
         {
             if(interning.WordCount==4096)throw new ArgumentException("Stored words exceed the portable4096-word budget.");
             byte[] data=actualWord.CopyStorage(cancellationToken);
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+            if(candidateTrace is not null&&candidateTrace.CandidateAdmitCurrent(pool))candidateTrace.CaptureInternBefore(data,chain,ownerC4);
+#else
+#endif
             int capacity=0;
             for(int count=1;count<=chain.Length;count++)if(capacity<count)capacity=Math.Max(count,(int)(capacity*1.5));
             LegacyNativeWordBuilder.W64(data,32,0);
@@ -151,6 +167,10 @@ public sealed partial class LegacyNativePlainWordPublisher
             foreach(ulong reference in chain)
             {
                 cancellationToken.ThrowIfCancellationRequested();byte[] glyph=pool.CopyRecord(reference,cancellationToken);
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+                if(candidateTrace is not null&&candidateTrace.CandidateAdmitCurrent(pool))candidateTrace.CaptureInternGlyph(reference,glyph);
+#else
+#endif
                 ushort publication=LegacyNativeWordBuilder.U16(glyph,6);flags|=publication;
                 if((publication&0x800)!=0&&(publication&0x400)==0)carry=false;
             }
@@ -159,6 +179,10 @@ public sealed partial class LegacyNativePlainWordPublisher
             record=new(pool,data,flat);index=words?.Count??0;
             cancellationToken.ThrowIfCancellationRequested();
             if(words is null){words=[];interning.Spans.Add(span,words);}words.Add(record);interning.WordCount++;
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+            if(candidateTrace is not null&&candidateTrace.CandidateAdmitCurrent(pool))candidateTrace.CaptureInternApplied(data,flat,index);
+#else
+#endif
         }
         return record;
     }

@@ -19,9 +19,10 @@ public sealed partial class LegacyFreshMainGlobalSourceBatchCompletion
             throw new InvalidDataException("Actual residual/source cache accounting changed.");
         associatedResidualInputs+=residual;associatedRows+=rows;associationMergeRequests+=merges;newAssociatedExtraSources+=newExtras;
     }
+    private readonly object validationMeterGate=new();
     private int validationMeterThread;
     //DATA counters, not a receipt/issuer and not a helper/CPU/RSS measurement.
-    public long EnumeratedValidationLoopBodies=>validationVisits;
+    public long EnumeratedValidationLoopBodies{get{lock(validationMeterGate)return validationVisits;}}
     public long MaximumValidationLoopBodies=>validationVisitLimit;
     private void InitializeValidationMeter(long preflight)
     {
@@ -42,17 +43,35 @@ public sealed partial class LegacyFreshMainGlobalSourceBatchCompletion
             throw new NotSupportedException("Actual residual association exceeds remaining batch structural/copy policy before expansion.");
         associationVisits+=work;associationCopyReserve+=copied;
     }
+    private void ReleaseCompletedValidationMeter()
+    {
+        lock(validationMeterGate)
+        {
+            if(!Volatile.Read(ref complete)||phase!=3||faulted||current!=-1||!Volatile.Read(ref validationMeterInitialized)||
+                Volatile.Read(ref validationMeterThread)!=Environment.CurrentManagedThreadId)
+                throw new InvalidOperationException("Only the successful actual batch producer may release its completed validation meter.");
+            //No counter reset, budget refund or association authority transfer.
+            Volatile.Write(ref validationMeterThread,0);
+        }
+    }
     internal void RequireValidationBinding(LegacyNativePlainWordPublisher actual,LegacyNativePlainWordBatchBinding actualBinding)
     {if(!ReferenceEquals(actual,publisher)||!ReferenceEquals(actualBinding,binding))throw new InvalidOperationException("Same private batch validation budget/binding required.");}
     internal void DebitValidationLoops(long count,CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        //Preflight entry scans are separately bounded before initialization.
-        int boundThread=Volatile.Read(ref validationMeterThread);
-        if(boundThread!=0&&boundThread!=Environment.CurrentManagedThreadId)throw new InvalidOperationException("Same batch validation-meter thread required.");
-        if(!Volatile.Read(ref validationMeterInitialized))return;
-        if(count<0||count>validationVisitLimit-validationVisits-associationVisits)
-            throw new NotSupportedException("Batch cumulative source-validation loop policy exhausted before traversal.");
-        validationVisits+=count;
+        //Only completed DATA validation can outlive its producer thread.
+        //Keep admission+debit atomic when different completed readers share the meter.
+        lock(validationMeterGate)
+        {
+            //Preflight entry scans are separately bounded before initialization.
+            int boundThread=Volatile.Read(ref validationMeterThread);
+            if(boundThread!=0&&boundThread!=Environment.CurrentManagedThreadId)throw new InvalidOperationException("Same batch validation-meter thread required.");
+            if(!Volatile.Read(ref validationMeterInitialized))return;
+            if(boundThread==0&&(!Volatile.Read(ref complete)||phase!=3||faulted))
+                throw new InvalidOperationException("Only successfully completed batch validation may release its thread binding.");
+            if(count<0||count>validationVisitLimit-validationVisits-associationVisits)
+                throw new NotSupportedException("Batch cumulative source-validation loop policy exhausted before traversal.");
+            validationVisits+=count;
+        }
     }
 }

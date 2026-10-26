@@ -38,9 +38,21 @@ Require(tie.AsSpan().SequenceEqual(new[]{2,1,0}),"Equal-key native quicksort swa
 // Native ceiling and low-byte remainder are observable even for factor512.
 var fractional=LegacySourcePointChronology.CreatePrepared(new[]{3},new[]{new LegacySourcePointKey(0,0,0),new LegacySourcePointKey(0,0,1)},new[]{0,1},new uint[]{0,1,256},512);
 Require(fractional.Resolve(0,1).MetadataPointIndex==1 && fractional.Resolve(0,1).RemainderByte==255 && fractional.Resolve(0,2).RemainderByte==0,"Ceiling or low-byte remainder differs");
-var sample=ordinary.RemapPreparedPoints(new[]{3},new uint[]{0,1,4});
+// Keep explicit unit1 integer truncation independent of native ordinary200.
+var explicitUnit=LegacySourcePointChronology.CreatePrepared(new[]{3,2},
+    new[]{new LegacySourcePointKey(0,0,0),new LegacySourcePointKey(0,0,1),new LegacySourcePointKey(0,0,2),
+        new LegacySourcePointKey(0,1,0),new LegacySourcePointKey(0,1,1)},new[]{0,1,2,3,4},sourceFactor:1);
+var sample=explicitUnit.RemapPreparedPoints(new[]{3},new uint[]{0,1,4});
 var second=sample.RemapPreparedPoints(new[]{3},new uint[]{0,1,3},2);
 Require(second.PreparedPointMap.Span.SequenceEqual(new uint[]{0,0,2}),"Fractional explicit source remap integer truncation differs");
+// Native16A130 source factor200;16AA00 composes in the retained unit.
+var ordinarySample=ordinary.RemapPreparedPoints(new[]{3},new uint[]{0,1,4});
+Require(ordinarySample.SourceFactor==200 && ordinarySample.PreparedPointMap.Span.SequenceEqual(new uint[]{0,200,800}),"Native ordinary200 initial map unit differs");
+var ordinarySecond=ordinarySample.RemapPreparedPoints(new[]{3},new uint[]{0,1,3},2);
+Require(ordinarySecond.PreparedPointMap.Span.SequenceEqual(new uint[]{0,100,500}),"Native ordinary200 fractional source remap differs");
+Require(ordinarySecond.Resolve(0,1).MetadataPointIndex==1 && ordinarySecond.Resolve(0,1).RemainderByte==100 &&
+    ordinarySecond.Resolve(0,2).MetadataPointIndex==3 && ordinarySecond.Resolve(0,2).RemainderByte==100 &&
+    ordinarySecond.Resolve(0,2).Key==new LegacySourcePointKey(0,1,0),"Native ordinary200 ceiling/remainder/key ownership differs");
 Reject(()=>LegacySourcePointChronology.ComposePointMap(new uint[]{1},0,[],1));
 Reject(()=>LegacySourcePointChronology.ComposePointMap(new uint[]{3},2,new uint[]{0,1},1));
 Reject(()=>ordinary.RemapPreparedPoints(new[]{1},new uint[]{0},0));

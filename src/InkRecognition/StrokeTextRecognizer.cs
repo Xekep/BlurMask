@@ -7,6 +7,9 @@ public sealed record TextRecognition(string Text, float Confidence, int Frames)
     /// <summary>Experimental native scores are candidate scores,
     /// not calibrated recognition probabilities. Hosts must label this mode.</summary>
     public bool ExperimentalCandidateScore { get; init; }
+    /// <summary>Completed native selected TEXT with checked original coverage.
+    /// Its numeric candidate channel is not a correctness probability.</summary>
+    public bool NativeSelectedText { get; internal init; }
     /// <summary>Optional ordered detached WORDs; multiple runs do not advertise flat Text.</summary>
     public IReadOnlyList<PositionedWordRun>? WordRuns { get; init; }
     public bool WordRunsCoverFullInput { get; init; }

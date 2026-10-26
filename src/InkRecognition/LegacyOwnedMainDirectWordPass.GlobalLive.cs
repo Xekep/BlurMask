@@ -2,6 +2,12 @@ namespace InkRecognition;
 
 public sealed partial class LegacyOwnedMainDirectWordPass
 {
+    internal LegacyFreshMainGlobalPublicationStorage RequireGlobalPublicationStorage(LegacyFreshMainGlobalWordControllerPolicy actual)
+    {
+        if(!ReferenceEquals(policy.Global,actual)||globalPublicationStorage is null||!globalPublicationStorage.IsFor(actual))
+            throw new ArgumentException("Actual producing GLOBAL scheduler allocator required.");
+        return globalPublicationStorage;
+    }
     private LegacyFreshMainGlobalCaseSession.LiveQueryLease? globalLivePublicationEpoch;
     private LegacyFreshMainGlobalWordPassResult? globalCompletedPublicationResult;
     internal LegacyNativeDelimiterQuerySource BindGlobalResultPublicationReader(LegacyFreshMainGlobalWordPassResult result,
@@ -47,7 +53,9 @@ public sealed partial class LegacyOwnedMainDirectWordPass
             int start = publication.State.NextNode, previousCount = publication.State.Count;
             int acousticBefore = source.AcousticEvaluations;
             var stage = publication.State.Publish(endingNode, Snapshot, delimiter, publication.Confidence,
-                cancellation => source.ValidateLiveQueryLease(lease, cancellation), token);
+                cancellation => source.ValidateLiveQueryLease(lease, cancellation), token,
+                LegacyFreshMainGlobalPublicationContext.ForLive(policy.Global!,RequireGlobalPublicationStorage(policy.Global!),
+                    lease,start,token));
             if (source.AcousticEvaluations != acousticBefore)
                 throw new InvalidOperationException("Compact publication cannot reevaluate main NN caches.");
             if (publication.Observer is { } observer)

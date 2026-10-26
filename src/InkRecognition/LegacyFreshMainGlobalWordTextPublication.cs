@@ -98,7 +98,7 @@ public sealed partial class LegacyFreshMainGlobalWordTextPublication
     {
         Wrapper=wrapper;wrapper.ValidatePreclaim(token);var completion=wrapper.ActualCompletion;
         batchWords=completion.BatchWords;selectedWordIndex=completion.Word.WordIndex;
-        if(completion.Snapshot.ActiveAlternativeCount60!=1||(batchWords is null&&(completion.Word.Next is not null||selectedWordIndex!=0))||
+        if(completion.Snapshot.ActiveAlternativeCount60!=1||(batchWords is null&&(completion.Word.Next is not null||selectedWordIndex!=0&&!completion.HasActualRankedSingletonFacade))||
             !ReferenceEquals(completion.Snapshot.WordHead18,completion.Word)||
             !ReferenceEquals(Scope.Seed,Scope.Context.Result.PublicationSeed)||
             !ReferenceEquals(Scope.Seed.PendingSelections,Scope.SharedState.Selections)||
@@ -191,7 +191,6 @@ public sealed partial class LegacyFreshMainGlobalWordTextPublication
                 if(batchWords is null)throw new NotSupportedException("All275 publication currently requires ordinary base-source glyph owners.");
                 RequireHigherMetadata(higher,source,token);
             }
-            if(batchWords is null)budget.AddSource(owner.Records.Length/40,compactCount,source.ReferenceCount,Scope.Document.ObjectCount);
             int matchingCompact=0;
             for(int row=starts[source.BaseNode];row<starts[source.BaseNode+1];row++)
             {
@@ -203,11 +202,10 @@ public sealed partial class LegacyFreshMainGlobalWordTextPublication
                 if(resolved.ExternalVariant!=0||resolved.EmittedSymbol is>=0xfff9 and<=0xfffc)
                     throw new NotSupportedException("Nonordinary compact replacement/control variants require a separate parent budget contract.");
             }
-            //The new batch uses the exact same three predicates as the
-            //refresh kernel, over its same private compact/source interval.
-            //Only those rows can append; unrelated source rows cannot emit
-            //alternatives here. Standalone's historical bound stays intact.
-            if(batchWords is not null)budget.AddSource(owner.Records.Length/40,matchingCompact,source.ReferenceCount,Scope.Document.ObjectCount);
+            //Both singleton and batch bindings use the same private refresh
+            //kernel/source interval and predicates above. Only matching rows
+            //can append; unrelated global compact rows cannot emit here.
+            budget.AddSource(owner.Records.Length/40,matchingCompact,source.ReferenceCount,Scope.Document.ObjectCount);
             if(allWords is not null)
             {
                 if(allWordRefreshCandidates!.TryGetValue(ownerKey,out int prior)&&prior!=matchingCompact)throw new InvalidDataException("Same actual source owner must retain its compact candidate extent.");
@@ -342,7 +340,16 @@ public sealed partial class LegacyFreshMainGlobalWordTextPublication
                 var published=LegacyNativeSourceLinePublication.Append(lines,0,lineInputs,guides,0,token);lines=published.Lines.ToArray();WrapperLineOffset=published.NextWrapperLineOffset;Record("source-lines");
                 text=new(this,textKey);stage="text-register";text.Selection=Scope.SharedState.Selections.CreateGlobalTextSelection(text,fault.Text,token);Record("text-registration-prefix");
                 if(text.Selection is null)throw new NotSupportedException("TEXT registration refused with its native counter/pending prefix retained.");
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+                Record("text-registered");stage="complete";completed=true;
+                // Only the already-owned singleton parent row; do not relabel a last batch row as its whole batch.
+                var scoreTrace=Scope.DiagnosticScoreTrace;
+                if(batchWords is null&&scoreTrace is not null&&scoreTrace.Admit(Wrapper.ActualCompletion.Source))
+                    scoreTrace.CaptureSelected("ParentSelectedCompleted",selectedWordIndex,wordStorage,wordReferences,true);
+                return this;
+#else
                 Record("text-registered");stage="complete";completed=true;return this;
+#endif
             }
             catch{faulted=true;allWords?.Fault(this);if(batchWords is not null)batchWords.Fault();stage="fault";Wrapper.FaultReservedWord(this);Record("fault");throw;}
         }

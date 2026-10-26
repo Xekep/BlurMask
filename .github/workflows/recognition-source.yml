@@ -5,6 +5,10 @@ on:
     branches: [main]
     paths:
       - 'src/InkRecognition/**'
+      - 'tools/LegacyContext226RoundedExtent.Probe/**'
+      - 'tools/LegacyOrdinaryChronologyFactor.Probe/**'
+      - 'tools/NativeSelectedTextAdmission.Probe/**'
+      - 'tools/WholeWordMatchingBound.Probe/**'
       - 'models/math/**'
       - 'models/ru-RU/**'
       - 'tools/LegacyMixedClassProbabilities.Probe/**'
@@ -42,6 +46,10 @@ on:
   pull_request:
     paths:
       - 'src/InkRecognition/**'
+      - 'tools/LegacyContext226RoundedExtent.Probe/**'
+      - 'tools/LegacyOrdinaryChronologyFactor.Probe/**'
+      - 'tools/NativeSelectedTextAdmission.Probe/**'
+      - 'tools/WholeWordMatchingBound.Probe/**'
       - 'models/math/**'
       - 'models/ru-RU/**'
       - 'tools/LegacyMixedClassProbabilities.Probe/**'
@@ -86,6 +94,25 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  ordinary-context:
+    name: Ordinary chronology and context / ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            11.0.100-preview.7.26381.103
+            10.0.x
+      - run: dotnet run --project tools/LegacyContext226RoundedExtent.Probe -c Release -- tools/LegacyContext226RoundedExtent.Probe/fake-inputs.json after
+      - run: dotnet run --project tools/LegacyOrdinaryChronologyFactor.Probe -c Release -- tools/LegacyOrdinaryChronologyFactor.Probe/fake-maps.json after
+      - run: dotnet run --project tools/NativeSelectedTextAdmission.Probe -c Release -- tools/NativeSelectedTextAdmission.Probe/fake-admission.json after
+      - run: dotnet run --project tools/WholeWordMatchingBound.Probe -c Release
   english-input:
     name: English input bootstrap / ${{ matrix.os }}
     strategy:

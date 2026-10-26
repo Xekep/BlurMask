@@ -7,11 +7,14 @@ It never imports production C# or uses the selected text as feedback.
 import ast,base64,hashlib,json,math,struct,sys
 from array import array
 from pathlib import Path
-if len(sys.argv) not in (4,5):raise SystemExit('AK LK capture.json [--fresh-case]')
-case_mode=len(sys.argv)==5
-if case_mode:assert sys.argv[4]=='--fresh-case'
+global_mode=len(sys.argv)==7 and sys.argv[4]=='--global-publication'
+if len(sys.argv) not in (4,5,7):raise SystemExit('AK LK capture.json [--fresh-case | --global-publication CASE PUBLICATION]')
+if len(sys.argv)==7:assert global_mode
+case_mode=len(sys.argv)==5 or global_mode
+if case_mode and not global_mode:assert sys.argv[4]=='--fresh-case' 
 ak=Path(sys.argv[1]).read_bytes();lk=Path(sys.argv[2]).read_bytes();c=json.loads(Path(sys.argv[3]).read_bytes())
 if case_mode:assert c['factory']==0x292
+if not global_mode:assert 'publicationOracleMode' not in c and 'publicationAllocatorInputs' not in c,'Explicit GLOBAL mode required' 
 assert hashlib.sha256(ak).hexdigest()=='7a5f08809e81fb4a2d4c78b3efd251d0986503b0d30d21de3695dab1f8a89978'
 assert hashlib.sha256(lk).hexdigest()=='d26ed08baf419361484958b3a04a5f740a228f4664f7e2643f43459223ef3e4e'
 def u16(b,p):return struct.unpack_from('<H',b,p)[0]
@@ -159,6 +162,18 @@ for n in reversed(range(len(rows))):
             else:active[pn]=True
             b[at+6]|=2;po,pn=u16(b,at+30),pn-s8(b,at+32)-1
 
+global_reference=None
+if global_mode:
+    import runpy
+    global_module=root/'tools/LegacyMainCompactMaterialization.Probe/global_language_reference.py'
+    global_raw=global_module.read_bytes()
+    assert hashlib.sha256(global_raw).hexdigest()=='2e4174cd38d8ad895fce784dbb04f988906de1bc57696bb876627ec57267d247','Unknown raw GLOBAL oracle source'
+    global_functions=runpy.run_path(str(global_module))
+    case_path,publication_path=Path(sys.argv[5]),Path(sys.argv[6])
+    assert 0<case_path.stat().st_size<=131072 and 0<publication_path.stat().st_size<=131072
+    global_reference=global_functions['GlobalReference'](c,ak,lk,case_path.read_bytes(),publication_path.read_bytes(),al)
+    assert global_module.read_bytes()==global_raw
+
 weights=[]
 for group in c['scores']:
     scale=struct.unpack('<f',struct.pack('<I',group['scaleBits']))[0]
@@ -205,13 +220,13 @@ def write(tag,coord,parent,cost,inc,symbol,alt,flags,value,aux):
     at=count*40;assert at+40<=len(storage)
     struct.pack_into('<QQiiiHHBB',storage,at,tag,coord,parent,wrap(cost),wrap(inc),symbol,alt,flags,value)
     w32(storage,at+36,aux);count+=1;return count-1
-def append(items,row,n,tag,parent,cost,inc,alternative,forced,value,bit3=False):
+def append(items,row,n,tag,parent,cost,inc,alternative,forced,value,bit3=False,aux=-1):
     for index,(symbol,kind,coord) in enumerate(items):
         final=index==len(items)-1;terminal6=False
         if final:
             terminal6=symbol in (N+1,N+2) or not(u16(row,24)!=n and row[5]&128) and symbol not in(special_e2,closed,knowledge) and symbol<65515 and row[26]&63!=startmap[symbol]
         parent=write(tag,coord,parent,cost,inc,symbol,alternative if final else 65535,
-            (kind&7)|(64 if terminal6 else 0)|(8 if final and bit3 else 0)|(16 if final and forced else 0),value,-1)
+            (kind&7)|(64 if terminal6 else 0)|(8 if final and bit3 else 0)|(16 if final and forced else 0),value,aux if final else -1)
     return parent
 def pool(n,o,k):return memoryview(pools[n])[(o*2+k)*40:(o*2+k+1)*40]
 def beam(n,o):return memoryview(rows[n])[o*88:(o+1)*88]
@@ -219,13 +234,20 @@ def previous(n,relative):return -1 if relative==65535 else starts[n]+relative
 penalty=int(f(f(f(c['penalty'])*f(.8))+.5))
 for n in range(len(rows)):
     starts.append(count);used=set();candidates=[]
+    if global_reference is not None:global_reference.begin_node(n)
     for o in range(primary):
+        if global_reference is not None:global_reference.reset_ordinal()
         for k in range(2):
             p=pool(n,o,k)
             if not p[27]&128:continue
             r=beam(n,o);arc=u16(r,28);assert r[4]==1 and i32(r,48)==-1
             assert (r[7]&1)==0 if case_mode else r[7]==0
-            candidates.append(dict(o=o,k=k,cost=i32(p,0),inc=i32(p,4),tag=u64(r,0),ctx=u64(p,16),key=i32(r,52),end=graph[n][arc][2],forced=False,bit3=False))
+            item=dict(o=o,k=k,cost=i32(p,0),inc=i32(p,4),tag=u64(r,0),ctx=u64(p,16),key=i32(r,52),end=graph[n][arc][2],forced=False,bit3=False)
+            if global_reference is not None:assert u16(r,36)!=global_reference.special_marker
+            if global_reference is not None and item['tag']&(1<<41) and global_reference.offer(item,u16(r,36)):
+                continue
+            candidates.append(item)
+        if global_reference is not None:candidates.extend(global_reference.heap.candidates())
     def compare(a,b):
         for field in ('key','end','cost'):
             delta=wrap(a[field]-b[field])
@@ -245,7 +267,7 @@ for n in range(len(rows)):
             first=left
     if candidates:sort(0,len(candidates)-1)
     #Native group quota resets on BOTH key/end changes, after unstable sort.
-    flag_rows=[dict(Tag=x['tag'],Context=x['ctx'],Auxiliary=-1,Fallback=bool(x['tag']&(1<<41)),Bit3=False,Bit4=False) for x in candidates]
+    flag_rows=[dict(Tag=x['tag'],Context=x['ctx'],Auxiliary=x.get('aux',-1),Fallback=x.get('fallback',bool(x['tag']&(1<<41))),Bit3=False,Bit4=False) for x in candidates]
     group_start=0;selected_distinct=0
     for index,item in enumerate(candidates):
         if index==0 or (item['key'],item['end'])!=(candidates[index-1]['key'],candidates[index-1]['end']):
@@ -260,7 +282,7 @@ for n in range(len(rows)):
         parent=-1 if pn<0 or reset else previous(pn,u16(pool(pn,po,pa),28))
         glyph=p[31]&31
         if not reset and pn>=0 and po>=primary:glyph=(glyph-(beam(pn,po)[33]&63))&255
-        terminal=append(frame(n,r,item['ctx'],prev_ctx,glyph),r,n,item['tag'],parent,item['cost']+(penalty if forced and source_headers[(item['tag']>>32)&255]&0x1c else 0),item['inc'],65535,forced,score_byte(n,r),bit3)
+        terminal=append(frame(n,r,item['ctx'],prev_ctx,glyph),r,n,item['tag'],parent,item['cost']+(penalty if forced and source_headers[(item['tag']>>32)&255]&0x1c else 0),item['inc'],65535,forced,score_byte(n,r),bit3,item.get('aux',-1))
         w16(p,28,terminal-starts[n]);used.add(u16(r,28))
     for o in range(limits[n]):
         r=beam(n,o)

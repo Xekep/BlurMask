@@ -28,6 +28,8 @@ public sealed partial class LegacyFreshMainGlobalWordAugmentation
         if(batchScope is null)throw new InvalidOperationException("Private batch worker required.");
         batchScope.RequireRanking(this,token);return RankCurrentSpan(batchWork,quota,left,right,envelope,token);
     }
+    internal LegacyOrdinaryGraphSourceReference[] CopyBatchReferences(LegacyFreshMainGlobalSourceBatchCompletion.SpanScope actual,CancellationToken token)
+    {actual.RequireText(this,token);return sourceReferences.ToArray();}
     internal int BatchTextReferenceCount(LegacyFreshMainGlobalSourceBatchCompletion.SpanScope actual,CancellationToken token)
     {if(!ReferenceEquals(batchScope,actual))throw new ArgumentException("Exact completed batch worker required.");actual.RequireText(this,token);return sourceReferences.Length;}
     internal LegacyNativeInkPositionRange[] ProjectBatchTextRanges(LegacyFreshMainGlobalSourceBatchCompletion.SpanScope actual,

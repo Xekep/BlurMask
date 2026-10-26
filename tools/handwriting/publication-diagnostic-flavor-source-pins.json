@@ -1,0 +1,140 @@
+{
+  "symbol": "BLURMASK_PUBLICATION_DIAGNOSTICS",
+  "scope": "Raw exact selection of directives only, no newline/hash waiver",
+  "core": [
+    {
+      "target": "src/InkRecognition/LegacyFreshMainGlobalPlainRecognition.cs",
+      "defaultSHA256": "7f369aa1f148889025e79fdeb3711b1c91c8ce4634142045742a297ee8f82029",
+      "diagnosticSHA256": "2e71aa4f2c5d8234a42cd5a15c1a1ec51bf8286e913bc6bf68503579f24222a2",
+      "conditionalSHA256": "f3a9aaf849fad5ffe7a167460eb798289d18d032bdcbd3897fc1e39c85753afe",
+      "defaultRawBytes": 12918,
+      "diagnosticRawBytes": 13171,
+      "oldCRLF": false,
+      "diagCRLF": true
+    },
+    {
+      "target": "src/InkRecognition/LegacyFreshMainGlobalWordAugmentation.cs",
+      "defaultSHA256": "3950061a0f668fd177abb1fa7de5450e01adc09dc52e993201c14d40bf379578",
+      "diagnosticSHA256": "bcd53a9b70b2d908a1c2e1f583261bbaaefa6c8f09d60c772a0880cdb45884ec",
+      "conditionalSHA256": "6d45e3d28158aabeaf04bb47c3f0da5c23fa709a70e8ae8dd0333c0863021b52",
+      "defaultRawBytes": 22485,
+      "diagnosticRawBytes": 28133,
+      "oldCRLF": true,
+      "diagCRLF": true
+    },
+    {
+      "target": "src/InkRecognition/LegacyFreshMainGlobalWordTextPublication.cs",
+      "defaultSHA256": "8c906a4055e756607cf4cb9a63fdcb165efe90876f35fe2016aa1c608b923f59",
+      "diagnosticSHA256": "4d2f6563d92e2947f2a181dfc40408f00d5e9a5226dc0f638b4c43dd46e82374",
+      "conditionalSHA256": "ae129692f216a56af7abc075e7ca73e9fbc0922b3d6ea2fe1d84369ab2413e7f",
+      "defaultRawBytes": 37141,
+      "diagnosticRawBytes": 37577,
+      "oldCRLF": true,
+      "diagCRLF": true
+    },
+    {
+      "target": "src/InkRecognition/LegacyNativePlainWordPublisher.cs",
+      "defaultSHA256": "bb1cb9171f01a7a3980e5002c5bacc2fd0899fccb4cbd6a76be7b58bf2f61f43",
+      "diagnosticSHA256": "a7b05c058f3ffa97d22f4c5bacb457b3bad872a80081662d420357bd36021454",
+      "conditionalSHA256": "16b679a3bc90e9f9f0103772f089ea238cddcafb8491e520dac343fb4b003f63",
+      "defaultRawBytes": 16181,
+      "diagnosticRawBytes": 16829,
+      "oldCRLF": true,
+      "diagCRLF": true
+    },
+    {
+      "target": "src/InkRecognition/LegacyNativePlainWordPublisher.Augmentation.cs",
+      "defaultSHA256": "79ff7fedf19f64f205e237738f6b52b21c6708c408cc328319c9b09fb3aa0905",
+      "diagnosticSHA256": "f8dd31b9da6c6b75719f7cc5aaa088090daa276bd45e5d62004df1f9bae7a4ea",
+      "conditionalSHA256": "214cc2fa78ac28d9c6ffdcf8c55ebd342bdf5de94e06b51fb265920138ce472a",
+      "defaultRawBytes": 2723,
+      "diagnosticRawBytes": 3023,
+      "oldCRLF": true,
+      "diagCRLF": true
+    },
+    {
+      "target": "src/InkRecognition/LegacyNativeGlyphRecordPool.Cleanup.cs",
+      "defaultSHA256": "f7a1429083cf2bcd58cb758c92b5d60ea179cc6954540d58ad5a5c58dccccddf",
+      "diagnosticSHA256": "903ea509b1b6aaf85d3c31c875d0fb4ca2ba860c70c46235138f8c7ed7824566",
+      "conditionalSHA256": "4fff3903d149b60d2d67bb90af24ea23e3523554c384a2b310655dd950c3337d",
+      "defaultRawBytes": 2574,
+      "diagnosticRawBytes": 3685,
+      "oldCRLF": false,
+      "diagCRLF": true
+    },
+    {
+      "target": "tools/LegacyGlobalTextPublication.ScoreDiagnostic/Source/LegacyPublicationScoreTrace.Diagnostic.cs",
+      "defaultSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "diagnosticSHA256": "21bc43b8968e09e533cf8658537c26df93f908024538a158ca757ea8ab2fbb84",
+      "conditionalSHA256": "b21a693bd5c03082fa650b28b8980d3e31b972b73aa8da8e553557fb2dcb75ba",
+      "defaultRawBytes": 0,
+      "diagnosticRawBytes": 13146,
+      "toolsOnlyCollector": true
+    },
+    {
+      "target": "tools/LegacyGlobalTextPublication.ScoreDiagnostic/Source/LegacyPublicationCandidateTrace.Diagnostic.cs",
+      "defaultSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "diagnosticSHA256": "43b4878ce7ca2986f16b0bf4322dbe5d374ffbe71dd96c3f5447953f1268d9e4",
+      "conditionalSHA256": "870a02babd67bd62b30a6a2728fe53bba13599237c24fef09da95d7fa66d2a75",
+      "defaultRawBytes": 0,
+      "diagnosticRawBytes": 18053,
+      "toolsOnlyCollector": true
+    }
+  ],
+  "meterFix": "Three disjoint V2 batch-completion files remain separate and unmodified by this packet.",
+  "project": {
+    "target": "src/InkRecognition/InkRecognition.csproj",
+    "sha256": "519d16488674ee239d6d1585961c4978ef27feb6d9254578c0d1785c5687a8c2"
+  },
+  "meterFixFiles": [
+    {
+      "target": "src/InkRecognition/LegacyFreshMainGlobalSourceBatchCompletion.ValidationWork.cs",
+      "original935SHA256": "32b17e2c84f29ac18adc605cad0530e31809969f0e0bbae87ad526142c50331e",
+      "v2SHA256": "a1bc378def3d535393ae2d83e591c9cd9de5ecfa713a805a982be24df83542be"
+    },
+    {
+      "target": "src/InkRecognition/LegacyFreshMainGlobalSourceBatchCompletion.cs",
+      "original935SHA256": "22543e0b2fb994a520a5578b83e432dc2626490edfdd27312ef4c9e421cd17d8",
+      "v2SHA256": "a2fe6c55ad376533e9b85cbf28b1580a8515a4d8f843552fbbb847245507426e"
+    },
+    {
+      "target": "src/InkRecognition/LegacyFreshMainGlobalSourceBatchCompletion.TextWords.cs",
+      "original935SHA256": "756eb266a642ec95debcd5dee453d23450e117acf308bc9f3d2db843758e8e3f",
+      "v2SHA256": "228582056f8bbadbd4448f5bbe6b2a49c9738225166d2aa491c3061481186026"
+    }
+  ],
+  "toolFiles": [
+    {
+      "target": "tools/LegacyGlobalTextPublication.Probe/audit_output.py",
+      "sha256": "c55525bf2cdc9bc469e9392f1e237fd30c16adc1f1cd6841e1b6c6b04f35d3b8"
+    },
+    {
+      "target": "tools/LegacyGlobalTextPublication.Probe/positive/audit_candidates.py",
+      "sha256": "c8c0218b2b5d256792ef190760c65fc28bd8e4a01d70c3abd0315b1b73173e30"
+    },
+    {
+      "target": "tools/LegacyGlobalTextPublication.Probe/positive/audit_rank_equality.py",
+      "sha256": "64f8b9ce95719b983832280e91bea22664d9953705b4e4502df0f9c96def059d"
+    },
+    {
+      "target": "tools/LegacyGlobalTextPublication.Probe/positive/reference-score-auditor-rank-adapter.py",
+      "sha256": "00e1fc4ca401ed56afdd29313f74a3d4601e8427142cef9ad273fab396212b02"
+    },
+    {
+      "target": "tools/LegacyGlobalTextPublication.ScoreDiagnostic/LegacyGlobalTextPublication.ScoreDiagnostic.csproj",
+      "sha256": "ce1481b5a8f27d95be4f3b6c8c8f932a78fe30ccca9f262a54e2b97f741a90ef"
+    },
+    {
+      "target": "tools/LegacyGlobalTextPublication.ScoreDiagnostic/Program.cs",
+      "sha256": "39147e433def19a3161e2ad5c074a6c1192e98f515dde2c8e16980cf318c6eaa"
+    },
+    {
+      "target": "tools/LegacyGlobalTextPublication.ScoreDiagnostic/Source/LegacyPublicationCandidateTrace.Diagnostic.cs",
+      "sha256": "870a02babd67bd62b30a6a2728fe53bba13599237c24fef09da95d7fa66d2a75"
+    },
+    {
+      "target": "tools/LegacyGlobalTextPublication.ScoreDiagnostic/Source/LegacyPublicationScoreTrace.Diagnostic.cs",
+      "sha256": "b21a693bd5c03082fa650b28b8980d3e31b972b73aa8da8e553557fb2dcb75ba"
+    }
+  ]
+}
