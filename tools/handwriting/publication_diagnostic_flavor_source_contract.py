@@ -23,9 +23,15 @@ def preprocess(raw,enabled):
 def verify(root,require_meter_v2=False):
     root=Path(root);meta=Path(__file__).with_name('publication-diagnostic-flavor-source-pins.json').read_bytes()
     assert sha(meta)==PINS_SHA,'Unknown flavor proof metadata';pins=json.loads(meta);assert pins['symbol']==SYMBOL.decode()
-    default=diagnostic=0
+    default=diagnostic=0;changedBound=[]
     for row in pins['core']:
-        raw=(root/row['target']).read_bytes();assert sha(raw)==row['conditionalSHA256'],'Unknown conditional body: '+row['target']
+        raw=(root/row['target']).read_bytes()
+        if row['target'].endswith('/LegacyFreshMainGlobalWordTextPublication.cs'):
+            helper=Path(__file__).with_name('wordtext_matching_bound_source.py');assert sha(helper.read_bytes())=='001ba4df9df9155b629b34a5dececad328cf23ae392e77b46d40b14f7a509850'
+            import runpy
+            raw,bound=runpy.run_path(str(helper))['restore'](raw)
+            if bound is not None:changedBound.append(bound)
+        assert sha(raw)==row['conditionalSHA256'],'Unknown conditional body: '+row['target']
         off=preprocess(raw,False);on=preprocess(raw,True)
         assert sha(off)==row['defaultSHA256']and len(off)==row['defaultRawBytes'],'Default must be raw935 exact'
         assert sha(on)==row['diagnosticSHA256']and len(on)==row['diagnosticRawBytes'],'Diagnostic must be rawC937 exact'
@@ -52,4 +58,4 @@ def verify(root,require_meter_v2=False):
         got=sha((root/row['target']).read_bytes());assert got in(row['original935SHA256'],row['v2SHA256']),'Unknown meter body'
         if require_meter_v2:assert got==row['v2SHA256'],'Production positive mode requires separately reviewed meterV2'
         meter.append('V2'if got==row['v2SHA256']else'Original935')
-    return{'Scope':'SOURCE_ONLY_NO_COMPILED_IL_OR_MODEL_CLAIM','DefaultCoreRaw935Bodies':default,'DefaultCollectorSourceCount':0,'DiagnosticRawC937Files':diagnostic,'DefaultProperty':False,'ToolsOnlyCollectors':2,'MeterBodies':meter,'RequireMeterV2':require_meter_v2,'FullProducerIndependent':False}
+    return{'Scope':'SOURCE_ONLY_NO_COMPILED_IL_OR_MODEL_CLAIM','DefaultCoreRaw935Bodies':default-len(changedBound),'HistoricalDefaultCore935BodiesAfterExactInverse':default,'ChangedBoundSourceViews':changedBound,'DefaultCollectorSourceCount':0,'DiagnosticRawC937Files':diagnostic-len(changedBound),'HistoricalDiagnosticC937FilesAfterExactInverse':diagnostic,'DefaultProperty':False,'ToolsOnlyCollectors':2,'MeterBodies':meter,'RequireMeterV2':require_meter_v2,'FullProducerIndependent':False}

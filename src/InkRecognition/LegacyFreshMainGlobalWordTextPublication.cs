@@ -191,7 +191,6 @@ public sealed partial class LegacyFreshMainGlobalWordTextPublication
                 if(batchWords is null)throw new NotSupportedException("All275 publication currently requires ordinary base-source glyph owners.");
                 RequireHigherMetadata(higher,source,token);
             }
-            if(batchWords is null)budget.AddSource(owner.Records.Length/40,compactCount,source.ReferenceCount,Scope.Document.ObjectCount);
             int matchingCompact=0;
             for(int row=starts[source.BaseNode];row<starts[source.BaseNode+1];row++)
             {
@@ -203,11 +202,10 @@ public sealed partial class LegacyFreshMainGlobalWordTextPublication
                 if(resolved.ExternalVariant!=0||resolved.EmittedSymbol is>=0xfff9 and<=0xfffc)
                     throw new NotSupportedException("Nonordinary compact replacement/control variants require a separate parent budget contract.");
             }
-            //The new batch uses the exact same three predicates as the
-            //refresh kernel, over its same private compact/source interval.
-            //Only those rows can append; unrelated source rows cannot emit
-            //alternatives here. Standalone's historical bound stays intact.
-            if(batchWords is not null)budget.AddSource(owner.Records.Length/40,matchingCompact,source.ReferenceCount,Scope.Document.ObjectCount);
+            //Both singleton and batch bindings use the same private refresh
+            //kernel/source interval and predicates above. Only matching rows
+            //can append; unrelated global compact rows cannot emit here.
+            budget.AddSource(owner.Records.Length/40,matchingCompact,source.ReferenceCount,Scope.Document.ObjectCount);
             if(allWords is not null)
             {
                 if(allWordRefreshCandidates!.TryGetValue(ownerKey,out int prior)&&prior!=matchingCompact)throw new InvalidDataException("Same actual source owner must retain its compact candidate extent.");

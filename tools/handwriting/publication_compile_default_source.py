@@ -3,7 +3,7 @@ Only two source bodies consumed by the reviewed strict16 closure may be projecte
 """
 from pathlib import Path
 import hashlib,runpy
-CONTRACT_SHA='fc5cf8632da0e9070557355e78012bfa85393a94ee6c471cb33c37a2aa090144'
+CONTRACT_SHA='0666f6539aa40f1433792ae0d3652467598da99a058b197e9206e894181c1dcf'
 SYMBOL=b'BLURMASK_PUBLICATION_DIAGNOSTICS'
 CORE=('LegacyFreshMainGlobalPlainRecognition.cs','LegacyFreshMainGlobalWordAugmentation.cs',
       'LegacyFreshMainGlobalWordTextPublication.cs','LegacyNativeGlyphRecordPool.Cleanup.cs',
@@ -44,6 +44,12 @@ def read_default_text(root,name):
         helper=root/'tools/handwriting/publication_diagnostic_flavor_source_contract.py'
         helper_raw=helper.read_bytes();assert _sha(helper_raw)==CONTRACT_SHA
         contract=runpy.run_path(str(helper));projected=contract['preprocess'](raw,False)
+        if name=='LegacyFreshMainGlobalWordTextPublication.cs':
+            boundHelper=Path(__file__).with_name('wordtext_matching_bound_source.py');assert _sha(boundHelper.read_bytes())=='001ba4df9df9155b629b34a5dececad328cf23ae392e77b46d40b14f7a509850'
+            previous,bound=runpy.run_path(str(boundHelper))['restore'](raw)
+            if bound is not None:
+                state=dict(state,CurrentMatchingBound=bound,ActualDefaultLfSha256=_sha(_text(projected).encode('utf-8')),SourceView='ExactHistoricalPreflightInverseOnly_NoRuntimeEquivalence')
+                projected=contract['preprocess'](previous,False)
         # verify() already authenticated this exact member's raw projected SHA/length.
         assert helper.read_bytes()==helper_raw and path.read_bytes()==raw,'Source changed during projection'
     else:projected=raw

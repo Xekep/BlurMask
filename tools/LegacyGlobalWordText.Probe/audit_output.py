@@ -33,6 +33,13 @@ def guide_lines(sample):
   for o,value in [(8,originx),(16,originy),(24,angle),(32,float(height)),(48,float(f32(g,12)))]:struct.pack_into('<d',out,i*56+o,value)
   struct.pack_into('<q',out,i*56+40,-1)
  return count,out.hex()
+import hashlib,importlib.util
+bound_path=root/'tools/handwriting/wordtext_matching_bound_source.py'
+assert hashlib.sha256(bound_path.read_bytes()).hexdigest()=='001ba4df9df9155b629b34a5dececad328cf23ae392e77b46d40b14f7a509850'
+bound_spec=importlib.util.spec_from_file_location('current_wordtext_bound',bound_path);bound_module=importlib.util.module_from_spec(bound_spec);bound_spec.loader.exec_module(bound_module)
+matching_count=bound_module.matching_count
+def historical_full_compact_bound(base,compactActive):
+ return sum(len(bytes.fromhex(g['before']))//40+compactActive for g in base['glyphs'])
 total=commands=unequal=0
 for sample in parent['actual']:
  base=byname[sample['name']];assert sample['complete']and not sample['faulted']
@@ -41,7 +48,11 @@ for sample in parent['actual']:
  assert sample['node']==sample['choiceCount']==1
  assert sample['wordKey']==base['wordClip']and sample['ordinary']==base['ordinaryRanges']and sample['textKey']==base['original']
  assert sample['wordSource26']==base['word26'];unequal+=sample['wordKey']!=sample['textKey']
- assert sample['rowUpperBound']==sum(len(bytes.fromhex(g['before']))//40+sample['compactActive']for g in base['glyphs'])<=65536
+ #Historical full-compact bound is intentionally not the current expectation.
+ storage=bytes.fromhex(sample['preflightCompact40']);starts=sample['preflightNodeStarts'];links=sample['links']
+ assert len(links)==len(base['glyphs'])
+ expected=sum(len(bytes.fromhex(g['before']))//40+matching_count(storage,starts,sample['compactActive'],link['preflightBaseNode'],link['preflightBaseSourceKey'])for g,link in zip(base['glyphs'],links))
+ assert type(sample['rowUpperBound']) is int and sample['rowUpperBound']==expected<=65536
  assert sample['rangeUpperBound']==sum(len(bytes.fromhex(g['source24']))//24*len(base['rawCounts'])for g in base['glyphs'])<=1048576
  assert len(sample['links'])==len(base['glyphs'])
  char_flags=0

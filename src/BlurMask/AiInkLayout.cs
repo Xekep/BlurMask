@@ -21,9 +21,10 @@ internal static partial class AiInkLayout
         internal float? CategoryScore { get; init; }
         internal float? ConfidenceForAdmission => Admission!=ResultAdmission.Scored||!float.IsFinite(Confidence)?null:Confidence;
         internal float AcceptanceThreshold => Admission!=ResultAdmission.Scored?float.PositiveInfinity:ExperimentalCandidateScore ? .5f : .85f;
-        // Explicit output admission; native candidates never become calibrated confidence.
+        // Local automatic-replacement policy: the existing .5 candidate cutoff.
+        // This is neither a probability nor a native TEXT export rule.
         internal bool TextAdmitted => Admission==ResultAdmission.NativeSelectedText
-            ? ExperimentalCandidateScore&&float.IsFinite(Confidence)&&Confidence is >=0f and <=1f
+            ? ExperimentalCandidateScore&&float.IsFinite(Confidence)&&Confidence is >=.5f and <=1f
             : Admission==ResultAdmission.Scored&&float.IsFinite(Confidence)&&Confidence>=AcceptanceThreshold;
     }
     private sealed class Group(InkMark stroke)

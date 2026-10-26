@@ -119,7 +119,7 @@ body=interner[start:end+1].lstrip().replace(',globalSource,globalWordSource)',',
 body_hash=hashlib.sha256(body.encode()).hexdigest()
 assert body_hash=='fe312e01172a6989f9f9117df9b87910f144d9494c56dda91d9744edd146790a',body_hash
 report=dict(status='PASS bounded runtime contracts; not full document/recognition completion',
- vendorExecution=False,compileDefaultSource=compileDefaultSource,wordCohortAuthentication=wordCohortAuthentication,wordSourceBridge=wordSourceBridge,dependencySha256=hashlib.sha256(dependency.read_bytes()).hexdigest(),
+ vendorExecution=False,ChangedMatchingBoundSourceView=wordCohortAuthentication.get('CurrentMatchingBoundPolicies',[]),PreflightRuntimeEquivalenceClaim=False,compileDefaultSource=compileDefaultSource,wordCohortAuthentication=wordCohortAuthentication,wordSourceBridge=wordSourceBridge,dependencySha256=hashlib.sha256(dependency.read_bytes()).hexdigest(),
  sourceContracts=sum(map(len,contracts.values())),nativeOrderStages=len(sequence),
  oldInternCoreNormalizedSha256=body_hash,
  admitted='fresh exact global1/oneWORD ordinary scalar outputs; prepared skip labelled separately',

@@ -8,6 +8,7 @@ on:
       - 'tools/LegacyContext226RoundedExtent.Probe/**'
       - 'tools/LegacyOrdinaryChronologyFactor.Probe/**'
       - 'tools/NativeSelectedTextAdmission.Probe/**'
+      - 'tools/WholeWordMatchingBound.Probe/**'
       - 'models/math/**'
       - 'models/ru-RU/**'
       - 'tools/LegacyMixedClassProbabilities.Probe/**'
@@ -48,6 +49,7 @@ on:
       - 'tools/LegacyContext226RoundedExtent.Probe/**'
       - 'tools/LegacyOrdinaryChronologyFactor.Probe/**'
       - 'tools/NativeSelectedTextAdmission.Probe/**'
+      - 'tools/WholeWordMatchingBound.Probe/**'
       - 'models/math/**'
       - 'models/ru-RU/**'
       - 'tools/LegacyMixedClassProbabilities.Probe/**'
@@ -110,6 +112,7 @@ jobs:
       - run: dotnet run --project tools/LegacyContext226RoundedExtent.Probe -c Release -- tools/LegacyContext226RoundedExtent.Probe/fake-inputs.json after
       - run: dotnet run --project tools/LegacyOrdinaryChronologyFactor.Probe -c Release -- tools/LegacyOrdinaryChronologyFactor.Probe/fake-maps.json after
       - run: dotnet run --project tools/NativeSelectedTextAdmission.Probe -c Release -- tools/NativeSelectedTextAdmission.Probe/fake-admission.json after
+      - run: dotnet run --project tools/WholeWordMatchingBound.Probe -c Release
   english-input:
     name: English input bootstrap / ${{ matrix.os }}
     strategy:

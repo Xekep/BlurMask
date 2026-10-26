@@ -78,5 +78,5 @@ def authenticate_word_text_cohort(root):
     from global_facade_owner_source_bridge import authenticate_owner_cohort
     owner=authenticate_owner_cohort(root);assert owner['NewFacadeProof'] is True
     texts={n:read(n) for n in pins['files']}
-    receipt=_verify_sources(texts,pins);receipt['OwnerSourceBridge']=owner;receipt['CompileDefaultSources']=projections;return receipt
+    receipt=_verify_sources(texts,pins);receipt['OwnerSourceBridge']=owner;receipt['CompileDefaultSources']=projections;receipt['CurrentMatchingBoundPolicies']=[r['ConditionalCohort']['CurrentMatchingBound'] for r in projections if r.get('ConditionalCohort') and 'CurrentMatchingBound' in r['ConditionalCohort']];receipt['PreflightHistoricalViewNotRuntimeEquivalence']=bool(receipt['CurrentMatchingBoundPolicies']);return receipt
 def verify_word_text_source(root):return authenticate_word_text_cohort(root)
