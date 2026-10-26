@@ -12,7 +12,7 @@ for name,h in s['sourcePins'].items():
  if pathlib.Path(name).name=='LegacyOrdinaryGraphSourceRanges.cs':
   import runpy
   helper=r/'tools/LegacyEnglishCharacters.Probe/source_preimage.py'
-  assert hashlib.sha256(helper.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='3839cc530b618f397eb1757f02455f124053561f3ab8f1f77a46d391e4b76d12'
+  assert hashlib.sha256(helper.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='fe7a8baf44ea5b7509f60070140066ae4dc73d970e4ac0b7898b9a68267dca8d'
   data=runpy.run_path(str(helper))['restore'](pathlib.Path(name).name,data,h)
  assert hashlib.sha256(data).hexdigest()==h,name
  if actual!=h:restored.append(dict(path=name,currentSHA256=actual,historicalSHA256=h))

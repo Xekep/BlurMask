@@ -10,13 +10,19 @@ def refuses(f):
  else:raise AssertionError('Source mutation accepted')
 for row in steps.values():
  name=row['name'];live=(repo/'src/InkRecognition'/name).read_bytes().replace(b'\r\n',b'\n')
+ expected=row['to']
+ if expected not in g['ALLOWED_EXPECTED'][name]:
+  #Internal default-body transition is not a new final expected authority.
+  assert name=='LegacyNativePlainWordPublisher.cs' and expected=='2f7144e49daa2bf36939db91fd48697769696e82ebe73d604c040d87a5aae08d'
+  refuses(lambda:restore(name,live,expected))
+  expected='9d6736eb716317d70640082cbd5c09a431819ca14e31664326f0aa9c3c957935'
  # Recover every approved historical endpoint from its exact canonical successor.
- restored=restore(name,live,row['to']);assert hashlib.sha256(restored).hexdigest()==row['to'];positive+=1
- assert restore(name,restored,row['to'])==restored;positive+=1
- assert restore(name,live.replace(b'\n',b'\r\n'),row['to'])==restored;positive+=1
+ restored=restore(name,live,expected);assert hashlib.sha256(restored).hexdigest()==expected;positive+=1
+ assert restore(name,restored,expected)==restored;positive+=1
+ assert restore(name,live.replace(b'\n',b'\r\n'),expected)==restored;positive+=1
  for bad in (live+b' ',b' '+live,live.replace(b'namespace',b'namespacE',1)):
-  refuses(lambda bad=bad:restore(name,bad,row['to']))
- refuses(lambda:restore(name,live,'0'*64));refuses(lambda:restore('Other.cs',live,row['to']))
+  refuses(lambda bad=bad:restore(name,bad,expected))
+ refuses(lambda:restore(name,live,'0'*64));refuses(lambda:restore('Other.cs',live,expected))
  # Successor hash is not a historical expected authority.
  if row['from']not in g['ALLOWED_EXPECTED'][name]:refuses(lambda:restore(name,live,row['from']))
 # Exact full-FIRST source loop using the original per-file encoding contract.

@@ -20,7 +20,7 @@ assert proof['leaf']['bytes']=='32c0c3'and read(0x18005a400,3)==bytes.fromhex('3
 def restored_source(repo,path,expected):
  import runpy
  helper=repo/'tools/LegacyEnglishCharacters.Probe/source_preimage.py'
- assert hashlib.sha256(helper.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='3839cc530b618f397eb1757f02455f124053561f3ab8f1f77a46d391e4b76d12'
+ assert hashlib.sha256(helper.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='fe7a8baf44ea5b7509f60070140066ae4dc73d970e4ac0b7898b9a68267dca8d'
  return runpy.run_path(str(helper))['restore'](Path(path).name,(repo/path).read_bytes(),expected)
 for r in proof['sourceDependencies']:
  data=(a.repo/r['path']).read_bytes()
