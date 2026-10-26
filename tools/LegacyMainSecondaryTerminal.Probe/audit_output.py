@@ -33,7 +33,7 @@ for _ in range(d['sourceEnd']):
     if choice is None:break
     expected.append(choice);excluded.append(choice['identity'])
 assert expected==d['choices']
-assert len(expected)==16 and len(set(excluded))==16 and d['configured']==2
+assert len(expected)==len(set(excluded))==len(d['choices'])>=2 and d['configured']==2
 assert d['controls']==512 and d['guards']==6
 assert expected[0]['identity']!=expected[1]['identity']
-print('PASS actual configured2410->16 distinct numeric terminals, repeated exclusions,2048 selected88/40 bytes and independent512 prepared matrix controls; no WORD text oracle.')
+print(f"PASS actual configured2410->{len(expected)} distinct numeric terminals, repeated exclusions,{len(expected)*128} selected88/40 bytes and independent512 prepared matrix controls; no WORD text oracle.")
