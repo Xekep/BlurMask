@@ -7,6 +7,7 @@ internal sealed class LegacyGlobalCompletedTextSource
     private readonly LegacyFreshMainGlobalNoCandidateSourceCompletion? legacy;
     private readonly LegacyFreshMainGlobalWordAugmentation? augmented;
     private readonly LegacyFreshMainGlobalSourceBatchCompletion? batch;
+    private readonly LegacyFreshMainGlobalSourceCompletion? facade;
     internal readonly LegacyFreshMainGlobalSourceBatchCompletion.CompletedTextWords? BatchWords;
     private readonly LegacyNativeInkPositionRange[]? augmentedRanges;
     internal readonly object Gate=new();
@@ -18,6 +19,8 @@ internal sealed class LegacyGlobalCompletedTextSource
     private readonly LegacyNativePublishedWordNode word;
     internal LegacyNativePublishedWordNode Word=>BatchWords?.CurrentNode(default)??word;
     internal LegacyFreshMainGlobalNoCandidateSourceCompletion? LegacyCompletion=>legacy;
+    internal bool HasActualRankedSingletonFacade=>facade is not null;
+    internal LegacyFreshMainGlobalSourceCompletion? SourceFacade=>facade;
     internal bool IsTopV68Completed=>legacy?.IsTopV68Completed??augmented?.IsComplete??batch!.IsComplete;
     internal bool IsFaulted=>legacy?.IsFaulted??augmented?.IsFaulted??batch!.IsFaulted;
     private LegacyGlobalCompletedTextSource(LegacyLibraryGlobalTextPublicationScope scope,
@@ -37,9 +40,20 @@ internal sealed class LegacyGlobalCompletedTextSource
         Scope=scope;batch=actual;Source=actual.TextSource(token);Snapshot=actual.TextSnapshot(token);
         BatchWords=actual.PrepareTextWords(token);word=BatchWords.Head(token);
     }
+    private LegacyGlobalCompletedTextSource(LegacyLibraryGlobalTextPublicationScope scope,
+        LegacyFreshMainGlobalSourceCompletion actual,CancellationToken token)
+    {
+        actual.Validate(token);
+        if(!ReferenceEquals(scope.SourceCompletion,actual)||actual.Batch.PublishedWordCount!=1||actual.Batch.UniqueSpanCount!=1)
+            throw new ArgumentException("Exact completed singleton279 facade required for selected-WORD binding.");
+        Scope=scope;facade=actual;batch=actual.Batch;Source=actual.Source;Snapshot=actual.Snapshot;word=actual.Word;
+        augmentedRanges=actual.CopyRanges();
+    }
+    internal static LegacyGlobalCompletedTextSource FromFacade(LegacyLibraryGlobalTextPublicationScope scope,
+        LegacyFreshMainGlobalSourceCompletion actual,CancellationToken token)=>new(scope,actual,token);
     internal static LegacyGlobalCompletedTextSource FromLegacy(LegacyLibraryGlobalTextPublicationScope scope,
         LegacyFreshMainGlobalNoCandidateSourceCompletion actual,CancellationToken token)
-    {actual.Validate(token);if(!actual.IsTopV68Completed||!ReferenceEquals(actual.TextScope,scope)||!ReferenceEquals(scope.SourceCompletion,actual))throw new ArgumentException("Exact completed legacy source and original scope required.");return new(scope,actual);}
+    {actual.Validate(token);if(!actual.IsTopV68Completed||!ReferenceEquals(actual.TextScope,scope)||!ReferenceEquals(scope.SourceCompletion?.Legacy,actual))throw new ArgumentException("Exact completed legacy source and original scope required.");return new(scope,actual);}
     internal static LegacyGlobalCompletedTextSource FromAugmentation(LegacyLibraryGlobalTextPublicationScope scope,
         LegacyFreshMainGlobalWordAugmentation actual,CancellationToken token)=>new(scope,actual,token);
     internal static LegacyGlobalCompletedTextSource FromBatch(LegacyLibraryGlobalTextPublicationScope scope,
@@ -50,11 +64,11 @@ internal sealed class LegacyGlobalCompletedTextSource
         scope.RequireActualAugmentationSource(actual.TextSource(token),token);
         if(ownedResource.Length!=572763||!Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(ownedResource)).Equals(actual.TextSnapshot(token).SourcePolicy.Owner.Graph.Source.Source.SourceFingerprint,StringComparison.OrdinalIgnoreCase))throw new ArgumentException("Same actual acoustic source resource required before TEXT binding.");
     }
-    internal bool IsIssuedFor(object owner)=>ReferenceEquals(legacy,owner)||ReferenceEquals(augmented,owner)||ReferenceEquals(batch,owner);
+    internal bool IsIssuedFor(object owner)=>ReferenceEquals(legacy,owner)||ReferenceEquals(augmented,owner)||ReferenceEquals(batch,owner)||ReferenceEquals(facade,owner);
     internal void Validate(CancellationToken token)
     {
         Scope.Validate();token.ThrowIfCancellationRequested();
-        if(legacy is not null)legacy.Validate(token);else if(augmented is not null)augmented.RequireCompleted(token);else{batch!.RequireCompleted(token);BatchWords!.Require(token);}
+        if(legacy is not null)legacy.Validate(token);else if(augmented is not null)augmented.RequireCompleted(token);else{batch!.RequireCompleted(token);BatchWords?.Require(token);}
         if(!ReferenceEquals(Scope.ActualTextCompletion,this)||!IsTopV68Completed||IsFaulted||
             !ReferenceEquals(Source.Owner.SourceDocument,Scope.Document)||!ReferenceEquals(Scope.SharedState.GlobalTopOwner,Source.Session!.Ownership)||
             !ReferenceEquals(word,Source.Session.Ownership.WordPublisher.Head))
@@ -104,6 +118,17 @@ public sealed partial class LegacyLibraryGlobalTextPublicationScope
             textCompletion.Validate(token);return textCompletion;
         }
     }
+    internal LegacyGlobalCompletedTextSource BindFacadeTextSource(LegacyFreshMainGlobalSourceCompletion actual,CancellationToken token)
+    {
+        lock(gate)
+        {
+            Validate();actual.Validate(token);
+            if(!ReferenceEquals(SourceCompletion,actual))throw new ArgumentException("Same actual original source facade required.");
+            textCompletion??=LegacyGlobalCompletedTextSource.FromFacade(this,actual,token);
+            if(!textCompletion.IsIssuedFor(actual))throw new InvalidOperationException("Scope already bound to another completion.");
+            textCompletion.Validate(token);return textCompletion;
+        }
+    }
     internal LegacyGlobalCompletedTextSource BindBatchTextSource(LegacyFreshMainGlobalSourceBatchCompletion actual,CancellationToken token)
     {
         lock(gate)
@@ -113,7 +138,7 @@ public sealed partial class LegacyLibraryGlobalTextPublicationScope
                 throw new ArgumentException("Original same-scope completed batch required.");
             if(textCompletion is null)
             {
-                if(enteredCompletion)throw new InvalidOperationException("Global source completion already entered.");
+                if(enteredCompletion&&!ReferenceEquals(SourceCompletion?.Batch,actual))throw new InvalidOperationException("Global source completion already entered.");
                 var binding=LegacyGlobalCompletedTextSource.FromBatch(this,actual,token);
                 enteredCompletion=true;
                 try{shared.BindActualGlobalTop(source.Session!.Ownership);textCompletion=binding;}

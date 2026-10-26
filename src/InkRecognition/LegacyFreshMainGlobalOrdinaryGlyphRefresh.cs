@@ -63,6 +63,9 @@ public sealed class LegacyFreshMainGlobalOrdinaryGlyphRefresh
             throw new ArgumentException("Identical actual global pool/source overlay/metadata/scoring/selection required.");
         compact=source.Selection.Publication.CopyCompactStorage();starts=source.Selection.Publication.CopyNodeStarts2478();
     }
+    public static LegacyFreshMainGlobalOrdinaryGlyphRefresh Prepare(ReadOnlySpan<byte> resource,
+        LegacyFreshMainGlobalSourceCompletion actual,CancellationToken token=default)
+    {actual.Validate(token);return PrepareCompleted(resource,actual.Bind(actual.Scope,token),token);}
     public static LegacyFreshMainGlobalOrdinaryGlyphRefresh Prepare(ReadOnlySpan<byte> acousticResource,
         LegacyFreshMainGlobalNoCandidateSourceCompletion actualCompletedSources,CancellationToken token=default)
     {

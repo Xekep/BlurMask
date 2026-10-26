@@ -6,11 +6,13 @@ p=argparse.ArgumentParser(description=__doc__);p.add_argument('output',type=Path
 p.add_argument('--native-repo',type=Path,required=True);p.add_argument('--caller-plan-root',type=Path,required=True)
 p.add_argument('--ordinary-plan-root',type=Path,required=True);p.add_argument('--capture',type=Path,required=True)
 p.add_argument('--recorded-manifest',type=Path,required=True);p.add_argument('--avalonia-xml',type=Path)
-a=p.parse_args();root=a.native_repo.resolve();here=Path(__file__).resolve().parent
+p.add_argument('--models',type=Path);p.add_argument('--child',type=Path);a=p.parse_args()
+if (a.models is None)!=(a.child is None):p.error('--models and --child must be supplied together')
+paired=[] if a.models is None else ['--models',str(a.models),'--child',str(a.child)];root=a.native_repo.resolve();here=Path(__file__).resolve().parent
 out=a.output.with_name('gtg-'+hashlib.sha256(str(a.output.resolve()).encode()).hexdigest()[:12]+'.json')
 dep=a.caller_plan_root/'tools/handwriting/audit_global_raw_timing_caller.py';saved=sys.argv
 try:
- sys.argv=[str(dep),str(out),'--native-repo',str(root),'--ordinary-plan-root',str(a.ordinary_plan_root),'--capture',str(a.capture)]
+ sys.argv=[str(dep),str(out),'--native-repo',str(root),'--ordinary-plan-root',str(a.ordinary_plan_root),'--capture',str(a.capture),*paired]
  runpy.run_path(str(dep),run_name='__main__')
 finally:sys.argv=saved
 sys.path.insert(0,str(root/'research/myscript/scripts'));from inspect_text_features import Binary

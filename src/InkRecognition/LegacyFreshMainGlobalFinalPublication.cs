@@ -81,7 +81,7 @@ public sealed class LegacyFreshMainGlobalFinalPublication
         pass.BeginCompactPublication(token); //Same claim as old positive append; all started failures consume it.
         int start = state.NextNode, previous = state.Count, evaluations = pass.Policy.Owner.AcousticEvaluations;
         var stage = state.Publish(pass.NodeCount - 1, pass.GetNodeSnapshot, reader, confidence,
-            pass.ValidateResultQueryLease, token);
+            pass.ValidateResultQueryLease, token, LegacyFreshMainGlobalPublicationContext.ForResult(pass,start,token));
         if (pass.Policy.Owner.AcousticEvaluations != evaluations)
             throw new InvalidOperationException("Final207CB0 cannot reevaluate NN groups.");
         var completed = new LegacyFreshMainGlobalFinalPublication(pass, confidence, start, previous,

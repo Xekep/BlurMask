@@ -955,7 +955,7 @@ foreach ($case in $cases) {
     if ((Get-Content .artifacts/legacy-original-field-dom-native.json.stable.sha256) -ne (Get-Content .artifacts/legacy-original-field-dom-managed.json.stable.sha256)) { throw 'Original-selected document Managed/Native stable parity failed' }
   }
   if ($name -eq 'LegacyGlobalTextPublication') {
-    python -I tools/LegacyGlobalTextPublication.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-global-text-publication-native.json
+    python -B tools/LegacyGlobalTextPublication.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-global-text-publication-native.json .artifacts/publication-ci/diagnostic-trace.json .artifacts/publication-ci/diagnostic-no-trace.json
     if ($LASTEXITCODE -ne 0) { throw 'Global pre-NN publication native oracle failed' }
     if ((Get-FileHash .artifacts/legacy-global-text-publication-native.json).Hash -ne (Get-FileHash .artifacts/legacy-global-text-publication-managed.json).Hash) { throw 'Global pre-NN publication Managed/Native parity failed' }
   }

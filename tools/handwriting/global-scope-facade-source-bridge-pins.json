@@ -1,0 +1,97 @@
+{
+  "scopePath": "src/InkRecognition/LegacyLibraryGlobalTextPublicationScope.cs",
+  "legacyLfSha256": "c92eb81a1702fa6ed0c262989f993f4350a5ddbb4cb5e999983f8404463167d5",
+  "candidateLfSha256": "2bf46179d723cfb34a1c72f219b119625fead32bf240d831ee8f72de15b86673",
+  "prepareOriginalSelectedLfSha256": "671a29dfcb308a57d6ae41e5ee708328d7c563a7c3c6cb06eb03601cdc587255",
+  "inverseEdits": [
+    {
+      "old": "public sealed class LegacyLibraryGlobalTextPublicationScope : IDisposable",
+      "new": "public sealed partial class LegacyLibraryGlobalTextPublicationScope : IDisposable",
+      "meaning": "Explicit partial declaration; supporting partial file separately authenticated"
+    },
+    {
+      "old": "    public LegacyFreshMainGlobalNoCandidateSourceCompletion? SourceCompletion {get;private set;}",
+      "new": "    private LegacyGlobalSourceCallerResidue? completionResidue;\n    public LegacyFreshMainGlobalSourceCompletion? SourceCompletion {get;private set;}",
+      "meaning": "Retain actual caller residues and private-issued facade reference"
+    },
+    {
+      "old": "    public LegacyFreshMainGlobalPlainRecognitionResult Run(ReadOnlySpan<byte> compactAllocatorStorage,\n        ReadOnlySpan<byte> wordAllocatorResidue120,ReadOnlySpan<byte> recordAllocatorResidue40,\n        ReadOnlySpan<ushort> labelStackResidue256,ReadOnlySpan<byte> requestStackResidue64,\n        ReadOnlySpan<byte> backtrackStackResidue72,CancellationToken token=default)\n    {\n        lock(gate)\n        {\n            Validate();token.ThrowIfCancellationRequested();\n            if(started)throw new InvalidOperationException(\"This adopted global invocation is single-use, including failed prefixes.\");\n            started=true;\n            try{return result=recognition!.Run(compactAllocatorStorage,wordAllocatorResidue120,recordAllocatorResidue40,\n                labelStackResidue256,requestStackResidue64,backtrackStackResidue72,token);}\n            catch{faulted=true;throw;}\n        }\n    }",
+      "new": "    public LegacyFreshMainGlobalPlainRecognitionResult Run(ReadOnlySpan<byte> compactAllocatorStorage,\n        ReadOnlySpan<byte> wordAllocatorResidue120,ReadOnlySpan<byte> recordAllocatorResidue40,\n        ReadOnlySpan<ushort> labelStackResidue256,ReadOnlySpan<byte> requestStackResidue64,\n        ReadOnlySpan<byte> backtrackStackResidue72,CancellationToken token=default)\n    {\n        lock(gate)\n        {\n            Validate();token.ThrowIfCancellationRequested();\n            if(started)throw new InvalidOperationException(\"This adopted global invocation is single-use, including failed prefixes.\");\n            started=true;\n            try{\n                completionResidue=new(wordAllocatorResidue120,recordAllocatorResidue40,labelStackResidue256,requestStackResidue64,backtrackStackResidue72);\n                return result=recognition!.Run(compactAllocatorStorage,completionResidue.Word,completionResidue.Glyph,\n                completionResidue.Labels,completionResidue.Request,completionResidue.Backtrack,token);}\n            catch{faulted=true;throw;}\n        }\n    }",
+      "meaning": "Copy actual caller residue values once before the SAME recognition.Run and retain those copies"
+    },
+    {
+      "old": "    public LegacyFreshMainGlobalNoCandidateSourceCompletion CompleteSources(ReadOnlySpan<byte> allocation400,\n        Span<byte> leadingScratch4,Span<byte> trailingScratch4,CancellationToken token=default)\n    {\n        lock(gate)\n        {\n            Validate();token.ThrowIfCancellationRequested();\n            if(allocation400.Length!=400||leadingScratch4.Length!=4||trailingScratch4.Length!=4||leadingScratch4.Overlaps(trailingScratch4))\n                throw new ArgumentException(\"Complete alternative400 and two distinct caller scratch4 slots required.\");\n            if(result is null||!ReferenceEquals(result.Owner.SourceDocument,Document)||!result.HasWinner||!result.PublicationCompleted)\n                throw new InvalidOperationException(\"The same completed positive raw global invocation is required.\");\n            if(enteredCompletion)throw new InvalidOperationException(\"Global source completion is single-use.\");\n            enteredCompletion=true;\n            try\n            {\n                SourceCompletion=LegacyFreshMainGlobalNoCandidateSourceCompletion.Prepare(this,result,allocation400,token);\n                shared.BindActualGlobalTop(result.Session!.Ownership);\n                SourceCompletion.Run(leadingScratch4,trailingScratch4,token);\n                return SourceCompletion;\n            }\n            catch{faulted=true;throw;}\n        }\n    }",
+      "new": "    public LegacyFreshMainGlobalSourceCompletion CompleteSources(ReadOnlySpan<byte> allocation400,\n        Span<byte> leadingScratch4,Span<byte> trailingScratch4,CancellationToken token=default)\n    {\n        lock(gate)\n        {\n            Validate();token.ThrowIfCancellationRequested();\n            if(allocation400.Length!=400||leadingScratch4.Length!=4||trailingScratch4.Length!=4||leadingScratch4.Overlaps(trailingScratch4))\n                throw new ArgumentException(\"Complete alternative400 and two distinct caller scratch4 slots required.\");\n            if(result is null||!ReferenceEquals(result.Owner.SourceDocument,Document)||!result.HasWinner||!result.PublicationCompleted)\n                throw new InvalidOperationException(\"The same completed positive raw global invocation is required.\");\n            if(enteredCompletion)throw new InvalidOperationException(\"Global source completion is single-use.\");\n            enteredCompletion=true;\n        }\n        // Shared GLOBAL preflight may call back into scope validation. Never\n        // hold the scope gate while waiting for that cancellable session lease.\n        try\n        {\n            var completion=LegacyFreshMainGlobalSourceCompletion.Prepare(this,result!,models.AcousticResource,allocation400,token);\n            lock(gate){Validate();SourceCompletion=completion;}\n            completion.Run(completionResidue!,leadingScratch4,trailingScratch4,token);\n            lock(gate){Validate();shared.BindActualGlobalTop(result!.Session!.Ownership);return completion;}\n        }\n        catch{lock(gate)faulted=true;throw;}\n    }",
+      "meaning": "Same pre-entry guards/claim; actual scoped facade/batch continuation outside scope gate"
+    }
+  ],
+  "supportLfSha256": {
+    "LegacyFreshMainGlobalSourceCompletion.cs": "a205f204a7b539c63f9e0d9142e5732745e376e77e81fa06bc07fef6425b0e9f",
+    "LegacyFreshMainGlobalGlyphExecutionSession.SourceCompletion.cs": "f1007656ca47a3f6d28ee6e83a5be904fcb0f88a4a3fd93fb121f3dcce5be50f",
+    "LegacyFreshMainGlobalSourceBatchCompletion.cs": "a2fe6c55ad376533e9b85cbf28b1580a8515a4d8f843552fbbb847245507426e",
+    "LegacyFreshMainGlobalSourceBatchCompletion.ValidationWork.cs": "a1bc378def3d535393ae2d83e591c9cd9de5ecfa713a805a982be24df83542be",
+    "LegacyFreshMainGlobalSourceBatchCompletion.TextWords.cs": "228582056f8bbadbd4448f5bbe6b2a49c9738225166d2aa491c3061481186026",
+    "LegacyGlobalCompletedTextSource.cs": "9b6dc129a0929bc86318b3c4662794aa939442fdace5e7099cb3dde0b51bc550",
+    "LegacyFreshMainGlobalPlainRecognition.cs": "7f369aa1f148889025e79fdeb3711b1c91c8ce4634142045742a297ee8f82029",
+    "LegacyFreshMainGlobalTextSourceWrapper.cs": "0d254c3fdc41a946f4be31ee7b8465b637ca9702e59b89238696c1ec0950f8a4"
+  },
+  "guards": {
+    "LegacyLibraryGlobalTextPublicationScope.cs": [
+      "context.PrepareInput(token);lease=context.RetainForPublication()",
+      "scope=new(context,lease,models)",
+      "models.PrepareGlobalDocument(context.Document,resolution,table,caseData,publication,token)",
+      "if(started)throw new InvalidOperationException",
+      "completionResidue=new(wordAllocatorResidue120,recordAllocatorResidue40,labelStackResidue256,requestStackResidue64,backtrackStackResidue72)",
+      "recognition!.Run(compactAllocatorStorage,completionResidue.Word,completionResidue.Glyph,",
+      "if(enteredCompletion)throw new InvalidOperationException(\"Global source completion is single-use.\");",
+      "enteredCompletion=true;",
+      "LegacyFreshMainGlobalSourceCompletion.Prepare(this,result!,models.AcousticResource,allocation400,token)",
+      "lock(gate){Validate();SourceCompletion=completion;}",
+      "completion.Run(completionResidue!,leadingScratch4,trailingScratch4,token)",
+      "shared.BindActualGlobalTop(result!.Session!.Ownership);return completion;",
+      "catch{lock(gate)faulted=true;throw;}"
+    ],
+    "LegacyFreshMainGlobalSourceCompletion.cs": [
+      "this.scope=scope;Source=source;Batch=batch;Word=source.Session!.Ownership.WordPublisher.Head!;",
+      "LegacyFreshMainGlobalSourceBatchCompletion.Prepare(scope,source,acoustic,allocation,token:token)",
+      "batch.ReserveSourceFacade(816,token)",
+      "if(started)throw new InvalidOperationException",
+      "byte[] left=leading.ToArray(),right=trailing.ToArray();started=true;",
+      "Batch.Run(residue.Word,residue.Glyph,residue.Labels,residue.Request,residue.Backtrack,leading,trailing,left,right,token)",
+      "scope.Validate();Batch.RequireCompleted(token)",
+      "ReferenceEquals(scope.SourceCompletion,this)",
+      "ReferenceEquals(scope,actualScope)",
+      "Batch.PublishedWordCount==1&&Batch.UniqueSpanCount==1",
+      "scope.BindFacadeTextSource(this,token):scope.BindBatchTextSource(Batch,token)",
+      "word.Length!=120||glyph.Length!=40||labels.Length!=256||request.Length!=64||backtrack.Length!=72",
+      "Word=word.ToArray();Glyph=glyph.ToArray();Labels=labels.ToArray();Request=request.ToArray();Backtrack=backtrack.ToArray();"
+    ],
+    "LegacyFreshMainGlobalGlyphExecutionSession.SourceCompletion.cs": [
+      "sourcePreflightThread!=0||sourceCompletionOwner is not null||IsStopped||!IsComplete||Volatile.Read(ref active)!=0",
+      "sourcePreflightThread=Environment.CurrentManagedThreadId",
+      "Monitor.Exit(session.gate)",
+      "sourceCompletionOwner=actualOwner;sourceCompletionThread=bindThread?Environment.CurrentManagedThreadId:0",
+      "ReferenceEquals(sourceCompletionOwner,actualOwner)",
+      "sourceCompletionThread!=0&&sourceCompletionThread!=Environment.CurrentManagedThreadId"
+    ],
+    "LegacyFreshMainGlobalSourceBatchCompletion.cs": [
+      "using var preflight=session.AcquireSourcePreflight(token)",
+      "session.ClaimSourceCompletion(this,true,token);preflight.Dispose();",
+      "finally{spans[current].SourceMarked=true;}",
+      "spans[current].RankDone=true;",
+      "session.CompleteSourceCompletion(this,token);phase=3;Volatile.Write(ref complete,true);ReleaseCompletedValidationMeter();",
+      "spans.Any(s=>!s.SourceDone||!s.SourceMarked||!s.RankDone)"
+    ],
+    "LegacyGlobalCompletedTextSource.cs": [
+      "ReferenceEquals(scope.SourceCompletion,actual)",
+      "actual.Batch.PublishedWordCount!=1||actual.Batch.UniqueSpanCount!=1",
+      "Scope=scope;facade=actual;batch=actual.Batch;Source=actual.Source;Snapshot=actual.Snapshot;word=actual.Word;",
+      "ReferenceEquals(Scope.ActualTextCompletion,this)",
+      "ReferenceEquals(Source.Owner.SourceDocument,Scope.Document)",
+      "ReferenceEquals(Scope.SharedState.GlobalTopOwner,Source.Session!.Ownership)",
+      "ReferenceEquals(SourceCompletion,actual)",
+      "textCompletion.IsIssuedFor(actual)"
+    ]
+  },
+  "scope": "Only actual current935+meterfixV2 closed source: unchanged original selected/context bootstrap, retained same-source caller residue values and real facade/single-use/preflight owner. No new native numerical or residue-lane knownness claim."
+}

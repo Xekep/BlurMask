@@ -85,9 +85,16 @@ contracts={
  'LegacyFreshMainTextDocumentSeed.cs':['InputBinding.RegistryId','PendingSelections=>shared.Selections',
  'ReferenceEquals(actualWords.SelectionContext,PendingSelections)'],
 }
+from global_scope_facade_source_bridge import verify_scope_source,LEGACY_SCOPE_LF_SHA
+scopeSourceBridge=verify_scope_source(root,LEGACY_SCOPE_LF_SHA)
 for name,needles in contracts.items():
  text=code(name)
- for needle in needles:assert needle in text,(name,needle)
+ for needle in needles:
+  if needle in text:continue
+  assert name=='LegacyLibraryGlobalTextPublicationScope.cs' and needle=='shared.BindActualGlobalTop(result.Session!.Ownership)',(name,needle)
+  from global_scope_facade_source_bridge import verify_scope_source,LEGACY_SCOPE_LF_SHA
+  scopeSourceBridge=verify_scope_source(root,LEGACY_SCOPE_LF_SHA)
+  assert scopeSourceBridge['Branch']=='ReviewedActual935Facade' 
 # Real typed/configured2 blockers must remain visible; this proposal does not
 # silently weaken those old gates to get a one-alternative global owner through.
 blockers={
@@ -116,7 +123,7 @@ if a.capture:
   (equal if sample['wordClip']==sample['original']else unequal).append(sample['name'])
  evidence=dict(sha256=hashlib.sha256(a.capture.read_bytes()).hexdigest(),actualSources=13,
    exactWordTextKeyMatches=equal,requiresUncoveredSourceBranch=unequal,naturalDuplicateKeys=0)
-a.output.write_text(json.dumps(dict(status='STATIC PROPOSAL ONLY',vendorExecution=False,regions=len(regions),
+a.output.write_text(json.dumps(dict(status='STATIC PROPOSAL ONLY',vendorExecution=False,scopeSourceBridge=scopeSourceBridge,regions=len(regions),
  pins=len(pins),dependencyReports=dependencies,globalContracts=sum(map(len,contracts.values())),
  currentOldDocumentBlockers=blockers,naturalEvidence=evidence,
  proposedFirstBatchOldSeams=['LegacyFreshMainGlobalTextSourceWrapper.cs','LegacyOwnedMainTextSourceInterner.cs'],

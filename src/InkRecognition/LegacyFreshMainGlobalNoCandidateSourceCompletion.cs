@@ -46,6 +46,7 @@ public sealed class LegacyFreshMainGlobalNoCandidateSourceCompletion
             throw new NotSupportedException("Exactly one actual forward WORD/span is restored.");
         byte[] compact=source.Selection.Publication.CopyCompactStorage();
         RequireNoActiveAugmentation(compact,source.Selection.Publication.RecordCount2470,token);
+        using var preflight=session.AcquireSourcePreflight(token);
         foreach(string text in new[]{"\u2610","\u2611","\u2612"})
             if(policy.Owner.Model.AcousticAlphabet.TryGetLabel(text,out _))throw new NotSupportedException("Actual checkbox rewriting requires its distinct source owner.");
         var publisher=session.Ownership.WordPublisher;

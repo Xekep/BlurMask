@@ -33,7 +33,8 @@ public sealed class LegacyFreshMainGlobalTextSourceWrapper
     private LegacyFreshMainGlobalWordTextPublication? reservedWordParent;
     public LegacyFreshMainGlobalTextGlyphChoices Choices{get;}
     public LegacyLibraryGlobalTextPublicationScope Scope=>Choices.Scope;
-    public LegacyFreshMainGlobalNoCandidateSourceCompletion Completion=>Choices.Completion;
+    public LegacyFreshMainGlobalSourceCompletion Completion=>Scope.SourceCompletion is{} actual&&ActualCompletion.IsIssuedFor(actual.Batch)?actual:throw new InvalidOperationException("This wrapper was not issued by the scope source facade.");
+    public LegacyFreshMainGlobalNoCandidateSourceCompletion LegacyCompletion=>Choices.Completion;
     internal LegacyGlobalCompletedTextSource ActualCompletion=>Choices.ActualCompletion;
     public int ActualWordPayloadCount=>Choices.ActualWordPayloadCount;
     public byte[][] CopyActualWordPayloads120(CancellationToken token=default)=>Choices.CopyActualWordPayloads120(token);
@@ -46,6 +47,13 @@ public sealed class LegacyFreshMainGlobalTextSourceWrapper
         references=ActualCompletion.Word.Word.FlatReferences.ToArray();operations=LegacyOwnedRawInkRangeOperations.Prepare(Scope.Document);
         descriptors=ActualCompletion.Snapshot.SourcePolicy.Owner.Graph.Source.Source.CopyDescriptors();
         ValidateDomain(token);
+    }
+    public static LegacyFreshMainGlobalTextSourceWrapper Prepare(LegacyLibraryGlobalTextPublicationScope scope,
+        LegacyFreshMainGlobalSourceCompletion actual,ReadOnlySpan<byte> resource,LegacyNativeTextPublicationData properties,
+        LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token=default)
+    {
+        var choices=LegacyFreshMainGlobalTextGlyphChoices.Prepare(scope,actual,resource,properties,normalization,circles,token);
+        var result=owners.GetValue(choices,c=>new(c,token));result.ValidatePreclaim(token);return result;
     }
     public static LegacyFreshMainGlobalTextSourceWrapper Prepare(LegacyLibraryGlobalTextPublicationScope actualScope,
         LegacyFreshMainGlobalNoCandidateSourceCompletion actualCompletion,ReadOnlySpan<byte> acousticResource,

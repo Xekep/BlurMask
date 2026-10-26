@@ -20,9 +20,21 @@ public sealed partial class LegacyFreshMainGlobalSourceBatchCompletion
     private readonly int compactAllocationBytes,snapshotDependencyBytes;
     private readonly SpanScope[] spans;
     private readonly long maximumWork,maximumCopy;
+    private long facadeCopiedPayload;
+    internal void ReserveSourceFacade(long bytes,CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        if(entered!=0||facadeCopiedPayload!=0||bytes!=816)throw new InvalidOperationException("One fixed actual GLOBAL facade payload reserve required.");
+        facadeCopiedPayload=bytes;
+    }
     private int entered,thread,phase,current=-1;
     private bool faulted,complete;
-    public bool IsComplete=>complete;
+    public bool QuoteCleanupCompleted {get;private set;}
+    public bool SourcesMarkedComplete=>spans.All(s=>s.SourceMarked);
+    public bool RankingApplied=>spans.All(s=>s.RankDone);
+    public bool SpanScoresApplied=>RankingApplied;
+    public bool CheckboxGuardVerified=>complete;
+    public bool IsComplete=>Volatile.Read(ref complete);
     public bool IsFaulted=>faulted;
     public int PublishedWordCount=>binding.Nodes.Length;
     public int UniqueSpanCount=>spans.Length;
@@ -52,6 +64,7 @@ public sealed partial class LegacyFreshMainGlobalSourceBatchCompletion
             !actualSource.HasWinner||!actualSource.PublicationCompleted||actualSource.Session is not{} session||!session.IsComplete||session.IsStopped||
             !ReferenceEquals(session.Ownership.PublishedTerminal,actualSource.Selection)||alternativeAllocation400.Length!=400||acousticResource.Length!=572763)
             throw new ArgumentException("Original successful source and explicit bounded batch resources required.");
+        using var preparation=session.AcquireSourcePreflight(token);
         if(checked((long)acousticResource.Length+32)>maximumCopiedPayloadBytes)
             throw new NotSupportedException("Owned acoustic copy/hash exceeds batch preclaim envelope.");
         //Own before hashing and before every worker's scalar parse. A caller's
@@ -99,7 +112,7 @@ public sealed partial class LegacyFreshMainGlobalSourceBatchCompletion
         if(claimed)
         {
             session.RequireSourceCompletion(this,token);
-            if(thread!=Environment.CurrentManagedThreadId)throw new InvalidOperationException("Entered batch thread changed.");
+            if(!Volatile.Read(ref complete)&&thread!=Environment.CurrentManagedThreadId)throw new InvalidOperationException("Entered batch thread changed.");
         }
     }
     public Result Run(ReadOnlySpan<byte> wordAllocatorResidue120,ReadOnlySpan<byte> glyphAllocatorResidue40,
@@ -107,6 +120,7 @@ public sealed partial class LegacyFreshMainGlobalSourceBatchCompletion
         Span<byte> leadingScratch4,Span<byte> trailingScratch4,Span<byte> compareLeft4,Span<byte> compareRight4,CancellationToken token=default)
     {
         token.ThrowIfCancellationRequested();
+        using var preflight=session.AcquireSourcePreflight(token);
         if(Volatile.Read(ref entered)!=0)throw new InvalidOperationException("Entered batch completion cannot retry.");
         Validate(token,false);
         if(wordAllocatorResidue120.Length!=120||glyphAllocatorResidue40.Length!=40||labelStackResidue256.Length!=256||requestResidue64.Length!=64||walkResidue72.Length!=72||
@@ -137,7 +151,7 @@ public sealed partial class LegacyFreshMainGlobalSourceBatchCompletion
         //120W: tail40W and at most two actual ReplaceRecord40 writes/word.
         //Snapshot1776 = four400 buffers +40 score row +88beam +16AL header +32SHA.
         //Extra24 is the three-element checkbox-label reference array; strings/BCL metadata remain separate.
-        long copy=checked(topology.SharedCopy+144*referenceUses+120L*binding.Nodes.Length+
+        long copy=checked(facadeCopiedPayload+topology.SharedCopy+144*referenceUses+120L*binding.Nodes.Length+
             8L*binding.Nodes.Length+48L*spans.Length+816+1776+24+572763+snapshotDependencyBytes+4L*starts.Length);
         for(int i=0;i<spans.Length;i++)
         {
@@ -176,32 +190,38 @@ public sealed partial class LegacyFreshMainGlobalSourceBatchCompletion
         DebitValidationLoops(checked((long)binding.PublisherCount+binding.Nodes.Length+spans.Length),token);
         publisher.RequireSourceBatch(binding,true,token);Validate(token,false);
         if(Interlocked.CompareExchange(ref entered,1,0)!=0)throw new InvalidOperationException("Entered batch completion cannot retry.");
-        thread=Environment.CurrentManagedThreadId;session.ClaimSourceCompletion(this,true,token);
+        thread=Environment.CurrentManagedThreadId;session.ClaimSourceCompletion(this,true,token);preflight.Dispose();
         try
         {
             LegacyFreshMainGlobalPublishedQuoteNormalization.ApplyPublished(snapshot,leadingScratch4,trailingScratch4,token);
+            QuoteCleanupCompleted=true;
             _=LegacyFreshMainGlobalResultGlyphNormalization.Prepare(source.Selection.Publication.Policy,token).ApplyPublished(snapshot,token);
             phase=1;
             for(current=0;current<spans.Length;current++)
-            {spans[current].Worker.RunBatchSource(working,records,labels,requests,walk,compareLeft4,compareRight4,envelopes[current],token);spans[current].SourceDone=true;}
+            {
+                // Native13E886 marks this shared275 AFTER the callback returns,
+                // including failure. The preallocated sidecar cannot debit/fail.
+                try{spans[current].Worker.RunBatchSource(working,records,labels,requests,walk,compareLeft4,compareRight4,envelopes[current],token);spans[current].SourceDone=true;}
+                finally{spans[current].SourceMarked=true;}
+            }
             //Native13E7F0 finishes every unique275 before13D360 starts.
             phase=2;int quota=LegacyPreparedMainWordRanking.InitialQuota(65535,65535,false);
             for(current=0;current<spans.Length;current++)
             {var result=spans[current].Worker.RankBatchSource(quota,compareLeft4,compareRight4,envelopes[current],token);quota=result.QuotaAfter;results[current]=result;spans[current].RankDone=true;}
-            current=-1;Validate(token,true);phase=3;complete=true;
+            current=-1;Validate(token,true);session.CompleteSourceCompletion(this,token);phase=3;Volatile.Write(ref complete,true);ReleaseCompletedValidationMeter();
             return new(binding.Nodes.Length,results,quota,work,copy);
         }
         catch{faulted=true;phase=-1;current=-1;session.FaultSourceCompletion(this);throw;}
     }
-    internal long RemainingEnumeratedCopyBudget(CancellationToken token){RequireCompleted(token);return maximumCopy-PreflightEnumeratedCopyBytes-earlyTextPreparationCopyBytes-associationCopyReserve;}
+    internal long RemainingEnumeratedCopyBudget(CancellationToken token){RequireCompleted(token);lock(validationMeterGate)return maximumCopy-PreflightEnumeratedCopyBytes-earlyTextPreparationCopyBytes-associationCopyReserve;}
     internal void RequireCompleted(CancellationToken token)
-    {Validate(token,true);DebitValidationLoops(spans.Length,token);if(!complete||phase!=3||spans.Any(s=>!s.SourceDone||!s.RankDone))throw new InvalidOperationException("Entire actual batch must complete before WORD/TEXT publication.");}
+    {Validate(token,true);DebitValidationLoops(spans.Length,token);if(!Volatile.Read(ref complete)||phase!=3||spans.Any(s=>!s.SourceDone||!s.SourceMarked||!s.RankDone))throw new InvalidOperationException("Entire actual batch must complete before WORD/TEXT publication.");}
     internal sealed class SpanScope
     {
         private readonly LegacyFreshMainGlobalSourceBatchCompletion owner;
         private readonly int ordinal;
         private LegacyFreshMainGlobalWordAugmentation? worker;
-        internal bool SourceDone,RankDone;
+        internal bool SourceDone,SourceMarked,RankDone;
         internal SpanScope(LegacyFreshMainGlobalSourceBatchCompletion owner,int ordinal){this.owner=owner;this.ordinal=ordinal;}
         internal LegacyFreshMainGlobalWordAugmentation Worker=>worker??throw new InvalidOperationException("Batch worker unbound.");
         internal void Bind(LegacyFreshMainGlobalWordAugmentation actual)
@@ -226,7 +246,7 @@ public sealed partial class LegacyFreshMainGlobalSourceBatchCompletion
         internal void RecordAssociation(LegacyFreshMainGlobalWordAugmentation actual,int residual,int rows,int merges,int newExtras,CancellationToken token)
         {RequireSource(actual,token);owner.RecordAssociation(residual,rows,merges,newExtras);}
         internal void RequireRanking(LegacyFreshMainGlobalWordAugmentation actual,CancellationToken token)
-        {Require(actual,token);if(owner.phase!=2||RankDone||owner.spans.Any(s=>!s.SourceDone))throw new InvalidOperationException("Ranking requires all unique source spans complete.");}
+        {Require(actual,token);if(owner.phase!=2||RankDone||owner.spans.Any(s=>!s.SourceDone||!s.SourceMarked))throw new InvalidOperationException("Ranking requires all unique source spans complete.");}
         internal void RequireText(LegacyFreshMainGlobalWordAugmentation actual,CancellationToken token)
         {
             owner.RequireCompleted(token);
@@ -235,6 +255,20 @@ public sealed partial class LegacyFreshMainGlobalSourceBatchCompletion
         }
         internal LegacyNativePublishedWordNode[] Heads(LegacyFreshMainGlobalWordAugmentation actual)
         {if(!ReferenceEquals(worker,actual))throw new InvalidOperationException("Exact batch worker required.");return owner.binding.Heads;}
+    }
+    internal LegacyOrdinaryGraphSourceReference[] CopyHeadReferences(CancellationToken token)
+    {
+        RequireCompleted(token);int count=spans[0].Worker.BatchTextReferenceCount(spans[0],token);
+        ChargeTextPreparationCopy(checked(104L*count),token);
+        return spans[0].Worker.CopyBatchReferences(spans[0],token);
+    }
+    internal LegacyNativeInkPositionRange[] CopyHeadRanges(CancellationToken token)
+    {
+        RequireCompleted(token);var doc=scope.Document;
+        var map=new LegacyNativeTextSourceInputMap(doc.CopySelectedInputs(),[],0);
+        LegacyNativeInkPositionRange[] original=[new(LegacyNativeInkPosition.Pack(0,0,3,doc.Strokes[0].Points.Count),
+            LegacyNativeInkPosition.Pack((uint)doc.ObjectCount-1,doc.Strokes[^1].Points.Count-1,5,doc.Strokes[^1].Points.Count))];
+        return spans[0].Worker.ProjectBatchTextRanges(spans[0],map,original,token);
     }
     public sealed class Result
     {

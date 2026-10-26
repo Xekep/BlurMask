@@ -4,11 +4,13 @@ from pathlib import Path
 from capstone import Cs,CS_ARCH_X86,CS_MODE_64
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('output',type=Path)
 p.add_argument('--native-repo',type=Path,required=True);p.add_argument('--ordinary-plan-root',type=Path,required=True);p.add_argument('--capture',type=Path,required=True)
-a=p.parse_args();root=a.native_repo.resolve();here=Path(__file__).resolve().parent
+p.add_argument('--models',type=Path);p.add_argument('--child',type=Path);a=p.parse_args()
+if (a.models is None)!=(a.child is None):p.error('--models and --child must be supplied together')
+paired=[] if a.models is None else ['--models',str(a.models),'--child',str(a.child)];root=a.native_repo.resolve();here=Path(__file__).resolve().parent
 dependency=a.output.with_name('grt-'+hashlib.sha256(str(a.output.resolve()).encode()).hexdigest()[:12]+'.json')
 script=a.ordinary_plan_root/'tools/handwriting/audit_global_geometric_ordinary_plan.py';saved=sys.argv
 try:
- sys.argv=[str(script),str(dependency),'--native-repo',str(root),'--capture',str(a.capture)]
+ sys.argv=[str(script),str(dependency),'--native-repo',str(root),'--capture',str(a.capture),*paired]
  runpy.run_path(str(script),run_name='__main__')
 finally:sys.argv=saved
 sys.path.insert(0,str(root/'research/myscript/scripts'));from inspect_text_features import Binary

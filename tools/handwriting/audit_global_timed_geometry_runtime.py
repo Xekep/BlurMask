@@ -8,7 +8,9 @@ p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('output',type=Path);p.add_argument('--native-repo',type=Path,required=True)
 p.add_argument('--recorded-manifest',type=Path,required=True);p.add_argument('--parent-capture',type=Path,required=True)
 p.add_argument('--capture',type=Path,required=True);p.add_argument('--native-capture',type=Path)
-a=p.parse_args();root=a.native_repo.resolve();package=Path(__file__).resolve().parents[2]
+p.add_argument('--models',type=Path);p.add_argument('--child',type=Path);a=p.parse_args()
+if (a.models is None)!=(a.child is None):p.error('--models and --child must be supplied together')
+paired=[] if a.models is None else ['--models',str(a.models),'--child',str(a.child)];root=a.native_repo.resolve();package=Path(__file__).resolve().parents[2]
 reports={}
 def run(name,script,args):
  destination=a.output.with_name('tgr-'+hashlib.sha256(str(a.output.resolve()).encode()).hexdigest()[:12]+'-'+str(len(reports))+'.json')
@@ -17,10 +19,10 @@ def run(name,script,args):
  finally:sys.argv=saved
  reports[name]=dict(path=str(destination),sha256=hashlib.sha256(destination.read_bytes()).hexdigest())
 run('numericNativeClosure',root/'tools/handwriting/audit_global_geometric_numeric_closure.py',
- ['--native-repo',root,'--capture',a.parent_capture])
+ ['--native-repo',root,'--capture',a.parent_capture,*paired])
 run('physicalConstructorNativeClosure',root/'tools/handwriting/audit_global_timed_geometry_plan.py',
  ['--native-repo',root,'--caller-plan-root',root,'--ordinary-plan-root',root,
-  '--capture',a.parent_capture,'--recorded-manifest',a.recorded_manifest])
+  '--capture',a.parent_capture,'--recorded-manifest',a.recorded_manifest,*paired])
 sys.path.insert(0,str(root/'research/myscript/scripts'));from inspect_text_features import Binary
 b=Binary('MyScriptText.dll');spec=json.loads((package/'tools/handwriting/global-timed-geometry-runtime-pins.json').read_bytes())
 assert hashlib.sha256(b.data).hexdigest()==spec['dllSha256'];md=Cs(CS_ARCH_X86,CS_MODE_64);decoded={}
@@ -72,6 +74,7 @@ numeric_report=a.output.with_name('tgr-'+hashlib.sha256(str(a.output.resolve()).
 try:
  sys.argv=[str(oracle),str(a.recorded_manifest),str(a.parent_capture),str(a.capture),'--report',str(numeric_report)]
  if a.native_capture:sys.argv+=['--native',str(a.native_capture)]
+ sys.argv+=paired
  runpy.run_path(str(oracle),run_name='__main__')
 finally:sys.argv=saved
 report=dict(status='PASS NEW timed ordinary geometry closure and independent numerical oracle',vendorExecution=False,

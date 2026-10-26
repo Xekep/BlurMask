@@ -375,6 +375,23 @@ public sealed class LegacyPreparedCaseDictionarySession
         finally{Exit();}
     }
 
+    //Like result V70, LIVE V70 is metadata-only: no query slot, revision,
+    //map reset or backend replacement. The actual pre-V80 lease is mandatory.
+    internal ReadOnlyMemory<byte> ReadLivePublicationTerminal(LivePublicationQueryLease lease,
+        ulong selectedSourceTag,ushort endingSymbol,byte boundaryArgument,CancellationToken token)
+    {
+        Enter(token);
+        try
+        {
+            RequireLivePublicationQueryLease(lease);
+            var result=ReadTerminalAction(selectedSourceTag,endingSymbol,boundaryArgument,token);
+            token.ThrowIfCancellationRequested();
+            RequireLivePublicationQueryLease(lease);
+            return result;
+        }
+        finally{Exit();}
+    }
+
     internal void EndLivePublicationQueryLease(LivePublicationQueryLease lease,CancellationToken token)
     {
         Enter(token);try{RequireLivePublicationQueryLease(lease);activeLivePublicationLease=null;}finally{Exit();}

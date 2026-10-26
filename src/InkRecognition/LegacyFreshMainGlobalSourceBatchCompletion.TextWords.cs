@@ -8,9 +8,20 @@ public sealed partial class LegacyFreshMainGlobalSourceBatchCompletion
     internal void ChargeTextPreparationCopy(long bytes,CancellationToken token)
     {
         RequireCompleted(token);
-        if(preparedTextWords is not null){preparedTextWords.ReservePreparationCopy(bytes,token);return;}
-        if(bytes<0||bytes>RemainingEnumeratedCopyBudget(token))throw new NotSupportedException("Owned TEXT resource preparation exceeds cumulative remaining copy envelope.");
-        earlyTextPreparationCopyBytes+=bytes;
+        CompletedTextWords? prepared;
+        lock(validationMeterGate)
+        {
+            prepared=preparedTextWords;
+            if(prepared is null)
+            {
+                if(bytes<0||bytes>maximumCopy-PreflightEnumeratedCopyBytes-earlyTextPreparationCopyBytes-associationCopyReserve)
+                    throw new NotSupportedException("Owned TEXT resource preparation exceeds cumulative remaining copy envelope.");
+                earlyTextPreparationCopyBytes+=bytes;return;
+            }
+        }
+        //The issued TEXT queue retains its separate same-thread contract.
+        //Do not hold the meter gate across its scope/owner validation.
+        prepared.ReservePreparationCopy(bytes,token);
     }
 
     //This internal issuer is deliberately not an overload of singular TEXT
@@ -19,8 +30,11 @@ public sealed partial class LegacyFreshMainGlobalSourceBatchCompletion
     internal CompletedTextWords PrepareTextWords(CancellationToken token)
     {
         RequireCompleted(token);
-        if(preparedTextWords is null)preparedTextWords=new(this,token);
-        preparedTextWords.Require(token);return preparedTextWords;
+        CompletedTextWords prepared;
+        //The sole issuer is FromBatch under its existing scope gate. Serialize
+        //initial queue copy-limit snapshot with earlier DATA-copy admissions.
+        lock(validationMeterGate){preparedTextWords??=new(this,token);prepared=preparedTextWords;}
+        prepared.Require(token);return prepared;
     }
     internal LegacyLibraryGlobalTextPublicationScope TextScope(CancellationToken token){RequireCompleted(token);return scope;}
     internal LegacyFreshMainGlobalPlainRecognitionResult TextSource(CancellationToken token){RequireCompleted(token);return source;}

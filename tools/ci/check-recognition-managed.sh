@@ -568,8 +568,7 @@ dotnet run --project tools/LegacyOriginalSourceHistory.Probe -c Release -- model
 python tools/LegacyOriginalSourceHistory.Probe/audit_output.py .artifacts/legacy-original-source-history-managed.json
 dotnet run --project tools/LegacyOriginalFieldDom.Probe -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/ru_RU-lk-text.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json models/text-unicode/legacy-case-data.json models/text-unicode/legacy-text-publication-data.json models/text-unicode/legacy-normalization-data.json models/text-unicode/legacy-circled-payload-data.json models/line-geometry/line-2e3-30.res models/line-geometry/line-2e3-50.res .artifacts/legacy-original-field-dom-managed.json
 python tools/LegacyOriginalFieldDom.Probe/audit_output.py .artifacts/legacy-original-field-dom-managed.json
-dotnet run --project tools/LegacyGlobalTextPublication.Probe -c Release -- models .artifacts/legacy-global-text-publication-managed.json
-python -I tools/LegacyGlobalTextPublication.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res .artifacts/legacy-global-text-publication-managed.json
+python -B tools/ci/check-global-publication.py .artifacts/publication-ci .artifacts/legacy-global-text-publication-managed.json
 dotnet run --project tools/LegacyGlobalOrdinaryRefresh.Probe -c Release -- models .artifacts/legacy-global-ordinary-refresh-managed.json
 python -I tools/LegacyGlobalOrdinaryRefresh.Probe/audit_output.py models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-separation-profile.json .artifacts/legacy-global-ordinary-refresh-managed.json
 dotnet run --project tools/LegacyGlobalTextGlyphChoices.Probe -c Release -- models .artifacts/legacy-global-text-glyph-choices-managed.json tools/test-data/russian-recorded-words/manifest.json

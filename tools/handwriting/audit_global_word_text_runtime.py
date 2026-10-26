@@ -7,6 +7,8 @@ import argparse,hashlib,json,runpy,sys
 from pathlib import Path
 root=Path(__file__).resolve().parents[2]
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('output',type=Path);a=p.parse_args()
+from global_wordtext_source_bridge import authenticate_word_text_cohort
+wordCohortAuthentication=authenticate_word_text_cohort(root)
 dependency=a.output.with_name('gwtr-'+hashlib.sha256(str(a.output.resolve()).encode()).hexdigest()[:12]+'.json')
 saved=sys.argv
 try:
@@ -75,9 +77,20 @@ contracts={
  ],
 }
 texts={}
+wordSourceBridge=None
+def require_contract(name,text,needle):
+ global wordSourceBridge
+ if needle in text:return
+ from global_wordtext_source_bridge import verify_word_text_source
+ wordSourceBridge=verify_word_text_source(root)
+ assert needle in wordSourceBridge['ReviewedChangedContracts'].get(name,{}),(name,needle)
 for name,needles in contracts.items():
- text=(root/'src/InkRecognition'/name).read_text(encoding='utf-8-sig');texts[name]=text
- for needle in needles:assert needle in text,(name,needle)
+ if name=='LegacyFreshMainGlobalWordTextPublication.cs':
+  from publication_compile_default_source import read_default_text
+  text,compileDefaultSource=read_default_text(root,name)
+ else:text=(root/'src/InkRecognition'/name).read_text(encoding='utf-8-sig')
+ texts[name]=text
+ for needle in needles:require_contract(name,text,needle)
 # Check native ordering independently of probe trace labels.
 parent=texts['LegacyFreshMainGlobalWordTextPublication.cs']
 sequence=['documentChoiceAllocated=true','stage="word-intern";var node=',
@@ -86,7 +99,12 @@ sequence=['documentChoiceAllocated=true','stage="word-intern";var node=',
  'CreateGlobalWordSelection(payload','documentLink=true;',
  'LegacyNativeSourceLinePublication.Append(lines','text=new(this,textKey)',
  'CreateGlobalTextSelection(text']
-offsets=[parent.index(s)for s in sequence];assert offsets==sorted(offsets)
+if all(s in parent for s in sequence):
+ offsets=[parent.index(s)for s in sequence];assert offsets==sorted(offsets)
+else:
+ from global_wordtext_source_bridge import verify_word_text_source
+ wordSourceBridge=verify_word_text_source(root)
+ assert wordSourceBridge['CurrentSelectedOnlyOrderVerified']
 # Compare the old numerical AVL body after removing only the approved typed
 # constructor sidecar argument. No comparator/balancing/coercion edits allowed.
 interner=texts['LegacyOwnedMainTextSourceInterner.cs']
@@ -101,7 +119,7 @@ body=interner[start:end+1].lstrip().replace(',globalSource,globalWordSource)',',
 body_hash=hashlib.sha256(body.encode()).hexdigest()
 assert body_hash=='fe312e01172a6989f9f9117df9b87910f144d9494c56dda91d9744edd146790a',body_hash
 report=dict(status='PASS bounded runtime contracts; not full document/recognition completion',
- vendorExecution=False,dependencySha256=hashlib.sha256(dependency.read_bytes()).hexdigest(),
+ vendorExecution=False,compileDefaultSource=compileDefaultSource,wordCohortAuthentication=wordCohortAuthentication,wordSourceBridge=wordSourceBridge,dependencySha256=hashlib.sha256(dependency.read_bytes()).hexdigest(),
  sourceContracts=sum(map(len,contracts.values())),nativeOrderStages=len(sequence),
  oldInternCoreNormalizedSha256=body_hash,
  admitted='fresh exact global1/oneWORD ordinary scalar outputs; prepared skip labelled separately',

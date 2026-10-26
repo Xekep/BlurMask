@@ -37,7 +37,8 @@ internal sealed class LegacyFreshMainGlobalCompactPublicationState
     }
     internal (LegacyPreparedMainCompactReachability.Result Reachability, LegacyPreparedMainCompactPublication.Result Publication)
         Publish(int endingNode, Func<int, LegacyMainDirectWordNodeResult> snapshot, LegacyNativeDelimiterQuerySource reader,
-            LegacyFreshMainGlobalGlyphConfidence confidence, Action<CancellationToken> validate, CancellationToken token)
+            LegacyFreshMainGlobalGlyphConfidence confidence, Action<CancellationToken> validate, CancellationToken token,
+            LegacyFreshMainGlobalPublicationContext language)
     {
         validate(token);
         if (!ReferenceEquals(confidence.Owner, Policy.Owner) || NextNode > endingNode || endingNode >= Starts.Length - 1)
@@ -52,7 +53,7 @@ internal sealed class LegacyFreshMainGlobalCompactPublicationState
             owner.Symbols.Geometry.CategoryOwner.Categories, invocation.Options.ContextSentinels24b8,
             invocation.LanguagePenalty2534, false, start, endingNode, reach.Nodes, reach.LanguageProbe,
             group => LegacyMainCompactGroupScores.FromGlobal(confidence.ReadGroup(group, token)),
-            Storage, Count, Starts, PrefixOwners, validate, token, owner.Symbols.CopySourceHeaders());
+            Storage, Count, Starts, PrefixOwners, validate, token, owner.Symbols.CopySourceHeaders(),language);
         validate(token);
         if (published.Storage.Length != Storage.Length || published.Count < Count || published.Count > Storage.Length / 40 ||
             published.Starts.Length != Starts.Length || published.PrefixOwners.Length != Starts.Length)

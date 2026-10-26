@@ -53,6 +53,19 @@ public sealed partial class LegacyFreshMainGlobalCaseSession
         }
         finally { Exit(); }
     }
+    internal ReadOnlyMemory<byte> ReadLiveTerminal(LiveQueryLease lease,ulong tag,
+        ushort endingSymbol,byte boundaryArgument,CancellationToken token)
+    {
+        Enter(token);
+        try
+        {
+            CheckLiveQueryLease(lease,token);
+            var result=dictionary.ReadLivePublicationTerminal(lease.DictionaryLease,tag,endingSymbol,boundaryArgument,token);
+            CheckLiveQueryLease(lease,token);
+            return result;
+        }
+        finally{Exit();}
+    }
     internal void EndLiveQueryLease(LiveQueryLease lease, CancellationToken token)
     {
         Enter(token);

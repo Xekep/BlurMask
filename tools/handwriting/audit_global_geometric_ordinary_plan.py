@@ -4,12 +4,14 @@ from pathlib import Path
 from capstone import Cs,CS_ARCH_X86,CS_MODE_64
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('output',type=Path)
 p.add_argument('--native-repo',type=Path,required=True);p.add_argument('--capture',type=Path,required=True)
-a=p.parse_args();root=a.native_repo.resolve();here=Path(__file__).resolve().parent
+p.add_argument('--models',type=Path);p.add_argument('--child',type=Path);a=p.parse_args()
+if (a.models is None)!=(a.child is None):p.error('--models and --child must be supplied together')
+paired=[] if a.models is None else ['--models',str(a.models),'--child',str(a.child)];root=a.native_repo.resolve();here=Path(__file__).resolve().parent
 dependencies={}
 for index,name in enumerate(('audit_global_cropped_source.py','audit_textfield_input_context.py')):
  out=a.output.with_name('ggo-'+hashlib.sha256(str(a.output.resolve()).encode()).hexdigest()[:12]+'-'+str(index)+'.json')
  args=[str(root/'tools/handwriting'/name),str(out)]
- if index==0:args+=['--native-repo',str(root),'--capture',str(a.capture)]
+ if index==0:args+=['--native-repo',str(root),'--capture',str(a.capture),*paired]
  saved=sys.argv
  try:sys.argv=args;runpy.run_path(args[0],run_name='__main__')
  finally:sys.argv=saved
@@ -50,7 +52,12 @@ for at,v in semantic.items():assert decoded[at]==v
 f=lambda at:struct.unpack('<f',b.data[b.off(at):b.off(at)+4])[0]
 assert f(0x18009_7b27+0x62869)==1_000_000 # prior MOVSS ends at97B27
 assert f(0x18009_7b3b+0x62675)==.5
-capture=a.capture.read_bytes();assert hashlib.sha256(capture).hexdigest()=='1f2d2f6e2bb57e6d249fc11325a5e9736f358a5cd9dce1fe2664dd8ecdebea58'
+capture=a.capture.read_bytes();pairedParentProof=None
+if a.models is None:
+ assert hashlib.sha256(capture).hexdigest()=='1f2d2f6e2bb57e6d249fc11325a5e9736f358a5cd9dce1fe2664dd8ecdebea58'
+else:
+ from global_current_parent_data_bridge import verify_current_parent
+ pairedParentProof=verify_current_parent(Path(__file__).resolve().parents[2],a.models,a.child,a.capture)
 actual=json.loads(capture)['actual'];structural=[]
 for s in actual:
  assert s['complete'] and not s['faulted'] and s['lineCount']==s['alternatives']==s['choiceCount']==1
@@ -74,7 +81,7 @@ assert sum(s['meanAngle']!=0 for s in structural)==4
 assert 10_000*3+500 != 5_000*3+500 != 5_000*3+0
 point=(root/'src/InkRecognition/StrokeTextRecognizer.cs').read_text(encoding='utf8')
 assert 'record struct InkPoint(float X, float Y)' in point or 'record struct InkPoint(float X,float Y)' in point
-report=dict(status='PASS STATIC proposal; full geometry blocked on typed timing lineage',vendorExecution=False,
+report=dict(status='PASS STATIC proposal; full geometry blocked on typed timing lineage',vendorExecution=False,pairedParentProof=pairedParentProof,
  dependencies=dependencies,fullFunctions=len(ranges),linearBytes=sum(r[3]for r in ranges),instructionPins=len(spec['pins']),bindings=len(spec['bindings']),semanticPins=len(semantic),
  directCallGraph=calls,actualStructuralProjection=structural,
  counts=dict(parents=13,characters=37,selectedUTF8Bytes=71,nonzeroMeanAngles=4),

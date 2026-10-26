@@ -64,6 +64,17 @@ public sealed class LegacyFreshMainGlobalTextGlyphChoices
         projection=new(scope,completion,token);
         Validate(token);
     }
+    public static LegacyFreshMainGlobalTextGlyphChoices Prepare(LegacyLibraryGlobalTextPublicationScope scope,
+        LegacyFreshMainGlobalSourceCompletion actual,ReadOnlySpan<byte> resource,LegacyNativeTextPublicationData properties,
+        LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token=default)
+    {
+        actual.Validate(token);
+        if(!ReferenceEquals(actual.Source.Owner.SourceDocument,scope.Document))throw new ArgumentException("Same original GLOBAL document required.");
+        // Existing batch preparation authenticates resource and charges complete
+        // resource/refresh/projection copies before allocating the TEXT binding.
+        if(!ReferenceEquals(scope.SourceCompletion,actual))throw new ArgumentException("Same original GLOBAL scope required.");
+        return PrepareBatch(scope,actual.Batch,resource,properties,normalization,circles,token,actual);
+    }
     public static LegacyFreshMainGlobalTextGlyphChoices Prepare(LegacyLibraryGlobalTextPublicationScope actualScope,
         LegacyFreshMainGlobalNoCandidateSourceCompletion actualCompletion,ReadOnlySpan<byte> acousticResource,
         LegacyNativeTextPublicationData properties,LegacyNativeUnicodeNormalizationData normalization,
@@ -72,7 +83,7 @@ public sealed class LegacyFreshMainGlobalTextGlyphChoices
         ArgumentNullException.ThrowIfNull(actualScope);ArgumentNullException.ThrowIfNull(actualCompletion);
         ArgumentNullException.ThrowIfNull(properties);ArgumentNullException.ThrowIfNull(normalization);ArgumentNullException.ThrowIfNull(circles);
         actualScope.Validate();actualCompletion.Validate(token);
-        if(!ReferenceEquals(actualScope.SourceCompletion,actualCompletion)||!actualCompletion.IsTopV68Completed||
+        if(!ReferenceEquals(actualScope.SourceCompletion?.Legacy,actualCompletion)||!actualCompletion.IsTopV68Completed||
             !ReferenceEquals(actualScope.SharedState.GlobalTopOwner,actualCompletion.Source.Session!.Ownership)||
             !ReferenceEquals(actualScope.SharedState.Document,actualCompletion.Source.Owner.SourceDocument))
             throw new ArgumentException("Identical actual pre-NN global scope, successful V68 and shared document/TOP required.");
@@ -95,7 +106,8 @@ public sealed class LegacyFreshMainGlobalTextGlyphChoices
     }
     internal static LegacyFreshMainGlobalTextGlyphChoices PrepareBatch(LegacyLibraryGlobalTextPublicationScope scope,
         LegacyFreshMainGlobalSourceBatchCompletion actual,ReadOnlySpan<byte> resource,LegacyNativeTextPublicationData properties,
-        LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token)
+        LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token,
+        LegacyFreshMainGlobalSourceCompletion? facade=null)
     {
         ArgumentNullException.ThrowIfNull(properties);ArgumentNullException.ThrowIfNull(normalization);ArgumentNullException.ThrowIfNull(circles);
         actual.RequireCompleted(token);
@@ -110,7 +122,7 @@ public sealed class LegacyFreshMainGlobalTextGlyphChoices
         byte[] owned=resource.ToArray();
         if(!Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(owned)).Equals(actual.TextSnapshot(token).SourcePolicy.Owner.Graph.Source.Source.SourceFingerprint,StringComparison.OrdinalIgnoreCase))
             throw new ArgumentException("Same actual batch acoustic resource required before TEXT binding.");
-        return PrepareCompleted(scope,scope.BindBatchTextSource(actual,token),owned,properties,normalization,circles,token);
+        return PrepareCompleted(scope,facade is null?scope.BindBatchTextSource(actual,token):facade.Bind(scope,token),owned,properties,normalization,circles,token);
     }
     private static LegacyFreshMainGlobalTextGlyphChoices PrepareCompleted(LegacyLibraryGlobalTextPublicationScope scope,LegacyGlobalCompletedTextSource binding,ReadOnlySpan<byte> resource,LegacyNativeTextPublicationData properties,LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token)
     {

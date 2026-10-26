@@ -17,7 +17,8 @@ public sealed partial class LegacyLibraryGlobalTextPublicationScope : IDisposabl
     public LegacyLibraryTextProcessingContext Context {get;}
     public LegacyOwnedRawInkDocument Document=>Context.Document;
     public LegacyFreshMainTextDocumentSeed Seed=>shared.DocumentSeed!;
-    public LegacyFreshMainGlobalNoCandidateSourceCompletion? SourceCompletion {get;private set;}
+    private LegacyGlobalSourceCallerResidue? completionResidue;
+    public LegacyFreshMainGlobalSourceCompletion? SourceCompletion {get;private set;}
     public bool IsFaulted {get{lock(gate)return faulted;}}
     internal LegacyMainSharedTextSourceState SharedState=>shared;
     private LegacyLibraryGlobalTextPublicationScope(LegacyLibraryTextProcessingContext context,
@@ -54,15 +55,17 @@ public sealed partial class LegacyLibraryGlobalTextPublicationScope : IDisposabl
             Validate();token.ThrowIfCancellationRequested();
             if(started)throw new InvalidOperationException("This adopted global invocation is single-use, including failed prefixes.");
             started=true;
-            try{return result=recognition!.Run(compactAllocatorStorage,wordAllocatorResidue120,recordAllocatorResidue40,
-                labelStackResidue256,requestStackResidue64,backtrackStackResidue72,token);}
+            try{
+                completionResidue=new(wordAllocatorResidue120,recordAllocatorResidue40,labelStackResidue256,requestStackResidue64,backtrackStackResidue72);
+                return result=recognition!.Run(compactAllocatorStorage,completionResidue.Word,completionResidue.Glyph,
+                completionResidue.Labels,completionResidue.Request,completionResidue.Backtrack,token);}
             catch{faulted=true;throw;}
         }
     }
 
     /// <summary>Capture, native quote cleanup, proven fresh-F4 return, then
     /// source count/fill, ranking and275 scores. Imported2A is never created.</summary>
-    public LegacyFreshMainGlobalNoCandidateSourceCompletion CompleteSources(ReadOnlySpan<byte> allocation400,
+    public LegacyFreshMainGlobalSourceCompletion CompleteSources(ReadOnlySpan<byte> allocation400,
         Span<byte> leadingScratch4,Span<byte> trailingScratch4,CancellationToken token=default)
     {
         lock(gate)
@@ -74,15 +77,17 @@ public sealed partial class LegacyLibraryGlobalTextPublicationScope : IDisposabl
                 throw new InvalidOperationException("The same completed positive raw global invocation is required.");
             if(enteredCompletion)throw new InvalidOperationException("Global source completion is single-use.");
             enteredCompletion=true;
-            try
-            {
-                SourceCompletion=LegacyFreshMainGlobalNoCandidateSourceCompletion.Prepare(this,result,allocation400,token);
-                shared.BindActualGlobalTop(result.Session!.Ownership);
-                SourceCompletion.Run(leadingScratch4,trailingScratch4,token);
-                return SourceCompletion;
-            }
-            catch{faulted=true;throw;}
         }
+        // Shared GLOBAL preflight may call back into scope validation. Never
+        // hold the scope gate while waiting for that cancellable session lease.
+        try
+        {
+            var completion=LegacyFreshMainGlobalSourceCompletion.Prepare(this,result!,models.AcousticResource,allocation400,token);
+            lock(gate){Validate();SourceCompletion=completion;}
+            completion.Run(completionResidue!,leadingScratch4,trailingScratch4,token);
+            lock(gate){Validate();shared.BindActualGlobalTop(result!.Session!.Ownership);return completion;}
+        }
+        catch{lock(gate)faulted=true;throw;}
     }
     internal void Validate(){lock(gate){ObjectDisposedException.ThrowIf(disposed,this);lease.Validate();if(faulted)throw new InvalidOperationException("Faulted global publication scope.");}}
     public void Dispose(){DisposeCore();GC.SuppressFinalize(this);}

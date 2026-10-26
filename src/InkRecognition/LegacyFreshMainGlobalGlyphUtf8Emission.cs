@@ -16,6 +16,9 @@ public sealed class LegacyFreshMainGlobalGlyphUtf8Emission
     private LegacyFreshMainGlobalGlyphUtf8Emission(LegacyGlobalCompletedTextSource completion,
         LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles)
     {ActualCompletion=completion;this.normalization=normalization;this.circles=circles;}
+    public static LegacyFreshMainGlobalGlyphUtf8Emission Prepare(LegacyFreshMainGlobalSourceCompletion actual,
+        LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token=default)
+    {actual.Validate(token);return PrepareCompleted(actual.Bind(actual.Scope,token),normalization,circles,token);}
     public static LegacyFreshMainGlobalGlyphUtf8Emission Prepare(LegacyFreshMainGlobalNoCandidateSourceCompletion actualCompletedSources,
         LegacyNativeUnicodeNormalizationData normalization,LegacyNativeCircledPayloadData circles,CancellationToken token=default)
     {

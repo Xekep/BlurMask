@@ -135,21 +135,12 @@ public sealed partial class ExperimentalGlobalTextRecognizer : IPositionedStroke
         var compact=source.Selection.Publication.CopyCompactStorage();int count=source.Selection.Publication.RecordCount2470;
         bool needsAugmentation=HasActiveAugmentation(compact,count,token);
         if(diagnostic is not null){diagnostic.Stage="completion";diagnostic.Route=needsAugmentation?"augmentation":"old-no-candidate";}
-        LegacyFreshMainGlobalTextSourceWrapper wrapper;
-        bool usesBatch=needsAugmentation||source.RawWordsInNativeHeadOrder.Count>1;
-        if(usesBatch)
-        {
-            var actual=LegacyFreshMainGlobalSourceBatchCompletion.Prepare(scope,source,completedAcoustic!,new byte[400],token:token);
-            actual.Run(new byte[120],new byte[40],new ushort[256],new byte[64],new byte[72],
-                new byte[4],new byte[4],new byte[4],new byte[4],token);
-            wrapper=LegacyFreshMainGlobalTextSourceWrapper.PrepareBatch(scope,actual,completedAcoustic!,publication,normalization!,circles!,token);
-            if(diagnostic is not null&&!needsAugmentation)diagnostic.Route="batch-zero-eligible";
-        }
-        else
-        {
-            var actual=scope.CompleteSources(new byte[400],new byte[4],new byte[4],token);
-            wrapper=LegacyFreshMainGlobalTextSourceWrapper.Prepare(scope,actual,completedAcoustic!,publication,normalization!,circles!,token);
-        }
+        // The same scope now owns the actual variable-WORD continuation for
+        // every positive source, including a genuinely zero-eligible batch.
+        var actual=scope.CompleteSources(new byte[400],new byte[4],new byte[4],token);
+        var wrapper=LegacyFreshMainGlobalTextSourceWrapper.Prepare(scope,actual,completedAcoustic!,publication,normalization!,circles!,token);
+        bool usesBatch=wrapper.ActualCompletion.BatchWords is not null;
+        if(diagnostic is not null&&!needsAugmentation)diagnostic.Route="batch-zero-eligible";
         if(diagnostic is not null)diagnostic.Stage="all275-text";
         var parent=LegacyFreshMainGlobalWordTextPublication.PrepareAllWords(wrapper,token);
         parent.Publish(new byte[40],new byte[8160],token);

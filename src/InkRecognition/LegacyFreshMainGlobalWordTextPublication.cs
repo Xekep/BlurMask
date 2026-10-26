@@ -98,7 +98,7 @@ public sealed partial class LegacyFreshMainGlobalWordTextPublication
     {
         Wrapper=wrapper;wrapper.ValidatePreclaim(token);var completion=wrapper.ActualCompletion;
         batchWords=completion.BatchWords;selectedWordIndex=completion.Word.WordIndex;
-        if(completion.Snapshot.ActiveAlternativeCount60!=1||(batchWords is null&&(completion.Word.Next is not null||selectedWordIndex!=0))||
+        if(completion.Snapshot.ActiveAlternativeCount60!=1||(batchWords is null&&(completion.Word.Next is not null||selectedWordIndex!=0&&!completion.HasActualRankedSingletonFacade))||
             !ReferenceEquals(completion.Snapshot.WordHead18,completion.Word)||
             !ReferenceEquals(Scope.Seed,Scope.Context.Result.PublicationSeed)||
             !ReferenceEquals(Scope.Seed.PendingSelections,Scope.SharedState.Selections)||
@@ -342,7 +342,16 @@ public sealed partial class LegacyFreshMainGlobalWordTextPublication
                 var published=LegacyNativeSourceLinePublication.Append(lines,0,lineInputs,guides,0,token);lines=published.Lines.ToArray();WrapperLineOffset=published.NextWrapperLineOffset;Record("source-lines");
                 text=new(this,textKey);stage="text-register";text.Selection=Scope.SharedState.Selections.CreateGlobalTextSelection(text,fault.Text,token);Record("text-registration-prefix");
                 if(text.Selection is null)throw new NotSupportedException("TEXT registration refused with its native counter/pending prefix retained.");
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+                Record("text-registered");stage="complete";completed=true;
+                // Only the already-owned singleton parent row; do not relabel a last batch row as its whole batch.
+                var scoreTrace=Scope.DiagnosticScoreTrace;
+                if(batchWords is null&&scoreTrace is not null&&scoreTrace.Admit(Wrapper.ActualCompletion.Source))
+                    scoreTrace.CaptureSelected("ParentSelectedCompleted",selectedWordIndex,wordStorage,wordReferences,true);
+                return this;
+#else
                 Record("text-registered");stage="complete";completed=true;return this;
+#endif
             }
             catch{faulted=true;allWords?.Fault(this);if(batchWords is not null)batchWords.Fault();stage="fault";Wrapper.FaultReservedWord(this);Record("fault");throw;}
         }

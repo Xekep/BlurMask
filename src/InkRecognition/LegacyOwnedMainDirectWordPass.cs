@@ -7,7 +7,7 @@ public enum LegacyMainDirectStorageKind
     HeapRecords, PrimaryAlternativePool, NodeRecords, NodePrimaryAlternatives,
     InitialRequestResidue, ParentRequestResidue, FlagRequestResidue, AuxiliaryScratch, LexicalResidue,
     SecondaryAlternativePool, NodeSecondaryAlternatives, PrimaryRecombinationRequestResidue,
-    LanguageContextRequestResidue
+    LanguageContextRequestResidue, PublicationLanguageHeap, PublicationCandidateHeap
 }
 
 public readonly record struct LegacyMainDirectStorageRequest(LegacyMainDirectStorageKind Kind,
@@ -41,6 +41,7 @@ public sealed partial class LegacyOwnedMainDirectWordPass
     private readonly LegacyNativeWordControllerConfiguration configuration;
     private readonly LegacyNativeWordHeapPreparation preparation;
     private readonly LegacyMainDirectStorageProvider allocator;
+    private readonly LegacyFreshMainGlobalPublicationStorage? globalPublicationStorage;
     private readonly LegacyNativeMainInitialSpecialCandidates initial;
     private readonly LegacyNativeOrdinaryParentWordCandidates parents;
     private readonly LegacyNativeMainWordFlagPrepass flagPrepass;
@@ -118,6 +119,7 @@ public sealed partial class LegacyOwnedMainDirectWordPass
         owner = policy.Source;
         configuration = policy.Configuration;
         this.allocator = allocator;
+        if(policy.Global is{} actualGlobal)globalPublicationStorage=new(actualGlobal,allocator);
         cumulative = new int[owner.Graph.NodeCount];
         if ((!owner.IsGlobal && owner.IsCaseAware != (caseSourcePolicy is not null)) ||
             owner.IsGlobal && caseSourcePolicy is not null ||

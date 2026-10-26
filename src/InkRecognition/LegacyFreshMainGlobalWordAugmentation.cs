@@ -22,6 +22,7 @@ public sealed partial class LegacyFreshMainGlobalWordAugmentation
     private int controller24a0;
     private byte[] sourceStorage26=[];
     private LegacyOrdinaryGraphSourceReference[] sourceReferences=[];
+    public bool SourcesMarkedComplete {get;private set;}
     public bool IsComplete=>complete;
     public bool IsFaulted=>faulted;
     private LegacyFreshMainGlobalWordAugmentation(ReadOnlySpan<byte> resource,LegacyFreshMainGlobalPlainRecognitionResult source,
@@ -45,6 +46,7 @@ public sealed partial class LegacyFreshMainGlobalWordAugmentation
             !session.IsComplete||session.IsStopped||!ReferenceEquals(session.Ownership.PublishedTerminal,actualSource.Selection)||
             alternativeAllocation400.Length!=400||acousticResource.Length!=572763)
             throw new ArgumentException("One actual successful live global published source and allocation400 required.");
+        using var preparation=session.AcquireSourcePreflight(token);
         var policy=actualSource.Selection.Publication.Policy;var cuts=policy.Owner.Graph.Source.Source;
         if(policy.Owner.Model.SourceKind!=0x135||policy.HasAssociatedSource||policy.Configuration.Trace2368!=0||
             policy.Configuration.Mode22f6!=0||policy.Refresh.KnowledgeOption22f8!=0||policy.Refresh.SourceFormat22f9!=0||
@@ -83,6 +85,7 @@ public sealed partial class LegacyFreshMainGlobalWordAugmentation
         CancellationToken token=default)
     {
         if(batchScope is not null)throw new InvalidOperationException("Batch span workers cannot enter standalone Run.");
+        using var preflight=session.AcquireSourcePreflight(token);
         Validate(token,false);
         if(wordAllocatorResidue120.Length!=120||glyphAllocatorResidue40.Length!=40||labelStackResidue256.Length!=256||
             requestResidue64.Length!=64||walkResidue72.Length!=72||leadingScratch4.Length!=4||trailingScratch4.Length!=4||
@@ -98,14 +101,16 @@ public sealed partial class LegacyFreshMainGlobalWordAugmentation
         byte[] recordStorage=glyphAllocatorResidue40.ToArray(),requestStorage=requestResidue64.ToArray(),walkStorage=walkResidue72.ToArray();
         ushort[] labelsStorage=labelStackResidue256.ToArray();
         if(Interlocked.CompareExchange(ref entered,1,0)!=0)throw new InvalidOperationException("Entered augmentation cannot retry.");
-        session.ClaimSourceCompletion(this,true,token);
+        session.ClaimSourceCompletion(this,true,token);preflight.Dispose();
         try
         {
             LegacyFreshMainGlobalPublishedQuoteNormalization.ApplyPublished(snapshot,leadingScratch4,trailingScratch4,token);
             _=LegacyFreshMainGlobalResultGlyphNormalization.Prepare(policy,token).ApplyPublished(snapshot,token);
             //Native frontend228: null v106 sampler preparation +21D last-group
             //invalidation only; immutable cached group snapshots have no such reuse hint.
-            var work=AugmentCurrentSpan(workingWord,recordStorage,labelsStorage,requestStorage,walkStorage,compareLeft4,compareRight4,envelope,token);
+            SpanWork work;
+            try{work=AugmentCurrentSpan(workingWord,recordStorage,labelsStorage,requestStorage,walkStorage,compareLeft4,compareRight4,envelope,token);}
+            finally{SourcesMarkedComplete=true;}
             var result=RankCurrentSpan(work,LegacyPreparedMainWordRanking.InitialQuota(65535,65535,false),compareLeft4,compareRight4,envelope,token);
             complete=true;return result;
         }
@@ -117,6 +122,12 @@ public sealed partial class LegacyFreshMainGlobalWordAugmentation
         byte[] requestStorage,byte[] walkStorage,Span<byte> compareLeft4,Span<byte> compareRight4,
         LegacyGlobalWordAugmentationEnvelope envelope,CancellationToken token)
     {
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+            var candidateTrace=source.ScoreTrace;int diagnosticWalk=-1;bool diagnosticEmit=false;
+            if(candidateTrace is not null&&candidateTrace.AdmitCandidate(source))
+                candidateTrace.CaptureCandidateBasis(span.Span.First,span.Span.Last,compact,starts,marker,joiner,closed,unit,softHyphen);
+#else
+#endif
             var ranges=policy.Owner.Acoustic.Geometry.Context.Source;
             var counted=ranges.ResolveForwardWithResiduals((uint)span.Span.First,(uint)span.Span.Last,token);
             var filled=ranges.ResolveForwardWithResiduals((uint)span.Span.First,(uint)span.Span.Last,token);
@@ -128,21 +139,42 @@ public sealed partial class LegacyFreshMainGlobalWordAugmentation
                 {
                     Validate(ct,true);var d=callbacks.ReadDelimiter(request,cursor,ct);Validate(ct,true);
                     if(!ReferenceEquals(d.Owner,callbacks))throw new InvalidOperationException("Actual delimiter callback owner required.");
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+                    var actualSymbols=d.CopySymbols();
+                    var reply=new LegacyGlobalSpanAlternativeWalkKernel.Delimiter(d.RemainingCursor,actualSymbols.Length,d.NativeFlag0C,d.NativeFlag0D);
+                    if(candidateTrace is not null&&candidateTrace.AdmitCandidate(source))
+                        candidateTrace.CaptureCandidateDelimiter(diagnosticWalk,diagnosticEmit,request,reply.RemainingCursor,reply.EmittedCount,reply.NativeFlag0C,reply.NativeFlag0D);
+                    return reply;
+#else
                     return new(d.RemainingCursor,d.CopySymbols().Length,d.NativeFlag0C,d.NativeFlag0D);
+#endif
                 },envelope);
             var scan=LegacyPreparedMainWordAugmentationCandidates.Scan(compact,compact.Length/40,starts,span.Span.First,span.Span.Last,false,
                 First,Last,(index,minimum)=>
                 {
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+                    diagnosticWalk=index;diagnosticEmit=false;
+#else
+#endif
                     Validate(token,true);var dry=walker.Run(index,minimum,false,ushort.MaxValue,[],token);controller24a0=0;
                     return new(dry.Status,dry.LastSourceKey);
                 },token);
             int originalCount=publisher.CaptureSpan(span,CurrentHeads,token).Words.Count,appended=0,duplicates=0,updated=0;
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+            if(candidateTrace is not null&&candidateTrace.AdmitCandidate(source))candidateTrace.CaptureCandidateScan(scan,originalCount);
+#else
+#endif
             foreach(int candidate in scan.CompactIndices)
             {
                 Validate(token,true);
                 //Native dictionaryV70 must produce this auxiliary payload. Neverzero/substituteit.
                 if(BinaryPrimitives.ReadInt32LittleEndian(compact.AsSpan(candidate*40+36))!=-1)
                     throw new NotSupportedException("Eligible candidate auxiliary dictionaryV70 fiveDWORD issuer not yet connected.");
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+                if(candidateTrace is not null&&candidateTrace.AdmitCandidate(source))candidateTrace.BeginCandidate(candidate,originalCount);
+                string diagnosticOutcome="Pending";diagnosticWalk=candidate;diagnosticEmit=true;
+#else
+#endif
                 workingWord.ResetPlain(token);var word=workingWord;
                 word.ApplyAugmentationFlag32((compact[candidate*40+32]&16)!=0,token);
                 int minimum=span.Span.First<0?-1:LegacyPreparedMainWordAugmentationCandidates.DecodeContextNode(span.Span.First);
@@ -151,21 +183,52 @@ public sealed partial class LegacyFreshMainGlobalWordAugmentation
                 byte[] executionRows=emission.Rows72;
                 if(emission.ResidualReferences.Length!=0)
                     executionRows=AssociateBatchResiduals(emission.Rows72,emission.ResidualReferences,token);
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+                if(candidateTrace is not null&&candidateTrace.AdmitCandidate(source))candidateTrace.CaptureCandidateEmission(emission,executionRows);
+#else
+#endif
                 for(int at=0;at<emission.Rows72.Length;at+=72)
                     if(emission.Rows72[at+60]!=0)throw new NotSupportedException("Augmentation currently binds actual ordinary0 writer; protocol/higher source requires its own path.");
                 var before=publisher.CaptureSpan(span,CurrentHeads,token);
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+                int diagnosticOldWord=0;
+                foreach(var old in before.Words)
+                {
+                    int diagnosticReference=0;
+                    foreach(ulong reference in old.FlatReferences)
+                    {
+                        byte[] ordinaryRow=session.Ownership.GlyphPool.CopyRecord(reference,token);
+                        if(candidateTrace is not null&&candidateTrace.AdmitCandidate(source))candidateTrace.CaptureCandidateOrdinaryRow(diagnosticOldWord,diagnosticReference,reference,ordinaryRow);
+                        if((BinaryPrimitives.ReadUInt16LittleEndian(ordinaryRow.AsSpan(4))&7)!=0)
+                            throw new NotSupportedException("Original275 equality requires separate nonordinary token owner.");
+                        diagnosticReference++;
+                    }
+                    diagnosticOldWord++;
+                }
+#else
                 foreach(var old in before.Words)foreach(ulong reference in old.FlatReferences)
                     if((BinaryPrimitives.ReadUInt16LittleEndian(session.Ownership.GlyphPool.CopyRecord(reference,token).AsSpan(4))&7)!=0)
                         throw new NotSupportedException("Original275 equality requires separate nonordinary token owner.");
+#endif
                 word.ApplySpanAlternativeFlags30(emission.WordFlags,token);
                 var chain=LegacyMainOrdinaryGlyphChainKernel.Apply(word,executionRows,[],policy.Owner.Graph.State.NodeCount,
                     compact.Length/40,starts,compact,node=>policy.Owner.Graph.State.GetNode(node).Count,session.OrdinaryProducer.Produce,
                     static (_,_,_,_,_,_,_)=>throw new NotSupportedException("No protocol writer is substituted."),
                     ushort.MaxValue,uint.MaxValue,uint.MaxValue,false,recordStorage,labelsStorage,requestStorage,1,token);
                 controller24a0=0;if(!chain.Succeeded)throw new InvalidOperationException("Actual augmentation218560 returnedfailure.");
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+                if(candidateTrace is not null&&candidateTrace.AdmitCandidate(source))candidateTrace.CaptureCandidateChain(chain);
+#else
+#endif
                 var costs=LegacyPreparedMainAugmentedWordCosts.Calculate(compact,compact.Length/40,candidate,emission.LastDirectParentIndex,
                     LegacyPreparedMainWordAugmentationCandidates.DecodeContextNode(span.Span.First),LegacyPreparedMainWordAugmentationCandidates.DecodeContextNode(span.Span.Last),0x135,token);
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+                byte[] candidateData=word.CopyStorage(token);
+                if(candidateTrace is not null&&candidateTrace.AdmitCandidate(source))candidateTrace.CaptureCandidateCosts(candidateData,costs);
+                word.SetRawScalars(costs.Score10,BinaryPrimitives.ReadSingleLittleEndian(candidateData.AsSpan(20)),costs.Cost18,costs.Cost1C,token);
+#else
                 byte[] candidateData=word.CopyStorage(token);word.SetRawScalars(costs.Score10,BinaryPrimitives.ReadSingleLittleEndian(candidateData.AsSpan(20)),costs.Cost18,costs.Cost1C,token);
+#endif
                 //219580 chooses the existing275 target during its count-pass
                 //eligibility scan, BEFORE217DB0 can change glyph source keys.
                 //13FE20 receives that same target; it does not derive/re-key275
@@ -174,30 +237,94 @@ public sealed partial class LegacyFreshMainGlobalWordAugmentation
                 else if(word.GetSourceSpan(First,Last,token)!=span.Span)throw new InvalidDataException("Actual emitted candidate source span changed.");
                 before=publisher.CaptureSpan(span,CurrentHeads,token);int match=-1;
                 for(int i=0;i<before.Words.Count;i++)
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+                {
+                    var comparisonPool=session.Ownership.GlyphPool;
+                    byte[] existingCompare=before.Words[i].CopyStorage(),candidateCompare=word.CopyStorage(token);
+                    if(Compare(comparisonPool,existingCompare,candidateCompare,compareLeft4,compareRight4,joiner,static label=>label,null,token)){match=i;break;}
+                }
+                if(candidateTrace is not null&&candidateTrace.AdmitCandidate(source))candidateTrace.CaptureCandidateMatch(match,before.Words.Count);
+                if(match==-1){Validate(token,true);_=publisher.InternPlainWord(word,span.Span,out _,token,candidateTrace);appended++;diagnosticOutcome="InternReturned";}
+#else
                     if(Compare(session.Ownership.GlyphPool,before.Words[i].CopyStorage(),word.CopyStorage(token),compareLeft4,compareRight4,joiner,static label=>label,null,token)){match=i;break;}
                 if(match==-1){Validate(token,true);_=publisher.InternPlainWord(word,span.Span,out _,token);appended++;}
+#endif
                 else
                 {
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+                    duplicates++;byte[] existing=before.Words[match].CopyStorage();diagnosticOutcome="DuplicateNoUpdate";
+                    if(candidateTrace is not null&&candidateTrace.AdmitCandidate(source))candidateTrace.CaptureCandidateDuplicate(existing);
+#else
                     duplicates++;byte[] existing=before.Words[match].CopyStorage();
+#endif
                     if(match>=originalCount&&(ClassWord(emission.WordFlags,existing)||costs.Cost18<BinaryPrimitives.ReadSingleLittleEndian(existing.AsSpan(24))))
                     {
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+                        Validate(token,true);publisher.UpdateAugmentedDuplicate(before,match,originalCount,costs.Score10-0.00001f,costs.Cost18,costs.Cost1C,emission.WordFlags,token,candidateTrace);updated++;diagnosticOutcome="DuplicateUpdated";
+#else
                         Validate(token,true);publisher.UpdateAugmentedDuplicate(before,match,originalCount,costs.Score10-0.00001f,costs.Cost18,costs.Cost1C,emission.WordFlags,token);updated++;
+#endif
                     }
                     if(chain.FirstNewReference!=ulong.MaxValue)
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+                        _=session.Ownership.GlyphPool.RemoveCreatedChainSegment(chain.FirstNewReference,chain.LastProcessedReference,token,candidateTrace);
+#else
                         _=session.Ownership.GlyphPool.RemoveCreatedChainSegment(chain.FirstNewReference,chain.LastProcessedReference,token);
+#endif
                 }
                 Validate(token,true);
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+                if(candidateTrace is not null&&candidateTrace.AdmitCandidate(source))candidateTrace.EndCandidate(diagnosticOutcome);
+#else
+#endif
             }
             return new(scan.CompactIndices.Length,appended,duplicates,updated);
         bool Compare(LegacyNativeGlyphRecordPool pool,ReadOnlySpan<byte> a,ReadOnlySpan<byte> b,Span<byte> l,Span<byte> r,ushort ignored,Func<ushort,ushort> mapper,Func<string,ushort>? lookup,CancellationToken ct)
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+        {
+            envelope.Equality();
+            if(candidateTrace is not null&&candidateTrace.AdmitAugmentationEquality(source))
+            {
+                candidateTrace.BeginEquality(a,b,l,r,ignored);
+                try
+                {
+                    bool equal=LegacyNativeMainWordEquality.CompareWithReadObserver(pool,a,b,l,r,ignored,mapper,lookup,ct,candidateTrace.CaptureEqualityRead);
+                    candidateTrace.EndEquality(equal,l,r);return equal;
+                }
+                catch{candidateTrace.AbortEquality();throw;}
+            }
+            return LegacyNativeMainWordEquality.Compare(pool,a,b,l,r,ignored,mapper,lookup,ct);
+        }
+        int First(int node,ushort arc)
+        {
+            envelope.Request();Validate(token,true);var actual=ResolveAugmentationBoundary(node,arc,token);
+            int value=unchecked((int)policy.Owner.Graph.State.GetNode(actual.Node)[actual.Arc].StartContextId);
+            if(candidateTrace is not null&&candidateTrace.AdmitCandidate(source))candidateTrace.CaptureCandidateBoundary(diagnosticWalk,diagnosticEmit,true,node,arc,actual.Node,actual.Arc,value);
+            return value;
+        }
+        int Last(int node,ushort arc)
+        {
+            envelope.Request();Validate(token,true);var actual=ResolveAugmentationBoundary(node,arc,token);
+            int value=unchecked((int)policy.Owner.Graph.State.GetNode(actual.Node)[actual.Arc].EndContextId);
+            if(candidateTrace is not null&&candidateTrace.AdmitCandidate(source))candidateTrace.CaptureCandidateBoundary(diagnosticWalk,diagnosticEmit,false,node,arc,actual.Node,actual.Arc,value);
+            return value;
+        }
+#else
         {envelope.Equality();return LegacyNativeMainWordEquality.Compare(pool,a,b,l,r,ignored,mapper,lookup,ct);}
         int First(int node,ushort arc){envelope.Request();Validate(token,true);var actual=ResolveAugmentationBoundary(node,arc,token);return unchecked((int)policy.Owner.Graph.State.GetNode(actual.Node)[actual.Arc].StartContextId);}
         int Last(int node,ushort arc){envelope.Request();Validate(token,true);var actual=ResolveAugmentationBoundary(node,arc,token);return unchecked((int)policy.Owner.Graph.State.GetNode(actual.Node)[actual.Arc].EndContextId);}
+#endif
         bool ClassWord(ushort flags,byte[] old)
         {
             if(BinaryPrimitives.ReadUInt16LittleEndian(old.AsSpan(48))!=flags||unchecked((short)flags)<0)return false;
             uint[] headers=policy.Owner.Symbols.CopySourceHeaders();if(flags>=headers.Length)throw new NotSupportedException("Actual WORD source header ordinal required.");
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+            uint actualHeader=headers[flags];
+            if(candidateTrace is not null&&candidateTrace.AdmitCandidate(source))candidateTrace.CaptureCandidateClassHeader(flags,actualHeader);
+            return(actualHeader&0x1c)!=0;
+#else
             return(headers[flags]&0x1c)!=0;
+#endif
         }
     }
     private Result RankCurrentSpan(SpanWork work,int carriedQuota,Span<byte> compareLeft4,Span<byte> compareRight4,
@@ -206,12 +333,45 @@ public sealed partial class LegacyFreshMainGlobalWordAugmentation
             var current=publisher.CaptureSpan(span,CurrentHeads,token);
             //Copy explicit scratch because comparison delegates cannot capture ref-like spans.
             byte[] left=compareLeft4.ToArray(),right=compareRight4.ToArray();
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+            var scoreTrace=source.ScoreTrace;
+            bool Equal(ReadOnlySpan<byte> a,ReadOnlySpan<byte> b)
+            {
+                envelope.Equality();
+                if(scoreTrace is not null&&scoreTrace.AdmitEquality(source))
+                {
+                    scoreTrace.UseRankEquality();scoreTrace.BeginEquality(a,b,left,right,joiner);
+                    try
+                    {
+                        bool equal=LegacyNativeMainWordEquality.CompareWithReadObserver(session.Ownership.GlyphPool,a,b,left,right,
+                            joiner,static label=>label,null,token,scoreTrace.CaptureEqualityRead);
+                        scoreTrace.EndEquality(equal,left,right);return equal;
+                    }
+                    catch{scoreTrace.AbortEquality();throw;}
+                }
+                return LegacyNativeMainWordEquality.Compare(session.Ownership.GlyphPool,a,b,left,right,joiner,static label=>label,null,token);
+            }
+            var rankWords=current.Words.Select(w=>w.CopyStorage()).ToArray();var rankSelected=current.SelectedOrdinals.ToArray();
+            var ranked=LegacyPreparedMainWordRanking.Rank(rankWords,rankSelected,carriedQuota,false,Equal,token);
+#else
             bool Equal(ReadOnlySpan<byte> a,ReadOnlySpan<byte> b){envelope.Equality();return LegacyNativeMainWordEquality.Compare(session.Ownership.GlyphPool,a,b,left,right,joiner,static label=>label,null,token);}
             var ranked=LegacyPreparedMainWordRanking.Rank(current.Words.Select(w=>w.CopyStorage()).ToArray(),current.SelectedOrdinals.ToArray(),
                 carriedQuota,false,Equal,token);
+#endif
             publisher.ApplySpanRanking(current,ranked.Words,ranked.OutputSourceOrdinals,ranked.OldToNew,token);
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+            if(scoreTrace is not null&&scoreTrace.Admit(source))scoreTrace.Capture("PreRank",current,rankWords,rankSelected,carriedQuota,ranked,null);
+            current=publisher.CaptureSpan(span,CurrentHeads,token);var scoreWords=current.Words.Select(w=>w.CopyStorage()).ToArray();
+            var scored=LegacyPreparedMainSpanScorePublication.Normalize(scoreWords,token);
+#else
             current=publisher.CaptureSpan(span,CurrentHeads,token);var scored=LegacyPreparedMainSpanScorePublication.Normalize(current.Words.Select(w=>w.CopyStorage()).ToArray(),token);
+#endif
             publisher.ApplySpanScores(current,scored.Words,token);Validate(token,true);
+#if BLURMASK_PUBLICATION_DIAGNOSTICS
+            if(scoreTrace is not null&&scoreTrace.Admit(source))scoreTrace.Capture("PostRankPreNormalize",current,scoreWords,current.SelectedOrdinals,carriedQuota,null,null);
+            if(scoreTrace is not null&&scoreTrace.Admit(source))scoreTrace.Capture("PostNormalizeApplied",current,scored.Words,current.SelectedOrdinals,carriedQuota,null,scored.ScoreOrder);
+#else
+#endif
             var result=new Result(work.Candidates,work.Appended,work.Duplicates,work.Updated,ranked.QuotaAfter,sourceReferences,sourceStorage26,publisher.CaptureSpan(span,CurrentHeads,token).Words.Select(w=>w.CopyStorage()).ToArray());
             if(controller24a0!=0)throw new InvalidOperationException("Native shared row scratch must be cleared afteraugmentation.");
             return result;
