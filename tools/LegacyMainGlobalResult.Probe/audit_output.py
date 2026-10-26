@@ -206,7 +206,7 @@ for owner,c in enumerate(captures):
     assert c['acousticMask']==mask and c['caseVersion']==512 and c['caseBoundary']==boundary
     assert c['caseRows']==list(case_rows.values())
     for g in c['groups']:
-        assert len(g['probabilities'])==4 and all(len(v)==180 and all(0<=p<=32767 for p in v)for v in g['probabilities'])
+        assert len(g['probabilities'])==4 and all(len(v)==180 and all(type(p)is int and 0<=p<=(32768 if i==header[3] else 32767)for i,p in enumerate(v))for v in g['probabilities']),'family-probability-domain'
         assert len(g['rawCosts'])==180 and len(g['finalCosts'])==195
         probabilities=g['probabilities'];source_probability=real(g['sourceProbabilityBits'])
         assert source_probability==0.,'This fixture has no enclosing primitive'
