@@ -44,6 +44,11 @@ internal static class AiPenProbe
         Console.WriteLine("AI row layout, uncertainty, model validation, history and peer ink: passed.");
     }
 
+    private sealed class CompletedRecognizer(TextRecognition value):IPositionedStrokeTextRecognizer
+    {
+        public string Language=>"prepared-completed";public bool ProducesPositionedWordRuns=>true;
+        public TextRecognition Recognize(IReadOnlyList<InkStroke> strokes,CancellationToken token=default){token.ThrowIfCancellationRequested();return value;}
+    }
     private static void VerifyExperimentalEngine()
     {
         var original = Program.Settings;
@@ -66,14 +71,14 @@ internal static class AiPenProbe
             // wall-clock deadline on cold/shared CI runners. The host deadline
             // stays unchanged; layout below consumes this same captured result.
             var actual = ((ExperimentalGlobalTextRecognizer)recognizer).RecognizeDiagnostic(ink);
-            if (actual.Text != "МИР" || !actual.ExperimentalCandidateScore || actual.Confidence < .5f)
+            if (actual.Text != "МИР" || !actual.ExperimentalCandidateScore || !actual.NativeSelectedText || !float.IsFinite(actual.Confidence) || actual.Confidence is <0f or >1f)
                 throw new InvalidOperationException($"Experimental global dictionary integration changed its actual diagnostic result: '{actual.Text}', score {actual.Confidence}.");
             var marks = ink.Select(stroke =>
             {
                 var mark = new InkMark(InkTool.Pen, Colors.Black, 3, new(stroke.Points[0].X, stroke.Points[0].Y));
                 foreach (var p in stroke.Points.Skip(1)) mark.AddPoint(new(p.X, p.Y)); return mark;
             }).ToArray();
-            var rows = AiAutomaticLayout.Recognize(marks, new DelegateRecognizer((_, _) => actual));
+            var rows = AiAutomaticLayout.Recognize(marks, new CompletedRecognizer(actual));
             if (rows.Count != 1 || rows[0].Text.Text != actual.Text || !rows[0].ExperimentalCandidateScore)
                 throw new InvalidOperationException("Actual experimental candidate scores were lost by the application layout: " +
                     string.Join(" / ", rows.Select(r => $"'{r.Text.Text}' score={r.Confidence} experimental={r.ExperimentalCandidateScore}")));

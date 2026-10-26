@@ -13,6 +13,7 @@ internal static class AiExperimentalMathLayout
         {
             AiInkLayout.ResultAdmission.UncalibratedMath=>Enabled(mode,experimental),
             AiInkLayout.ResultAdmission.ExperimentalClassifiedMath=>AiExperimentalAutoLayout.Enabled(mode,experimental,installedRawPack)&&value.ConfidenceForAdmission is null&&value.CategoryScore is >=.85f and <=1f,
+            AiInkLayout.ResultAdmission.NativeSelectedText=>experimental&&(mode=="text"||mode=="auto")&&value.TextAdmitted&&value.ConfidenceForAdmission is null,
             _=>value.Admission==AiInkLayout.ResultAdmission.Scored
         };
     internal static IReadOnlyList<AiInkLayout.Result> Recognize(IReadOnlyList<InkMark> strokes,

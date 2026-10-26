@@ -7,7 +7,7 @@ namespace BlurMask;
 // Batch layout is separate from inference: pen lifts do not define character boundaries.
 internal static partial class AiInkLayout
 {
-    internal enum ResultAdmission { Scored, UncalibratedMath, ExperimentalClassifiedMath }
+    internal enum ResultAdmission { Scored, UncalibratedMath, ExperimentalClassifiedMath, NativeSelectedText }
     internal sealed record Result(InkMark[] Strokes, InkMark Text, float Confidence = 1)
     {
         internal string? SizingText { get; set; }
@@ -21,6 +21,10 @@ internal static partial class AiInkLayout
         internal float? CategoryScore { get; init; }
         internal float? ConfidenceForAdmission => Admission!=ResultAdmission.Scored||!float.IsFinite(Confidence)?null:Confidence;
         internal float AcceptanceThreshold => Admission!=ResultAdmission.Scored?float.PositiveInfinity:ExperimentalCandidateScore ? .5f : .85f;
+        // Explicit output admission; native candidates never become calibrated confidence.
+        internal bool TextAdmitted => Admission==ResultAdmission.NativeSelectedText
+            ? ExperimentalCandidateScore&&float.IsFinite(Confidence)&&Confidence is >=0f and <=1f
+            : Admission==ResultAdmission.Scored&&float.IsFinite(Confidence)&&Confidence>=AcceptanceThreshold;
     }
     private sealed class Group(InkMark stroke)
     {
@@ -88,6 +92,8 @@ internal static partial class AiInkLayout
                 // Preserve pen chronology for delayed dots/crossbars and connected words.
                 var part = strokes.Where(members.Contains).Select(s => new InkStroke(s.Points.Select(p => new InkPoint((float)p.X, (float)p.Y)).ToArray())).ToArray();
                 var line = recognizer.Recognize(part, cancellationToken);
+                // Completed native text must retain its positioned coverage metadata.
+                if(line.NativeSelectedText){uncertain=true;break;}
                 if (!float.IsFinite(line.Confidence) || line.Confidence < (line.ExperimentalCandidateScore ? .5f : .75f) || string.IsNullOrWhiteSpace(line.Text) || value.Length + line.Text.Length > 4000)
                 { uncertain = true; break; }
                 experimentalScore |= line.ExperimentalCandidateScore;

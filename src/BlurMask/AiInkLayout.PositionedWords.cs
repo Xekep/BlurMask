@@ -15,14 +15,14 @@ internal static partial class AiInkLayout
         var ink=sources.Select(s=>new InkStroke(s.Points.Select(p=>p.Transform(s.Transform)).Select(p=>new InkPoint((float)p.X,(float)p.Y)).ToArray())).ToArray();
         var decoded=recognizer.Recognize(ink,token);token.ThrowIfCancellationRequested();
         if(decoded.WordRuns is not{Count:>0 and<=128} runs||!decoded.WordRunsCoverFullInput||
-            !decoded.ExperimentalCandidateScore||!float.IsFinite(decoded.Confidence)||decoded.Confidence is<.5f or>1f)
+            !decoded.ExperimentalCandidateScore||!decoded.NativeSelectedText||!float.IsFinite(decoded.Confidence)||decoded.Confidence is<0f or>1f)
             return null;
         if(runs.Count>1&&decoded.Text.Length!=0||decoded.Confidence!=runs.Min(r=>r.CandidateScore)||runs.Sum(r=>(long)r.OriginalRanges.Count)>4096)return null;
         var first=sources[0];var output=new PositionedWord[runs.Count];int characters=0;long remainingPointReads=RecognizedWordInkBounds.MaximumWholeRunPointReads;
         for(int i=0;i<runs.Count;i++)
         {
             token.ThrowIfCancellationRequested();var run=runs[i];characters=checked(characters+run.Text.Length);
-            if(!float.IsFinite(run.CandidateScore)||run.CandidateScore is<.5f or>1f||string.IsNullOrWhiteSpace(run.Text)||
+            if(!float.IsFinite(run.CandidateScore)||run.CandidateScore is<0f or>1f||string.IsNullOrWhiteSpace(run.Text)||
                 run.Text.Any(char.IsWhiteSpace)||run.Text.EnumerateRunes().Any(r=>Rune.GetUnicodeCategory(r) is UnicodeCategory.Control or UnicodeCategory.Format or UnicodeCategory.PrivateUse or UnicodeCategory.Surrogate)||characters>1024||!FiniteLine(run.Line))return null;
             var projection=RecognizedWordInkBounds.Project(ink,run.OriginalRanges,remainingPointReads,token);remainingPointReads-=projection.PointReads;
             var actual=projection.Bounds;
@@ -40,7 +40,7 @@ internal static partial class AiInkLayout
         //can replace ink. One unsupported WORD rejects this whole Result.
         var all=runs.SelectMany(r=>r.OriginalRanges).ToArray();
         if(!RecognizedWordInkBounds.CoversFullInput(ink,all,token))return null;
-        return new(sources,output[0].Mark,decoded.Confidence){ExperimentalCandidateScore=true,PositionedWords=output};
+        return new(sources,output[0].Mark,decoded.Confidence){ExperimentalCandidateScore=true,Admission=ResultAdmission.NativeSelectedText,PositionedWords=output};
     }
     private static bool FiniteLine(LegacyCompletedGlobalTextWords.PreparedLine line)=>line.Index>=0&&double.IsFinite(line.OriginX)&&
         double.IsFinite(line.OriginY)&&double.IsFinite(line.Angle)&&Math.Cos(line.Angle)!=0&&

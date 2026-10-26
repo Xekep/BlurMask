@@ -26,8 +26,21 @@ internal static class AiPositionedWordChecks
         var moved=AiInkLayout.Recognize([transformed],new Mock());
         Need(moved.Count==1&&moved[0].PositionedWords![0].SourceBounds==new Rect(-50,25,20,20)&&
              moved[0].PositionedWords![1].SourceBounds==new Rect(-30,25,20,20),"same transformed input coordinates used for inference and range placement");
-        foreach(var failure in new[]{"low","whitespace","coverage","bounds","flat","flag","control","height","range"})
+        foreach(var failure in new[]{"whitespace","coverage","bounds","flat","flag","control","height","range","nonfinite","legacy"})
         {Need(AiInkLayout.Recognize([Stroke()],new Mock(failure)).Count==0,"whole expression refusal: "+failure);}
+        var low=AiInkLayout.Recognize([Stroke()],new Mock("low")).Single();
+        Need(low.Confidence==.49f&&low.Admission==AiInkLayout.ResultAdmission.NativeSelectedText&&low.TextAdmitted&&low.ConfidenceForAdmission is null&&float.IsPositiveInfinity(low.AcceptanceThreshold),"low native channel retained, not relabelled confidence");
+        Need(AiExperimentalMathLayout.CanApply(low,"text",true)&&AiExperimentalMathLayout.CanApply(low,"auto",true)&&!AiExperimentalMathLayout.CanApply(low,"text",false)&&!AiExperimentalMathLayout.CanApply(low,"math",true),"explicit native text mode admission");
+        Need(new AiInkLayout.Result([],low.Text,.8f).ConfidenceForAdmission==.8f&&!new AiInkLayout.Result([],low.Text,.8f).TextAdmitted&&new AiInkLayout.Result([],low.Text,.9f).TextAdmitted,"ordinary OCR .85 threshold preserved");
+        var auto=AiAutomaticLayout.Recognize([Stroke()],new Mock("ascii-low"),(_,_)=>throw new InvalidOperationException("Native selected text reached math fallback."));
+        Need(auto.Count==1&&auto[0].TextAdmitted&&auto[0].Admission==AiInkLayout.ResultAdmission.NativeSelectedText,"AUTO explicit native text admission");
+        var classification=new InkRecognition.RawContent.RawContentResult([new(0,InkRecognition.RawContent.InkCategory.Text,.9f)],[new(InkRecognition.RawContent.InkCategory.Text,[0],.9f)]);
+        var classified=AiAutomaticLayout.Recognize([Stroke()],new Mock("ascii-low"),(_,_)=>throw new InvalidOperationException("Text region went to math."),rawAnalyzer:(_,_)=>classification);
+        Need(classified.Count==1&&classified[0].TextAdmitted&&classified[0].Admission==AiInkLayout.ResultAdmission.NativeSelectedText,"classified AUTO native admission");
+        var experimental=AiExperimentalAutoLayout.Recognize([Stroke()],(_,_)=>classification,(_,_)=>throw new InvalidOperationException("Experimental text went to math."),new Mock("ascii-low"));
+        Need(experimental.Count==1&&experimental[0].TextAdmitted&&experimental[0].ConfidenceForAdmission is null,"experimental AUTO native admission without confidence");
+        var weak=classification with{Regions=[new(InkRecognition.RawContent.InkCategory.Text,[0],.849f)]};
+        Need(AiExperimentalAutoLayout.Recognize([Stroke()],(_,_)=>weak,(_,_)=>throw new InvalidOperationException("Weak region went to math."),new Mock("ascii-low")).Count==0,"category confidence threshold unchanged");
         using var cancel=new CancellationTokenSource();cancel.Cancel();
         try{AiInkLayout.Recognize([Stroke()],new Mock(),cancel.Token);throw new Exception("missing cancel");}
         catch(OperationCanceledException){checks++;}
@@ -88,10 +101,11 @@ internal static class AiPositionedWordChecks
                 if(failure=="bounds"&&i==1)b=b with{Left=b.Left+1};
                 var r=ranges[i];if(failure=="range"&&i==1)r=r with{Last=new(9UL<<32|0x2ff05)};
                 string text=i==0?"да":failure=="whitespace"?" ":failure=="control"?"\u200b":"нет";
-                runs[i]=new(text,i==1&&failure=="low"?.49f:.8f,b,line,[r]);
+                if(failure=="ascii-low")text=i==0?"ab":"cd";
+                runs[i]=new(text,i==1&&(failure=="low"||failure=="ascii-low")?.49f:failure=="nonfinite"?float.NaN:.8f,b,line,[r]);
             }
             return new(failure=="flat"?"да нет":"",runs.Min(r=>r.CandidateScore),2)
-                {ExperimentalCandidateScore=true,WordRuns=Array.AsReadOnly(runs),WordRunsCoverFullInput=failure!="flag"};
+                {ExperimentalCandidateScore=true,NativeSelectedText=failure!="legacy",WordRuns=Array.AsReadOnly(runs),WordRunsCoverFullInput=failure!="flag"};
         }
     }
 }

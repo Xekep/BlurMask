@@ -1,0 +1,191 @@
+[
+  {
+    "name": "fake-sigmoid-p-quarter-center-threequarters-slope-two",
+    "text": "ab",
+    "scoreBits": 1049211569,
+    "kind": 0,
+    "length": 40,
+    "before": false,
+    "after": true
+  },
+  {
+    "name": "native-later-vector-zero",
+    "text": "ab",
+    "scoreBits": 0,
+    "kind": 0,
+    "length": 40,
+    "before": false,
+    "after": true
+  },
+  {
+    "name": "below-half-native-domain",
+    "text": "ab",
+    "scoreBits": 1048576000,
+    "kind": 0,
+    "length": 40,
+    "before": false,
+    "after": true
+  },
+  {
+    "name": "half",
+    "text": "ab",
+    "scoreBits": 1056964608,
+    "kind": 0,
+    "length": 40,
+    "before": true,
+    "after": true
+  },
+  {
+    "name": "unit",
+    "text": "ab",
+    "scoreBits": 1065353216,
+    "kind": 0,
+    "length": 40,
+    "before": true,
+    "after": true
+  },
+  {
+    "name": "sentinel",
+    "text": "ab",
+    "scoreBits": -1082130432,
+    "kind": 0,
+    "length": 40,
+    "before": false,
+    "after": false
+  },
+  {
+    "name": "negative",
+    "text": "ab",
+    "scoreBits": -1098907648,
+    "kind": 0,
+    "length": 40,
+    "before": false,
+    "after": false
+  },
+  {
+    "name": "over-unit",
+    "text": "ab",
+    "scoreBits": 1067450368,
+    "kind": 0,
+    "length": 40,
+    "before": false,
+    "after": false
+  },
+  {
+    "name": "max-float",
+    "text": "ab",
+    "scoreBits": 2139095039,
+    "kind": 0,
+    "length": 40,
+    "before": false,
+    "after": false
+  },
+  {
+    "name": "nan",
+    "text": "ab",
+    "scoreBits": 2143289344,
+    "kind": 0,
+    "length": 40,
+    "before": false,
+    "after": false
+  },
+  {
+    "name": "positive-inf",
+    "text": "ab",
+    "scoreBits": 2139095040,
+    "kind": 0,
+    "length": 40,
+    "before": false,
+    "after": false
+  },
+  {
+    "name": "negative-inf",
+    "text": "ab",
+    "scoreBits": -8388608,
+    "kind": 0,
+    "length": 40,
+    "before": false,
+    "after": false
+  },
+  {
+    "name": "empty",
+    "text": "",
+    "scoreBits": 1049211569,
+    "kind": 0,
+    "length": 40,
+    "before": false,
+    "after": false
+  },
+  {
+    "name": "blank",
+    "text": " ",
+    "scoreBits": 1049211569,
+    "kind": 0,
+    "length": 40,
+    "before": false,
+    "after": false
+  },
+  {
+    "name": "embedded-space",
+    "text": "a b",
+    "scoreBits": 1049211569,
+    "kind": 0,
+    "length": 40,
+    "before": false,
+    "after": false
+  },
+  {
+    "name": "control",
+    "text": "a\u0001",
+    "scoreBits": 1049211569,
+    "kind": 0,
+    "length": 40,
+    "before": false,
+    "after": false
+  },
+  {
+    "name": "format",
+    "text": "a\u200b",
+    "scoreBits": 1049211569,
+    "kind": 0,
+    "length": 40,
+    "before": false,
+    "after": false
+  },
+  {
+    "name": "private",
+    "text": "a\ue000",
+    "scoreBits": 1049211569,
+    "kind": 0,
+    "length": 40,
+    "before": false,
+    "after": false
+  },
+  {
+    "name": "other-kind",
+    "text": "ab",
+    "scoreBits": 1049211569,
+    "kind": 1,
+    "length": 40,
+    "before": false,
+    "after": false
+  },
+  {
+    "name": "short-record",
+    "text": "ab",
+    "scoreBits": 1049211569,
+    "kind": 0,
+    "length": 39,
+    "before": false,
+    "after": false
+  },
+  {
+    "name": "long-record",
+    "text": "ab",
+    "scoreBits": 1049211569,
+    "kind": 0,
+    "length": 41,
+    "before": false,
+    "after": false
+  }
+]

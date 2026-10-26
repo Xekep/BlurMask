@@ -60,7 +60,7 @@ internal static class AiExperimentalAutoLayout
             else
             {
                 var decoded=AiInkLayout.Recognize(members,text,token);
-                if(decoded.Count==0||decoded.Any(r=>r.Admission!=AiInkLayout.ResultAdmission.Scored||!float.IsFinite(r.Confidence)||r.Confidence<r.AcceptanceThreshold))continue;
+                if(decoded.Count==0||decoded.Any(r=>!r.TextAdmitted))continue;
                 var actual=decoded.SelectMany(r=>r.Strokes).ToArray();
                 if(actual.Length!=members.Length||actual.Distinct().Count()!=members.Length||actual.Any(s=>!members.Contains(s)))continue;
                 foreach(var result in decoded)
