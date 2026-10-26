@@ -11,6 +11,7 @@ var table = LegacyCursiveSeparationTable.Load(File.ReadAllBytes(args[2])); using
 var model = LegacyRussianModelBundle.Load(ak, lk, engine); byte[] line30 = File.ReadAllBytes(args[5]), line50 = File.ReadAllBytes(args[6]);
 
 int guards = 0; long comparedBytes = 0; int comparedContexts = 0; ulong identity = 0x10000;
+var globalInputCapture=new GlobalPublicationInputCapture(ak,lk,args[3],args[4]);
 using var output = File.Create(args[7]); using var writer = new Utf8JsonWriter(output); writer.WriteStartArray();
 foreach (int fixture in new[] { 31, 35, 60, 1, 0 })
 {
@@ -34,12 +35,16 @@ foreach (int fixture in new[] { 31, 35, 60, 1, 0 })
     var producer = prepared
         ? LegacyFreshMainGlobalWordPass.CreateWithPreparedPublicationAtNode(ak, policy, Allocate, confidence, residue, 2)
         : LegacyFreshMainGlobalWordPass.CreateWithIntermediatePublication(ak, policy, Allocate, confidence, residue);
+    using var prefixInputFrame=globalInputCapture.Begin();
     var pass = producer.RunOwned(); int evaluations = owner.AcousticEvaluations;
+    var prefixAllocatorInputs=prefixInputFrame.Complete();
     var retainedReader = pass.RequirePublicationReader(default); byte[] retainedPrefix = pass.CopyIntermediateCompactStorage();
     Reject(() => LegacyFreshMainGlobalFinalPublication.Append(pass, confidence, new byte[ak.Length]));
     Reject(() => LegacyFreshMainGlobalFinalPublication.Append(pass, LegacyFreshMainGlobalGlyphConfidence.Prepare(ak, Fresh().Owner), ak));
     Reject(() => LegacyFreshMainGlobalFinalPublication.Append(pass, confidence, ak, new(true)));
+    using var finalInputFrame=globalInputCapture.Begin();
     var final = LegacyFreshMainGlobalFinalPublication.Append(pass, confidence, ak);
+    var finalAllocatorInputs=finalInputFrame.Complete();
     //This is deliberately the first terminal scan on this producing pass.
     var invocation = LegacyFreshMainGlobalTerminalInvocation.Prepare(policy);
     var selected = invocation.SelectPublished(final);
@@ -91,7 +96,7 @@ foreach (int fixture in new[] { 31, 35, 60, 1, 0 })
     byte[] selectedBytes = selected.CopySelectedRecord(); Array.Clear(selected.CopySelectedRecord());
     if (!selectedBytes.AsSpan().SequenceEqual(selected.CopySelectedRecord())) throw new Exception("Mutable selected88 escaped.");
 
-    writer.WriteStartObject(); writer.WriteNumber("factory", 0x292); writer.WriteBoolean("preparedEarlyGate", prepared);
+    writer.WriteStartObject();globalInputCapture.Write(writer,prefixAllocatorInputs.Concat(finalAllocatorInputs),policy.Configuration.PrimaryAlternativeCount2402); writer.WriteNumber("factory", 0x292); writer.WriteBoolean("preparedEarlyGate", prepared);
     writer.WriteNumber("nodeCount", pass.NodeCount); writer.WriteNumber("maximumAtoms", graph.State.MaximumAtoms);
     writer.WriteNumber("intermediatePublicationDistance", policy.MaximumParentDistance54); writer.WriteNumber("boundedLogicalNodeLimit", 240); writer.WriteNumber("startingNode2490", final.StartingNode2490);
     writer.WriteNumber("nextNode2490", final.NextNode2490); writer.WriteNumber("publicationCount", final.PublicationCount);
@@ -130,7 +135,7 @@ foreach (int fixture in new[] { 31, 35, 60, 1, 0 })
 }
 writer.WriteEndArray(); writer.Flush(); Console.WriteLine($"PASS {guards} guards/{comparedBytes} full row/pool bytes/{comparedContexts} symbolic fields");
 LegacyMainDirectStorageAllocation Allocate(LegacyMainDirectStorageRequest r)
-{ var b = new byte[r.RequiredBytes]; r.PreviousStorage.Span.CopyTo(b); return new(b, ++identity); }
+{ var b = new byte[r.RequiredBytes]; r.PreviousStorage.Span.CopyTo(b);ulong id=++identity;globalInputCapture.Observe(r,id,b);return new(b,id); }
 void Reject(Action action) { try { action(); } catch (Exception e) when (e is ArgumentException or InvalidOperationException or NotSupportedException or OperationCanceledException) { guards++; return; } throw new Exception("Expected final publication guard."); }
 void Compare(ReadOnlyMemory<byte> a, ReadOnlyMemory<byte> e, int stride, int[] fields, LegacySymbolContextFactory ac, LegacySymbolContextFactory ec)
 {

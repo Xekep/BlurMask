@@ -11,10 +11,10 @@ import struct
 import sys
 import tempfile
 from pathlib import Path
-if len(sys.argv) != 4:
-    raise SystemExit('AK LK capture.json')
+if len(sys.argv) != 6:
+    raise SystemExit('AK LK CASE PUBLICATION capture.json')
 root = Path(__file__).resolve().parents[2]
-capture = Path(sys.argv[3]).resolve()
+capture = Path(sys.argv[5]).resolve()
 rows = json.loads(capture.read_bytes())
 assert [c['nodeCount'] for c in rows] == [124,140,240,4,4]
 assert [c['startingNode2490'] for c in rows] == [120,120,120,3,0]
@@ -57,7 +57,7 @@ with tempfile.TemporaryDirectory(prefix='global-final-',dir=capture.parent) as t
         path.write_text(json.dumps(c),encoding='utf-8')
         previous=sys.argv
         try:
-            sys.argv=[str(common),previous[1],previous[2],str(path),'--fresh-case']
+            sys.argv=[str(common),previous[1],previous[2],str(path),'--global-publication',previous[3],previous[4]]
             exec(numeric,{'__file__':str(common),'__name__':'__main__'})
         finally:
             sys.argv=previous

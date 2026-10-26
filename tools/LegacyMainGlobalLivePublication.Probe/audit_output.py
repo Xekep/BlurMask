@@ -4,10 +4,10 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
-if len(sys.argv) != 4:
-    raise SystemExit('AK LK capture.json')
+if len(sys.argv) != 6:
+    raise SystemExit('AK LK CASE PUBLICATION capture.json')
 root = Path(__file__).resolve().parents[2]
-capture = Path(sys.argv[3]).resolve()
+capture = Path(sys.argv[5]).resolve()
 rows = json.loads(capture.read_bytes())
 assert len(rows) == 4
 assert [r['actualGraphNodeCount'] for r in rows] == [124, 140, 240, 4]
@@ -20,5 +20,5 @@ with tempfile.TemporaryDirectory(prefix='global-live-', dir=capture.parent) as d
         path = Path(directory) / f'{i}.json'
         path.write_text(json.dumps(row), encoding='utf-8')
         subprocess.run([sys.executable, str(root / 'tools/LegacyMainLiveCompactPublication.Probe/audit_output.py'),
-                        sys.argv[1], sys.argv[2], str(path)], check=True)
+                        sys.argv[1], sys.argv[2], str(path), '--global-publication', sys.argv[3], sys.argv[4]], check=True)
 print('PASS actual global124/140/240 empty native gates and separate prepared global4 nonempty LIVE/final append; no winner invented.')
