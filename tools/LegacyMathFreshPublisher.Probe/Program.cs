@@ -21,6 +21,10 @@ foreach(long id in new[]{long.MinValue,-2L,0L,1L})
   throw new InvalidDataException("Native typed numeric reader changed non-sentinel tag.");
 if(Math2DomValueConversion.RegistrationTag(-1)!=-1||Math2DomValueConversion.CollectedTag(long.MaxValue)!=long.MaxValue)
  throw new InvalidDataException("CB8 numeric reader sentinels were conflated.");
+int ownedChecks=0;
+void OwnerRequire(bool condition){if(!condition)throw new InvalidDataException("Retained Ink ownership check failed.");ownedChecks++;}
+void OwnerReject(Action action)
+{try{action();}catch(Exception e)when(e is ArgumentException or InvalidOperationException or NotSupportedException){ownedChecks++;return;}throw new InvalidDataException("Missing retained Ink ownership guard.");}
 using var canceled=new CancellationTokenSource();canceled.Cancel();
 var actual=new List<Actual>();var events=new List<Stage>();
 foreach(int width in new[]{1,3,16})foreach(bool reversed in new[]{false,true})
@@ -31,6 +35,38 @@ foreach(int width in new[]{1,3,16})foreach(bool reversed in new[]{false,true})
  using var publication=Math2Mode0FreshMathPublisher.CreateDiagnostic(prepared.Receipt,Math2Mode0FreshMathPublisher.DefaultPayloadBudget,
   (stage,index,target)=>{if(width==1&&!reversed)events.Add(new(stage.ToString(),index));});
  var result=publication.CopyResult();
+ Math2Mode0RetainedInk? borrowed=null;
+ publication.WithRetainedInkForReview(ink=>
+ {
+  borrowed=ink;
+  OwnerRequire(!ReferenceEquals(ink.Identity,prepared.Field.OriginalInkIdentity)&&!ReferenceEquals(ink.Identity,prepared.Field.SelectedInkIdentity));
+  OwnerRequire(ReferenceEquals(ink.Names,prepared.Field.SelectedNameOwner)&&ink.SnapshotNext==result.RegistryNext);
+  foreach(var row in result.Registry)
+  {
+   var selection=ink.FindOldSelection(row.Id)??throw new InvalidDataException("Missing real retained C22.");
+   var name=ink.FindOldName(row.Id)??throw new InvalidDataException("Missing retained name.");
+   OwnerRequire(name is LegacyLibraryOriginalDomName token&&token.Text==row.Name);
+   OwnerRequire(ink.CountRanges(selection)==row.Ranges.Length&&ink.EqualRanges(selection,selection)&&ink.CompareName(name,name)==0);
+   var copy=ink.CopySelectionRanges(selection);copy.AsSpan().Fill(default);
+   OwnerRequire(ink.CopySelectionRanges(selection).AsSpan().SequenceEqual(row.Ranges));
+   long next=ink.SnapshotNext;OwnerReject(()=>ink.Register((LegacyLibraryOriginalDomName)name,new object()));OwnerRequire(ink.SnapshotNext==next);
+  }
+  OwnerRequire(ink.FindOldSelection(-9999) is null&&ink.FindOldName(-9999) is null);
+  using var sibling=prepared.Field.WithFreshPublicationInput(prepared.Receipt,input=>input.CloneSelectedInk(),default);
+  var foreign=sibling.FindOldSelection(0)??throw new InvalidDataException("Sibling clone lost INPUT.");
+  OwnerRequire(!ReferenceEquals(sibling.Identity,ink.Identity)&&ReferenceEquals(sibling.Names,ink.Names));
+  OwnerReject(()=>ink.CountRanges(foreign));OwnerReject(()=>ink.EqualRanges(foreign,foreign));
+  OwnerReject(()=>ink.CountRanges(new object()));OwnerReject(()=>ink.CompareName(new object(),new object()));
+  // Diagnostic vectors against a genuinely owned sibling clone; these are
+  // not claimed to be a produced nonfresh old-result tag vector.
+  long siblingNext=sibling.SnapshotNext;
+  OwnerRequire(Math2DomCb8TagCleanup.RemoveStale(new long[]{0,0},[],sibling));
+  OwnerRequire(sibling.FindOldSelection(0) is null);OwnerRequire(sibling.FindOldName(0) is null);
+  OwnerRequire(sibling.RemoveSelection(0));OwnerRequire(sibling.RemoveSelection(-9999));
+  OwnerRequire(sibling.SnapshotNext==siblingNext);OwnerRequire(ink.FindOldSelection(0) is not null);
+  return 0;
+ });
+ OwnerReject(()=>borrowed!.FindOldSelection(0));
  if(!Same(before,prepared.Field.CopySnapshot()))throw new InvalidDataException("Candidate publication mutated original selected registry/field.");
  Reject(()=>Math2Mode0FreshMathPublisher.Create(prepared.Receipt));
  var detached=publication.CopyResult();detached.Registry[0].Ranges.AsSpan().Fill(default);detached.Candidate.AsSpan().Fill(null!);
@@ -108,6 +144,7 @@ using(var p=Prepare(runtime,run,bundle,1,false))
 }
 File.WriteAllText(args[3],JsonSerializer.Serialize(new Capture(Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(args[1]))),actual.ToArray(),events.ToArray(),failures.ToArray(),refused!,new(true,true,gc),new(successes,refusals,true),guards),CaptureJson.Default.Capture));
 Console.WriteLine($"PASS{actual.Count} actual NN Math publishers(cold1/preparedsearch3/16);{failures.Count} whole-stage prefixes/{guards} guards; actual3op2/thirdregistry/late tags/borrowed-copy GC.");
+Console.WriteLine($"PASS {ownedChecks} concrete retained Ink/C22/clone/name/lifetime controls (no nonfresh edit acceptance).");
 
 static InkStroke[] Ink(bool reverse)
 {InkStroke[] a=[new([new InkPoint(0,30),new(0,0),new(10,18),new(20,0),new(20,30)]),new([new InkPoint(35,0),new(35,30)])];return reverse?a.Reverse().ToArray():a;}

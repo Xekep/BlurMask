@@ -5,6 +5,10 @@ edit application or recognition acceptance. The subsequent
 [typed C# matcher](../../../../docs/agents/research/math-dom-cb8-edit-kernel-20261028.md)
 is tested separately and must not receive snapshot-derived ownership authority.
 
+Subsequent implementation added a [concrete fresh retained Ink clone](../../../../docs/agents/research/math-retained-ink-owner-20261028.md).
+The original gap analysis below describes the pre-clone checkpoint. The new clone
+does not yet provide a prior-result factory or opcode7 owning join.
+
 ## Reproducible batch
 
 [retained-owner-request.json](retained-owner-request.json) exports seven complete

@@ -82,7 +82,7 @@ cleanup = [
     dict(old=[], new=[], fail=-1, calls=[], done=[], result=True),
     dict(old=[1, 2, 3], new=[2], fail=-1, calls=[1, 3], done=[1, 3], result=True),
     dict(old=[1, 1, 2], new=[], fail=-1, calls=[1, 1, 2], done=[1, 1, 2], result=True),
-    dict(old=[1, 1, 2], new=[], fail=1, calls=[1, 1], done=[1], result=False),
+    dict(old=[1, 1, 2], new=[], fail=2, calls=[1, 1, 2], done=[1, 1], result=False),
     dict(old=[1, 1], new=[1], fail=-1, calls=[], done=[], result=True),
     dict(old=[1, 2, 3], new=[2, 2], fail=-1, calls=[1, 3], done=[1, 3], result=True),
     dict(old=[1, 2, 3], new=[], fail=0, calls=[1], done=[], result=False),

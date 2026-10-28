@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 [assembly: InternalsVisibleTo("LegacyMathFreshPublisher.Probe")]
@@ -10,7 +11,7 @@ namespace InkRecognition.Math;
 internal sealed record Math2Mode0PublicationInput(LegacyOwnedRawInkDocument Document,
     LegacyLibraryOriginalDomNameOwner Names, IReadOnlyList<Math2Mode0MathFieldNode> FieldNodes,
     int FieldIdentity, long InputId, long Next, LegacyNativeInkPositionRange[] InputRanges,
-    object SelectedInk, Action<CancellationToken> Check);
+    object SelectedInk, Func<Math2Mode0RetainedInk> CloneSelectedInk, Action<CancellationToken> Check);
 internal enum Math2Mode0PublishStage { Claimed, OuterCopied, ThirdRegistryCloned, FieldCloned,
     CandidateRoot, Sequence, PendingLinked, Symbol, SegmentList, Segment, Candidate,
     Character, Terminal, PayloadCloned, ActionQueued, PatchApplied, HeaderFreed,
@@ -60,21 +61,32 @@ internal sealed class Math2Mode0FreshMathPublisher : IDisposable
         internal Math2Mode0PublishNode[] Snapshot() => Nodes.Select(n => new Math2Mode0PublishNode(n.Id,n.Kind,
             n.Name.Text,n.Parent?.Id??0,n.Origin,n.Tag,n.Text,n.Number,n.Uri,n.Prefix)).ToArray();
     }
-    private sealed class Pending(long id, string name, LegacyNativeInkPositionRange[]? ranges)
-    { internal long Id=id, Resolved=-1; internal readonly string Name=name; internal readonly LegacyNativeInkPositionRange[]? Ranges=ranges; }
+    private sealed class Pending(long id, LegacyLibraryOriginalDomName name, object? selection)
+    { internal long Id=id, Resolved=-1; internal readonly LegacyLibraryOriginalDomName Name=name; internal readonly object? Selection=selection; }
+    // Native V28 prepends pending entries. Borrow that order without cloning
+    // operands or exposing a caller-populated snapshot as owner authority.
+    private sealed class PendingView(List<Pending> entries) : IReadOnlyList<Math2DomCb8Pending>
+    {
+        public int Count => entries.Count;
+        public Math2DomCb8Pending this[int index]
+        { get { var p=entries[entries.Count-1-index];return new(p.Id,p.Name,p.Selection); } }
+        public IEnumerator<Math2DomCb8Pending> GetEnumerator()
+        { for(int i=0;i<Count;i++)yield return this[i]; }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()=>GetEnumerator();
+    }
     private sealed class Patch(int ordinal, Node candidate, Node payload, Node parent)
     { internal readonly int Ordinal=ordinal; internal readonly Node Candidate=candidate, Payload=payload, Parent=parent; internal bool Applied; }
-    private readonly object gate = new(), thirdInk = new();
+    private readonly object gate = new();
+    private Math2Mode0RetainedInk? retainedInk;
     private readonly Math2Mode0SelectedMathFieldCopy receipt;
     private readonly Arena candidate, temporary;
     private readonly long reservation;
-    private readonly List<Math2Mode0PublishRegistry> registry = [];
     private readonly List<Pending> pending = [];
     private readonly List<Patch> patch = [];
     private readonly List<long> oldTags = [], newTags = [];
     private readonly object selectedInk;
     private Math2Mode0OuterSymbolVector? outer;
-    private long temporaryNext=2, next;
+    private long temporaryNext=2;
     private bool complete, failed, released, headerLive;
     private int cleanupCount;
     private string phase="claimed";
@@ -135,15 +147,17 @@ internal sealed class Math2Mode0FreshMathPublisher : IDisposable
         long RegisterPending(string name,LegacyNativeInkPositionRange[] ranges)
         {
             long id=temporaryNext++;
-            var p=new Pending(id,name,pending.Count==failSelection?null:ranges.ToArray());pending.Add(p);
+            var p=new Pending(id,candidate.Names.Intern(name),pending.Count==failSelection?null:retainedInk!.CreateSelection(ranges));pending.Add(p);
             Observe(Math2Mode0PublishStage.PendingLinked,pending.Count-1);
-            if(ranges.Length!=0&&p.Ranges is null)throw new InvalidOperationException("Prepared C22 clone refusal leaves linked pending prefix.");
+            if(ranges.Length!=0&&p.Selection is null)throw new InvalidOperationException("Prepared C22 clone refusal leaves linked pending prefix.");
             return id;
         }
         Observe(Math2Mode0PublishStage.Claimed);
         outer=Math2Mode0OuterSymbolVector.CreateSingle(receipt.Copy,token);outer.ValidateDocument(input.Document,token);
         var symbols=outer.CopySymbols();Observe(Math2Mode0PublishStage.OuterCopied);
-        next=input.Next;registry.Add(new(input.InputId,"INPUT",102,input.InputRanges.ToArray()));
+        retainedInk=input.CloneSelectedInk();
+        if(ReferenceEquals(retainedInk.Identity,input.SelectedInk)||!ReferenceEquals(retainedInk.Names,input.Names)||retainedInk.SnapshotNext!=input.Next)
+            throw new InvalidOperationException("Exact distinct selected Ink clone with preserved names/Next required.");
         Observe(Math2Mode0PublishStage.ThirdRegistryCloned);
         //028070.V88 clones the SELECTED FIELD subtree, not the PAGE scaffold.
         //Retain source node identities and clone attributes before children.
@@ -194,9 +208,17 @@ internal sealed class Math2Mode0FreshMathPublisher : IDisposable
             var child=result.Children[i];var payload=temporary.Clone(child);Observe(Math2Mode0PublishStage.PayloadCloned,i);
             patch.Add(new(i,child,payload,oldRoot));Observe(Math2Mode0PublishStage.ActionQueued,i);
         }
-        //All actual actions are opcode2: CB8's op7/tag filter retains them.
+        //Filter real produced actions through the retained owner's callback.
+        //This fresh producer has only opcode2; the callback's opcode7 path is
+        //not admitted by inventing old/new variants or an old result.
+        var pendingView=new PendingView(pending);var tagName=temporary.Names.Intern("tag");
         foreach(var action in patch)
-        {Arena.Attach(action.Parent,action.Payload);action.Applied=true;Observe(Math2Mode0PublishStage.PatchApplied,action.Ordinal);}
+        {
+            if(Math2DomCb8EditMatcher.Matches(2,action.Parent.Kind,null,action.Parent.Name,tagName,
+                default,default,pendingView,retainedInk!,token:token))
+                throw new InvalidOperationException("A produced opcode2 must not be filtered as an opcode7 tag edit.");
+            Arena.Attach(action.Parent,action.Payload);action.Applied=true;Observe(Math2Mode0PublishStage.PatchApplied,action.Ordinal);
+        }
         headerLive=false;Observe(Math2Mode0PublishStage.HeaderFreed);
         IEnumerable<Node> Walk(Node parent)
         {foreach(var child in parent.Children){yield return child;foreach(var descendant in Walk(child))yield return descendant;}}
@@ -209,8 +231,8 @@ internal sealed class Math2Mode0FreshMathPublisher : IDisposable
             var p=pending.SingleOrDefault(p=>p.Id==-tag)??throw new InvalidOperationException("Missing actual CB8 pending entry.");
             if(p.Resolved<0)
             {
-                if(p.Ranges is null)throw new InvalidOperationException("Pending C22 construction failed.");
-                long id=next++;registry.Add(new(id,p.Name,102,p.Ranges.ToArray()));p.Resolved=id;
+                if(p.Selection is null)throw new InvalidOperationException("Pending C22 construction failed.");
+                long id=retainedInk!.Register(p.Name,p.Selection);p.Resolved=id;
                 Observe(Math2Mode0PublishStage.Registered,checked((int)p.Id-2));
             }
             attribute.Number=p.Resolved;Observe(Math2Mode0PublishStage.TagWritten,checked((int)p.Id-2));
@@ -221,19 +243,28 @@ internal sealed class Math2Mode0FreshMathPublisher : IDisposable
         //Actual fresh old result has zero old tags; native V50 has no IDs to
         //delete. Nonempty-old/imported stale deletion is not admitted here.
         if(oldTags.Count!=0)throw new NotSupportedException("No prior result tags in fresh scope.");
+        if(!Math2DomCb8TagCleanup.RemoveStale(CollectionsMarshal.AsSpan(oldTags),CollectionsMarshal.AsSpan(newTags),retainedInk!,token))
+            throw new InvalidOperationException("Retained Ink stale-tag cleanup failed.");
         Observe(Math2Mode0PublishStage.StaleCleaned);Cleanup();Observe(Math2Mode0PublishStage.Complete);complete=true;
     }
     internal Math2Mode0PublishSnapshot CopySnapshot()
     {
-        lock(gate)return new(complete,failed,released,reservation,phase,temporaryNext,next,headerLive,cleanupCount,
-            ReferenceEquals(candidate.Names,temporary.Names),!ReferenceEquals(thirdInk,selectedInk),candidate.Snapshot(),temporary.Snapshot(),
-            registry.Select(r=>r with{Ranges=r.Ranges.ToArray()}).ToArray(),pending.Select(p=>new Math2Mode0PublishPending(p.Id,p.Name,p.Resolved,p.Ranges is not null,p.Ranges?.ToArray()??[])).ToArray(),
+        lock(gate)return new(complete,failed,released,reservation,phase,temporaryNext,retainedInk?.SnapshotNext??0,headerLive,cleanupCount,
+            ReferenceEquals(candidate.Names,temporary.Names),!ReferenceEquals(retainedInk?.Identity,selectedInk),candidate.Snapshot(),temporary.Snapshot(),
+            retainedInk?.CopyRegistry()??[],pending.Select(p=>new Math2Mode0PublishPending(p.Id,p.Name.Text,p.Resolved,p.Selection is not null,p.Selection is null?[]:retainedInk!.CopySelectionRanges(p.Selection))).ToArray(),
             patch.Select(p=>new Math2Mode0PublishPatch(2,p.Ordinal,p.Candidate.Id,p.Payload.Id,p.Parent.Id,p.Applied)).ToArray(),oldTags.ToArray(),newTags.ToArray());
     }
     internal Math2Mode0PublishSnapshot CopyResult(CancellationToken token=default)
     {
         receipt.Validate(receipt.Copy,receipt.Field,token);
         lock(gate){ObjectDisposedException.ThrowIf(released,this);if(!complete||failed)throw new InvalidOperationException("Successful live Math temporary publication required.");return CopySnapshot();}
+    }
+    //Review borrow under the same receipt -> field -> publisher order. This is
+    //not an opcode7/edit-production entrypoint and grants no original mutation.
+    internal T WithRetainedInkForReview<T>(Func<Math2Mode0RetainedInk,T> review,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(review);
+        return WithCompletedTransferInput(_=>review(retainedInk!),token);
     }
     //Trusted outgoing view. Receipt validation is OUTSIDE field/publisher gates;
     //the actual pre-NN binding and copy are rechecked inside the field accessor.
@@ -249,11 +280,11 @@ internal sealed class Math2Mode0FreshMathPublisher : IDisposable
                 Check(token);
                 IEnumerable<Math2Mode0PublishNode> Nodes()
                 {foreach(var n in temporary.Nodes)yield return new(n.Id,n.Kind,n.Name.Text,n.Parent?.Id??0,n.Origin,n.Tag,n.Text,n.Number,n.Uri,n.Prefix);}
-                return consume(new(input,receipt.Field.OriginalInkIdentity,thirdInk,temporary.Names,
-                    temporary.Nodes.Count,Nodes,registry,next,reservation,Check));
+                return consume(new(input,receipt.Field.OriginalInkIdentity,retainedInk!.Identity,temporary.Names,
+                    temporary.Nodes.Count,Nodes,retainedInk.BorrowRegistry(),retainedInk.SnapshotNext,reservation,Check));
             }
         },token);
     }
     private void Cleanup(){if(cleanupCount!=0)return;cleanupCount=1;headerLive=false;outer?.Dispose();}
-    public void Dispose(){lock(gate){if(released)return;released=true;Cleanup();}}
+    public void Dispose(){lock(gate){if(released)return;released=true;Cleanup();retainedInk?.Dispose();}}
 }

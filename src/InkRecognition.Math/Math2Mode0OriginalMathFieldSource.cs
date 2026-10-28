@@ -41,6 +41,103 @@ internal sealed class Math2Mode0OriginalMathFieldSource : IDisposable
         internal Selection(InkOwner owner, LegacyNativeInkPositionRange[] ranges, bool nullEmpty = false)
         { Owner = owner; Ranges = ranges; Storage = nullEmpty ? null : new object(); }
     }
+    // Same concrete InkOwner/Selection representation as original and selected
+    // Ink, but a genuinely distinct registry/C22 clone for the CB8 lifetime.
+    private sealed class RetainedInk(Math2Mode0OriginalMathFieldSource sourceField, InkOwner ink)
+        : Math2Mode0RetainedInk
+    {
+        private readonly object inkGate = new();
+        private bool disposed;
+        internal override object Identity => ink;
+        internal override LegacyLibraryOriginalDomNameOwner Names => sourceField.SelectedNameOwner;
+        internal override long SnapshotNext { get { lock (inkGate) return ink.Next; } }
+        private void Parent()
+        {
+            if (!Monitor.IsEntered(sourceField.gate)) throw new InvalidOperationException("Retained Ink operations require the original field gate.");
+            sourceField.CheckScope();
+        }
+        private void Live() => ObjectDisposedException.ThrowIf(disposed, this);
+        private Selection Owned(object selection)
+            => selection is Selection actual && ReferenceEquals(actual.Owner, ink) ? actual
+                : throw new ArgumentException("C22 must belong to this exact retained Ink clone.");
+        private LegacyLibraryOriginalDomName Named(object name)
+            => name is LegacyLibraryOriginalDomName actual && ReferenceEquals(actual.Owner, Names) ? actual
+                : throw new ArgumentException("Canonical name must belong to the retained shared DOM name owner.");
+        private Math2Mode0PublishRegistry[] Rows(bool copy)
+            => ink.Registry.Values.OrderBy(e => e.Id).Select(e => new Math2Mode0PublishRegistry(e.Id, e.Name,
+                e.Category, copy ? e.C22.Ranges.ToArray() : e.C22.Ranges)).ToArray();
+        internal override Math2Mode0PublishRegistry[] BorrowRegistry()
+        { Parent(); lock (inkGate) { Live(); return Rows(false); } }
+        internal override Math2Mode0PublishRegistry[] CopyRegistry()
+        { lock (inkGate) return Rows(true); }
+        internal override object CreateSelection(ReadOnlySpan<LegacyNativeInkPositionRange> ranges)
+        {
+            Parent(); lock (inkGate)
+            {
+                Live();
+                if (ranges.IsEmpty) throw new NotSupportedException("This fresh retained clone admits nonempty produced ranges only.");
+                foreach (var range in ranges)
+                {
+                    LegacyNativeSourceRangeUtf8.ValidatePosition(range.First); LegacyNativeSourceRangeUtf8.ValidatePosition(range.Last);
+                    if (!LegacyOwnedRawInkRangeOperations.Contains(sourceField.domain, range)) throw new ArgumentException("C22 range lies outside the retained source INPUT.");
+                }
+                return new Selection(ink, ranges.ToArray());
+            }
+        }
+        internal override LegacyNativeInkPositionRange[] CopySelectionRanges(object selection)
+        { lock (inkGate) return Owned(selection).Ranges.ToArray(); }
+        internal override long Register(LegacyLibraryOriginalDomName name, object selection)
+        {
+            Parent(); lock (inkGate)
+            {
+                Live(); var actual = Owned(selection); var canonicalName = Named(name);
+                if (canonicalName.Text is not ("MATH_SYMBOL" or "MATH_NODE")) throw new NotSupportedException("Only produced Math selection names are admitted.");
+                var canonical = ink.Registry.Values.Select(e => e.C22).FirstOrDefault(c =>
+                    LegacyOwnedRawInkRangeOperations.Equal(c.Ranges, actual.Ranges)) ?? actual;
+                long id = ink.Next++;
+                ink.Registry.Add(id, new(id, canonicalName.Text, 102, ink, canonical));
+                return id;
+            }
+        }
+        public override int CompareName(object left, object right)
+        { Parent(); lock (inkGate) { Live(); return string.CompareOrdinal(Named(left).Text, Named(right).Text); } }
+        public override object? FindOldSelection(long id)
+        { Parent(); lock (inkGate) { Live(); return ink.Registry.TryGetValue(id, out var entry) ? entry.C22 : null; } }
+        public override object? FindOldName(long id)
+        { Parent(); lock (inkGate) { Live(); return ink.Registry.TryGetValue(id, out var entry) ? Names.Intern(entry.Name) : null; } }
+        public override int CountRanges(object selection)
+        { Parent(); lock (inkGate) { Live(); return Owned(selection).Ranges.Length; } }
+        public override bool EqualRanges(object oldSelection, object pendingSelection)
+        { Parent(); lock (inkGate) { Live(); return LegacyOwnedRawInkRangeOperations.Equal(Owned(oldSelection).Ranges, Owned(pendingSelection).Ranges); } }
+        public override bool RemoveSelection(long id)
+        {
+            Parent(); lock (inkGate)
+            {
+                Live();
+                // Ink069630 returns success immediately when C51 has no ID.
+                // Duplicate stale tags therefore still call removal twice,
+                // with the second call succeeding as a no-op. Next never rewinds.
+                ink.Registry.Remove(id); return true;
+            }
+        }
+        public override void Dispose() { lock (inkGate) disposed = true; }
+    }
+    private Math2Mode0RetainedInk CloneSelectedInk()
+    {
+        if (!Monitor.IsEntered(gate)) throw new InvalidOperationException("Selected Ink clone requires the actual field gate.");
+        CheckScope();
+        if (selectedInk.Registry.Count != 1 || selectedInk.Next != 1)
+            throw new NotSupportedException("This factory clones the admitted fresh one-INPUT registry only.");
+        var clone = new InkOwner(Document) { Next = selectedInk.Next };
+        foreach (var entry in selectedInk.Registry.Values)
+        {
+            if (!ReferenceEquals(entry.Owner, selectedInk) || !ReferenceEquals(entry.C22.Owner, selectedInk))
+                throw new InvalidOperationException("Selected registry lost its owning C22 identity.");
+            var selection = new Selection(clone, entry.C22.Ranges.ToArray(), entry.C22.Storage is null);
+            clone.Registry.Add(entry.Id, new(entry.Id, entry.Name, entry.Category, clone, selection));
+        }
+        return new RetainedInk(this, clone);
+    }
     private readonly List<Math2Mode0MathFieldNode> original = [], selected = [];
     private readonly List<string> trace = [];
     private readonly LegacyNativeInkPositionRange[] domain;
@@ -241,7 +338,7 @@ internal sealed class Math2Mode0OriginalMathFieldSource : IDisposable
                 a.Parent == input.Id && a.ValueTag == 4 && a.NumericValue == entry.Id))
                 throw new InvalidOperationException("Actual selected field/id/input/tag identity required for publication.");
             return action(new(Document, SelectedNameOwner, selected.AsReadOnly(), field.Id, entry.Id,
-                selectedInk.Next, entry.C22.Ranges, selectedInk, Check));
+                selectedInk.Next, entry.C22.Ranges, selectedInk, () => { Check(token); return CloneSelectedInk(); }, Check));
         }
     }
     //Trusted original mutation view reached only through the exact completed

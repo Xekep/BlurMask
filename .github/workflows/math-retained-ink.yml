@@ -1,0 +1,111 @@
+name: Math retained Ink ownership
+
+on:
+  push:
+    branches: [main, 'codex/**']
+    paths:
+      - '.github/workflows/math-retained-ink.yml'
+      - 'src/InkRecognition.Math/Math2Mode0*.cs'
+      - 'src/InkRecognition.Math/Math2Dom*.cs'
+      - 'src/InkRecognition/LegacyOwnedRawInk*.cs'
+      - 'src/InkRecognition/LegacyNative*.cs'
+      - 'src/InkRecognition/LegacyLibraryOriginalTextFieldBootstrap.cs'
+      - 'tools/LegacyMathFreshPublisher.Probe/**'
+      - 'tools/LegacyMathOutgoingTransfer.Probe/**'
+      - 'tools/LegacyMathOriginalApplication.Probe/**'
+      - 'tools/export-ink-math-model.py'
+      - 'tools/fetch-ink-math-runtime.py'
+      - 'models/math2/**'
+      - 'global.json'
+  pull_request:
+    paths:
+      - '.github/workflows/math-retained-ink.yml'
+      - 'src/InkRecognition.Math/Math2Mode0*.cs'
+      - 'src/InkRecognition.Math/Math2Dom*.cs'
+      - 'src/InkRecognition/LegacyOwnedRawInk*.cs'
+      - 'src/InkRecognition/LegacyNative*.cs'
+      - 'src/InkRecognition/LegacyLibraryOriginalTextFieldBootstrap.cs'
+      - 'tools/LegacyMathFreshPublisher.Probe/**'
+      - 'tools/LegacyMathOutgoingTransfer.Probe/**'
+      - 'tools/LegacyMathOriginalApplication.Probe/**'
+      - 'tools/export-ink-math-model.py'
+      - 'tools/fetch-ink-math-runtime.py'
+      - 'models/math2/**'
+      - 'global.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: math-retained-ink-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ownership:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    env:
+      DOTNET_PROCESSOR_COUNT: 2
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_CLI_USE_MSBUILD_SERVER: 0
+    steps:
+      - uses: actions/checkout@v4
+        timeout-minutes: 4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            11.0.100-preview.7.26381.103
+            10.0.x
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install independent numerical oracle
+        run: python -m pip install numpy==2.3.3
+      - name: Prepare repository model and pinned official CPU runtime
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path .artifacts/math-retained -Force | Out-Null
+          $rid = switch ("$env:RUNNER_OS/$env:RUNNER_ARCH") {
+            'Windows/X64' { 'win-x64' }
+            'Linux/X64' { 'linux-x64' }
+            'macOS/ARM64' { 'osx-arm64' }
+            'macOS/X64' { 'osx-x64' }
+            default { throw 'Unsupported runner platform' }
+          }
+          $lib = if ($IsWindows) { 'onnxruntime.dll' } elseif ($IsMacOS) { 'libonnxruntime.dylib' } else { 'libonnxruntime.so' }
+          python tools/fetch-ink-math-runtime.py $rid --output .artifacts/math-retained/runtime
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned official runtime fetch failed' }
+          python tools/export-ink-math-model.py models/math2/math2-unwrapped.res --output .artifacts/math-retained/model.ikrmath
+          if ($LASTEXITCODE -ne 0) { throw 'Repository model export failed' }
+          "RETAINED_INK_RID=$rid" | Out-File -LiteralPath $env:GITHUB_ENV -Append -Encoding utf8
+          "RETAINED_INK_RUNTIME=.artifacts/math-retained/runtime/runtimes/$rid/native/$lib" | Out-File -LiteralPath $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Actual model through fresh publication, outgoing transfer and original application
+        shell: pwsh
+        run: |
+          $projects = @('LegacyMathFreshPublisher.Probe', 'LegacyMathOutgoingTransfer.Probe', 'LegacyMathOriginalApplication.Probe')
+          foreach ($project in $projects) {
+            $managed = ".artifacts/math-retained/$project-managed.json"
+            $native = ".artifacts/math-retained/$project-native.json"
+            dotnet run --project "tools/$project" -c Release -- .artifacts/math-retained/model.ikrmath models/math2/math2-unwrapped.res $env:RETAINED_INK_RUNTIME $managed
+            if ($LASTEXITCODE -ne 0) { throw "$project managed owning checks failed" }
+            python -I "tools/$project/audit_output.py" $managed models/math2/math2-unwrapped.res
+            if ($LASTEXITCODE -ne 0) { throw "$project managed independent oracle failed" }
+            dotnet publish "tools/$project" -c Release -r $env:RETAINED_INK_RID -p:PublishAot=true -m:1 --disable-build-servers -p:UseSharedCompilation=false -o ".artifacts/math-retained/native-$project"
+            if ($LASTEXITCODE -ne 0) { throw "$project Native AOT publish failed" }
+            $exe = ".artifacts/math-retained/native-$project/LegacyMathFreshPublisher.Probe"
+            if ($IsWindows) { $exe += '.exe' } else { $exe = './' + $exe }
+            & $exe .artifacts/math-retained/model.ikrmath models/math2/math2-unwrapped.res $env:RETAINED_INK_RUNTIME $native
+            if ($LASTEXITCODE -ne 0) { throw "$project native owning checks failed" }
+            python -I "tools/$project/audit_output.py" $native models/math2/math2-unwrapped.res $managed
+            if ($LASTEXITCODE -ne 0) { throw "$project native independent oracle/managed equivalence failed" }
+          }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: math-retained-ink-${{ matrix.os }}
+          path: .artifacts/math-retained/*.json
+          if-no-files-found: ignore
