@@ -109,3 +109,12 @@ order, failed-C22 prefix and remaining concrete owning join.
 The focused workflow cancels superseded runs of the same branch and limits
 repository checkout to four minutes. This avoids an obsolete or stalled checkout
 holding up iterative port verification; all current managed/AOT checks still run.
+
+All three current jobs passed the independent C reference, managed544620 controls
+and Native AOT544620 controls on Windows, Linux and macOS in
+[run40736052560](https://github.com/Xekep/BlurMask/actions/runs/40736052560),
+code commit `9211b78ad6e8d5524018c666a494ab15ebeb1bd8`.
+The earlier69-source macOS run stalled during checkout; the current70-source
+run checked out and completed successfully, including the matching and cleanup
+controls. These results concern the focused Math DOM workflow, not every research
+gate or the full application's release eligibility.
