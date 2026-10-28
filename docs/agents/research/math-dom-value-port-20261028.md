@@ -90,3 +90,8 @@ retained; `.NET ToString` is not substituted. Unsupported floating text conversi
 without that service refuses explicitly. True prior-result editing, nonfresh
 owner construction and whole recognition integration remain unfinished. These
 controls establish neither handwriting accuracy nor full engine completion.
+
+The [next-dependency packet](../../../tools/handwriting/ports/dom-float-20261028/README.md)
+records the freshly exported dtoa/helpers, exact notation branches and rounding
+environment query. Its unusual NaN/Infinity outputs are static predictions,
+not vendor runtime observations; no floating implementation is admitted there.
