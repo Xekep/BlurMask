@@ -1,0 +1,161 @@
+--- main935/LegacyOrdinaryGraphSourceRanges.cs
++++ candidate950/LegacyOrdinaryGraphSourceRanges.cs
+@@ -101,6 +101,20 @@
+         var arc=node[arcOrdinal];return ResolveForwardWithResiduals(arc.StartContextId,arc.EndContextId,cancellationToken);
+     }
+ 
++    // Private per-call work accounting only. Never issues source authority or replays a source call.
++    internal LegacyOrdinaryGraphSourceReference[] ResolveCandidateWithResidualsMetered(int endingNode,int arcOrdinal,
++        CancellationToken cancellationToken,LegacyOrdinarySourceTraversalMeter meter)
++    {
++        cancellationToken.ThrowIfCancellationRequested();meter.Before(256);
++        var node=Graph.GetNode(endingNode);
++        if((uint)arcOrdinal>=(uint)node.Count)throw new ArgumentOutOfRangeException(nameof(arcOrdinal));
++        var arc=node[arcOrdinal];
++        var rows=ResolveForwardRows(arc.StartContextId,arc.EndContextId,cancellationToken,meter);
++        meter.Before(checked(512+128L*rows.Count));
++        return rows.Select(r=>new LegacyOrdinaryGraphSourceReference(r.First.Key,r.Tail?r.Last.Key:r.LastStart.Key,
++            r.First.RemainderByte,r.Tail?r.Last.RemainderByte:r.LastStart.RemainderByte)).ToArray();
++    }
++
+     /// <summary>Only the successful ordinary forward mode0 branch1A9AE0 is
+     /// supported. Reverse endpoint, protocol and exceptional source rows are
+     /// separate native branches; this method never fabricates their membership.</summary>
+@@ -118,21 +132,30 @@
+             .Select(r=>new LegacyOrdinaryGraphSourceReference(r.First.Key,r.Tail?r.Last.Key:r.LastStart.Key,
+                 r.First.RemainderByte,r.Tail?r.Last.RemainderByte:r.LastStart.RemainderByte)).ToArray();
+ 
+-    private List<Row> ResolveForwardRows(uint firstContext,uint lastContext,CancellationToken cancellationToken)
+-    {
+-        cancellationToken.ThrowIfCancellationRequested();
++    private List<Row> ResolveForwardRows(uint firstContext,uint lastContext,CancellationToken cancellationToken,LegacyOrdinarySourceTraversalMeter? meter=null)
++    {
++        cancellationToken.ThrowIfCancellationRequested();meter?.Before(256);
+         if(firstContext>int.MaxValue||lastContext>int.MaxValue||firstContext>lastContext||
+             (firstContext>>7)>=(uint)seedGraph.NodeCount||(lastContext>>7)>=(uint)seedGraph.NodeCount)
+             throw new NotSupportedException("Bounded ordinary forward graph context interval required.");
++        // Context high bits are node identities in BOTH immutable seed constructors.
++        // Backtracking frames are an active strictly-increasing-node path.
++        int depth=checked((int)((lastContext>>7)-(firstContext>>7)+1));
++        meter?.Before(checked(1024+128L*depth)); //frames growth/metadata before its first allocation.
+         var frames=new List<(int Node,int Ordinal)>();int visits=0;bool found=false;
+         int firstNode=(int)(firstContext>>7);
+-        for(int ordinal=0;ordinal<seedGraph.ReadSourceNode(firstNode).Length&&!found;ordinal++)
+-        {
++        for(int ordinal=0;TraversalCondition(meter)&&ordinal<seedGraph.ReadSourceNode(firstNode).Length&&!found;ordinal++)
++        {
++            meter?.Before(256);
+             var arc=seedGraph.ReadSourceNode(firstNode)[ordinal];if(arc.StartContextId!=firstContext)continue;
++            // One actual Stack per matching start. Cumulative geometric backing
++            // initialization/copies <=128*depth plus fixed metadata, prepaid.
++            meter?.Before(checked(1024+128L*depth));
+             frames.Clear();var stack=new Stack<(int Node,int Ordinal,int Child)>();stack.Push((firstNode,ordinal,-1));
+-            while(stack.Count!=0)
++            while(TraversalCondition(meter)&&stack.Count!=0)
+             {
+                 cancellationToken.ThrowIfCancellationRequested();if(++visits>1_048_576)throw new ArgumentException("Source path visit budget exceeded.");
++                meter?.Before(512); //pop/read frame, source metadata, two possible pushes or one removal.
+                 var frame=stack.Pop();var current=seedGraph.ReadSourceNode(frame.Node)[frame.Ordinal];
+                 if(frame.Child==-1)
+                 {
+@@ -153,8 +176,9 @@
+             }
+         }
+         if(!found)throw new InvalidDataException("Actual ordinary source path does not reach its requested ending context.");
++        meter?.Before(checked(512+128L*frames.Count)); //actual path selector/materialization once.
+         var path=frames.Select(frame=>seeds.Seeds[seedGraph.ReadSourceNode(frame.Node)[frame.Ordinal].SeedGroupIndex].Atom.Range).ToArray();
+-        return ProjectOwnedRows(prepared,original,path,keys,cancellationToken);
++        return ProjectOwnedRows(prepared,original,path,keys,cancellationToken,meter);
+     }
+ 
+     /// <summary>Shared1A8E60/1A9570/1A9AE0 ordinary forward projection, after
+@@ -167,34 +191,60 @@
+                 r.First.RemainderByte,r.Tail?r.Last.RemainderByte:r.LastStart.RemainderByte)).ToArray();
+ 
+     private static List<Row> ProjectOwnedRows(LegacySourcePointChronology prepared,LegacyOrdinarySourceInk original,
+-        IReadOnlyList<LegacyInkRange> path,LegacySourcePointKey[] keys,CancellationToken cancellationToken)
+-    {
+-        cancellationToken.ThrowIfCancellationRequested();
++        IReadOnlyList<LegacyInkRange> path,LegacySourcePointKey[] keys,CancellationToken cancellationToken,LegacyOrdinarySourceTraversalMeter? meter=null)
++    {
++        cancellationToken.ThrowIfCancellationRequested();meter?.Before(512);
+         if(path.Count>4096)throw new ArgumentException("Portable ordinary source range path budget exceeded.");
++        meter?.Before(checked(512+256L*path.Count)); //row List cumulative growth/zeroing and enumeration setup.
+         var rows=new List<Row>();
+         foreach(var range in path)
+         {
+-            cancellationToken.ThrowIfCancellationRequested();
++            cancellationToken.ThrowIfCancellationRequested();meter?.Before(1024);
+             var first=prepared.Resolve(range.StrokeIndex,range.StartPoint);
+             var lastStart=prepared.Resolve(range.StrokeIndex,range.EndPointExclusive-1);
+-            var last=original.ResolveEndingMetadata(lastStart,cancellationToken);
++            var last=meter is null?original.ResolveEndingMetadata(lastStart,cancellationToken):
++                original.ResolveEndingMetadataMetered(lastStart,cancellationToken,meter);
+             bool tail=range.EndPointExclusive==prepared.StrokePointCounts.Span[range.StrokeIndex];
+             rows.Add(new(first,last,lastStart,tail));
+         }
+         //1A9570 sorts start keys ascending, then remainder bytes descending,
+         //then end keys ascending and end remainders descending. Stable ties.
+-        rows=rows.OrderBy(r=>r,RowComparer.Instance).ToList();
++        if(meter is null)rows=rows.OrderBy(r=>r,RowComparer.Instance).ToList();
++        else
++        {
++            // Runtime source bound: buffer/key/map/result setup and unpaired
++            // O(N) controls. Each real comparison prepays its paired sort work.
++            meter.Before(checked(2048+512L*rows.Count));
++            try{rows=rows.OrderBy(r=>r,new MeteredRowComparer(meter)).ToList();}
++            catch(Exception)when(meter.HasFailure){meter.RethrowFailure();throw;}
++        }
+         //1A9AE0 reverse merge uses the F8 endpoint pointer and its next record,
+         //not raw ordinal+1 (which loses dropped duplicate runs).
+-        for(int i=rows.Count-1;i>0;i--)
+-        {
+-            cancellationToken.ThrowIfCancellationRequested();var current=rows[i];var previous=rows[i-1];
++        for(int i=rows.Count-1;TraversalCondition(meter)&&i>0;i--)
++        {
++            cancellationToken.ThrowIfCancellationRequested();meter?.Before(512);
++            var current=rows[i];var previous=rows[i-1];
+             bool equal=current.First.Key==previous.LastStart.Key&&current.First.RemainderByte==previous.LastStart.RemainderByte;
+             int nextIndex=previous.LastStart.KeyRecordIndex+1;
+             bool adjacent=previous.Tail&&nextIndex<keys.Length&&current.First.Key==keys[nextIndex];
+-            if(equal||adjacent){rows[i-1]=previous with{Last=current.Last,LastStart=current.LastStart,Tail=current.Tail};rows.RemoveAt(i);}
++            if(equal||adjacent)
++            {
++                //RemoveAt shifts only the actual following rows, including Row value stores.
++                meter?.Before(checked(128+128L*(rows.Count-i-1)));
++                rows[i-1]=previous with{Last=current.Last,LastStart=current.LastStart,Tail=current.Tail};rows.RemoveAt(i);
++            }
+         }
+         return rows;
++    }
++
++    // The condition's original metadata/getter still executes exactly once.
++    private static bool TraversalCondition(LegacyOrdinarySourceTraversalMeter? meter)
++    {meter?.Before(128);return true;}
++    private sealed class MeteredRowComparer:IComparer<Row>
++    {
++        private readonly LegacyOrdinarySourceTraversalMeter meter;
++        internal MeteredRowComparer(LegacyOrdinarySourceTraversalMeter meter){this.meter=meter;}
++        public int Compare(Row a,Row b){meter.Before(512);return RowComparer.Instance.Compare(a,b);}
+     }
+ 
+     private readonly record struct Row(LegacySourcePointIdentity First,LegacySourcePointIdentity Last,
+@@ -212,3 +262,18 @@
+         {int c=a.First.CompareTo(b.First);if(c!=0)return c;c=a.Second.CompareTo(b.Second);return c!=0?c:a.Third.CompareTo(b.Third);}
+     }
+ }
++
++// Internal DATA-work debit. Public/default source methods pass null.
++internal abstract class LegacyOrdinarySourceTraversalMeter
++{
++    private System.Runtime.ExceptionServices.ExceptionDispatchInfo? failure;
++    internal bool HasFailure=>failure is not null;
++    internal void Before(long units)
++    {
++        if(failure is not null)failure.Throw(); //failed per-call debit cannot be retried/reset.
++        try{Charge(units);}
++        catch(Exception error){failure=System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(error);throw;}
++    }
++    protected abstract void Charge(long units);
++    internal void RethrowFailure(){failure!.Throw();}
++}

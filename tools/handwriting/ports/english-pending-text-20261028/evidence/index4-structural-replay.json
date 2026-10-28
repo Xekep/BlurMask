@@ -1,0 +1,7 @@
+{
+  "sameInputSha": "d1c9284dbe4f79301f2a0d860e14b3c00e5a0ba02430b98a6bac5f0c43fa6b99",
+  "sameSourceCompletion": true,
+  "sameMetrics": true,
+  "originalIndex": 4,
+  "scope": "two same candidate owning runs; baseline has no completed capture"
+}

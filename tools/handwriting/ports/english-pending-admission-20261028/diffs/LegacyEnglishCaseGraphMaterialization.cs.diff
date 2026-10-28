@@ -1,0 +1,27 @@
+--- main935/LegacyEnglishCaseGraphMaterialization.cs
++++ candidate950/LegacyEnglishCaseGraphMaterialization.cs
+@@ -5,7 +5,16 @@
+     internal static Images BuildGraph(LegacyNativeWordRecordHeap heap,LegacyNativeWordHeapPreparation preparation,
+         LegacyCursiveCategoryProfile categories,LegacySymbolContextFactory contexts,int currentNode,
+         Func<int,IReadOnlyList<LegacyNativeStoredWordRecord>> ownedParents,LegacyInkAlphabet alphabet,CancellationToken token)
++        =>BuildGraphCore(heap,preparation,categories,contexts,currentNode,ownedParents,alphabet,false,out _,token);
++    internal static Images BuildPeriodicGraph(LegacyNativeWordRecordHeap heap,LegacyNativeWordHeapPreparation preparation,
++        LegacyCursiveCategoryProfile categories,LegacySymbolContextFactory contexts,int currentNode,
++        Func<int,IReadOnlyList<LegacyNativeStoredWordRecord>> ownedParents,LegacyInkAlphabet alphabet,out int materializedMinimum,CancellationToken token)
++        =>BuildGraphCore(heap,preparation,categories,contexts,currentNode,ownedParents,alphabet,true,out materializedMinimum,token);
++    private static Images BuildGraphCore(LegacyNativeWordRecordHeap heap,LegacyNativeWordHeapPreparation preparation,
++        LegacyCursiveCategoryProfile categories,LegacySymbolContextFactory contexts,int currentNode,
++        Func<int,IReadOnlyList<LegacyNativeStoredWordRecord>> ownedParents,LegacyInkAlphabet alphabet,bool collectMinimum,out int materializedMinimum,CancellationToken token)
+     {
++        materializedMinimum=0x4000000;
+         token.ThrowIfCancellationRequested();var c=preparation.Configuration;
+         if(heap.Capacity!=250||heap.Count>250||ownedParents is null||c.PrimaryArcLimit230a!=125||c.PrimaryAlternativeCount2402!=2||c.SecondaryAlternativeCount2404!=1)
+             throw new NotSupportedException("Exact node1 primary250/125 alternatives2/1 domain required.");
+@@ -34,6 +43,7 @@
+         for(int i=0;i<descriptor.Count;i++)
+         {
+             token.ThrowIfCancellationRequested();if(primaryOrdinals is not null&&i<descriptor.Count)primaryOrdinals[i]=BinaryPrimitives.ReadInt32LittleEndian(backing.AsSpan(i*128+88));var stored=LegacyNativeWordRowMaterializer.Materialize(backing.AsSpan(i*128,128),(ushort)i,125,2,1,ordered.PrimaryAlternativeStorage.Span,cancellationToken:token);
++            if(collectMinimum)materializedMinimum=Math.Min(materializedMinimum,BinaryPrimitives.ReadInt32LittleEndian(backing.AsSpan(i*128+16)));
+             stored.Record.Span.CopyTo(rows.AsSpan(i*88));stored.PrimaryAlternatives.Span.CopyTo(alternatives.AsSpan(i*80));
+         }
+         return new(backing,rows,alternatives,descriptor.Count,heap.Count,descriptor,primaryOrdinals);

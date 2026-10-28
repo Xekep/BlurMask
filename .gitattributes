@@ -18,3 +18,8 @@ src/InkRecognition/LegacyFreshMainGlobalWordTextPublication.cs -text whitespace=
 # Retain exact tested preimage/candidate hashes in the isolated RU work packet.
 tools/handwriting/ports/ru-scalar-cache-20261028/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 tools/handwriting/ports/english-query-caches-20261028/** -text whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+tools/handwriting/ports/english-pending-text-20261028/** -text whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+tools/handwriting/ports/english-pending-admission-20261028/** -text whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+# Patch context markers and original whitespace are byte-authenticated data.
+tools/handwriting/ports/english-pending-text-20261028/*.patch -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol
+tools/handwriting/ports/english-pending-admission-20261028/diffs/*.diff -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab,cr-at-eol

@@ -1,0 +1,40 @@
+--- main935/LegacyPreparedMainTextGlyphReuse.cs
++++ candidate950/LegacyPreparedMainTextGlyphReuse.cs
+@@ -136,7 +136,7 @@
+     }
+ 
+     private LegacyPreparedTextGlyphReuseResult Process(int count,int selectedInputIndex,
+-        Func<int,LegacyPreparedGlyphReuseInput> read,CancellationToken token)
++        Func<int,LegacyPreparedGlyphReuseInput> read,CancellationToken token,ILegacyEnglishCharacterReuseVisitBudget? budget=null)
+     {
+         token.ThrowIfCancellationRequested();if(count is <0 or >65536)throw new ArgumentOutOfRangeException(nameof(count));
+         lock(gate)
+@@ -147,10 +147,10 @@
+             {
+                 for(int inputIndex=0;inputIndex<count;inputIndex++)
+                 {
+-                    token.ThrowIfCancellationRequested();var input=read(inputIndex);
++                    token.ThrowIfCancellationRequested();budget?.BeforeEmission(token);var input=read(inputIndex);
+                     if(input.Utf8.Length>1_048_576)throw new NotSupportedException("Bounded emitted-byte extent exceeded.");
+                     //Native21760 interns first, even for an empty interval.
+-                    int beforeIntern=strings.Count;
++                    int beforeIntern=strings.Count;budget?.BeforeIntern(input.Utf8.Length,beforeIntern,token);
+                     var identity=strings.Intern(input.Utf8.Span,token);
+                     //The apparent fifth21760 parameter is reused as the OUT
+                     //new-entry byte from builtin3E.virtual10, NOT caller policy.
+@@ -158,13 +158,14 @@
+                     if(input.FailureStage==2)throw new NativeEmissionFailure();
+                     int match=-1;
+                     if(!newlyInterned)
+-                        for(int old=0;old<original;old++)if(ReferenceEquals(rows[old].Text,identity)){match=old;break;}
++                        for(int old=0;old<original;old++){budget?.BeforeIdentityProbe(token);if(ReferenceEquals(rows[old].Text,identity)){match=old;break;}}
+                     if(match>=0)
+                     {
+                         if(inputIndex==selectedInputIndex)marker=match;
+                     }
+                     else
+                     {
++                        budget?.BeforePublication(input.Utf8.Length,strings.Count,token);
+                         if(inputIndex==selectedInputIndex)marker=rows.Count;
+                         if(input.FailureStage==3)throw new NativeEmissionFailure();
+                         if(rows.Count==65536)throw new NotSupportedException("Bounded source-record capacity exceeded.");

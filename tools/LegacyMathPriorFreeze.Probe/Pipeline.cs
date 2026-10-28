@@ -25,4 +25,3 @@ sealed class Pipeline:IDisposable
  }
  public void Dispose(){Application?.Dispose();Outgoing?.Dispose();Publisher?.Dispose();Receipt?.Dispose();Source?.Dispose();Field?.Dispose();}
 }
-

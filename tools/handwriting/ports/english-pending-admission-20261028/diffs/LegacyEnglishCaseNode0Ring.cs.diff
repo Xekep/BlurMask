@@ -1,0 +1,11 @@
+--- main935/LegacyEnglishCaseNode0Ring.cs
++++ candidate950/LegacyEnglishCaseNode0Ring.cs
+@@ -4,7 +4,7 @@
+ // Successful fresh1FA300 subset. Pointer-vector bytes are opaque zero-owned
+ // representatives; actual alias authority is the SAME block reference+offset.
+ // No native pointer identity is invented or published.
+-internal sealed class LegacyEnglishCaseNode0Ring
++internal sealed partial class LegacyEnglishCaseNode0Ring
+ {
+     private const int RowBytes=156*88,PrimaryBytes=125*80;
+     private readonly LegacyEnglishCaseNode0Ledger ledger;

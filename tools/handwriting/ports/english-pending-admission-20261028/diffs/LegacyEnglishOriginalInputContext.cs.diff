@@ -1,0 +1,15 @@
+--- main935/LegacyEnglishOriginalInputContext.cs
++++ candidate950/LegacyEnglishOriginalInputContext.cs
+@@ -147,5 +147,12 @@
+         var parent=knowledge.Owner.Owner.Owner.Parent;
+         parent.OriginalInputContext?.Require(parent,token);
+     }
++    // This new explicit route may NOT replace a missing pre-NN context with a late bootstrap.
++    internal void RequirePreNeuralOriginalInputContext(CancellationToken token)
++    {
++        var parent=knowledge.Owner.Owner.Owner.Parent;
++        var input=parent.OriginalInputContext??throw new InvalidOperationException("Authentic pre-NN original-selected input required.");
++        input.Require(parent,token);
++    }
+     internal void ReleaseOriginalInputContext()=>knowledge.Owner.Owner.Owner.Parent.ReleaseOriginalInputContext();
+ }

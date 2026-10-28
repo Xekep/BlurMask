@@ -1,0 +1,161 @@
+--- main935/LegacyEnglishCaseGraphWordPublication.cs
++++ candidate950/LegacyEnglishCaseGraphWordPublication.cs
+@@ -8,7 +8,7 @@
+     internal sealed record GraphWordChoiceData(int Ordinal,uint Flags,ulong[] OrdinaryPairs,byte[] Scalar48,
+         GraphWordCharacterLinkData[] Links,GraphCharacterData[] Characters);
+     internal sealed record GraphWordAssignedData(int Field08,ulong Field00,long Field40,int Field48);
+-    internal sealed record GraphWordPublicationData(int SourceNode,int SelectedOrdinal,long SelectionId,uint Flags,
++    internal record GraphWordPublicationData(int SourceNode,int SelectedOrdinal,long SelectionId,uint Flags,
+         GraphWordAssignedData Defaults,ulong[] OriginalPairs,GraphWordChoiceData[] Choices,
+         GraphCharacterPayloadData[] FinalCharacters,GraphCharacterCommandData[] PendingCommands,string[] Trace);
+     internal sealed record GraphWordPublicationResult(GraphCharactersResult LastChoiceCharacters,GraphWordPublicationData Word);
+@@ -37,11 +37,16 @@
+         try
+         {
+             parent.InternWord(token); //028E25/defaults precede every024F30 refresh.
++            GraphCompactRefreshIndex? refreshIndex=null;
++            if(graphPeriodicActive&&graphOriginalSelectedRequested&&graphTextPublicationRequested)
++                refreshIndex=GraphCompactRefreshIndex.Issue(stage,compact,pool,parent,token);
+             for(int ordinal=0;ordinal<parent.Count;ordinal++)
+             {
+                 parent.Open(ordinal,token);
+                 graphGlyphGeometryContext=null; //private per-choice geometry, SAME original document.
+-                CompleteGraphGlyphChoiceRows(stage,compact,publisher,pool,ordinary,parent.CurrentReferences(token),token);
++                var output=graphPeriodicActive&&graphOriginalSelectedRequested&&graphTextPublicationRequested&&ordinal<parent.Count-1
++                    ?GraphCharacterOutput.IntermediatePrefixesOnly:GraphCharacterOutput.FullCanonical;
++                CompleteGraphGlyphChoiceRows(stage,compact,publisher,pool,ordinary,parent.CurrentReferences(token),token,output,refreshIndex);
+                 parent.Close(token);
+             }
+             graphWordPublicationData=parent.CompleteWord(token);
+@@ -50,6 +55,8 @@
+             if(graphSelectedSourcesRequested)graphSelectedSourcesData=parent.CompleteSelectedSources(token);
+             if(graphSourceIndicesRequested)graphSourceIndicesData=parent.CompleteSourceIndices(token);
+             if(graphOriginalSelectedRequested)graphEarlySelectedInputData=parent.CopyEarlySelectedInputData(token);
++            if(graphPeriodicActive&&graphOriginalSelectedRequested&&graphTextPublicationRequested&&graphSelectedSourcesRequested)
++                graphWordPublicationData=parent.CopyFinalSelectedData(graphWordPublicationData!,token);
+             //Future021AB0/NULL projection/TEXT must be called HERE while the
+             //same CHAR context/StringPool/Selections are live, never on result DATA.
+         }
+@@ -95,8 +102,21 @@
+             if(head.Next is not null)throw new NotSupportedException("One actual279 WORD span required.");
+             //Fixed4096 row-pointer reservation BEFORE CaptureSpan allocates its
+             //words/selected/ordinal arrays, lists and validation hashsets.
+-            Reserve(65536,131072,32768);
+-            span=publisher.CaptureSpan(head,[head],token);
++            if(owner.graphPeriodicActive&&owner.graphOriginalSelectedRequested&&owner.graphTextPublicationRequested)
++            {
++                Reserve(0,0,512); // BEFORE the allocation-free actual same-pool span scalar validation.
++                var scalar=publisher.ReadFreshSingletonTopScalars(head,pool,token);
++                var budget=LegacyEnglishPeriodicPublicationBudget.SpanCapture(scalar.Count);
++                Reserve(budget.Payload,budget.Copies,budget.Visits);
++                span=publisher.CaptureSpan(head,[head],token);
++                if(span.Words.Count!=scalar.Count||span.SelectedOrdinals.Count!=1||span.SelectedOrdinals[0]!=scalar.Selected)
++                    throw new InvalidOperationException("Same immutable span counts/selection changed during capture.");
++            }
++            else
++            {
++                Reserve(65536,131072,32768);
++                span=publisher.CaptureSpan(head,[head],token);
++            }
+             if(span.Words.Count is<1 or>4095||span.SelectedNodes.Count!=1||!ReferenceEquals(span.SelectedNodes[0],head))
+                 throw new NotSupportedException("One live TOP and complete bounded275 span required.");
+             SelectedOrdinal=span.SelectedOrdinals[0];Reserve(checked(4096+Count*256L),checked(8192+Count*512L),checked(4096+Count*256L));int references=0;
+@@ -139,6 +159,50 @@
+         }
+         private void Reserve(long payload,long copies,long visits)
+         {Stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,payload);Stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,copies);Stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,visits);}
++        internal void RequireCompactRefreshIndex(GraphLanguageScope actualStage,LegacyNativeGlyphRecordPool actualPool,CancellationToken token)
++        {
++            token.ThrowIfCancellationRequested();
++            if(poisoned||finished||thread!=Environment.CurrentManagedThreadId||!ReferenceEquals(Stage,actualStage)||
++                !ReferenceEquals(Pool,actualPool)||!ReferenceEquals(owner.graphWordPublicationContext,this)||
++                !owner.graphPeriodicActive||!owner.graphOriginalSelectedRequested||!owner.graphTextPublicationRequested)
++                throw new InvalidOperationException("Same private rich WORD/compact refresh index required.");
++        }
++        internal LegacyNativeInkPositionRange[] CopyGeometryWordClip(GraphLanguageScope actualStage,
++            LegacyNativeGlyphRecordPool actualPool,LegacyOwnedRawInkDocument actualDocument,GraphWordSourceData actualSource,CancellationToken token)
++        {
++            // BEFORE new metadata reads; no complete-span rewalk or source query.
++            actualStage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,1024);
++            RequireCompactRefreshIndex(actualStage,actualPool,token);
++            if(!ReferenceEquals(Document,actualDocument)||!ReferenceEquals(owner.graphWordSourceData,actualSource)||
++                current!=next||current<0||current>=Count||firstPassNext!=0)
++                throw new InvalidOperationException("Same private original WORD projection before first geometry reference required.");
++            // Retain original Issue projection-product admission, even though its
++            // identical projection already completed in this private WORD owner.
++            if((long)actualSource.References.Length*Document.ObjectCount>4096)
++                throw new NotSupportedException("Geometry projection/intersection admission cap reached before allocation.");
++            int references=span.Words[current].FlatReferences.Count;
++            var budget=GraphGeometryReuseCharge(originalKey.Length,Document.ObjectCount,references);
++            Stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,budget.Payload);
++            Stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,budget.Copies);
++            Stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,budget.Visits);
++            return originalKey.ToArray(); // Never expose the private writable backing array.
++        }
++        internal void RequireIntermediateCharacterOutput(GraphLanguageScope actualStage,CancellationToken token)
++        {
++            token.ThrowIfCancellationRequested();
++            if(poisoned||thread!=Environment.CurrentManagedThreadId||!ReferenceEquals(Stage,actualStage)||
++                !ReferenceEquals(owner.graphWordPublicationContext,this)||!owner.graphPeriodicActive||
++                !owner.graphOriginalSelectedRequested||!owner.graphTextPublicationRequested||
++                current!=next||current<0||current>=Count-1)
++                throw new InvalidOperationException("Actual nonfinal rich WORD choice required for prefix-only CHAR DATA.");
++        }
++        internal int ReadCharacterPublisherHistory()=>publisher.ReadPublicationHistoryCount();
++        private long MarkerFlagVisits()
++        {
++            Stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,64);
++            int count=publisher.ReadPublicationHistoryCount();
++            return GraphCharacterVisitCharge.MarkerFlags(count);
++        }
+         internal void Require(CancellationToken token)
+         {
+             owner.RequireGraphPublication(Stage,token);owner.graphWordSourceSession!.RequireCompletedForTop(publisher,Pool,token);
+@@ -175,7 +239,7 @@
+         }
+         internal void RequireChoiceGeometry(object actual,LegacyOwnedRawInkDocument document,GraphLanguageScope stage,LegacyNativeGlyphRecordPool pool,CancellationToken token)
+         {Require(token);if(current<0||firstPassNext!=CurrentReferences(token).Count||!ReferenceEquals(owner.graphGlyphGeometryContext,actual)||!ReferenceEquals(Document,document)||!ReferenceEquals(Stage,stage)||!ReferenceEquals(Pool,pool))throw new InvalidOperationException("Same current WORD private geometry required.");}
+-        internal void AppendCharacter(GraphCharacterSource source,GraphCharacterPayload payload,int marker,CancellationToken token)
++        internal void AppendCharacter(GraphCharacterSource source,GraphCharacterPayload payload,int marker,byte[] currentSelectionRows,CancellationToken token)
+         {
+             Require(token);source.Context.RequireCurrent(source,token);
+             if(current<0||links is null||links.Count>=CurrentReferences(token).Count||CurrentReferences(token)[links.Count]!=source.Reference||
+@@ -191,12 +255,23 @@
+                 Reserve(checked(4096+128*n),checked(8192+256*n+48*n*n),checked(4096+128*n*n));
+                 ordinary=operations.Union(ordinary,key,token);
+             }
+-            Reserve(checked(4096+payload.Reuse.RecordCount*512L),checked(8192+payload.Reuse.RecordCount*1024L),checked(4096+payload.Reuse.RecordCount*256L));
+-            var rows=payload.Reuse.CopyEnglishRecords(payload,token);
+-            if((uint)marker>=(uint)rows.Count)throw new NotSupportedException("Actual selected CHAR marker unavailable.");
+-            choiceFlags=LegacyFreshMainGlobalWordSourceChoice.FoldFlags(choiceFlags,rows[marker].Flags,rows[marker].Flags);
++            if(owner.graphPeriodicActive&&owner.graphOriginalSelectedRequested&&owner.graphTextPublicationRequested)
++            {
++                // Same live marked flags only: no full canonical row/UTF8 snapshot is consumed here.
++                // Retain the original fixed envelope for guards, lock/scalar reads and the following link allocation.
++                Reserve(4096,8192,MarkerFlagVisits());
++                uint actualFlags=payload.Reuse.ReadEnglishCurrentMarkerFlags(source,payload,marker,token);
++                choiceFlags=LegacyFreshMainGlobalWordSourceChoice.FoldFlags(choiceFlags,actualFlags,actualFlags);
++            }
++            else
++            {
++                Reserve(checked(4096+payload.Reuse.RecordCount*512L),checked(8192+payload.Reuse.RecordCount*1024L),checked(4096+payload.Reuse.RecordCount*256L));
++                var rows=payload.Reuse.CopyEnglishRecords(payload,token);
++                if((uint)marker>=(uint)rows.Count)throw new NotSupportedException("Actual selected CHAR marker unavailable.");
++                choiceFlags=LegacyFreshMainGlobalWordSourceChoice.FoldFlags(choiceFlags,rows[marker].Flags,rows[marker].Flags);
++            }
+             var b=new byte[24];BinaryPrimitives.WriteInt32LittleEndian(b.AsSpan(16),marker);links.Add(new(payload.Node.Identity,marker,b));
+-            if(owner.graphPostTextCoverageRequested)RetainPostTextLink(payload,marker,token);
++            if(owner.graphPostTextCoverageRequested)RetainPostTextLink(source,payload,marker,currentSelectionRows,token);
+         }
+         internal void Close(CancellationToken token)
+         {
+@@ -210,6 +285,9 @@
+         {
+             Require(token);if(finished||wordNode is null||current!=-1||next!=Count)throw new InvalidOperationException("All275 choice completion required.");
+             var context=owner.graphCharacterContext??throw new InvalidOperationException("Actual live CHAR context required.");context.RequireCompleted(token);
++            if(owner.graphPeriodicActive&&owner.graphOriginalSelectedRequested&&owner.graphTextPublicationRequested&&
++                (owner.graphCharacterNodes is null||owner.graphCharacterTree is null||owner.graphCharacterCommands is null))
++                throw new InvalidOperationException("Final rich CHAR canonical export must precede WORD completion.");
+             flags=FoldGraphWordFlags(flags,output); //native029080, after ALL choices.
+             if((flags&0x200000)!=0)selectionId=-1;
+             else

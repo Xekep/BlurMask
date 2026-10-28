@@ -1,0 +1,770 @@
+{
+  "productionGitCommit": "4436c4f9decd2144018cc1e4e52200535b10a85d",
+  "productionCount": 935,
+  "stageCount": 950,
+  "added": [
+    "LegacyEnglishCaseGraphFinalSelectedData.cs",
+    "LegacyEnglishCaseGraphPeriodicAlternativeWalk.cs",
+    "LegacyEnglishCaseGraphPeriodicBacktrackRows.cs",
+    "LegacyEnglishCaseGraphPeriodicCompact.cs",
+    "LegacyEnglishCaseGraphPeriodicContextBudget.cs",
+    "LegacyEnglishCaseGraphPeriodicCost.cs",
+    "LegacyEnglishCaseGraphPeriodicPreparation.cs",
+    "LegacyEnglishCaseGraphPeriodicQueryBudget.cs",
+    "LegacyEnglishCaseGraphPeriodicRows.cs",
+    "LegacyEnglishCaseGraphPeriodicWordEquality.cs",
+    "LegacyEnglishCaseGraphPeriodicWorkspace.cs",
+    "LegacyNativeOrdinaryParentWordCandidates.EnglishPeriodic.cs",
+    "LegacyOrdinaryGraphSourceRanges.EnglishPeriodic.cs",
+    "LegacyPreparedMainCompactPublication.EnglishPeriodic.cs",
+    "LegacyPreparedMainCompactReachability.EnglishPeriodic.cs"
+  ],
+  "changed": [
+    "ExperimentalGlobalTextRecognizer.Batch.cs",
+    "ExperimentalGlobalTextRecognizer.cs",
+    "LegacyDegenerateFloatContextGeometry.cs",
+    "LegacyEnglishCaseExecutionPool.cs",
+    "LegacyEnglishCaseGraphAuxiliarySource.cs",
+    "LegacyEnglishCaseGraphCharacterBindings.cs",
+    "LegacyEnglishCaseGraphCharacters.cs",
+    "LegacyEnglishCaseGraphCompactScores.cs",
+    "LegacyEnglishCaseGraphEarlySelectedInput.cs",
+    "LegacyEnglishCaseGraphFinalCompact.cs",
+    "LegacyEnglishCaseGraphGlyphChoices.cs",
+    "LegacyEnglishCaseGraphGlyphDispatch.cs",
+    "LegacyEnglishCaseGraphGlyphGeometry.cs",
+    "LegacyEnglishCaseGraphLanguageStage.cs",
+    "LegacyEnglishCaseGraphLoop.cs",
+    "LegacyEnglishCaseGraphLoopBudget.cs",
+    "LegacyEnglishCaseGraphMaterialization.cs",
+    "LegacyEnglishCaseGraphPhase1.cs",
+    "LegacyEnglishCaseGraphPostTextCoverage.cs",
+    "LegacyEnglishCaseGraphProtocolGlyph.cs",
+    "LegacyEnglishCaseGraphRawWord.cs",
+    "LegacyEnglishCaseGraphRefreshAllocation.cs",
+    "LegacyEnglishCaseGraphSpanLease.cs",
+    "LegacyEnglishCaseGraphTailAdmission.cs",
+    "LegacyEnglishCaseGraphWordPublication.cs",
+    "LegacyEnglishCaseGraphWordSourceCompletion.cs",
+    "LegacyEnglishCaseGraphWordSourceRanges.cs",
+    "LegacyEnglishCaseNode0Auxiliary.cs",
+    "LegacyEnglishCaseNode0Completion.cs",
+    "LegacyEnglishCaseNode0LexiconIndex.cs",
+    "LegacyEnglishCaseNode0NativeFreshPolicy.cs",
+    "LegacyEnglishCaseNode0Ring.cs",
+    "LegacyEnglishCaseNode1Completion.cs",
+    "LegacyEnglishCaseNode1Preparation.cs",
+    "LegacyEnglishCaseQueryInitialization.cs",
+    "LegacyEnglishOriginalInputContext.cs",
+    "LegacyFloatContextGeometry.cs",
+    "LegacyFreshMainGlobalPlainRecognition.cs",
+    "LegacyFreshMainGlobalWordAugmentation.cs",
+    "LegacyFreshMainGlobalWordTextPublication.cs",
+    "LegacyInitialWordHeapTail.cs",
+    "LegacyNativeAuxiliaryDelimiterQuerySource.cs",
+    "LegacyNativeCaseNormalQuerySource.cs",
+    "LegacyNativeCasePreparation.cs",
+    "LegacyNativeDelimiterQuerySource.cs",
+    "LegacyNativeGlyphRecordPool.Cleanup.cs",
+    "LegacyNativeGlyphRecordPool.cs",
+    "LegacyNativeGlyphScoreCache.cs",
+    "LegacyNativeGlyphSymbolUpdate.cs",
+    "LegacyNativeOrdinaryGlyphRefreshKernel.cs",
+    "LegacyNativePlainWordPublisher.Augmentation.cs",
+    "LegacyNativePlainWordPublisher.LiveSpan.cs",
+    "LegacyNativePlainWordPublisher.cs",
+    "LegacyNativeWordHeapDescriptor.GraphPhase1.cs",
+    "LegacyNativeWordHeapRouter.cs",
+    "LegacyNativeWordRecordHeap.cs",
+    "LegacyOrdinaryGraphSourceRanges.cs",
+    "LegacyOrdinarySourceInk.cs",
+    "LegacyOwnedRawInkDocument.cs",
+    "LegacyPreparedAggregateDictionaryQuerySource.cs",
+    "LegacyPreparedDictionaryQuerySource.cs",
+    "LegacyPreparedMainCompactPublication.cs",
+    "LegacyPreparedMainCompactReachability.cs",
+    "LegacyPreparedMainTextGlyphReuse.cs",
+    "LegacySourcePointChronology.cs",
+    "LegacySymbolContextFactory.cs",
+    "LegacyTaggedAggregateDictionaryQuerySource.cs",
+    "LegacyWideSymbolPairs.cs",
+    "StrokeTextRecognizer.cs"
+  ],
+  "unchangedCount": 866,
+  "removed": [],
+  "items": [
+    {
+      "name": "ExperimentalGlobalTextRecognizer.Batch.cs",
+      "status": "changed",
+      "productionSha256": "9f684c87e93482bb9588b61b3c9de3154deb5478a3d3407572dafb97fc7a0158",
+      "base950Sha256": "1b95178132934cdf32ce333e4e8907afd7629b17597fbe8106347dd78a2571b4",
+      "candidateSha256": "1b95178132934cdf32ce333e4e8907afd7629b17597fbe8106347dd78a2571b4",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "ExperimentalGlobalTextRecognizer.cs",
+      "status": "changed",
+      "productionSha256": "76f61af0a25f9e561d0ecd779c5a749abc2dc00e8353bef2bb29196be88ba986",
+      "base950Sha256": "b577b9ffa6fb36dd7d784df25fd971010e42c3d2d490eef17594f62c1c4dd432",
+      "candidateSha256": "b577b9ffa6fb36dd7d784df25fd971010e42c3d2d490eef17594f62c1c4dd432",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyDegenerateFloatContextGeometry.cs",
+      "status": "changed",
+      "productionSha256": "ca1df35969e68c83da533ee63cedfb6476d4f96a6e57900aaf098070078e9709",
+      "base950Sha256": "d7683575ae56280a5adf0f9798146d751b54a17dd85a9a1c882dcf1c8b597ba2",
+      "candidateSha256": "d7683575ae56280a5adf0f9798146d751b54a17dd85a9a1c882dcf1c8b597ba2",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseExecutionPool.cs",
+      "status": "changed",
+      "productionSha256": "f9079d247cc2b6c3c8bed27c828e2789747e118cc89d5f0c0529740a591d2bef",
+      "base950Sha256": "67193971937fd9e29831be025b8e6c499e1b0e61f1811b9d02fe4fb62b44363a",
+      "candidateSha256": "67193971937fd9e29831be025b8e6c499e1b0e61f1811b9d02fe4fb62b44363a",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphAuxiliarySource.cs",
+      "status": "changed",
+      "productionSha256": "c913b329e31d6a38cfe38b51d9ddd3fd1e2aab73e2e65c88694da31526794d0d",
+      "base950Sha256": "53f67245e370b60c659a7ed5a82fbdc08bf61fbaec01e556aaf3e89ef7d12135",
+      "candidateSha256": "53f67245e370b60c659a7ed5a82fbdc08bf61fbaec01e556aaf3e89ef7d12135",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphCharacterBindings.cs",
+      "status": "changed",
+      "productionSha256": "ecf5c87162cd13422c5119a7fd48895be4cd01b2200223dcca345c0f7d038784",
+      "base950Sha256": "dfac9d8fad13a763a52938b712a83680dd243c3e9ebd6518eadc52d9603bcfb7",
+      "candidateSha256": "2aee7c51f70b48ec37887de13eb727eee742325c0445ad54506346f6f943c078",
+      "introducedByThisTask": true
+    },
+    {
+      "name": "LegacyEnglishCaseGraphCharacters.cs",
+      "status": "changed",
+      "productionSha256": "e09d378b9908575543b03359d5c3d6229657c4d3030255426c516593e845318a",
+      "base950Sha256": "2910c877a307aef90732f3fc09d5d03297402a787812999e057941b173a216ce",
+      "candidateSha256": "36baefaf09b4d660cfecbb9b92470ef167974258daae8855f022338201bf8a39",
+      "introducedByThisTask": true
+    },
+    {
+      "name": "LegacyEnglishCaseGraphCompactScores.cs",
+      "status": "changed",
+      "productionSha256": "fb02e156e038fb38b3c1d1bae4387f4217c794756137c0839278cf92df67cf84",
+      "base950Sha256": "294541d6f7efa6e50fd9ff60812172c33140ee76c987e3e076cc4224202a98be",
+      "candidateSha256": "294541d6f7efa6e50fd9ff60812172c33140ee76c987e3e076cc4224202a98be",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphEarlySelectedInput.cs",
+      "status": "changed",
+      "productionSha256": "cf7d305c9a1c00a3481f66bb470a5e9c0dfe0d26fa05ce466ec270935f2cc88b",
+      "base950Sha256": "5f920b7627e8a3c6e01c2f6a9a1454194ebb77b17e50cb03b688f73796366bf4",
+      "candidateSha256": "5f920b7627e8a3c6e01c2f6a9a1454194ebb77b17e50cb03b688f73796366bf4",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphFinalCompact.cs",
+      "status": "changed",
+      "productionSha256": "e164a09d6fdee2dc21b9b19f4b9512b1d9aff3d10410702c5bf66b6b9d94a360",
+      "base950Sha256": "93d66e12eea2003606b965887797e74bea158959dbedbfa49b7df2a24de47b64",
+      "candidateSha256": "93d66e12eea2003606b965887797e74bea158959dbedbfa49b7df2a24de47b64",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphFinalSelectedData.cs",
+      "status": "added",
+      "productionSha256": null,
+      "base950Sha256": "e48dc7e37c59e88e4ff402c13df6b113f071c9d2b810957580b6910a9d940c38",
+      "candidateSha256": "e48dc7e37c59e88e4ff402c13df6b113f071c9d2b810957580b6910a9d940c38",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphGlyphChoices.cs",
+      "status": "changed",
+      "productionSha256": "560a5377929d272f8ea2329f73a7e50ca37ed32706a71239891e37589c258b7e",
+      "base950Sha256": "b86a1331818b41e4bb1ef37c9f4f6ea0b57890e80fa20e90aa7d611020960d45",
+      "candidateSha256": "b86a1331818b41e4bb1ef37c9f4f6ea0b57890e80fa20e90aa7d611020960d45",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphGlyphDispatch.cs",
+      "status": "changed",
+      "productionSha256": "a46e3aba7a180e881f6d7bbe082c8c3074bb4869368a41e70ee2e1b898aa05f6",
+      "base950Sha256": "ec08ea0a7cc454251ecb433b6eeb82578802b77a5ceaad254db9adad0b2953a9",
+      "candidateSha256": "ec08ea0a7cc454251ecb433b6eeb82578802b77a5ceaad254db9adad0b2953a9",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphGlyphGeometry.cs",
+      "status": "changed",
+      "productionSha256": "f4980eb1a7e5bec3b55a44109628f79b95159edf8eb83df5b2339a4f5bd349da",
+      "base950Sha256": "ce66cf57a853a1d1e22639b0bf646d05c38264bf1b464d829c7fd1f0f99ee649",
+      "candidateSha256": "ce66cf57a853a1d1e22639b0bf646d05c38264bf1b464d829c7fd1f0f99ee649",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphLanguageStage.cs",
+      "status": "changed",
+      "productionSha256": "8b0a56e231e4818abeadd28188e23cf0555ee7c6fc0ba5239434e1da2d87eb52",
+      "base950Sha256": "130f1c8be9b60cd29f644820971d802af4d0abb0b68a43cce9efa0f05d5c8356",
+      "candidateSha256": "130f1c8be9b60cd29f644820971d802af4d0abb0b68a43cce9efa0f05d5c8356",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphLoop.cs",
+      "status": "changed",
+      "productionSha256": "eceb682b4905e911dd2d5514a7a6045d41e2a195693e64fc9559e2bdb0b58c68",
+      "base950Sha256": "5e0603d9b90efcb2dedfdc5a91cfe45069555ca889fe80b7f04c83d6dfa4d933",
+      "candidateSha256": "5e0603d9b90efcb2dedfdc5a91cfe45069555ca889fe80b7f04c83d6dfa4d933",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphLoopBudget.cs",
+      "status": "changed",
+      "productionSha256": "22e7c830d73cedc14b12064d5a26da51c160182ad14e9111a07d9ee131b0742e",
+      "base950Sha256": "8401492d8f4abb85cbe4654034414c726f89d712a6bbc98ca4d5743c9ee0232b",
+      "candidateSha256": "8401492d8f4abb85cbe4654034414c726f89d712a6bbc98ca4d5743c9ee0232b",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphMaterialization.cs",
+      "status": "changed",
+      "productionSha256": "c48f62ae60f8e215821f3357edb6740a78d246c2713af58308b3fb78c618a659",
+      "base950Sha256": "0a1af3bb5443f37bad8309ac124403df136f8e76da80a01f9afb1d6ebca28c08",
+      "candidateSha256": "0a1af3bb5443f37bad8309ac124403df136f8e76da80a01f9afb1d6ebca28c08",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphPeriodicAlternativeWalk.cs",
+      "status": "added",
+      "productionSha256": null,
+      "base950Sha256": "514b9d48df0162343efbb6640a485846e762107181d781c63dc03ecce08c7863",
+      "candidateSha256": "514b9d48df0162343efbb6640a485846e762107181d781c63dc03ecce08c7863",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphPeriodicBacktrackRows.cs",
+      "status": "added",
+      "productionSha256": null,
+      "base950Sha256": "0b9106d318daf950cd005b81d9067ce83a118659c83a9989813939509e41add1",
+      "candidateSha256": "0b9106d318daf950cd005b81d9067ce83a118659c83a9989813939509e41add1",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphPeriodicCompact.cs",
+      "status": "added",
+      "productionSha256": null,
+      "base950Sha256": "273aee41943d87927820d2c362295fa78975a745ab9744c8e25233b393182ddc",
+      "candidateSha256": "273aee41943d87927820d2c362295fa78975a745ab9744c8e25233b393182ddc",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphPeriodicContextBudget.cs",
+      "status": "added",
+      "productionSha256": null,
+      "base950Sha256": "2ad260dc4482477e615699c3ffb0b7fb8913d1a9d274e3b4fd7ad6a0c9a20978",
+      "candidateSha256": "2ad260dc4482477e615699c3ffb0b7fb8913d1a9d274e3b4fd7ad6a0c9a20978",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphPeriodicCost.cs",
+      "status": "added",
+      "productionSha256": null,
+      "base950Sha256": "6a471fe24b27cc8f54f24ec49edcd3d1369a8e2bf08797388c03c67abbbd9cae",
+      "candidateSha256": "6a471fe24b27cc8f54f24ec49edcd3d1369a8e2bf08797388c03c67abbbd9cae",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphPeriodicPreparation.cs",
+      "status": "added",
+      "productionSha256": null,
+      "base950Sha256": "d4cd45f58b23cde9b7f29955f336d97578807096af48427ce60903b10bdfe178",
+      "candidateSha256": "d4cd45f58b23cde9b7f29955f336d97578807096af48427ce60903b10bdfe178",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphPeriodicQueryBudget.cs",
+      "status": "added",
+      "productionSha256": null,
+      "base950Sha256": "2f00b0b27eab29f8a075066ed1dce3f19c11a5a8f35eb996ce729860fdb50030",
+      "candidateSha256": "2f00b0b27eab29f8a075066ed1dce3f19c11a5a8f35eb996ce729860fdb50030",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphPeriodicRows.cs",
+      "status": "added",
+      "productionSha256": null,
+      "base950Sha256": "709bbbec332b866ad3df0054cc7b79d3568bfa14e393f6fc45af575910f20fd4",
+      "candidateSha256": "709bbbec332b866ad3df0054cc7b79d3568bfa14e393f6fc45af575910f20fd4",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphPeriodicWordEquality.cs",
+      "status": "added",
+      "productionSha256": null,
+      "base950Sha256": "925c4e470311cdb6c0ceb9e16b5361f980fcc3648a76e1eaf4492a8d8c4d5ae8",
+      "candidateSha256": "925c4e470311cdb6c0ceb9e16b5361f980fcc3648a76e1eaf4492a8d8c4d5ae8",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphPeriodicWorkspace.cs",
+      "status": "added",
+      "productionSha256": null,
+      "base950Sha256": "d23274b21dcb56cae45c87dc012a8108a158491c834281ae63616b8c57cacc56",
+      "candidateSha256": "d23274b21dcb56cae45c87dc012a8108a158491c834281ae63616b8c57cacc56",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphPhase1.cs",
+      "status": "changed",
+      "productionSha256": "01f060a3c09fa006f1e7b98cd0f7e2bd1955a635df4ac78b4401ede76ca79074",
+      "base950Sha256": "5080da0b485f43f7ddfb5e87c6c75579c7a5b4fa49cf81c691689182a28d2baa",
+      "candidateSha256": "5080da0b485f43f7ddfb5e87c6c75579c7a5b4fa49cf81c691689182a28d2baa",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphPostTextCoverage.cs",
+      "status": "changed",
+      "productionSha256": "065a35a4ab6fbe592b36d7284aad0d4dadda3d291d1194b417a7de04636feb6c",
+      "base950Sha256": "490a5f76e1897fc60c2c13561f88101598bdc1a21c185bdebad0e312615c31b8",
+      "candidateSha256": "26bc60fe0d9ca32f59a1257eda90cd8a2a9ef323fd6dc2a86ff5c6d9e2ab8d74",
+      "introducedByThisTask": true
+    },
+    {
+      "name": "LegacyEnglishCaseGraphProtocolGlyph.cs",
+      "status": "changed",
+      "productionSha256": "9face02ca3b4821889de2e40c743097c89f47167c22c925df04a11315152bfa6",
+      "base950Sha256": "515721c4dd6d44c33506dcb15d9775ad8203b498f6960cbad0281e6229bd970c",
+      "candidateSha256": "515721c4dd6d44c33506dcb15d9775ad8203b498f6960cbad0281e6229bd970c",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphRawWord.cs",
+      "status": "changed",
+      "productionSha256": "65944a6133764cda3f5a25155b7f3c77fd676ac8fb79e1a08b52225e6d3afc11",
+      "base950Sha256": "8d209ee53ae07babcbdd96a45067c06a2870ccb1e67b6464520986601bb923a5",
+      "candidateSha256": "8d209ee53ae07babcbdd96a45067c06a2870ccb1e67b6464520986601bb923a5",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphRefreshAllocation.cs",
+      "status": "changed",
+      "productionSha256": "13518607ccf94632fee4f3a0f9d056eb4cb3fa59701d913412f074c6e0ca5de0",
+      "base950Sha256": "4ce4bb82b7912eab050dee0def3e87365bc45f6e2307e99f83e0ba78e2755bef",
+      "candidateSha256": "4ce4bb82b7912eab050dee0def3e87365bc45f6e2307e99f83e0ba78e2755bef",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphSpanLease.cs",
+      "status": "changed",
+      "productionSha256": "022c6de5beb3c64993ce915e21c10470acbd8df1f56653a67ce2d4c256b0a501",
+      "base950Sha256": "6e942b9b720f4e61c01c84a702401bb6e2e0975cc5db5f761b1a2519e8474fcc",
+      "candidateSha256": "6e942b9b720f4e61c01c84a702401bb6e2e0975cc5db5f761b1a2519e8474fcc",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphTailAdmission.cs",
+      "status": "changed",
+      "productionSha256": "4ef665b11470c3547d9f3f49f601c0fb0a92516037fd12f2adbc02ae6f97e2ae",
+      "base950Sha256": "c634e1cd7dff80243dbb393572f323ccf8098bab423c5539c796db9a8a32f3b5",
+      "candidateSha256": "c634e1cd7dff80243dbb393572f323ccf8098bab423c5539c796db9a8a32f3b5",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphWordPublication.cs",
+      "status": "changed",
+      "productionSha256": "c28a1a71fdfa4329af140c09ae4166a570f9cccde537bfbbb47b6e77e0c59ab9",
+      "base950Sha256": "0ca584d286bcb733abf472fd972ab8fd5bff06eb1855bac458671938dd68b73c",
+      "candidateSha256": "65c487aed0e064d84fe43b36f05917c760efd7b23e87f687824fe02071c8a42a",
+      "introducedByThisTask": true
+    },
+    {
+      "name": "LegacyEnglishCaseGraphWordSourceCompletion.cs",
+      "status": "changed",
+      "productionSha256": "0eab97801f2e858d781a6a1b8416e37c9e99a751a120f8506676b96ed1215f83",
+      "base950Sha256": "b628c2375bcddaa401836037e88d5137565a944db3cfac097d3d90af7d12f56a",
+      "candidateSha256": "b628c2375bcddaa401836037e88d5137565a944db3cfac097d3d90af7d12f56a",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseGraphWordSourceRanges.cs",
+      "status": "changed",
+      "productionSha256": "8b1622ae6dc52b02dc1526d149b233da6f3602f401208172628378e5e0cc6ee7",
+      "base950Sha256": "4c420c1f3e9973736e64067a461f4615037258a40f49ab44dd8057c657a45d1c",
+      "candidateSha256": "4c420c1f3e9973736e64067a461f4615037258a40f49ab44dd8057c657a45d1c",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseNode0Auxiliary.cs",
+      "status": "changed",
+      "productionSha256": "5fcfb008e2d1f7d58475f9d89a599a348148c4c20917a5c0dfc4a346c3e8666f",
+      "base950Sha256": "c40d9e8904decf1fab0750b464868519779d80ed05d19e7c899b5ee911eb0f54",
+      "candidateSha256": "c40d9e8904decf1fab0750b464868519779d80ed05d19e7c899b5ee911eb0f54",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseNode0Completion.cs",
+      "status": "changed",
+      "productionSha256": "b7389a8b0eb4a971440f005b2af0ef425f4e29f86465031e6f1bc0563742fba7",
+      "base950Sha256": "53c913b0f56eb6e07cd2a5a0eb4ba677d6df310a4cf1e62d96f9566317cee2b5",
+      "candidateSha256": "53c913b0f56eb6e07cd2a5a0eb4ba677d6df310a4cf1e62d96f9566317cee2b5",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseNode0LexiconIndex.cs",
+      "status": "changed",
+      "productionSha256": "ced256570f46a6e4c8a12f13ba1fd3fd2ec046ef70fabd54790c9ede6debe17b",
+      "base950Sha256": "74282982499cfb348c441c292cdd8da94b9d79eff818a49cb589409c72610947",
+      "candidateSha256": "74282982499cfb348c441c292cdd8da94b9d79eff818a49cb589409c72610947",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseNode0NativeFreshPolicy.cs",
+      "status": "changed",
+      "productionSha256": "beb604796661fcdaf6c9d15d330dfa279765683acab3225bebc579504dc4dffc",
+      "base950Sha256": "429323bca0d92dc319321d857db55eb6e3698fb4d039f0755e32bc56bd879c5c",
+      "candidateSha256": "429323bca0d92dc319321d857db55eb6e3698fb4d039f0755e32bc56bd879c5c",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseNode0Ring.cs",
+      "status": "changed",
+      "productionSha256": "1d84ab2835e0cf73390c01555928f80f16291cc4665467cb10b0efecd26f24e0",
+      "base950Sha256": "d030ea4e11009024ca7c36e6d8f6fe1aa6f113b2cf04a0601c2f9cec628b7ed4",
+      "candidateSha256": "d030ea4e11009024ca7c36e6d8f6fe1aa6f113b2cf04a0601c2f9cec628b7ed4",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseNode1Completion.cs",
+      "status": "changed",
+      "productionSha256": "8740946ece0b163e207f365c3450220619d5d91654e4550f9f559ad6240930b9",
+      "base950Sha256": "43b4f72263a4aa80726eba5dd9a07fd690cbf5cb7f4e8401bf0589b875b5fa58",
+      "candidateSha256": "43b4f72263a4aa80726eba5dd9a07fd690cbf5cb7f4e8401bf0589b875b5fa58",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseNode1Preparation.cs",
+      "status": "changed",
+      "productionSha256": "09f0322633f51bf73efd82ae3f12387521467e45287d6e97754d08d003d12d4a",
+      "base950Sha256": "6df5db526dc4d23d29e4e54ce186f9f6dc25d3164df8622c454bc0889cf87784",
+      "candidateSha256": "6df5db526dc4d23d29e4e54ce186f9f6dc25d3164df8622c454bc0889cf87784",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishCaseQueryInitialization.cs",
+      "status": "changed",
+      "productionSha256": "80a3a001fd042068dc32372695d4cd7c2f155e96918570a9a6cae0f717e27190",
+      "base950Sha256": "8576f061a6d26dcfe61532bc2717d5a6336b025265d76ade91d69be02f798932",
+      "candidateSha256": "8576f061a6d26dcfe61532bc2717d5a6336b025265d76ade91d69be02f798932",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyEnglishOriginalInputContext.cs",
+      "status": "changed",
+      "productionSha256": "cc8a24379ea3d5685b951a9d8b70ff92b841415f016a978d0bba84bf30030891",
+      "base950Sha256": "e634d69b1470f88553fe5c570b8ab55f405c4885b1e00b37d5b4f444cf91ad39",
+      "candidateSha256": "e634d69b1470f88553fe5c570b8ab55f405c4885b1e00b37d5b4f444cf91ad39",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyFloatContextGeometry.cs",
+      "status": "changed",
+      "productionSha256": "9159798dd7cff249e900488e300ab6b6f040d1124c5652312439a0a713c20074",
+      "base950Sha256": "a8f618cb87bccbeedcf1b1ea2aff87ece76b3f8b52a106761d4fb83f84486622",
+      "candidateSha256": "a8f618cb87bccbeedcf1b1ea2aff87ece76b3f8b52a106761d4fb83f84486622",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyFreshMainGlobalPlainRecognition.cs",
+      "status": "changed",
+      "productionSha256": "f3a9aaf849fad5ffe7a167460eb798289d18d032bdcbd3897fc1e39c85753afe",
+      "base950Sha256": "7f369aa1f148889025e79fdeb3711b1c91c8ce4634142045742a297ee8f82029",
+      "candidateSha256": "7f369aa1f148889025e79fdeb3711b1c91c8ce4634142045742a297ee8f82029",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyFreshMainGlobalWordAugmentation.cs",
+      "status": "changed",
+      "productionSha256": "6d45e3d28158aabeaf04bb47c3f0da5c23fa709a70e8ae8dd0333c0863021b52",
+      "base950Sha256": "3950061a0f668fd177abb1fa7de5450e01adc09dc52e993201c14d40bf379578",
+      "candidateSha256": "3950061a0f668fd177abb1fa7de5450e01adc09dc52e993201c14d40bf379578",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyFreshMainGlobalWordTextPublication.cs",
+      "status": "changed",
+      "productionSha256": "a6a09abd67c2ce7b96b3b84a71374f865a45d121e66820133c71107b7af5c564",
+      "base950Sha256": "8c906a4055e756607cf4cb9a63fdcb165efe90876f35fe2016aa1c608b923f59",
+      "candidateSha256": "8c906a4055e756607cf4cb9a63fdcb165efe90876f35fe2016aa1c608b923f59",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyInitialWordHeapTail.cs",
+      "status": "changed",
+      "productionSha256": "c3f6c7b6c78721b5daf564b6f047b881a668b8575ba3b34817a9109f4fd1f059",
+      "base950Sha256": "6555f134cd5082e4345bb7d299ee83fc6230f8801a1c63110097280adbb1843e",
+      "candidateSha256": "6555f134cd5082e4345bb7d299ee83fc6230f8801a1c63110097280adbb1843e",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyNativeAuxiliaryDelimiterQuerySource.cs",
+      "status": "changed",
+      "productionSha256": "69308d69d358e11832dbdddc3dba0d9a8acfc9b16d78e68e9210a4c6c03c7f73",
+      "base950Sha256": "c1bc4ba792f339ecab10d8da29782a4e128b864862346ef57f585336285b36ec",
+      "candidateSha256": "c1bc4ba792f339ecab10d8da29782a4e128b864862346ef57f585336285b36ec",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyNativeCaseNormalQuerySource.cs",
+      "status": "changed",
+      "productionSha256": "3e37447ebf420d9b54598c0056c77b579b1a773acf8a94df5f18518acd2e47ba",
+      "base950Sha256": "02013a57d8ad12c0bbff4a4a3d935ca493b45ffcb9e462e77dcbef0bdc5a3ac4",
+      "candidateSha256": "02013a57d8ad12c0bbff4a4a3d935ca493b45ffcb9e462e77dcbef0bdc5a3ac4",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyNativeCasePreparation.cs",
+      "status": "changed",
+      "productionSha256": "172d30aa9afb0dea1dce70da13eede2df0ebfb09fedf767c478de016e852afc3",
+      "base950Sha256": "70dc9716311701e4d19e462f44cc66f27e7a709bd9c3b73d3a9d5d42b2eb436f",
+      "candidateSha256": "70dc9716311701e4d19e462f44cc66f27e7a709bd9c3b73d3a9d5d42b2eb436f",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyNativeDelimiterQuerySource.cs",
+      "status": "changed",
+      "productionSha256": "1296d5f1b0a188f1dcd2e0a34211b60663283b6166c83c2b1cbe686c68888890",
+      "base950Sha256": "7c11e023788c7f0ffa54e1d52d7bc6e5b262f8dd990e993d1fb344f57e0c4476",
+      "candidateSha256": "7c11e023788c7f0ffa54e1d52d7bc6e5b262f8dd990e993d1fb344f57e0c4476",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyNativeGlyphRecordPool.Cleanup.cs",
+      "status": "changed",
+      "productionSha256": "4fff3903d149b60d2d67bb90af24ea23e3523554c384a2b310655dd950c3337d",
+      "base950Sha256": "f7a1429083cf2bcd58cb758c92b5d60ea179cc6954540d58ad5a5c58dccccddf",
+      "candidateSha256": "f7a1429083cf2bcd58cb758c92b5d60ea179cc6954540d58ad5a5c58dccccddf",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyNativeGlyphRecordPool.cs",
+      "status": "changed",
+      "productionSha256": "fc722988ecf9c2c74350bc418ccd50a51bf5c824f4ee2524750f1b5bc7acb35a",
+      "base950Sha256": "4bd4e815c47cfd5f3dbd1770aec1d38dd61b5465b31faf0e759ff061adda46d8",
+      "candidateSha256": "4bd4e815c47cfd5f3dbd1770aec1d38dd61b5465b31faf0e759ff061adda46d8",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyNativeGlyphScoreCache.cs",
+      "status": "changed",
+      "productionSha256": "b0981eeff105bb1c6c6cd53601cc21ff13a16e80a48c8c5d6d02ea48aa776c08",
+      "base950Sha256": "51158b00d43fc68e5ae9d912baace97f10fa6a58ef8e903fe6bc174254aab1ae",
+      "candidateSha256": "51158b00d43fc68e5ae9d912baace97f10fa6a58ef8e903fe6bc174254aab1ae",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyNativeGlyphSymbolUpdate.cs",
+      "status": "changed",
+      "productionSha256": "924d339f9324f999e67e5abf136a6b9f6d523b012fd97a5664a21597084d8f0a",
+      "base950Sha256": "e19b73a99b553470721487a55175d00489a14f73db3e5899f3ccada76f975349",
+      "candidateSha256": "e19b73a99b553470721487a55175d00489a14f73db3e5899f3ccada76f975349",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyNativeOrdinaryGlyphRefreshKernel.cs",
+      "status": "changed",
+      "productionSha256": "da6c23c889229b675b5358f7dbdb65be667917bdcde85685d14b1a657efabadf",
+      "base950Sha256": "c1d8484f1eea5c9a73ccd007e7d3075b715c55f30dcf8cf96929160ebf0a79d0",
+      "candidateSha256": "c1d8484f1eea5c9a73ccd007e7d3075b715c55f30dcf8cf96929160ebf0a79d0",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyNativeOrdinaryParentWordCandidates.EnglishPeriodic.cs",
+      "status": "added",
+      "productionSha256": null,
+      "base950Sha256": "08d8d953d2f21d7bc635fce9351bf5dadd42a337ed3d9704e99a8a638c75ef30",
+      "candidateSha256": "08d8d953d2f21d7bc635fce9351bf5dadd42a337ed3d9704e99a8a638c75ef30",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyNativePlainWordPublisher.Augmentation.cs",
+      "status": "changed",
+      "productionSha256": "214cc2fa78ac28d9c6ffdcf8c55ebd342bdf5de94e06b51fb265920138ce472a",
+      "base950Sha256": "79ff7fedf19f64f205e237738f6b52b21c6708c408cc328319c9b09fb3aa0905",
+      "candidateSha256": "79ff7fedf19f64f205e237738f6b52b21c6708c408cc328319c9b09fb3aa0905",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyNativePlainWordPublisher.LiveSpan.cs",
+      "status": "changed",
+      "productionSha256": "0fdbb0bb61c3c9614c7a37a0fdbd0f2e0531881b8d0bfe49376b9d633e90c46a",
+      "base950Sha256": "0fdbb0bb61c3c9614c7a37a0fdbd0f2e0531881b8d0bfe49376b9d633e90c46a",
+      "candidateSha256": "560ecbd0f02d3abeeefcbedf864ecc6196cdc2a4189bef2d6748fa93c4693d7b",
+      "introducedByThisTask": true
+    },
+    {
+      "name": "LegacyNativePlainWordPublisher.cs",
+      "status": "changed",
+      "productionSha256": "16b679a3bc90e9f9f0103772f089ea238cddcafb8491e520dac343fb4b003f63",
+      "base950Sha256": "bb1cb9171f01a7a3980e5002c5bacc2fd0899fccb4cbd6a76be7b58bf2f61f43",
+      "candidateSha256": "bb1cb9171f01a7a3980e5002c5bacc2fd0899fccb4cbd6a76be7b58bf2f61f43",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyNativeWordHeapDescriptor.GraphPhase1.cs",
+      "status": "changed",
+      "productionSha256": "fe108d39547b7dfbcbf833cc214356e053595819a2a7613e44d968f05f19e293",
+      "base950Sha256": "f0df5d323d6cd97f2c6d68dc9c34e2138f5f4b9a143846807b6a1f643c5aa735",
+      "candidateSha256": "f0df5d323d6cd97f2c6d68dc9c34e2138f5f4b9a143846807b6a1f643c5aa735",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyNativeWordHeapRouter.cs",
+      "status": "changed",
+      "productionSha256": "6578c12d1af786e14556edd2302c1fba0bbad7d132a3741cf4fe0a68fb627e1e",
+      "base950Sha256": "f068b6c9392eac3da6b64f5cef2590b6019031dd96f611b1ff0c973b696ccdf5",
+      "candidateSha256": "f068b6c9392eac3da6b64f5cef2590b6019031dd96f611b1ff0c973b696ccdf5",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyNativeWordRecordHeap.cs",
+      "status": "changed",
+      "productionSha256": "10cb967540114a866b4c895d8828fa02430fd080215435ee7c893bcc41373604",
+      "base950Sha256": "5719c15e6321d9136f6d9a4086896de80681c07f23f2697ca59e052012908dd3",
+      "candidateSha256": "5719c15e6321d9136f6d9a4086896de80681c07f23f2697ca59e052012908dd3",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyOrdinaryGraphSourceRanges.EnglishPeriodic.cs",
+      "status": "added",
+      "productionSha256": null,
+      "base950Sha256": "ec1c94a07aee4b598338f90b9cd95a1d2c8989ce8cdd6033abfdfc50d4bfb496",
+      "candidateSha256": "ec1c94a07aee4b598338f90b9cd95a1d2c8989ce8cdd6033abfdfc50d4bfb496",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyOrdinaryGraphSourceRanges.cs",
+      "status": "changed",
+      "productionSha256": "aa8a7de87951050c1312e2b84218a6eb2300fdec7842ec8cf46c680c56a6f5ab",
+      "base950Sha256": "62b6ea3b0d5f000842c7f15fcee2264cdda6bdd949092c1e9af6491c5ebc6f4c",
+      "candidateSha256": "62b6ea3b0d5f000842c7f15fcee2264cdda6bdd949092c1e9af6491c5ebc6f4c",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyOrdinarySourceInk.cs",
+      "status": "changed",
+      "productionSha256": "34bdda6179be10f2f6de2213b0cf6c230e6e48c81ab818859a4dcaacddcb8708",
+      "base950Sha256": "6eefb5fe248799bc05444c8bcebcf4d1046da60cbab7e68ad9591b90a47984e1",
+      "candidateSha256": "6eefb5fe248799bc05444c8bcebcf4d1046da60cbab7e68ad9591b90a47984e1",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyOwnedRawInkDocument.cs",
+      "status": "changed",
+      "productionSha256": "d4e1a432342114ef9fa17f34c7ee57081a3577af996f4b336e5f7dfbd8819ddb",
+      "base950Sha256": "68e37e77a7d0427c0bd00e68c0ebc6f5ad5d5f8d35ca3d9047c4f9409ab3d979",
+      "candidateSha256": "68e37e77a7d0427c0bd00e68c0ebc6f5ad5d5f8d35ca3d9047c4f9409ab3d979",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyPreparedAggregateDictionaryQuerySource.cs",
+      "status": "changed",
+      "productionSha256": "1b9c23c34c73dc7e725d21acb30f1a380ecfcd1ad4fb989d54173bdbf6368038",
+      "base950Sha256": "ec749fc7858e404e7c3ed00492d7aefd12dadc0e6a2a690652e2f270fbf3391c",
+      "candidateSha256": "ec749fc7858e404e7c3ed00492d7aefd12dadc0e6a2a690652e2f270fbf3391c",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyPreparedDictionaryQuerySource.cs",
+      "status": "changed",
+      "productionSha256": "595b322352149fec433fb4adea52f24dbc177b588ff0c38d9062dbfa5a26a2e9",
+      "base950Sha256": "c569ce809190085d5cf18840fd6be9194413c727d862300e6771fca76d8cbae0",
+      "candidateSha256": "c569ce809190085d5cf18840fd6be9194413c727d862300e6771fca76d8cbae0",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyPreparedMainCompactPublication.EnglishPeriodic.cs",
+      "status": "added",
+      "productionSha256": null,
+      "base950Sha256": "634a2ce7dbe0cae7877a4a17c7ad8dfafbe9de70ce242704a8600c888fb1615e",
+      "candidateSha256": "634a2ce7dbe0cae7877a4a17c7ad8dfafbe9de70ce242704a8600c888fb1615e",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyPreparedMainCompactPublication.cs",
+      "status": "changed",
+      "productionSha256": "6202d58f39b219dfc22035ba322f9881ae11a0b93a9a57f5d075da292a9d7959",
+      "base950Sha256": "fda016e34f3bade5423a77c63369dc984b01d33840954cc2c404092ac809e5cd",
+      "candidateSha256": "fda016e34f3bade5423a77c63369dc984b01d33840954cc2c404092ac809e5cd",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyPreparedMainCompactReachability.EnglishPeriodic.cs",
+      "status": "added",
+      "productionSha256": null,
+      "base950Sha256": "11d051431eb4edeaceaaf1bb970a84e300adb6d2ff57bef819036bfa5fa5a313",
+      "candidateSha256": "11d051431eb4edeaceaaf1bb970a84e300adb6d2ff57bef819036bfa5fa5a313",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyPreparedMainCompactReachability.cs",
+      "status": "changed",
+      "productionSha256": "14e8ec3c2de51c4531c369cc3b705ffc4298a80ebe4b6a9f22251d30709fb30c",
+      "base950Sha256": "561807bba1b125081f01ca8a19487acb5e9fb84d30f05e8265a6d83440071ed7",
+      "candidateSha256": "561807bba1b125081f01ca8a19487acb5e9fb84d30f05e8265a6d83440071ed7",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyPreparedMainTextGlyphReuse.cs",
+      "status": "changed",
+      "productionSha256": "ca2c67d7a206a338fe0409c013b68e5a19ab58f219585c5d12bb087da041773b",
+      "base950Sha256": "ca2c67d7a206a338fe0409c013b68e5a19ab58f219585c5d12bb087da041773b",
+      "candidateSha256": "2a925e529d1579a2bfa82bd4e348da8b9a8e7b19336b439d2e99771cd78f46eb",
+      "introducedByThisTask": true
+    },
+    {
+      "name": "LegacySourcePointChronology.cs",
+      "status": "changed",
+      "productionSha256": "2e7bf68330e2c2ad9f90ff33f8172f09ad1675b5e04f031686e05c7ac5e22143",
+      "base950Sha256": "83a5c15f09407d5f1d692db86538e931142661daf8b466a49c773bc79c1abd48",
+      "candidateSha256": "83a5c15f09407d5f1d692db86538e931142661daf8b466a49c773bc79c1abd48",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacySymbolContextFactory.cs",
+      "status": "changed",
+      "productionSha256": "1b7904a437552b638aefe2f3ec91633b3fb7b2516945f6f7e45d3ade2aca2d02",
+      "base950Sha256": "3b17418551dbcb4275f6bae88370ceb05acc6137f4507d6eb6d4f2ee3ada52be",
+      "candidateSha256": "3b17418551dbcb4275f6bae88370ceb05acc6137f4507d6eb6d4f2ee3ada52be",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyTaggedAggregateDictionaryQuerySource.cs",
+      "status": "changed",
+      "productionSha256": "e662d03d39b91b95db178a7ea0a6a18209fe565833f89732dac6ec8fc51ed22e",
+      "base950Sha256": "be6870d0cee383c7d1e0f5f9b2c8d86ef436bc952a1184cd693cc7a214072584",
+      "candidateSha256": "be6870d0cee383c7d1e0f5f9b2c8d86ef436bc952a1184cd693cc7a214072584",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "LegacyWideSymbolPairs.cs",
+      "status": "changed",
+      "productionSha256": "c99e39a2e6fe391f3d672d1b842291cab483300a800cd9fd914be415b566c9ab",
+      "base950Sha256": "8e8453c56195493be2ce7101b823b7805f076b1406c6a2cd4e34ae958023051b",
+      "candidateSha256": "8e8453c56195493be2ce7101b823b7805f076b1406c6a2cd4e34ae958023051b",
+      "introducedByThisTask": false
+    },
+    {
+      "name": "StrokeTextRecognizer.cs",
+      "status": "changed",
+      "productionSha256": "48328302a0dfd724d97281d46569eadb1892db073ae9b4734b0eb071491c8537",
+      "base950Sha256": "6eab8bfb70661aab5c2211424141d3c3193842a8b87bbaab0cc280f84195755c",
+      "candidateSha256": "6eab8bfb70661aab5c2211424141d3c3193842a8b87bbaab0cc280f84195755c",
+      "introducedByThisTask": false
+    }
+  ],
+  "warning": "15 added and63 inherited changed files are NOT independently admitted by this six-file experiment; review score/geometry/public-routing changes separately."
+}

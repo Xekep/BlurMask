@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "scope": "Completed original index4 pending-TEXT in exact isolated950; not production935 admission",
+  "files": {
+    "check_source.py": {
+      "bytes": 2137,
+      "sha256": "ed46369640abce69e690ad2580f0548494c8cebae93d0138ad682912bcbe0a7d"
+    },
+    "controls/check_controls.py": {
+      "bytes": 1069,
+      "sha256": "88fde71c9c5a15b5a65035fdfb34df3cccac4b320d4ff0ce5febb431687aa561"
+    },
+    "controls/Controls.csproj": {
+      "bytes": 714,
+      "sha256": "45a9dc117aad0ae584b601ebe87941ef3c6c5220c579178188ab5034ba44587b"
+    },
+    "controls/expected-cancellation.jsonl": {
+      "bytes": 6335,
+      "sha256": "4c444bb472162c3119525faa9d97b11f2667de887aafef194b7bca6e6f143178"
+    },
+    "controls/expected-charges.json": {
+      "bytes": 64191,
+      "sha256": "9424370a8a607de4574172dfe8c90aed8a25269e606f282be2eed2f30ccabaeb"
+    },
+    "controls/expected-reuse.jsonl": {
+      "bytes": 7969,
+      "sha256": "349bfc0c39ed427f233d01a13da155d2f6a30c55826338817c928af128b65e23"
+    },
+    "controls/Program.cs": {
+      "bytes": 7236,
+      "sha256": "016400c586875a2c7be9e547a1c983d2d47e856d031c61b70c058c7dd5811a41"
+    },
+    "controls/reuse-fixture.json": {
+      "bytes": 508,
+      "sha256": "8776e877ddbb00cce5b0ee6b8c770121c5a422a042270ba2d5961915b7e00a49"
+    },
+    "evidence/actual-candidates.json": {
+      "bytes": 917,
+      "sha256": "ba19c2bd57deeb5b53864a78d2339e8fc6d4d2ddf41f4c96185a3d5f0b1eb2fc"
+    },
+    "evidence/entry-pdb1.json": {
+      "bytes": 2995,
+      "sha256": "5c29e9a5fe41c70eccbfd6a24120ee0a6b772455dcb22909ca31c0a46d51d0ad"
+    },
+    "evidence/four-fixture-common-replay.json": {
+      "bytes": 11559,
+      "sha256": "9419d76d1581d18bbb940ae6d99d48a6ca500f50098c43e8d599ae8078b388a3"
+    },
+    "evidence/history/candidate-owning-first.json": {
+      "bytes": 1247,
+      "sha256": "dd08658f9eb17a9b210c6b9f44fb8b089a56a928e427ca2547ce0e4b62e9b0b8"
+    },
+    "evidence/history/candidate-owning-first.stderr": {
+      "bytes": 5730,
+      "sha256": "9bd4b32b8858c53da844a429c78593b27be51927ef5a40b545ae12001f6b85ed"
+    },
+    "evidence/history/candidate-owning-fourth.json": {
+      "bytes": 1248,
+      "sha256": "7bdf2a40f098f569aa6c7327fcf2181a0e01a16cfb2841a65bebb62347fa5615"
+    },
+    "evidence/history/candidate-owning-fourth.stderr": {
+      "bytes": 2579,
+      "sha256": "830dddf6ba75d048c9d73f112060c963892fb7e00e1686265b9129cc853cdfe5"
+    },
+    "evidence/history/candidate-owning-second.json": {
+      "bytes": 1248,
+      "sha256": "a257717cf207b70b980974b3f7e900c98fd538432316dca57ad1a0ddb2560cad"
+    },
+    "evidence/history/candidate-owning-second.stderr": {
+      "bytes": 5011,
+      "sha256": "2dcbf91eeb0f6bcc2ed4573b52665e000977facc86bdbe4c8abf55d955b46d8e"
+    },
+    "evidence/history/candidate-owning-third.json": {
+      "bytes": 1248,
+      "sha256": "073e638172c60995d91b8f3fb19be52b3746a0177d53f5bab37cf7f27e2f8e14"
+    },
+    "evidence/history/candidate-owning-third.stderr": {
+      "bytes": 2579,
+      "sha256": "830dddf6ba75d048c9d73f112060c963892fb7e00e1686265b9129cc853cdfe5"
+    },
+    "evidence/history/observed-failure.json": {
+      "bytes": 1247,
+      "sha256": "e5d4923370dc268713850eddbb2ba6703e3149a7d619797888e151dcd12e633b"
+    },
+    "evidence/history/observer-first.stderr": {
+      "bytes": 4992,
+      "sha256": "5da62d8d759adb88d0ef7ebf40a864019d30a59edd26aa3383cdc430898e6dd7"
+    },
+    "evidence/index4-structural-replay.json": {
+      "bytes": 253,
+      "sha256": "2d1679378e001e6fa150ef6a341c5493cbf4471460df08c1d3a4cba0595ca7ff"
+    },
+    "evidence/library-pdb950.json": {
+      "bytes": 408907,
+      "sha256": "5c2620beb89b6dfe57f92219251574d19b952e8387c2d4dab02bc4011b672027"
+    },
+    "evidence/native-static-batches.json": {
+      "bytes": 10239,
+      "sha256": "7ca28d02b1d98dabd67802fb9abe343a30a8d350ca7414b73736ba1e4b2f9ecb"
+    },
+    "evidence/numeric-prefix-cancellation-audit.json": {
+      "bytes": 212,
+      "sha256": "9f009d8fa17b26d0557f57137a0f006b8f50246bee8ac7bf44b8c37e4246974a"
+    },
+    "evidence/owning-envelope.json": {
+      "bytes": 1141,
+      "sha256": "1739d80fc1f9559086a685726e99ee0c5827fbfa0efc825729c9bcfdc1ec18e7"
+    },
+    "evidence/owning-index4-completed.json": {
+      "bytes": 12066,
+      "sha256": "d1925340f4dc9bdbffe80af89c53673cd8633bea1435b514d3196b33c3f0cc60"
+    },
+    "evidence/source-and-capture-refusers.json": {
+      "bytes": 1043,
+      "sha256": "2bd3a34559776d5b48eed026ee966b7f0884ecdd8a0286cb3ea35b340fb4e606"
+    },
+    "inventory/main935-to-stage950.json": {
+      "bytes": 38494,
+      "sha256": "a818ddd1e378aae975128aa137a11717126417e943bab4894a2934c038ccf25e"
+    },
+    "preimage/LegacyEnglishCaseGraphCharacterBindings.cs": {
+      "bytes": 7327,
+      "sha256": "dfac9d8fad13a763a52938b712a83680dd243c3e9ebd6518eadc52d9603bcfb7"
+    },
+    "preimage/LegacyEnglishCaseGraphCharacters.cs": {
+      "bytes": 40618,
+      "sha256": "2910c877a307aef90732f3fc09d5d03297402a787812999e057941b173a216ce"
+    },
+    "preimage/LegacyEnglishCaseGraphPostTextCoverage.cs": {
+      "bytes": 13524,
+      "sha256": "490a5f76e1897fc60c2c13561f88101598bdc1a21c185bdebad0e312615c31b8"
+    },
+    "preimage/LegacyEnglishCaseGraphWordPublication.cs": {
+      "bytes": 29249,
+      "sha256": "0ca584d286bcb733abf472fd972ab8fd5bff06eb1855bac458671938dd68b73c"
+    },
+    "preimage/LegacyNativePlainWordPublisher.LiveSpan.cs": {
+      "bytes": 1175,
+      "sha256": "0fdbb0bb61c3c9614c7a37a0fdbd0f2e0531881b8d0bfe49376b9d633e90c46a"
+    },
+    "preimage/LegacyPreparedMainTextGlyphReuse.cs": {
+      "bytes": 11818,
+      "sha256": "ca2c67d7a206a338fe0409c013b68e5a19ab58f219585c5d12bb087da041773b"
+    },
+    "README.md": {
+      "bytes": 7368,
+      "sha256": "0b111160636ea1cb8954b05216bed402c6fae3542c07e7772b1985fe272c9f08"
+    },
+    "six-files.patch": {
+      "bytes": 22622,
+      "sha256": "00950539fe6486ece012ad5a4452d20be9cecc0c7c592d73074999f39f00b493"
+    },
+    "source/LegacyEnglishCaseGraphCharacterBindings.cs": {
+      "bytes": 8348,
+      "sha256": "2aee7c51f70b48ec37887de13eb727eee742325c0445ad54506346f6f943c078"
+    },
+    "source/LegacyEnglishCaseGraphCharacters.cs": {
+      "bytes": 46428,
+      "sha256": "36baefaf09b4d660cfecbb9b92470ef167974258daae8855f022338201bf8a39"
+    },
+    "source/LegacyEnglishCaseGraphPostTextCoverage.cs": {
+      "bytes": 13541,
+      "sha256": "26bc60fe0d9ca32f59a1257eda90cd8a2a9ef323fd6dc2a86ff5c6d9e2ab8d74"
+    },
+    "source/LegacyEnglishCaseGraphWordPublication.cs": {
+      "bytes": 29635,
+      "sha256": "65c487aed0e064d84fe43b36f05917c760efd7b23e87f687824fe02071c8a42a"
+    },
+    "source/LegacyNativePlainWordPublisher.LiveSpan.cs": {
+      "bytes": 1329,
+      "sha256": "560ecbd0f02d3abeeefcbedf864ecc6196cdc2a4189bef2d6748fa93c4693d7b"
+    },
+    "source/LegacyPreparedMainTextGlyphReuse.cs": {
+      "bytes": 12289,
+      "sha256": "2a925e529d1579a2bfa82bd4e348da8b9a8e7b19336b439d2e99771cd78f46eb"
+    },
+    "source-pins.json": {
+      "bytes": 323273,
+      "sha256": "9e75ac97ae23a08fce4b6709225a63ae96cbdf3d6373e0b8d429a368d52e59ca"
+    },
+    "VISIT-CENSUS.md": {
+      "bytes": 6156,
+      "sha256": "05cbfd1a8b2b00d1e73196ebada8e69479d018eb94118f49abb2dadf11438f76"
+    }
+  }
+}

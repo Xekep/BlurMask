@@ -1,0 +1,56 @@
+{
+  "pdb": {
+    "path": "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\candidate-artifacts\\bin\\LegacyEnglishPeriodicPendingText.ActualEntry\\release\\LegacyEnglishWordSource.ActualEntry.pdb",
+    "bytes": 13996,
+    "sha256": "5a76f3a2cc2bcf14d1627a1c7af68e29d3818c84ee33cb73c03d794ac652f98f"
+  },
+  "dll": {
+    "path": "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\candidate-artifacts\\bin\\LegacyEnglishPeriodicPendingText.ActualEntry\\release\\LegacyEnglishWordSource.ActualEntry.dll",
+    "bytes": 39424,
+    "sha256": "faaadd8e8e60dd30a83fe760ddbc99c01712fd580168cfd8e168acb6497417ae"
+  },
+  "codeView": [
+    {
+      "guid": "2e8efe9d-5858-4e1b-95cd-742626bc0bd1",
+      "stamp": 2791685036,
+      "age": 1,
+      "path": "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\candidate-artifacts\\obj\\LegacyEnglishPeriodicPendingText.ActualEntry\\release\\LegacyEnglishWordSource.ActualEntry.pdb"
+    }
+  ],
+  "authoredDocuments": 1,
+  "generatedDocuments": 3,
+  "documents": [
+    {
+      "path": "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\stage\\entry\\Program.cs",
+      "bytes": 11778,
+      "sha256": "16eef680776592c8a32b54df3e6588070b117ab116673be9941fd5a66acb4838",
+      "algorithm": "8829d00f-11b8-4213-878b-770e8597ac16",
+      "language": "3f5162f8-07c6-11d3-9053-00c04fa302a1",
+      "kind": "authored"
+    },
+    {
+      "path": "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\candidate-artifacts\\obj\\LegacyEnglishPeriodicPendingText.ActualEntry\\release\\LegacyEnglishPeriodicPendingText.ActualEntry.GlobalUsings.g.cs",
+      "bytes": 239,
+      "sha256": "a3c6048bb4d922b1799a9977f84362a3787b68810cac67aa86ac3aa23295f227",
+      "algorithm": "8829d00f-11b8-4213-878b-770e8597ac16",
+      "language": "3f5162f8-07c6-11d3-9053-00c04fa302a1",
+      "kind": "generated"
+    },
+    {
+      "path": "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\candidate-artifacts\\obj\\LegacyEnglishPeriodicPendingText.ActualEntry\\release\\.NETCoreApp,Version=v10.0.AssemblyAttributes.cs",
+      "bytes": 200,
+      "sha256": "93d67476196ebfc80d1d7d8844b91146cfd678d105f5ce635eb900ca40610c9b",
+      "algorithm": "8829d00f-11b8-4213-878b-770e8597ac16",
+      "language": "3f5162f8-07c6-11d3-9053-00c04fa302a1",
+      "kind": "generated"
+    },
+    {
+      "path": "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\candidate-artifacts\\obj\\LegacyEnglishPeriodicPendingText.ActualEntry\\release\\LegacyEnglishPeriodicPendingText.ActualEntry.AssemblyInfo.cs",
+      "bytes": 1040,
+      "sha256": "2eed9ec1723335a22a1c24f714eb767fabbb05912ddaa4a2a250304f52ac2f6e",
+      "algorithm": "8829d00f-11b8-4213-878b-770e8597ac16",
+      "language": "3f5162f8-07c6-11d3-9053-00c04fa302a1",
+      "kind": "generated"
+    }
+  ]
+}

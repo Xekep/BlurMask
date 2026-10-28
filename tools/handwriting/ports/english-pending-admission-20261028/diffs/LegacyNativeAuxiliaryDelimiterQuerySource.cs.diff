@@ -1,0 +1,37 @@
+--- main935/LegacyNativeAuxiliaryDelimiterQuerySource.cs
++++ candidate950/LegacyNativeAuxiliaryDelimiterQuerySource.cs
+@@ -99,14 +99,15 @@
+                     level.Query.Flags24 = flags24; level.Query.Flags26 = flags26;
+                 }
+             }
+-            byte[] output = new byte[query.Capacity * 32];
++            int outputBytes = query.Capacity * 32;
++            byte[] output = Array.Empty<byte>();
+             int written = 0, calls = 0;
+-            if (!Traverse(0, sourceTag, query.ParentContext, 0, 0, 0, 0))
++            if (!Traverse(0, sourceTag, query.ParentContext, 0, 0, 0, 0, outputBytes))
+             { valid = false; return new(-1, ReadOnlyMemory<byte>.Empty, 0, accepted, calls); }
+             cancellationToken.ThrowIfCancellationRequested();
+             return new(written, output.AsMemory(0, written * 32).ToArray(), 0, accepted, calls);
+ 
+-            bool Traverse(int depth, ulong currentTag, ulong parent, byte length, int cost, byte kind, byte flag)
++            bool Traverse(int depth, ulong currentTag, ulong parent, byte length, int cost, byte kind, byte flag, int bufferBytes)
+             {
+                 cancellationToken.ThrowIfCancellationRequested();
+                 for (int ancestor = 0; ancestor < depth; ancestor++) if (levels[ancestor].Tag == currentTag) return true;
+@@ -170,13 +171,14 @@
+                             if (!Traverse(depth + 1, BinaryPrimitives.ReadUInt64LittleEndian(row),
+                                 BinaryPrimitives.ReadUInt64LittleEndian(row[8..]), unchecked((byte)(length + row[22])),
+                                 unchecked(cost + BinaryPrimitives.ReadInt32LittleEndian(row[16..])),
+-                                (byte)(row[23] & 7), (byte)(row[23] >> 3 & 1))) return false;
++                                (byte)(row[23] & 7), (byte)(row[23] >> 3 & 1), bufferBytes)) return false;
+                         }
+                         if (written == query.Capacity) return true;
+                         if (handled && ((row[5] & 2) != 0 || (flags24 & 0x20) != 0))
+                         {
+                             if (accepted >= query.Skip)
+                             {
++                                if (output.Length == 0) output = new byte[bufferBytes];
+                                 var target = output.AsSpan(written * 32, 32); row.CopyTo(target);
+                                 byte terminal = symbol != zwj && (row[5] & 2) != 0 ? (byte)2 : (byte)0;
+                                 target[5] = (byte)((target[5] & 0x79) | terminal | (symbol == zwj ? 4 : 0) | (byte)(currentTag >> 40) & 0x80);

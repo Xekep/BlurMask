@@ -1,0 +1,297 @@
+--- base950/LegacyEnglishCaseGraphCharacterBindings.cs
++++ candidate950/LegacyEnglishCaseGraphCharacterBindings.cs
+@@ -57,6 +57,24 @@
+             token.ThrowIfCancellationRequested();return Array.AsReadOnly(copy);
+         }
+     }
++    internal int ReadEnglishSnapshotByteCount(LegacyEnglishCaseNode0Completion.GraphCharacterPayload payload,int expectedRows,CancellationToken token)
++    {
++        payload.Context.Require(token);
++        if(!ReferenceEquals(payload.Reuse,this)||!ReferenceEquals(strings,payload.Context.Strings)||!payload.Complete)
++            throw new InvalidOperationException("Actual same-context initialized CHAR records required.");
++        lock(gate)
++        {
++            if(failed||rows.Count!=expectedRows)throw new InvalidOperationException("Same complete CHAR snapshot extent required.");
++            int total=0;
++            foreach(var row in rows)
++            {
++                token.ThrowIfCancellationRequested();
++                var text=row.Text??throw new InvalidOperationException("Complete CHAR text required.");
++                strings.Validate(text);total=checked(total+text.ByteCount);
++            }
++            token.ThrowIfCancellationRequested();return total;
++        }
++    }
+     // Scalar read from the SAME live private row backing, never an imported snapshot.
+     internal uint ReadEnglishCurrentMarkerFlags(LegacyEnglishCaseNode0Completion.GraphCharacterSource source,
+         LegacyEnglishCaseNode0Completion.GraphCharacterPayload payload,int marker,CancellationToken token)
+@@ -86,7 +104,7 @@
+             ushort ordinal=BinaryPrimitives.ReadUInt16LittleEndian(selected.AsSpan(i*4));
+             var glyph=actual.Glyphs.Resolve(key|((ulong)ordinal<<40));
+             return new(glyph.PublicationFlags,actual.Context.EmitReuse(actual,glyph,token));
+-        },token);
++        },token,actual.Context);
+     }
+ }
+ internal sealed partial class LegacyEnglishCaseNode1Geometry
+--- base950/LegacyEnglishCaseGraphCharacters.cs
++++ candidate950/LegacyEnglishCaseGraphCharacters.cs
+@@ -61,32 +61,48 @@
+         else if(output!=GraphCharacterOutput.FullCanonical)throw new ArgumentOutOfRangeException(nameof(output));
+         if(!GraphCharacterEntryAllowed(graphCharactersRequested,graphCharacterContext is not null,graphWordPublicationContext is not null,refs.Count==progress.Count,graphGlyphGeometryContext is not null))
+             throw new InvalidOperationException("Exact completed private first-pass producer required.");
++        stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,512);
+         long ownerRows=0;
+-        foreach(var reference in refs){token.ThrowIfCancellationRequested();ownerRows=checked(ownerRows+pool.ReadGraphRefreshOwnerCount(LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(reference),token));}
++        foreach(var reference in refs){token.ThrowIfCancellationRequested();stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,64);ownerRows=checked(ownerRows+pool.ReadGraphRefreshOwnerCount(LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(reference),token));}
+         if(refs.Count is<1 or>128||ownerRows>65536)throw new NotSupportedException("Bounded complete owning CHAR row domain required.");
+         // Same whole-row allowance as UTF8 path, before selection/emission/export.
+         stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(65536+ownerRows*2240+refs.Count*4096L));
+         stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(131072+ownerRows*4256+refs.Count*8192L));
+-        stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(16384+ownerRows*8192));
++        // Selection and actual fresh/reuse work are charged at their pre-read boundaries below.
+         // Reused CHAR rows can grow while earlier per-reference prefixes stay
+         // retained: reserve R*sum(ownerRows), not merely successful new rows.
+         long prefixRows=checked((long)refs.Count*ownerRows);
+         stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(65536+prefixRows*1024));
+         stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(131072+prefixRows*2048));
+-        stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(16384+prefixRows*512));
++        bool meterPrefixes=graphPeriodicActive&&graphOriginalSelectedRequested&&graphTextPublicationRequested;
++        if(!meterPrefixes)stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(16384+prefixRows*512));
+         var context=graphGlyphGeometryContext!.CreateCharacterContext(stage,pool,token);graphCharacterContext=context;
+         context.Require(token);
+-        var choices=new GraphGlyphChoiceData[refs.Count];var utf8=new GraphGlyphUtf8Data[refs.Count];var chars=new GraphCharacterData[refs.Count];
++        var choices=output==GraphCharacterOutput.FullCanonical?new GraphGlyphChoiceData[refs.Count]:null;var utf8=output==GraphCharacterOutput.FullCanonical?new GraphGlyphUtf8Data[refs.Count]:null;var chars=new GraphCharacterData[refs.Count];
+         for(int i=0;i<refs.Count;i++)
+         {
+             RequireGraphPublication(stage,token);ulong reference=refs[i],key=LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(reference);
+             if(progress[i].Key!=key)throw new InvalidDataException("Retained actual reference chronology changed.");
+             var source=context.Begin(i,reference,token);var selected=source.Selection;
+             byte[] selectedRows=selected.CopySelectionRows4();
+-            var result=context.Publish(source,token);var rows=result.Payload.Reuse.CopyEnglishRecords(result.Payload,token);
++            var result=context.Publish(source,token);
++            if(meterPrefixes)
++            {
++                stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,64);
++                int histories=(graphWordPublicationContext??throw new InvalidOperationException("Actual rich CHAR prefix parent required.")).ReadCharacterPublisherHistory();
++                stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(256L+64L*histories));
++                int records=result.Payload.Reuse.RecordCount;
++                stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(64L*records));
++                int bytes=result.Payload.Reuse.ReadEnglishSnapshotByteCount(result.Payload,records,token);
++                stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,GraphCharacterVisitCharge.Snapshot(records,bytes,progress[i].Source.Length,histories,output==GraphCharacterOutput.FullCanonical));
++            }
++            var rows=result.Payload.Reuse.CopyEnglishRecords(result.Payload,token);
+             if((uint)result.Marker>=(uint)rows.Count)throw new NotSupportedException("Actual CHAR selected marker unavailable.");
+-            choices[i]=new(reference,progress[i].Source.ToArray(),progress[i].Bits,progress[i].Visited,selected.CopyOwnerStorage40(),selectedRows,selected.SelectedMarker);
+-            utf8[i]=new(reference,rows.Select(x=>x.Flags).ToArray(),rows.Select(x=>x.Text!.ReadBytes()).ToArray(),selectedRows.ToArray(),result.Marker);
++            if(choices is not null&&utf8 is not null)
++            {
++                choices[i]=new(reference,progress[i].Source.ToArray(),progress[i].Bits,progress[i].Visited,selected.CopyOwnerStorage40(),selectedRows,selected.SelectedMarker);
++                utf8[i]=new(reference,rows.Select(x=>x.Flags).ToArray(),rows.Select(x=>x.Text!.ReadBytes()).ToArray(),selectedRows.ToArray(),result.Marker);
++            }
+             chars[i]=new(reference,result.Payload.Node.Identity,result.Inserted,source.Ordinary,Pairs(source.CopyRanges(token)),result.Payload.SelectionId,
+                 result.Payload.LineId,result.Payload.Flags,result.Payload.Prior,result.Payload.PriorVisits,result.Marker,
+                 rows.Select(x=>x.CopyStorage40()).ToArray(),rows.Select(x=>KnownCharacterRecord()).ToArray(),rows.Select(x=>x.Text!.ReadBytes()).ToArray());
+@@ -273,7 +289,7 @@
+         internal int RangeCount=>key.Length;
+         internal LegacyNativeInkPositionRange[] CopyRanges(CancellationToken token){Context.RequireCurrent(this,token);return key.ToArray();}
+     }
+-    internal sealed partial class GraphCharacterContext:IDisposable
++    internal sealed partial class GraphCharacterContext:IDisposable,ILegacyEnglishCharacterReuseVisitBudget
+     {
+         private readonly LegacyEnglishCaseNode0Completion owner;
+         internal GraphLanguageScope Stage{get;}
+@@ -327,6 +343,8 @@
+             // Selection and glyph snapshot are produced HERE from the identical
+             // private pool. Prepared/caller snapshots are never issuer inputs.
+             ReserveCurrentRanges(index,token);
++            int ownerRows=Pool.ReadGraphRefreshOwnerCount(key,token);
++            Stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,GraphCharacterVisitCharge.Selection(ownerRows));
+             var node=Pool.CopyOwnerNode(key,token);
+             var selection=LegacyPreparedGlyphAlternativeSelection.Select(node,unchecked((uint)(int)(short)(reference>>40)),
+                 new byte[checked((node.Records.Length/40*3/2+2)*4)],0,token);
+@@ -347,14 +365,14 @@
+             var totals=charge.Finish();
+             Stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,totals.Payload);
+             Stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,totals.Copies);
+-            Stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,totals.Visits);
++            Stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,charge.Probes==0?GraphCharacterVisitCharge.NoProbeRanges(ranges[index].Length,produced.Count,original.Length,Interner.Count):totals.Visits);
+             Require(token);
+         }
+         internal void RequireCurrent(GraphCharacterSource actual,CancellationToken token)
+         {Require(token);if(!ReferenceEquals(current,actual)||!ReferenceEquals(actual.Context,this)||actual.Index!=next)throw new InvalidOperationException("Actual current processed source receipt required.");}
+         internal (GraphCharacterPayload Payload,bool Inserted,int Marker) Publish(GraphCharacterSource source,CancellationToken token)
+         {
+-            RequireCurrent(source,token);var intern=Interner.InternEnglish(source,token);GraphCharacterPayload payload;int marker;
++            RequireCurrent(source,token);Stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,512);var intern=Interner.InternEnglish(source,token);GraphCharacterPayload payload;int marker;
+             if(intern.Inserted)
+             {
+                 var fresh=EmitFresh(source,token);payload=new(this,source,intern.Node,fresh,token);payloads.Add(intern.Node.Identity,payload);initializing=payload;
+@@ -375,19 +393,30 @@
+             RequireCurrent(source,token);byte[] selections=source.Selection.CopySelectionRows4();ulong key=LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(source.Reference);
+             for(int j=0;j<selections.Length;j+=4)
+             {
++                Stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,512);
+                 var glyph=source.Glyphs.Resolve(key|((ulong)BinaryPrimitives.ReadUInt16LittleEndian(selections.AsSpan(j))<<40));
+-                RequireOrdinary(glyph);
++                int bytes=RequireOrdinary(glyph);
++                Stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(128+GraphCharacterVisitCharge.Emission(bytes)+GraphCharacterVisitCharge.Publication(bytes==3?4:bytes,checked(Strings.Count+selections.Length/4))));
+             }
+             return LegacyNativeTextGlyphCaller.Produce(source.Glyphs,Alphabet,header,selections,key,false,unchecked((int)source.Selection.SelectedMarker!.Value),Strings,Properties,Normalization,cancellationToken:token);
+         }
+         internal byte[] EmitReuse(GraphCharacterSource source,LegacyNativeOwnedGlyphRecord glyph,CancellationToken token)
+-        {RequireCurrent(source,token);RequireOrdinary(glyph);return LegacyNativeOrdinaryGlyphUtf8.Emit(glyph.Symbol,Alphabet,cancellationToken:token);}
+-        private void RequireOrdinary(LegacyNativeOwnedGlyphRecord glyph)
++        {RequireCurrent(source,token);int bytes=RequireOrdinary(glyph);Stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,GraphCharacterVisitCharge.Emission(bytes));return LegacyNativeOrdinaryGlyphUtf8.Emit(glyph.Symbol,Alphabet,cancellationToken:token);}
++        private int RequireOrdinary(LegacyNativeOwnedGlyphRecord glyph)
+         {
+             var d=glyph.Symbol;ushort e=BinaryPrimitives.ReadUInt16LittleEndian(header.AsSpan(6));
+-            if((d.KindFlags&7)!=0||d.SymbolOrRunLength>=Alphabet.LabelCount||d.SymbolOrRunLength==e||!Alphabet.TryGetText(d.SymbolOrRunLength,out string text)||System.Text.Encoding.UTF8.GetByteCount(text)>64)
++            if((d.KindFlags&7)!=0||d.SymbolOrRunLength>=Alphabet.LabelCount||d.SymbolOrRunLength==e||!Alphabet.TryGetText(d.SymbolOrRunLength,out string text)||text.Length>64||System.Text.Encoding.UTF8.GetByteCount(text)>64)
+                 throw new NotSupportedException("Actual ordinary bounded nonHeaderE label required.");
+-        }
++            return System.Text.Encoding.UTF8.GetByteCount(text);
++        }
++        void ILegacyEnglishCharacterReuseVisitBudget.BeforeEmission(CancellationToken token)
++        {token.ThrowIfCancellationRequested();Stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,512);}
++        void ILegacyEnglishCharacterReuseVisitBudget.BeforeIntern(int bytes,int entries,CancellationToken token)
++        {token.ThrowIfCancellationRequested();Stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,GraphCharacterVisitCharge.Intern(bytes,entries));}
++        void ILegacyEnglishCharacterReuseVisitBudget.BeforeIdentityProbe(CancellationToken token)
++        {token.ThrowIfCancellationRequested();Stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,32);}
++        void ILegacyEnglishCharacterReuseVisitBudget.BeforePublication(int bytes,int entries,CancellationToken token)
++        {token.ThrowIfCancellationRequested();Stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,GraphCharacterVisitCharge.Publication(bytes,entries));}
+         internal void RequireInitializing(GraphCharacterPayload payload,CancellationToken token)
+         {
+             RequireCurrent(payload.Source,token);
+@@ -494,3 +523,43 @@
+ 
+     }
+ }
++
++// Numeric logical read/control envelopes, not CPU/JIT/RSS claims.
++internal interface ILegacyEnglishCharacterReuseVisitBudget
++{
++    void BeforeEmission(CancellationToken token);
++    void BeforeIntern(int bytes,int entries,CancellationToken token);
++    void BeforeIdentityProbe(CancellationToken token);
++    void BeforePublication(int bytes,int entries,CancellationToken token);
++}
++internal static class GraphCharacterVisitCharge
++{
++    internal static long Selection(int rows)
++    {if((uint)rows>65536)throw new ArgumentOutOfRangeException(nameof(rows));return checked(512L+192L*rows+96L*rows*(rows-1)/2);}
++    // No Union/Intersect/Subtract calls: only optional Contains(original), skipped
++    // later-key checks, source-key copies and the same interner call remain.
++    internal static long NoProbeRanges(int keyRows,int references,int originalRows,int interned)
++    {
++        if((uint)keyRows>65536||references is<1 or>128||(uint)originalRows>65536||(uint)interned>65536)throw new ArgumentOutOfRangeException();
++        return checked(4096L+96L*originalRows+32L*references+512L*keyRows+256L*(interned+1)*(keyRows+1));
++    }
++    internal static long RangeCall(int rows,int cuts)
++    {
++        if(rows<0||cuts<0||rows>65536-cuts)throw new ArgumentOutOfRangeException();
++        long n=(long)rows+cuts;
++        return checked(512L+128L*n+512L*n*cuts+128L*cuts);
++    }
++    internal static long MarkerFlags(int publishers)
++    {if(publishers<0)throw new ArgumentOutOfRangeException();return checked(1024L+32L*publishers);}
++    internal static long Snapshot(int records,int bytes,int sourceBytes,int publishers,bool canonical)
++    {
++        if((uint)records>65536||bytes<0||sourceBytes<0||publishers<0)throw new ArgumentOutOfRangeException();
++        return checked(4096L+64L*publishers+512L*records+(canonical?2L:1L)*bytes+(canonical?sourceBytes:0));
++    }
++    internal static long Emission(int bytes)
++    {if((uint)bytes>64)throw new ArgumentOutOfRangeException(nameof(bytes));return 512L+64L*bytes;}
++    internal static long Intern(int bytes,int entries)
++    {if((uint)bytes>64||entries<0)throw new ArgumentOutOfRangeException();return checked(256L+8L*(entries+1)*(2L*bytes+16));}
++    internal static long Publication(int bytes,int entries)
++    {if((uint)bytes>64||entries<0)throw new ArgumentOutOfRangeException();return checked(512L+2048L*bytes+24L*32+4L*bytes+10L*32+2*Intern(bytes,checked(entries+1)));}
++}
+--- base950/LegacyEnglishCaseGraphPostTextCoverage.cs
++++ candidate950/LegacyEnglishCaseGraphPostTextCoverage.cs
+@@ -91,7 +91,7 @@
+             //Copy(target), List backing and growth/Split, final ToArray, key
+             //clone and exported pair arrays. Each cut can add at most one row.
+             //The n*cuts terms cover repeated searches/shifts, not CPU cycles.
+-            Reserve(checked(2048+128*n),checked(4096+256*n+32*n*cuts),checked(4096+512*n*(cuts+1L)));
++            Reserve(checked(2048+128*n),checked(4096+256*n+32*n*cuts),GraphCharacterVisitCharge.RangeCall(rows,cuts));
+         }
+         private void RequirePostTextPayload(PostTextLink link,GraphCharacterContext context,CancellationToken token)
+         {
+--- base950/LegacyEnglishCaseGraphWordPublication.cs
++++ candidate950/LegacyEnglishCaseGraphWordPublication.cs
+@@ -196,6 +196,13 @@
+                 current!=next||current<0||current>=Count-1)
+                 throw new InvalidOperationException("Actual nonfinal rich WORD choice required for prefix-only CHAR DATA.");
+         }
++        internal int ReadCharacterPublisherHistory()=>publisher.ReadPublicationHistoryCount();
++        private long MarkerFlagVisits()
++        {
++            Stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,64);
++            int count=publisher.ReadPublicationHistoryCount();
++            return GraphCharacterVisitCharge.MarkerFlags(count);
++        }
+         internal void Require(CancellationToken token)
+         {
+             owner.RequireGraphPublication(Stage,token);owner.graphWordSourceSession!.RequireCompletedForTop(publisher,Pool,token);
+@@ -252,7 +259,7 @@
+             {
+                 // Same live marked flags only: no full canonical row/UTF8 snapshot is consumed here.
+                 // Retain the original fixed envelope for guards, lock/scalar reads and the following link allocation.
+-                Reserve(4096,8192,4096);
++                Reserve(4096,8192,MarkerFlagVisits());
+                 uint actualFlags=payload.Reuse.ReadEnglishCurrentMarkerFlags(source,payload,marker,token);
+                 choiceFlags=LegacyFreshMainGlobalWordSourceChoice.FoldFlags(choiceFlags,actualFlags,actualFlags);
+             }
+--- base950/LegacyNativePlainWordPublisher.LiveSpan.cs
++++ candidate950/LegacyNativePlainWordPublisher.LiveSpan.cs
+@@ -2,6 +2,9 @@
+ 
+ public sealed partial class LegacyNativePlainWordPublisher
+ {
++    // Scalar read-only audit sizes; no source/WORD handles or authority.
++    internal int ReadPublicationHistoryCount()=>interning.Publishers.Count;
++
+     //Read-only. No apply/claim or payload clone. Only NEW private span factory supplies its snapshot.
+     internal void RequireLiveSpanRows(LegacyNativePlainWordSpanSnapshot snapshot,CancellationToken token)
+     {
+--- base950/LegacyPreparedMainTextGlyphReuse.cs
++++ candidate950/LegacyPreparedMainTextGlyphReuse.cs
+@@ -136,7 +136,7 @@
+     }
+ 
+     private LegacyPreparedTextGlyphReuseResult Process(int count,int selectedInputIndex,
+-        Func<int,LegacyPreparedGlyphReuseInput> read,CancellationToken token)
++        Func<int,LegacyPreparedGlyphReuseInput> read,CancellationToken token,ILegacyEnglishCharacterReuseVisitBudget? budget=null)
+     {
+         token.ThrowIfCancellationRequested();if(count is <0 or >65536)throw new ArgumentOutOfRangeException(nameof(count));
+         lock(gate)
+@@ -147,10 +147,10 @@
+             {
+                 for(int inputIndex=0;inputIndex<count;inputIndex++)
+                 {
+-                    token.ThrowIfCancellationRequested();var input=read(inputIndex);
++                    token.ThrowIfCancellationRequested();budget?.BeforeEmission(token);var input=read(inputIndex);
+                     if(input.Utf8.Length>1_048_576)throw new NotSupportedException("Bounded emitted-byte extent exceeded.");
+                     //Native21760 interns first, even for an empty interval.
+-                    int beforeIntern=strings.Count;
++                    int beforeIntern=strings.Count;budget?.BeforeIntern(input.Utf8.Length,beforeIntern,token);
+                     var identity=strings.Intern(input.Utf8.Span,token);
+                     //The apparent fifth21760 parameter is reused as the OUT
+                     //new-entry byte from builtin3E.virtual10, NOT caller policy.
+@@ -158,13 +158,14 @@
+                     if(input.FailureStage==2)throw new NativeEmissionFailure();
+                     int match=-1;
+                     if(!newlyInterned)
+-                        for(int old=0;old<original;old++)if(ReferenceEquals(rows[old].Text,identity)){match=old;break;}
++                        for(int old=0;old<original;old++){budget?.BeforeIdentityProbe(token);if(ReferenceEquals(rows[old].Text,identity)){match=old;break;}}
+                     if(match>=0)
+                     {
+                         if(inputIndex==selectedInputIndex)marker=match;
+                     }
+                     else
+                     {
++                        budget?.BeforePublication(input.Utf8.Length,strings.Count,token);
+                         if(inputIndex==selectedInputIndex)marker=rows.Count;
+                         if(input.FailureStage==3)throw new NativeEmissionFailure();
+                         if(rows.Count==65536)throw new NotSupportedException("Bounded source-record capacity exceeded.");

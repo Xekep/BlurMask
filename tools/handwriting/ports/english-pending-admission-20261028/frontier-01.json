@@ -1,0 +1,27 @@
+{
+  "base": "pinned main935",
+  "overlay": [
+    "LegacyEnglishCaseGraphFinalSelectedData.cs",
+    "LegacyEnglishCaseGraphPeriodicAlternativeWalk.cs",
+    "LegacyEnglishCaseGraphPeriodicBacktrackRows.cs",
+    "LegacyEnglishCaseGraphPeriodicCompact.cs",
+    "LegacyEnglishCaseGraphPeriodicContextBudget.cs",
+    "LegacyEnglishCaseGraphPeriodicCost.cs",
+    "LegacyEnglishCaseGraphPeriodicPreparation.cs",
+    "LegacyEnglishCaseGraphPeriodicQueryBudget.cs",
+    "LegacyEnglishCaseGraphPeriodicRows.cs",
+    "LegacyEnglishCaseGraphPeriodicWordEquality.cs",
+    "LegacyEnglishCaseGraphPeriodicWorkspace.cs",
+    "LegacyNativeOrdinaryParentWordCandidates.EnglishPeriodic.cs",
+    "LegacyOrdinaryGraphSourceRanges.EnglishPeriodic.cs",
+    "LegacyPreparedMainCompactPublication.EnglishPeriodic.cs",
+    "LegacyPreparedMainCompactReachability.EnglishPeriodic.cs",
+    "LegacyEnglishCaseGraphCharacterBindings.cs",
+    "LegacyEnglishCaseGraphCharacters.cs",
+    "LegacyEnglishCaseGraphPostTextCoverage.cs",
+    "LegacyEnglishCaseGraphWordPublication.cs",
+    "LegacyNativePlainWordPublisher.LiveSpan.cs",
+    "LegacyPreparedMainTextGlyphReuse.cs"
+  ],
+  "warning": "Compile experiment only; additions include unused FinalSelectedData deliberately to expose compile frontier. No automatic admission."
+}

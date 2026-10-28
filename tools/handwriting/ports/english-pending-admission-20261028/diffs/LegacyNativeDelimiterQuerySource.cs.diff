@@ -1,0 +1,106 @@
+--- main935/LegacyNativeDelimiterQuerySource.cs
++++ candidate950/LegacyNativeDelimiterQuerySource.cs
+@@ -100,6 +100,7 @@
+         try
+         {
+             if (!valid) throw new InvalidOperationException("Failed delimiter preparation cannot be revived by a node reset.");
++            contexts.ObservePeriodicNormalReset(this,cancellationToken);
+             foreach (var slot in slots)
+             {
+                 slot.Tag = ulong.MaxValue; slot.Accepted = -1;
+@@ -125,10 +126,11 @@
+         cancellationToken.ThrowIfCancellationRequested();
+         if (Interlocked.CompareExchange(ref active, 1, 0) != 0)
+             throw new InvalidOperationException("Native delimiter queries must be serialized.");
++        LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope? budget=null;
+         try
+         {
+             if (!valid) throw new InvalidOperationException("Failed delimiter preparation requires a fresh source.");
+-            var q = query.Request;
++            var q = query.Request;budget=contexts.BeginPeriodicNormalQuery(this,q,cancellationToken);budget?.Allocate(256);budget?.Copy(256);
+             if ((uint)q.Node != (uint)query.SourceTag || q.Skip is < 0 or > 2_000_000 || q.Capacity is < 1 or > 512 ||
+                 q.ContextRoot != 0 && q.ContextRoot != contexts.ContainerIdentity)
+                 throw new ArgumentException("Actual source tag/node, same context owner and bounded query required.");
+@@ -158,7 +160,7 @@
+                 }
+             }
+             int recordLength = q.Capacity * 32;
+-            if (recordScratch.Length < recordLength) recordScratch = new byte[recordLength];
++            if (recordScratch.Length < recordLength){budget?.Allocate(recordLength);recordScratch = new byte[recordLength];}
+             Memory<byte> output = recordScratch.AsMemory(0, recordLength);
+             int written = 0, backendCalls = 0;
+             if (!Traverse(0, query.SourceTag, q.ParentContext, 0, 0, 0, 0))
+@@ -185,11 +187,12 @@
+                     for (int i = 0; i < written; i++) Prefix(output.Span.Slice(i * 32, 32), ordinary, allowExtra: false);
+             }
+             cancellationToken.ThrowIfCancellationRequested();
++            budget?.Allocate(checked(64L+written*32L));budget?.Copy(checked(written*32L));
+             return new(written, output.Slice(0, written * 32).ToArray(), query.SlotIndex, slot.Accepted, backendCalls);
+ 
+             bool Traverse(int depth, ulong tag, ulong parentContext, byte carriedLength, int carriedCost, byte carriedKind, byte carriedFlag)
+             {
+-                cancellationToken.ThrowIfCancellationRequested();
++                cancellationToken.ThrowIfCancellationRequested();budget?.Visit(256);budget?.Copy(128);
+                 for (int ancestor = 0; ancestor < depth; ancestor++)
+                     if (slot.Levels[ancestor].Tag == tag) return true;
+                 var level = slot.Levels[depth];
+@@ -212,7 +215,7 @@
+                     while (level.Cursor < level.Count)
+                     {
+                         cancellationToken.ThrowIfCancellationRequested();
+-                        var row = level.Records.AsSpan(level.Cursor * 32, 32);
++                        budget?.Visit(64);budget?.Copy(64);var row = level.Records.AsSpan(level.Cursor * 32, 32);
+                         ushort symbol = BinaryPrimitives.ReadUInt16LittleEndian(row[20..]);
+                         if (symbol != zwj)
+                         {
+@@ -274,6 +277,7 @@
+ 
+             bool Fetch(Level level)
+             {
++                if(budget is not null)budget.Propagate(q,level.Query);budget?.Allocate(128);budget?.Copy(128);budget?.Visit(128);
+                 level.Query.Capacity = 128;
+                 backendCalls++;
+                 var page = reader(level.Tag, level.Query, cancellationToken);
+@@ -282,28 +286,30 @@
+                     throw new InvalidDataException("Native delimiter backend must own an exact128-row block.");
+                 if (!page.ExtraCosts.IsEmpty) throw new NotSupportedException("Unexpected delimiter extra-cost side table.");
+                 level.Count = page.ReturnedCount;
+-                level.Records = page.Records.ToArray();
++                budget?.Allocate(page.Records.Length);budget?.Copy(page.Records.Length);level.Records = page.Records.ToArray();
+                 return level.Count != -1;
+             }
+ 
+             void Prefix(Span<byte> row, ulong prefix, bool allowExtra = true)
+             {
++                budget?.Visit(64);budget?.Copy(16);
+                 if (allowExtra && (q.Flags24 & 0x100) != 0)
+                 { BinaryPrimitives.WriteUInt64LittleEndian(row[24..], prefix); return; }
+                 ulong suffix = BinaryPrimitives.ReadUInt64LittleEndian(row[8..]);
+                 if (suffix != 0 && q.ContextRoot == 0)
+                 { BinaryPrimitives.WriteUInt64LittleEndian(row[8..], 0); return; }
+-                var symbols = new List<ushort>();
++                budget?.Allocate(64);budget?.Copy(64);var symbols = new List<ushort>();
+                 for (ulong cursor = suffix; cursor != 0;)
+                 {
+                     cancellationToken.ThrowIfCancellationRequested();
+                     if (symbols.Count == 4096) throw new NotSupportedException("Bounded literal delimiter context required.");
++                    budget?.Visit(32);if(symbols.Count==symbols.Capacity){budget?.Allocate(checked(64L+8L*(symbols.Count+1)));budget?.Copy(checked(8L*(symbols.Count+1)));}
+                     var node = contexts.ReadNode(cursor); symbols.Add(node.Symbol); cursor = node.ParentLink;
+                 }
+                 ulong result = prefix;
+                 for (int i = symbols.Count - 1; i >= 0; i--)
+                 {
+-                    var resolved = contexts.ResolveChild(result, symbols[i], cancellationToken);
++                    budget?.Visit(32);var resolved = contexts.ResolveChild(result, symbols[i], cancellationToken);
+                     if (resolved.Created) contexts.LinkCreatedContext(resolved.Identity, result);
+                     result = resolved.Identity;
+                 }
+@@ -311,7 +317,7 @@
+             }
+         }
+         catch { valid = false; throw; }
+-        finally { Volatile.Write(ref active, 0); }
++        finally { try{budget?.End();}finally{Volatile.Write(ref active, 0);} }
+     }
+ 
+     private static byte Carry(byte value, byte kind, byte flag)

@@ -1,0 +1,247 @@
+[
+  {
+    "folder": "native-batch-01",
+    "status": "passed",
+    "program": "MyScriptText.dll",
+    "binarySha256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+    "projectUnchanged": true,
+    "inputsUnchanged": true,
+    "verifiedInstructions": 1691,
+    "functions": [
+      {
+        "address": "0x1800213a0",
+        "name": "FUN_1800213a0",
+        "signature": "undefined FUN_1800213a0(void)",
+        "bodyAddresses": 950,
+        "artifacts": {
+          "1800213a0.c": "af6c2c9d2e827e95fca84b8a0fb8b88cdbd94d1e9d3e9546aee686264e572322",
+          "1800213a0.instructions.tsv": "6e85fad41db9621d3bd34e339f643f0d1b42a8ab4faea9b9e30269e2d92459e5",
+          "1800213a0.references.tsv": "95dd2c13c23a9fcb222542eafce206f907f4e537f4b732c64bba0c090223ab54"
+        },
+        "instructions": 275,
+        "status": "passed"
+      },
+      {
+        "address": "0x180021760",
+        "name": "FUN_180021760",
+        "signature": "undefined FUN_180021760(void)",
+        "bodyAddresses": 844,
+        "artifacts": {
+          "180021760.c": "14a8df0b9e9246307ddd7cd452892bfbb7b88b01a3816c9ce2e1cd4d5d0a818c",
+          "180021760.instructions.tsv": "427c5606e1a8a14ff217bfffc3ba6e6e00d8db891989b5f80083f90b2049586c",
+          "180021760.references.tsv": "1228b10918c1e59563d473ea8a3bc53d11ef136d5f29cff22dd75d0bf7c77f04"
+        },
+        "instructions": 219,
+        "status": "passed"
+      },
+      {
+        "address": "0x180021d10",
+        "name": "FUN_180021d10",
+        "signature": "undefined FUN_180021d10(void)",
+        "bodyAddresses": 1370,
+        "artifacts": {
+          "180021d10.c": "a0eed949fcb4a8dd2392f14e1729458a47e0a5bebfd777465e31b0bba296e6f9",
+          "180021d10.instructions.tsv": "107df2302ba93894a89163aba7fd740b03497a4b7eda2f4870b127f2a44303eb",
+          "180021d10.references.tsv": "47209f9573d526ee166b73b1f192d074e83ca529584ed3088097451b89db9d4d"
+        },
+        "instructions": 366,
+        "status": "passed"
+      },
+      {
+        "address": "0x180024d40",
+        "name": "FUN_180024d40",
+        "signature": "undefined FUN_180024d40(void)",
+        "bodyAddresses": 493,
+        "artifacts": {
+          "180024d40.c": "33dcd9173c7f230278c9edb42f362e663df430ea0466a064bb54259176a75145",
+          "180024d40.instructions.tsv": "af94dc6d41b4323ed13c8c94a111b606c488ef5c3f4474191cba29fb9fc859d6",
+          "180024d40.references.tsv": "43316b3da31b6cbe4b7c02e75e9f8c27128eac367ebf32d3a190a9483a95705b"
+        },
+        "instructions": 129,
+        "status": "passed"
+      },
+      {
+        "address": "0x180024f30",
+        "name": "FUN_180024f30",
+        "signature": "undefined FUN_180024f30(void)",
+        "bodyAddresses": 2567,
+        "artifacts": {
+          "180024f30.c": "190655e81cf4611ab94baade3fe3c71e15ab42c94d6674dcf2b30f3cac506bc7",
+          "180024f30.instructions.tsv": "62470ab311beafeb8547166e329eee32faeee00e7e0e61e8200c3e85b4450731",
+          "180024f30.references.tsv": "040c6636cd9198a248c879b024273db2f1f800dabe93121d755b7349465c946f"
+        },
+        "instructions": 702,
+        "status": "passed"
+      }
+    ],
+    "reportSha256": "50651d42c4bede419ee868c85e9dddb6c84a6eb0d636913c6c54dd5e528225f2",
+    "indexSha256": "61aeae85d8379caa7500b5ea0abc108439250d7f0ed91b5c5908de8916004442"
+  },
+  {
+    "folder": "native-selection-02",
+    "status": "passed",
+    "program": "MyScriptText.dll",
+    "binarySha256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+    "projectUnchanged": true,
+    "inputsUnchanged": true,
+    "verifiedInstructions": 338,
+    "functions": [
+      {
+        "address": "0x18013a830",
+        "name": "FUN_18013a830",
+        "signature": "undefined FUN_18013a830(void)",
+        "bodyAddresses": 845,
+        "artifacts": {
+          "18013a830.c": "d4c057fa3f142dfe89b418f66086566e798310354ab968044e604ba2194dbe20",
+          "18013a830.instructions.tsv": "0f892e488bbcf3ad44e46d2e4ecee831a125cb64e1b25e9fd34bb389cfc8b287",
+          "18013a830.references.tsv": "20b2b688ad7add638a7926d2cced5c399608c633a2067722947b96cb40d1d980"
+        },
+        "instructions": 234,
+        "status": "passed"
+      },
+      {
+        "address": "0x18013c6e0",
+        "name": "FUN_18013c6e0",
+        "signature": "undefined FUN_18013c6e0(void)",
+        "bodyAddresses": 345,
+        "artifacts": {
+          "18013c6e0.c": "6bbf054c76ad50fc00465b04b790edba09fbd51140b049e35b542bab2c804115",
+          "18013c6e0.instructions.tsv": "798a71d4f0de2a7837bd6ea7b0a198344256d2f39ef4781250b412860899f3b3",
+          "18013c6e0.references.tsv": "730829c8c210ff609430aa9baec3539a35d52202a502e2c38de791cc6189b363"
+        },
+        "instructions": 104,
+        "status": "passed"
+      }
+    ],
+    "reportSha256": "e057dde62fba8d52c90e38ce2da29f4c2adb371a22406506abc953ee497fad09",
+    "indexSha256": "9c5ca8838f78a8dcc6661440becfa29ec1e47eb1f8034e7058b1e95bd0d08352"
+  },
+  {
+    "folder": "native-posttext-text-04",
+    "status": "passed",
+    "program": "MyScriptText.dll",
+    "binarySha256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+    "projectUnchanged": true,
+    "inputsUnchanged": true,
+    "verifiedInstructions": 73,
+    "functions": [
+      {
+        "address": "0x18001c740",
+        "name": "FUN_18001c740",
+        "signature": "undefined FUN_18001c740(void)",
+        "bodyAddresses": 269,
+        "artifacts": {
+          "18001c740.c": "592fafc0076b130c4da5ae41e365d8ba5394b63ab0f93c0fce9501694c83527b",
+          "18001c740.instructions.tsv": "f1886c8942b96fc1018a06b7ba7230cc3cfa29103deff770c8b549b35b58d5f0",
+          "18001c740.references.tsv": "e37e1f7365dc88643b77663766b8bc726fc31e2ed5d06a7f2c6bafb236593cdb"
+        },
+        "instructions": 73,
+        "status": "passed"
+      }
+    ],
+    "reportSha256": "ee830b24350b4134cac542f3cae1d4940387f9b3a0f0d275d07899ce1f9bfaad",
+    "indexSha256": "f911cac34c12fe94ee5d87f807f9b9662fc17bc3b970f9e413b563f67323db44"
+  },
+  {
+    "folder": "native-posttext-ink-06",
+    "status": "passed",
+    "program": "MyScriptInk.dll",
+    "binarySha256": "b553d9742c369d70e118756aa36647020f2cdab151fe00d5e4a50afd3789a02a",
+    "projectUnchanged": true,
+    "inputsUnchanged": true,
+    "verifiedInstructions": 119,
+    "functions": [
+      {
+        "address": "0x180080300",
+        "name": "FUN_180080300",
+        "signature": "bool __fastcall FUN_180080300(longlong param_1, longlong * param_2, char * param_3, uint param_4)",
+        "bodyAddresses": 167,
+        "artifacts": {
+          "180080300.c": "75104a5fa9011642ea50dcf559d02dd477b4341e19fc687a083e3d4e259222d9",
+          "180080300.instructions.tsv": "f1a924537806876c46b1694d1364fbe922310f65dc7a676516edb8d364f967dd",
+          "180080300.references.tsv": "923ef748ae637e829c6f3d53e0ea030d6ad95592d6be21e66e7e89639a519605"
+        },
+        "instructions": 51,
+        "status": "passed"
+      },
+      {
+        "address": "0x1800812d0",
+        "name": "FUN_1800812d0",
+        "signature": "undefined8 __fastcall FUN_1800812d0(longlong param_1, longlong * param_2, longlong * param_3, longlong param_4, uint param_5)",
+        "bodyAddresses": 219,
+        "artifacts": {
+          "1800812d0.c": "a60f66a2af614c72fa8697fa54f93d9543ecac72275764041c8c73d38aca1101",
+          "1800812d0.instructions.tsv": "6fa15bf19834fa517206a5c3d7d6b1982e32d8379adfb59c00570d3d0b26042c",
+          "1800812d0.references.tsv": "978a78ecb744399415e0bc8aeda9557fe839224b24a43436d1bfd6d0e712e41c"
+        },
+        "instructions": 68,
+        "status": "passed"
+      }
+    ],
+    "reportSha256": "ac81c35cefecc4b8eb9e07c1d61f7a459456d4a8c2c01a222f6ac782bb1ed4f4",
+    "indexSha256": "bd1a2d7caab1fd026a4401b8ce9fece86ed1c4d1519ffa915126875cffb8c947"
+  },
+  {
+    "folder": "native-posttext-03",
+    "status": "failed",
+    "program": "MyScriptText.dll",
+    "binarySha256": "18f1b4fc211ae96cecd05611f72dbef52d93ac4484c61b735c8296dc01c3977f",
+    "projectUnchanged": true,
+    "inputsUnchanged": true,
+    "verifiedInstructions": null,
+    "functions": [
+      {
+        "address": "0x18001c740",
+        "name": "FUN_18001c740",
+        "signature": "undefined FUN_18001c740(void)",
+        "bodyAddresses": 269,
+        "artifacts": {
+          "18001c740.c": "592fafc0076b130c4da5ae41e365d8ba5394b63ab0f93c0fce9501694c83527b",
+          "18001c740.instructions.tsv": "f1886c8942b96fc1018a06b7ba7230cc3cfa29103deff770c8b549b35b58d5f0",
+          "18001c740.references.tsv": "e37e1f7365dc88643b77663766b8bc726fc31e2ed5d06a7f2c6bafb236593cdb"
+        },
+        "instructions": 73,
+        "status": "passed"
+      },
+      {
+        "address": "0x180080300",
+        "status": "missing-function-entry",
+        "containingEntry": "1800800c0",
+        "containingName": "FUN_1800800c0"
+      },
+      {
+        "address": "0x1800812d0",
+        "status": "missing-function-entry",
+        "containingEntry": "180081240",
+        "containingName": "FUN_180081240"
+      }
+    ],
+    "reportSha256": "4eb0aa98abfbb998687c735105b41052cfa48387e325a3b617dd4e384d3968cd",
+    "indexSha256": "a821787d0dc933e084403b28b01c83fd9da928c38d5d9331825002dc244f955f"
+  },
+  {
+    "folder": "native-posttext-engine-05",
+    "status": "failed",
+    "program": "MyScriptEngine.dll",
+    "binarySha256": "d31abcd309cbb558bb80bf50fe1968921de515bc40fbeb0e886a5cf14dbc0a5c",
+    "projectUnchanged": true,
+    "inputsUnchanged": true,
+    "verifiedInstructions": null,
+    "functions": [
+      {
+        "address": "0x180080300",
+        "status": "missing-function-entry",
+        "containingEntry": "1800802e0",
+        "containingName": "FUN_1800802e0"
+      },
+      {
+        "address": "0x1800812d0",
+        "status": "missing-function-entry",
+        "containingEntry": "180081070",
+        "containingName": "FUN_180081070"
+      }
+    ],
+    "reportSha256": "dfeaf53349f943da35563fada3c308097106a417ed504b9d3643f3497abfcf99",
+    "indexSha256": "1d5a3e496bf95dd5328b9962a2949b5f9dee771edcc0b6e9d033336aa7f463cc"
+  }
+]

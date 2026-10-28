@@ -1,0 +1,39 @@
+{
+  "fixtureName": "actual-4",
+  "targetLabel": null,
+  "targetLabelReason": "Pinned input schema contains Name/Raw/Resolution only; Name is actual-4, not a target transcription.",
+  "selectedWordOrdinal": 0,
+  "choices": [
+    {
+      "ordinal": 0,
+      "characters": [
+        {
+          "sourceNode": 1,
+          "reference": 16777217,
+          "canonicalMarker": 0,
+          "alternatives": [
+            "v",
+            "r"
+          ],
+          "selectedUtf8": "v"
+        }
+      ]
+    },
+    {
+      "ordinal": 1,
+      "characters": [
+        {
+          "sourceNode": 1,
+          "reference": 1099528404993,
+          "canonicalMarker": 1,
+          "alternatives": [
+            "v",
+            "r"
+          ],
+          "selectedUtf8": "r"
+        }
+      ]
+    }
+  ],
+  "scope": "pending native CHAR/WORD/TEXT data only; no public positioned/admission"
+}

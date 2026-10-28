@@ -1,0 +1,1719 @@
+{
+  "warning": "Heuristic filtered from bound symbols. Exact full file edges preserve symbols separately. File or partial-type graph is NOT runtime call reachability or minimum hunk proof.",
+  "edges": {
+    "ExperimentalGlobalTextRecognizer.Batch.cs": {
+      "ExperimentalGlobalTextRecognizer.cs": [
+        "InkRecognition.ExperimentalGlobalTextRecognizer.Empty()",
+        "InkRecognition.ExperimentalGlobalTextRecognizer.FullOriginalInput(InkRecognition.LegacyOwnedRawInkDocument, System.Threading.CancellationToken)",
+        "InkRecognition.ExperimentalGlobalTextRecognizer.TryAdmitSelectedGlyph(System.ReadOnlySpan<byte>, string, out float)"
+      ],
+      "LegacyFreshMainGlobalWordTextPublication.cs": [
+        "InkRecognition.LegacyFreshMainGlobalWordTextPublication.CopySourceLines56()"
+      ]
+    },
+    "ExperimentalGlobalTextRecognizer.cs": {
+      "ExperimentalGlobalTextRecognizer.Batch.cs": [
+        "InkRecognition.ExperimentalGlobalTextRecognizer.ReadCompletedBatch(InkRecognition.LegacyFreshMainGlobalWordTextPublication, InkRecognition.LegacyFreshMainGlobalPlainRecognitionResult, InkRecognition.InkStroke[], InkRecognition.ExperimentalCompletedTextDiagnostic?, System.Threading.CancellationToken)"
+      ],
+      "LegacyFreshMainGlobalPlainRecognition.cs": [
+        "InkRecognition.LegacyFreshMainGlobalPlainRecognition.Run(System.ReadOnlySpan<byte>, System.ReadOnlySpan<byte>, System.ReadOnlySpan<byte>, System.ReadOnlySpan<ushort>, System.ReadOnlySpan<byte>, System.ReadOnlySpan<byte>, System.Threading.CancellationToken)"
+      ],
+      "LegacyFreshMainGlobalWordTextPublication.cs": [
+        "InkRecognition.LegacyFreshMainGlobalWordTextPublication.CopySourceLines56()",
+        "InkRecognition.LegacyFreshMainGlobalWordTextPublication.PrepareAllWords(InkRecognition.LegacyFreshMainGlobalTextSourceWrapper, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyFreshMainGlobalWordTextPublication.Publish(System.ReadOnlySpan<byte>, System.ReadOnlySpan<byte>, System.Threading.CancellationToken)"
+      ],
+      "LegacyNativeGlyphRecordPool.cs": [
+        "InkRecognition.LegacyNativeGlyphRecordPool.CopyRecord(ulong, System.Threading.CancellationToken)"
+      ],
+      "LegacyOwnedRawInkDocument.cs": [
+        "InkRecognition.LegacyOwnedRawInkDocument.CopySelectedInputs()",
+        "InkRecognition.LegacyOwnedRawInkDocument.Create(System.Collections.Generic.IReadOnlyList<InkRecognition.InkStroke>, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyDegenerateFloatContextGeometry.cs": {},
+    "LegacyEnglishCaseExecutionPool.cs": {
+      "LegacyEnglishCaseGraphPeriodicPreparation.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicPreparation.Require(InkRecognition.LegacyEnglish119MainKnowledge, System.Threading.CancellationToken)"
+      ],
+      "LegacyNativeCasePreparation.cs": [
+        "InkRecognition.LegacyNativeCasePreparation.PrepareOuterWide(InkRecognition.LegacyNativeCaseAlphabetRanges, InkRecognition.LegacyNativeTextPublicationData, InkRecognition.LegacyEnglishCaseExecutionPoolReceipt, System.Threading.CancellationToken)"
+      ],
+      "LegacyWideSymbolPairs.cs": [
+        "InkRecognition.LegacyWideSymbolPairs.TryGetSingleWideBase(string?, out int)"
+      ]
+    },
+    "LegacyEnglishCaseGraphAuxiliarySource.cs": {
+      "LegacyEnglishCaseGraphLanguageStage.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope.Require(System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicCost.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicActive"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.index",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ledger"
+      ],
+      "LegacyEnglishCaseNode0LexiconIndex.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0LexiconIndex.ChargeBindingChecks()",
+        "InkRecognition.LegacyEnglishCaseNode0LexiconIndex.ChargeEmptyAuxiliaryRead(ulong)",
+        "InkRecognition.LegacyEnglishCaseNode0LexiconIndex.RequireEmptyAuxiliary(System.ReadOnlySpan<ushort>)"
+      ],
+      "LegacyEnglishCaseQueryInitialization.cs": [
+        "InkRecognition.LegacyEnglishCaseInitializationPlan.auxiliary",
+        "InkRecognition.LegacyEnglishCaseInitializationPlan.RequirePublished(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseInitializationPlan.ValidateParent(System.Threading.CancellationToken)"
+      ],
+      "LegacyNativeAuxiliaryDelimiterQuerySource.cs": [
+        "InkRecognition.LegacyNativeAuxiliaryDelimiterQuerySource.Read(ulong, InkRecognition.LegacyPreparedDictionaryQuery, System.Threading.CancellationToken)"
+      ],
+      "LegacyPreparedDictionaryQuerySource.cs": [
+        "InkRecognition.LegacyPreparedDictionaryQuerySource.lexicon",
+        "InkRecognition.LegacyPreparedDictionaryQuerySource.map",
+        "InkRecognition.LegacyPreparedDictionaryQuerySource.reading",
+        "InkRecognition.LegacyPreparedDictionaryQuerySource.recordScratch"
+      ]
+    },
+    "LegacyEnglishCaseGraphCharacterBindings.cs": {
+      "LegacyEnglishCaseGraphCharacters.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.EmitReuse(InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterSource, InkRecognition.LegacyNativeOwnedGlyphRecord, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.Require(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.RequireCurrent(InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterSource, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.RequireInitializing(InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterPayload, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.RequireReusable(InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterPayload, InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterSource, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterSource.CopyRanges(System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphEarlySelectedInput.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.MatchesGraphSelectionBinding(InkRecognition.LegacyOwnedFreshTextSourceContext, System.Threading.CancellationToken)"
+      ],
+      "LegacyPreparedMainTextGlyphReuse.cs": [
+        "InkRecognition.LegacyPreparedMainTextGlyphReuse.failed",
+        "InkRecognition.LegacyPreparedMainTextGlyphReuse.gate",
+        "InkRecognition.LegacyPreparedMainTextGlyphReuse.normalization",
+        "InkRecognition.LegacyPreparedMainTextGlyphReuse.Process(int, int, System.Func<int, InkRecognition.LegacyPreparedGlyphReuseInput>, System.Threading.CancellationToken, InkRecognition.ILegacyEnglishCharacterReuseVisitBudget?)",
+        "InkRecognition.LegacyPreparedMainTextGlyphReuse.properties",
+        "InkRecognition.LegacyPreparedMainTextGlyphReuse.rows",
+        "InkRecognition.LegacyPreparedMainTextGlyphReuse.strings",
+        "InkRecognition.LegacyPreparedTextGlyphReuseRecord.CopyStorage40()"
+      ]
+    },
+    "LegacyEnglishCaseGraphCharacters.cs": {
+      "LegacyEnglishCaseGraphCharacterBindings.cs": [
+        "InkRecognition.LegacyEnglishCaseNode1Geometry.ReadGraphCharacterLine(InkRecognition.LegacyEnglish119MainLocalCandidates, InkRecognition.LegacyOrdinaryCursiveCandidateGraph, int, ushort, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyOwnedFreshTextSourceContext.CreateEnglishCharacter(InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterPayload, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyOwnedMainTextSourceInterner.InternEnglish(InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterSource, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyPreparedMainTextGlyphReuse.ApplyEnglish(InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterPayload, InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterSource, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyPreparedMainTextGlyphReuse.CopyEnglishRecords(InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterPayload, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyPreparedMainTextGlyphReuse.CreateEnglish(InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterPayload, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyPreparedMainTextGlyphReuse.ReadEnglishSnapshotByteCount(InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterPayload, int, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphEarlySelectedInput.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphOriginalSelectedRequested"
+      ],
+      "LegacyEnglishCaseGraphFinalCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireGraphPublication(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphGlyphChoices.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphGlyphChoices"
+      ],
+      "LegacyEnglishCaseGraphGlyphDispatch.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphRefreshDispatch.TryRead(InkRecognition.LegacyNativeGlyphRecordPool, ulong, System.Threading.CancellationToken, out InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphRefreshDispatch.Receipt)"
+      ],
+      "LegacyEnglishCaseGraphGlyphGeometry.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphGlyphGeometryContext",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphGeometryContext.document",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphGeometryContext.finished",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphGeometryContext.glyphs",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphGeometryContext.head",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphGeometryContext.operations",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphGeometryContext.original",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphGeometryContext.owner",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphGeometryContext.pendingOriginal",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphGeometryContext.pool",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphGeometryContext.publisher",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphGeometryContext.Require(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphGeometryContext.source",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphGeometryContext.stage",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.Pairs(System.ReadOnlySpan<InkRecognition.LegacyNativeInkPositionRange>)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RunGraphFirstGlyphGeometry(InkRecognition.LegacyNativeUnicodeNormalizationData, System.Threading.CancellationToken, System.Action<InkRecognition.LegacyEnglishCaseNode0Completion.GraphMainConfidenceObservation>?, bool)"
+      ],
+      "LegacyEnglishCaseGraphLoop.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopGeometry"
+      ],
+      "LegacyEnglishCaseGraphPeriodicCost.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicActive"
+      ],
+      "LegacyEnglishCaseGraphRefreshAllocation.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterEntryAllowed(bool, bool, bool, bool, bool)"
+      ],
+      "LegacyEnglishCaseGraphTailAdmission.cs": [
+        "InkRecognition.LegacyEnglishCasePrimaryCompletion.RequireGraphLoop(InkRecognition.LegacyEnglishCaseNode0Completion, System.Threading.CancellationToken, bool)"
+      ],
+      "LegacyEnglishCaseGraphWordPublication.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.BeginWordChoice(InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext, object, System.Collections.Generic.IReadOnlyList<InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterRange>, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.ReserveWordChoiceSnapshots(InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordPublicationContext",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.AppendCharacter(InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterSource, InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterPayload, int, byte[], System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.ReadCharacterPublisherHistory()",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.RequireChoiceGeometry(object, InkRecognition.LegacyOwnedRawInkDocument, InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, InkRecognition.LegacyNativeGlyphRecordPool, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.RequireIntermediateCharacterOutput(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphWordSourceCompletion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordSourceData",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordSourceSession",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordSourceSession.RequireCompletedForTop(InkRecognition.LegacyNativePlainWordPublisher, InkRecognition.LegacyNativeGlyphRecordPool, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphWordSourceRanges.cs": [
+        "InkRecognition.LegacyEnglish119MainLocalCandidates.GraphWordRangeReceipt.Preflight(int, int, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglish119MainLocalCandidates.GraphWordRangeReceipt.ReadOrdinary140(int, ushort, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.primary"
+      ],
+      "LegacyEnglishOriginalInputContext.cs": [
+        "InkRecognition.LegacyEnglishCasePrimaryCompletion.ReleaseOriginalInputContext()",
+        "InkRecognition.LegacyEnglishCasePrimaryCompletion.RequireOriginalInputContext(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishOriginalInputContext.BorrowStrings(InkRecognition.LegacyEnglish119ParentSubmission, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishOriginalInputContext.Require(InkRecognition.LegacyEnglish119ParentSubmission, System.Threading.CancellationToken)"
+      ],
+      "LegacyNativeGlyphRecordPool.cs": [
+        "InkRecognition.LegacyNativeGlyphRecordPool.CopyOwnerNode(ulong, System.Threading.CancellationToken)"
+      ],
+      "LegacyNativePlainWordPublisher.Augmentation.cs": [
+        "InkRecognition.LegacyNativePlainWordPublisher.RequireSoleActiveSourceHead(InkRecognition.LegacyNativePublishedWordNode)"
+      ],
+      "LegacyOwnedRawInkDocument.cs": [
+        "InkRecognition.LegacyOwnedRawInkDocument.CopySelectedInputs()"
+      ],
+      "LegacyPreparedMainTextGlyphReuse.cs": [
+        "InkRecognition.LegacyPreparedTextGlyphReuseRecord.CopyStorage40()"
+      ]
+    },
+    "LegacyEnglishCaseGraphCompactScores.cs": {
+      "LegacyEnglishCaseGraphFinalCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ObserveGraphCompactScore(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, int, int, float, ushort[], int[], float[])"
+      ],
+      "LegacyEnglishCaseGraphLanguageStage.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope.RequireCompactPhase()"
+      ]
+    },
+    "LegacyEnglishCaseGraphEarlySelectedInput.cs": {
+      "LegacyEnglishCaseGraphCharacters.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.owner",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphCharactersRequested"
+      ],
+      "LegacyEnglishCaseGraphFinalCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphFinalCompactBusy",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireGraphPublication(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphLanguageStage.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLanguageScope"
+      ],
+      "LegacyEnglishCaseGraphPeriodicBacktrackRows.cs": [
+        "(long Payload, long Copies, long Visits).Copies",
+        "(long Payload, long Copies, long Visits).Payload",
+        "(long Payload, long Copies, long Visits).Visits",
+        "InkRecognition.LegacyEnglishPeriodicPublicationBudget.PreNeuralReuse(int, int)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicCost.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicActive"
+      ],
+      "LegacyEnglishCaseGraphPostTextCoverage.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.postTextFinished",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RunGraphFirstPostTextCoverage(InkRecognition.LegacyNativeUnicodeNormalizationData, System.Threading.CancellationToken, System.Action<InkRecognition.LegacyEnglishCaseNode0Completion.GraphMainConfidenceObservation>?, bool)"
+      ],
+      "LegacyEnglishCaseGraphTailAdmission.cs": [
+        "InkRecognition.LegacyEnglishCasePrimaryCompletion.RequireGraphLoop(InkRecognition.LegacyEnglishCaseNode0Completion, System.Threading.CancellationToken, bool)"
+      ],
+      "LegacyEnglishCaseGraphWordPublication.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordPublicationContext",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.current",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.finished",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.next",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.owner",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.poisoned",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.Require(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.Reserve(long, long, long)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.thread",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.wordNode",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordPublicationRequested"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.primary"
+      ],
+      "LegacyEnglishOriginalInputContext.cs": [
+        "InkRecognition.LegacyEnglishOriginalInputContext.Require(InkRecognition.LegacyEnglish119ParentSubmission, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyEnglishCaseGraphFinalCompact.cs": {
+      "LegacyEnglishCaseGraphCompactScores.cs": [
+        "InkRecognition.LegacyMainCompactGroupScores.FromEnglishGraph(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, int, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphLanguageStage.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLanguageScope",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope.RequireCompactPhase()",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope.RequireFirstOnlyPattern()"
+      ],
+      "LegacyEnglishCaseGraphLoop.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopGeometry",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopSourcePolicy",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RunGraphFirstLoopCore(bool, System.Threading.CancellationToken, bool, bool)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicCost.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicActive"
+      ],
+      "LegacyEnglishCaseGraphRawWord.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.BuildGraphRawWord(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, InkRecognition.LegacyPreparedMainCompactPublication.Result, InkRecognition.LegacyPreparedMainTerminalWinner, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphRawWord"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.phase"
+      ],
+      "LegacyEnglishCaseNode0Ring.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Ring.OwnedPrimaryAt(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.OwnedPrimaryMaskAt(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.OwnedRowMaskAt(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.OwnedRowsAt(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.RetainedEndAt(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.SourceEndAt(int)"
+      ],
+      "LegacyEnglishCaseQueryInitialization.cs": [
+        "InkRecognition.LegacyEnglishCaseInitializationPlan.normal",
+        "InkRecognition.LegacyEnglishCaseInitializationPlan.RequirePublished(System.Threading.CancellationToken)"
+      ],
+      "LegacyPreparedMainCompactPublication.cs": [
+        "InkRecognition.LegacyPreparedMainCompactPublication.Run(InkRecognition.LegacyNativeWordControllerConfiguration, InkRecognition.LegacyOrdinaryRecognitionGraph, InkRecognition.LegacySymbolContextFactory, InkRecognition.LegacyInkAlphabet, InkRecognition.LegacyCursiveCategoryProfile, bool, int, bool, int, int, InkRecognition.LegacyMainDirectWordNodeResult[], System.Func<int, ushort, System.Threading.CancellationToken, bool>, System.Func<int, InkRecognition.LegacyMainCompactGroupScores>, System.ReadOnlySpan<byte>, int, System.ReadOnlySpan<int>, System.ReadOnlySpan<int>, System.Action<System.Threading.CancellationToken>, System.Threading.CancellationToken, System.ReadOnlySpan<uint>, InkRecognition.LegacyFreshMainGlobalPublicationContext?)"
+      ],
+      "LegacyPreparedMainCompactReachability.cs": [
+        "InkRecognition.LegacyPreparedMainCompactReachability.Run(InkRecognition.LegacyNativeWordControllerConfiguration, int, int, int, System.Func<int, InkRecognition.LegacyMainDirectWordNodeResult>, InkRecognition.LegacyNativeDelimiterQuerySource, ulong, System.Action<System.Threading.CancellationToken>, bool, System.Threading.CancellationToken, int)"
+      ],
+      "LegacySymbolContextFactory.cs": [
+        "InkRecognition.LegacySymbolContextFactory.CopyNodes()"
+      ]
+    },
+    "LegacyEnglishCaseGraphFinalSelectedData.cs": {
+      "LegacyEnglishCaseGraphCharacters.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphCharacterContext",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.Dispose()",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.RequireCompleted(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterPayload.CopyRetainedRanges()",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphCharactersRequested"
+      ],
+      "LegacyEnglishCaseGraphEarlySelectedInput.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphEarlySelectedInputData",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphOriginalSelectedRequested"
+      ],
+      "LegacyEnglishCaseGraphGlyphChoices.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphGlyphChoicesRequested"
+      ],
+      "LegacyEnglishCaseGraphGlyphGeometry.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphGlyphGeometryRequested",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.Pairs(System.ReadOnlySpan<InkRecognition.LegacyNativeInkPositionRange>)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicCost.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicActive"
+      ],
+      "LegacyEnglishCaseGraphPostTextCoverage.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPostTextCoverageData",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPostTextCoverageRequested",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.postTextChoices",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.postTextFinished",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.RequirePostTextPayload(InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.PostTextLink, InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphTailAdmission.cs": [
+        "InkRecognition.LegacyEnglishCasePrimaryCompletion.RequireGraphLoop(InkRecognition.LegacyEnglishCaseNode0Completion, System.Threading.CancellationToken, bool)"
+      ],
+      "LegacyEnglishCaseGraphWordPublication.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.current",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.finished",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.head",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.next",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.owner",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.Require(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.Reserve(long, long, long)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.span",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordPublicationData",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordPublicationRequested"
+      ],
+      "LegacyEnglishCaseGraphWordSourceCompletion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordSourceRequested",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RunGraphFirstPeriodicWordSourceCompletion(System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ledger",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.phase",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.primary"
+      ],
+      "LegacyEnglishOriginalInputContext.cs": [
+        "InkRecognition.LegacyEnglishCasePrimaryCompletion.ReleaseOriginalInputContext()",
+        "InkRecognition.LegacyEnglishCasePrimaryCompletion.RequirePreNeuralOriginalInputContext(System.Threading.CancellationToken)"
+      ],
+      "LegacyNativeGlyphRecordPool.cs": [
+        "(int Owners, int Records).Owners",
+        "InkRecognition.LegacyNativeGlyphRecordPool.CopyRecord(ulong, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeGlyphRecordPool.ReadRawExportCounts()"
+      ],
+      "LegacyPreparedMainTextGlyphReuse.cs": [
+        "InkRecognition.LegacyPreparedMainTextGlyphReuse.failed",
+        "InkRecognition.LegacyPreparedMainTextGlyphReuse.gate",
+        "InkRecognition.LegacyPreparedMainTextGlyphReuse.rows",
+        "InkRecognition.LegacyPreparedMainTextGlyphReuse.strings"
+      ]
+    },
+    "LegacyEnglishCaseGraphGlyphChoices.cs": {
+      "LegacyEnglishCaseGraphCharacters.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.CompleteGraphCharacterPass(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, InkRecognition.LegacyNativeGlyphRecordPool, System.Collections.Generic.IReadOnlyList<ulong>, System.Collections.Generic.List<(ulong Key, byte[] Source, uint Bits, int Visited)>, System.Threading.CancellationToken, InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterOutput)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphCharacterSourceRanges",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphCharactersRequested",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphGlyphDispatch"
+      ],
+      "LegacyEnglishCaseGraphFinalCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireGraphPublication(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphGlyphDispatch.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCompactRefreshIndex.ReadCount(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, InkRecognition.LegacyNativeGlyphRecordPool, int, ushort, ulong, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCompactRefreshIndex.Refresh(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, InkRecognition.LegacyNativeGlyphRecordPool, int, ushort, ulong, InkRecognition.LegacyOrdinaryGlyphRefreshOperations, System.ReadOnlySpan<byte>, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphRefreshDispatch.Remember(InkRecognition.LegacyNativeGlyphRecordPool, ulong, InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphRefreshDispatch.Receipt, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphRefreshDispatch.TryRead(InkRecognition.LegacyNativeGlyphRecordPool, ulong, System.Threading.CancellationToken, out InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphRefreshDispatch.Receipt)"
+      ],
+      "LegacyEnglishCaseGraphGlyphGeometry.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphGlyphGeometryContext",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphGeometryContext.BeginReference(ulong, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphGeometryContext.Finish(int, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphGeometryContext.Issue(InkRecognition.LegacyEnglishCaseNode0Completion, InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, InkRecognition.LegacyNativePlainWordPublisher, InkRecognition.LegacyNativeGlyphRecordPool, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphGeometryContext.Project(ulong, System.ReadOnlySpan<InkRecognition.LegacyOrdinaryGraphSourceReference>, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphGlyphGeometryData",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphGlyphGeometryRequested"
+      ],
+      "LegacyEnglishCaseGraphRefreshAllocation.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphGlyphAllocationProgress",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphIndexedRefreshCharge(long, long, int, int, int)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphRefreshCharge(long, long, int, int)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphRefreshMatches(System.ReadOnlySpan<byte>, ulong)"
+      ],
+      "LegacyEnglishCaseGraphTailAdmission.cs": [
+        "InkRecognition.LegacyEnglishCasePrimaryCompletion.RequireGraphLoop(InkRecognition.LegacyEnglishCaseNode0Completion, System.Threading.CancellationToken, bool)"
+      ],
+      "LegacyEnglishCaseGraphWordPublication.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.CompleteGraphWordPublication(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, InkRecognition.LegacyPreparedMainCompactPublication.Result, InkRecognition.LegacyNativePlainWordPublisher, InkRecognition.LegacyNativeGlyphRecordPool, InkRecognition.LegacyMainOrdinaryGlyphProductionOperations, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordPublicationContext",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.BeforeReference(ulong, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.RequireReferences(System.Collections.Generic.IReadOnlyList<ulong>, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordPublicationRequested"
+      ],
+      "LegacyEnglishCaseGraphWordSourceCompletion.cs": [
+        "InkRecognition.GraphWordSourceNumerics.Encode26(InkRecognition.LegacyOrdinaryGraphSourceReference[], System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordSourceSession",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordSourceSession.RequireCompletedForTop(InkRecognition.LegacyNativePlainWordPublisher, InkRecognition.LegacyNativeGlyphRecordPool, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphWordSourceRanges.cs": [
+        "InkRecognition.LegacyEnglish119MainLocalCandidates.GraphWordRangeReceipt.Preflight(int, int, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglish119MainLocalCandidates.GraphWordRangeReceipt.ReadOrdinary140(int, ushort, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglish119MainLocalCandidates.RetainGraphWordRanges(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.primary"
+      ],
+      "LegacyNativeGlyphRecordPool.cs": [
+        "InkRecognition.LegacyNativeGlyphRecordPool.CopyOwnerNode(ulong, System.Threading.CancellationToken)"
+      ],
+      "LegacyNativeGlyphScoreCache.cs": [
+        "InkRecognition.LegacyNativeGlyphScoreCache.CreateFirstOrdinalIndex(int, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeGlyphScoreCache.FirstOrdinalIndex.ReadRequestCost(System.ReadOnlySpan<byte>, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeGlyphScoreCache.FirstOrdinalIndex.ReadSymbolScore(ushort, byte, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeGlyphScoreCache.ReadFirstCandidateScore(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeGlyphScoreCache.ReadRequestCost(System.ReadOnlySpan<byte>, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeGlyphScoreCache.ReadSymbolScore(ushort, byte, System.Threading.CancellationToken)"
+      ],
+      "LegacyNativeOrdinaryGlyphRefreshKernel.cs": [
+        "InkRecognition.LegacyNativeOrdinaryGlyphRefreshKernel.Apply(InkRecognition.LegacyNativeGlyphRecordPool, ulong, System.ReadOnlySpan<byte>, int, int, ulong, InkRecognition.LegacyOrdinaryGlyphRefreshOperations, System.ReadOnlySpan<byte>, System.Threading.CancellationToken)"
+      ],
+      "LegacyNativePlainWordPublisher.Augmentation.cs": [
+        "InkRecognition.LegacyNativePlainWordPublisher.RequireSoleActiveSourceHead(InkRecognition.LegacyNativePublishedWordNode)"
+      ]
+    },
+    "LegacyEnglishCaseGraphGlyphDispatch.cs": {
+      "LegacyEnglishCaseGraphFinalCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireGraphPublication(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphWordPublication.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.RequireCompactRefreshIndex(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, InkRecognition.LegacyNativeGlyphRecordPool, System.Threading.CancellationToken)"
+      ],
+      "LegacyNativeGlyphRecordPool.cs": [
+        "InkRecognition.LegacyNativeGlyphRecordPool.CreateRichDescriptorBatch(ulong, int, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeGlyphRecordPool.DescriptorBatch.Complete(System.Threading.CancellationToken)"
+      ],
+      "LegacyNativeOrdinaryGlyphRefreshKernel.cs": [
+        "InkRecognition.LegacyNativeOrdinaryGlyphRefreshKernel.ApplyIndexed(InkRecognition.LegacyNativeGlyphRecordPool, ulong, System.ReadOnlySpan<byte>, int, int, ulong, System.ReadOnlySpan<int>, InkRecognition.LegacyOrdinaryGlyphRefreshOperations, System.ReadOnlySpan<byte>, System.Threading.CancellationToken, InkRecognition.LegacyNativeGlyphRecordPool.DescriptorBatch?)"
+      ]
+    },
+    "LegacyEnglishCaseGraphGlyphGeometry.cs": {
+      "LegacyEnglishCaseGraphCharacters.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphCharactersRequested",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGlyphGeometryContext.RetainCharacterRanges(ulong, byte[], bool, InkRecognition.LegacyNativeInkPositionRange[], InkRecognition.LegacyNativeInkPositionRange[], System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphEarlySelectedInput.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphOriginalSelectedRequested"
+      ],
+      "LegacyEnglishCaseGraphFinalCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireGraphPublication(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicCost.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicActive"
+      ],
+      "LegacyEnglishCaseGraphTailAdmission.cs": [
+        "InkRecognition.LegacyEnglishCasePrimaryCompletion.RequireGraphLoop(InkRecognition.LegacyEnglishCaseNode0Completion, System.Threading.CancellationToken, bool)"
+      ],
+      "LegacyEnglishCaseGraphWordPublication.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordPublicationContext",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.CopyGeometryWordClip(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, InkRecognition.LegacyNativeGlyphRecordPool, InkRecognition.LegacyOwnedRawInkDocument, InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordSourceData, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphWordSourceCompletion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordSourceData",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordSourceSession",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordSourceSession.RequireCompletedForTop(InkRecognition.LegacyNativePlainWordPublisher, InkRecognition.LegacyNativeGlyphRecordPool, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.primary"
+      ],
+      "LegacyEnglishOriginalInputContext.cs": [
+        "InkRecognition.LegacyEnglish119ParentSubmission.originalInputContext",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireOriginalInputRoute(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, InkRecognition.LegacyEnglish119ParentSubmission, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishOriginalInputContext.BeginPublication(InkRecognition.LegacyEnglish119ParentSubmission, System.Threading.CancellationToken)"
+      ],
+      "LegacyNativeGlyphRecordPool.cs": [
+        "InkRecognition.LegacyNativeGlyphRecordPool.CopyRecord(ulong, System.Threading.CancellationToken)"
+      ],
+      "LegacyNativePlainWordPublisher.Augmentation.cs": [
+        "InkRecognition.LegacyNativePlainWordPublisher.RequireSoleActiveSourceHead(InkRecognition.LegacyNativePublishedWordNode)"
+      ],
+      "LegacyOwnedRawInkDocument.cs": [
+        "InkRecognition.LegacyOwnedRawInkDocument.CopySelectedInputs()",
+        "InkRecognition.LegacyOwnedRawInkDocument.Create(System.Collections.Generic.IReadOnlyList<InkRecognition.InkStroke>, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyEnglishCaseGraphLanguageStage.cs": {
+      "LegacyEnglishCaseGraphFinalCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphFinalCompactRequested",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RunGraphFinalCompact(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphLoop.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageRequired(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, int, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopActive",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.SealGraphEmptyLanguage(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RunGraphPeriodicFinalCompact(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicCost.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicActive",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicCompletedNode"
+      ],
+      "LegacyEnglishCaseGraphPhase1.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.CompleteGraphPhase1(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, int[], System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphWordSourceCompletion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordSourceRequested"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ledger",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.numericHandles",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ring"
+      ],
+      "LegacyEnglishCaseNode0Ring.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Ring.ClearCurrent3e(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.ClearNode0Counters(int, int)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.EnableGraphCursor(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.EnterGraphNode(int, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseNode1Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireNode1(InkRecognition.LegacyEnglishFreshCaseMainSource, InkRecognition.LegacyEnglishCaseInitialQueryPass)"
+      ]
+    },
+    "LegacyEnglishCaseGraphLoop.cs": {
+      "LegacyEnglishCaseGraphFinalCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphFinalCompactRequested"
+      ],
+      "LegacyEnglishCaseGraphLanguageStage.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLanguageScope",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope.Require(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope.SealCanonicalFirstOnly()",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.PrepareGraphLanguageInputs(InkRecognition.LegacyEnglishFreshCaseMainSource.Node1QueryLease, int, InkRecognition.LegacyEnglishCaseNode1Materialization.Images, InkRecognition.LegacyCursiveCategoryProfile, bool, System.Threading.CancellationToken, int, InkRecognition.LegacyEnglishCaseNode0Completion.GraphLoopOutput)"
+      ],
+      "LegacyEnglishCaseGraphMaterialization.cs": [
+        "InkRecognition.LegacyEnglishCaseNode1Materialization.BuildGraph(InkRecognition.LegacyNativeWordRecordHeap, InkRecognition.LegacyNativeWordHeapPreparation, InkRecognition.LegacyCursiveCategoryProfile, InkRecognition.LegacySymbolContextFactory, int, System.Func<int, System.Collections.Generic.IReadOnlyList<InkRecognition.LegacyNativeStoredWordRecord>>, InkRecognition.LegacyInkAlphabet, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicContextBudget.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicContextBudget",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicContextBudget.Close()",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicContextBudget.Issue(InkRecognition.LegacyEnglishCaseNode0Completion, InkRecognition.LegacySymbolContextFactory, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicCost.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicActive",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicCompletedNode",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicInvalidationFirst"
+      ],
+      "LegacyEnglishCaseGraphPeriodicPreparation.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicPrepared"
+      ],
+      "LegacyEnglishCaseGraphPeriodicQueryBudget.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicQueryScope",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.Close()"
+      ],
+      "LegacyEnglishCaseGraphPeriodicRows.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicQueryPage",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicRows.Issue(InkRecognition.LegacyEnglishCaseNode0Completion, int, InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicWorkspace, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicRows.Record(int, ushort, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicWorkspace.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicWorkspace",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicWorkspace.BeginNode(int, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicWorkspace.Close()",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicWorkspace.EndNode(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicWorkspace.Issue(InkRecognition.LegacyEnglishCaseNode0Completion, InkRecognition.LegacyNativeWordHeapQuotaLimits, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicWorkspace.Materialize(InkRecognition.LegacyNativeWordHeapPreparation, InkRecognition.LegacySymbolContextFactory, InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicRows, out int, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicWorkspace.MaximumSpan(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicWorkspace.PreviousNode(byte, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphSpanLease.cs": [
+        "InkRecognition.LegacyEnglishCaseInitializationPlan.ReadGraphSpan(InkRecognition.LegacyEnglishFreshCaseMainSource.Node1QueryLease, InkRecognition.LegacyNativeDelimiterQuery, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode1Geometry.CreateGraphGroupCosts(int, ushort, System.ReadOnlySpan<int>, byte, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishFreshCaseMainSource.BeginGraphSpan(InkRecognition.LegacyEnglishCaseNode0Completion, InkRecognition.LegacyEnglishCaseInitialQueryPass, InkRecognition.LegacyEnglishFreshCaseMainSpanSession.Receipt, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishFreshCaseMainSource.EndGraphSpan(InkRecognition.LegacyEnglishFreshCaseMainSource.Node1QueryLease, bool)"
+      ],
+      "LegacyEnglishCaseGraphTailAdmission.cs": [
+        "InkRecognition.LegacyEnglishCasePrimaryCompletion.RequireGraphLoop(InkRecognition.LegacyEnglishCaseNode0Completion, System.Threading.CancellationToken, bool)"
+      ],
+      "LegacyEnglishCaseGraphWordSourceCompletion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordSourceRequested"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.activeStage",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.completedBacking",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ledger",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.pending",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.pendingReceipt",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.phase",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.primary",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ring",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.thread"
+      ],
+      "LegacyEnglishCaseNode0Ring.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Ring.EnableGraphCursor(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.OwnedPrimaryAt(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.OwnedPrimaryMaskAt(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.OwnedRowMaskAt(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.OwnedRowsAt(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.SourceEndAt(int)"
+      ],
+      "LegacyEnglishCaseNode1Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.node1Pass",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ReadNode1Thresholds(InkRecognition.LegacyEnglish119MainKnowledge)"
+      ],
+      "LegacyEnglishCaseNode1Preparation.cs": [
+        "InkRecognition.LegacyEnglishCasePrimaryCompletion.Node1Pass(InkRecognition.LegacyEnglishCaseNode0Completion)"
+      ],
+      "LegacyNativeOrdinaryParentWordCandidates.EnglishPeriodic.cs": [
+        "InkRecognition.LegacyNativeOrdinaryParentWordCandidates.ProcessPeriodicPage(System.ReadOnlySpan<byte>, ushort, byte, int, ushort, System.ReadOnlySpan<byte>, ushort, InkRecognition.LegacyNativeWordSymbolQualifier, System.Collections.Generic.IReadOnlyDictionary<byte, uint>, System.Func<int, ushort, InkRecognition.LegacyNativeWordAcousticGroupCosts>, InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicRows, InkRecognition.LegacyNativeWordHeapRouter, float, bool, bool, byte, bool, bool, System.Func<int, ushort, bool>?, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyEnglishCaseGraphLoopBudget.cs": {},
+    "LegacyEnglishCaseGraphMaterialization.cs": {
+      "LegacyNativeWordRecordHeap.cs": [
+        "InkRecognition.LegacyNativeWordRecordHeap.GetSlotStorageSnapshot()"
+      ]
+    },
+    "LegacyEnglishCaseGraphPeriodicAlternativeWalk.cs": {
+      "LegacyEnglishCaseGraphFinalCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireGraphPublication(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyEnglishCaseGraphPeriodicBacktrackRows.cs": {
+      "LegacyEnglishCaseGraphEarlySelectedInput.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphOriginalSelectedRequested"
+      ],
+      "LegacyEnglishCaseGraphFinalCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireGraphPublication(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicCost.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicActive"
+      ]
+    },
+    "LegacyEnglishCaseGraphPeriodicCompact.cs": {
+      "LegacyEnglishCaseGraphCompactScores.cs": [
+        "InkRecognition.LegacyMainCompactGroupScores.FromEnglishGraph(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, int, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphFinalCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseInitializationPlan.WithGraphPublicationReader(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Action<InkRecognition.LegacyNativeDelimiterQuerySource>, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphCompactData",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphFinalCompactBusy",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireGraphPublication(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphLanguageStage.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLanguageScope",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope.RequireCompactPhase()",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope.RequireFirstOnlyPattern()"
+      ],
+      "LegacyEnglishCaseGraphLoop.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopGeometry",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopSourcePolicy"
+      ],
+      "LegacyEnglishCaseGraphPeriodicContextBudget.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicContextBudget",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicContextBudget.BeforeFrame(ulong, ulong)",
+        "InkRecognition.LegacySymbolContextFactory.ReadPeriodicParentLink(InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicContextBudget, ulong)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicCost.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicActive",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.ReadPeriodicCumulative(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, int, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphRawWord.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.BuildGraphRawWord(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, InkRecognition.LegacyPreparedMainCompactPublication.Result, InkRecognition.LegacyPreparedMainTerminalWinner, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphRawWord"
+      ],
+      "LegacyEnglishCaseGraphWordSourceCompletion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordSourceRequested"
+      ],
+      "LegacyEnglishCaseNode0Ring.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Ring.OwnedPrimaryAt(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.OwnedPrimaryMaskAt(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.OwnedRowMaskAt(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.OwnedRowsAt(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.SourceEndAt(int)"
+      ],
+      "LegacyPreparedMainCompactPublication.EnglishPeriodic.cs": [
+        "InkRecognition.LegacyPreparedMainCompactPublication.RunPeriodic(InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore, InkRecognition.LegacyNativeWordControllerConfiguration, InkRecognition.LegacyOrdinaryRecognitionGraph, InkRecognition.LegacySymbolContextFactory, InkRecognition.LegacyInkAlphabet, InkRecognition.LegacyCursiveCategoryProfile, int, System.Func<int, ushort, System.Threading.CancellationToken, bool>, System.Func<int, InkRecognition.LegacyMainCompactGroupScores>, System.Threading.CancellationToken, System.ReadOnlySpan<uint>)"
+      ],
+      "LegacyPreparedMainCompactReachability.EnglishPeriodic.cs": [
+        "InkRecognition.LegacyPreparedMainCompactReachability.RunPeriodic(InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore, InkRecognition.LegacyNativeWordControllerConfiguration, int, InkRecognition.LegacyNativeDelimiterQuerySource, ulong, System.Threading.CancellationToken, int)"
+      ]
+    },
+    "LegacyEnglishCaseGraphPeriodicContextBudget.cs": {
+      "LegacyEnglishCaseGraphLoop.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopActive"
+      ],
+      "LegacyEnglishCaseGraphPeriodicCost.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicActive"
+      ],
+      "LegacyEnglishCaseGraphPeriodicQueryBudget.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicQueryScope",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.BeforeActualNormalReset(InkRecognition.LegacyNativeDelimiterQuerySource, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.Begin(InkRecognition.LegacyNativeDelimiterQuerySource, InkRecognition.LegacyPreparedDictionaryQuery, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.Issue(InkRecognition.LegacyEnglishCaseNode0Completion, InkRecognition.LegacySymbolContextFactory)"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ledger",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.phase",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.thread"
+      ],
+      "LegacyEnglishCaseNode1Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.node1Pass"
+      ],
+      "LegacySymbolContextFactory.cs": [
+        "InkRecognition.LegacySymbolContextFactory.Get(ulong)",
+        "InkRecognition.LegacySymbolContextFactory.periodicBudget"
+      ]
+    },
+    "LegacyEnglishCaseGraphPeriodicCost.cs": {
+      "LegacyEnglishCaseGraphLanguageStage.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope.RequireCompactPhase()",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope.RequirePhase1()"
+      ],
+      "LegacyEnglishCaseGraphLoop.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopActive",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopNode"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.fresh"
+      ],
+      "LegacyEnglishCaseNode0NativeFreshPolicy.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0NativeFreshPolicy.RequireGraphPeriodicSource(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseNode0Ring.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Ring.currentNode",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.ledger",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.OwnedRowMaskAt(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.OwnedRowsAt(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.SourceEndAt(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.vectors"
+      ]
+    },
+    "LegacyEnglishCaseGraphPeriodicPreparation.cs": {
+      "LegacyEnglishCaseGraphLoopBudget.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.PreflightGraphLoopPayload(InkRecognition.LegacyEnglish119MainKnowledge, System.Threading.CancellationToken, bool)"
+      ],
+      "LegacyEnglishCaseNode1Preparation.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.PrepareNode1Spans(InkRecognition.LegacyEnglish119MainKnowledge, InkRecognition.LegacyEnglishLkFreshNumericBinding, InkRecognition.LegacyNativeCaseData, InkRecognition.LegacyNativeTextPublicationData, long, System.Threading.CancellationToken, InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicPreparation?)"
+      ]
+    },
+    "LegacyEnglishCaseGraphPeriodicQueryBudget.cs": {
+      "LegacyEnglishCaseGraphPeriodicContextBudget.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicContextBudget",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicContextBudget.BeforeNormalReset(InkRecognition.LegacyNativeDelimiterQuerySource, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicContextBudget.BeginQuery(InkRecognition.LegacyNativeDelimiterQuerySource, InkRecognition.LegacyPreparedDictionaryQuery, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicContextBudget.Require(InkRecognition.LegacySymbolContextFactory)"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ledger"
+      ],
+      "LegacyEnglishCaseNode1Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.node1Pass"
+      ],
+      "LegacyEnglishCaseQueryInitialization.cs": [
+        "InkRecognition.LegacyEnglishCaseInitializationPlan.normal",
+        "InkRecognition.LegacyEnglishCaseInitializationPlan.phase"
+      ],
+      "LegacySymbolContextFactory.cs": [
+        "InkRecognition.LegacySymbolContextFactory.periodicBudget"
+      ]
+    },
+    "LegacyEnglishCaseGraphPeriodicRows.cs": {
+      "LegacyEnglishCaseGraphLoop.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopActive",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopGeometry",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopLease",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopNode",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopParent",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopPrevious",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopQuery"
+      ],
+      "LegacyEnglishCaseGraphPeriodicCost.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicActive"
+      ],
+      "LegacyEnglishCaseGraphPeriodicWorkspace.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicWorkspace"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ledger",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.phase",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ring",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.thread"
+      ],
+      "LegacyEnglishCaseNode0Ring.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Ring.OwnedPrimaryAt(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.OwnedRowsAt(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.SourceEndAt(int)"
+      ],
+      "LegacyEnglishCaseNode1Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.node1Pass"
+      ],
+      "LegacyNativeWordHeapRouter.cs": [
+        "InkRecognition.LegacyNativeWordHeapRouter.TryAllocate(int, byte, bool, int, InkRecognition.LegacyNativeWordSlotInitializer, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyEnglishCaseGraphPeriodicWordEquality.cs": {
+      "LegacyEnglishCaseGraphWordSourceCompletion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireGraphPeriodicEquality(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, InkRecognition.LegacyNativeGlyphRecordPool, System.Threading.CancellationToken)"
+      ],
+      "LegacyNativeGlyphRecordPool.cs": [
+        "InkRecognition.LegacyNativeGlyphRecordPool.CopyRecord(ulong, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyEnglishCaseGraphPeriodicWorkspace.cs": {
+      "LegacyEnglishCaseGraphLanguageStage.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope.RequirePhase1()"
+      ],
+      "LegacyEnglishCaseGraphLoop.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopActive",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopLease",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopNode",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopSpan",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireGraphLoopSpan(int, byte)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicContextBudget.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicContextBudget",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicContextBudget.BeforeComposition(ulong)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicCost.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicActive"
+      ],
+      "LegacyEnglishCaseGraphPeriodicRows.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicRows.Primary(int, ushort, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicRows.Record(int, ushort, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicRows.RequireWorkspace(InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicWorkspace, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ledger",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.phase",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ring",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.thread"
+      ],
+      "LegacyEnglishCaseNode1Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.node1Pass"
+      ],
+      "LegacyNativeWordRecordHeap.cs": [
+        "InkRecognition.LegacyNativeWordRecordHeap.mutating",
+        "InkRecognition.LegacyNativeWordRecordHeap.periodicWorkspace",
+        "InkRecognition.LegacyNativeWordRecordHeap.slots"
+      ],
+      "LegacySymbolContextFactory.cs": [
+        "InkRecognition.LegacySymbolContextFactory.ReadNode(ulong)"
+      ]
+    },
+    "LegacyEnglishCaseGraphPhase1.cs": {
+      "LegacyEnglishCaseGraphLanguageStage.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope.Require(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope.RequirePhase1()"
+      ],
+      "LegacyEnglishCaseGraphPeriodicCost.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.CompleteGraphPeriodicCost(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, int, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicActive"
+      ],
+      "LegacyEnglishCaseNode0Ring.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Ring.Cleanup(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.ClearNode0Counters(int, int)"
+      ],
+      "LegacyNativeWordHeapDescriptor.GraphPhase1.cs": [
+        "InkRecognition.LegacyNativeWordHeapDescriptor.CompleteGraphFirstPhase1(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, int[], System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyEnglishCaseGraphPostTextCoverage.cs": {
+      "LegacyEnglishCaseGraphCharacters.cs": [
+        "InkRecognition.GraphCharacterVisitCharge.RangeCall(int, int)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphCharacterContext",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.RequireCompleted(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterPayload.CopyRetainedRanges()"
+      ],
+      "LegacyEnglishCaseGraphEarlySelectedInput.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphOriginalSelectedRequested",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.MatchesGraphSelectionBinding(InkRecognition.LegacyOwnedFreshTextSourceContext, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.MatchesGraphSelectionBindingAtPreparation()"
+      ],
+      "LegacyEnglishCaseGraphFinalCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireGraphPublication(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphGlyphGeometry.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.Pairs(System.ReadOnlySpan<InkRecognition.LegacyNativeInkPositionRange>)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicCost.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicActive"
+      ],
+      "LegacyEnglishCaseGraphTailAdmission.cs": [
+        "InkRecognition.LegacyEnglishCasePrimaryCompletion.RequireGraphLoop(InkRecognition.LegacyEnglishCaseNode0Completion, System.Threading.CancellationToken, bool)"
+      ],
+      "LegacyEnglishCaseGraphWordPublication.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.current",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.CurrentReferences(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.finished",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.flags",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.head",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.links",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.operations",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.ordinary",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.originalKey",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.owner",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.Require(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.Reserve(long, long, long)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.span"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.primary"
+      ]
+    },
+    "LegacyEnglishCaseGraphProtocolGlyph.cs": {
+      "LegacyEnglishCaseGraphFinalCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireGraphPublication(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyEnglishCaseGraphRawWord.cs": {
+      "LegacyEnglishCaseExecutionPool.cs": [
+        "InkRecognition.LegacyEnglishCaseExecutionPoolReceipt.RequireOuterWide(InkRecognition.LegacyEnglishCaseInitializationPlan, InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, InkRecognition.LegacyNativeCasePreparation, InkRecognition.LegacyInkAlphabet, InkRecognition.LegacyNativeTextPublicationData, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphEarlySelectedInput.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphOriginalSelectedRequested"
+      ],
+      "LegacyEnglishCaseGraphFinalCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireGraphPublication(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphGlyphChoices.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.CompleteGraphGlyphChoices(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, InkRecognition.LegacyPreparedMainCompactPublication.Result, InkRecognition.LegacyNativePlainWordPublisher, InkRecognition.LegacyNativeGlyphRecordPool, InkRecognition.LegacyMainOrdinaryGlyphProductionOperations, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphGlyphChoicesRequested"
+      ],
+      "LegacyEnglishCaseGraphLoop.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopGeometry",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RunGraphFirstLoopCore(bool, System.Threading.CancellationToken, bool, bool)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicBacktrackRows.cs": [
+        "(long Payload, long Copy, long Visit).Copy",
+        "(long Payload, long Copy, long Visit).Payload",
+        "(long Payload, long Copy, long Visit).Visit",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RunGraphPeriodicBacktrackRows(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, InkRecognition.LegacyPreparedMainCompactPublication.Result, InkRecognition.LegacyOrdinaryRecognitionGraph, InkRecognition.LegacyInkAlphabet, ushort, int, int, ushort, System.ReadOnlySpan<byte>, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishPeriodicPublicationBudget.RawInitialPayload(int)",
+        "InkRecognition.LegacyEnglishPeriodicRawWork.Chain(int, int)",
+        "InkRecognition.LegacyEnglishPeriodicRawWork.FlushVisits(int, int)",
+        "InkRecognition.LegacyEnglishPeriodicRawWork.PoolExport(int, int)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicCost.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicActive",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.CopyPeriodicCumulative(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphProtocolGlyph.cs": [
+        "InkRecognition.LegacyEnglishCaseNode1Geometry.CreateGraphProtocolOperations(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode1Geometry.RequireGraphProtocolOwner(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphTailAdmission.cs": [
+        "InkRecognition.LegacyEnglishCasePrimaryCompletion.RequireGraphLoop(InkRecognition.LegacyEnglishCaseNode0Completion, System.Threading.CancellationToken, bool)"
+      ],
+      "LegacyEnglishCaseGraphWordSourceCompletion.cs": [
+        "InkRecognition.GraphWordSourceNumerics.RequireSupportedReplacement(ushort, ushort)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.CompleteGraphWordSource(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, InkRecognition.LegacyPreparedMainCompactPublication.Result, InkRecognition.LegacyNativeGlyphRecordPool, InkRecognition.LegacyNativePlainWordPublisher, InkRecognition.LegacyMainOrdinaryGlyphProductionOperations, InkRecognition.LegacyMainProtocolGlyphProductionOperations, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordSourceRequested",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordSourceSession",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordSourceSession.RequireCompletedForTop(InkRecognition.LegacyNativePlainWordPublisher, InkRecognition.LegacyNativeGlyphRecordPool, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.fresh",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.index",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.phase",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.primary"
+      ],
+      "LegacyEnglishCaseNode0LexiconIndex.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0LexiconIndex.ReadTerminalWordId(int)"
+      ],
+      "LegacyEnglishCaseNode0NativeFreshPolicy.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0NativeFreshPolicy.ReadGraphCurrentCaseCategory(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, ulong, ushort)"
+      ],
+      "LegacyEnglishCaseQueryInitialization.cs": [
+        "InkRecognition.LegacyEnglishCaseInitializationPlan.binding",
+        "InkRecognition.LegacyEnglishCaseInitializationPlan.knowledge",
+        "InkRecognition.LegacyEnglishCaseInitializationPlan.publication",
+        "InkRecognition.LegacyEnglishCaseInitializationPlan.RequirePublished(System.Threading.CancellationToken)"
+      ],
+      "LegacyNativeGlyphRecordPool.cs": [
+        "(int Owners, int Records).Owners",
+        "(int Owners, int Records).Records",
+        "InkRecognition.LegacyNativeGlyphRecordPool.CopyOwnerNodes(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeGlyphRecordPool.CreateWithoutGeometryCapture(bool, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeGlyphRecordPool.ReadRawExportCounts()"
+      ],
+      "LegacyNativePlainWordPublisher.cs": [
+        "InkRecognition.LegacyNativePlainWordPublisher.Publish(InkRecognition.LegacyNativeWordBuilder, System.Func<int, ushort, int>, System.Func<int, ushort, int>, int, int, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativePlainWordRecord.CopyStorage()"
+      ],
+      "LegacyWideSymbolPairs.cs": [
+        "InkRecognition.LegacyWideSymbolPairs.CreateUnrestricted(InkRecognition.LegacyInkAlphabet, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyEnglishCaseGraphRefreshAllocation.cs": {
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ledger"
+      ]
+    },
+    "LegacyEnglishCaseGraphSpanLease.cs": {
+      "LegacyEnglishCaseGraphLoop.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireGraphLoopSpan(int, byte)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicWorkspace.cs": [
+        "(int Node, int Span).Node",
+        "(int Node, int Span).Span",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.NextActualGraphSpan(InkRecognition.LegacyEnglishFreshCaseMainSource.Node1QueryLease, bool)"
+      ],
+      "LegacyEnglishCaseNode1Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireNode1(InkRecognition.LegacyEnglishFreshCaseMainSource, InkRecognition.LegacyEnglishCaseInitialQueryPass)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireNode1Query(InkRecognition.LegacyEnglishFreshCaseMainSource.Node1QueryLease, InkRecognition.LegacyNativeDelimiterQuery)"
+      ],
+      "LegacyEnglishCaseQueryInitialization.cs": [
+        "InkRecognition.LegacyEnglishCaseInitializationPlan.normal",
+        "InkRecognition.LegacyEnglishCaseInitializationPlan.owner",
+        "InkRecognition.LegacyEnglishCaseInitializationPlan.phase",
+        "InkRecognition.LegacyEnglishCaseInitializationPlan.ValidateParent(System.Threading.CancellationToken)"
+      ],
+      "LegacyNativeDelimiterQuerySource.cs": [
+        "InkRecognition.LegacyNativeDelimiterQuerySource.Read(InkRecognition.LegacyNativeDelimiterQuery, System.Threading.CancellationToken)"
+      ],
+      "LegacyPreparedDictionaryQuerySource.cs": [
+        "InkRecognition.LegacyPreparedDictionaryQuerySource.SetWorkingMap(InkRecognition.LegacyPreparedDictionaryWorkingMap)"
+      ]
+    },
+    "LegacyEnglishCaseGraphTailAdmission.cs": {
+      "LegacyEnglishCaseGraphLoopBudget.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.PreflightGraphLoopPayload(InkRecognition.LegacyEnglish119MainKnowledge, System.Threading.CancellationToken, bool)"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.IsPreparedFor(InkRecognition.LegacyEnglishCasePrimaryCompletion)"
+      ]
+    },
+    "LegacyEnglishCaseGraphWordPublication.cs": {
+      "LegacyEnglishCaseGraphCharacterBindings.cs": [
+        "InkRecognition.LegacyPreparedMainTextGlyphReuse.CopyEnglishRecords(InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterPayload, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyPreparedMainTextGlyphReuse.ReadEnglishCurrentMarkerFlags(InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterSource, InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterPayload, int, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphCharacters.cs": [
+        "InkRecognition.GraphCharacterVisitCharge.MarkerFlags(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphCharacterCommands",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphCharacterContext",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.completed",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.current",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.disposed",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.geometryIdentity",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.joiner",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.next",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.owner",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.payloads",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.positive",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.produced",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.ranges",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.Require(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.RequireCompleted(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.RequireCurrent(InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterSource, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.skipped",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphCharacterNodes",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphCharacters",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterSource.CopyRanges(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphCharactersRequested",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphCharacterTree",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RunGraphFirstCharacters(InkRecognition.LegacyNativeUnicodeNormalizationData, System.Threading.CancellationToken, System.Action<InkRecognition.LegacyEnglishCaseNode0Completion.GraphMainConfidenceObservation>?, bool)"
+      ],
+      "LegacyEnglishCaseGraphEarlySelectedInput.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphEarlySelectedInputData",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphOriginalSelectedRequested",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.CopyEarlySelectedInputData(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.MatchesGraphSelectionBinding(InkRecognition.LegacyOwnedFreshTextSourceContext, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.PrepareEarlyOriginalSelected(System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphFinalCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireGraphPublication(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphFinalSelectedData.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.CopyFinalSelectedData(InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationData, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphGlyphChoices.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.CompleteGraphGlyphChoiceRows(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, InkRecognition.LegacyPreparedMainCompactPublication.Result, InkRecognition.LegacyNativePlainWordPublisher, InkRecognition.LegacyNativeGlyphRecordPool, InkRecognition.LegacyMainOrdinaryGlyphProductionOperations, System.Collections.Generic.IReadOnlyList<ulong>, System.Threading.CancellationToken, InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterOutput, InkRecognition.LegacyEnglishCaseNode0Completion.GraphCompactRefreshIndex?)"
+      ],
+      "LegacyEnglishCaseGraphGlyphDispatch.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCompactRefreshIndex.Issue(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, InkRecognition.LegacyPreparedMainCompactPublication.Result, InkRecognition.LegacyNativeGlyphRecordPool, InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphGlyphGeometry.cs": [
+        "(long Payload, long Copies, long Visits).Copies",
+        "(long Payload, long Copies, long Visits).Payload",
+        "(long Payload, long Copies, long Visits).Visits",
+        "InkRecognition.LegacyEnglish119ParentSubmission.CreateGraphRawDocument(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphGeometryReuseCharge(int, int, int)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphGlyphGeometryContext",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphGlyphGeometryRequested",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.Pairs(System.ReadOnlySpan<InkRecognition.LegacyNativeInkPositionRange>)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ProjectCore(InkRecognition.LegacyOwnedRawInkDocument, InkRecognition.LegacyNativeTextSourceInputMap, System.ReadOnlySpan<InkRecognition.LegacyNativeInkPositionRange>, System.ReadOnlySpan<InkRecognition.LegacyOrdinaryGraphSourceReference>, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.Reserve(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, int, int, int, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicBacktrackRows.cs": [
+        "(long Payload, long Copies, long Visits).Copies",
+        "(long Payload, long Copies, long Visits).Payload",
+        "(long Payload, long Copies, long Visits).Visits",
+        "InkRecognition.LegacyEnglishPeriodicPublicationBudget.SpanCapture(int)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicCost.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicActive"
+      ],
+      "LegacyEnglishCaseGraphPostTextCoverage.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPostTextCoverageData",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPostTextCoverageRequested",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.BeginPostTextChoice(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.CompletePostTextCoverage(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.PreparePostTextState(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.RetainPostTextLink(InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterSource, InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterPayload, int, byte[], System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordPublicationContext.SealPostTextChoice(System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphTailAdmission.cs": [
+        "InkRecognition.LegacyEnglishCasePrimaryCompletion.RequireGraphLoop(InkRecognition.LegacyEnglishCaseNode0Completion, System.Threading.CancellationToken, bool)"
+      ],
+      "LegacyEnglishCaseGraphWordSourceCompletion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordSourceData",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordSourceSession",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphWordSourceSession.RequireCompletedForTop(InkRecognition.LegacyNativePlainWordPublisher, InkRecognition.LegacyNativeGlyphRecordPool, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.primary"
+      ],
+      "LegacyNativePlainWordPublisher.Augmentation.cs": [
+        "InkRecognition.LegacyNativePlainWordPublisher.RequireSoleActiveSourceHead(InkRecognition.LegacyNativePublishedWordNode)"
+      ],
+      "LegacyNativePlainWordPublisher.cs": [
+        "InkRecognition.LegacyNativePlainWordPublisher.CaptureSpan(InkRecognition.LegacyNativePublishedWordNode, System.Collections.Generic.IReadOnlyList<InkRecognition.LegacyNativePublishedWordNode?>, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativePlainWordRecord.CopyStorage()"
+      ],
+      "LegacyNativePlainWordPublisher.LiveSpan.cs": [
+        "InkRecognition.LegacyNativePlainWordPublisher.ReadPublicationHistoryCount()",
+        "InkRecognition.LegacyNativePlainWordPublisher.RequireLiveSpanRows(InkRecognition.LegacyNativePlainWordSpanSnapshot, System.Threading.CancellationToken)"
+      ],
+      "LegacyOwnedRawInkDocument.cs": [
+        "InkRecognition.LegacyOwnedRawInkDocument.CopySelectedInputs()"
+      ]
+    },
+    "LegacyEnglishCaseGraphWordSourceCompletion.cs": {
+      "LegacyEnglishCaseGraphCharacters.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphCharacterContext",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphCharacterContext.Dispose()",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphCharactersRequested"
+      ],
+      "LegacyEnglishCaseGraphEarlySelectedInput.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphEarlySelectedInputData",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphOriginalSelectedRequested"
+      ],
+      "LegacyEnglishCaseGraphFinalCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireGraphPublication(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphGlyphChoices.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphGlyphChoicesRequested"
+      ],
+      "LegacyEnglishCaseGraphGlyphGeometry.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphGlyphGeometryRequested"
+      ],
+      "LegacyEnglishCaseGraphLoop.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopGeometry",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RunGraphFirstPeriodicWordSourceExecution(System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicAlternativeWalk.cs": [
+        "InkRecognition.LegacyEnglishPeriodicSpanAlternativeWalkKernel.Run(int, int, bool, ushort, System.ReadOnlySpan<byte>, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicCost.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicActive"
+      ],
+      "LegacyEnglishCaseGraphPeriodicWordEquality.cs": [
+        "InkRecognition.LegacyEnglishPeriodicWordEquality.Compare(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, InkRecognition.LegacyNativeGlyphRecordPool, System.ReadOnlySpan<byte>, System.ReadOnlySpan<byte>, System.Span<byte>, System.Span<byte>, ushort, System.Func<ushort, ushort>?, System.Func<string, ushort>?, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphPostTextCoverage.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPostTextCoverageData",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPostTextCoverageRequested"
+      ],
+      "LegacyEnglishCaseGraphProtocolGlyph.cs": [
+        "InkRecognition.LegacyEnglishCaseNode1Geometry.RequireGraphProtocolOwner(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphRawWord.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphRawWord",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RunGraphFirstRawWord(System.Threading.CancellationToken, System.Action<InkRecognition.LegacyEnglishCaseNode0Completion.GraphMainConfidenceObservation>?)"
+      ],
+      "LegacyEnglishCaseGraphTailAdmission.cs": [
+        "InkRecognition.LegacyEnglishCasePrimaryCompletion.RequireGraphLoop(InkRecognition.LegacyEnglishCaseNode0Completion, System.Threading.CancellationToken, bool)"
+      ],
+      "LegacyEnglishCaseGraphWordPublication.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordPublicationData",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphWordPublicationRequested"
+      ],
+      "LegacyEnglishCaseGraphWordSourceRanges.cs": [
+        "InkRecognition.LegacyEnglish119MainLocalCandidates.GraphWordRangeReceipt.CopyDiagnosticInputs(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglish119MainLocalCandidates.GraphWordRangeReceipt.Preflight(int, int, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglish119MainLocalCandidates.GraphWordRangeReceipt.ReadMode2(int, int, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglish119MainLocalCandidates.GraphWordRangeReceipt.Require(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglish119MainLocalCandidates.RetainGraphWordRanges(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ledger",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.phase",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.primary"
+      ],
+      "LegacyEnglishOriginalInputContext.cs": [
+        "InkRecognition.LegacyEnglishCasePrimaryCompletion.ReleaseOriginalInputContext()",
+        "InkRecognition.LegacyEnglishCasePrimaryCompletion.RequirePreNeuralOriginalInputContext(System.Threading.CancellationToken)"
+      ],
+      "LegacyNativeGlyphRecordPool.Cleanup.cs": [
+        "InkRecognition.LegacyNativeGlyphRecordPool.RemoveCreatedChainSegment(ulong, ulong, System.Threading.CancellationToken)"
+      ],
+      "LegacyNativeGlyphRecordPool.cs": [
+        "InkRecognition.LegacyNativeGlyphRecordPool.CopyOwnerNodes(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeGlyphRecordPool.CopyRecord(ulong, System.Threading.CancellationToken)"
+      ],
+      "LegacyNativePlainWordPublisher.Augmentation.cs": [
+        "InkRecognition.LegacyNativePlainWordPublisher.RequireSoleActiveSourceHead(InkRecognition.LegacyNativePublishedWordNode)",
+        "InkRecognition.LegacyNativePlainWordPublisher.UpdateAugmentedDuplicate(InkRecognition.LegacyNativePlainWordSpanSnapshot, int, int, float, float, float, ushort, System.Threading.CancellationToken)"
+      ],
+      "LegacyNativePlainWordPublisher.cs": [
+        "InkRecognition.LegacyNativePlainWordPublisher.ApplySpanRanking(InkRecognition.LegacyNativePlainWordSpanSnapshot, System.Collections.Generic.IReadOnlyList<byte[]>, System.ReadOnlySpan<int>, System.ReadOnlySpan<int>, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativePlainWordPublisher.ApplySpanScores(InkRecognition.LegacyNativePlainWordSpanSnapshot, System.Collections.Generic.IReadOnlyList<byte[]>, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativePlainWordPublisher.CaptureSpan(InkRecognition.LegacyNativePublishedWordNode, System.Collections.Generic.IReadOnlyList<InkRecognition.LegacyNativePublishedWordNode?>, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativePlainWordPublisher.InternPlainWord(InkRecognition.LegacyNativeWordBuilder, InkRecognition.LegacyNativeWordSourceSpan, out int, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativePlainWordRecord.CopyStorage()"
+      ]
+    },
+    "LegacyEnglishCaseGraphWordSourceRanges.cs": {
+      "LegacyEnglishCaseGraphFinalCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireGraphPublication(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyOrdinaryGraphSourceRanges.cs": [
+        "InkRecognition.LegacyOrdinaryGraphSourceRanges.keys",
+        "InkRecognition.LegacyOrdinaryGraphSourceRanges.ResolveCandidateWithResiduals(int, int, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyOrdinaryGraphSourceRanges.ResolveCandidateWithResidualsMetered(int, int, System.Threading.CancellationToken, InkRecognition.LegacyOrdinarySourceTraversalMeter)",
+        "InkRecognition.LegacyOrdinaryGraphSourceRanges.ResolveForwardWithResiduals(uint, uint, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyOrdinaryGraphSourceRanges.seedGraph"
+      ],
+      "LegacyOrdinaryGraphSourceRanges.EnglishPeriodic.cs": [
+        "InkRecognition.LegacyOrdinaryGraphSourceRanges.ResolvePeriodicForwardWithResiduals(InkRecognition.LegacyEnglish119MainLocalCandidates.GraphWordRangeReceipt, uint, uint, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyEnglishCaseNode0Auxiliary.cs": {
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.index",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ledger",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ring",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.Stage.Require()"
+      ],
+      "LegacyEnglishCaseNode0LexiconIndex.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0LexiconIndex.ChargeBindingChecks()",
+        "InkRecognition.LegacyEnglishCaseNode0LexiconIndex.ChargeEmptyAuxiliaryRead(ulong)",
+        "InkRecognition.LegacyEnglishCaseNode0LexiconIndex.RequireEmptyAuxiliary(System.ReadOnlySpan<ushort>)"
+      ],
+      "LegacyEnglishCaseQueryInitialization.cs": [
+        "InkRecognition.LegacyEnglishCaseInitializationPlan.auxiliary",
+        "InkRecognition.LegacyEnglishCaseInitializationPlan.RequirePublished(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseInitializationPlan.ValidateParent(System.Threading.CancellationToken)"
+      ],
+      "LegacyNativeAuxiliaryDelimiterQuerySource.cs": [
+        "InkRecognition.LegacyNativeAuxiliaryDelimiterQuerySource.Read(ulong, InkRecognition.LegacyPreparedDictionaryQuery, System.Threading.CancellationToken)"
+      ],
+      "LegacyPreparedDictionaryQuerySource.cs": [
+        "InkRecognition.LegacyPreparedDictionaryQuerySource.lexicon",
+        "InkRecognition.LegacyPreparedDictionaryQuerySource.map",
+        "InkRecognition.LegacyPreparedDictionaryQuerySource.reading",
+        "InkRecognition.LegacyPreparedDictionaryQuerySource.recordScratch"
+      ]
+    },
+    "LegacyEnglishCaseNode0Completion.cs": {
+      "LegacyEnglishCaseNode0Auxiliary.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RunAuxiliaryPrefixDraft(InkRecognition.LegacyEnglishCaseNode0Completion.Stage, int, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseNode0LexiconIndex.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0LexiconIndex.Prepare(InkRecognition.LegacyEnglishLkFreshNumericBinding, InkRecognition.LegacyEnglishCaseNode0Ledger, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseNode0NativeFreshPolicy.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0NativeFreshPolicy.BindInitialization(InkRecognition.LegacyEnglishCaseNode0Completion, InkRecognition.LegacyEnglishCasePrimaryCompletion, InkRecognition.LegacyEnglishCaseInitialConsumer, InkRecognition.LegacyEnglishCaseInitialQueryPass, InkRecognition.LegacyEnglishFreshCaseMainSource.InitializationLease, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0NativeFreshPolicy.Prepare(InkRecognition.LegacyEnglish119MainKnowledge, InkRecognition.LegacyEnglishLkFreshNumericBinding, InkRecognition.LegacyEnglishCaseNode0Ledger, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseNode0Ring.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Ring.Cleanup(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.ClearCurrent3e(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Ring.ClearNode0Counters(int, int)"
+      ]
+    },
+    "LegacyEnglishCaseNode0LexiconIndex.cs": {},
+    "LegacyEnglishCaseNode0NativeFreshPolicy.cs": {
+      "LegacyEnglishCaseGraphLanguageStage.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope.Require(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope.RequirePhase1()"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireNativeFreshPolicy(InkRecognition.LegacyEnglishCaseNode0NativeFreshPolicy)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.Stage.Require()",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.Stage.RequireNativeFreshPolicy(InkRecognition.LegacyEnglishCaseNode0NativeFreshPolicy)"
+      ],
+      "LegacyNativeCasePreparation.cs": [
+        "InkRecognition.LegacyNativeCasePreparation.ReadClassification(ushort, bool)"
+      ]
+    },
+    "LegacyEnglishCaseNode0Ring.cs": {},
+    "LegacyEnglishCaseNode1Completion.cs": {
+      "LegacyEnglishCaseGraphLanguageStage.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLanguageScope",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.PrepareGraphLanguageInputs(InkRecognition.LegacyEnglishFreshCaseMainSource.Node1QueryLease, int, InkRecognition.LegacyEnglishCaseNode1Materialization.Images, InkRecognition.LegacyCursiveCategoryProfile, bool, System.Threading.CancellationToken, int, InkRecognition.LegacyEnglishCaseNode0Completion.GraphLoopOutput)"
+      ],
+      "LegacyEnglishCaseGraphLoop.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphLoopActive",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireGraphLoopQuery(InkRecognition.LegacyEnglishFreshCaseMainSource.Node1QueryLease, InkRecognition.LegacyNativeDelimiterQuery)"
+      ],
+      "LegacyEnglishCaseGraphTailAdmission.cs": [
+        "InkRecognition.LegacyEnglishCasePrimaryCompletion.RequireTwoNodeGraphTail(InkRecognition.LegacyEnglishCaseNode0Completion, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.activeStage",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.completedBacking",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ledger",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.pending",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.pendingReceipt",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.phase",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.primary",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.ring",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.thread"
+      ],
+      "LegacyEnglishCaseNode1Preparation.cs": [
+        "InkRecognition.LegacyEnglishCasePrimaryCompletion.Node1Pass(InkRecognition.LegacyEnglishCaseNode0Completion)"
+      ],
+      "LegacySymbolContextFactory.cs": [
+        "InkRecognition.LegacySymbolContextFactory.CopyNodes()"
+      ]
+    },
+    "LegacyEnglishCaseNode1Preparation.cs": {
+      "LegacyEnglishCaseExecutionPool.cs": [
+        "InkRecognition.LegacyEnglishCaseExecutionPoolReceipt.Preflight(InkRecognition.LegacyEnglish119MainKnowledge, InkRecognition.LegacyEnglishLkFreshNumericBinding, long, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseExecutionPoolReceipt.PreflightOuterWide(InkRecognition.LegacyEnglish119MainKnowledge, InkRecognition.LegacyEnglishLkFreshNumericBinding, long, InkRecognition.LegacyEnglishCaseNode0Ledger, InkRecognition.LegacyNativeTextPublicationData, InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicPreparation, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseGraphLoopBudget.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.PreflightGraphLoopPayload(InkRecognition.LegacyEnglish119MainKnowledge, System.Threading.CancellationToken, bool)"
+      ],
+      "LegacyEnglishCaseGraphPeriodicPreparation.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicPreparation.Require(InkRecognition.LegacyEnglish119MainKnowledge, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphPeriodicPrepared"
+      ],
+      "LegacyEnglishCaseNode0Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.IsRunningFor(InkRecognition.LegacyEnglishCasePrimaryCompletion)"
+      ],
+      "LegacyEnglishCaseNode0LexiconIndex.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0LexiconIndex.Prepare(InkRecognition.LegacyEnglishLkFreshNumericBinding, InkRecognition.LegacyEnglishCaseNode0Ledger, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseNode0NativeFreshPolicy.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0NativeFreshPolicy.Prepare(InkRecognition.LegacyEnglish119MainKnowledge, InkRecognition.LegacyEnglishLkFreshNumericBinding, InkRecognition.LegacyEnglishCaseNode0Ledger, System.Threading.CancellationToken)"
+      ],
+      "LegacyEnglishCaseNode1Completion.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.PreflightNode1(InkRecognition.LegacyEnglish119MainKnowledge, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.PreflightNode1WholeStart(InkRecognition.LegacyEnglish119MainKnowledge, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyEnglishCaseQueryInitialization.cs": {
+      "LegacyEnglishCaseExecutionPool.cs": [
+        "InkRecognition.LegacyEnglishCaseExecutionPoolReceipt.PrepareOuterWide(InkRecognition.LegacyEnglishCaseInitializationPlan, InkRecognition.LegacyNativeCaseAlphabetRanges, InkRecognition.LegacyNativeTextPublicationData, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseExecutionPoolReceipt.RequireCapacity(InkRecognition.LegacyEnglishCaseInitializationPlan)"
+      ],
+      "LegacyNativeCaseNormalQuerySource.cs": [
+        "InkRecognition.LegacyNativeCaseNormalQuerySource.BindOwnedOrdinaryDictionary(InkRecognition.LegacyNativeCaseRecordExpansion, InkRecognition.LegacyPreparedDictionaryQuerySource, InkRecognition.LegacyOrdinaryRecognitionGraph, bool, bool)"
+      ],
+      "LegacyNativeCasePreparation.cs": [
+        "InkRecognition.LegacyNativeCasePreparation.Prepare(InkRecognition.LegacyNativeCaseAlphabetRanges, InkRecognition.LegacyNativeTextPublicationData, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeCasePreparation.ReadClassification(ushort, bool)"
+      ],
+      "LegacySymbolContextFactory.cs": [
+        "InkRecognition.LegacySymbolContextFactory.CopyNodes()",
+        "InkRecognition.LegacySymbolContextFactory.CopyPageUsedCounts()"
+      ],
+      "LegacyTaggedAggregateDictionaryQuerySource.cs": [
+        "InkRecognition.LegacyTaggedAggregateDictionaryQuerySource.Read(ulong, InkRecognition.LegacyPreparedDictionaryQuery, bool, bool, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyTaggedDictionaryChild.BindEnglishInitialization(InkRecognition.LegacyEnglishCaseInitializationBindings)"
+      ]
+    },
+    "LegacyEnglishOriginalInputContext.cs": {
+      "LegacyEnglishCaseGraphEarlySelectedInput.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.graphOriginalSelectedRequested"
+      ],
+      "LegacyEnglishCaseGraphFinalCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequireGraphPublication(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope, System.Threading.CancellationToken)"
+      ],
+      "LegacyOwnedRawInkDocument.cs": [
+        "InkRecognition.LegacyOwnedRawInkDocument.Create(System.Collections.Generic.IReadOnlyList<InkRecognition.InkStroke>, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyFloatContextGeometry.cs": {
+      "LegacyDegenerateFloatContextGeometry.cs": [
+        "InkRecognition.LegacyDegenerateFloatContextGeometry.ExtractValidated(System.Collections.Generic.IReadOnlyList<InkRecognition.InkStroke>, float, float, float, float, bool, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyFreshMainGlobalPlainRecognition.cs": {
+      "LegacyOwnedRawInkDocument.cs": [
+        "InkRecognition.LegacyOwnedRawInkDocument.Create(System.Collections.Generic.IReadOnlyList<InkRecognition.InkStroke>, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyFreshMainGlobalWordAugmentation.cs": {
+      "LegacyNativeGlyphRecordPool.Cleanup.cs": [
+        "InkRecognition.LegacyNativeGlyphRecordPool.RemoveCreatedChainSegment(ulong, ulong, System.Threading.CancellationToken)"
+      ],
+      "LegacyNativeGlyphRecordPool.cs": [
+        "InkRecognition.LegacyNativeGlyphRecordPool.CopyRecord(ulong, System.Threading.CancellationToken)"
+      ],
+      "LegacyNativePlainWordPublisher.Augmentation.cs": [
+        "InkRecognition.LegacyNativePlainWordPublisher.RequireSoleActiveSourceHead(InkRecognition.LegacyNativePublishedWordNode)",
+        "InkRecognition.LegacyNativePlainWordPublisher.UpdateAugmentedDuplicate(InkRecognition.LegacyNativePlainWordSpanSnapshot, int, int, float, float, float, ushort, System.Threading.CancellationToken)"
+      ],
+      "LegacyNativePlainWordPublisher.cs": [
+        "InkRecognition.LegacyNativePlainWordPublisher.ApplySpanRanking(InkRecognition.LegacyNativePlainWordSpanSnapshot, System.Collections.Generic.IReadOnlyList<byte[]>, System.ReadOnlySpan<int>, System.ReadOnlySpan<int>, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativePlainWordPublisher.ApplySpanScores(InkRecognition.LegacyNativePlainWordSpanSnapshot, System.Collections.Generic.IReadOnlyList<byte[]>, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativePlainWordPublisher.CaptureSpan(InkRecognition.LegacyNativePublishedWordNode, System.Collections.Generic.IReadOnlyList<InkRecognition.LegacyNativePublishedWordNode?>, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativePlainWordPublisher.InternPlainWord(InkRecognition.LegacyNativeWordBuilder, InkRecognition.LegacyNativeWordSourceSpan, out int, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativePlainWordRecord.CopyStorage()"
+      ]
+    },
+    "LegacyFreshMainGlobalWordTextPublication.cs": {
+      "LegacyNativeGlyphRecordPool.cs": [
+        "InkRecognition.LegacyNativeGlyphRecordPool.CopyOwnerNode(ulong, System.Threading.CancellationToken)"
+      ],
+      "LegacyNativePlainWordPublisher.cs": [
+        "InkRecognition.LegacyNativePlainWordRecord.CopyStorage()"
+      ],
+      "LegacyOwnedRawInkDocument.cs": [
+        "InkRecognition.LegacyOwnedRawInkDocument.CopySelectedInputs()"
+      ]
+    },
+    "LegacyInitialWordHeapTail.cs": {},
+    "LegacyNativeAuxiliaryDelimiterQuerySource.cs": {
+      "LegacySymbolContextFactory.cs": [
+        "InkRecognition.LegacySymbolContextFactory.ReadNode(ulong)"
+      ]
+    },
+    "LegacyNativeCaseNormalQuerySource.cs": {
+      "LegacyEnglishCaseGraphPeriodicQueryBudget.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.Allocate(long)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.Copy(long)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.Propagate(InkRecognition.LegacyPreparedDictionaryQuery, InkRecognition.LegacyPreparedDictionaryQuery)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.Visit(long)"
+      ]
+    },
+    "LegacyNativeCasePreparation.cs": {
+      "LegacyEnglishCaseExecutionPool.cs": [
+        "InkRecognition.LegacyEnglishCaseExecutionPoolReceipt.ObserveOuterWideText(ushort, string?, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyNativeDelimiterQuerySource.cs": {
+      "LegacyEnglishCaseGraphPeriodicQueryBudget.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.Allocate(long)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.Copy(long)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.End()",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.Propagate(InkRecognition.LegacyPreparedDictionaryQuery, InkRecognition.LegacyPreparedDictionaryQuery)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.Visit(long)",
+        "InkRecognition.LegacySymbolContextFactory.BeginPeriodicNormalQuery(InkRecognition.LegacyNativeDelimiterQuerySource, InkRecognition.LegacyPreparedDictionaryQuery, System.Threading.CancellationToken)",
+        "InkRecognition.LegacySymbolContextFactory.ObservePeriodicNormalReset(InkRecognition.LegacyNativeDelimiterQuerySource, System.Threading.CancellationToken)"
+      ],
+      "LegacyOrdinarySourceInk.cs": [
+        "InkRecognition.LegacyOrdinarySourceInk.ReadV10dResourceProfile(System.ReadOnlySpan<byte>, int)"
+      ],
+      "LegacySymbolContextFactory.cs": [
+        "InkRecognition.LegacySymbolContextFactory.LinkCreatedContext(ulong, ulong)",
+        "InkRecognition.LegacySymbolContextFactory.ReadNode(ulong)",
+        "InkRecognition.LegacySymbolContextFactory.ResolveChild(ulong, ushort, System.Threading.CancellationToken)",
+        "InkRecognition.LegacySymbolContextFactory.ResolveInitial(ushort, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyNativeGlyphRecordPool.Cleanup.cs": {
+      "LegacyNativeGlyphRecordPool.cs": [
+        "InkRecognition.LegacyNativeGlyphRecordPool.nodes",
+        "InkRecognition.LegacyNativeGlyphRecordPool.ResolveRow(ulong)",
+        "InkRecognition.LegacyNativeGlyphRecordPool.totalRecords"
+      ]
+    },
+    "LegacyNativeGlyphRecordPool.cs": {},
+    "LegacyNativeGlyphScoreCache.cs": {},
+    "LegacyNativeGlyphSymbolUpdate.cs": {
+      "LegacyNativeGlyphRecordPool.cs": [
+        "InkRecognition.LegacyNativeGlyphRecordPool.CopyRecord(ulong, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeGlyphRecordPool.DescriptorBatch.CopyRecord(InkRecognition.LegacyNativeGlyphRecordPool, ulong, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeGlyphRecordPool.DescriptorBatch.ReplaceRecord(InkRecognition.LegacyNativeGlyphRecordPool, ulong, System.ReadOnlySpan<byte>, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeGlyphRecordPool.ReplaceRecord(ulong, System.ReadOnlySpan<byte>, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyNativeOrdinaryGlyphRefreshKernel.cs": {
+      "LegacyNativeGlyphRecordPool.cs": [
+        "InkRecognition.LegacyNativeGlyphRecordPool.AppendDescriptor(ulong, int, bool, System.ReadOnlySpan<byte>, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeGlyphRecordPool.CopyRecord(ulong, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeGlyphRecordPool.DescriptorBatch.Append(int, System.ReadOnlySpan<byte>, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeGlyphRecordPool.DescriptorBatch.CopyRecord(InkRecognition.LegacyNativeGlyphRecordPool, ulong, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeGlyphRecordPool.DescriptorBatch.ReplaceRecord(InkRecognition.LegacyNativeGlyphRecordPool, ulong, System.ReadOnlySpan<byte>, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeGlyphRecordPool.ReplaceRecord(ulong, System.ReadOnlySpan<byte>, System.Threading.CancellationToken)"
+      ],
+      "LegacyNativeGlyphSymbolUpdate.cs": [
+        "InkRecognition.LegacyNativeGlyphSymbolUpdate.Apply(InkRecognition.LegacyNativeGlyphRecordPool, ulong, ushort, int, byte, bool, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeGlyphSymbolUpdate.ApplyUsingBatch(InkRecognition.LegacyNativeGlyphRecordPool, InkRecognition.LegacyNativeGlyphRecordPool.DescriptorBatch, ulong, ushort, int, byte, bool, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyNativeOrdinaryParentWordCandidates.EnglishPeriodic.cs": {
+      "LegacyEnglishCaseGraphPeriodicRows.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicRows.ChargePage(int, int)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicRows.ChargeRequest()",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicRows.RequirePage(System.ReadOnlySpan<byte>, System.ReadOnlySpan<byte>, int, ushort, InkRecognition.LegacyOrdinaryRecognitionGraph, InkRecognition.LegacySymbolContextFactory, InkRecognition.LegacyInkAlphabet, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeWordHeapRouter.TryInsertPeriodicInitialRecord(InkRecognition.LegacyInitialWordRecordFields, InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicRows, System.Threading.CancellationToken)"
+      ],
+      "LegacySymbolContextFactory.cs": [
+        "InkRecognition.LegacySymbolContextFactory.ReadNode(ulong)"
+      ]
+    },
+    "LegacyNativePlainWordPublisher.Augmentation.cs": {
+      "LegacyNativePlainWordPublisher.cs": [
+        "InkRecognition.LegacyNativePlainWordPublisher.interning",
+        "InkRecognition.LegacyNativePlainWordPublisher.pool",
+        "InkRecognition.LegacyNativePlainWordPublisher.released",
+        "InkRecognition.LegacyNativePlainWordRecord.CopyStorage()",
+        "InkRecognition.LegacyNativePublishedWordNode.RebindWord(int, InkRecognition.LegacyNativePlainWordRecord)"
+      ]
+    },
+    "LegacyNativePlainWordPublisher.cs": {
+      "LegacyNativeGlyphRecordPool.cs": [
+        "InkRecognition.LegacyNativeGlyphRecordPool.CopyRecord(ulong, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyNativePlainWordPublisher.LiveSpan.cs": {
+      "LegacyNativePlainWordPublisher.cs": [
+        "InkRecognition.LegacyNativePlainWordPublisher.interning",
+        "InkRecognition.LegacyNativePlainWordPublisher.released"
+      ]
+    },
+    "LegacyNativeWordHeapDescriptor.GraphPhase1.cs": {
+      "LegacyEnglishCaseGraphLanguageStage.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope.ClaimPhase1()",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope.PublishMaterializedMinimum(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope.Require(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope.RequireFirstOnlyPattern()",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope.RequirePhase1()"
+      ],
+      "LegacyEnglishCaseGraphPeriodicWorkspace.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicWorkspace.Phase1Partitions(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicWorkspace.Phase1Pivot(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicWorkspace.Phase1Temporary(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.RequirePeriodicWorkspace(InkRecognition.LegacyEnglishCaseNode0Completion.GraphLanguageScope)"
+      ]
+    },
+    "LegacyNativeWordHeapRouter.cs": {
+      "LegacyInitialWordHeapTail.cs": [
+        "InkRecognition.LegacyInitialWordHeapTail.Initialize(System.Span<byte>, bool, System.Func<int, ushort, System.ReadOnlyMemory<byte>>?)"
+      ],
+      "LegacyNativeWordRecordHeap.cs": [
+        "InkRecognition.LegacyNativeWordRecordHeap.GetSlotSnapshot(int)",
+        "InkRecognition.LegacyNativeWordRecordHeap.TryAllocate(int, InkRecognition.LegacyNativeWordSlotInitializer, System.Action<System.ReadOnlyMemory<byte>>?, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyNativeWordRecordHeap.cs": {
+      "LegacyEnglishCaseGraphPeriodicWorkspace.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicWorkspace.ChargeHeapSnapshot(InkRecognition.LegacyNativeWordRecordHeap, int)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicWorkspace.Copy(long)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicWorkspace.RequireQueryHeap(InkRecognition.LegacyNativeWordRecordHeap, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicWorkspace.Visit(long)"
+      ],
+      "LegacyInitialWordHeapTail.cs": [
+        "InkRecognition.LegacyInitialWordHeapTail.Initialize(System.Span<byte>, bool, System.Func<int, ushort, System.ReadOnlyMemory<byte>>?)"
+      ]
+    },
+    "LegacyOrdinaryGraphSourceRanges.cs": {
+      "LegacyOrdinarySourceInk.cs": [
+        "InkRecognition.LegacyOrdinarySourceInk.ResolveEndingMetadata(InkRecognition.LegacySourcePointIdentity, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyOrdinarySourceInk.ResolveEndingMetadataMetered(InkRecognition.LegacySourcePointIdentity, System.Threading.CancellationToken, InkRecognition.LegacyOrdinarySourceTraversalMeter)"
+      ],
+      "LegacySourcePointChronology.cs": [
+        "InkRecognition.LegacySourcePointChronology.Resolve(int, int)"
+      ]
+    },
+    "LegacyOrdinaryGraphSourceRanges.EnglishPeriodic.cs": {
+      "LegacyEnglishCaseGraphWordSourceRanges.cs": [
+        "InkRecognition.LegacyEnglish119MainLocalCandidates.GraphWordRangeReceipt.ChargeVisits(long)",
+        "InkRecognition.LegacyEnglish119MainLocalCandidates.GraphWordRangeReceipt.RequirePeriodicSource(InkRecognition.LegacyOrdinaryGraphSourceRanges, System.Threading.CancellationToken)"
+      ],
+      "LegacyOrdinaryGraphSourceRanges.cs": [
+        "InkRecognition.LegacyOrdinaryGraphSourceRanges.keys",
+        "InkRecognition.LegacyOrdinaryGraphSourceRanges.original",
+        "InkRecognition.LegacyOrdinaryGraphSourceRanges.prepared",
+        "InkRecognition.LegacyOrdinaryGraphSourceRanges.ProjectOwnedRows(InkRecognition.LegacySourcePointChronology, InkRecognition.LegacyOrdinarySourceInk, System.Collections.Generic.IReadOnlyList<InkRecognition.LegacyInkRange>, InkRecognition.LegacySourcePointKey[], System.Threading.CancellationToken, InkRecognition.LegacyOrdinarySourceTraversalMeter?)",
+        "InkRecognition.LegacyOrdinaryGraphSourceRanges.seedGraph",
+        "InkRecognition.LegacyOrdinaryGraphSourceRanges.seeds"
+      ]
+    },
+    "LegacyOrdinarySourceInk.cs": {
+      "LegacyOrdinaryGraphSourceRanges.cs": [
+        "InkRecognition.LegacyOrdinarySourceTraversalMeter.Before(long)"
+      ],
+      "LegacySourcePointChronology.cs": [
+        "InkRecognition.LegacySourcePointChronology.CreatePrepared(System.ReadOnlySpan<int>, System.ReadOnlySpan<InkRecognition.LegacySourcePointKey>, System.ReadOnlySpan<int>, System.ReadOnlySpan<uint>, uint)",
+        "InkRecognition.LegacySourcePointChronology.Resolve(int, int)"
+      ]
+    },
+    "LegacyOwnedRawInkDocument.cs": {},
+    "LegacyPreparedAggregateDictionaryQuerySource.cs": {
+      "LegacyEnglishCaseGraphPeriodicQueryBudget.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.Allocate(long)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.Copy(long)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.Visit(long)"
+      ],
+      "LegacyPreparedDictionaryQuerySource.cs": [
+        "InkRecognition.LegacyPreparedDictionaryQuerySource.Read(InkRecognition.LegacyPreparedDictionaryQuery, bool, System.Func<ulong, ushort, InkRecognition.LegacyDictionaryQueryContext>?, System.Action<ulong, ulong>?, bool, System.Threading.CancellationToken)"
+      ],
+      "LegacySymbolContextFactory.cs": [
+        "InkRecognition.LegacySymbolContextFactory.LinkCreatedContext(ulong, ulong)",
+        "InkRecognition.LegacySymbolContextFactory.ResolveChild(ulong, ushort, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyPreparedDictionaryQuerySource.cs": {
+      "LegacyEnglishCaseGraphPeriodicQueryBudget.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.Allocate(long)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.Copy(long)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.Visit(long)"
+      ]
+    },
+    "LegacyPreparedMainCompactPublication.cs": {
+      "LegacySymbolContextFactory.cs": [
+        "InkRecognition.LegacySymbolContextFactory.ReadNode(ulong)"
+      ]
+    },
+    "LegacyPreparedMainCompactPublication.EnglishPeriodic.cs": {
+      "LegacyEnglishCaseGraphPeriodicCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.Allocate(long)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.BeforeFrame(ulong, ulong)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.CompactStorage()",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.Copy(long)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.PrefixOwners()",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.Primary(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.Require(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.Rows(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.SourceEnd(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.Starts()",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.Visit(long)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.WritePrimaryOrdinal(int, int, int, ushort)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.WriteRowOrdinal(int, int, ushort)"
+      ],
+      "LegacyPreparedMainCompactPublication.cs": [
+        "InkRecognition.LegacyPreparedMainCompactPublication.I32(System.ReadOnlySpan<byte>, int)",
+        "InkRecognition.LegacyPreparedMainCompactPublication.Pack(int, int)",
+        "InkRecognition.LegacyPreparedMainCompactPublication.U16(System.ReadOnlySpan<byte>, int)",
+        "InkRecognition.LegacyPreparedMainCompactPublication.U64(System.ReadOnlySpan<byte>, int)",
+        "InkRecognition.LegacyPreparedMainCompactPublication.Write(System.Span<byte>, ulong, ulong, int, int, int, ushort, ushort, byte, byte, int)"
+      ],
+      "LegacySymbolContextFactory.cs": [
+        "InkRecognition.LegacySymbolContextFactory.ReadNode(ulong)"
+      ]
+    },
+    "LegacyPreparedMainCompactReachability.cs": {
+      "LegacyNativeDelimiterQuerySource.cs": [
+        "InkRecognition.LegacyNativeDelimiterQuerySource.Read(InkRecognition.LegacyNativeDelimiterQuery, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacyPreparedMainCompactReachability.EnglishPeriodic.cs": {
+      "LegacyEnglishCaseGraphPeriodicCompact.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.Allocate(long)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.ClearPrimaryMark(int, int)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.ClearRowMark(int, int)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.Copy(long)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.MarkPrimary(int, int, int)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.MarkRow(int, int)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.Primary(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.Require(System.Threading.CancellationToken)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.Rows(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.SourceEnd(int)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicCompactStore.Visit(long)"
+      ],
+      "LegacyNativeDelimiterQuerySource.cs": [
+        "InkRecognition.LegacyNativeDelimiterQuerySource.Read(InkRecognition.LegacyNativeDelimiterQuery, System.Threading.CancellationToken)"
+      ],
+      "LegacyPreparedMainCompactReachability.cs": [
+        "InkRecognition.LegacyPreparedMainCompactReachability.I32(System.ReadOnlySpan<byte>, int)",
+        "InkRecognition.LegacyPreparedMainCompactReachability.U16(System.ReadOnlySpan<byte>, int)"
+      ]
+    },
+    "LegacyPreparedMainTextGlyphReuse.cs": {
+      "LegacyEnglishCaseGraphCharacters.cs": [
+        "InkRecognition.ILegacyEnglishCharacterReuseVisitBudget.BeforeEmission(System.Threading.CancellationToken)",
+        "InkRecognition.ILegacyEnglishCharacterReuseVisitBudget.BeforeIdentityProbe(System.Threading.CancellationToken)",
+        "InkRecognition.ILegacyEnglishCharacterReuseVisitBudget.BeforeIntern(int, int, System.Threading.CancellationToken)",
+        "InkRecognition.ILegacyEnglishCharacterReuseVisitBudget.BeforePublication(int, int, System.Threading.CancellationToken)"
+      ]
+    },
+    "LegacySourcePointChronology.cs": {},
+    "LegacySymbolContextFactory.cs": {
+      "LegacyEnglishCaseGraphPeriodicContextBudget.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicContextBudget.BeforeInsert(InkRecognition.LegacySymbolContextFactory, int, int, int, int)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicContextBudget.BeforeView(InkRecognition.LegacySymbolContextFactory)"
+      ]
+    },
+    "LegacyTaggedAggregateDictionaryQuerySource.cs": {
+      "LegacyEnglishCaseGraphPeriodicQueryBudget.cs": [
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.Allocate(long)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.CaseWrapper(InkRecognition.LegacyPreparedDictionaryQuery)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.Copy(long)",
+        "InkRecognition.LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope.Visit(long)"
+      ],
+      "LegacyEnglishCaseQueryInitialization.cs": [
+        "InkRecognition.LegacyEnglishCaseInitializationBindings.RequireCurrent()"
+      ],
+      "LegacyNativeCaseNormalQuerySource.cs": [
+        "InkRecognition.LegacyNativeCaseNormalQuerySource.Read(InkRecognition.LegacyNativeCaseNormalQuery, System.Threading.CancellationToken)",
+        "InkRecognition.LegacyNativeCaseNormalQuerySource.ResetForControllerNode()"
+      ],
+      "LegacyPreparedAggregateDictionaryQuerySource.cs": [
+        "InkRecognition.LegacyPreparedAggregateDictionaryQuerySource.CopyAcceptedCountBases()",
+        "InkRecognition.LegacyPreparedAggregateDictionaryQuerySource.Read(ulong, InkRecognition.LegacyPreparedDictionaryQuery, bool, bool, System.Threading.CancellationToken)"
+      ],
+      "LegacyPreparedDictionaryQuerySource.cs": [
+        "InkRecognition.LegacyPreparedDictionaryQuerySource.ResetQueries()"
+      ]
+    },
+    "LegacyWideSymbolPairs.cs": {},
+    "StrokeTextRecognizer.cs": {}
+  }
+}

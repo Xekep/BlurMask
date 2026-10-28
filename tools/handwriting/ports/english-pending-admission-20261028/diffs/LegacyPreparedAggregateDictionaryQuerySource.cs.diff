@@ -1,0 +1,48 @@
+--- main935/LegacyPreparedAggregateDictionaryQuerySource.cs
++++ candidate950/LegacyPreparedAggregateDictionaryQuerySource.cs
+@@ -84,7 +84,7 @@
+         ArgumentNullException.ThrowIfNull(query); cancellationToken.ThrowIfCancellationRequested();
+         if (Interlocked.CompareExchange(ref active, 1, 0) != 0)
+             throw new InvalidOperationException("Aggregate source calls must be serialized.");
+-        int globalSkip = query.Skip;
++        var budget=query.PeriodicQuery;budget?.Allocate(128);budget?.Copy(128);budget?.Visit(256);int globalSkip = query.Skip;
+         try
+         {
+             if (!valid) throw new InvalidOperationException("Failed aggregate preparation requires a fresh session.");
+@@ -110,7 +110,7 @@
+                     {
+                         var page = ReadChild(child, query, auxiliary, clearExtraCosts, cancellationToken);
+                         query.Skip = globalSkip;
+-                        if (page.ReturnedCount != 0) return Stamp(page, current, globalSkip);
++                        if (page.ReturnedCount != 0) return Stamp(page, current, globalSkip,query.PeriodicQuery);
+                     }
+                     query.Skip = globalSkip;
+                     current++;
+@@ -125,7 +125,7 @@
+             cancellationToken.ThrowIfCancellationRequested();
+             if (!selectedEligible)
+                 return new(-1, ReadOnlyMemory<byte>.Empty, ReadOnlyMemory<byte>.Empty, ordinal, globalSkip, null);
+-            return Stamp(ReadChild(selected, query, auxiliary, clearExtraCosts, cancellationToken), ordinal, globalSkip);
++            return Stamp(ReadChild(selected, query, auxiliary, clearExtraCosts, cancellationToken), ordinal, globalSkip,query.PeriodicQuery);
+         }
+         catch { valid = false; throw; }
+         finally { query.Skip = globalSkip; Volatile.Write(ref active, 0); }
+@@ -136,6 +136,7 @@
+     {
+         var before = (query.Node, query.Skip, query.Capacity, query.Parameter1c, query.Parameter20,
+             query.Flags24, query.Flags26, query.Category18, query.Parameter19, query.ContextRoot, query.ParentContext);
++        query.PeriodicQuery?.Allocate(256);query.PeriodicQuery?.Copy(256);query.PeriodicQuery?.Visit(256);
+         var page = child.Read(query, auxiliary, clearExtraCosts, token);
+         token.ThrowIfCancellationRequested();
+         var after = (query.Node, query.Skip, query.Capacity, query.Parameter1c, query.Parameter20,
+@@ -148,8 +149,9 @@
+         return page;
+     }
+ 
+-    private static LegacyAggregateDictionaryQueryPage Stamp(LegacyPreparedDictionaryQueryPage page, int ordinal, int skip)
++    private static LegacyAggregateDictionaryQueryPage Stamp(LegacyPreparedDictionaryQueryPage page, int ordinal, int skip,LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope? budget)
+     {
++        budget?.Allocate(checked(128L+page.Records.Length+page.ClearedExtraCosts.Length));budget?.Copy(checked(page.Records.Length+page.ClearedExtraCosts.Length+Math.Max(0,page.ReturnedCount)));budget?.Visit(checked(64L+Math.Max(0,page.ReturnedCount)*8L));
+         byte[] records = page.Records.ToArray();
+         for (int i = 0; i < Math.Max(0, page.ReturnedCount); i++) records[i * 32 + 4] = (byte)(ordinal + 1);
+         return new(page.ReturnedCount, records, page.ClearedExtraCosts.ToArray(), ordinal, skip, page);

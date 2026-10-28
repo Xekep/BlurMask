@@ -1,0 +1,11 @@
+--- main935/LegacyDegenerateFloatContextGeometry.cs
++++ candidate950/LegacyDegenerateFloatContextGeometry.cs
+@@ -29,7 +29,7 @@
+         for(int i=0;i<3;i++)
+         {
+             result[15+i]=strokes.Count==i+1?1:-1;
+-            result[18+i*4]=i==0?Clip((0f-verticalReference)/four):0;
++            result[18+i*4]=i==0?Clip(-verticalReference/four):0;
+             result[19+i*4]=result[20+i*4]=result[21+i*4]=-1;
+         }
+         foreach(float value in result)if(!float.IsFinite(value))

@@ -1,0 +1,16 @@
+--- main935/LegacyWideSymbolPairs.cs
++++ candidate950/LegacyWideSymbolPairs.cs
+@@ -23,6 +23,13 @@
+         return baseScalar>=0;
+     }
+ 
++    // Pure scalar predicate used by the owning fused preparation. No source authority.
++    internal static bool TryGetSingleWideBase(string? text,out int baseScalar)
++    {
++        baseScalar=-1;
++        return text is not null&&Rune.DecodeFromUtf16(text,out var rune,out int consumed)==OperationStatus.Done&&
++            consumed==text.Length&&TryGetWideBase(rune.Value,out baseScalar);
++    }
+     /// <summary>
+     /// Native param3=false: scan acoustic labels in ascending order and require
+     /// a single UTF32 scalar, a wide substitution, and an exact alphabet lookup.

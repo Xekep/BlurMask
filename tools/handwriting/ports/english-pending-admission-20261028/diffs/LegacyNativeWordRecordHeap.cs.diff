@@ -1,0 +1,69 @@
+--- main935/LegacyNativeWordRecordHeap.cs
++++ candidate950/LegacyNativeWordRecordHeap.cs
+@@ -9,10 +9,11 @@
+ /// bytes0..77, preserves78..7f, and returns a slot to the explicit initializer.
+ /// Native language/bucket routing, root promotion and winner policy are separate.
+ /// </summary>
+-public sealed class LegacyNativeWordRecordHeap
++public sealed partial class LegacyNativeWordRecordHeap
+ {
+     public const int SlotSize = 0x80;
+     private readonly byte[] slots;
++    private readonly LegacyEnglishCaseNode0Completion.GraphPeriodicWorkspace? periodicWorkspace;
+     private bool mutating;
+     public int Capacity { get; }
+     public int Count { get; private set; }
+@@ -31,12 +32,14 @@
+     {
+         if ((uint)slotIndex >= (uint)Count)
+             throw new ArgumentOutOfRangeException(nameof(slotIndex));
++        periodicWorkspace?.ChargeHeapSnapshot(this,SlotSize);
+         return slots.AsSpan(slotIndex * SlotSize, SlotSize).ToArray();
+     }
+ 
+     /// <summary>Owned full-capacity slot storage, including inactive bytes.
+     /// Capacity resizing must retain those bytes rather than infer zeroes.</summary>
+-    public ReadOnlyMemory<byte> GetSlotStorageSnapshot() => slots.ToArray();
++    public ReadOnlyMemory<byte> GetSlotStorageSnapshot()
++    {periodicWorkspace?.ChargeHeapSnapshot(this,slots.Length);return slots.ToArray();}
+ 
+     /// <summary>
+     /// A full heap rejects equal/worse cost; equal children prefer the right
+@@ -49,6 +52,7 @@
+         Action<ReadOnlyMemory<byte>>? onEvictedRoot = null, CancellationToken cancellationToken = default)
+     {
+         ArgumentNullException.ThrowIfNull(initializeSlot); cancellationToken.ThrowIfCancellationRequested();
++        periodicWorkspace?.RequireQueryHeap(this,cancellationToken);
+         if (mutating) throw new InvalidOperationException("Native word heap mutation is not reentrant.");
+         if (Capacity == 0 || candidateCost > 0x3ffffff) return false;
+         mutating = true;
+@@ -70,7 +74,7 @@
+             }
+             else
+             {
+-                target = Count++;
++                periodicWorkspace?.Copy(4);target = Count++;
+                 while (target != 0)
+                 {
+                     int parent = (target - 1) / 2;
+@@ -79,7 +83,7 @@
+                 }
+             }
+             var slot = slots.AsSpan(target * SlotSize, SlotSize);
+-            slot[..0x78].Clear();
++            periodicWorkspace?.Copy(124);slot[..0x78].Clear();
+             BinaryPrimitives.WriteInt32LittleEndian(slot[0x10..], candidateCost);
+             initializeSlot(slot);
+             if (ReadCost(target) != candidateCost)
+@@ -116,7 +120,8 @@
+         }, onEvictedRoot, cancellationToken);
+     }
+ 
+-    private int ReadCost(int index) => BinaryPrimitives.ReadInt32LittleEndian(slots.AsSpan(index * SlotSize + 0x10));
+-    private void CopySlot(int source, int target) =>
+-        slots.AsSpan(source * SlotSize, SlotSize).CopyTo(slots.AsSpan(target * SlotSize, SlotSize));
++    private int ReadCost(int index)
++    {periodicWorkspace?.Visit(4);return BinaryPrimitives.ReadInt32LittleEndian(slots.AsSpan(index * SlotSize + 0x10));}
++    private void CopySlot(int source,int target)
++    {periodicWorkspace?.Visit(SlotSize);periodicWorkspace?.Copy(SlotSize);slots.AsSpan(source*SlotSize,SlotSize).CopyTo(slots.AsSpan(target*SlotSize,SlotSize));}
+ }

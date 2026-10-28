@@ -1,0 +1,49 @@
+--- main935/LegacyEnglishCaseGraphGlyphGeometry.cs
++++ candidate950/LegacyEnglishCaseGraphGlyphGeometry.cs
+@@ -52,6 +52,15 @@
+                 LegacyNativeInkPosition.Pack((uint)document.ObjectCount-1,document.Strokes[^1].Points.Count-1,5,document.Strokes[^1].Points.Count))];
+             operations=LegacyOwnedRawInkRangeOperations.Prepare(document);
+         }
++        // Rich-only immutable-document reuse, prepaid by the WORD clip copier.
++        private GraphGlyphGeometryContext(LegacyEnglishCaseNode0Completion owner,GraphLanguageScope stage,
++            LegacyNativePlainWordPublisher publisher,LegacyNativeGlyphRecordPool pool,LegacyNativePublishedWordNode head,
++            GraphWordSourceData source,LegacyOwnedRawInkDocument document,LegacyNativeInkPositionRange[] copiedWordClip)
++        {
++            this.owner=owner;this.stage=stage;this.publisher=publisher;this.pool=pool;this.head=head;this.source=source;this.document=document;
++            map=document.GraphPublicationMap;original=[document.GraphPublicationRoot];
++            operations=LegacyOwnedRawInkRangeOperations.Prepare(document);wordClip=copiedWordClip;
++        }
+         internal static GraphGlyphGeometryContext Issue(LegacyEnglishCaseNode0Completion owner,GraphLanguageScope stage,
+             LegacyNativePlainWordPublisher publisher,LegacyNativeGlyphRecordPool pool,CancellationToken token)
+         {
+@@ -66,6 +75,14 @@
+                 throw new NotSupportedException("Same actual completed forward WORD source interval required.");
+             var parent=stage.Lease.Root.Knowledge.Owner.Owner.Owner.Parent;
+             var document=owner.graphWordPublicationContext?.Document??parent.CreateGraphRawDocument(stage,token);
++            if(owner.graphPeriodicActive&&owner.graphOriginalSelectedRequested&&owner.graphTextPublicationRequested&&
++                owner.graphWordPublicationContext is{} wordParent)
++            {
++                var clip=wordParent.CopyGeometryWordClip(stage,pool,document,source,token);
++                // Precharge occurred BEFORE constructor field initializers (including List128).
++                var reused=new GraphGlyphGeometryContext(owner,stage,publisher,pool,head,source,document,clip);
++                owner.graphGlyphGeometryContext=reused;reused.Require(token);return reused;
++            }
+             Reserve(stage,source.References.Length,document.ObjectCount,0,token);
+             var result=new GraphGlyphGeometryContext(owner,stage,publisher,pool,head,source,document);
+             owner.graphGlyphGeometryContext=result;
+@@ -108,6 +125,15 @@
+             Require(token);finished=true;return value;
+         }
+     }
++    // Context setup/BeginReference copies/Finish exports only: rich Issue does
++    // not re-run already-completed WORD projection or clone/validate its map.
++    internal static (long Payload,long Copies,long Visits) GraphGeometryReuseCharge(int wordRanges,int objects,int references)
++    {
++        if(wordRanges is<0 or>4096||objects is<1 or>256||references is<1 or>128)throw new ArgumentOutOfRangeException();
++        return(checked(4096L+objects*16L+wordRanges*32L+references*128L),
++            checked(8192L+objects*32L+wordRanges*64L+references*256L),
++            checked(4096L+objects*64L+wordRanges*96L+references*128L));
++    }
+     private static void Reserve(GraphLanguageScope stage,int count,int objects,int filters,CancellationToken token)
+     {
+         stage.Owner.RequireGraphPublication(stage,token);

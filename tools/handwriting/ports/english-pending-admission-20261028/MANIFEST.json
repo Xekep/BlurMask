@@ -1,0 +1,341 @@
+{
+  "scope": "Admission dependency review only; no recognition runtime emitted/executed by semantic compile experiments. Completed950 packet remains separate.",
+  "files": {
+    "README.md": {
+      "bytes": 9504,
+      "sha256": "23e61623fd1266ef1d4437cd776acf1e10863b2d5a1c6c2e87d069598faa5408"
+    },
+    "analyzer/Analyzer.csproj": {
+      "bytes": 599,
+      "sha256": "2edf320b436c004e50891b422fc13a0eb1967a4aeb700a15af0015173f70f6e1"
+    },
+    "analyzer/Program.cs": {
+      "bytes": 3014,
+      "sha256": "b2254cfa9bf8fe32be15ec81cb15a3c6b05bc8ead3b6c4f0b337bd956e0815a7"
+    },
+    "delta-classification.json": {
+      "bytes": 45812,
+      "sha256": "4f7ed2d72cd0134af9c0134f566cb046bc05ce87c5ed554aa48e4d9a1c5de756"
+    },
+    "diffs/ExperimentalGlobalTextRecognizer.Batch.cs.diff": {
+      "bytes": 1298,
+      "sha256": "3d01a1726a0425af7431c655f78f7cde262680fd08afbb78fb46fdb5e75913a6"
+    },
+    "diffs/ExperimentalGlobalTextRecognizer.cs.diff": {
+      "bytes": 2720,
+      "sha256": "9ba6033d9d5be08c20dc7d3c24c563287e56335342c16c16da7642334a894b4c"
+    },
+    "diffs/LegacyDegenerateFloatContextGeometry.cs.diff": {
+      "bytes": 505,
+      "sha256": "d4cc1c3e62a4ea3fa02bde4858c13bd8cb5ceb9403f4363cadde009db791d4f8"
+    },
+    "diffs/LegacyEnglishCaseExecutionPool.cs.diff": {
+      "bytes": 8748,
+      "sha256": "58654232af2a2004912239f552e41a00911391f4592d07eda2f7b8d17c3aad50"
+    },
+    "diffs/LegacyEnglishCaseGraphAuxiliarySource.cs.diff": {
+      "bytes": 1530,
+      "sha256": "c34f998d8a37b14bc237667d42e836524c72d11aa67176de57b24f04146c9dae"
+    },
+    "diffs/LegacyEnglishCaseGraphCharacterBindings.cs.diff": {
+      "bytes": 3079,
+      "sha256": "89b73e63b771d6f1568abfaf476bef0811e539bdd6e8532aebeab13a9a159105"
+    },
+    "diffs/LegacyEnglishCaseGraphCharacters.cs.diff": {
+      "bytes": 23213,
+      "sha256": "5e9c098ceef8a431728e03b6579aaf4138dcf12c55aaa6e49708ce5bcaa1ced8"
+    },
+    "diffs/LegacyEnglishCaseGraphCompactScores.cs.diff": {
+      "bytes": 823,
+      "sha256": "84bae4efc09a911c19aadacc1f33d027dd49769e7732a7aa722d924b40fc3a14"
+    },
+    "diffs/LegacyEnglishCaseGraphEarlySelectedInput.cs.diff": {
+      "bytes": 2042,
+      "sha256": "80dd85d90b6990c9a17db0c423a43606e34e117847b9bf0477963a1c4a123fc3"
+    },
+    "diffs/LegacyEnglishCaseGraphFinalCompact.cs.diff": {
+      "bytes": 1835,
+      "sha256": "939c0511927692003a8ed0c98ee21cffe3e09d4474c9d9373d7ae38544760894"
+    },
+    "diffs/LegacyEnglishCaseGraphGlyphChoices.cs.diff": {
+      "bytes": 7329,
+      "sha256": "49bf2a675b064d6bbfa20b3de5673491897f3e7edd921eeb0b4cc663ad9a652b"
+    },
+    "diffs/LegacyEnglishCaseGraphGlyphDispatch.cs.diff": {
+      "bytes": 9084,
+      "sha256": "1db3b536123eb452b72b4296eb52d073922c4f5b4b60c858337ed5eacb531b99"
+    },
+    "diffs/LegacyEnglishCaseGraphGlyphGeometry.cs.diff": {
+      "bytes": 3549,
+      "sha256": "9237486913d33890399312759c411ea754469292f3a59ca87b12580ae5c730f3"
+    },
+    "diffs/LegacyEnglishCaseGraphLanguageStage.cs.diff": {
+      "bytes": 9436,
+      "sha256": "ed3c35f3cdb69fca5def2ef76838f2ad99084609f04a4a7a187f7d47eaf9f1fa"
+    },
+    "diffs/LegacyEnglishCaseGraphLoop.cs.diff": {
+      "bytes": 19020,
+      "sha256": "9ac56a859a0e290020c3e901cfe1517e12059f7ef42a0aa89f8a6284ee43b0a2"
+    },
+    "diffs/LegacyEnglishCaseGraphLoopBudget.cs.diff": {
+      "bytes": 2874,
+      "sha256": "a2fde2bb56fc2daa72cdabcb0cb280b2395479d13693554dcd4e0f4a593ac67f"
+    },
+    "diffs/LegacyEnglishCaseGraphMaterialization.cs.diff": {
+      "bytes": 2743,
+      "sha256": "99898b8a8f849b8bcd8f7a13f3d55809c000d356213b913d195b8e443052093a"
+    },
+    "diffs/LegacyEnglishCaseGraphPhase1.cs.diff": {
+      "bytes": 519,
+      "sha256": "b263c34be9b272acc8fe7f605102e84fa74eacf86ab3ffa16d6cee4c1c1148b8"
+    },
+    "diffs/LegacyEnglishCaseGraphPostTextCoverage.cs.diff": {
+      "bytes": 3772,
+      "sha256": "ee78e3fa7b346ecd6ada4b81bec23bdcc88753a9fffd4cb37b2a9fc79ec20251"
+    },
+    "diffs/LegacyEnglishCaseGraphProtocolGlyph.cs.diff": {
+      "bytes": 3073,
+      "sha256": "f6c22ba3328d12bb2799e244872eb8b389da4c05fa959360d47ce056b71cb37c"
+    },
+    "diffs/LegacyEnglishCaseGraphRawWord.cs.diff": {
+      "bytes": 14990,
+      "sha256": "ae5e7c2f66175eb679aa252a533d323948a3ac5be37c8870193d208081f17c15"
+    },
+    "diffs/LegacyEnglishCaseGraphRefreshAllocation.cs.diff": {
+      "bytes": 1402,
+      "sha256": "acd77d971859f0dbbdf6fd79210b0d88244540552991df6f0f046cbdf89f3f8b"
+    },
+    "diffs/LegacyEnglishCaseGraphSpanLease.cs.diff": {
+      "bytes": 629,
+      "sha256": "d3c88105f549e9711be70ef914a2554569ab976a54d65c26e5a6bd5e4eda551c"
+    },
+    "diffs/LegacyEnglishCaseGraphTailAdmission.cs.diff": {
+      "bytes": 1712,
+      "sha256": "1a9169eae98ad7c911fa1510e839e2e629d614342d9ebfdb82aa848942a4e923"
+    },
+    "diffs/LegacyEnglishCaseGraphWordPublication.cs.diff": {
+      "bytes": 13168,
+      "sha256": "2ba1b55f895bbbeac5e13bc349e3772673f4a79cda8ca44a76687ec2861e5e68"
+    },
+    "diffs/LegacyEnglishCaseGraphWordSourceCompletion.cs.diff": {
+      "bytes": 13822,
+      "sha256": "5f133945b2ef110f1b21c4a41851ed91f0a3f09d6887c24c36403579a8365e35"
+    },
+    "diffs/LegacyEnglishCaseGraphWordSourceRanges.cs.diff": {
+      "bytes": 5894,
+      "sha256": "5e7fda7121b5e9f10f2a46c00e2131adb8a7c0b9c4cae472841a7a3114a661c1"
+    },
+    "diffs/LegacyEnglishCaseNode0Auxiliary.cs.diff": {
+      "bytes": 1346,
+      "sha256": "ae01bd81082a867e5826ba84d3e87f5fe4aad1804cd3b30b4bbcb677d3b259f7"
+    },
+    "diffs/LegacyEnglishCaseNode0Completion.cs.diff": {
+      "bytes": 4670,
+      "sha256": "dab9a371f2f6ffba970f573f8fd6ad1bfe4e3d1842be861cb8cee93134f80f41"
+    },
+    "diffs/LegacyEnglishCaseNode0LexiconIndex.cs.diff": {
+      "bytes": 1587,
+      "sha256": "822254420bdac14b7719448fff058cdd5ad40528c39ef14f126684522d44ea56"
+    },
+    "diffs/LegacyEnglishCaseNode0NativeFreshPolicy.cs.diff": {
+      "bytes": 1316,
+      "sha256": "af16848a3124c530930a87725a7d1073427afd75a86f7fe29f3731f9436918e9"
+    },
+    "diffs/LegacyEnglishCaseNode0Ring.cs.diff": {
+      "bytes": 561,
+      "sha256": "a9886fd6b881f112aa0ba8b060a40adb9b70ece4992d5d653336727740074d1c"
+    },
+    "diffs/LegacyEnglishCaseNode1Completion.cs.diff": {
+      "bytes": 2310,
+      "sha256": "aeedf3185e08925569d455baac4b88c0d5eaa03bfebd79857f18b4e5a6ee2183"
+    },
+    "diffs/LegacyEnglishCaseNode1Preparation.cs.diff": {
+      "bytes": 9252,
+      "sha256": "1986136fc76e1429ca8ec7b9557fed656e1a3e62f6240169725bf074f3e327e4"
+    },
+    "diffs/LegacyEnglishCaseQueryInitialization.cs.diff": {
+      "bytes": 1605,
+      "sha256": "01730f1536a26b61075560aa9fae493fab6e4b8716e097377769bfc474f86add"
+    },
+    "diffs/LegacyEnglishOriginalInputContext.cs.diff": {
+      "bytes": 806,
+      "sha256": "12e20a1d9e46b5af6b8885ee0f2de58e8c80e97556dc26da75998924e429ebac"
+    },
+    "diffs/LegacyFloatContextGeometry.cs.diff": {
+      "bytes": 949,
+      "sha256": "83cd069a3584c5767259d37958b4698fa36338ba592a104b0a62393f12a871a3"
+    },
+    "diffs/LegacyFreshMainGlobalPlainRecognition.cs.diff": {
+      "bytes": 13740,
+      "sha256": "93d96454351c583dd0e49dda2c4ccdc23bdea1202d4a551fde66a9c016151c4a"
+    },
+    "diffs/LegacyFreshMainGlobalWordAugmentation.cs.diff": {
+      "bytes": 18591,
+      "sha256": "f5a345a24de2a8a1bc605ea3608dac627646cf812a002f9ffc43bab7b7ae50f0"
+    },
+    "diffs/LegacyFreshMainGlobalWordTextPublication.cs.diff": {
+      "bytes": 3469,
+      "sha256": "5eebb6c344337c0f279d79c7b8a5cf05f0c33c16b4626b59fab5f009e9bffc7d"
+    },
+    "diffs/LegacyInitialWordHeapTail.cs.diff": {
+      "bytes": 556,
+      "sha256": "b2ead701bbedaa26d516cc4914ae69680b715e6e1c8cf470f8bd17c1feb31808"
+    },
+    "diffs/LegacyNativeAuxiliaryDelimiterQuerySource.cs.diff": {
+      "bytes": 2652,
+      "sha256": "642527cbf2eb13a341ee5dc81edf72e512c6dabcffad7ffab6ce4d4c2ab61aa7"
+    },
+    "diffs/LegacyNativeCaseNormalQuerySource.cs.diff": {
+      "bytes": 6087,
+      "sha256": "f3ad090c1553c7512617f2b68e834419f27671433b71ba1e21fece031aefacc0"
+    },
+    "diffs/LegacyNativeCasePreparation.cs.diff": {
+      "bytes": 4157,
+      "sha256": "5e9174e551e25eddfbc6ab0a49576c133a6ac9e2220f032ebb634b668e780e57"
+    },
+    "diffs/LegacyNativeDelimiterQuerySource.cs.diff": {
+      "bytes": 6516,
+      "sha256": "d1fe8b3a35cedc0b69bf813cce58e1a4c23ae28347a174af88ba7c31758c8df3"
+    },
+    "diffs/LegacyNativeGlyphRecordPool.Cleanup.cs.diff": {
+      "bytes": 4342,
+      "sha256": "609efd65849686e73b6b1f6a5fe1be638c4b9d15cc41290cd658dea5964972c7"
+    },
+    "diffs/LegacyNativeGlyphRecordPool.cs.diff": {
+      "bytes": 7474,
+      "sha256": "e12a722d34a4152851057f8143892e4ecaf1ee494ca439161169235ed880cf17"
+    },
+    "diffs/LegacyNativeGlyphScoreCache.cs.diff": {
+      "bytes": 3163,
+      "sha256": "8cc99389dd7959a381f22aad0019b434123284d706d5923ccb8bda876320c58a"
+    },
+    "diffs/LegacyNativeGlyphSymbolUpdate.cs.diff": {
+      "bytes": 1715,
+      "sha256": "fe73169061a46d2a32f8f6268321cfddd6fcb301bdb0a65390b150046cbf9a4a"
+    },
+    "diffs/LegacyNativeOrdinaryGlyphRefreshKernel.cs.diff": {
+      "bytes": 5209,
+      "sha256": "68d0164fd8e53d06e1c2668b270cff0179590fa0ffaeecb37e1a362829b8e887"
+    },
+    "diffs/LegacyNativePlainWordPublisher.Augmentation.cs.diff": {
+      "bytes": 2179,
+      "sha256": "aa30228836ddd7f9b078c92bba56431cd0e1fd3ef4d8829fe5653b79e0888b50"
+    },
+    "diffs/LegacyNativePlainWordPublisher.LiveSpan.cs.diff": {
+      "bytes": 580,
+      "sha256": "90d92fdb4ae96ea0b269b008584d798329ef1f1badcafba3411ec819794728da"
+    },
+    "diffs/LegacyNativePlainWordPublisher.cs.diff": {
+      "bytes": 3290,
+      "sha256": "3bcbaea332ef47113f436827b6faef57c63c03f4b4ddcf0b4ad3759afafc24c5"
+    },
+    "diffs/LegacyNativeWordHeapDescriptor.GraphPhase1.cs.diff": {
+      "bytes": 4161,
+      "sha256": "334df0cf6f073a83ec850295b7bba7e13abd27d194ee0fae3a9645dbf3c0d9b7"
+    },
+    "diffs/LegacyNativeWordHeapRouter.cs.diff": {
+      "bytes": 508,
+      "sha256": "c74677e8b505bcdfa057566c93f42d970cc4475be5ba85b72a7fa824c41f7d35"
+    },
+    "diffs/LegacyNativeWordRecordHeap.cs.diff": {
+      "bytes": 3421,
+      "sha256": "dd9664550ef08d2331e4a1d65d93450b5df46f7470dbec51d89c588a06b499d2"
+    },
+    "diffs/LegacyOrdinaryGraphSourceRanges.cs.diff": {
+      "bytes": 10283,
+      "sha256": "0da808ac83940c2cfae8b63f9b4af9aaaec10596561d384ce586ae918860b232"
+    },
+    "diffs/LegacyOrdinarySourceInk.cs.diff": {
+      "bytes": 2391,
+      "sha256": "efe17a935d0f5f8de4ca3bb2efe8b2e06e99417c8ee8e84cae5b9175b07ef2e8"
+    },
+    "diffs/LegacyOwnedRawInkDocument.cs.diff": {
+      "bytes": 681,
+      "sha256": "d6cbc7aab496cc69f15ad71fb306b0e5c8836ac45751a195c8d94d62ae569b83"
+    },
+    "diffs/LegacyPreparedAggregateDictionaryQuerySource.cs.diff": {
+      "bytes": 3377,
+      "sha256": "0f85c04cbcb12c9d38daa9bc3bdb7a5fd042ce666ada9c4e0c1ab19120661275"
+    },
+    "diffs/LegacyPreparedDictionaryQuerySource.cs.diff": {
+      "bytes": 4275,
+      "sha256": "7005c4797aea81ad1bc16bc0f331670c5b0213beab2d9c004e15158c1d4f095b"
+    },
+    "diffs/LegacyPreparedMainCompactPublication.cs.diff": {
+      "bytes": 684,
+      "sha256": "4c93c185efdf1e962c0d6c3d9c0ec0c2583734db54c1f0bb6c574ca3306f49f0"
+    },
+    "diffs/LegacyPreparedMainCompactReachability.cs.diff": {
+      "bytes": 608,
+      "sha256": "2f556452c204c708b5864c4d1c9542060f0f000b296ae3b06d399346fd7fe827"
+    },
+    "diffs/LegacyPreparedMainTextGlyphReuse.cs.diff": {
+      "bytes": 2589,
+      "sha256": "b0b490e5f8b4a61c1ffb806e124858f41ddf69c11f7e6dcfc52ece192e6880e6"
+    },
+    "diffs/LegacySourcePointChronology.cs.diff": {
+      "bytes": 686,
+      "sha256": "7a58dfa893102d308ce3aafcc1608b81f1a02a87a5e74dc19893c542194b658f"
+    },
+    "diffs/LegacySymbolContextFactory.cs.diff": {
+      "bytes": 1588,
+      "sha256": "4990837905adfb41d12cbae343adf349b934c8beef24bef0d3beaea7f93c4ae8"
+    },
+    "diffs/LegacyTaggedAggregateDictionaryQuerySource.cs.diff": {
+      "bytes": 2102,
+      "sha256": "0094d90c2415a2e7684187cd2a8eb3758f6ca6c8933f4b8b56904ccecd541df6"
+    },
+    "diffs/LegacyWideSymbolPairs.cs.diff": {
+      "bytes": 739,
+      "sha256": "5ca4a4f075a2b9c119f7371d8721b0358980eed0e701952beb472a33fe87c64f"
+    },
+    "diffs/StrokeTextRecognizer.cs.diff": {
+      "bytes": 772,
+      "sha256": "c5a6396cf6736c0b7d789b6c2a744aef3757cb5d3cc7d5ed499306609b638d99"
+    },
+    "frontier-01-errors.json": {
+      "bytes": 44068,
+      "sha256": "5a2e9216324c69e9161844d7eb2b184e53ccec42ca44110410445202f8a4d101"
+    },
+    "frontier-01.json": {
+      "bytes": 1318,
+      "sha256": "2ad6e80c59315408046533840e26b02f34c7b22eeea68cefdab55bba53943373"
+    },
+    "frontier-02-errors.json": {
+      "bytes": 14742,
+      "sha256": "5c0c274a55e091a6ebea5a9cf1ea6c1dce4aa314dbd389de0f2ec0a309976afa"
+    },
+    "frontier-02.json": {
+      "bytes": 1965,
+      "sha256": "78f83250d07de6fdd910673eb249211b6e3c49b0235264f82ecfa72c96b98259"
+    },
+    "frontier-03-errors.json": {
+      "bytes": 1221,
+      "sha256": "c01281e92e6af6965f8551616a46c2ed27592259c2ade676fc538c46212f560c"
+    },
+    "frontier-03.json": {
+      "bytes": 2447,
+      "sha256": "6132bd6135105b5eb5232970c87baf37b014cc589ad6ac7328742590e87cd837"
+    },
+    "frontier-04-diagnostics-errors.json": {
+      "bytes": 43,
+      "sha256": "6ce6b7f6d554753bd65599791743a6c1190f8a3010e0acb6e21c98481a8cfa2a"
+    },
+    "frontier-04-errors.json": {
+      "bytes": 43,
+      "sha256": "3ba1f14aa680c23da75ae2ed22b7e9506129dcc0768b23f93ff8621b956bb229"
+    },
+    "frontier-04.json": {
+      "bytes": 2601,
+      "sha256": "634fa2e44b5c09a5c11eaa12de4011b6cc433500f922bc3f625d22f19e221b99"
+    },
+    "narrow-member-edges.json": {
+      "bytes": 134582,
+      "sha256": "855388457c78a7176bb324efc7d165b65882190f5558f529869f5642d272f78a"
+    },
+    "semantic-file-edges.json": {
+      "bytes": 3810893,
+      "sha256": "9cd4b4caf34ddbdde9dd90a10db37d3058d90dff93e335cec2e572d007364afd"
+    }
+  }
+}

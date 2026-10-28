@@ -1,0 +1,13 @@
+--- main935/LegacyEnglishCaseQueryInitialization.cs
++++ candidate950/LegacyEnglishCaseQueryInitialization.cs
+@@ -111,7 +111,9 @@
+         for(int node=0;node<graph.NodeCount;node++)foreach(var arc in graph.GetNode(node)){if((uint)arc.GroupId>=(uint)graph.Groups.Count||arc.Span>=8||++count>4096)throw new InvalidDataException("Whole source arc bound exceeded.");}
+         var ordinaryGraph=LegacyOrdinaryRecognitionGraph.FromSameSource(graph);
+         bool dutch=ReadDutch();if(dutch)throw new NotSupportedException("Actual English source must not select Dutch ligature mode.");
+-        var prepared=LegacyNativeCasePreparation.Prepare(LegacyNativeCaseAlphabetRanges.Prepare(knowledge.Source.Alphabet,cases,publication,token),publication,token);
++        var ranges=LegacyNativeCaseAlphabetRanges.Prepare(knowledge.Source.Alphabet,cases,publication,token);
++        var prepared=executionPool is{HasOuterWidePreparation:true} widePool?
++            widePool.PrepareOuterWide(this,ranges,publication,token):LegacyNativeCasePreparation.Prepare(ranges,publication,token);
+         var version=numeric.LanguageOwner.CopyFieldPayload("150.casePathVersion");if(version.Length!=2||BinaryPrimitives.ReadUInt16LittleEndian(version)!=0x200)throw new NotSupportedException("Actual0200 case policy required.");
+         var policy=LegacyNativeCasePathPolicy.Create(0x200);var expansion=new LegacyNativeCaseRecordExpansion(prepared,policy,contexts);Check("init:case-preparation",token);
+         var dictionary=maps.CreateQuerySource(numeric.DataOwner.Dictionary,0xc0e);Check("init:dictionary",token);

@@ -1,0 +1,16 @@
+--- main935/LegacyEnglishCaseGraphAuxiliarySource.cs
++++ candidate950/LegacyEnglishCaseGraphAuxiliarySource.cs
+@@ -8,8 +8,12 @@
+             throw new InvalidOperationException("Same privately initialized generic auxiliary query/controller required.");
+         plan.BindingForAudit.Dictionary.RequireGraphEmptyAuxiliary(index,stage);
+         ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.AuxiliaryOuter,4096);
+-        ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.AuxiliaryOuter,32768);
++        index.ChargeEmptyAuxiliaryRead(tag);
+         ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.AuxiliaryOuter,926);
++        // Exact empty-map/index/scratch identity is authenticated BEFORE the new metadata-read precharge above.
++        // The actual immutable empty auxiliary map and retained dictionary scratch were authenticated above.
++        // Its4096 output array is already reserved. Cover closure/DTO/query-metadata wrappers before entering the transitive empty path.
++        if(graphPeriodicActive){ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.AuxiliaryMetadata,1024);ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.AuxiliaryMetadata,1024);}
+         var page=plan.ReadGraphAuxiliary(stage,tag,query,token);
+         if(page.ReturnedCount!=0||!page.Records.IsEmpty)throw new NotSupportedException("Actual immutable empty auxiliary map branch required.");
+         stage.Require(token);return new(page.ReturnedCount,page.Records,ReadOnlyMemory<byte>.Empty,page.SlotIndex,page.AcceptedCount,null);

@@ -1,0 +1,66 @@
+--- main935/LegacyPreparedDictionaryQuerySource.cs
++++ candidate950/LegacyPreparedDictionaryQuerySource.cs
+@@ -16,6 +16,7 @@
+     public byte Parameter19 { get; set; }
+     public ulong ContextRoot { get; set; }
+     public ulong ParentContext { get; set; }
++    internal LegacyEnglishCaseNode0Completion.GraphPeriodicQueryScope? PeriodicQuery;
+     internal LegacyPreparedDictionaryQuerySource? Owner;
+     internal int SlotIndex;
+ }
+@@ -94,6 +95,7 @@
+         //Select also refuses absent auxiliary data before mutating the ring.
+         //The map is immutable; no per-page copy or public alias is needed.
+         ReadOnlySpan<ushort> selected = map.ReadSelectedMap(auxiliary, (byte)query.Flags24);
++        var budget=query.PeriodicQuery;budget?.Allocate(128);budget?.Copy(128);budget?.Visit(128);
+         reading = true;
+         try
+         {
+@@ -120,25 +122,25 @@
+             }
+             while (NextChild(slot) < slot.End && slot.Accepted < query.Skip)
+             {
+-                cancellationToken.ThrowIfCancellationRequested(); Refill(slot);
++                cancellationToken.ThrowIfCancellationRequested(); budget?.Visit(256*16);budget?.Copy(256*4);Refill(slot);
+                 //091e10: count only mapped edges, and only terminals for auxiliary queries.
+                 while (slot.BlockCursor < slot.BlockCount && slot.Accepted < query.Skip)
+                 {
+-                    uint packed = slot.Labels[slot.BlockCursor++];
++                    budget?.Visit(32);uint packed = slot.Labels[slot.BlockCursor++];
+                     if (Accept(packed, selected, auxiliary)) slot.Accepted++;
+                 }
+             }
+             int storageLength = query.Capacity * 32;
+-            if (recordScratch.Length < storageLength) recordScratch = new byte[storageLength];
++            if (recordScratch.Length < storageLength){budget?.Allocate(storageLength);recordScratch = new byte[storageLength];}
+             Span<byte> recordStorage = recordScratch.AsSpan(0, storageLength);
+             while (NextChild(slot) < slot.End && slot.Accepted < query.Skip + query.Capacity)
+             {
+-                cancellationToken.ThrowIfCancellationRequested(); Refill(slot);
++                cancellationToken.ThrowIfCancellationRequested(); budget?.Visit(256*16);budget?.Copy(256*4);Refill(slot);
+                 int cursor = slot.BlockCursor, accepted = slot.Accepted;
+                 int written = accepted - query.Skip;
+                 while (cursor < slot.BlockCount && written < query.Capacity)
+                 {
+-                    uint packed = slot.Labels[cursor];
++                    budget?.Visit(64);uint packed = slot.Labels[cursor];
+                     int node = slot.Start + cursor++;
+                     if (!Accept(packed, selected, auxiliary)) continue;
+                     int lexical = (int)(packed & lexicon.PackedLabelMask);
+@@ -156,7 +158,7 @@
+                     }
+                     byte flags = (byte)((query.Node == 0 ? 1 : 0) | ((packed & lexicon.PackedTerminalBit) != 0 ? 2 : 0));
+                     Span<byte> record = recordStorage.Slice(written * 32, 32);
+-                    record.Clear(); //Preserve fresh-zero padding on every emitted row.
++                    budget?.Copy(64);record.Clear(); //Preserve fresh-zero padding on every emitted row.
+                     BinaryPrimitives.WriteUInt32LittleEndian(record, (uint)node);
+                     record[5] = flags;
+                     BinaryPrimitives.WriteUInt64LittleEndian(record[8..], context);
+@@ -171,6 +173,7 @@
+             // A supplied extra-cost buffer would then have a negative memset size.
+             if (clearExtraCosts && returned < 0)
+                 throw new ArgumentException("Native extra-cost clearing requires an in-range page offset.");
++            budget?.Allocate(checked(128L+Math.Max(0,returned)*32L+(clearExtraCosts?returned*12L:0)));budget?.Copy(checked(Math.Max(0,returned)*32L+(clearExtraCosts?returned*12L:0)));
+             return new(returned, recordStorage.Slice(0, Math.Max(0, returned) * 32).ToArray(), query.SlotIndex, NextChild(slot), slot.Accepted,
+                 clearExtraCosts ? new byte[returned * 12] : []);
+         }

@@ -1,0 +1,19 @@
+--- main935/ExperimentalGlobalTextRecognizer.Batch.cs
++++ candidate950/ExperimentalGlobalTextRecognizer.Batch.cs
+@@ -44,7 +44,7 @@
+                 if(diagnostic is not null)
+                 {
+                     float native=BitConverter.Int32BitsToSingle(BinaryPrimitives.ReadInt32LittleEndian(glyph.Record40.AsSpan(16)));
+-                    diagnostic.Reason=!float.IsFinite(native)||native<0||native>1?"glyph-score-outside-native-domain":"glyph-kind-or-text-policy";
++                    diagnostic.Reason=!float.IsFinite(native)||native<.5f||native>1?"glyph-score-outside-half-to-one":"glyph-kind-or-text-policy";
+                 }
+                 return Empty();
+             }
+@@ -64,6 +64,6 @@
+         token.ThrowIfCancellationRequested();
+         int nodes=source.Selection.Publication.CopyNodeStarts2478().Length-1;
+         if(diagnostic is not null){diagnostic.Stage="admitted";diagnostic.Reason="accepted";}
+-        return new(runs.Length==1?runs[0].Text:"",score,nodes){ExperimentalCandidateScore=true,NativeSelectedText=true,WordRuns=Array.AsReadOnly(runs),WordRunsCoverFullInput=true};
++        return new(runs.Length==1?runs[0].Text:"",score,nodes){ExperimentalCandidateScore=true,WordRuns=Array.AsReadOnly(runs),WordRunsCoverFullInput=true};
+     }
+ }

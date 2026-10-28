@@ -1,0 +1,290 @@
+[
+  {
+    "variant": "baseline",
+    "index": 4,
+    "completed": false,
+    "error": "System.IO.InvalidDataException",
+    "message": "Node0 visit allowance exhausted before source access.",
+    "visits": 16733042,
+    "elapsed": 1818,
+    "envelope": {
+      "command": [
+        "C:/Program Files/dotnet/dotnet.exe",
+        "exec",
+        "--fx-version",
+        "10.0.12",
+        "--roll-forward",
+        "Disable",
+        "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\replay-baseline-artifacts\\bin\\Replay\\release\\LegacyEnglishWordSource.ActualEntry.dll",
+        "--actual-entry",
+        "E:\\BlurMask-build-artifacts-20261014\\root-english949-rich-index-actual-20261026\\models",
+        "E:\\BlurMask-build-artifacts-20261014\\root-english-ru949-verification-20261026\\english-original141.json",
+        "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\replay\\baseline-4.json"
+      ],
+      "cwd": "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\stage",
+      "watchdogSeconds": 45,
+      "processorCount": 2,
+      "affinityMask": 3,
+      "observedChildAffinity": 3,
+      "exitCode": 1,
+      "seconds": 2.0915665000211447
+    }
+  },
+  {
+    "variant": "candidate",
+    "index": 4,
+    "completed": true,
+    "error": null,
+    "message": null,
+    "visits": 16756970,
+    "elapsed": null,
+    "envelope": {
+      "command": [
+        "C:/Program Files/dotnet/dotnet.exe",
+        "exec",
+        "--fx-version",
+        "10.0.12",
+        "--roll-forward",
+        "Disable",
+        "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\replay-candidate-artifacts\\bin\\Replay\\release\\LegacyEnglishWordSource.ActualEntry.dll",
+        "--actual-entry",
+        "E:\\BlurMask-build-artifacts-20261014\\root-english949-rich-index-actual-20261026\\models",
+        "E:\\BlurMask-build-artifacts-20261014\\root-english-ru949-verification-20261026\\english-original141.json",
+        "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\replay\\candidate-4.json"
+      ],
+      "cwd": "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\stage",
+      "watchdogSeconds": 45,
+      "processorCount": 2,
+      "affinityMask": 3,
+      "observedChildAffinity": 3,
+      "exitCode": 0,
+      "seconds": 1.7546145000960678
+    },
+    "selectedUtf8": [
+      "v"
+    ]
+  },
+  {
+    "variant": "baseline",
+    "index": 5,
+    "completed": false,
+    "error": "System.IO.InvalidDataException",
+    "message": "Node0 visit allowance exhausted before source access.",
+    "visits": 16755384,
+    "elapsed": 1044,
+    "envelope": {
+      "command": [
+        "C:/Program Files/dotnet/dotnet.exe",
+        "exec",
+        "--fx-version",
+        "10.0.12",
+        "--roll-forward",
+        "Disable",
+        "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\replay-baseline-artifacts\\bin\\Replay\\release\\LegacyEnglishWordSource.ActualEntry.dll",
+        "--actual-entry",
+        "E:\\BlurMask-build-artifacts-20261014\\root-english949-rich-index-actual-20261026\\models",
+        "E:\\BlurMask-build-artifacts-20261014\\root-english-ru949-verification-20261026\\english-original141.json",
+        "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\replay\\baseline-5.json"
+      ],
+      "cwd": "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\stage",
+      "watchdogSeconds": 45,
+      "processorCount": 2,
+      "affinityMask": 3,
+      "observedChildAffinity": 3,
+      "exitCode": 1,
+      "seconds": 1.204009999986738
+    }
+  },
+  {
+    "variant": "candidate",
+    "index": 5,
+    "completed": false,
+    "error": "System.IO.InvalidDataException",
+    "message": "Node0 visit allowance exhausted before source access.",
+    "visits": 16755384,
+    "elapsed": 3305,
+    "envelope": {
+      "command": [
+        "C:/Program Files/dotnet/dotnet.exe",
+        "exec",
+        "--fx-version",
+        "10.0.12",
+        "--roll-forward",
+        "Disable",
+        "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\replay-candidate-artifacts\\bin\\Replay\\release\\LegacyEnglishWordSource.ActualEntry.dll",
+        "--actual-entry",
+        "E:\\BlurMask-build-artifacts-20261014\\root-english949-rich-index-actual-20261026\\models",
+        "E:\\BlurMask-build-artifacts-20261014\\root-english-ru949-verification-20261026\\english-original141.json",
+        "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\replay\\candidate-5.json"
+      ],
+      "cwd": "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\stage",
+      "watchdogSeconds": 45,
+      "processorCount": 2,
+      "affinityMask": 3,
+      "observedChildAffinity": 3,
+      "exitCode": 1,
+      "seconds": 3.558209600043483
+    }
+  },
+  {
+    "variant": "baseline",
+    "index": 60,
+    "completed": false,
+    "error": "System.NotSupportedException",
+    "message": "Actual fixture graph has no node1; no prepared substitution.",
+    "visits": null,
+    "elapsed": 1145,
+    "envelope": {
+      "captureAlreadyCreatedBeforeSummaryHarvestFailure": true
+    }
+  },
+  {
+    "variant": "candidate",
+    "index": 60,
+    "completed": false,
+    "error": "System.NotSupportedException",
+    "message": "Actual fixture graph has no node1; no prepared substitution.",
+    "visits": null,
+    "elapsed": 655,
+    "envelope": {
+      "command": [
+        "C:/Program Files/dotnet/dotnet.exe",
+        "exec",
+        "--fx-version",
+        "10.0.12",
+        "--roll-forward",
+        "Disable",
+        "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\replay-candidate-artifacts\\bin\\Replay\\release\\LegacyEnglishWordSource.ActualEntry.dll",
+        "--actual-entry",
+        "E:\\BlurMask-build-artifacts-20261014\\root-english949-rich-index-actual-20261026\\models",
+        "E:\\BlurMask-build-artifacts-20261014\\root-english-ru949-verification-20261026\\english-original141.json",
+        "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\replay\\candidate-60.json"
+      ],
+      "cwd": "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\stage",
+      "watchdogSeconds": 45,
+      "processorCount": 2,
+      "affinityMask": 3,
+      "observedChildAffinity": 3,
+      "exitCode": 1,
+      "seconds": 0.7714005999732763
+    }
+  },
+  {
+    "variant": "baseline",
+    "index": 64,
+    "completed": false,
+    "error": "System.NotSupportedException",
+    "message": "Actual fixture graph has no node1; no prepared substitution.",
+    "visits": null,
+    "elapsed": 661,
+    "envelope": {
+      "command": [
+        "C:/Program Files/dotnet/dotnet.exe",
+        "exec",
+        "--fx-version",
+        "10.0.12",
+        "--roll-forward",
+        "Disable",
+        "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\replay-baseline-artifacts\\bin\\Replay\\release\\LegacyEnglishWordSource.ActualEntry.dll",
+        "--actual-entry",
+        "E:\\BlurMask-build-artifacts-20261014\\root-english949-rich-index-actual-20261026\\models",
+        "E:\\BlurMask-build-artifacts-20261014\\root-english-ru949-verification-20261026\\english-original141.json",
+        "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\replay\\baseline-64.json"
+      ],
+      "cwd": "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\stage",
+      "watchdogSeconds": 45,
+      "processorCount": 2,
+      "affinityMask": 3,
+      "observedChildAffinity": 3,
+      "exitCode": 1,
+      "seconds": 0.7795336999697611
+    }
+  },
+  {
+    "variant": "candidate",
+    "index": 64,
+    "completed": false,
+    "error": "System.NotSupportedException",
+    "message": "Actual fixture graph has no node1; no prepared substitution.",
+    "visits": null,
+    "elapsed": 686,
+    "envelope": {
+      "command": [
+        "C:/Program Files/dotnet/dotnet.exe",
+        "exec",
+        "--fx-version",
+        "10.0.12",
+        "--roll-forward",
+        "Disable",
+        "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\replay-candidate-artifacts\\bin\\Replay\\release\\LegacyEnglishWordSource.ActualEntry.dll",
+        "--actual-entry",
+        "E:\\BlurMask-build-artifacts-20261014\\root-english949-rich-index-actual-20261026\\models",
+        "E:\\BlurMask-build-artifacts-20261014\\root-english-ru949-verification-20261026\\english-original141.json",
+        "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\replay\\candidate-64.json"
+      ],
+      "cwd": "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\stage",
+      "watchdogSeconds": 45,
+      "processorCount": 2,
+      "affinityMask": 3,
+      "observedChildAffinity": 3,
+      "exitCode": 1,
+      "seconds": 0.8036521000321954
+    }
+  },
+  {
+    "variant": "baseline",
+    "index": 4,
+    "control": "caller-precancel",
+    "passed": true,
+    "envelope": {
+      "command": [
+        "C:/Program Files/dotnet/dotnet.exe",
+        "exec",
+        "--fx-version",
+        "10.0.12",
+        "--roll-forward",
+        "Disable",
+        "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\replay-baseline-artifacts\\bin\\Replay\\release\\LegacyEnglishWordSource.ActualEntry.dll",
+        "--actual-entry",
+        "E:\\BlurMask-build-artifacts-20261014\\root-english949-rich-index-actual-20261026\\models",
+        "E:\\BlurMask-build-artifacts-20261014\\root-english-ru949-verification-20261026\\english-original141.json",
+        "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\replay\\baseline-4-precancel.json"
+      ],
+      "cwd": "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\stage",
+      "watchdogSeconds": 45,
+      "processorCount": 2,
+      "affinityMask": 3,
+      "observedChildAffinity": 3,
+      "exitCode": 1,
+      "seconds": 0.8636628000531346
+    }
+  },
+  {
+    "variant": "candidate",
+    "index": 4,
+    "control": "caller-precancel",
+    "passed": true,
+    "envelope": {
+      "command": [
+        "C:/Program Files/dotnet/dotnet.exe",
+        "exec",
+        "--fx-version",
+        "10.0.12",
+        "--roll-forward",
+        "Disable",
+        "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\replay-candidate-artifacts\\bin\\Replay\\release\\LegacyEnglishWordSource.ActualEntry.dll",
+        "--actual-entry",
+        "E:\\BlurMask-build-artifacts-20261014\\root-english949-rich-index-actual-20261026\\models",
+        "E:\\BlurMask-build-artifacts-20261014\\root-english-ru949-verification-20261026\\english-original141.json",
+        "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\replay\\candidate-4-precancel.json"
+      ],
+      "cwd": "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\stage",
+      "watchdogSeconds": 45,
+      "processorCount": 2,
+      "affinityMask": 3,
+      "observedChildAffinity": 3,
+      "exitCode": 1,
+      "seconds": 0.8793169000418857
+    }
+  }
+]

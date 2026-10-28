@@ -1,0 +1,26 @@
+{
+  "envelope": {
+    "command": [
+      "C:/Program Files/dotnet/dotnet.exe",
+      "exec",
+      "--fx-version",
+      "10.0.12",
+      "--roll-forward",
+      "Disable",
+      "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\candidate-artifacts\\bin\\LegacyEnglishPeriodicPendingText.ActualEntry\\release\\LegacyEnglishWordSource.ActualEntry.dll",
+      "--actual-entry",
+      "E:\\BlurMask-build-artifacts-20261014\\root-english949-rich-index-actual-20261026\\models",
+      "E:\\BlurMask-build-artifacts-20261014\\root-english-ru949-verification-20261026\\english-original141.json",
+      "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\candidate-owning-fifth.json"
+    ],
+    "cwd": "E:\\BlurMask-build-artifacts-20261014\\english-character-pass-next-20261028\\stage",
+    "watchdogSeconds": 45,
+    "processorCount": 2,
+    "affinityMask": 3,
+    "observedChildAffinity": 3,
+    "exitCode": 0,
+    "seconds": 3.1370778999989852
+  },
+  "librarySha256": "1f7aec03fac687043faea5160adcf4666a852febaad6a3bdff1b16542dd78098",
+  "sourceUnchanged": true
+}

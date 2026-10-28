@@ -1,0 +1,49 @@
+{
+  "status": "PASS",
+  "positiveCandidateSourceCount": 950,
+  "sourceRefusers": [
+    {
+      "label": "one-byte/source mutation",
+      "rejected": true
+    },
+    {
+      "label": "ledger cap mutation",
+      "rejected": true
+    },
+    {
+      "label": "extra source",
+      "rejected": true
+    },
+    {
+      "label": "missing source",
+      "rejected": true
+    },
+    {
+      "label": "source filename case mismatch",
+      "rejected": true
+    },
+    {
+      "label": "production935 cannot be baseline950",
+      "rejected": true
+    },
+    {
+      "label": "changed packet preimage",
+      "rejected": true
+    },
+    {
+      "label": "changed manifest even whitespace",
+      "rejected": true
+    }
+  ],
+  "captureRefusers": [
+    "charge off-by-one",
+    "missing numeric row",
+    "forged UTF8 prefix",
+    "marker corruption",
+    "bool/int type substitution",
+    "pre-read event order",
+    "foreign cancellation token",
+    "unpoisoned retry",
+    "unknown output field"
+  ]
+}

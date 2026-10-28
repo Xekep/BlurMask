@@ -1,0 +1,35 @@
+--- main935/ExperimentalGlobalTextRecognizer.cs
++++ candidate950/ExperimentalGlobalTextRecognizer.cs
+@@ -183,7 +183,7 @@
+                 if(diagnostic is not null)
+                 {
+                     float native=BitConverter.Int32BitsToSingle(BinaryPrimitives.ReadInt32LittleEndian(row.AsSpan(16)));
+-                    diagnostic.Reason=!float.IsFinite(native)||native<0||native>1?"glyph-score-outside-native-domain":"glyph-kind-or-text-policy";
++                    diagnostic.Reason=!float.IsFinite(native)||native<.5f||native>1?"glyph-score-outside-half-to-one":"glyph-kind-or-text-policy";
+                 }
+                 return Empty();
+             }
+@@ -198,7 +198,7 @@
+         var lineGeometry=LegacyCompletedGlobalTextWords.DecodePreparedLine(parent.CopySourceLines56());
+         var run=new PositionedWordRun(selectedText,score,RecognizedWordInkBounds.FromOriginalRanges(snapshot,originalWord,token),lineGeometry,originalWord);
+         token.ThrowIfCancellationRequested();
+-        return new(selectedText,score,nodes){ExperimentalCandidateScore=true,NativeSelectedText=true,WordRuns=Array.AsReadOnly(new[]{run}),WordRunsCoverFullInput=true};
++        return new(selectedText,score,nodes){ExperimentalCandidateScore=true,WordRuns=Array.AsReadOnly(new[]{run}),WordRunsCoverFullInput=true};
+         }
+         finally
+         {
+@@ -224,12 +224,12 @@
+         token.ThrowIfCancellationRequested();if(count<1||count>compact.Length/40)throw new InvalidDataException("Complete bounded active compact extent required.");
+         for(int i=0;i<count;i++){token.ThrowIfCancellationRequested();if((compact[i*40+32]&8)!=0)return true;}return false;
+     }
+-    //Native channel domain is structural; its value is not an acceptance probability.
++    //Host policy is unchanged: native glyph+16 supplies an uncalibrated candidate, not probability.
+     internal static bool TryAdmitSelectedGlyph(ReadOnlySpan<byte> record,string value,out float candidate)
+     {
+         candidate=0;if(record.Length!=40||(BinaryPrimitives.ReadUInt16LittleEndian(record[4..])&7)!=0)return false;
+         float score=BitConverter.Int32BitsToSingle(BinaryPrimitives.ReadInt32LittleEndian(record[16..]));
+-        if(!float.IsFinite(score)||score<0||score>1||string.IsNullOrWhiteSpace(value)||value.Any(char.IsWhiteSpace)||
++        if(!float.IsFinite(score)||score<.5f||score>1||string.IsNullOrWhiteSpace(value)||value.Any(char.IsWhiteSpace)||
+             value.EnumerateRunes().Any(r=>Rune.GetUnicodeCategory(r) is UnicodeCategory.Control or UnicodeCategory.Format or UnicodeCategory.PrivateUse or UnicodeCategory.Surrogate))return false;
+         candidate=score;return true;
+     }

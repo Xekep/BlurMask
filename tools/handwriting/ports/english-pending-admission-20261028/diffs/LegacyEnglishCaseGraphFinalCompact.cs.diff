@@ -1,0 +1,19 @@
+--- main935/LegacyEnglishCaseGraphFinalCompact.cs
++++ candidate950/LegacyEnglishCaseGraphFinalCompact.cs
+@@ -68,6 +68,8 @@
+             {
+                 void Validate(CancellationToken ct)
+                 {stage.RequireCompactPhase();ct.ThrowIfCancellationRequested();if(!graphFinalCompactBusy||!graphFinalCompactRequested)throw new InvalidOperationException("Same private publication cohort required.");}
++                // One request is constructed inside this actual shared reachability invocation.
++                stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,8);stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,8);
+                 var reached=LegacyPreparedMainCompactReachability.Run(c,graph.MaximumAtoms,0,stage.CurrentNode,
+                     n=>owned[n],reader,contexts.ContainerIdentity,Validate,false,token,5);
+                 var published=LegacyPreparedMainCompactPublication.Run(c,graph,contexts,root.Source.Alphabet,geometry.Categories,
+@@ -116,6 +118,7 @@
+     internal void ObserveGraphCompactScore(GraphLanguageScope stage,int group,int span,float scale,ushort[] symbols,int[] costs,float[] weights)
+     {
+         RequireGraphPublication(stage,default);
++        if(graphPeriodicActive)return; // Cached weight owner is retained; only detached score diagnostics are suppressed.
+         if(graphCompactScores is null||symbols.Length>150||symbols.Length!=costs.Length||costs.Length!=weights.Length||
+             graphCompactScores.Count>=4096||graphCompactScores.Any(x=>x.Group==group))throw new InvalidDataException("One bounded actual cached group export required.");
+         graphCompactScores.Add(new(group,span,BitConverter.SingleToInt32Bits(scale),symbols.ToArray(),costs.ToArray(),weights.Select(BitConverter.SingleToInt32Bits).ToArray()));

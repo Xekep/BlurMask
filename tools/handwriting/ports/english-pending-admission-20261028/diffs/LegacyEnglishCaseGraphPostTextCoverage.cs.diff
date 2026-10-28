@@ -1,0 +1,52 @@
+--- main935/LegacyEnglishCaseGraphPostTextCoverage.cs
++++ candidate950/LegacyEnglishCaseGraphPostTextCoverage.cs
+@@ -26,7 +26,10 @@
+ 
+     internal sealed partial class GraphWordPublicationContext
+     {
+-        private sealed record PostTextLink(GraphCharacterPayload Payload,int Marker);
++        private record PostTextLink(GraphCharacterPayload Payload,int Marker);
++        // Carry-only CURRENT input provenance. Canonical adjusted Marker remains separate.
++        private sealed record RichPostTextLink(GraphCharacterPayload Payload,int Marker,ulong CurrentSourceReference,
++            uint SelectedInputOrdinal,ushort SelectedGlyphOrdinal):PostTextLink(Payload,Marker);
+         private sealed record PostTextChoice(LegacyNativeInkPositionRange[] Ordinary,PostTextLink[] Links);
+         private PostTextChoice?[]? postTextChoices;
+         private List<PostTextLink>? postTextLinks;
+@@ -50,14 +53,26 @@
+                 throw new InvalidOperationException("Next private post-TEXT choice required.");
+             postTextLinks=new(CurrentReferences(token).Count);
+         }
+-        private void RetainPostTextLink(GraphCharacterPayload payload,int marker,CancellationToken token)
++        private void RetainPostTextLink(GraphCharacterSource source,GraphCharacterPayload payload,int marker,byte[] currentSelectionRows,CancellationToken token)
+         {
+             Require(token);
+             if(postTextLinks is null||links is null||postTextLinks.Count+1!=links.Count||
+                 !ReferenceEquals(payload.Context,owner.graphCharacterContext)||!ReferenceEquals(payload.Context.Document,Document)||
+                 !ReferenceEquals(payload.Context.Selections,Selections)||!payload.Complete)
+                 throw new InvalidOperationException("Exact just-appended live CHAR required.");
+-            postTextLinks.Add(new(payload,marker));
++            if(owner.graphPeriodicActive&&owner.graphOriginalSelectedRequested&&owner.graphTextPublicationRequested)
++            {
++                // BEFORE any new source/selection reads or derived-record allocation.
++                Reserve(128,256,1024);
++                if(!ReferenceEquals(source.Context,payload.Context)||source.Index!=postTextLinks.Count)
++                    throw new InvalidOperationException("Exact CURRENT source/link position required.");
++                uint input=source.Selection.SelectedMarker??throw new InvalidOperationException("Actual selected input position required.");
++                if(currentSelectionRows.Length%4!=0||input>=(uint)(currentSelectionRows.Length/4))
++                    throw new InvalidDataException("Same CURRENT selected input row extent required.");
++                ushort ordinal=System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(currentSelectionRows.AsSpan(checked((int)input*4),2));
++                postTextLinks.Add(new RichPostTextLink(payload,marker,source.Reference,input,ordinal));
++            }
++            else postTextLinks.Add(new(payload,marker));
+         }
+         private void SealPostTextChoice(CancellationToken token)
+         {
+@@ -76,7 +91,7 @@
+             //Copy(target), List backing and growth/Split, final ToArray, key
+             //clone and exported pair arrays. Each cut can add at most one row.
+             //The n*cuts terms cover repeated searches/shifts, not CPU cycles.
+-            Reserve(checked(2048+128*n),checked(4096+256*n+32*n*cuts),checked(4096+512*n*(cuts+1L)));
++            Reserve(checked(2048+128*n),checked(4096+256*n+32*n*cuts),GraphCharacterVisitCharge.RangeCall(rows,cuts));
+         }
+         private void RequirePostTextPayload(PostTextLink link,GraphCharacterContext context,CancellationToken token)
+         {
