@@ -82,3 +82,9 @@ claim that a DOM floating field was produced by that narrow tag4 publication pat
 Windows Native AOT passed the same70775 frozen-input checks; publish25.39seconds,
 native execution0.08seconds in this local CPU2 envelope. These are individual
 verification timings, not an application performance comparison.
+
+Managed and Native AOT checks on Windows, Linux and macOS all passed in
+[workflow40720795216](https://github.com/Xekep/BlurMask/actions/runs/40720795216)
+for code commit `9f99160ec9c3d5952d0112c38425e1c82d52da34`.
+This confirms these numerical/storage/layout controls across those platforms;
+it does not establish the remaining finite dtoa or recognition algorithms.
