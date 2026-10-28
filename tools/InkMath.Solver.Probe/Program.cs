@@ -184,6 +184,82 @@ try { await cancellableSolver.SolveAsync("1+1", activeCancellation.Token); throw
 if (child is null || !child.HasExited) throw new Exception("Canceled CAS child was not reaped.");
 child.Dispose();
 if (cancellationWatch.Elapsed > TimeSpan.FromSeconds(2)) throw new Exception("Native child cancellation was slow.");
+
+// Pinned Giac defaults can return Cauchy PV values for ordinary divergent
+// integrals. These exercise the actual solver boundary and native CLI.
+var ordinaryIntegralControls = new (string Input, string Expected)[]
+{
+    (@"\int_1^\infty \frac{1}{x^2} dx", "1"),
+    (@"\int_{-1}^{1} \frac{1}{\sqrt{\abs{x}}} dx", "4"),
+    (@"\int_0^1 a x dx", @"\frac{a}{2}"),
+    (@"\int_0^a x^2 dx", @"\frac{a^{3}}{3}"),
+    (@"\int_0^a \sin x dx", @"-\cos\left(a\right)+1"),
+    (@"\int_{-\infty}^{\infty} \frac{1}{1+x^2} dx", @"\pi "),
+    (@"\int_{\infty}^{-\infty} \frac{1}{1+x^2} dx", @"-\pi "),
+    (@"\int_{-\infty}^{\infty} e^{-x^2} dx", @"\sqrt{\pi }"),
+    (@"\int_{-\infty}^{\infty} e^{-x^2}(\int_{-\infty}^{\infty}e^{-t^2}dt) dx", @"\pi "),
+    (@"\int_0^a (\int_0^x (\int_0^t s ds) dt) dx", @"\frac{a^{4}}{24}"),
+    (@"\int_{-1}^{1} \sqrt{x} dx", @"\frac{2+2*i}{3}"),
+    (@"\int_0^a x dx=1", @"a\in \left\{-\sqrt{2},\sqrt{2}\right\}")
+};
+foreach (var (input, expected) in ordinaryIntegralControls)
+{
+    var actual = await solver.SolveAsync(input);
+    if (!SameResult(actual?.LaTex, expected, actual?.IsEquation == false))
+        throw new Exception($"Ordinary-integral/parameter/mode boundary differs: {input} -> {actual?.LaTex}; expected {expected}");
+}
+var divergentIntegralControls = new[]
+{
+    @"\int_{-1}^{1} \frac{1}{x} dx",
+    @"\int_1^3 \frac{1}{x-2} dx",
+    @"\int_{-1}^{1} \frac{1}{x^2} dx",
+    @"\int_0^1 \frac{1}{x} dx",
+    @"\int_0^\pi \tan x dx",
+    @"\int_{-\pi}^{\pi} \tan x dx",
+    @"\int_{-\infty}^{\infty} \frac{x}{1+x^2} dx",
+    @"\int_0^1 \frac{1}{x-a} dx",
+    @"\int_0^a \frac{1}{x-1} dx",
+    @"\int_0^1 (\int_{-1}^{1} \frac{1}{t}dt) dx"
+};
+foreach (var input in divergentIntegralControls)
+    if (await solver.SolveAsync(input) is not null)
+        throw new Exception("Divergent or unverified parameter-dependent integral produced an ordinary answer: " + input);
+
+
+// A native unverified-singularity warning requires an exact proven marker for
+// every checked integral, including a non-parameterized one. Diagnostic text
+// that merely contains a marker substring must not impersonate that status.
+const string uncheckedWarning = "No checks were made for singular points of antiderivative F for definite integration in [0,1]";
+foreach (var status in new[] { "", "BLURMASK_INTEGRAL_DOMAIN=0", "note: BLURMASK_INTEGRAL_DOMAIN=1", "BLURMASK_INTEGRAL_DOMAIN=unknown" })
+    if (!SymbolicMathSolver.RejectsUnverifiedIntegralDiagnostics(uncheckedWarning + "\n" + status))
+        throw new Exception("An unverified integral warning escaped without an exact native status marker.");
+if (SymbolicMathSolver.RejectsUnverifiedIntegralDiagnostics(uncheckedWarning + "\nBLURMASK_INTEGRAL_DOMAIN=1\n") ||
+    SymbolicMathSolver.RejectsUnverifiedIntegralDiagnostics("Warning, integration of abs or sign assumes constant sign by intervals"))
+    throw new Exception("A proven integral diagnostic or unrelated warning was incorrectly rejected.");
+
+// Generated bindings are outside the input grammar; no input variable may
+// alias their names, including the native singular-point lambda argument.
+foreach (var name in new[] { "blurmaskintegraltemporary", "blurmaskintegrandtemporary0", "blurmaskpoletemporary", "blurmaskdiagnosticerror" })
+    foreach (var input in new[] { name, @"\mathrm{" + name + "}", @"\operatorname{" + name + "}" })
+    {
+        try
+        {
+            if (new MathExpressionParser(input).Parse().Variables.Contains(name, StringComparer.Ordinal))
+                throw new Exception("Input grammar collided with a generated Giac binding: " + input);
+        }
+        catch (FormatException) { }
+    }
+
+// This valid, bounded AST expands diagnostic commands beyond the adapter's
+// 16KiB limit. It must refuse BEFORE launching any native child.
+var commandCapInput = string.Join("+", Enumerable.Repeat(@"\int_0^a (x+b) dx", 30));
+_ = new MathExpressionParser(commandCapInput).Parse();
+int commandCapStarts = 0;
+var commandCapSolver = new SymbolicMathSolver(Path.GetFullPath(args[0])) { ProcessStarted = _ => commandCapStarts++ };
+if (await commandCapSolver.SolveAsync(commandCapInput) is not null || commandCapStarts != 0)
+    throw new Exception("Generated integral command limit failed before native process launch.");
+Console.WriteLine($"PASS ordinary-integral Giac boundary: {ordinaryIntegralControls.Length} exact/mode/nested controls, {divergentIntegralControls.Length} divergence/domain controls, 12 grammar binding guards, 6 diagnostic status guards and pre-launch command cap.");
+
 Console.WriteLine($"PASS native Giac: {actualFixtures.Length} calculus/arithmetic/algebra fixtures, {integralFixtures.Length} exact integral fixtures, unavailable engine, cancellation and undefined/injection guards; {watch.ElapsedMilliseconds} ms");
 
 static bool SameResult(string? actual, string expected, bool allowStructural)

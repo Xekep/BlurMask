@@ -154,6 +154,16 @@ recognition accuracy.
 
 ### Giac-only calculation, 28 October 2026
 
+The subsequent ordinary-definite-integral fix evaluates these requests in
+native calculation mode1 and restores mode0 before solve/LaTeX. Explicit
+opposite infinite bounds become two independently evaluated tails. An
+unverified-singularity warning requires a sufficient numeric native diagnostic;
+unknown status refuses. Generated commands above16KiB refuse before process
+launch. This is conservative and can reject valid integrals; it is not a
+general convergence proof. See the
+[calculation verification](../../agents/research/giac-ordinary-integrals-20261028.md)
+for the pinned cause, test scope and remaining native limitations.
+
 Removed `PolynomialIntegralSolver` and `NumericExpressionEvaluator`. Recognition,
 LaTeX formatting and the bounded AST adapter remain independent from calculation.
 The experimental library calculation helper delegates explicitly to its supplied

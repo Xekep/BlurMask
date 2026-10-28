@@ -33,11 +33,31 @@ public sealed class SymbolicMathSolver
         if (expression is Matrix matrix && matrix.Rows.SelectMany(r => r).All(e => e is Binary { Operator: "=" }))
         { equations = matrix.Rows.SelectMany(r => r).ToArray(); equation = true; }
         if (equation && variables.Length == 0) return null;
-        var operation = equation ? "solve(" + (equations is null ? expression.Cas : "[" + string.Join(',', equations.Select(e => e.Cas)) + "]") +
+        bool checkedIntegral = ContainsDefiniteIntegral(expression);
+        // This generated name cannot be produced by the admitted math grammar.
+        const string integralValue = "blurmaskintegraltemporary";
+        string operand = checkedIntegral ? integralValue : expression.Cas;
+        var operation = equation ? "solve(" + (checkedIntegral ? integralValue : equations is null ? expression.Cas : "[" + string.Join(',', equations.Select(e => e.Cas)) + "]") +
             "," + (variables.Length == 1 ? variables[0] : "[" + string.Join(',', variables) + "]") + ")" :
-            expression is Call ? expression.Cas : "simplify(" + expression.Cas + ")";
+            expression is Call ? operand : "simplify(" + operand + ")";
         var command = "latex(" + operation + ")";
-        string? result = await ExecuteAsync(command, cancellationToken).ConfigureAwait(false);
+        if (checkedIntegral)
+        {
+            // Pinned Giac enables its own interior singularity checks in
+            // GeoGebra calculation mode. Reset before solve/LaTeX so roots and
+            // complex-unit presentation retain the existing mode0 contract.
+            var preparation = new StringBuilder();
+            int temporaryIndex = 0;
+            string source = equations is null ? IntegralCas(expression, preparation, ref temporaryIndex) :
+                "[" + string.Join(',', equations.Select(e => IntegralCas(e, preparation, ref temporaryIndex))) + "]";
+            if (temporaryIndex != 0 && !equation) command = "latex(simplify(" + integralValue + "))";
+            string certificate = "try_catch(print(\"BLURMASK_INTEGRAL_DOMAIN=\"+string(when(" +
+                string.Join(" && ", DefiniteIntegrals(expression).Select(IntegralCertificate)) +
+                ",1,0))),blurmaskdiagnosticerror,print(\"BLURMASK_INTEGRAL_DOMAIN=0\"))\n";
+            command = "calc_mode(1)\n" + certificate + preparation + integralValue + ":=(" + source + ")\ncalc_mode(0)\n" + command;
+            if (command.Length > 16384) return null;
+        }
+        string? result = await ExecuteAsync(command, cancellationToken, checkedIntegral).ConfigureAwait(false);
         if (result is null || result.Length > 3500 || result.Contains("undef", StringComparison.OrdinalIgnoreCase) ||
             result.Contains("operatorname", StringComparison.Ordinal) || result.Contains("\\int", StringComparison.Ordinal) || result.Contains("\\lim", StringComparison.Ordinal) ||
             result.Contains("\\mathrm", StringComparison.Ordinal) || result.Contains("\\infty", StringComparison.Ordinal) && expression is not Call { Name: "limit" }) return null;
@@ -65,6 +85,99 @@ public sealed class SymbolicMathSolver
         return new(result, equation);
     }
 
+    private static bool ContainsDefiniteIntegral(Expression expression) => expression switch
+    {
+        Call { Name: "integrate", Arguments.Length: 4 } => true,
+        Call call => call.Arguments.Any(ContainsDefiniteIntegral),
+        Binary binary => ContainsDefiniteIntegral(binary.Left) || ContainsDefiniteIntegral(binary.Right),
+        Matrix matrix => matrix.Rows.SelectMany(row => row).Any(ContainsDefiniteIntegral),
+        _ => false
+    };
+
+    private static IEnumerable<Call> DefiniteIntegrals(Expression expression)
+    {
+        if (expression is Call { Name: "integrate", Arguments.Length: 4 } integral) yield return integral;
+        IEnumerable<Expression> children = expression switch
+        {
+            Call call => call.Arguments,
+            Binary binary => [binary.Left, binary.Right],
+            Matrix matrix => matrix.Rows.SelectMany(row => row),
+            _ => []
+        };
+        foreach (var child in children)
+            foreach (var nested in DefiniteIntegrals(child)) yield return nested;
+    }
+
+    internal static bool RejectsUnverifiedIntegralDiagnostics(string diagnostics)
+        => diagnostics.Contains("No checks were made for singular points of antiderivative", StringComparison.Ordinal) &&
+            !diagnostics.Split('\n').Any(line => line.Trim() == "BLURMASK_INTEGRAL_DOMAIN=1");
+
+    private static string NativeNumericTruth(string condition)
+        => "when(type(" + condition + ")==DOM_INT,when(" + condition + ",1,0),0)";
+
+    private static string IntegralCertificate(Call integral)
+    {
+        const string pole = "blurmaskpoletemporary";
+        string body = integral.Arguments[0].Cas, variable = integral.Arguments[1].Cas;
+        string Bound(Expression bound) => InfinitySign(bound) switch
+        {
+            1 => "+infinity", -1 => "-infinity", _ => bound.Cas
+        };
+        string lower = Bound(integral.Arguments[2]), upper = Bound(integral.Arguments[3]);
+        // Unknown symbolic inequalities are NOT native true. Reduce only
+        // integer truth values to 0/1 before combining branches numerically.
+        string nonreal = "when(type(im(" + pole + "))==DOM_INT,when(im(" + pole + ")!=0,1,0)," +
+            "when(type(im(" + pole + "))==DOM_FLOAT,when(abs(im(" + pole + "))>0,1,0),0))";
+        string below = NativeNumericTruth(pole + "<" + lower) + "*" + NativeNumericTruth(pole + "<" + upper);
+        string above = NativeNumericTruth(pole + ">" + lower) + "*" + NativeNumericTruth(pole + ">" + upper);
+        string outside = "product(map(" + pole + "->max(" + nonreal + "," + below + "," + above + "),singular(" + body + "," + variable + ")))";
+        return "(is_polynomial(" + body + "," + variable + ") || " + outside + "==1)";
+    }
+
+    private static int InfinitySign(Expression expression) => expression switch
+    {
+        Variable { Name: "infinity" } => 1,
+        Binary { Operator: "*", Left: Number { Value: "-1" }, Right: var right } => -InfinitySign(right),
+        _ => 0
+    };
+
+    private static string IntegralCas(Expression expression, StringBuilder preparation, ref int temporaryIndex)
+    {
+        // Store each whole-line integrand once: nested rewrites grow linearly,
+        // rather than recursively duplicating both copies of an inner integral.
+        if (expression is Call { Name: "integrate", Arguments.Length: 4 } integral &&
+            InfinitySign(integral.Arguments[2]) * InfinitySign(integral.Arguments[3]) == -1)
+        {
+            string body = IntegralCas(integral.Arguments[0], preparation, ref temporaryIndex);
+            string variable = integral.Arguments[1].Cas;
+            string temporary = "blurmaskintegrandtemporary" + temporaryIndex++;
+            preparation.Append(temporary).Append(":=(").Append(body).Append(")\n");
+            string lower = InfinitySign(integral.Arguments[2]) < 0 ? "-infinity" : "+infinity";
+            string upper = InfinitySign(integral.Arguments[3]) < 0 ? "-infinity" : "+infinity";
+            return "(integrate(" + temporary + "," + variable + "," + lower + ",0)+integrate(" + temporary + "," + variable + ",0," + upper + "))";
+        }
+        if (expression is Binary binary)
+            return "(" + IntegralCas(binary.Left, preparation, ref temporaryIndex) + binary.Operator + IntegralCas(binary.Right, preparation, ref temporaryIndex) + ")";
+        if (expression is Call call)
+        {
+            var arguments = new string[call.Arguments.Length];
+            for (int i = 0; i < arguments.Length; i++) arguments[i] = IntegralCas(call.Arguments[i], preparation, ref temporaryIndex);
+            return call.Name + "(" + string.Join(',', arguments) + ")";
+        }
+        if (expression is Matrix matrix)
+        {
+            var rows = new List<string>();
+            foreach (var row in matrix.Rows)
+            {
+                var entries = new List<string>();
+                foreach (var item in row) entries.Add(IntegralCas(item, preparation, ref temporaryIndex));
+                rows.Add("[" + string.Join(',', entries) + "]");
+            }
+            return "[" + string.Join(',', rows) + "]";
+        }
+        return expression.Cas;
+    }
+
     private static string RootSet(string latex)
     {
         if (latex is "[]" or "\\left[\\right]") return "\\varnothing";
@@ -83,7 +196,7 @@ public sealed class SymbolicMathSolver
         return underscore < 0 ? name : name + "_{" + variable[(underscore + 1)..] + "}";
     }
 
-    private async Task<string?> ExecuteAsync(string command, CancellationToken token)
+    private async Task<string?> ExecuteAsync(string command, CancellationToken token, bool guardIntegralWarnings = false)
     {
         var parent = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "BlurMask-Giac"));
         var directory = Path.GetFullPath(Path.Combine(parent, Guid.NewGuid().ToString("N")));
@@ -101,6 +214,11 @@ public sealed class SymbolicMathSolver
         start.Environment["XCAS_HOME"] = directory;
         start.Environment["GIAC_THREADS"] = "1";
         start.Environment["GIAC_NO_TIME"] = "1";
+        // The pinned singularity diagnostic is translated by gettext. Keep
+        // the child protocol stable independently of the desktop UI language.
+        start.Environment["LC_ALL"] = "C";
+        start.Environment["LANG"] = "C";
+        start.Environment["LANGUAGE"] = "C";
         foreach (var name in new[] { "OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "VECLIB_MAXIMUM_THREADS", "GOTO_NUM_THREADS" }) start.Environment[name] = "1";
         // No external display is needed by a command-line calculation.
         start.Environment.Remove("DISPLAY"); start.Environment.Remove("WAYLAND_DISPLAY");
@@ -117,7 +235,11 @@ public sealed class SymbolicMathSolver
             await process.StandardInput.WriteLineAsync(command.AsMemory(), deadline.Token).ConfigureAwait(false);
             process.StandardInput.Close();
             await process.WaitForExitAsync(deadline.Token).ConfigureAwait(false);
-            var stdout = await output.ConfigureAwait(false); await errors.ConfigureAwait(false);
+            var stdout = await output.ConfigureAwait(false); var stderr = await errors.ConfigureAwait(false);
+            // A pinned native diagnostic reports unverified symbolic singularities.
+            // Require a sufficient native diagnostic for EVERY checked integral;
+            // do not publish an unconditional answer when Giac cannot check them.
+            if (guardIntegralWarnings && RejectsUnverifiedIntegralDiagnostics(stderr)) return null;
             if (process.ExitCode != 0) return null;
             string? value = null;
             foreach (var line in stdout.Split('\n'))
