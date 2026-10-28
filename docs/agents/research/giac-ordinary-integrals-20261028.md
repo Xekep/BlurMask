@@ -1,5 +1,16 @@
 # Ordinary definite integrals through the bundled Giac
 
+29 October CLI compatibility follow-up: some official builds emit the imaginary
+constant as `\mathrm{i}`. The adapter canonicalizes only that supported token
+before its existing unsupported-markup filter. The original permanent probe
+passes managed/Native AOT against both the bundled and exact official pinned
+CLI. Evidence: `giac-cli-timing-compat-review-20261028` and
+`giac-cli-compatible-root-20261028` under the build-artifact root. Two historical
+outer45s timeouts remain recorded; complete traces found distributed per-call
+cost rather than a reproduced stuck calculation. No calculation limit or golden
+was relaxed. A fresh51-run procedural NN corpus also passes its equality gates
+with the actual bundled CLI; the CI job now binds that downloaded solver.
+
 The old default mode0 adapter could publish0 for ordinary divergent integrals:
 1/x on[-1,1],1/(x-2) on[1,3], and tan(x) on[0,pi]. This was an actual bundled
 CLI/adapter result, not a handwriting-recognition failure. The fix is in

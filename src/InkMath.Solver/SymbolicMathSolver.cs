@@ -66,6 +66,9 @@ public sealed class SymbolicMathSolver
             if (command.Length > 16384) return null;
         }
         string? result = await ExecuteAsync(command, cancellationToken, checkedIntegral).ConfigureAwait(false);
+        // Giac CLI builds use either plain i or this upright imaginary unit.
+        // Canonicalize the supported constant before rejecting other Roman markup.
+        result = result?.Replace(@"\mathrm{i}", "i", StringComparison.Ordinal);
         if (result is null || result.Length > 3500 || result.Contains("undef", StringComparison.OrdinalIgnoreCase) ||
             result.Contains("operatorname", StringComparison.Ordinal) || result.Contains("\\int", StringComparison.Ordinal) || result.Contains("\\lim", StringComparison.Ordinal) ||
             result.Contains("\\mathrm", StringComparison.Ordinal) || result.Contains("\\infty", StringComparison.Ordinal) && expression is not Call { Name: "limit" }) return null;

@@ -59,6 +59,15 @@ internal static class OriginalGlobalLiveSchedulerOracle
         int count = 0, nextNode = 0;
         int[] starts = new int[graph.NodeCount + 1], prefix = new int[graph.NodeCount + 1];
         var confidence = LegacyFreshMainGlobalGlyphConfidence.Prepare(ak, policy.Owner);
+        // This procedural reference owns an explicit zero allocator, like its existing heap/pool buffers.
+        // GLOBAL publication must use this reference policy's actual live source/language lease.
+        // The independent raw-resource auditor still checks complete final bytes separately.
+        ulong publicationAllocationIdentity=1;
+        var publicationStorage=new LegacyFreshMainGlobalPublicationStorage(policy,request =>
+        {
+            byte[] storage=new byte[request.RequiredBytes];request.PreviousStorage.Span.CopyTo(storage);
+            return new(storage,++publicationAllocationIdentity);
+        });
         var invocation = LegacyFreshMainGlobalTerminalInvocation.Prepare(policy);
         source.ResetForControllerNode();
         owner.AdvanceNodeEpoch(-1, default);
@@ -254,7 +263,8 @@ internal static class OriginalGlobalLiveSchedulerOracle
                     owner.Categories.Categories, invocation.Options.ContextSentinels24b8, invocation.LanguagePenalty2534,
                     false, nextNode, node, reach.Nodes, reach.LanguageProbe,
                     group => LegacyMainCompactGroupScores.FromGlobal(confidence.ReadGroup(group)),
-                    compact, count, starts, prefix, Validate, default, headers);
+                    compact, count, starts, prefix, Validate, default, headers,
+                    LegacyFreshMainGlobalPublicationContext.ForLive(policy,publicationStorage,liveLease,nextNode,default));
                 publications.Add(new(nextNode, node, before, reach, published));
                 for (int prior = nextNode; prior <= node; prior++) buffers[prior].ApplyCompactPublication(policy, published.Nodes[prior], default);
                 compact = published.Storage; count = published.Count; starts = published.Starts; prefix = published.PrefixOwners; nextNode = node + 1;

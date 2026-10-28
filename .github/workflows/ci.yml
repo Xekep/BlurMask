@@ -1213,6 +1213,12 @@ jobs:
           python tools/export-ink-math-model.py models/math2/math2-unwrapped.res --output .artifacts/math-mode0.ikrmath
           if ($LASTEXITCODE -ne 0) { throw 'Bounded Math2 model export failed.' }
           $runtime = ".artifacts/formula-app/runtimes/$rid/native/$lib"
+          $solverName = if ($IsWindows) { 'icas.exe' } else { 'icas' }
+          $env:BLURMASK_TEST_GIAC = (Resolve-Path ".artifacts/formula-app/runtimes/$rid/solver/$solverName").Path
+          if (-not $IsWindows) {
+            chmod +x $env:BLURMASK_TEST_GIAC
+            if ($LASTEXITCODE -ne 0) { throw 'Bundled Giac CLI permission restoration failed.' }
+          }
           dotnet run --project tools/LegacyMathTensorState.Probe -c Release -- .artifacts/math-mode0.ikrmath models/math2/math2-unwrapped.res $runtime .artifacts/math-mode0-managed.json
           if ($LASTEXITCODE -ne 0) { throw 'Managed mode0 tensor lifecycle failed.' }
           python tools/LegacyMathTensorState.Probe/audit_output.py .artifacts/math-mode0-managed.json models/math2/math2-unwrapped.res
