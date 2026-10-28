@@ -1,0 +1,6 @@
+{
+  "schema": 1,
+  "binarySha256": "17f5236d257fe3175574ec29acf5116e375b247e02d2bc7c190ee908bd185a2f",
+  "addresses": ["0x1800078d0", "0x180007b50", "0x180032800"],
+  "decompileSeconds": 45
+}

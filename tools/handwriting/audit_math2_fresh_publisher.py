@@ -44,8 +44,16 @@ checks={
   'headerLive=false;Observe(Math2Mode0PublishStage.HeaderFreed)',
   'foreach(var node in Walk(oldRoot))foreach(var attribute in node.Attributes)',
   'pending.SingleOrDefault(p=>p.Id==-tag)', 'long id=next++;registry.Add(new(id,p.Name,102,p.Ranges.ToArray()));p.Resolved=id',
-  'attribute.Number=p.Resolved', 'newTags.Add(attribute.Number!.Value)',
-  'if(oldTags.Count!=0)', 'outer?.Dispose()', 'catch{target.failed=true;if(observer is null)target.Dispose();throw;}']}
+  'attribute.Tag!=4||attribute.Number is not long actualTag',
+  'long tag=Math2DomValueConversion.RegistrationTag(actualTag)',
+  'attribute.Number=p.Resolved', 'newTags.Add(Math2DomValueConversion.CollectedTag(attribute.Number!.Value))',
+  'if(oldTags.Count!=0)', 'outer?.Dispose()', 'catch{target.failed=true;if(observer is null)target.Dispose();throw;}'],
+ 'src/InkRecognition.Math/Math2DomValueConversion.cs':[
+  'internal static long Signed64(long actualValue) => actualValue',
+  'internal static long RegistrationTag(long actualValue)',
+  'if (tag == long.MaxValue) throw new NotSupportedException(',
+  'internal static long CollectedTag(long actualValue)',
+  'if (tag == -1) throw new NotSupportedException(']}
 text={};pins=0
 for path,expressions in checks.items():
  s=(root/path).read_text(encoding='utf-8-sig');text[path]=s
@@ -59,9 +67,10 @@ assert publisher.index('if(planned>budget)')<publisher.index('Interlocked.Compar
 assert publisher.index('var payload=temporary.Clone(child)')<publisher.index('patch.Add(new(i,child,payload,oldRoot))')<publisher.index('foreach(var action in patch)')
 assert publisher.index('Arena.Attach(action.Parent,action.Payload)')<publisher.index('headerLive=false;Observe(Math2Mode0PublishStage.HeaderFreed)')<publisher.index('pending.SingleOrDefault')
 assert publisher.index('p.Resolved=id;')<publisher.index('Math2Mode0PublishStage.Registered,')<publisher.index('attribute.Number=p.Resolved')
+assert publisher.index('attribute.Tag!=4||attribute.Number is not long actualTag')<publisher.index('Math2DomValueConversion.RegistrationTag(actualTag)')<publisher.index('pending.SingleOrDefault')
 assert 'receipt.Dispose('not in publisher and 'receipt.Copy.Dispose('not in publisher
 assert 'LegacyLibraryOriginalTextFieldBootstrap'not in publisher
-a.output.write_text(json.dumps(dict(staticOnly=True,vendorExecution=False,nativeReport=str(report),nativeRegions=18,nativePins=435,nativeBindings=17,consumptionPins=pins,orderedJoins=5,
+a.output.write_text(json.dumps(dict(staticOnly=True,vendorExecution=False,nativeReport=str(report),nativeRegions=18,nativePins=435,nativeBindings=17,consumptionPins=pins,orderedJoins=6,
  runtimeSha256={p:hashlib.sha256((root/p).read_bytes()).hexdigest()for p in checks},
  scope='Library actual fresh produced receipt/third registry/candidate/temp DOM/3op2 cloned ordered patch/late CB8 tags; same-field locks without field->receipt inversion, oneuse CWT, borrowed firstcopy. No native edit ABI or original-page/history acceptance.'),indent=2)+'\n',encoding='utf8')
-print(f'PASS18 complete native patch bodies/435pins/17bindings +{pins} runtimeconsumption checks/5orderedjoins; no vendor execution')
+print(f'PASS18 complete native patch bodies/435pins/17bindings +{pins} runtimeconsumption checks/6orderedjoins; no vendor execution')

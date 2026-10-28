@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(ReviewedMathLibraryPath)' == ''">
+    <ProjectReference Include="../../src/InkRecognition.Math/InkRecognition.Math.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(ReviewedMathLibraryPath)' != ''">
+    <Reference Include="InkRecognition.Math"><HintPath>$(ReviewedMathLibraryPath)</HintPath><Private>true</Private></Reference>
+  </ItemGroup>
+</Project>

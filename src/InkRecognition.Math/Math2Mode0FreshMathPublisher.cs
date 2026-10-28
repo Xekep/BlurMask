@@ -203,7 +203,8 @@ internal sealed class Math2Mode0FreshMathPublisher : IDisposable
         foreach(var node in Walk(oldRoot))foreach(var attribute in node.Attributes)
         {
             if(attribute.Name.Text!="tag")continue;
-            if(attribute.Tag!=4||attribute.Number is not long tag)throw new NotSupportedException("Actual typed INT64 tag required.");
+            if(attribute.Tag!=4||attribute.Number is not long actualTag)throw new NotSupportedException("Actual typed INT64 tag required.");
+            long tag=Math2DomValueConversion.RegistrationTag(actualTag);
             if(tag>=0)continue;
             var p=pending.SingleOrDefault(p=>p.Id==-tag)??throw new InvalidOperationException("Missing actual CB8 pending entry.");
             if(p.Resolved<0)
@@ -215,7 +216,7 @@ internal sealed class Math2Mode0FreshMathPublisher : IDisposable
             attribute.Number=p.Resolved;Observe(Math2Mode0PublishStage.TagWritten,checked((int)p.Id-2));
         }
         foreach(var node in Walk(oldRoot))foreach(var attribute in node.Attributes)
-            if(attribute.Name.Text=="tag")newTags.Add(attribute.Number!.Value);
+            if(attribute.Name.Text=="tag")newTags.Add(Math2DomValueConversion.CollectedTag(attribute.Number!.Value));
         Observe(Math2Mode0PublishStage.NewTags);
         //Actual fresh old result has zero old tags; native V50 has no IDs to
         //delete. Nonempty-old/imported stale deletion is not admitted here.

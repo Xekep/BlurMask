@@ -10,6 +10,17 @@ using var runtime=new OrtRuntime(Path.GetFullPath(args[2]));using var run=runtim
 using var stream=File.OpenRead(args[0]);using var bundle=Math2Mode0ColdBundle.Read(runtime,stream,File.ReadAllBytes(args[1]));
 int guards=0;void Reject(Action action)
 {try{action();}catch(Exception e)when(e is ArgumentException or InvalidOperationException or NotSupportedException or OperationCanceledException){guards++;return;}throw new InvalidDataException("Missing Math publication guard.");}
+// Native0336C0/033870 use different sentinels. These are scalar reader
+// controls; actual owning publication below still supplies all positive tags.
+void RejectSentinel(Action action)
+{try{action();}catch(NotSupportedException){return;}throw new InvalidDataException("Missing native numeric sentinel refusal.");}
+RejectSentinel(()=>Math2DomValueConversion.RegistrationTag(long.MaxValue));
+RejectSentinel(()=>Math2DomValueConversion.CollectedTag(-1));
+foreach(long id in new[]{long.MinValue,-2L,0L,1L})
+ if(Math2DomValueConversion.RegistrationTag(id)!=id||Math2DomValueConversion.CollectedTag(id)!=id)
+  throw new InvalidDataException("Native typed numeric reader changed non-sentinel tag.");
+if(Math2DomValueConversion.RegistrationTag(-1)!=-1||Math2DomValueConversion.CollectedTag(long.MaxValue)!=long.MaxValue)
+ throw new InvalidDataException("CB8 numeric reader sentinels were conflated.");
 using var canceled=new CancellationTokenSource();canceled.Cancel();
 var actual=new List<Actual>();var events=new List<Stage>();
 foreach(int width in new[]{1,3,16})foreach(bool reversed in new[]{false,true})
