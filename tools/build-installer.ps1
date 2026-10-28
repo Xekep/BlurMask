@@ -27,7 +27,7 @@ $outputDir = [IO.Path]::GetFullPath($OutputDirectory)
 if (-not $SkipPublish) {
     & (Join-Path $PSScriptRoot 'build.ps1') -Runtime win-x64 -Version $Version -OutputDirectory $publishDir
 }
-$required = @('BlurMask.exe')
+$required = @('NovaPen.exe')
 foreach ($name in $required) {
     if (-not (Test-Path -LiteralPath (Join-Path $publishDir $name))) { throw "Incomplete publish directory: missing $name" }
 }
@@ -66,14 +66,14 @@ if ($sourceArchive -ne $releaseSourceArchive) { Copy-Item -LiteralPath $sourceAr
 "$sourceHash  $sourceName" | Set-Content -LiteralPath "$releaseSourceArchive.sha256" -Encoding ascii
 $compiler = & (Join-Path $PSScriptRoot 'install-inno-setup.ps1')
 New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
-& $compiler '--quiet-progress' "--define=AppVersion=$Version" "--define=NumericVersion=$numericVersion" "--define=PublishDir=$publishDir" "--define=SolverDir=$solverDir" "--define=InstallerOutputDir=$outputDir" (Join-Path (Split-Path $PSScriptRoot -Parent) 'packaging\BlurMask.iss')
+& $compiler '--quiet-progress' "--define=AppVersion=$Version" "--define=NumericVersion=$numericVersion" "--define=PublishDir=$publishDir" "--define=SolverDir=$solverDir" "--define=InstallerOutputDir=$outputDir" (Join-Path (Split-Path $PSScriptRoot -Parent) 'packaging\NovaPen.iss')
 if ($LASTEXITCODE -ne 0) { throw "Inno Setup compilation failed: $LASTEXITCODE" }
-$installer = Join-Path $outputDir "BlurMask-$Version-win-x64-Setup.exe"
+$installer = Join-Path $outputDir "NovaPen-$Version-win-x64-Setup.exe"
 if (-not (Test-Path -LiteralPath $installer)) { throw "Installer not created: $installer" }
 $hash = (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLowerInvariant()
 "$hash  $([IO.Path]::GetFileName($installer))" | Set-Content -LiteralPath "$installer.sha256" -Encoding ascii
 @{
-    product = 'BlurMask'; version = $Version; runtime = 'win-x64'; innoSetup = '7.1.0';
+    product = 'NovaPen'; version = $Version; runtime = 'win-x64'; innoSetup = '7.1.0';
     commit = $env:GITHUB_SHA; sha256 = $hash
     solver = @{ giacCommit = $solverManifest.giacCommit; executableSha256 = $solverHash; sourceArchive = $sourceName; sourceSha256 = $sourceHash }
 } | ConvertTo-Json | Set-Content -LiteralPath "$installer.json" -Encoding utf8

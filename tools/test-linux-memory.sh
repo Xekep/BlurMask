@@ -156,15 +156,15 @@ summary = {'unit': 'MiB', 'scenario': scenario, 'phases': [{ 'phase': r['phase']
 PY
 
 }
-toolbar="$(wait_visible 'BlurMask.*drawing tools')"
+toolbar="$(wait_visible 'NovaPen.*drawing tools')"
 sleep 3
-assert_unmapped 'BlurMask.*ink overlay'
+assert_unmapped 'NovaPen.*ink overlay'
 sample startup-cursor
 if [[ "${BLURMASK_MEMORY_CPU_ONLY:-}" == 1 ]]; then sleep 10; else sleep 7; fi
 sample startup-idle
 if [[ "${BLURMASK_MEMORY_CPU_ONLY:-}" == 1 ]]; then
   key ctrl+shift+3
-  overlay="$(wait_visible 'BlurMask.*ink overlay')"
+  overlay="$(wait_visible 'NovaPen.*ink overlay')"
   sleep 2
   sample desktop-pen-mapped
   sleep 10
@@ -179,7 +179,7 @@ time.sleep(max(0, 2 - (time.monotonic() - float(sys.argv[1]))))
 PY
   sample desktop-active-stroke
   key ctrl+shift+c
-  canvas="$(wait_visible 'BlurMask.*Canvas')"
+  canvas="$(wait_visible 'NovaPen.*Canvas')"
   sleep 2
   sample canvas-open
   sleep 10
@@ -189,14 +189,14 @@ PY
 fi
 if [[ "${BLURMASK_MEMORY_AI_ONLY:-}" == 1 ]]; then
   key ctrl+shift+3
-  overlay="$(wait_visible 'BlurMask.*ink overlay')"
+  overlay="$(wait_visible 'NovaPen.*ink overlay')"
   sleep 2
   sample ai-before-selection
   xdotool mousemove --window "$toolbar" 26 124 click 1
-  flyout="$(wait_visible 'BlurMask.*menu')"
+  flyout="$(wait_visible 'NovaPen.*menu')"
   xdotool mousemove --window "$flyout" 54 20 click 1
   sleep .5
-  assert_unmapped 'BlurMask.*menu'
+  assert_unmapped 'NovaPen.*menu'
   sample ai-selected
   stroke "$overlay" 620 650 660 550 700 650
   stroke "$overlay" 640 615 680 615
@@ -217,16 +217,16 @@ if [[ "${BLURMASK_MEMORY_AI_ONLY:-}" == 1 ]]; then
   exit 0
 fi
 key ctrl+shift+3
-overlay="$(wait_visible 'BlurMask.*ink overlay')"
+overlay="$(wait_visible 'NovaPen.*ink overlay')"
 sleep 2
 sample desktop-pen-mapped
 stroke "$overlay" 600 550 670 580 740 530 800 590
 sample desktop-stroke
 key ctrl+shift+2
-assert_unmapped 'BlurMask.*ink overlay'
+assert_unmapped 'NovaPen.*ink overlay'
 sample cursor-after-desktop
 key ctrl+shift+c
-canvas="$(wait_visible 'BlurMask.*Canvas')"
+canvas="$(wait_visible 'NovaPen.*Canvas')"
 sleep 2
 sample canvas-open
 xdotool windowactivate --sync "$canvas"
@@ -235,17 +235,17 @@ stroke "$canvas" 360 310 430 360 510 330 590 410
 sample canvas-stroke
 wmctrl -ic "$(printf '0x%x' "$canvas")"
 sleep 1
-assert_unmapped 'BlurMask.*Canvas'
+assert_unmapped 'NovaPen.*Canvas'
 key ctrl+shift+2
 sample canvas-hidden
 # Reuse the same native windows, retain the same stroke count: isolate caches from document growth.
 for cycle in {1..6}; do
   key ctrl+shift+3
-  [[ "$(wait_visible 'BlurMask.*ink overlay')" == "$overlay" ]]
+  [[ "$(wait_visible 'NovaPen.*ink overlay')" == "$overlay" ]]
   sleep .5
   sample "cycle-$cycle-desktop"
   key ctrl+shift+c
-  [[ "$(wait_visible 'BlurMask.*Canvas')" == "$canvas" ]]
+  [[ "$(wait_visible 'NovaPen.*Canvas')" == "$canvas" ]]
   sleep .7
   sample "cycle-$cycle-canvas"
   wmctrl -ic "$(printf '0x%x' "$canvas")"
@@ -256,9 +256,9 @@ done
 # Create every privacy mode through the real flyout, then destroy them through the WM.
 for mode in {0..4}; do
   xdotool mousemove --window "$toolbar" 26 358 click 1
-  flyout="$(wait_visible 'BlurMask.*menu')"
+  flyout="$(wait_visible 'NovaPen.*menu')"
   xdotool mousemove --window "$flyout" "$((20 + mode * 34))" 20 click 1
-  mask="$(wait_visible '^BlurMask$')"
+  mask="$(wait_visible '^NovaPen$')"
   sleep .7
   sample "mask-$mode-created"
   if (( mode == 0 )); then
@@ -269,7 +269,7 @@ for mode in {0..4}; do
   fi
   wmctrl -ic "$(printf '0x%x' "$mask")"
   sleep .8
-  assert_unmapped '^BlurMask$'
+  assert_unmapped '^NovaPen$'
   sample "mask-$mode-closed"
 done
 sleep 10

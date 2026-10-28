@@ -6,11 +6,11 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsAotCompatible>true</IsAotCompatible>
     <Description>Independent pen-stroke mathematics recognition with native CPU ONNX Runtime.</Description>
-    <PackageId>BlurMask.InkRecognition.Math</PackageId>
+    <PackageId>NovaPen.InkRecognition.Math</PackageId>
     <Authors>Xekep</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>PACKAGE.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/Xekep/BlurMask</RepositoryUrl>
+    <RepositoryUrl>https://github.com/Xekep/NovaPen</RepositoryUrl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <DebugType>none</DebugType><DebugSymbols>false</DebugSymbols>

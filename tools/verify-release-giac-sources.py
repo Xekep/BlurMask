@@ -88,10 +88,10 @@ def main():
     if args.package:
         packages = [args.package]
     else:
-        mac = list(args.directory.glob('BlurMask-osx-*.tar.gz'))
+        mac = list(args.directory.glob('NovaPen-osx-*.tar.gz'))
         if len(mac) != 1:
             raise ValueError('Release needs exactly one macOS host package')
-        packages = [args.directory / 'BlurMask-win-x64.zip', args.directory / 'BlurMask-linux-x64.tar.gz', *mac]
+        packages = [args.directory / 'NovaPen-win-x64.zip', args.directory / 'NovaPen-linux-x64.tar.gz', *mac]
     for package in packages:
         verify_package(package, args.directory)
 

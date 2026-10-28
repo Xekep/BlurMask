@@ -6,7 +6,7 @@ REVISION='bd8f81ddb5c74d5c8897b36ad88b440266245103'
 FONTS=[('inter','Inter[opsz,wght].ttf','Inter'),('manrope','Manrope[wght].ttf','Manrope'),
        ('sourceserif4','SourceSerif4[opsz,wght].ttf','SourceSerif4'),('stixtwomath','STIXTwoMath-Regular.ttf','STIXTwoMath'),
        ('stixtwotext','STIXTwoText[wght].ttf','STIXTwoText'),('stixtwotext','STIXTwoText-Italic[wght].ttf','STIXTwoTextItalic')]
-directory=ROOT/'src/BlurMask/Assets/Fonts'; directory.mkdir(parents=True,exist_ok=True)
+directory=ROOT/'src/NovaPen/Assets/Fonts'; directory.mkdir(parents=True,exist_ok=True)
 reports=[]
 for family,filename,local in FONTS:
     base=f'https://raw.githubusercontent.com/google/fonts/{REVISION}/ofl/{family}/'

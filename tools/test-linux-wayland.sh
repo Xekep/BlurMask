@@ -21,9 +21,9 @@ export LIBGL_ALWAYS_SOFTWARE=1
 # The EGL driver may use llvmpipe. This does not request Avalonia's X11 software backend.
 unset DISPLAY WAYLAND_DISPLAY WAYLAND_SOCKET
 mkdir -p "$XDG_DATA_HOME" "$XDG_CONFIG_HOME" "$XDG_CACHE_HOME" "$XDG_PICTURES_DIR" "$BLURMASK_SMOKE_ARTIFACTS"
-runtime="$(mktemp -d "${TMPDIR:-/tmp}/blurmask-wayland.XXXXXX")"
+runtime="$(mktemp -d "${TMPDIR:-/tmp}/novapen-wayland.XXXXXX")"
 chmod 700 "$runtime"
-export XDG_RUNTIME_DIR="$runtime" WAYLAND_DISPLAY=wayland-blurmask-test
+export XDG_RUNTIME_DIR="$runtime" WAYLAND_DISPLAY=wayland-novapen-test
 app_pid= compositor_pid=
 cleanup() {
   result=$?

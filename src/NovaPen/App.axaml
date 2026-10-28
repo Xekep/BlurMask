@@ -1,0 +1,25 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:NovaPen"
+             x:Class="NovaPen.App"
+             RequestedThemeVariant="Default">
+  <Application.Styles>
+    <FluentTheme />
+  </Application.Styles>
+
+  <TrayIcon.Icons>
+    <TrayIcons>
+      <TrayIcon Icon="/Assets/NovaPen.ico"
+                ToolTipText="{x:Static local:UiText.TrayTooltip}"
+                IsVisible="{x:Static local:Program.ShowTray}"
+                Clicked="TrayOnClicked">
+        <TrayIcon.Menu>
+          <NativeMenu>
+            <NativeMenuItem Header="{x:Static local:UiText.ShowWindow}" Click="TrayOnClicked" />
+            <NativeMenuItem Header="{x:Static local:UiText.ExitApp}" Click="ExitOnClicked" />
+          </NativeMenu>
+        </TrayIcon.Menu>
+      </TrayIcon>
+    </TrayIcons>
+  </TrayIcon.Icons>
+</Application>

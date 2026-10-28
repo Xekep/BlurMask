@@ -5,11 +5,11 @@
     <Nullable>enable</Nullable>
     <IsAotCompatible>true</IsAotCompatible>
     <Description>Local stroke classification and segmentation using native CPU ONNX Runtime.</Description>
-    <PackageId>BlurMask.InkRecognition.RawContent</PackageId>
+    <PackageId>NovaPen.InkRecognition.RawContent</PackageId>
     <Authors>Xekep</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>PACKAGE.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/Xekep/BlurMask</RepositoryUrl>
+    <RepositoryUrl>https://github.com/Xekep/NovaPen</RepositoryUrl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <DebugType>none</DebugType><DebugSymbols>false</DebugSymbols>

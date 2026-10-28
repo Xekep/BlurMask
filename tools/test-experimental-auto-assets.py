@@ -30,7 +30,7 @@ def main():
   try:module.check(changed)
   except ValueError:controls.append(name)
   else:raise AssertionError('Malformed pack accepted: '+name)
- manual=(ROOT/'src/BlurMask/AiExperimentalMathModels.cs').read_text(encoding='utf-8');raw_owner=(ROOT/'src/BlurMask/AiExperimentalRawContentModels.cs').read_text(encoding='utf-8')
+ manual=(ROOT/'src/NovaPen/AiExperimentalMathModels.cs').read_text(encoding='utf-8');raw_owner=(ROOT/'src/NovaPen/AiExperimentalRawContentModels.cs').read_text(encoding='utf-8')
  source=cache_source_controls(manual,raw_owner);source_negatives=[]
  for name,m,r in [('missing-manual-data-catch',manual.replace('InvalidDataException or ',''),raw_owner),('manual-no-memoization',manual.replace('failed=true;','failed=false;'),raw_owner),('missing-raw-data-catch',manual,raw_owner.replace('InvalidDataException or ','')),('raw-no-memoization',manual,raw_owner.replace('failed=signature;','failed=null;'))]:
   try:cache_source_controls(m,r)

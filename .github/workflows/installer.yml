@@ -36,8 +36,8 @@ jobs:
         with:
           path: |
             .artifacts/giac-runtime/win-x64
-            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz
-            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz.sha256
+            .artifacts/installers/NovaPen-Giac-corresponding-sources-*.tar.gz
+            .artifacts/installers/NovaPen-Giac-corresponding-sources-*.tar.gz.sha256
           key: giac-win-x64-${{ hashFiles('tools/prepare-giac-runtime.ps1', 'tools/giac-native/Makefile', 'tools/giac-native/build.sh', 'tools/giac-native/icas.cpp', 'tools/giac-native/test-transport.ps1') }}
       - uses: actions/setup-dotnet@v4
         with:
@@ -64,14 +64,14 @@ jobs:
           .\tools\test-installer.ps1 -InstallerPath $installer.FullName -PublishDirectory .artifacts/installer-publish/win-x64
       - uses: actions/upload-artifact@v4
         with:
-          name: BlurMask-Windows-Installer
+          name: NovaPen-Windows-Installer
           path: .artifacts/installers/*
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: BlurMask-Installer-Test-Logs
+          name: NovaPen-Installer-Test-Logs
           path: |
             .artifacts/installer-test/**/*.log
-            ${{ runner.temp }}/BlurMask-Giac-source-build/build-*/**/*.log
+            ${{ runner.temp }}/NovaPen-Giac-source-build/build-*/**/*.log
             .artifacts/giac-runtime/win-x64/manifest.json

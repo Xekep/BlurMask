@@ -15,7 +15,7 @@
 | Нагрузочные сценарии | [Performance](tooling/performance.md) |
 | Подробности функций и интеграции | [Маски](../engineering/reference/window-masks.md), [AI-перо](../engineering/reference/ai-pen.md), [Giac](../engineering/reference/math-solver.md), [полный справочник рисования](../engineering/reference/desktop-guide.md) |
 | Библиотеки и пакеты | [InkRecognition](../../src/InkRecognition/README.md), [NuGet README](../../src/InkRecognition/PACKAGE.md), [ресурсы моделей](../../models/README.md) |
-| Сервер, хранение и API | [Self-hosting](../engineering/deployment.md), [исходники сервера](../../src/BlurMask.Server) |
+| Сервер, хранение и API | [Self-hosting](../engineering/deployment.md), [исходники сервера](../../src/NovaPen.Server) |
 
 Исследовательская заметка фиксирует конкретную проверку и дату. Не превращайте числовой контроль, сравнение исходников или пройденный отдельный этап в утверждение о качестве распознавания. Сохраняйте первую ошибку и происхождение входных данных; изменение квот и подмена входа не исправляют алгоритм.
 

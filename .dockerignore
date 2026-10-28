@@ -2,6 +2,6 @@
 .artifacts
 **/bin
 **/obj
-src/BlurMask.Server/.env
-src/BlurMask.Server/.data
-src/BlurMask.Server/node_modules
+src/NovaPen.Server/.env
+src/NovaPen.Server/.data
+src/NovaPen.Server/node_modules

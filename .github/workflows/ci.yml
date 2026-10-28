@@ -19,6 +19,23 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 
 jobs:
+  mask-regressions:
+    name: Headless masks / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    env:
+      DOTNET_PROCESSOR_COUNT: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 11.0.100-preview.7.26381.103
+      - name: Check region selection and attachment tracking without visible overlays
+        run: dotnet run --project tools/NovaPen.MaskProbe/NovaPen.MaskProbe.csproj -c Release --no-launch-profile
   render:
     name: Screenshot reduction / thin stroke coverage
     runs-on: ubuntu-latest
@@ -31,43 +48,43 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install Pillow==11.3.0
-      - run: dotnet run --project tools/BlurMask.RenderProbe -c Release -- --output .artifacts/render-ci --label ci --frames 30
-      - run: python tools/BlurMask.RenderProbe/quality.py .artifacts/render-ci
+      - run: dotnet run --project tools/NovaPen.RenderProbe -c Release -- --output .artifacts/render-ci --label ci --frames 30
+      - run: python tools/NovaPen.RenderProbe/quality.py .artifacts/render-ci
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: BlurMask-Synthetic-Render
+          name: NovaPen-Synthetic-Render
           path: .artifacts/render-ci/
   installer:
     name: Windows installer / Inno Setup 7.1.0
     needs: native-aot-windows
     uses: ./.github/workflows/installer.yml
     with:
-      publish-artifact: BlurMask-win-x64
+      publish-artifact: NovaPen-win-x64
   deb:
     name: Debian installer / Linux x64
     needs: native-aot-linux
     uses: ./.github/workflows/deb.yml
     with:
-      publish-artifact: BlurMask-linux-x64
+      publish-artifact: NovaPen-linux-x64
   arch:
     name: Arch installer / Linux x64
     needs: native-aot-linux
     uses: ./.github/workflows/arch.yml
     with:
-      publish-artifact: BlurMask-linux-x64
+      publish-artifact: NovaPen-linux-x64
   void:
     name: Void installer / Linux x64 glibc
     needs: native-aot-linux
     uses: ./.github/workflows/xbps.yml
     with:
-      publish-artifact: BlurMask-linux-x64
+      publish-artifact: NovaPen-linux-x64
   server:
     name: Download page / API / PostgreSQL
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: src/BlurMask.Server
+        working-directory: src/NovaPen.Server
     services:
       postgres:
         image: postgres:17
@@ -132,8 +149,8 @@ jobs:
       - name: Validate Bash workflow syntax before long recognition tests
         shell: bash
         run: python tools/check-workflow-shells.py --bash-script tools/ci/check-recognition-managed.sh .github/workflows/ci.yml
-      - run: dotnet restore src/BlurMask/BlurMask.csproj
-      - run: dotnet build src/BlurMask/BlurMask.csproj -c Release --no-restore -p:PublishAot=false -p:SelfContained=false
+      - run: dotnet restore src/NovaPen/NovaPen.csproj
+      - run: dotnet build src/NovaPen/NovaPen.csproj -c Release --no-restore -p:PublishAot=false -p:SelfContained=false
       - name: Completed text host policy, full-input coverage and embedded delivery without inference
         shell: bash
         run: |
@@ -141,7 +158,7 @@ jobs:
           dotnet run --project tools/ExperimentalCompletedGlobalText.Probe -c Release -- --prepared .artifacts/completed-text-policy.json
           python -I -B tools/ExperimentalCompletedGlobalText.ActualBatch/write_plan.py . .artifacts/completed-text-plan.json
           dotnet run --project tools/ExperimentalCompletedGlobalText.ActualBatch -c Release -- --validate-plan .artifacts/completed-text-plan.json .artifacts/completed-text-plan-audit.json
-          dotnet run --project tools/ExperimentalCompletedGlobalText.Resources -c Release -- src/BlurMask/bin/Release/net11.0/BlurMask.dll .artifacts/completed-text-plan.json .artifacts/completed-text-resources.json
+          dotnet run --project tools/ExperimentalCompletedGlobalText.Resources -c Release -- src/NovaPen/bin/Release/net11.0/NovaPen.dll .artifacts/completed-text-plan.json .artifacts/completed-text-resources.json
       - name: Compile gated recognition drafts and check cancellation contract
         shell: bash
         run: |
@@ -172,7 +189,7 @@ jobs:
           dotnet run --project tools/LegacyEnglishTaggedWord.Probe -c Release -- models .artifacts/english-tagged-word.json
           python -I -B tools/LegacyEnglishTaggedWord.Probe/audit_reference.py models .artifacts/english-tagged-word.json .artifacts/english-tagged-word-reference
       - name: Portable stroke engine numerical goldens, model validation and ink history
-        run: dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --ai-pen-test
+        run: dotnet src/NovaPen/bin/Release/net11.0/NovaPen.dll --ai-pen-test
       - name: Math token formatter and model guards
         run: dotnet run --project tools/InkRecognition.Math.Probe -c Release
       - name: Symbolic mathematics grammar and command isolation
@@ -404,7 +421,7 @@ jobs:
           python tools/LegacyDirectionalCoordinates.Probe/reference_controls.py .artifacts/legacy-coordinate-controls.json
           dotnet run --project tools/LegacyDirectionalCoordinates.Probe -c Release -- .artifacts/legacy-coordinate-controls.json
       - name: Overlay compositor IPC ownership, cancellation and transport
-        run: dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --overlay-platform-test
+        run: dotnet src/NovaPen/bin/Release/net11.0/NovaPen.dll --overlay-platform-test
       - name: Legacy fixed point crossings and directional intersection classes
         run: |
           python tools/LegacyIntersection.Probe/reference_controls.py .artifacts/legacy-intersection-controls.json
@@ -763,9 +780,9 @@ jobs:
           $exe = if ($IsWindows) { '.artifacts/solver-probe/InkMath.Solver.Probe.exe' } else { '.artifacts/solver-probe/InkMath.Solver.Probe' }
           & $exe $env:BLURMASK_TEST_GIAC
           if ($LASTEXITCODE -ne 0) { throw 'Actual native CAS numerical/resource checks failed.' }
-          dotnet build src/BlurMask -c Release -p:PublishAot=false -p:SelfContained=false
+          dotnet build src/NovaPen -c Release -p:PublishAot=false -p:SelfContained=false
           if ($LASTEXITCODE -ne 0) { throw 'Application build failed.' }
-          dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --ai-pen-test
+          dotnet src/NovaPen/bin/Release/net11.0/NovaPen.dll --ai-pen-test
           if ($LASTEXITCODE -ne 0) { throw 'CAS application typesetting/equals policy integration failed.' }
 
   native-aot-windows:
@@ -777,20 +794,20 @@ jobs:
         with:
           path: |
             .artifacts/giac-runtime/win-x64
-            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz
-            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz.sha256
+            .artifacts/installers/NovaPen-Giac-corresponding-sources-*.tar.gz
+            .artifacts/installers/NovaPen-Giac-corresponding-sources-*.tar.gz.sha256
           key: giac-win-x64-${{ hashFiles('tools/prepare-giac-runtime.ps1', 'tools/giac-native/Makefile', 'tools/giac-native/build.sh', 'tools/giac-native/icas.cpp', 'tools/giac-native/test-transport.ps1') }}
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 11.0.100-preview.7.26381.103
-      - run: dotnet restore src/BlurMask/BlurMask.csproj
+      - run: dotnet restore src/NovaPen/NovaPen.csproj
       - name: Publish
         shell: pwsh
         run: .\tools\build.ps1 win-x64 -Version "1.0.0-dev.$env:GITHUB_RUN_NUMBER"
       - name: Native experimental manual math delivery without inference
         shell: pwsh
         run: |
-          $exe = './src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe'
+          $exe = './src/NovaPen/bin/Release/net11.0/win-x64/publish/NovaPen.exe'
           & $exe --experimental-math-layout-test | Out-Default
           if ($LASTEXITCODE -ne 0) { throw 'Experimental math injected layout/route guards failed.' }
           & $exe --experimental-math-model-test | Out-Default
@@ -799,7 +816,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Experimental AUTO routing/assets verification failed.' }
       - name: Positioned WORD layout and offscreen fonts
         shell: pwsh
-        run: python tools/ci/check-positioned-word-layout.py ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe .artifacts/positioned-word-layout
+        run: python tools/ci/check-positioned-word-layout.py ./src/NovaPen/bin/Release/net11.0/win-x64/publish/NovaPen.exe .artifacts/positioned-word-layout
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -808,16 +825,16 @@ jobs:
       - name: Native bundled Giac discovery and advanced mathematics
         shell: pwsh
         run: |
-          $env:BLURMASK_TEST_GIAC = (Resolve-Path 'src/BlurMask/bin/Release/net11.0/win-x64/publish/runtimes/win-x64/solver/icas.exe').Path
-          & ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe --math-solver-test | Out-Default
+          $env:BLURMASK_TEST_GIAC = (Resolve-Path 'src/NovaPen/bin/Release/net11.0/win-x64/publish/runtimes/win-x64/solver/icas.exe').Path
+          & ./src/NovaPen/bin/Release/net11.0/win-x64/publish/NovaPen.exe --math-solver-test | Out-Default
           if ($LASTEXITCODE -ne 0) { throw 'Bundled solver discovery failed.' }
           dotnet run --project tools/InkMath.Solver.Probe -c Release -- $env:BLURMASK_TEST_GIAC
           if ($LASTEXITCODE -ne 0) { throw 'Bundled solver mathematical controls failed.' }
       - name: Verify static graphics and bundled formula runtime
         shell: pwsh
         run: |
-          $dir = "src\BlurMask\bin\Release\net11.0\win-x64\publish"
-          if (-not (Test-Path (Join-Path $dir 'BlurMask.exe'))) { throw 'Native executable is missing.' }
+          $dir = "src\NovaPen\bin\Release\net11.0\win-x64\publish"
+          if (-not (Test-Path (Join-Path $dir 'NovaPen.exe'))) { throw 'Native executable is missing.' }
           if (Get-ChildItem $dir -Filter '*.dll') { throw 'Static native build contains external DLLs.' }
           if (Get-ChildItem $dir -Filter '*.pdb') { throw 'Native payload contains debug symbols.' }
           $math = Join-Path $dir 'runtimes/win-x64/native'
@@ -827,26 +844,26 @@ jobs:
       - name: Native hot-path performance probe
         shell: pwsh
         run: |
-          & ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe --performance-test | Out-Default
+          & ./src/NovaPen/bin/Release/net11.0/win-x64/publish/NovaPen.exe --performance-test | Out-Default
           if ($LASTEXITCODE -ne 0) { throw 'Native performance probe failed.' }
       - name: Native mask region equivalence and performance
         shell: pwsh
         run: |
-          & ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe --mask-performance-test | Out-Default
+          & ./src/NovaPen/bin/Release/net11.0/win-x64/publish/NovaPen.exe --mask-performance-test | Out-Default
           if ($LASTEXITCODE -ne 0) { throw 'Mask region probe failed.' }
       - name: Native offline AI pen probe
         shell: pwsh
         run: |
-          & ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe --ai-pen-test | Out-Default
+          & ./src/NovaPen/bin/Release/net11.0/win-x64/publish/NovaPen.exe --ai-pen-test | Out-Default
           if ($LASTEXITCODE -ne 0) { throw 'AI pen probe failed.' }
-          & ./src/BlurMask/bin/Release/net11.0/win-x64/publish/BlurMask.exe --overlay-platform-test | Out-Default
+          & ./src/NovaPen/bin/Release/net11.0/win-x64/publish/NovaPen.exe --overlay-platform-test | Out-Default
           if ($LASTEXITCODE -ne 0) { throw 'Overlay IPC probe failed.' }
       - name: Startup and single-instance smoke test
         shell: pwsh
         env:
           BLURMASK_SMOKE_ARTIFACTS: ${{ github.workspace }}/.artifacts/ui-preview
         run: |
-          $exe = Resolve-Path "src\BlurMask\bin\Release\net11.0\win-x64\publish\BlurMask.exe"
+          $exe = Resolve-Path "src\NovaPen\bin\Release\net11.0\win-x64\publish\NovaPen.exe"
 
           # First process owns the single-instance mutex and remains alive long enough
           # for a duplicate launch to be tested.
@@ -854,68 +871,68 @@ jobs:
           Start-Sleep -Milliseconds 500
 
           if ($first.HasExited) {
-            throw "First BlurMask instance exited before duplicate-launch test (code $($first.ExitCode))"
+            throw "First NovaPen instance exited before duplicate-launch test (code $($first.ExitCode))"
           }
 
           # A duplicate launch must terminate silently and successfully.
           $second = Start-Process -FilePath $exe -WindowStyle Hidden -PassThru
           if (-not $second.WaitForExit(3000)) {
             $second.Kill()
-            throw "Second BlurMask instance did not exit promptly"
+            throw "Second NovaPen instance did not exit promptly"
           }
           if ($second.ExitCode -ne 0) {
-            throw "Second BlurMask instance exited with code $($second.ExitCode)"
+            throw "Second NovaPen instance exited with code $($second.ExitCode)"
           }
 
           if (-not $first.WaitForExit(45000)) {
             $first.Kill()
-            throw "BlurMask smoke test timed out"
+            throw "NovaPen smoke test timed out"
           }
           if ($first.ExitCode -ne 0) {
-            $errorLog = Join-Path ([IO.Path]::GetTempPath()) 'BlurMask-smoke-error.txt'
+            $errorLog = Join-Path ([IO.Path]::GetTempPath()) 'NovaPen-smoke-error.txt'
             if (Test-Path -LiteralPath $errorLog) { Get-Content -LiteralPath $errorLog }
-            throw "BlurMask exited with code $($first.ExitCode)"
+            throw "NovaPen exited with code $($first.ExitCode)"
           }
       - name: Upload actual UI previews
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: BlurMask-UI-previews
+          name: NovaPen-UI-previews
           path: |
             .artifacts/ui-preview/*.png
             .artifacts/ui-preview/*.txt
           if-no-files-found: warn
       - uses: actions/upload-artifact@v4
         with:
-          name: BlurMask-win-x64
-          path: src/BlurMask/bin/Release/net11.0/win-x64/publish/
+          name: NovaPen-win-x64
+          path: src/NovaPen/bin/Release/net11.0/win-x64/publish/
       - name: Software rendering / simulated RDP session
         shell: pwsh
         env:
           BLURMASK_TEST_REMOTE_SESSION: '1'
         run: |
-          $exe = Resolve-Path "src\BlurMask\bin\Release\net11.0\win-x64\publish\BlurMask.exe"
+          $exe = Resolve-Path "src\NovaPen\bin\Release\net11.0\win-x64\publish\NovaPen.exe"
           $test = Start-Process -FilePath $exe -ArgumentList '--smoke-test' -WindowStyle Hidden -PassThru
           if (-not $test.WaitForExit(45000)) { $test.Kill(); throw 'Software rendering smoke test timed out.' }
           if ($test.ExitCode -ne 0) { throw "Software rendering failed ($($test.ExitCode))." }
 
       - uses: actions/upload-artifact@v4
         with:
-          name: BlurMask-Giac-Sources-win-x64
+          name: NovaPen-Giac-Sources-win-x64
           path: |
-            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz
-            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz.sha256
+            .artifacts/installers/NovaPen-Giac-corresponding-sources-*.tar.gz
+            .artifacts/installers/NovaPen-Giac-corresponding-sources-*.tar.gz.sha256
           if-no-files-found: error
 
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: BlurMask-Giac-Build-Logs-win-x64
+          name: NovaPen-Giac-Build-Logs-win-x64
           path: |
             .artifacts/giac-build/**/build-*/*.log
             .artifacts/giac-build/**/build-*/**/*.log
             .artifacts/giac-runtime/**/manifest.json
-            ${{ runner.temp }}/BlurMask-Giac-source-build/build-*/**/*.log
+            ${{ runner.temp }}/NovaPen-Giac-source-build/build-*/**/*.log
           if-no-files-found: ignore
 
   native-aot-linux:
@@ -927,26 +944,26 @@ jobs:
         with:
           path: |
             .artifacts/giac-runtime/linux-x64
-            .artifacts/installers/BlurMask-Giac-corresponding-sources-*-linux-x64.tar.gz
-            .artifacts/installers/BlurMask-Giac-corresponding-sources-*-linux-x64.tar.gz.sha256
+            .artifacts/installers/NovaPen-Giac-corresponding-sources-*-linux-x64.tar.gz
+            .artifacts/installers/NovaPen-Giac-corresponding-sources-*-linux-x64.tar.gz.sha256
           key: giac-linux-x64-${{ hashFiles('tools/prepare-giac-runtime.sh', 'tools/giac-native/**') }}
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 11.0.100-preview.7.26381.103
       - name: Install Native AOT and X11 smoke-test dependencies
         run: sudo apt-get update && sudo apt-get install -y clang build-essential m4 curl xz-utils zlib1g-dev xvfb libx11-6 libxcb-shape0 libice6 libsm6 libfontconfig1
-      - run: dotnet restore src/BlurMask/BlurMask.csproj
+      - run: dotnet restore src/NovaPen/NovaPen.csproj
       - run: bash ./tools/build.sh linux-x64
       - name: Native experimental manual math delivery without inference
         shell: bash
         run: |
           set -euo pipefail
-          exe="src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask"
+          exe="src/NovaPen/bin/Release/net11.0/linux-x64/publish/NovaPen"
           "$exe" --experimental-math-layout-test
           "$exe" --experimental-math-model-test
           "$exe" --experimental-auto-layout-test "$(dirname "$exe")/models/raw-content2.ikrraw"
       - name: Positioned WORD layout and offscreen fonts
-        run: xvfb-run -a python tools/ci/check-positioned-word-layout.py ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask .artifacts/positioned-word-layout
+        run: xvfb-run -a python tools/ci/check-positioned-word-layout.py ./src/NovaPen/bin/Release/net11.0/linux-x64/publish/NovaPen .artifacts/positioned-word-layout
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -955,38 +972,38 @@ jobs:
       - name: Native bundled Giac discovery and advanced mathematics
         shell: bash
         run: |
-          publish="src/BlurMask/bin/Release/net11.0/linux-x64/publish"
+          publish="src/NovaPen/bin/Release/net11.0/linux-x64/publish"
           export BLURMASK_TEST_GIAC="$PWD/$publish/runtimes/linux-x64/solver/icas"
-          "$publish/BlurMask" --math-solver-test
+          "$publish/NovaPen" --math-solver-test
           dotnet run --project tools/InkMath.Solver.Probe -c Release -- "$BLURMASK_TEST_GIAC"
       - name: Native offline AI pen probe
-        run: ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --ai-pen-test
+        run: ./src/NovaPen/bin/Release/net11.0/linux-x64/publish/NovaPen --ai-pen-test
       - name: Native overlay IPC probe
-        run: ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --overlay-platform-test
+        run: ./src/NovaPen/bin/Release/net11.0/linux-x64/publish/NovaPen --overlay-platform-test
       - name: Startup smoke test
-        run: xvfb-run -a ./src/BlurMask/bin/Release/net11.0/linux-x64/publish/BlurMask --smoke-test --minimized
+        run: xvfb-run -a ./src/NovaPen/bin/Release/net11.0/linux-x64/publish/NovaPen --smoke-test --minimized
       - uses: actions/upload-artifact@v4
         with:
-          name: BlurMask-linux-x64
-          path: src/BlurMask/bin/Release/net11.0/linux-x64/publish/
+          name: NovaPen-linux-x64
+          path: src/NovaPen/bin/Release/net11.0/linux-x64/publish/
 
       - uses: actions/upload-artifact@v4
         with:
-          name: BlurMask-Giac-Sources-linux-x64
+          name: NovaPen-Giac-Sources-linux-x64
           path: |
-            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz
-            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz.sha256
+            .artifacts/installers/NovaPen-Giac-corresponding-sources-*.tar.gz
+            .artifacts/installers/NovaPen-Giac-corresponding-sources-*.tar.gz.sha256
           if-no-files-found: error
 
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: BlurMask-Giac-Build-Logs-linux-x64
+          name: NovaPen-Giac-Build-Logs-linux-x64
           path: |
             .artifacts/giac-build/**/build-*/*.log
             .artifacts/giac-build/**/build-*/**/*.log
             .artifacts/giac-runtime/**/manifest.json
-            ${{ runner.temp }}/BlurMask-Giac-source-build/build-*/**/*.log
+            ${{ runner.temp }}/NovaPen-Giac-source-build/build-*/**/*.log
           if-no-files-found: ignore
 
   native-cloud:
@@ -1016,27 +1033,27 @@ jobs:
           dotnet-version: 10.0.x
       - uses: actions/download-artifact@v4
         with:
-          name: BlurMask-linux-x64
+          name: NovaPen-linux-x64
           path: .artifacts/native-cloud
       - run: sudo apt-get update && sudo apt-get install -y xvfb libx11-6 libxcb-shape0 libice6 libsm6 libfontconfig1
       - name: Exercise native clients against the real API and live channel
         shell: bash
         run: |
-          cd src/BlurMask.Server
+          cd src/NovaPen.Server
           dotnet build -c Release
           dotnet run --no-build -c Release --urls http://127.0.0.1:5079 > /tmp/pen-live.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid"' EXIT
           curl --fail --silent --retry 20 --retry-connrefused --retry-delay 1 http://127.0.0.1:5079/healthz
           cd ../..
-          chmod +x .artifacts/native-cloud/BlurMask
-          xvfb-run -a .artifacts/native-cloud/BlurMask --isolated-smoke-test --software-rendering
+          chmod +x .artifacts/native-cloud/NovaPen
+          xvfb-run -a .artifacts/native-cloud/NovaPen --isolated-smoke-test --software-rendering
 
       - name: Upload native collaboration visual checks
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: BlurMask-collaboration-visual
+          name: NovaPen-collaboration-visual
           path: |
             .artifacts/collaboration-visual/**/*.png
             .artifacts/collaboration-visual/**/*.csv
@@ -1050,17 +1067,17 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: BlurMask-linux-x64
+          name: NovaPen-linux-x64
           path: .artifacts/native-wayland-payload
       - run: sudo apt-get update && sudo apt-get install -y weston libwayland-client0 libwayland-cursor0 libwayland-egl1 libxkbcommon0 libegl1 libgles2 libgl1-mesa-dri python3-pil
       - name: Verify native protocol, rendered canvas and compositor pixels
         run: |
-          chmod +x .artifacts/native-wayland-payload/BlurMask
-          bash tools/test-linux-wayland.sh .artifacts/native-wayland-payload/BlurMask "$GITHUB_WORKSPACE/.artifacts/native-wayland"
+          chmod +x .artifacts/native-wayland-payload/NovaPen
+          bash tools/test-linux-wayland.sh .artifacts/native-wayland-payload/NovaPen "$GITHUB_WORKSPACE/.artifacts/native-wayland"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: BlurMask-native-wayland
+          name: NovaPen-native-wayland
           path: .artifacts/native-wayland/
 
   native-linux-cpu:
@@ -1078,21 +1095,21 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: BlurMask-linux-x64
+          name: NovaPen-linux-x64
           path: .artifacts/linux-cpu-payload
       - run: sudo apt-get update && sudo apt-get install -y xvfb xauth openbox picom xdotool wmctrl x11-utils mesa-utils python3
       - name: Measure idle and active own-process CPU
         env:
           RENDERER: ${{ matrix.renderer }}
         run: |
-          chmod +x .artifacts/linux-cpu-payload/BlurMask
+          chmod +x .artifacts/linux-cpu-payload/NovaPen
           args=()
           if [[ "$RENDERER" == software ]]; then args+=(--software-rendering); fi
-          bash tools/test-linux-memory.sh .artifacts/linux-cpu-payload/BlurMask "$GITHUB_WORKSPACE/.artifacts/linux-cpu-$RENDERER" "${args[@]}"
+          bash tools/test-linux-memory.sh .artifacts/linux-cpu-payload/NovaPen "$GITHUB_WORKSPACE/.artifacts/linux-cpu-$RENDERER" "${args[@]}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: BlurMask-Linux-CPU-${{ matrix.renderer }}
+          name: NovaPen-Linux-CPU-${{ matrix.renderer }}
           path: .artifacts/linux-cpu-${{ matrix.renderer }}/
 
   native-aot-macos:
@@ -1103,7 +1120,7 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 11.0.100-preview.7.26381.103
-      - run: dotnet restore src/BlurMask/BlurMask.csproj
+      - run: dotnet restore src/NovaPen/NovaPen.csproj
       - name: Detect runner architecture
         shell: bash
         run: |
@@ -1113,8 +1130,8 @@ jobs:
         with:
           path: |
             .artifacts/giac-runtime/${{ env.RID }}
-            .artifacts/installers/BlurMask-Giac-corresponding-sources-*-${{ env.RID }}.tar.gz
-            .artifacts/installers/BlurMask-Giac-corresponding-sources-*-${{ env.RID }}.tar.gz.sha256
+            .artifacts/installers/NovaPen-Giac-corresponding-sources-*-${{ env.RID }}.tar.gz
+            .artifacts/installers/NovaPen-Giac-corresponding-sources-*-${{ env.RID }}.tar.gz.sha256
           key: giac-${{ env.RID }}-${{ hashFiles('tools/prepare-giac-runtime.sh', 'tools/giac-native/**') }}
       - name: Publish for runner architecture
         run: bash ./tools/build.sh "${{ env.RID }}"
@@ -1122,12 +1139,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          exe="src/BlurMask/bin/Release/net11.0/${{ env.RID }}/publish/BlurMask"
+          exe="src/NovaPen/bin/Release/net11.0/${{ env.RID }}/publish/NovaPen"
           "$exe" --experimental-math-layout-test
           "$exe" --experimental-math-model-test
           "$exe" --experimental-auto-layout-test "$(dirname "$exe")/models/raw-content2.ikrraw"
       - name: Positioned WORD layout and offscreen fonts
-        run: python tools/ci/check-positioned-word-layout.py ./src/BlurMask/bin/Release/net11.0/${{ env.RID }}/publish/BlurMask .artifacts/positioned-word-layout
+        run: python tools/ci/check-positioned-word-layout.py ./src/NovaPen/bin/Release/net11.0/${{ env.RID }}/publish/NovaPen .artifacts/positioned-word-layout
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -1136,36 +1153,36 @@ jobs:
       - name: Native bundled Giac discovery and advanced mathematics
         shell: bash
         run: |
-          publish="src/BlurMask/bin/Release/net11.0/${{ env.RID }}/publish"
+          publish="src/NovaPen/bin/Release/net11.0/${{ env.RID }}/publish"
           export BLURMASK_TEST_GIAC="$PWD/$publish/runtimes/${{ env.RID }}/solver/icas"
-          "$publish/BlurMask" --math-solver-test
+          "$publish/NovaPen" --math-solver-test
           dotnet run --project tools/InkMath.Solver.Probe -c Release -- "$BLURMASK_TEST_GIAC"
       - name: Native offline AI pen probe
-        run: ./src/BlurMask/bin/Release/net11.0/${{ env.RID }}/publish/BlurMask --ai-pen-test
+        run: ./src/NovaPen/bin/Release/net11.0/${{ env.RID }}/publish/NovaPen --ai-pen-test
       - name: Native overlay IPC probe
-        run: ./src/BlurMask/bin/Release/net11.0/${{ env.RID }}/publish/BlurMask --overlay-platform-test
+        run: ./src/NovaPen/bin/Release/net11.0/${{ env.RID }}/publish/NovaPen --overlay-platform-test
       - uses: actions/upload-artifact@v4
         with:
-          name: BlurMask-macos
-          path: src/BlurMask/bin/Release/net11.0/${{ env.RID }}/publish/
+          name: NovaPen-macos
+          path: src/NovaPen/bin/Release/net11.0/${{ env.RID }}/publish/
 
       - uses: actions/upload-artifact@v4
         with:
-          name: BlurMask-Giac-Sources-macos
+          name: NovaPen-Giac-Sources-macos
           path: |
-            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz
-            .artifacts/installers/BlurMask-Giac-corresponding-sources-*.tar.gz.sha256
+            .artifacts/installers/NovaPen-Giac-corresponding-sources-*.tar.gz
+            .artifacts/installers/NovaPen-Giac-corresponding-sources-*.tar.gz.sha256
           if-no-files-found: error
 
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: BlurMask-Giac-Build-Logs-macos
+          name: NovaPen-Giac-Build-Logs-macos
           path: |
             .artifacts/giac-build/**/build-*/*.log
             .artifacts/giac-build/**/build-*/**/*.log
             .artifacts/giac-runtime/**/manifest.json
-            ${{ runner.temp }}/BlurMask-Giac-source-build/build-*/**/*.log
+            ${{ runner.temp }}/NovaPen-Giac-source-build/build-*/**/*.log
           if-no-files-found: ignore
 
   math-native-runtime:
@@ -1176,11 +1193,11 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            artifact: BlurMask-win-x64
+            artifact: NovaPen-win-x64
           - os: ubuntu-22.04
-            artifact: BlurMask-linux-x64
+            artifact: NovaPen-linux-x64
           - os: macos-latest
-            artifact: BlurMask-macos
+            artifact: NovaPen-macos
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4

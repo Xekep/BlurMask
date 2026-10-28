@@ -73,8 +73,8 @@ contracts={
  'src/InkRecognition/LegacyLibraryOriginalTextFieldBootstrap.cs':['public LegacyOwnedRawInkDocument Document => CurrentView.Document','Prepare(LegacyFreshRawInkCurrentView actualRaw'],
  'src/InkRecognition/LegacyLibraryOriginalSelectedFieldContext.cs':['public LegacyOwnedRawInkDocument Document => Original.Document'],
  'src/InkRecognition/LegacyLibraryGlobalTextPublicationScope.cs':['PrepareOriginalSelected(','models.PrepareGlobalDocument(context.Document'],
- 'src/BlurMask/InkDocument.cs':['public List<Point> Points','Length < 0.65'],
- 'src/BlurMask/AiInkLayout.cs':['strokes.Where(members.Contains)','new InkStroke(s.Points.Select']}
+ 'src/NovaPen/InkDocument.cs':['public List<Point> Points','Length < 0.65'],
+ 'src/NovaPen/AiInkLayout.cs':['strokes.Where(members.Contains)','new InkStroke(s.Points.Select']}
 sourceHashes={}
 for name,rules in contracts.items():
  raw=(root/name).read_bytes();text=raw.decode('utf8');assert all(r in text for r in rules),name

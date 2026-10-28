@@ -15,12 +15,12 @@ obj/
 **/.env
 **/.data/
 **/node_modules/
-src/BlurMask.Server/bin/
-src/BlurMask.Server/obj/
-src/BlurMask.Server/.env
-src/BlurMask.Server/.data/
-src/BlurMask.Server/tests/.data/
-src/BlurMask.Server/node_modules/
+src/NovaPen.Server/bin/
+src/NovaPen.Server/obj/
+src/NovaPen.Server/.env
+src/NovaPen.Server/.data/
+src/NovaPen.Server/tests/.data/
+src/NovaPen.Server/node_modules/
 
 # Local static-analysis sources, SDK and Ghidra projects.
 research/myscript/

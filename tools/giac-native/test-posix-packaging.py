@@ -52,7 +52,7 @@ def main():
         # validation is expected to fail that permission guard on this host;
         # all provenance/hash checks before it are still exercised.
         (output / 'icas').chmod(0o755)
-        archive_name = 'BlurMask-Giac-corresponding-sources-bdbb1c41-linux-x64.tar.gz'
+        archive_name = 'NovaPen-Giac-corresponding-sources-bdbb1c41-linux-x64.tar.gz'
         (root / archive_name).write_bytes(b'own corresponding-source control')
         manifest = dict(runtime='linux-x64', buildRecipeSha256=packager.recipe_hash(tools),
                         sourceArchive=archive_name,

@@ -9,11 +9,11 @@
     <DebugType Condition="'$(Configuration)' == 'Release'">none</DebugType>
     <DebugSymbols Condition="'$(Configuration)' == 'Release'">false</DebugSymbols>
     <Description>Portable CPU recognition of pen strokes, independent of desktop UI.</Description>
-    <PackageId>BlurMask.InkRecognition</PackageId>
+    <PackageId>NovaPen.InkRecognition</PackageId>
     <Authors>Xekep</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>PACKAGE.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/Xekep/BlurMask</RepositoryUrl>
+    <RepositoryUrl>https://github.com/Xekep/NovaPen</RepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
     <None Include="PACKAGE.md" Pack="true" PackagePath="/" />

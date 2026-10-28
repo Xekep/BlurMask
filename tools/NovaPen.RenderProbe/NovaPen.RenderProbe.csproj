@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net11.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Isolated renderer only; this assembly name preserves production font resource URIs. -->
+    <AssemblyName>NovaPen</AssemblyName>
+    <InkDocumentSource Condition="'$(InkDocumentSource)' == ''">../../src/NovaPen/InkDocument.cs</InkDocumentSource>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/InkRecognition/InkRecognition.csproj" />
+    <PackageReference Include="Avalonia.Headless" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Skia" Version="12.1.2" />
+    <Compile Include="$(InkDocumentSource)" Link="Production/InkDocument.cs" />
+    <Compile Include="../../src/NovaPen/InkFonts.cs;../../src/NovaPen/MathTypesetting.cs" Link="Production/%(Filename)%(Extension)" />
+    <Compile Include="../../src/NovaPen/AiTypesetLayout.cs;../../src/NovaPen/CanvasGeometry.cs" Link="Production/%(Filename)%(Extension)" />
+    <Compile Include="../../src/NovaPen.Shared/*.cs" Link="Shared/%(Filename)%(Extension)" />
+    <AvaloniaResource Include="../../src/NovaPen/Assets/Fonts/*" Link="Assets/Fonts/%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

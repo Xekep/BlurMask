@@ -9,7 +9,7 @@ dotnet restore
 dotnet build -c Release -p:PublishAot=false -p:SelfContained=false
 ```
 
-CLI-режимы перечислены в [`Program.cs`](../../src/BlurMask/Program.cs). `--ai-pen-test` запускает набор headless-проверок, включая `DesktopFeatureChecks`; `--overlay-platform-test` включает `MaskAttachmentChecks`. Математические проверки требуют соответствующего model/runtime-пакета; `--math-solver-test` проверяет реальный Giac и его маршрутизацию. Запускать нужно собранное приложение с ожидаемыми зависимостями, а не произвольную старую копию.
+CLI-режимы перечислены в [`Program.cs`](../../src/NovaPen/Program.cs). `--ai-pen-test` запускает набор headless-проверок, включая `DesktopFeatureChecks`; `--overlay-platform-test` включает `MaskAttachmentChecks`. Математические проверки требуют соответствующего model/runtime-пакета; `--math-solver-test` проверяет реальный Giac и его маршрутизацию. Запускать нужно собранное приложение с ожидаемыми зависимостями, а не произвольную старую копию.
 
 | Изменение | Что проверять |
 |---|---|

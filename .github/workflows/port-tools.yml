@@ -12,8 +12,8 @@ on:
       - 'tools/export-raw-content-model.py'
       - 'tools/export-ink-math-model.py'
       - 'models/raw-content/**'
-      - 'src/BlurMask/AiExperimental*MathModels.cs'
-      - 'src/BlurMask/AiExperimentalRawContentModels.cs'
+      - 'src/NovaPen/AiExperimental*MathModels.cs'
+      - 'src/NovaPen/AiExperimentalRawContentModels.cs'
   pull_request:
     paths:
       - '.github/workflows/port-tools.yml'
@@ -24,8 +24,8 @@ on:
       - 'tools/export-raw-content-model.py'
       - 'tools/export-ink-math-model.py'
       - 'models/raw-content/**'
-      - 'src/BlurMask/AiExperimental*MathModels.cs'
-      - 'src/BlurMask/AiExperimentalRawContentModels.cs'
+      - 'src/NovaPen/AiExperimental*MathModels.cs'
+      - 'src/NovaPen/AiExperimentalRawContentModels.cs'
 
 permissions:
   contents: read

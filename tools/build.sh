@@ -4,7 +4,7 @@ cd "$(dirname "$0")/.."
 
 RID="${1:-linux-x64}"
 VERSION="${2:-}"
-publish_args=(publish ./src/BlurMask/BlurMask.csproj -c Release -r "$RID" --self-contained true -p:PublishAot=true)
+publish_args=(publish ./src/NovaPen/NovaPen.csproj -c Release -r "$RID" --self-contained true -p:PublishAot=true)
 if [[ -n "$VERSION" ]]; then
   if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$ ]]; then
     echo "Invalid application version: $VERSION" >&2; exit 2
@@ -28,23 +28,23 @@ if [[ "$RID" != "$PREFIX"* ]]; then
   exit 2
 fi
 
-echo "Publishing BlurMask (.NET 11 Native AOT) for $RID..."
+echo "Publishing NovaPen (.NET 11 Native AOT) for $RID..."
 dotnet "${publish_args[@]}"
 
 case "$RID" in
   linux-x64|osx-x64|osx-arm64)
-    python3 tools/fetch-ink-math-runtime.py "$RID" --output "src/BlurMask/bin/Release/net11.0/$RID/publish" ;;
+    python3 tools/fetch-ink-math-runtime.py "$RID" --output "src/NovaPen/bin/Release/net11.0/$RID/publish" ;;
   *) echo "Formula runtime is not packaged for $RID; handwritten ink and text recognition remain available." ;;
 esac
 
 case "$RID" in
   linux-x64|osx-x64|osx-arm64)
-    python3 tools/package-experimental-math-model.py --output "src/BlurMask/bin/Release/net11.0/$RID/publish" --rid "$RID"
+    python3 tools/package-experimental-math-model.py --output "src/NovaPen/bin/Release/net11.0/$RID/publish" --rid "$RID"
     solver_dir=".artifacts/giac-runtime/$RID"
     bash tools/prepare-giac-runtime.sh "$RID" "$solver_dir" .artifacts/installers
-    install -d "src/BlurMask/bin/Release/net11.0/$RID/publish/runtimes/$RID/solver"
-    cp -a "$solver_dir/." "src/BlurMask/bin/Release/net11.0/$RID/publish/runtimes/$RID/solver/" ;;
+    install -d "src/NovaPen/bin/Release/net11.0/$RID/publish/runtimes/$RID/solver"
+    cp -a "$solver_dir/." "src/NovaPen/bin/Release/net11.0/$RID/publish/runtimes/$RID/solver/" ;;
   *) echo "Bundled Giac is not available for $RID." ;;
 esac
 
-echo "Published to: src/BlurMask/bin/Release/net11.0/$RID/publish/"
+echo "Published to: src/NovaPen/bin/Release/net11.0/$RID/publish/"

@@ -24,7 +24,7 @@ installed CLI paths are discovered automatically. A custom developer installatio
 can select `icas.exe` / `icas` / `giac`, rather than the graphical `xcas` executable:
 
 ```text
-BlurMask --set-math-solver /absolute/path/to/icas
+NovaPen --set-math-solver /absolute/path/to/icas
 ```
 
 The command verifies `1+1`; bundled native solvers take precedence. No Python
@@ -90,10 +90,10 @@ command verifies a calculation, not authenticity; use upstream or OS packages.
 complexity, actual calculus/algebra results and cancellation of a live native
 process. Pass the absolute CLI path to exercise Giac. Without it, only grammar
 tests run. `BLURMASK_TEST_GIAC` enables real CAS → application equals policy and
-typesetting tests under `BlurMask --ai-pen-test`, without starting any GUI.
+typesetting tests under `NovaPen --ai-pen-test`, without starting any GUI.
 Native application CI builds the bundled CLI from pinned sources on Windows,
 Linux and macOS, then checks automatic discovery, the default-on toggle and
-calculus/algebra results. Package tests run `BlurMask --math-solver-test` after
+calculus/algebra results. Package tests run `NovaPen --math-solver-test` after
 installation and reinstallation of Windows, Debian, Arch and Void packages.
 The legacy upstream CLI remains a separate regression control. Source-build
 transport tests and complete license/source manifests accompany every payload.
@@ -135,7 +135,7 @@ fixtures, plus invalid notation, injection, cancellation and child cleanup.
 This verifies calculation/parsing, not handwriting recognition or math-model
 admission. An independent source review also checked the braced-power cases.
 
-Evidence: `root-math-factorial-final-verification-frozen-manifest-20261023.json`, SHA256 `80156ab773285a64d177ffa5801c54268aee044ee8f9682bb0fa7ee88eacdd8f`, under `E:/BlurMask-build-artifacts-20261014/`.
+Evidence: `root-math-factorial-final-verification-frozen-manifest-20261023.json`, SHA256 `80156ab773285a64d177ffa5801c54268aee044ee8f9682bb0fa7ee88eacdd8f`, under `E:/NovaPen-build-artifacts-20261014/`.
 
 ### Recognized limit notation, 23 October 2026
 

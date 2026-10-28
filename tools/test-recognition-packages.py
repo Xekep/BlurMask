@@ -11,7 +11,7 @@ parser.add_argument("version")
 args = parser.parse_args()
 feed = args.feed.resolve()
 for suffix in ("", ".Math", ".RawContent"):
-    if not (feed / f"BlurMask.InkRecognition{suffix}.{args.version}.nupkg").is_file():
+    if not (feed / f"NovaPen.InkRecognition{suffix}.{args.version}.nupkg").is_file():
         raise ValueError("Missing independent recognition package")
 with tempfile.TemporaryDirectory(prefix="ink-package-consumer-") as temporary:
     root = Path(temporary)
@@ -24,7 +24,7 @@ with tempfile.TemporaryDirectory(prefix="ink-package-consumer-") as temporary:
     items = ET.SubElement(project, "ItemGroup")
     # Only the outer package is referenced: both transitive library dependencies
     # must resolve with the same version from this feed, not from source projects.
-    ET.SubElement(items, "PackageReference", Include="BlurMask.InkRecognition.RawContent", Version=args.version)
+    ET.SubElement(items, "PackageReference", Include="NovaPen.InkRecognition.RawContent", Version=args.version)
     ET.ElementTree(project).write(root / "consumer.csproj", encoding="utf-8")
     config = ET.Element("configuration")
     sources = ET.SubElement(config, "packageSources")

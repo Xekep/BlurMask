@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=NovaPen
+Comment=Desktop drawing and shared canvas
+Comment[ru]=Рисование на экране и совместное полотно
+Comment[fr]=Dessin sur le bureau et toile partagée
+Comment[de]=Desktop-Zeichnungen und gemeinsame Zeichenfläche
+Exec=/opt/novapen/NovaPen
+Icon=novapen
+Terminal=false
+Categories=Graphics;
+StartupNotify=false
+X-GNOME-Autostart-enabled=true

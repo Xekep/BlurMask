@@ -1,7 +1,7 @@
 param(
     [string]$OutputDirectory = (Join-Path (Split-Path $PSScriptRoot -Parent) '.artifacts\giac-runtime\win-x64'),
     [string]$SourcesDirectory = (Join-Path (Split-Path $PSScriptRoot -Parent) '.artifacts\giac-sources'),
-    [string]$CacheDirectory = (Join-Path ([IO.Path]::GetTempPath()) 'BlurMask-Giac-source-build'),
+    [string]$CacheDirectory = (Join-Path ([IO.Path]::GetTempPath()) 'NovaPen-Giac-source-build'),
     [ValidateRange(1, 16)][int]$Jobs = 4
 )
 
@@ -34,7 +34,7 @@ $recipeDescription = ($recipeFiles | ForEach-Object { (Split-Path $_ -Leaf) + ':
 $sha = [Security.Cryptography.SHA256]::Create()
 try { $recipeHash = [BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($recipeDescription))).Replace('-','').ToLowerInvariant() }
 finally { $sha.Dispose() }
-$archiveName = 'BlurMask-Giac-corresponding-sources-bdbb1c41.tar.gz'
+$archiveName = 'NovaPen-Giac-corresponding-sources-bdbb1c41.tar.gz'
 $sourceArchive = Join-Path $sourcesOutput $archiveName
 $manifestPath = Join-Path $output 'manifest.json'
 if ((Test-Path -LiteralPath $manifestPath) -and (Test-Path -LiteralPath $sourceArchive)) {
@@ -127,12 +127,12 @@ Copy-Item (Join-Path $cache 'licenses\COPYING.RUNTIME') $licenseDir -Force
 Copy-Item (Join-Path $cache 'licenses\winpthreads-COPYING') $licenseDir -Force
 Copy-Item (Join-Path $giacHeaders 'tinymt32_license.h') (Join-Path $licenseDir 'TinyMT-BSD-3-Clause.txt') -Force
 $notices = @'
-Giac CLI built for BlurMask, using GeoGebra/giac commit
+Giac CLI built for NovaPen, using GeoGebra/giac commit
 bdbb1c41fe52d8b4fb7c1d15c2deaea88fc3803c (2026-09-11).
 Giac copyright Bernard Parisse and contributors, GPL-3.0-or-later.
 The independently built transport is GPL-3.0-or-later; full GPL text: COPYING.
 Corresponding source and build recipe: the accompanying release asset
-BlurMask-Giac-corresponding-sources-bdbb1c41.tar.gz (same release as this runtime).
+NovaPen-Giac-corresponding-sources-bdbb1c41.tar.gz (same release as this runtime).
 
 Statically linked components:
 GMP 6.3.0, GNU project contributors, LGPL-3.0-or-later OR GPL-2.0-or-later.
@@ -148,7 +148,7 @@ Toolchain source provenance: w64devkit 2.10.0 Dockerfile and source.tar release.
 '@
 Set-Content -LiteralPath (Join-Path $output 'THIRD-PARTY-NOTICES.txt') -Value $notices -Encoding UTF8
 $manifest = [ordered]@{
-    schemaVersion=1; runtime='win-x64'; transport='BlurMask stdin/stdout --sage'; giacCommit='bdbb1c41fe52d8b4fb7c1d15c2deaea88fc3803c'
+    schemaVersion=1; runtime='win-x64'; transport='NovaPen stdin/stdout --sage'; giacCommit='bdbb1c41fe52d8b4fb7c1d15c2deaea88fc3803c'
     compiler='GCC 16.2.0 (w64devkit 2.10.0)'; static=$true; sourceArchive=$archiveName; buildRecipeSha256=$recipeHash
     executableSha256=(Get-FileHash (Join-Path $output 'icas.exe') -Algorithm SHA256).Hash.ToLowerInvariant()
     executableBytes=(Get-Item (Join-Path $output 'icas.exe')).Length; systemImports=$dlls

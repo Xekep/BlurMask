@@ -37,7 +37,7 @@ direct system dependencies. Architecture is independently checked with
 The output contains `icas`, GPL/LGPL/TinyMT notices and texts, `SOURCES.txt`,
 and a hash manifest. Linux also supplies the GCC Runtime Library Exception.
 Each RID receives its own release asset:
-`BlurMask-Giac-corresponding-sources-bdbb1c41-$RID.tar.gz` and SHA256 sidecar.
+`NovaPen-Giac-corresponding-sources-bdbb1c41-$RID.tar.gz` and SHA256 sidecar.
 The source archive contains all three original archives, the complete POSIX
 recipe, the common transport, licenses and build instructions. Its internal
 manifest omits its own archive hash to avoid a circular hash reference; the

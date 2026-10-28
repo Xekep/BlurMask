@@ -7,8 +7,8 @@ Desktop probes measure CPU time and managed allocations on a single thread, not 
 Isolated desktop smoke tests suppress the OS tray icon/taskbar entry and do not register global hotkeys; synthetic hotkey messages address only the app's own HWND. Full desktop/mask smoke tests run on CI runners. After an Explorer crash on the development desktop, further local full UI stress runs were stopped. Windows recorded `explorer.exe` / `twinui.pcshell.dll` / `0xc0000005`. Offline analysis with the matching Microsoft PDBs located a null read in `IWindowTabView::Id`, called by `WindowTabHost::OnActiveTabChanged` and `WindowTabDataModel::UpdateActiveTab` through `UpdateTabsForWindow`. This identifies the Windows window-tab handler that failed; it does not establish which application/event triggered it, or verify a fix for Explorer. The recovered Explorer process remained running through the subsequent server-only load tests.
 
 ```powershell
-dotnet build src/BlurMask -c Release -p:PublishAot=false -p:SelfContained=false
-dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --performance-test
+dotnet build src/NovaPen -c Release -p:PublishAot=false -p:SelfContained=false
+dotnet src/NovaPen/bin/Release/net11.0/NovaPen.dll --performance-test
 # Or use the published Native AOT executable with --performance-test.
 ```
 
@@ -103,23 +103,23 @@ resolution). A bounded short stroke plus settling over about two seconds measure
 1.97% / 4.35%; Picom measured 0% in that interval. This short, model-free Xvfb
 workload is not a sustained drawing benchmark, a physical Hyprland/GPU measurement
 or a temperature test. CPU and full-frame blur on the user's laptop still require
-measurement on that hardware. Run [38130801420](https://github.com/Xekep/BlurMask/actions/runs/38130801420)
+measurement on that hardware. Run [38130801420](https://github.com/Xekep/NovaPen/actions/runs/38130801420)
 contains the raw per-process stat timestamps/ticks and CPU interval summaries.
 
 Reproduce installed-app measurements with `tools/test-linux-memory.sh` in an
 isolated unprivileged container. The headless app command is:
 
 ```sh
-BlurMask --recognition-memory-test --text-model /path/en-US.ikrpack --math-model /path/math2.ikrmath --input /path/strokes.json
+NovaPen --recognition-memory-test --text-model /path/en-US.ikrpack --math-model /path/math2.ikrmath --input /path/strokes.json
 ```
 
 The full UI matrix and old AI confirmation are archived in GitHub Actions runs
-[38129120038](https://github.com/Xekep/BlurMask/actions/runs/38129120038) and
-[38129441464](https://github.com/Xekep/BlurMask/actions/runs/38129441464).
+[38129120038](https://github.com/Xekep/NovaPen/actions/runs/38129120038) and
+[38129441464](https://github.com/Xekep/NovaPen/actions/runs/38129441464).
 
 ## Opt-in server load tests
 
-`src/BlurMask.Server/tests/load.mjs` checks every preview recipient, point order, cross-board isolation, persisted point equality, conditional reads and health latency. It creates uniquely prefixed test boards and writes their IDs separately for bounded cleanup. It never prints invitation keys. It paces public HTTP traffic below admission limits and stops on errors or health latency over two seconds.
+`src/NovaPen.Server/tests/load.mjs` checks every preview recipient, point order, cross-board isolation, persisted point equality, conditional reads and health latency. It creates uniquely prefixed test boards and writes their IDs separately for bounded cleanup. It never prints invitation keys. It paces public HTTP traffic below admission limits and stops on errors or health latency over two seconds.
 
 ```powershell
 $env:PEN_TEST_URL='http://127.0.0.1:5095'
@@ -128,7 +128,7 @@ $env:PEN_LOAD_USERS='4'
 $env:PEN_LOAD_WRITERS='2'
 $env:PEN_LOAD_SECONDS='6'
 $env:PEN_LOAD_OUTPUT='.artifacts/load-local.json'
-node src/BlurMask.Server/tests/load.mjs
+node src/NovaPen.Server/tests/load.mjs
 ```
 
 Online probes require explicit `PEN_LOAD_ONLINE=yes`. `PEN_LOAD_HOST=127.0.0.1` runs from the server through its HTTPS nginx vhost with the public SNI name and normal certificate validation. Only the transport is loopback: the API, WebSocket proxy, auth and PostgreSQL are real. Different bound loopback source addresses model different clients while retaining IP limits. This does not measure Internet bandwidth or distant users' latency. `PEN_LOAD_STOP_FILE` lets a resource monitor request a graceful stop.
@@ -157,7 +157,7 @@ The expected aggregate traffic and active-writer count must accompany any capaci
 
 ## Screenshot rendering at reduced zoom
 
-`tools/BlurMask.RenderProbe` creates no windows and uses the production ink document
+`tools/NovaPen.RenderProbe` creates no windows and uses the production ink document
 with Avalonia Headless and CPU Skia. A 200-frame Windows run compared `ccc6f91` with
 the corrected reduced-image cache. The synthetic input is a 3840×2160 PNG with fine
 detail. Values below are milliseconds per offscreen render, not compositor FPS.

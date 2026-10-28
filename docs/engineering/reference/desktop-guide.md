@@ -55,7 +55,7 @@ and [official tool guide](https://epicpen.com/userguide).
 - The canvas has a collapsible floating icon toolbar for new/connect/share/background/export/screen/fit actions. Click the chalk logo or press **Tab** to collapse/expand it. **Ctrl+V** pastes a screenshot from the clipboard as a movable image that is saved, shared and included in PNG exports.
 - Pasted images are normalized to PNG (up to 2048 px on the longest side); shared documents are limited to 4 MiB and 32 megapixels of raster content.
 - Interface language follows the system UI language: English, French, German or Russian; other languages fall back to English.
-- Screenshots include all monitors and visible annotations, exclude the toolbar, and save PNG files to `Pictures/BlurMask`.
+- Screenshots include all monitors and visible annotations, exclude the toolbar, and save PNG files to `Pictures/NovaPen`.
 - The menu includes **New mask**, text size, history actions, visibility, shortcuts, and exit.
 - Multiple monitors use separate transparent windows and a shared document with physical desktop coordinates.
 
@@ -63,12 +63,12 @@ Shortcuts follow the installed Epic Pen layout used as the reference: **Ctrl+Shi
 **2** cursor, **3** pen, **4** highlighter, **5** eraser, **6** undo, **7** clear,
 **PrintScreen** screenshot, **[ / ]** decrease/increase width, **F** fading ink, **0** toolbar visibility,
 **L/E/R/A/T** line/ellipse/rectangle/arrow/text, **W/B** white/black screen board, **9** previous color.
-**Alt+Shift+1–6** select quick colors. BlurMask additions: **Ctrl+Shift+Y** redo, **C** independent canvas, **D** screen input.
+**Alt+Shift+1–6** select quick colors. NovaPen additions: **Ctrl+Shift+Y** redo, **C** independent canvas, **D** screen input.
 Open **Menu → Settings** to record, disable or reset shortcuts and select the interface language.
 Shortcut changes apply immediately; language changes apply after restarting. Settings are saved in the user's
 local application-data directory as `BlurMask/settings.json`. The settings window suspends shortcuts while
 recording combinations and rejects duplicates. Windows shortcuts are global; on Linux/macOS they work while
-a BlurMask window is focused. Conflicts with another app appear in Settings; the toolbar remains available.
+a NovaPen window is focused. Conflicts with another app appear in Settings; the toolbar remains available.
 
 Windows supports click-through ink and desktop screenshots. Other platforms currently hide the
 ink overlay in cursor mode; desktop screenshots and global hotkeys are Windows-only.
@@ -97,14 +97,14 @@ exports and undo history; cancellation or disconnection clears them. View-only p
 receive live previews. Screen annotations and fading ink remain local.
 
 The minimalist software download page, ASP.NET Core API, PostgreSQL storage and Docker/Caddy configuration for
-`pen.kiiko.ru` are in [`src/BlurMask.Server/`](../../../src/BlurMask.Server/README.md). Deployment requires a server and DNS
+`pen.kiiko.ru` are in [`src/NovaPen.Server/`](../../../src/NovaPen.Server/README.md). Deployment requires a server and DNS
 configuration; see that README for launch commands. Accounts are not required: shared links
 carry permission to edit or view a particular board. The website has no drawing editor;
-opening an invitation there offers software downloads and a button to copy the invitation into BlurMask.
+opening an invitation there offers software downloads and a button to copy the invitation into NovaPen.
 
 Epic Pen's [official guide](https://epicpen.com/userguide) describes desktop annotation and
 white/black screen boards. The independent persistent canvas and shared native drawing
-are BlurMask additions.
+are NovaPen additions.
 
 ## Privacy modes
 
@@ -122,5 +122,5 @@ The tray tooltip shows the current mode.
 
 ### Tray and single-instance behavior
 
-- Right-click the tray icon to open the application menu: drawing tools, create a mask, close the mask, or exit BlurMask.
-- Only one BlurMask process is allowed per OS user/session. Launching it again exits silently with code `0`; it does not show a dialog, notification, or second tray icon.
+- Right-click the tray icon to open the application menu: drawing tools, create a mask, close the mask, or exit NovaPen.
+- Only one NovaPen process is allowed per OS user/session. Launching it again exits silently with code `0`; it does not show a dialog, notification, or second tray icon.

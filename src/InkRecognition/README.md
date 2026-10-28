@@ -66,7 +66,7 @@ probability. Unsupported paths return empty text. The adapter accepts at most32
 strokes/1024 finite points and has a two-second cooperative processing budget;
 external cancellation still propagates.
 
-The BlurMask opt-in application setting now uses
+The NovaPen opt-in application setting now uses
 `ExperimentalGlobalTextRecognizer.Load(acoustic, linguistic, engine, line30,
 line50, separation, cases, publication)`. It owns the actual full Russian global
 dictionary context and creates private recognition state per invocation. The

@@ -35,8 +35,8 @@
         "tools/export-raw-content-model.py",
         "tools/export-ink-math-model.py",
         "models/raw-content/raw-content2.res",
-        "src/BlurMask/AiExperimentalMathModels.cs",
-        "src/BlurMask/AiExperimentalRawContentModels.cs"
+        "src/NovaPen/AiExperimentalMathModels.cs",
+        "src/NovaPen/AiExperimentalRawContentModels.cs"
       ],
       "outputs": [
         "asset-controls.json",

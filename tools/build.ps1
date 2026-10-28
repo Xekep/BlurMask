@@ -21,8 +21,8 @@ if (-not $valid) {
     throw "Native AOT does not support cross-OS publishing. Requested RID: $Runtime"
 }
 
-Write-Host "Publishing BlurMask (.NET 11 Native AOT) for $Runtime..."
-$publishArguments = @('publish', (Join-Path $repoRoot 'src/BlurMask/BlurMask.csproj'), '-c', 'Release',
+Write-Host "Publishing NovaPen (.NET 11 Native AOT) for $Runtime..."
+$publishArguments = @('publish', (Join-Path $repoRoot 'src/NovaPen/NovaPen.csproj'), '-c', 'Release',
     '-r', $Runtime, '--self-contained', 'true', '-p:PublishAot=true')
 if ($Version) {
     if ($Version -notmatch '^\d+\.\d+\.\d+(?:\.\d+)?(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$') { throw 'Invalid application version.' }
@@ -43,11 +43,11 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $targetFramework = "net11.0"
-$publishDir = Join-Path $repoRoot "src\BlurMask\bin\Release\$targetFramework\$Runtime\publish"
+$publishDir = Join-Path $repoRoot "src\NovaPen\bin\Release\$targetFramework\$Runtime\publish"
 if ($OutputDirectory) { $publishDir = [IO.Path]::GetFullPath($OutputDirectory) }
 
 if ($Runtime.StartsWith('win-')) {
-    $required = @('BlurMask.exe')
+    $required = @('NovaPen.exe')
     if ($DynamicNativeLibraries) { $required += @('av_libglesv2.dll', 'libSkiaSharp.dll', 'libHarfBuzzSharp.dll') }
     foreach ($name in $required) {
         $path = Join-Path $publishDir $name

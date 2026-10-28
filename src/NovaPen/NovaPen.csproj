@@ -1,0 +1,66 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net11.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>NovaPen</AssemblyName>
+    <Version>1.0.0</Version>
+    <RootNamespace>NovaPen</RootNamespace>
+
+    <!-- Native AOT is the release/deployment model for this app. -->
+    <PublishAot>true</PublishAot>
+    <IsAotCompatible>true</IsAotCompatible>
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>full</TrimMode>
+    <SelfContained>true</SelfContained>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <OptimizationPreference>Speed</OptimizationPreference>
+    <!-- Windows AOT links the rendering libraries into the executable. -->
+    <StaticNativeLibraries Condition="'$(StaticNativeLibraries)' == '' and $([MSBuild]::IsOSPlatform('Windows')) and '$(PublishAot)' == 'true'">true</StaticNativeLibraries>
+
+    <ApplicationIcon Condition="$([MSBuild]::IsOSPlatform('Windows'))">Assets\NovaPen.ico</ApplicationIcon>
+    <LinuxWaylandBackend Condition="$([MSBuild]::IsOSPlatform('Linux')) or $([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('linux-'))">true</LinuxWaylandBackend>
+    <DefineConstants Condition="'$(LinuxWaylandBackend)' == 'true'">$(DefineConstants);LINUX_WAYLAND_BACKEND</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Wayland" Version="12.1.2" Condition="'$(LinuxWaylandBackend)' == 'true'" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.2" />
+    <PackageReference Include="StaticLink.Avalonia" Version="3.119.4-7922.1" Condition="'$(StaticNativeLibraries)' == 'true'" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets/**" />
+    <EmbeddedResource Include="../../models/ru-RU/ru_RU-ak-cur.lite.res" LogicalName="NovaPen.ExperimentalInk.acoustic" />
+    <EmbeddedResource Include="../../models/ru-RU/legacy-engine-profile.json" LogicalName="NovaPen.ExperimentalInk.engine" />
+    <EmbeddedResource Include="../../models/ru-RU/legacy-separation-profile.json" LogicalName="NovaPen.ExperimentalInk.separation" />
+    <EmbeddedResource Include="../../models/ru-RU/ru_RU-lk-text.lite.res" LogicalName="NovaPen.ExperimentalInk.linguistic" />
+    <EmbeddedResource Include="../../models/line-geometry/line-2e3-30.res" LogicalName="NovaPen.ExperimentalInk.spatial30" />
+    <EmbeddedResource Include="../../models/line-geometry/line-2e3-50.res" LogicalName="NovaPen.ExperimentalInk.physical50" />
+    <EmbeddedResource Include="../../models/text-unicode/legacy-case-data.json" LogicalName="NovaPen.ExperimentalInk.cases" />
+    <EmbeddedResource Include="../../models/text-unicode/legacy-text-publication-data.json" LogicalName="NovaPen.ExperimentalInk.publication" />
+    <EmbeddedResource Include="../../models/text-unicode/legacy-normalization-data.json" LogicalName="NovaPen.ExperimentalInk.normalization" />
+    <EmbeddedResource Include="../../models/text-unicode/legacy-circled-payload-data.json" LogicalName="NovaPen.ExperimentalInk.circles" />
+    <EmbeddedResource Include="../../models/en-US/en_US-ak-cur.res" LogicalName="NovaPen.ExperimentalInk.english" />
+    <ProjectReference Include="../InkRecognition/InkRecognition.csproj" />
+    <ProjectReference Include="../InkRecognition.Math/InkRecognition.Math.csproj" />
+    <ProjectReference Include="../InkRecognition.RawContent/InkRecognition.RawContent.csproj" />
+    <ProjectReference Include="../InkMath.Solver/InkMath.Solver.csproj" />
+    <Compile Include="../NovaPen.Shared/*.cs" Link="Shared/%(Filename)%(Extension)" />
+    <Compile Include="../../tools/InkRecognitionChecks.cs" Link="Diagnostics/InkRecognitionChecks.cs" />
+    <None Include="../../docs/licenses/*.txt;../../docs/THIRD-PARTY-NOTICES.txt"
+          Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <Target Name="RemoveNativeDebugSymbols" AfterTargets="Publish" Condition="'$(PublishAot)' == 'true' and $([MSBuild]::IsOSPlatform('Windows'))">
+    <ItemGroup>
+      <_NativeDebugSymbols Include="$(PublishDir)libSkiaSharp.pdb;$(PublishDir)libHarfBuzzSharp.pdb" />
+    </ItemGroup>
+    <Delete Files="@(_NativeDebugSymbols)" />
+  </Target>
+</Project>

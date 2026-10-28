@@ -32,14 +32,14 @@ jobs:
       PACKAGE_VERSION: ${{ inputs.version }}
       RELEASE_TAG: ${{ inputs.release-tag }}
       GH_TOKEN: ${{ github.token }}
-      PAYLOAD: src/BlurMask/bin/Release/net11.0/linux-x64/publish
+      PAYLOAD: src/NovaPen/bin/Release/net11.0/linux-x64/publish
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         if: inputs.publish-artifact != ''
         with:
           name: ${{ inputs.publish-artifact }}
-          path: src/BlurMask/bin/Release/net11.0/linux-x64/publish
+          path: src/NovaPen/bin/Release/net11.0/linux-x64/publish
       - name: Download and verify the existing release payload
         if: inputs.release-tag != ''
         shell: bash
@@ -48,11 +48,11 @@ jobs:
           [[ -z "$PACKAGE_VERSION" || "$PACKAGE_VERSION" == "${RELEASE_TAG#v}" ]]
           echo "PACKAGE_VERSION=${RELEASE_TAG#v}" >> "$GITHUB_ENV"
           mkdir -p .artifacts/arch-release "$PAYLOAD"
-          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --pattern BlurMask-linux-x64.tar.gz --dir .artifacts/arch-release
-          digest="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" --jq '.assets[] | select(.name == "BlurMask-linux-x64.tar.gz") | .digest')"
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --pattern NovaPen-linux-x64.tar.gz --dir .artifacts/arch-release
+          digest="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" --jq '.assets[] | select(.name == "NovaPen-linux-x64.tar.gz") | .digest')"
           [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
-          echo "${digest#sha256:}  .artifacts/arch-release/BlurMask-linux-x64.tar.gz" | sha256sum --check
-          tar -xzf .artifacts/arch-release/BlurMask-linux-x64.tar.gz -C "$PAYLOAD"
+          echo "${digest#sha256:}  .artifacts/arch-release/NovaPen-linux-x64.tar.gz" | sha256sum --check
+          tar -xzf .artifacts/arch-release/NovaPen-linux-x64.tar.gz -C "$PAYLOAD"
       - uses: actions/setup-dotnet@v4
         if: inputs.publish-artifact == '' && inputs.release-tag == ''
         with:
@@ -99,12 +99,12 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: BlurMask-Arch-UI
+          name: NovaPen-Arch-UI
           path: .artifacts/arch-ui/results/
           if-no-files-found: warn
       - uses: actions/upload-artifact@v4
         with:
-          name: BlurMask-Arch-Installer
+          name: NovaPen-Arch-Installer
           path: |
             .artifacts/installers/*.pkg.tar.zst
             .artifacts/installers/*.pkg.tar.zst.sha256

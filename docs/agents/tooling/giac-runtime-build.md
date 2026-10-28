@@ -6,7 +6,7 @@ pinned Giac/GMP/MPFR sources and command transport. The application build script
 copy the platform runtime into `runtimes/<RID>/solver`, including portable builds.
 
 `tools/prepare-giac-runtime.ps1` builds a standalone, statically linked Windows
-x64 `icas.exe` from fixed source archives. This is BlurMask's minimal console
+x64 `icas.exe` from fixed source archives. This is NovaPen's minimal console
 transport around Giac, not the Xcas graphical installer or an upstream release
 named `2.0.0-21`. `--version` identifies the precise Giac commit.
 
@@ -26,7 +26,7 @@ Install Git for Windows and 7-Zip, then run from PowerShell:
 ./tools/prepare-giac-runtime.ps1 `
   -OutputDirectory .artifacts/giac-runtime/win-x64 `
   -SourcesDirectory .artifacts/installers `
-  -CacheDirectory D:/BlurMask-Giac-build `
+  -CacheDirectory D:/NovaPen-Giac-build `
   -Jobs 4
 ```
 
@@ -41,11 +41,11 @@ fresh local build imports `KERNEL32.dll` and `msvcrt.dll` and has a 19,582,464-b
 executable (about 18.7 MiB); compiler/build changes may alter that size/hash.
 
 The separately uploaded release asset is
-`BlurMask-Giac-corresponding-sources-bdbb1c41.tar.gz`, with a `.sha256` sidecar.
-It contains the exact complete Giac/GMP/MPFR source archives, BlurMask transport,
+`NovaPen-Giac-corresponding-sources-bdbb1c41.tar.gz`, with a `.sha256` sidecar.
+It contains the exact complete Giac/GMP/MPFR source archives, NovaPen transport,
 build helper/recipe and licenses. Build-tool source provenance is pinned through
 the toolchain release and its Dockerfile; toolchain executables are not installed
-with BlurMask. The runtime's manifest binds the source archive and executable
+with NovaPen. The runtime's manifest binds the source archive and executable
 hashes. Do not publish a runtime without its matching source asset. Old Xcas
 installer snapshots containing mismatched `doc/giac-1.7.0` are not used.
 
@@ -75,7 +75,7 @@ Verified headlessly against the source-built runtime: 8 explicit transport
 controls; 31 grammar translations; 20 built-in exact integral fixtures with
 independent Giac comparisons; 29 actual Giac calculus/algebra fixtures; running
 and pre-start cancellation; undefined, identity, unchanged-input and injection
-guards. No Xcas or BlurMask GUI was launched. Installer placement, bundled
+guards. No Xcas or NovaPen GUI was launched. Installer placement, bundled
 discovery and installed application tests belong to the installer workflow.
 
 ### Windows build details

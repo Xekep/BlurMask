@@ -2,7 +2,7 @@
 
 ## Windows: "stack-based buffer overrun" / immediate native crash
 
-The default Windows Native AOT build links rendering libraries into `BlurMask.exe`.
+The default Windows Native AOT build links rendering libraries into `NovaPen.exe`.
 Formula recognition also needs the bundled `runtimes/win-x64/native` folder.
 Older builds and the diagnostic
 `-DynamicNativeLibraries` build require these libraries alongside the executable:
@@ -24,7 +24,7 @@ Useful isolation steps:
 1. Build/run without AOT:
 
    ```powershell
-   dotnet run --project src/BlurMask -c Release -p:PublishAot=false
+   dotnet run --project src/NovaPen -c Release -p:PublishAot=false
    ```
 
 2. Publish Native AOT again from the CLI, not by manually copying Visual Studio output:
@@ -36,7 +36,7 @@ Useful isolation steps:
 3. Run the CI smoke mode from the publish directory:
 
    ```powershell
-   .\src\BlurMask\bin\Release\net11.0\win-x64\publish\BlurMask.exe --smoke-test
+   .\src\NovaPen\bin\Release\net11.0\win-x64\publish\NovaPen.exe --smoke-test
    ```
 
 4. If non-AOT works but the complete Native AOT payload fails, capture the Windows
@@ -45,7 +45,7 @@ Useful isolation steps:
 
 ## Remote Desktop / GPU device changes
 
-Launch `BlurMask.exe --software-rendering` before connecting over RDP to keep the
+Launch `NovaPen.exe --software-rendering` before connecting over RDP to keep the
 renderer independent of GPU/compositor changes. Sessions already using RDP select
 this profile automatically at startup. It disables native glass magnification and
 uses an opaque cover for effects requiring compositor blur. Existing ink is retained
@@ -75,8 +75,8 @@ native relative popups and toolbar dragging uses the compositor's move operation
 You can override a saved selection without editing configuration:
 
 ```sh
-blurmask --display-backend x11 --software-rendering
-blurmask --display-backend wayland
+novapen --display-backend x11 --software-rendering
+novapen --display-backend wayland
 ```
 
 Close the existing process first. Explicit Wayland needs `WAYLAND_DISPLAY`; without
@@ -88,16 +88,16 @@ The desktop ink layer is transparent by design; it receives input while a drawin
 tool is selected. The separate **Canvas** window should have an opaque board and
 a toolbar. If that window is transparent, it is a rendering problem.
 
-Close BlurMask using **Quit** in its tray menu before trying another renderer:
+Close NovaPen using **Quit** in its tray menu before trying another renderer:
 the application only permits one running instance. Run:
 
 ```sh
-blurmask --software-rendering
+novapen --software-rendering
 ```
 
 This selects the CPU renderer on Linux as well as Windows in builds containing
 the Linux renderer fix. Earlier builds ignored this option on Linux.
-For those builds, `LIBGL_ALWAYS_SOFTWARE=1 blurmask` can help isolate the GPU path.
+For those builds, `LIBGL_ALWAYS_SOFTWARE=1 novapen` can help isolate the GPU path.
 
 On Hyprland, capture the window information while the issue is visible:
 
@@ -105,7 +105,7 @@ On Hyprland, capture the window information while the issue is visible:
 hyprctl version
 hyprctl activewindow
 hyprctl clients -j
-pacman -Q blurmask hyprland xorg-xwayland mesa
+pacman -Q novapen hyprland xorg-xwayland mesa
 ```
 
 Window titles distinguish the desktop ink layer from Canvas. The client data
@@ -133,7 +133,7 @@ and [IPC](https://wiki.hypr.land/IPC/) documentation.
 
 Other compositors need their own per-window configuration. For example, picom
 with global background blur needs an exclusion for the desktop ink window's
-title; inspect its title with `xprop _NET_WM_NAME`. Do not exclude all `BlurMask`
+title; inspect its title with `xprop _NET_WM_NAME`. Do not exclude all `NovaPen`
 windows, because that would also disable blur privacy masks. The regression
 checks compare a detailed real desktop before and after mapping/drawing, and
 include a blur-enabled negative control. Tests under Xvfb/Openbox/picom do not
@@ -146,4 +146,4 @@ The mode changes immediately. The tray tooltip shows the current mode. Pixel Blu
 
 ## Glass Refraction on Windows
 
-The Windows Glass Refraction mode keeps the optical cells fixed at 30×30 px on a 32 px pitch, so resizing only changes how many cells are visible. Internally it uses exactly four persistent Magnifier child windows for the entire mask. Each one is clipped with a disjoint Win32 region and has a slightly different zoom, offset and color transform. This gives piecewise optical displacement without creating one HWND per cell. There is no 60 Hz geometry timer; BlurMask updates the four source rectangles only when the mask moves or resizes. If the native backend cannot initialize, BlurMask falls back to the translucent glass-block visual instead of crashing.
+The Windows Glass Refraction mode keeps the optical cells fixed at 30×30 px on a 32 px pitch, so resizing only changes how many cells are visible. Internally it uses exactly four persistent Magnifier child windows for the entire mask. Each one is clipped with a disjoint Win32 region and has a slightly different zoom, offset and color transform. This gives piecewise optical displacement without creating one HWND per cell. There is no 60 Hz geometry timer; NovaPen updates the four source rectangles only when the mask moves or resizes. If the native backend cannot initialize, NovaPen falls back to the translucent glass-block visual instead of crashing.

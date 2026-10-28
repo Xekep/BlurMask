@@ -9,7 +9,7 @@ on:
         type: string
       publish-artifact:
         description: 'Verified Linux Native AOT artifact from source-run-id'
-        default: BlurMask-linux-x64
+        default: NovaPen-linux-x64
         required: false
         type: string
       source-run-id:
@@ -73,11 +73,11 @@ jobs:
           [[ -z "$PACKAGE_VERSION" || "$PACKAGE_VERSION" == "${RELEASE_TAG#v}" ]]
           echo "PACKAGE_VERSION=${RELEASE_TAG#v}" >> "$GITHUB_ENV"
           mkdir -p .artifacts/void-release "$PAYLOAD"
-          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --pattern BlurMask-linux-x64.tar.gz --dir .artifacts/void-release
-          digest="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" --jq '.assets[] | select(.name == "BlurMask-linux-x64.tar.gz") | .digest')"
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --pattern NovaPen-linux-x64.tar.gz --dir .artifacts/void-release
+          digest="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" --jq '.assets[] | select(.name == "NovaPen-linux-x64.tar.gz") | .digest')"
           [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
-          echo "${digest#sha256:}  .artifacts/void-release/BlurMask-linux-x64.tar.gz" | sha256sum --check
-          tar -xzf .artifacts/void-release/BlurMask-linux-x64.tar.gz -C "$PAYLOAD"
+          echo "${digest#sha256:}  .artifacts/void-release/NovaPen-linux-x64.tar.gz" | sha256sum --check
+          tar -xzf .artifacts/void-release/NovaPen-linux-x64.tar.gz -C "$PAYLOAD"
       - name: Package the existing payload in official Void glibc
         shell: bash
         run: |
@@ -92,6 +92,11 @@ jobs:
           docker run --rm --platform linux/amd64 -v "$GITHUB_WORKSPACE:/workspace:ro" \
             -v "$GITHUB_WORKSPACE/.artifacts/void-installers:/output" -w /workspace \
             -e BLURMASK_VERSION="$version" -e PAYLOAD -e SOURCE_DATE_EPOCH "$image" sh -euc '
+              # Use the official global CDN before any XBPS TLS/bootstrap request.
+              # /etc overrides survive the XBPS self-update; TLS and RSA checks stay enabled.
+              mkdir -p /etc/xbps.d
+              cp /usr/share/xbps.d/*-repository-*.conf /etc/xbps.d/
+              sed -i "s|https://repo-default[.]voidlinux[.]org/|https://repo-fastly.voidlinux.org/|g" /etc/xbps.d/*-repository-*.conf
               xbps-install -Suy xbps
               xbps-install -Suy
               xbps-install -y bash findutils shadow util-linux
@@ -106,6 +111,11 @@ jobs:
           docker run --rm --platform linux/amd64 -v "$GITHUB_WORKSPACE:/workspace:ro" \
             -v "$GITHUB_WORKSPACE/.artifacts/void-ui/results:/tmp/void-ui-results" \
             -w /workspace "$VOID_IMAGE" sh -euc '
+              # Use the official global CDN before any XBPS TLS/bootstrap request.
+              # /etc overrides survive the XBPS self-update; TLS and RSA checks stay enabled.
+              mkdir -p /etc/xbps.d
+              cp /usr/share/xbps.d/*-repository-*.conf /etc/xbps.d/
+              sed -i "s|https://repo-default[.]voidlinux[.]org/|https://repo-fastly.voidlinux.org/|g" /etc/xbps.d/*-repository-*.conf
               xbps-install -Suy xbps
               xbps-install -Suy
               xbps-install -y bash findutils shadow util-linux desktop-file-utils xvfb-run dejavu-fonts-ttf \
@@ -122,12 +132,12 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: BlurMask-Void-UI
+          name: NovaPen-Void-UI
           path: .artifacts/void-ui/results/
           if-no-files-found: warn
       - uses: actions/upload-artifact@v4
         with:
-          name: BlurMask-Void-Installer
+          name: NovaPen-Void-Installer
           path: |
             .artifacts/void-installers/*.x86_64.xbps
             .artifacts/void-installers/*.x86_64.xbps.sha256

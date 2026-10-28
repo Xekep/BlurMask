@@ -1,7 +1,7 @@
-# BlurMask.InkRecognition
+# NovaPen.InkRecognition
 
 Reusable CPU ink recognition for .NET 10 and Native AOT, independent of the
-BlurMask desktop UI. No MyScript SDK DLL is loaded or executed.
+NovaPen desktop UI. No MyScript SDK DLL is loaded or executed.
 
 The package includes the portable BLSTM executor and experimental recovered
 legacy model readers, glyph feature composers, integer acoustic costs,
@@ -42,4 +42,4 @@ complete group search, native context/default policies and a validated end-to-en
 GUI recognizer remain unfinished. Prepared geometry APIs do not infer missing
 context or promise recognition accuracy.
 
-Source and detailed evidence: https://github.com/Xekep/BlurMask/tree/main/src/InkRecognition
+Source and detailed evidence: https://github.com/Xekep/NovaPen/tree/main/src/InkRecognition

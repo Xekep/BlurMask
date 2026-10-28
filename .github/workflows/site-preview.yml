@@ -1,0 +1,42 @@
+name: Site preview
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    env:
+      DOTNET_PROCESSOR_COUNT: '2'
+      BLURMASK_TEST_LANGUAGE: en
+      BLURMASK_SITE_PREVIEW: ${{ github.workspace }}/.artifacts/site-preview/app-preview.png
+      BLURMASK_SMOKE_ARTIFACTS: ${{ github.workspace }}/.artifacts/site-preview/isolated
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 11.0.100-preview.7.26381.103
+      - name: Install isolated X11 rendering dependencies
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends xvfb xauth openbox libx11-6 libxcb-shape0 libice6 libsm6 libfontconfig1 libxrandr2 libxcursor1 libxi6 libxrender1 fonts-dejavu-core
+      - name: Build the real application without Native AOT or solver packaging
+        run: dotnet build src/NovaPen/NovaPen.csproj -c Release -r linux-x64 -p:PublishAot=false -p:PublishTrimmed=false -p:StaticNativeLibraries=false -p:SelfContained=false
+      - name: Render the actual canvas in Xvfb
+        shell: bash
+        run: |
+          mkdir -p .artifacts/site-preview
+          xvfb-run -a -s '-screen 0 1400x1000x24' bash -euc '
+            openbox > .artifacts/site-preview/openbox.log 2>&1 &
+            wm=$!
+            trap "kill $wm 2>/dev/null || true" EXIT
+            timeout 45s dotnet src/NovaPen/bin/Release/net11.0/linux-x64/NovaPen.dll --website-preview --software-rendering
+          '
+          test -s .artifacts/site-preview/app-preview.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NovaPen-Site-Preview
+          path: .artifacts/site-preview/app-preview.png
+          if-no-files-found: error

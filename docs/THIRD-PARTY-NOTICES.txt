@@ -18,11 +18,11 @@ Visual C++ runtime dependencies from the builder's licensed Visual Studio REDIST
 
 Windows x64, Linux x64 and native macOS x64/arm64 builds include an independently
 built Giac CLI (GPL-3.0-or-later), running as a separate process and disabled by
-default. No Giac library is linked into BlurMask. The solver directory contains
+default. No Giac library is linked into NovaPen. The solver directory contains
 complete license texts, component notices, provenance and the matching
 source-archive SHA256. Corresponding source and the build recipe are supplied
-in the same release as BlurMask-Giac-corresponding-sources-bdbb1c41.tar.gz
-(Windows) or BlurMask-Giac-corresponding-sources-bdbb1c41-<RID>.tar.gz (POSIX).
+in the same release as NovaPen-Giac-corresponding-sources-bdbb1c41.tar.gz
+(Windows) or NovaPen-Giac-corresponding-sources-bdbb1c41-<RID>.tar.gz (POSIX).
 See docs/agents/tooling/giac-runtime-build.md for pinned sources and build details.
 
 Developer verification tooling only: tools/Math2DomValue.Probe/reference/dtoa.c

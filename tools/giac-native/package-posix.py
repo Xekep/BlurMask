@@ -68,7 +68,7 @@ def verify_inputs(cache, rid):
 def cached(output, sources, tools, rid):
     validate_output(output, rid)
     manifest = json.loads((output / 'manifest.json').read_text(encoding='utf-8'))
-    archive_name = f'BlurMask-Giac-corresponding-sources-bdbb1c41-{rid}.tar.gz'
+    archive_name = f'NovaPen-Giac-corresponding-sources-bdbb1c41-{rid}.tar.gz'
     expected_inputs = [dict(file=name, sha256=sha, url=url) for name, sha, url in specs(rid)]
     if (manifest['runtime'] != rid or manifest['buildRecipeSha256'] != recipe_hash(tools)
             or manifest['sourceArchive'] != archive_name or manifest['inputs'] != expected_inputs):
@@ -123,10 +123,10 @@ def package(output, sources, cache, work, tools, rid):
                  licenses / 'TinyMT-BSD-3-Clause.txt')
     if rid == 'linux-x64':
         shutil.copy2(cache / 'COPYING.RUNTIME', licenses / 'COPYING.RUNTIME')
-    archive_name = f'BlurMask-Giac-corresponding-sources-bdbb1c41-{rid}.tar.gz'
+    archive_name = f'NovaPen-Giac-corresponding-sources-bdbb1c41-{rid}.tar.gz'
     compiler = subprocess.check_output(['g++' if rid == 'linux-x64' else 'clang++', '--version'],
                                        text=True).splitlines()[0]
-    notice = f'''Giac CLI built for BlurMask ({rid}), GeoGebra/giac commit {COMMIT}.
+    notice = f'''Giac CLI built for NovaPen ({rid}), GeoGebra/giac commit {COMMIT}.
 Giac: Bernard Parisse and contributors, GPL-3.0-or-later.
 The independently built transport is GPL-3.0-or-later; full GPL text: COPYING.
 Corresponding source and complete recipe: {archive_name}, same release as this runtime.
@@ -142,7 +142,7 @@ Compiler: {compiler}
     notice += ('No FLTK, Xcas GUI, readline, PARI, CoCoALib, NTL, GSL or upstream prebuilt CAS libraries.\n'
                'OS system libraries are not redistributed. Dynamic system dependencies: ' + ', '.join(dependencies) + '\n')
     (output / 'THIRD-PARTY-NOTICES.txt').write_text(notice, encoding='utf-8')
-    manifest = dict(schemaVersion=1, runtime=rid, transport='BlurMask stdin/stdout --sage',
+    manifest = dict(schemaVersion=1, runtime=rid, transport='NovaPen stdin/stdout --sage',
                     giacCommit=COMMIT, compiler=compiler, staticNumericLibraries=True,
                     compilerRuntime='static' if rid == 'linux-x64' else 'dynamic-system',
                     macosDeploymentTarget=None if rid == 'linux-x64' else '11.0',

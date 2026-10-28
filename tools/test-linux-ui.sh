@@ -161,15 +161,15 @@ stroke() {
   xdotool mouseup 1
   sleep .6
 }
-toolbar="$(wait_visible 'BlurMask.*drawing tools')"
+toolbar="$(wait_visible 'NovaPen.*drawing tools')"
 sleep 1
 xwininfo -root -tree > "$out/startup-windows.txt"
-assert_unmapped 'BlurMask.*ink overlay'
+assert_unmapped 'NovaPen.*ink overlay'
 capture root startup-desktop
 capture "$toolbar" toolbar-startup
 # Pen maps the layer; pointer gestures must reach it.
 click_toolbar 124
-overlay="$(wait_visible 'BlurMask.*ink overlay')"
+overlay="$(wait_visible 'NovaPen.*ink overlay')"
 capture "$overlay" desktop-before
 capture root desktop-pen-mapped
 background_check startup-desktop desktop-pen-mapped normal
@@ -217,15 +217,15 @@ PY
 # A pointer click through the ink layer must reach the toolbar and open a menu.
 click_toolbar 212
 xwininfo -root -tree > "$out/toolbar-click-windows.txt"
-flyout="$(wait_visible 'BlurMask.*menu')"
+flyout="$(wait_visible 'NovaPen.*menu')"
 capture "$flyout" sizes-flyout
 xdotool mousemove --window "$flyout" 88 20 click 1
 sleep .5
-assert_unmapped 'BlurMask.*menu'
+assert_unmapped 'NovaPen.*menu'
 xdotool windowactivate --sync "$toolbar"
 xdotool key --clearmodifiers ctrl+shift+c
-canvas="$(wait_visible 'BlurMask.*Canvas')"
-assert_unmapped 'BlurMask.*ink overlay'
+canvas="$(wait_visible 'NovaPen.*Canvas')"
+assert_unmapped 'NovaPen.*ink overlay'
 # Native mapping does not mean that picom has presented the first frame yet.
 # Wait for the real screen to paint without activating, raising or moving the window.
 paint_start=$SECONDS
@@ -271,22 +271,22 @@ capture root canvas-after-desktop
 # Ask the WM to close, rather than destroying the native window directly.
 wmctrl -ic "$(printf '0x%x' "$canvas")"
 sleep .8
-assert_unmapped 'BlurMask.*Canvas'
+assert_unmapped 'NovaPen.*Canvas'
 # Closing flushes the document; the periodic autosave has a 1300 ms cadence.
 find "$XDG_DATA_HOME" -name canvas.json -exec cp {} "$out/canvas-state.json" \;
 test -s "$out/canvas-state.json"
-[[ "$(wait_visible 'BlurMask.*ink overlay')" == "$overlay" ]]
+[[ "$(wait_visible 'NovaPen.*ink overlay')" == "$overlay" ]]
 wmctrl -ic "$(printf '0x%x' "$overlay")"
 sleep .8
-assert_unmapped 'BlurMask.*ink overlay'
+assert_unmapped 'NovaPen.*ink overlay'
 capture root desktop-wm-hidden
 background_check startup-desktop desktop-wm-hidden hidden
 click_toolbar 124
-[[ "$(wait_visible 'BlurMask.*ink overlay')" == "$overlay" ]]
+[[ "$(wait_visible 'NovaPen.*ink overlay')" == "$overlay" ]]
 capture root desktop-wm-reopened
 background_check desktop-highlighter-screen desktop-wm-reopened reopened
 click_toolbar 212
-flyout="$(wait_visible 'BlurMask.*menu')"
+flyout="$(wait_visible 'NovaPen.*menu')"
 capture "$flyout" reopened-sizes-flyout
 xwininfo -root -tree > "$out/reopened-windows.txt"
 python - "$out" <<'PY'

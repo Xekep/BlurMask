@@ -37,7 +37,7 @@ jobs:
         if: inputs.publish-artifact != ''
         with:
           name: ${{ inputs.publish-artifact }}
-          path: src/BlurMask/bin/Release/net11.0/linux-x64/publish
+          path: src/NovaPen/bin/Release/net11.0/linux-x64/publish
       - if: inputs.publish-artifact == ''
         run: bash ./tools/build.sh linux-x64
       - name: Package and test Debian installer
@@ -47,6 +47,6 @@ jobs:
           bash ./tools/test-deb.sh .artifacts/installers/*.deb
       - uses: actions/upload-artifact@v4
         with:
-          name: BlurMask-Debian-Installer
+          name: NovaPen-Debian-Installer
           path: .artifacts/installers/*
           if-no-files-found: error

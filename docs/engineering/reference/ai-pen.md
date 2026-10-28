@@ -83,20 +83,20 @@ available for the previous recognizer.
 
 ```sh
 python tools/export-ink-math-model.py models/math2/math-sr.res --output .artifacts/math2.ikrmath
-BlurMask --install-ink-math-model .artifacts/math2.ikrmath
+NovaPen --install-ink-math-model .artifacts/math2.ikrmath
 ```
 
 The current application stores its model at:
 
 ```
-<LocalApplicationData>/BlurMask/models/en-US.ikrpack
+<LocalApplicationData>/NovaPen/models/en-US.ikrpack
 ```
 
 Convert the supported English resource from the repository with:
 
 ```sh
 python tools/export-ink-model.py --resource models/en-US/en_US-ak-cur.res --output .artifacts/en-US.ikrpack
-BlurMask --install-ink-model .artifacts/en-US.ikrpack
+NovaPen --install-ink-model .artifacts/en-US.ikrpack
 ```
 
 The exporter does not download, activate or distribute vendor assets. Exported
@@ -135,7 +135,7 @@ is explicitly experimental.
 
 ```sh
 dotnet run --project tools/InkRecognition.Probe -c Release
-dotnet src/BlurMask/bin/Release/net11.0/BlurMask.dll --ai-pen-test
+dotnet src/NovaPen/bin/Release/net11.0/NovaPen.dll --ai-pen-test
 dotnet run --project tools/InkRecognition.Probe -c Release -- model.ikrpack strokes.json
 ```
 

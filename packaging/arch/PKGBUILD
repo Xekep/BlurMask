@@ -1,30 +1,30 @@
 # Packages the existing Ubuntu 22.04 Native AOT payload; no .NET SDK/runtime needed.
-pkgname=blurmask
+pkgname=novapen
 pkgver=${BLURMASK_VERSION:-1.0.0}
 pkgrel=1
 pkgdesc='Native desktop annotation, privacy masks and shared canvas'
 arch=('x86_64')
-url='https://github.com/Xekep/BlurMask'
+url='https://github.com/Xekep/NovaPen'
 license=('MIT' 'GPL-3.0-or-later')
 depends=('glibc>=2.35' 'gcc-libs' 'zlib' 'openssl' 'icu' 'ca-certificates'
          'libx11' 'libxcb' 'libice' 'libsm' 'fontconfig' 'libxcursor'
          'libxrandr' 'libxi' 'libxrender' 'dbus' 'wayland' 'libxkbcommon' 'libglvnd')
 optdepends=('xorg-xwayland: run in a Wayland desktop session')
-backup=('etc/xdg/autostart/blurmask.desktop')
+backup=('etc/xdg/autostart/novapen.desktop')
 # The payload is already stripped; never alter the tested native binaries.
 options=('!strip' '!debug')
-source=('payload.tar' 'blurmask.desktop' 'blurmask.svg' 'LICENSE')
+source=('payload.tar' 'novapen.desktop' 'novapen.svg' 'LICENSE')
 # tools/build-arch.sh appends the SHA-256 of every local input before makepkg.
 
 package() {
-  install -d "$pkgdir/opt/blurmask" "$pkgdir/usr/bin"
-  cp -a "$srcdir/payload/." "$pkgdir/opt/blurmask/"
-  chmod 755 "$pkgdir/opt/blurmask/BlurMask"
-  chmod 755 "$pkgdir/opt/blurmask/runtimes/linux-x64/solver/icas"
-  ln -s /opt/blurmask/BlurMask "$pkgdir/usr/bin/blurmask"
-  install -Dm644 "$srcdir/blurmask.desktop" "$pkgdir/usr/share/applications/blurmask.desktop"
-  install -Dm644 "$srcdir/blurmask.desktop" "$pkgdir/etc/xdg/autostart/blurmask.desktop"
-  sed -i 's|^Exec=/opt/blurmask/BlurMask$|Exec=/opt/blurmask/BlurMask --minimized|' "$pkgdir/etc/xdg/autostart/blurmask.desktop"
-  install -Dm644 "$srcdir/blurmask.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/blurmask.svg"
-  install -Dm644 "$srcdir/LICENSE" "$pkgdir/usr/share/licenses/blurmask/LICENSE"
+  install -d "$pkgdir/opt/novapen" "$pkgdir/usr/bin"
+  cp -a "$srcdir/payload/." "$pkgdir/opt/novapen/"
+  chmod 755 "$pkgdir/opt/novapen/NovaPen"
+  chmod 755 "$pkgdir/opt/novapen/runtimes/linux-x64/solver/icas"
+  ln -s /opt/novapen/NovaPen "$pkgdir/usr/bin/novapen"
+  install -Dm644 "$srcdir/novapen.desktop" "$pkgdir/usr/share/applications/novapen.desktop"
+  install -Dm644 "$srcdir/novapen.desktop" "$pkgdir/etc/xdg/autostart/novapen.desktop"
+  sed -i 's|^Exec=/opt/novapen/NovaPen$|Exec=/opt/novapen/NovaPen --minimized|' "$pkgdir/etc/xdg/autostart/novapen.desktop"
+  install -Dm644 "$srcdir/novapen.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/novapen.svg"
+  install -Dm644 "$srcdir/LICENSE" "$pkgdir/usr/share/licenses/novapen/LICENSE"
 }
