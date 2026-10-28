@@ -5,8 +5,9 @@ package="$(realpath "${1:?Pass a Void x86_64 XBPS package}")"
 [[ "$EUID" == 0 ]] || { echo 'Use a clean root-owned Void container.' >&2; exit 2; }
 [[ "$(xbps-uhelper arch)" == x86_64 && "$(getconf GNU_LIBC_VERSION)" == glibc* ]]
 [[ "$(basename "$package")" =~ ^novapen-[0-9].*\.x86_64\.xbps$ ]]
+if xbps-query blurmask &>/dev/null; then echo 'Use a clean runner: legacy BlurMask is present.' >&2; exit 2; fi
 if xbps-query novapen &>/dev/null; then echo 'NovaPen is already installed.' >&2; exit 2; fi
-for path in /opt/novapen /usr/bin/novapen /etc/xdg/autostart/novapen.desktop; do
+for path in /opt/novapen /usr/bin/novapen /etc/xdg/autostart/blurmask.desktop; do
   [[ ! -e "$path" ]] || { echo "Existing NovaPen path: $path" >&2; exit 2; }
 done
 repo="$(mktemp -d)"
@@ -23,6 +24,7 @@ cp "$package" "$repo/"
 xbps-rindex -a "$repo/$(basename "$package")"
 xbps-query -R --repository="$repo" -p architecture novapen | grep -Fx x86_64
 xbps-query -R --repository="$repo" -p license novapen | grep -Fx 'MIT, GPL-3.0-or-later'
+xbps-query -R --repository="$repo" -p replaces novapen | grep -Fx 'blurmask>=0'
 xbps-install -y --repository="$repo" novapen
 installed=1
 test -x /opt/novapen/NovaPen
@@ -32,9 +34,9 @@ test "$(readlink /usr/bin/novapen)" == /opt/novapen/NovaPen
 test -s /usr/share/icons/hicolor/scalable/apps/novapen.svg
 test -s /usr/share/licenses/novapen/LICENSE
 desktop-file-validate /usr/share/applications/novapen.desktop
-desktop-file-validate /etc/xdg/autostart/novapen.desktop
+desktop-file-validate /etc/xdg/autostart/blurmask.desktop
 grep -Fx 'Exec=/opt/novapen/NovaPen' /usr/share/applications/novapen.desktop
-grep -Fx 'Exec=/opt/novapen/NovaPen --minimized' /etc/xdg/autostart/novapen.desktop
+grep -Fx 'Exec=/opt/novapen/NovaPen --minimized' /etc/xdg/autostart/blurmask.desktop
 (cd /opt/novapen; sha256sum --check /usr/share/doc/novapen/payload.sha256)
 for license in THIRD-PARTY-NOTICES.txt LICENSE-FONT-Inter.txt LICENSE-FONT-Manrope.txt \
   LICENSE-FONT-SourceSerif4.txt LICENSE-FONT-STIXTwoMath.txt LICENSE-FONT-STIXTwoText.txt LICENSE-FONT-STIXTwoTextItalic.txt \
@@ -91,7 +93,7 @@ runuser -u novapen-test -- /usr/bin/novapen --math-solver-test
 xbps-pkgdb --checks=files,dependencies novapen
 xbps-remove -y novapen
 installed=0
-for path in /opt/novapen /usr/bin/novapen /etc/xdg/autostart/novapen.desktop /usr/share/applications/novapen.desktop /usr/share/icons/hicolor/scalable/apps/novapen.svg /usr/share/licenses/novapen /usr/share/doc/novapen; do
+for path in /opt/novapen /usr/bin/novapen /etc/xdg/autostart/blurmask.desktop /usr/share/applications/novapen.desktop /usr/share/icons/hicolor/scalable/apps/novapen.svg /usr/share/licenses/novapen /usr/share/doc/novapen; do
   test ! -e "$path"
 done
 echo 'Void glibc install, native dependencies/licenses, pointer/pixels, reinstall and removal checks passed.'

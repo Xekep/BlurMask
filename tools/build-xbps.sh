@@ -28,8 +28,9 @@ chmod 755 "$root/opt/novapen/NovaPen"
 chmod 755 "$root/opt/novapen/runtimes/linux-x64/solver/icas"
 ln -s /opt/novapen/NovaPen "$root/usr/bin/novapen"
 install -Dm644 packaging/novapen.desktop "$root/usr/share/applications/novapen.desktop"
-install -Dm644 packaging/novapen.desktop "$root/etc/xdg/autostart/novapen.desktop"
-sed -i 's|^Exec=/opt/novapen/NovaPen$|Exec=/opt/novapen/NovaPen --minimized|' "$root/etc/xdg/autostart/novapen.desktop"
+# Keep the XDG autostart ID stable: preserve disabled user overrides and replace the old conffile.
+install -Dm644 packaging/novapen.desktop "$root/etc/xdg/autostart/blurmask.desktop"
+sed -i 's|^Exec=/opt/novapen/NovaPen$|Exec=/opt/novapen/NovaPen --minimized|' "$root/etc/xdg/autostart/blurmask.desktop"
 install -Dm644 src/NovaPen/Assets/NovaPen.svg "$root/usr/share/icons/hicolor/scalable/apps/novapen.svg"
 install -Dm644 LICENSE "$root/usr/share/licenses/novapen/LICENSE"
 # Keep all font/runtime licenses and the complete native payload byte-for-byte.
@@ -48,7 +49,7 @@ xbps-create -A x86_64 -n "novapen-${version}_1" \
   -s 'Native desktop annotation, privacy masks and shared canvas' \
   -S 'Native AOT application; no separately installed .NET runtime. Requires Void glibc. X11/XWayland supports desktop drawing; optional native Wayland supports the separate canvas. XWayland and the graphics driver are supplied by the desktop environment.' \
   -l 'MIT, GPL-3.0-or-later' -m 'Xekep <noreply@kiiko.ru>' -H 'https://github.com/Xekep/NovaPen' \
-  -D "$dependencies" -F /etc/xdg/autostart/novapen.desktop --compression zstd "$root"
+  -R 'blurmask>=0' -D "$dependencies" -F /etc/xdg/autostart/blurmask.desktop --compression zstd "$root"
 [[ -s "$package" ]]
 sha256sum "$(basename "$package")" > "$package.sha256"
 echo "Built $package"

@@ -1,5 +1,8 @@
 # Packages the existing Ubuntu 22.04 Native AOT payload; no .NET SDK/runtime needed.
 pkgname=novapen
+# Rename transition: a local pacman -U must also refuse co-installation.
+conflicts=('blurmask')
+replaces=('blurmask')
 pkgver=${BLURMASK_VERSION:-1.0.0}
 pkgrel=1
 pkgdesc='Native desktop annotation, privacy masks and shared canvas'
@@ -10,7 +13,7 @@ depends=('glibc>=2.35' 'gcc-libs' 'zlib' 'openssl' 'icu' 'ca-certificates'
          'libx11' 'libxcb' 'libice' 'libsm' 'fontconfig' 'libxcursor'
          'libxrandr' 'libxi' 'libxrender' 'dbus' 'wayland' 'libxkbcommon' 'libglvnd')
 optdepends=('xorg-xwayland: run in a Wayland desktop session')
-backup=('etc/xdg/autostart/novapen.desktop')
+backup=('etc/xdg/autostart/blurmask.desktop')
 # The payload is already stripped; never alter the tested native binaries.
 options=('!strip' '!debug')
 source=('payload.tar' 'novapen.desktop' 'novapen.svg' 'LICENSE')
@@ -23,8 +26,9 @@ package() {
   chmod 755 "$pkgdir/opt/novapen/runtimes/linux-x64/solver/icas"
   ln -s /opt/novapen/NovaPen "$pkgdir/usr/bin/novapen"
   install -Dm644 "$srcdir/novapen.desktop" "$pkgdir/usr/share/applications/novapen.desktop"
-  install -Dm644 "$srcdir/novapen.desktop" "$pkgdir/etc/xdg/autostart/novapen.desktop"
-  sed -i 's|^Exec=/opt/novapen/NovaPen$|Exec=/opt/novapen/NovaPen --minimized|' "$pkgdir/etc/xdg/autostart/novapen.desktop"
+# Keep the XDG autostart ID stable: preserve disabled user overrides and replace the old conffile.
+  install -Dm644 "$srcdir/novapen.desktop" "$pkgdir/etc/xdg/autostart/blurmask.desktop"
+  sed -i 's|^Exec=/opt/novapen/NovaPen$|Exec=/opt/novapen/NovaPen --minimized|' "$pkgdir/etc/xdg/autostart/blurmask.desktop"
   install -Dm644 "$srcdir/novapen.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/novapen.svg"
   install -Dm644 "$srcdir/LICENSE" "$pkgdir/usr/share/licenses/novapen/LICENSE"
 }

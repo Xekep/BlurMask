@@ -19,12 +19,13 @@ chmod 755 "$root/opt/novapen/NovaPen"
 if [[ -f "$root/opt/novapen/runtimes/$rid/solver/icas" ]]; then chmod 755 "$root/opt/novapen/runtimes/$rid/solver/icas"; fi
 ln -s /opt/novapen/NovaPen "$root/usr/bin/novapen"
 install -m 644 packaging/novapen.desktop "$root/usr/share/applications/novapen.desktop"
-install -m 644 packaging/novapen.desktop "$root/etc/xdg/autostart/novapen.desktop"
-sed -i 's|^Exec=/opt/novapen/NovaPen$|Exec=/opt/novapen/NovaPen --minimized|' "$root/etc/xdg/autostart/novapen.desktop"
+# Keep the XDG autostart ID stable: preserve disabled user overrides and replace the old conffile.
+install -m 644 packaging/novapen.desktop "$root/etc/xdg/autostart/blurmask.desktop"
+sed -i 's|^Exec=/opt/novapen/NovaPen$|Exec=/opt/novapen/NovaPen --minimized|' "$root/etc/xdg/autostart/blurmask.desktop"
 install -m 644 src/NovaPen/Assets/NovaPen.svg "$root/usr/share/icons/hicolor/scalable/apps/novapen.svg"
 install -m 644 LICENSE "$root/usr/share/doc/novapen/copyright"
 printf '\nBundled Giac is GPL-3.0-or-later. Complete solver/dependency licenses and\ncorresponding-source instructions: /opt/novapen/runtimes/%s/solver/.\n' "$rid" >> "$root/usr/share/doc/novapen/copyright"
-printf '/etc/xdg/autostart/novapen.desktop\n' > "$root/DEBIAN/conffiles"
+printf '/etc/xdg/autostart/blurmask.desktop\n' > "$root/DEBIAN/conffiles"
 mkdir "$stage/debian"
 printf 'Source: novapen\nSection: graphics\nPriority: optional\nMaintainer: Xekep <noreply@kiiko.ru>\n\nPackage: novapen\nArchitecture: %s\nDescription: Desktop annotation and shared canvas\n' "$arch" > "$stage/debian/control"
 elfs=(-e"$root/opt/novapen/NovaPen")
@@ -36,6 +37,8 @@ dependencies="$(cd "$stage" && dpkg-shlibdeps -O -l"$root/opt/novapen" "${elfs[@
 dependencies="${dependencies#shlibs:Depends=}"
 cat > "$root/DEBIAN/control" <<EOF
 Package: novapen
+Conflicts: blurmask
+Replaces: blurmask
 Version: $version
 Architecture: $arch
 Maintainer: Xekep <noreply@kiiko.ru>

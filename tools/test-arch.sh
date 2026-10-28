@@ -4,8 +4,11 @@ set -euo pipefail
 package="$(realpath "${1:?Pass an Arch package}")"
 [[ "$EUID" == 0 ]] || { echo 'Use a clean root-owned Arch container.' >&2; exit 2; }
 [[ "$(pacman -Qp "$package" | cut -d' ' -f1)" == novapen ]]
+bsdtar -xOf "$package" .PKGINFO | grep -Fx 'conflict = blurmask'
+bsdtar -xOf "$package" .PKGINFO | grep -Fx 'replaces = blurmask'
+if pacman -Q blurmask &>/dev/null; then echo 'Use a clean runner: legacy BlurMask is present.' >&2; exit 2; fi
 if pacman -Q novapen &>/dev/null; then echo 'NovaPen is already installed.' >&2; exit 2; fi
-if [[ -e /opt/novapen || -e /etc/xdg/autostart/novapen.desktop ]]; then echo 'Existing NovaPen files found.' >&2; exit 2; fi
+if [[ -e /opt/novapen || -e /etc/xdg/autostart/blurmask.desktop ]]; then echo 'Existing NovaPen files found.' >&2; exit 2; fi
 cleanup() { pacman -R --noconfirm novapen; }
 trap cleanup EXIT
 pacman -U --noconfirm "$package"
@@ -16,9 +19,9 @@ test "$(readlink /usr/bin/novapen)" == /opt/novapen/NovaPen
 test -s /usr/share/icons/hicolor/scalable/apps/novapen.svg
 test -s /usr/share/licenses/novapen/LICENSE
 desktop-file-validate /usr/share/applications/novapen.desktop
-desktop-file-validate /etc/xdg/autostart/novapen.desktop
+desktop-file-validate /etc/xdg/autostart/blurmask.desktop
 grep -Fx 'Exec=/opt/novapen/NovaPen' /usr/share/applications/novapen.desktop
-grep -Fx 'Exec=/opt/novapen/NovaPen --minimized' /etc/xdg/autostart/novapen.desktop
+grep -Fx 'Exec=/opt/novapen/NovaPen --minimized' /etc/xdg/autostart/blurmask.desktop
 while IFS= read -r -d '' elf; do
   dependencies="$(ldd "$elf")"
   printf '%s\n%s\n' "$elf" "$dependencies"
@@ -42,7 +45,7 @@ runuser -u novapen-test -- /usr/bin/novapen --math-solver-test
 pacman -Qkk novapen
 cleanup
 trap - EXIT
-for path in /opt/novapen /usr/bin/novapen /etc/xdg/autostart/novapen.desktop /usr/share/applications/novapen.desktop /usr/share/icons/hicolor/scalable/apps/novapen.svg /usr/share/licenses/novapen; do
+for path in /opt/novapen /usr/bin/novapen /etc/xdg/autostart/blurmask.desktop /usr/share/applications/novapen.desktop /usr/share/icons/hicolor/scalable/apps/novapen.svg /usr/share/licenses/novapen; do
   test ! -e "$path"
 done
 echo 'Arch install, dependencies, real UI input/pixels, reinstall and removal checks passed.'

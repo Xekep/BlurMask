@@ -231,3 +231,5 @@ build starts with a Windows "stack-based buffer overrun" dialog.
 ## License
 
 MIT.
+
+Linux rename compatibility: the packages replace/conflict with the former `blurmask` package. The system autostart entry keeps `/etc/xdg/autostart/blurmask.desktop` as its XDG identity; its displayed name, executable and icon are NovaPen. Keeping this filename lets package managers take over the existing configuration file and keeps a user's same-name `Hidden=true` override effective. The application-menu entry is `novapen.desktop`. No user settings or canvases are removed.
