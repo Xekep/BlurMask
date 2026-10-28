@@ -1,5 +1,10 @@
 # Math CB8 edit-selection matching, 28 October 2026
 
+The later [typed C# kernel](../../../../docs/agents/research/math-dom-cb8-edit-kernel-20261028.md)
+uses the completed DOM conversion service directly and has managed/AOT controls.
+The earlier standalone Python kernel and its static evidence are retained below.
+Neither implementation establishes the missing nonfresh owning join.
+
 `cb8_edit_match.py` ports the decision and required-service call order of
 Document `032800`, the callback supplied by CB8.V10 (`033040`) when matching
 old/new tag edits. This operation was previously hashed and instruction-pinned

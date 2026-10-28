@@ -51,10 +51,11 @@ jobs:
           python -B tools/handwriting/ports/dom-parser-20261028/reference_controls.py .artifacts/math-dom/strings.json
           python -B tools/Math2DomValue.Probe/reference_controls.py .artifacts/math-dom/numbers.json
           python -B tools/Math2DomValue.Probe/finite_controls.py .artifacts/math-dom/finite.json
+          python -B tools/Math2DomValue.Probe/cb8_controls.py .artifacts/math-dom/cb8.json
       - name: Independent Netlib mode2 and mode6 comparison
         run: python -B tools/Math2DomValue.Probe/reference/run_reference.py .artifacts/math-dom/finite.json .artifacts/math-dom/reference
       - name: Managed DOM and default string service checks
-        run: dotnet run --project tools/Math2DomValue.Probe -c Release -- .artifacts/math-dom/strings.json .artifacts/math-dom/numbers.json .artifacts/math-dom/finite.json
+        run: dotnet run --project tools/Math2DomValue.Probe -c Release -- .artifacts/math-dom/strings.json .artifacts/math-dom/numbers.json .artifacts/math-dom/finite.json .artifacts/math-dom/cb8.json
       - name: Native AOT checks on the same frozen inputs
         shell: pwsh
         run: |
@@ -68,7 +69,7 @@ jobs:
           dotnet publish tools/Math2DomValue.Probe -c Release -r $rid -p:PublishAot=true -m:1 --disable-build-servers -p:UseSharedCompilation=false -o .artifacts/math-dom/native
           if ($LASTEXITCODE -ne 0) { throw 'Native probe build failed' }
           $exe = if ($IsWindows) { '.artifacts/math-dom/native/Math2DomValue.Probe.exe' } else { './.artifacts/math-dom/native/Math2DomValue.Probe' }
-          & $exe .artifacts/math-dom/strings.json .artifacts/math-dom/numbers.json .artifacts/math-dom/finite.json
+          & $exe .artifacts/math-dom/strings.json .artifacts/math-dom/numbers.json .artifacts/math-dom/finite.json .artifacts/math-dom/cb8.json
           if ($LASTEXITCODE -ne 0) { throw 'Native DOM checks failed' }
       - uses: actions/upload-artifact@v4
         if: always()

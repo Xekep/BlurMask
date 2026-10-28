@@ -118,3 +118,8 @@ The timings are individual verification runs, not recognition performance claims
 The fresh Math publication path still consumes only its admitted tag4 attributes;
 these formatting checks do not manufacture an actual prior result, opcode7 owner,
 recognition acceptance or improved handwriting quality.
+
+The independent C reference, managed implementation and Native AOT all passed on
+Windows, Linux and macOS in [run40731690820](https://github.com/Xekep/BlurMask/actions/runs/40731690820)
+for code commit `cb620b77d4a025e490a3dbf0d77496892e5db385`. Source pins and
+all three job/step summaries are retained locally in `ci-verification.json`.

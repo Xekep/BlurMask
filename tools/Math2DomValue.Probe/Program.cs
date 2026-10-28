@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using InkRecognition.Math;
 
-if (args.Length is not (2 or 3)) throw new ArgumentException("DEFAULT_SERVICE_CONTROLS NUMERIC_READER_CONTROLS [FINITE_CONTROLS]");
+if (args.Length is < 2 or > 4) throw new ArgumentException("DEFAULT_SERVICE_CONTROLS NUMERIC_READER_CONTROLS [FINITE_CONTROLS [CB8_CONTROLS]]");
 int controls = 0;
 using (var data = JsonDocument.Parse(File.ReadAllBytes(args[0])))
 {
@@ -54,7 +54,7 @@ using (var data = JsonDocument.Parse(File.ReadAllBytes(args[1])))
 byte[] scratch = Enumerable.Repeat((byte)0xcc, 64).ToArray();
 void Require(bool condition, string message)
 { if (!condition) throw new InvalidDataException(message + " at " + controls); controls++; }
-if (args.Length == 3)
+if (args.Length >= 3)
 {
     using var finite = JsonDocument.Parse(File.ReadAllBytes(args[2]));
     byte[] digits = new byte[17];
@@ -195,7 +195,8 @@ allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
 for (int i = 0; i < 10000; i++)
     Math2DomExactDigits.Instance.Generate(123456789d, 9, integerDigits, out _, out _);
 Require(GC.GetAllocatedBytesForCurrentThread() == allocatedBefore, "finite exact integer allocation");
-Console.WriteLine($"PASS {controls} string/numeric/DOM/layout/mode2 checks. Full recognition and CB8 prior-result ownership remain unfinished.");
+if (args.Length == 4) controls += Cb8Controls.Run(args[3]);
+Console.WriteLine($"PASS {controls} string/numeric/DOM/layout/mode2/CB8 checks. Full recognition and CB8 prior-result ownership remain unfinished.");
 
 sealed class DigitTuple : IMath2DomDigitGenerator
 {
