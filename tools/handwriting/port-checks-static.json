@@ -3,6 +3,19 @@
   "description": "Reviewed stdlib-only checks; no inference, SDK, vendor engine or GUI execution.",
   "steps": [
     {
+      "id": "batch-export-controls",
+      "argv": ["{python}", "{root}/tools/handwriting/test_export_port_batch.py"],
+      "inputs": [
+        "tools/handwriting/test_export_port_batch.py",
+        "tools/handwriting/export_port_batch.py",
+        "tools/handwriting/run_port_checks.py",
+        "tools/handwriting/ghidra/ExportPortBatch.java"
+      ],
+      "timeoutSeconds": 45,
+      "cache": true,
+      "inputsComplete": true
+    },
+    {
       "id": "planner-controls",
       "argv": ["{python}", "{root}/tools/handwriting/test_plan_port_checks.py"],
       "inputs": [

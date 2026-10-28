@@ -1,0 +1,59 @@
+name: Recognition port tools
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/port-tools.yml'
+      - 'tools/handwriting/*port*'
+      - 'tools/handwriting/ghidra/**'
+      - 'tools/test-experimental-auto-assets.py'
+      - 'tools/package-experimental-raw-content-model.py'
+      - 'tools/export-raw-content-model.py'
+      - 'tools/export-ink-math-model.py'
+      - 'models/raw-content/**'
+      - 'src/BlurMask/AiExperimental*MathModels.cs'
+      - 'src/BlurMask/AiExperimentalRawContentModels.cs'
+  pull_request:
+    paths:
+      - '.github/workflows/port-tools.yml'
+      - 'tools/handwriting/*port*'
+      - 'tools/handwriting/ghidra/**'
+      - 'tools/test-experimental-auto-assets.py'
+      - 'tools/package-experimental-raw-content-model.py'
+      - 'tools/export-raw-content-model.py'
+      - 'tools/export-ink-math-model.py'
+      - 'models/raw-content/**'
+      - 'src/BlurMask/AiExperimental*MathModels.cs'
+      - 'src/BlurMask/AiExperimentalRawContentModels.cs'
+
+permissions:
+  contents: read
+
+jobs:
+  controls:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test runner and static-export guards
+        shell: bash
+        run: |
+          python -B tools/handwriting/test_plan_port_checks.py
+          python -B tools/handwriting/test_run_port_checks.py
+          python -B tools/handwriting/test_export_port_batch.py
+      - name: Execute reviewed resource checks without a cache
+        run: python -B tools/handwriting/run_port_checks.py tools/handwriting/port-checks-static.json --output .artifacts/port-tools-checks --cache .artifacts/port-tools-cache --no-cache
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: port-tool-checks-${{ matrix.os }}
+          path: .artifacts/port-tools-checks/
+          if-no-files-found: ignore
