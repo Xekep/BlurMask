@@ -1,5 +1,5 @@
 from pathlib import Path
-import ast,hashlib,json,sys,struct
+import ast,hashlib,importlib.util,json,sys,struct
 import numpy as np
 repo=Path(sys.argv[1]);cap=Path(sys.argv[2]);p=json.loads(cap.read_bytes())
 def definitions(path):
@@ -7,6 +7,7 @@ def definitions(path):
 f=definitions(repo/'tools/LegacyEnglishNoInitialGlyph.Probe/feature_oracle.py')['extract'];nn=definitions(repo/'tools/LegacyFreshMainAcoustic.Probe/audit_output.py');cost=definitions(repo/'tools/LegacyCostEnsemble.Probe/reference_controls.py')['reference']
 ak=(repo/'models/ru-RU/ru_RU-ak-cur.lite.res').read_bytes();profile=json.loads((repo/'models/ru-RU/legacy-engine-profile.json').read_bytes());assert hashlib.sha256(ak).hexdigest()=='7a5f08809e81fb4a2d4c78b3efd251d0986503b0d30d21de3695dab1f8a89978'
 assert p['inputSha256']=='c8fe150f3ca960cf7216da88c1dd90e1045aed2ef4652a8fa66c9e7a85353dce'and p['expectedLabelsRead'] is False
+spec=importlib.util.spec_from_file_location('ru_first_probability',repo/'tools/handwriting/ru_first_mixed_probability.py');mixed=importlib.util.module_from_spec(spec);spec.loader.exec_module(mixed);first_probability=mixed.for_russian_first(ak)
 count=degen=points=0;smallest=32767;largest=-32768
 for sample in p['samples']:
  assert sample['target']==100 and sample['height']>0 and set(bytes.fromhex(sample['mask']))=={1}
@@ -31,7 +32,7 @@ for sample in p['samples']:
   signs=[1024 if ranges[0][1]==0 else-1024,1024 if ranges[-1][2]==sample['counts'][ranges[-1][0]]else-1024]
   assert signs==group['boundaries']and group['context']==[-1024]*28
   t,r=f(expected);degen+=int(len({tuple(xy)for stroke in expected for xy in stroke})==1)
-  prob=[nn['exp_prob'](nn['network'](ak,at,v+group['context']+signs,profile['activations']['hidden']))for at,v in [(19195,t),(105197,r)]]
+  prob=[first_probability(nn['network'](ak,at,v+group['context']+signs,profile['activations']['hidden']))for at,v in [(19195,t),(105197,r)]]
   assert prob[0]==group['trajectoryProbabilities']and prob[1]==group['rasterProbabilities'],('NN',sample['id'],group['ordinal'])
   assert group['costs']==cost([dict(probabilities=x,weight=1)for x in prob]+[None]*5,1,[]),('cost',sample['id'],group['ordinal'])
   count+=1

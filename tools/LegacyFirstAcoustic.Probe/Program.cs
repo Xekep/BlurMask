@@ -1,6 +1,7 @@
 using InkRecognition;
 using System.Buffers.Binary;
 using System.Text.Json;
+using System.Security.Cryptography;
 
 if(args.Length is not (0 or 2))throw new ArgumentException("Usage: LegacyFirstAcoustic.Probe [ru-ak.res engine-profile.json]");
 byte[] fixture=OwnSource();var model=LegacyFirstAcousticModel.ReadSource(fixture,0);
@@ -41,10 +42,14 @@ if(args.Length==2)
     var a=LegacyStrokeFeatures.ExtractIsolatedInput(one);var b=LegacyRasterFeatures.ExtractIsolatedInput(one);
     var scores=model.EvaluatePreparedInputs(a,b,activations);int[] costs=scores.GetFreshIntegerCosts();
     //Independent byte-slice loader reproduces exactly the typed ownership route.
-    var expectedA=LegacyClassScores.Convert(LegacyInkNetwork.Load(resource.AsSpan(19195,85995)).Evaluate(a,activations)).Probability32768;
-    var expectedB=LegacyClassScores.Convert(LegacyInkNetwork.Load(resource.AsSpan(105197,82395)).Evaluate(b,activations)).Probability32768;
-    if(!expectedA.Span.SequenceEqual(scores.TrajectoryProbability32768.Span)||!expectedB.Span.SequenceEqual(scores.RasterProbability32768.Span))throw new Exception("Typed/direct model outputs differ.");
-    Console.WriteLine($"PASS actual source6120→ordinary13082→247/229 firstNN; first5 integer labels {string.Join(',',costs.Select((c,i)=>(c,i)).OrderBy(v=>v.c).Take(5).Select(v=>$"{v.i}:{v.c}"))}. Caller-isolated short ink only; no native normalization/context/word winner claim.");
+    var rawA=LegacyInkNetwork.Load(resource.AsSpan(19195,85995)).Evaluate(a,activations);
+    var rawB=LegacyInkNetwork.Load(resource.AsSpan(105197,82395)).Evaluate(b,activations);
+    var expectedA=NativeFirstMixedReference(resource,rawA);
+    var expectedB=NativeFirstMixedReference(resource,rawB);
+    if(!expectedA.AsSpan().SequenceEqual(scores.TrajectoryProbability32768.Span)||!expectedB.AsSpan().SequenceEqual(scores.RasterProbability32768.Span))throw new Exception("Typed/native mixed model outputs differ.");
+    if(expectedA.AsSpan().SequenceEqual(LegacyClassScores.Convert(rawA).Probability32768.Span)||
+        expectedB.AsSpan().SequenceEqual(LegacyClassScores.Convert(rawB).Probability32768.Span))throw new Exception("Actual first mixed/plain negative control lost sensitivity.");
+    Console.WriteLine($"PASS actual source6120->ordinary13082->247/229 firstNN; first5 integer labels {string.Join(',',costs.Select((c,i)=>(c,i)).OrderBy(v=>v.c).Take(5).Select(v=>$"{v.i}:{v.c}"))}. Caller-isolated short ink only; no native normalization/context/word winner claim.");
 }
 
 static LegacyInkStroke[] Stroke(params(short X,short Y)[] points)=>[new(points.Select(p=>new LegacyInkPoint(p.X,p.Y)).ToArray())];
@@ -69,3 +74,19 @@ static byte[] OwnSource()
 }
 static void Header(BinaryWriter w,uint kind,ushort version){w.Write(0x0101fe90u);w.Write(0u);w.Write(kind);w.Write((ushort)0);w.Write(version);}
 static void Finish(MemoryStream s,int p){long save=s.Position;s.Position=p+4;using(var w=new BinaryWriter(s,System.Text.Encoding.UTF8,true))w.Write((uint)(save-p-8));s.Position=save;}
+
+// Independent native decomposition: ordinary EXP excludes AL.runtimeE and the
+// special sigmoid is evaluated separately. This never calls the production mixed helper.
+static int[] NativeFirstMixedReference(ReadOnlySpan<byte> resource,ReadOnlySpan<int> raw)
+{
+    if(Convert.ToHexStringLower(SHA256.HashData(resource))!="7a5f08809e81fb4a2d4c78b3efd251d0986503b0d30d21de3695dab1f8a89978"||resource[187648]!=0)
+        throw new Exception("Actual first resource/unmasked dispatch required.");
+    int special=BinaryPrimitives.ReadUInt16LittleEndian(resource[(6219+6)..]);
+    if(special>=raw.Length)throw new Exception("Owned AL special output differs.");
+    var ordinary=new int[raw.Length-1];for(int i=0,j=0;i<raw.Length;i++)if(i!=special)ordinary[j++]=raw[i];
+    var normalized=LegacyClassScores.Convert(ordinary).Probability32768.Span;var expected=new int[raw.Length];
+    for(int i=0,j=0;i<expected.Length;i++)if(i!=special)expected[i]=normalized[j++];
+    float exponent=((float)raw[special]*-2f)/1048576f;
+    expected[special]=exponent>75f?0:(int)(32768.0/(Math.Exp((double)exponent)+1.0)+.5);
+    return expected;
+}

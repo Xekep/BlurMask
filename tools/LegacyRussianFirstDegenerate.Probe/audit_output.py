@@ -1,5 +1,5 @@
 """Independent scalar exact assignment + NumPy int8 NN oracle; no target labels."""
-import ast,base64,hashlib,json,math,struct,sys
+import ast,base64,hashlib,importlib.util,json,math,struct,sys
 from pathlib import Path
 import numpy as np
 ROOT=Path(__file__).resolve().parents[2]
@@ -11,6 +11,7 @@ assert hashlib.sha256(b).hexdigest()=='7a5f08809e81fb4a2d4c78b3efd251d0986503b0d
 assert p['actualInputSha256']==hashlib.sha256(actual).hexdigest() and p['expectedLabelsRead'] is False
 assert p['sourceFingerprint'].lower()==hashlib.sha256(b[6120:187933]).hexdigest()
 assert len(p['rows'])==4 and p['checks']==95
+spec=importlib.util.spec_from_file_location('ru_first_probability',ROOT/'tools/handwriting/ru_first_mixed_probability.py');mixed=importlib.util.module_from_spec(spec);spec.loader.exec_module(mixed);first_probability=mixed.for_russian_first(b)
 stats=[1024,-768,0,0,-768,1024,-1024];t=[0]*217;t[6:36]=[1024]*30;t[210:217]=stats;r=stats+[-1024]*64+[1024]*128
 for row,old in zip(p['rows'],src['samples']):
  d=old['diagnostic'];xy=[list(map(int,p.split(','))) for p in d['normalizedShorts'].split('|')];ctx=list(map(int,d['context'].split(',')));ends=list(map(int,d['boundaries'].split(',')))
@@ -19,7 +20,7 @@ for row,old in zip(p['rows'],src['samples']):
  assert row['trajectory']==t and row['raster']==r
  ti=t+ctx+ends;ri=r+ctx+ends
  assert row['trajectoryInput']==ti and row['rasterInput']==ri
- prob=[nn['exp_prob'](nn['network'](b,at,vec,profile['activations']['hidden'])) for at,vec in [(19195,ti),(105197,ri)]]
+ prob=[first_probability(nn['network'](b,at,vec,profile['activations']['hidden'])) for at,vec in [(19195,ti),(105197,ri)]]
  assert row['trajectoryProbabilities']==prob[0] and row['rasterProbabilities']==prob[1]
  slots=[dict(probabilities=x,weight=1) for x in prob]+[None]*5
  assert row['integerCosts']==cost(slots,1,[])

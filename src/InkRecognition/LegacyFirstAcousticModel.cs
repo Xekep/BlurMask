@@ -20,13 +20,14 @@ public sealed class LegacyFirstAcousticModel
     public LegacyInkNetwork RasterNetwork { get; }
     public ReadOnlyMemory<LegacyAcousticWeightSlot> Slots { get; }
     internal string SourceFingerprint { get; }
+    private readonly int mixedSpecialOutputLabel;
 
     private LegacyFirstAcousticModel(LegacyOrdinaryRowAcousticProfile row,int offset,int consumed,
         byte selector,short target,LegacyInkNetwork context,LegacyInkNetwork trajectory,
-        LegacyInkNetwork raster,LegacyAcousticWeightSlot[] slots,string sourceFingerprint)
+        LegacyInkNetwork raster,LegacyAcousticWeightSlot[] slots,string sourceFingerprint,int mixedSpecialOutputLabel)
     {RowProfile=row;OrdinaryNodeOffset=offset;PrefixBytesConsumed=consumed;ContextSelector=selector;
         NormalizationTarget=target;ContextNetwork=context;TrajectoryNetwork=trajectory;RasterNetwork=raster;Slots=slots;
-        SourceFingerprint=sourceFingerprint;}
+        SourceFingerprint=sourceFingerprint;this.mixedSpecialOutputLabel=mixedSpecialOutputLabel;}
 
     public static LegacyFirstAcousticModel ReadSource(ReadOnlySpan<byte> resource,int sourceOffset,
         CancellationToken cancellationToken=default)
@@ -71,8 +72,22 @@ public sealed class LegacyFirstAcousticModel
         if(context.InputWidth!=30||context.Kind!=0x7001||trajectory.InputWidth!=247||trajectory.Kind!=0x1f||
             raster.InputWidth!=229||raster.Kind!=0x2f||trajectory.OutputWidth!=raster.OutputWidth||trajectory.OutputWidth>512)
             throw new InvalidDataException("Network widths/kinds differ from the first acoustic profile.");
-        return new(row,offset,r.Position,selector,target,context,trajectory,raster,slots,
-            Convert.ToHexString(SHA256.HashData(resource.Slice(sourceOffset,sourceEnd-sourceOffset))));
+        string fingerprint=Convert.ToHexString(SHA256.HashData(resource.Slice(sourceOffset,sourceEnd-sourceOffset)));
+        int mixedLabel=-1;
+        // Native1B9730 ->1B86F0 passes param4=0. For this source the loaded
+        //21D.runtime78 is0, so AL.runtimeE selects V68/E9360 mixed probability.
+        // Keep other first-source contracts unchanged until independently proved.
+        if(fingerprint=="AA2AF98C8C550603E797F304DB204AEDD1102482CC8A6DDCC0ED8B62CF8113D2")
+        {
+            int header=checked(sourceOffset+99);
+            if(sourceOffset!=6120||offset!=13082||offset+r.Position!=187648||resource[offset+r.Position]!=0||
+                BinaryPrimitives.ReadUInt32LittleEndian(resource[(header-6)..])!=0x2b||
+                BinaryPrimitives.ReadUInt16LittleEndian(resource[(header-2)..])!=0x103)
+                throw new InvalidDataException("Owned Russian first mixed-dispatch layout differs.");
+            mixedLabel=BinaryPrimitives.ReadUInt16LittleEndian(resource[(header+6)..]);
+            if(mixedLabel>=trajectory.OutputWidth)throw new InvalidDataException("First AL special label is outside output mapping.");
+        }
+        return new(row,offset,r.Position,selector,target,context,trajectory,raster,slots,fingerprint,mixedLabel);
     }
 
     /// <summary>Constructor1b0330 initializes mode1=0/mode2=1; without dynamic1b0,
@@ -84,8 +99,12 @@ public sealed class LegacyFirstAcousticModel
         ReadOnlySpan<short> raster,LegacyInkActivations activations,CancellationToken cancellationToken=default)
     {
         ArgumentNullException.ThrowIfNull(activations);cancellationToken.ThrowIfCancellationRequested();
-        var first=LegacyClassScores.Convert(TrajectoryNetwork.Evaluate(trajectory,activations,cancellationToken:cancellationToken),cancellationToken).Probability32768;
-        var second=LegacyClassScores.Convert(RasterNetwork.Evaluate(raster,activations,cancellationToken:cancellationToken),cancellationToken).Probability32768;
+        var trajectoryRaw=TrajectoryNetwork.Evaluate(trajectory,activations,cancellationToken:cancellationToken);
+        var first=mixedSpecialOutputLabel<0?LegacyClassScores.Convert(trajectoryRaw,cancellationToken).Probability32768:
+            LegacyClassScores.ConvertMixedProbabilities(trajectoryRaw,mixedSpecialOutputLabel,cancellationToken);
+        var rasterRaw=RasterNetwork.Evaluate(raster,activations,cancellationToken:cancellationToken);
+        var second=mixedSpecialOutputLabel<0?LegacyClassScores.Convert(rasterRaw,cancellationToken).Probability32768:
+            LegacyClassScores.ConvertMixedProbabilities(rasterRaw,mixedSpecialOutputLabel,cancellationToken);
         // No invented confidence calibration: this endpoint owns only the integer probability channel.
         return new(first,second,SourceFingerprint);
     }

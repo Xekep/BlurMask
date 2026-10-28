@@ -319,6 +319,7 @@ $cases = @(
   @{ Name = 'LegacyEnglish119FinalSingle'; Args = @('models', '.artifacts/legacy-en119-final-single-blind.json', '.artifacts/legacy-en119-final-single-native.json') },
   @{ Name = 'LegacyEnglishLkPacked102'; Args = @('models', '.artifacts/legacy-en-lk-packed102-native.json') },
   @{ Name = 'LegacyEnglishLkSparse101'; Args = @('models', '.artifacts/legacy-en-lk-sparse101-native.json') },
+  @{ Name = 'LegacyFirstAcoustic'; Args = @('models/ru-RU/ru_RU-ak-cur.lite.res', 'models/ru-RU/legacy-engine-profile.json') },
   @{ Name = 'LegacyRussianFirstDegenerate'; Args = @('models', 'tools/LegacyRussianFirstDegenerate.Probe/normalized-controls.json', '.artifacts/legacy-russian-first-degenerate-native.json') },
   @{ Name = 'LegacyEnglishMainMasks'; Args = @('models', '.artifacts/legacy-en119-final-single-blind.json', '.artifacts/legacy-en-main119-masks-native.json') },
   @{ Name = 'LegacyEnglishMainAcoustic'; Args = @('models', '.artifacts/legacy-en119-final-single-blind.json', '.artifacts/legacy-en-main119-acoustic-native.json') },
