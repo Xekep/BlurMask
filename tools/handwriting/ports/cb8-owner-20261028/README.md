@@ -1,5 +1,9 @@
 # CB8 owning adapter review
 
+The [new seven-function retained-owner map](retained-owner-map.md) records the
+freshly verified constructor/state fields, prepend order and owning join still
+required after the typed C# callback port. It is static evidence only.
+
 Static review only; no vendor execution, native acceptance, or production changes.
 
 ## Current owner boundary

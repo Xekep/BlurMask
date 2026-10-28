@@ -75,5 +75,37 @@ Its future adapter must retain the same actual Ink, canonical naming service,
 pending-list order, C22 range identities and lifetime locks. The kernel does not
 manufacture them from names, arrays, matching IDs or snapshots. Existing fresh
 publication still creates only opcode2 actions and never calls this matcher.
-Prior-result construction, edit production, transactional application, stale-tag
+Prior-result construction, edit production, transactional application, owning stale-tag
 cleanup and original receiver/history acceptance remain unfinished.
+
+## Subsequent ordered stale-tag cleanup
+
+[Math2DomCb8TagCleanup](../../../src/InkRecognition.Math/Math2DomCb8TagCleanup.cs)
+now implements the pure0339D0/CB8.V50 decision and service-call loop. It walks
+borrowed old/new vectors in order, keeps any old ID present in the new vector,
+and removes every other old ID through an explicit retained-Ink service. It
+does not deduplicate old IDs, filter signed values, pre-delete a whole batch,
+or roll back earlier deletions after a later false return/exception. An empty
+old vector succeeds without a removal call. Input vectors remain unchanged.
+
+The same frozen control generator adds10 targeted native cleanup cases and38
+decision/cancellation/interrupted-prefix checks. These exercise duplicate old
+and new IDs, absence/presence, failures at the first/second removal, signed64
+extremes and preservation of already completed deletion prefixes. Synthetic
+removal services are expressly not actual registry owners. This additional
+algorithm still does not wire a nonfresh owner or authorize real deletion.
+
+The expanded final managed probe passed544620 checks with70 authored Math files
+and two probe C# files authenticated through portable PDBs. Its local evidence is
+`E:/BlurMask-build-artifacts-20261014/math-dom-cb8-cleanup-20261028/`.
+The final Windows Native AOT run passed the same544620 checks. Six real
+model/official-ORT fresh publication cases and their independent failure-prefix
+oracle passed against this same Math DLL, SHA256
+`ce07e4407d0b1df0f811ce278730a522f2f2dce08f669a88764576964ebd87f3`.
+The [seven-function owning map](../../../tools/handwriting/ports/cb8-owner-20261028/retained-owner-map.md)
+documents the newly verified constructor/state layout, pending-list prepend
+order, failed-C22 prefix and remaining concrete owning join.
+
+The focused workflow cancels superseded runs of the same branch and limits
+repository checkout to four minutes. This avoids an obsolete or stalled checkout
+holding up iterative port verification; all current managed/AOT checks still run.

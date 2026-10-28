@@ -78,6 +78,19 @@ add('unknown memory after all-digit storage refuses', False, converted + ['Parse
 add('unknown memory after sign refuses', False, converted + ['ParseOld'], old=value(text='+', terminated=False), throws=True)
 add('null conversion pointer refuses', False, converted + ['ParseOld'], old=value(tag=0), throws=True)
 
+cleanup = [
+    dict(old=[], new=[], fail=-1, calls=[], done=[], result=True),
+    dict(old=[1, 2, 3], new=[2], fail=-1, calls=[1, 3], done=[1, 3], result=True),
+    dict(old=[1, 1, 2], new=[], fail=-1, calls=[1, 1, 2], done=[1, 1, 2], result=True),
+    dict(old=[1, 1, 2], new=[], fail=1, calls=[1, 1], done=[1], result=False),
+    dict(old=[1, 1], new=[1], fail=-1, calls=[], done=[], result=True),
+    dict(old=[1, 2, 3], new=[2, 2], fail=-1, calls=[1, 3], done=[1, 3], result=True),
+    dict(old=[1, 2, 3], new=[], fail=0, calls=[1], done=[], result=False),
+    dict(old=[1, 2, 3], new=[], fail=1, calls=[1, 2], done=[1], result=False),
+    dict(old=[1, 2, 3], new=[2], fail=2, calls=[1, 3], done=[1, 3], result=True),
+    dict(old=[-(1 << 63), -1, 0, (1 << 63) - 1], new=[], fail=-1,
+         calls=[-(1 << 63), -1, 0, (1 << 63) - 1], done=[-(1 << 63), -1, 0, (1 << 63) - 1], result=True),
+]
 with Path(sys.argv[1]).open('x', encoding='utf-8') as stream:
-    json.dump(dict(cases=rows), stream, separators=(',', ':'))
-print(f'{len(rows)} independent native branch/prefix controls')
+    json.dump(dict(cases=rows, cleanup=cleanup), stream, separators=(',', ':'))
+print(f'{len(rows)} native matching and {len(cleanup)} ordered cleanup controls')

@@ -5,6 +5,17 @@ internal static class Cb8Controls
 {
     private sealed record Range(int Key, int Count);
     private sealed class Interrupted : Exception { }
+    private sealed class Removal(int fail, int interrupt = -1) : IMath2DomCb8Removal
+    {
+        internal readonly List<long> Calls = [], Completed = [];
+        public bool RemoveSelection(long id)
+        {
+            Calls.Add(id);
+            if (Calls.Count - 1 == interrupt) throw new Interrupted();
+            if (Calls.Count - 1 == fail) return false;
+            Completed.Add(id); return true;
+        }
+    }
     private sealed class Services(JsonElement control, int interrupt = -1) : IMath2DomCb8Services
     {
         internal readonly List<string> Trace = [];
@@ -70,6 +81,32 @@ internal static class Cb8Controls
             try { Invoke(control, pending, canceled, cancel.Token); throw new InvalidDataException("CB8 cancellation ignored"); }
             catch (OperationCanceledException) { }
             if (canceled.Trace.Count != 0) throw new InvalidDataException("CB8 cancellation performed work");
+            count++;
+        }
+        foreach (var control in controls.RootElement.GetProperty("cleanup").EnumerateArray())
+        {
+            long[] Read(string property) => control.GetProperty(property).EnumerateArray().Select(x => x.GetInt64()).ToArray();
+            long[] oldTags = Read("old"), newTags = Read("new"), calls = Read("calls"), done = Read("done");
+            var removal = new Removal(control.GetProperty("fail").GetInt32());
+            bool result = Math2DomCb8TagCleanup.RemoveStale(oldTags, newTags, removal);
+            if (result != control.GetProperty("result").GetBoolean() || !removal.Calls.SequenceEqual(calls)
+                || !removal.Completed.SequenceEqual(done) || !oldTags.SequenceEqual(Read("old")) || !newTags.SequenceEqual(Read("new")))
+                throw new InvalidDataException("CB8 ordered deletion/failure prefix/vector mutation");
+            count++;
+            for (int at = 0; at < calls.Length; at++)
+            {
+                var interrupted = new Removal(-1, at);
+                try { Math2DomCb8TagCleanup.RemoveStale(oldTags, newTags, interrupted); throw new InvalidDataException("CB8 removal exception swallowed"); }
+                catch (Interrupted) { }
+                if (!interrupted.Calls.SequenceEqual(calls.Take(at + 1)) || !interrupted.Completed.SequenceEqual(calls.Take(at)))
+                    throw new InvalidDataException("CB8 deletion prefix was rolled back or continued");
+                count++;
+            }
+            using var cancel = new CancellationTokenSource(); cancel.Cancel();
+            var canceled = new Removal(-1);
+            try { Math2DomCb8TagCleanup.RemoveStale(oldTags, newTags, canceled, cancel.Token); throw new InvalidDataException("CB8 removal cancellation ignored"); }
+            catch (OperationCanceledException) { }
+            if (canceled.Calls.Count != 0) throw new InvalidDataException("CB8 removal ran after cancellation");
             count++;
         }
         return count;
