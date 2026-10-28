@@ -187,6 +187,7 @@ jobs:
           done
           python tools/package-model-resources.py .artifacts/recognition-release/InkRecognition-models.zip
           python tools/test-recognition-packages.py .artifacts/recognition-release "$version"
+          dotnet run --project tools/Math2Cb8EditMatching.Probe -c Release -p:Version="$version"
       - uses: actions/upload-artifact@v4
         with:
           name: release-recognition-library

@@ -1,10 +1,9 @@
 """Actual raw math diagnostic oracle: geometry, AL byte provenance, syntax and
-bounded solver/equality checks. Not an NN accuracy or native semantic claim.
+Giac-only equality gating checks. Not an NN accuracy or native semantic claim.
 Only tracked stdlib/NumPy helpers and data bytes; no vendor execution.
 """
 from pathlib import Path
 import ast,base64,hashlib,importlib.util,json,re,runpy,struct,sys
-from fractions import Fraction
 import numpy as np
 root=Path(__file__).resolve().parents[2]
 procedural_only='--procedural-only'in sys.argv
@@ -38,15 +37,7 @@ for sample in data['samples']:
     tokens.append(value.rstrip(b'\0').decode('utf8'))
    latex=record['diagnosticLatex'];requested=latex is not None and latex.rstrip().endswith('=')
    assert requested==record['diagnosticTrailingEqualsRequested']
-   assert record['diagnosticEqualsGatedResult']==((record['diagnosticPolynomialIntegral']or record['diagnosticNumeric'])if requested else None)
-   # A separate exact rational check consumes recognized syntax, never expected labels.
-   if record['diagnosticPolynomialIntegral']is not None:
-    expression=latex.rstrip().removesuffix('=').rstrip()
-    match=re.fullmatch(r'\\int\s*_\{(-?\d+)\}\^\{(-?\d+)\}([A-Za-z])\^\{(\d+)\}d([A-Za-z])',expression)
-    assert match and match[3]==match[5],expression
-    lo,hi,power=int(match[1]),int(match[2]),int(match[4]);answer=Fraction(hi**(power+1)-lo**(power+1),power+1)
-    expected_answer=str(answer.numerator)if answer.denominator==1 else ('-'if answer<0 else'')+rf'\frac{{{abs(answer.numerator)}}}{{{answer.denominator}}}'
-    assert record['diagnosticPolynomialIntegral']==expected_answer,(expression,record['diagnosticPolynomialIntegral'],expected_answer)
+   assert record['diagnosticEqualsGatedResult']==(record['diagnosticGiac']if requested else None)
    if index==0:
     first.append(dict(id=sample['id'],width=width,actual=latex,expectedPostInference=sample['expectedPostInference'],equals=requested,result=record['diagnosticEqualsGatedResult']))
  # Independent-label comparison is intentionally post-inference and report-only.

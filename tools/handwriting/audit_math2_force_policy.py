@@ -280,9 +280,9 @@ report = dict(
         ownerOffset=0x188, packetOffset=0x20, instanceOffset=0x30,
         precedence=precedence, warmCounterexample=dict(outer=warm_outer, active=warm_active)),
     corrections=[
-        dict(path='docs/legacy-math2-score-channels.md', lines=[15, 51],
+        dict(path='docs/agents/research/legacy-math2-score-channels.md', lines=[15, 51],
              change='decoder clone -> same-pointer retained decoder, under the default Engine service'),
-        dict(path='docs/legacy-math2-tensor-lifecycle.md', lines=[9],
+        dict(path='docs/agents/research/legacy-math2-tensor-lifecycle.md', lines=[9],
              change='selected/cloned EF1 -> selected EF1 retained at the same pointer'),
         dict(path='tools/handwriting/audit_math2_score_channels.py', lines=[144],
              change='report.route EEF B8 clone -> EEF B8 same-pointer retain'),

@@ -47,7 +47,7 @@ constructs the same validated portable model in memory; all67 tensors and native
 parameter bytes match the independent exporter. The application bundles that
 resource as its default English path. This does not implement English MAIN
 dictionary decoding or automatic bilingual selection. See
-[direct English resource loading](../../docs/native-english-text-resource.md).
+[direct English resource loading](../../docs/agents/research/native-english-text-resource.md).
 
 Limits of the initial CTC API: whole-word geometry is heuristic; CTC has no
 lexical language model; Russian and Math2 are not implemented by that API. Confidence is an acoustic
@@ -77,7 +77,7 @@ Native scores remain uncalibrated. Eight resources are bundled in the applicatio
 the independent library does not embed weights. The setting stays disabled by
 default. English main decoding, automatic text/formula choice and reliable
 Russian cursive quality remain unfinished. See the
-[host adapter checks](../../docs/experimental-global-text-adapter.md).
+[host adapter checks](../../docs/agents/research/experimental-global-text-adapter.md).
 
 The legacy RU investigation has a separate experimental API:
 `LegacyInkNetwork.Load` reads a complete FEA0/version106 classifier. The caller
@@ -98,7 +98,7 @@ tools/LegacyInk.Probe/isolated-ru-pi-raster.json activations.json` for eight
 original synthetic **П/И** controls against locally supplied assets. Supplied
 reference files can be checked with `--raw-controls` or `--score-controls`.
 These controls exercise narrow raw-ink paths, not handwriting accuracy.
-See [the evidence and current limits](../../docs/ink-math-engine.md#russian-text-preparation).
+See [the evidence and current limits](../../docs/agents/research/ink-math-engine.md#russian-text-preparation).
 
 `LegacyPackedLexicon` restores the checked packed RU dictionary graph and
 supports prefix transitions and terminal word lookup without expanding its
@@ -109,7 +109,7 @@ tests. These APIs do not turn raw ink into Russian words; acoustic-to-lexical
 mapping, cursive segmentation and language costs remain unfinished.
 `LegacyInkAlphabet` reads caller-supplied acoustic and lexical alphabets so that
 their distinct numeric IDs can be mapped through Unicode text.
-See [lexical format evidence and checks](../../docs/legacy-russian-lexicon.md).
+See [lexical format evidence and checks](../../docs/agents/research/legacy-russian-lexicon.md).
 
 The alphabet loader also exposes stored virtual-label markers, per-symbol bits
 and the checked three-form accessor with narrow/wide signed lookup maps and
@@ -127,7 +127,7 @@ boundaries. Vendor-free probes cover mapping, terminal words, grouping, late
 dots, geometry limits and cancellation. Four locally supplied classifier checks
 rank the original printed **ИП** sample first after automatic separated grouping.
 This remains an experimental headless path; general Russian words and joined
-handwriting are not enabled in the app. See [the checked pipeline and limits](../../docs/legacy-russian-segmented-word.md).
+handwriting are not enabled in the app. See [the checked pipeline and limits](../../docs/agents/research/legacy-russian-segmented-word.md).
 
 An opt-in `relatedFormMode` expands candidates through supplied acoustic form
 relations and retains the strongest score per lexical label. The default uses
@@ -162,7 +162,7 @@ and pass their JSON path to `LegacyDirectional.Probe`.
 caller-prepared geometry and intersection classifications. Independent own
 controls cover signed covariance, dynamic scaling and integer arc reduction;
 unprepared coordinates, guessed intersections and the full 313-vector are not
-supplied by this API. See [the restored passes and remaining work](../../docs/legacy-russian-directional-profile.md).
+supplied by this API. See [the restored passes and remaining work](../../docs/agents/research/legacy-russian-directional-profile.md).
 
 `LegacyDirectionalCoordinatePreparation` and `LegacyDirectionalResampling`
 prepare power-of-two coordinates, constant-step physical strokes and native
@@ -175,7 +175,7 @@ and joined-word decoding remain unfinished.
 spatial-grid crossing flags and self-loop intervals; the underlying
 `LegacyQuantizedSegmentIntersection` preserves the checked fixed-point
 arithmetic. Together they pass 4,736 own pair/classification references plus a
-complete prepared-ink smoke path. See [the intersection checks and limits](../../docs/legacy-russian-intersections.md).
+complete prepared-ink smoke path. See [the intersection checks and limits](../../docs/agents/research/legacy-russian-intersections.md).
 
 `LegacyDirectionalWindowStatistics` and `LegacyDirectionalFeatureAssembly`
 restore the checked 3f temporal local channels and calibrated 313-column input
@@ -188,16 +188,16 @@ an explicit caller baseline, with 640 own numerical controls. The composed
 `LegacyTemporalDirectionalFeatures` connects these passes to the temporal313
 input. Its optional real-model diagnostic currently has weak class accuracy;
 automatic baseline/context inference and the full recognition profile remain
-unfinished. See [baseline mapping](../../docs/legacy-russian-directional-baseline.md)
-and [model diagnostic limits](../../docs/legacy-russian-directional-model.md).
+unfinished. See [baseline mapping](../../docs/agents/research/legacy-russian-directional-baseline.md)
+and [model diagnostic limits](../../docs/agents/research/legacy-russian-directional-model.md).
 
 The checked prior-context path now has separate components for
-[`LegacyContextGeometry`](../../docs/legacy-russian-context-geometry.md) (30 raster/geometry channels),
-[`LegacyPriorContextSelection`](../../docs/legacy-russian-prior-context.md) (line/scope and target-stroke exclusion),
-[`LegacyContextWeighting`](../../docs/legacy-russian-context-weighting.md) (28 weighted channels) and
-[`LegacyFloatInputQuantization`](../../docs/legacy-russian-float-input.md) (model-scaled float input).
+[`LegacyContextGeometry`](../../docs/agents/research/legacy-russian-context-geometry.md) (30 raster/geometry channels),
+[`LegacyPriorContextSelection`](../../docs/agents/research/legacy-russian-prior-context.md) (line/scope and target-stroke exclusion),
+[`LegacyContextWeighting`](../../docs/agents/research/legacy-russian-context-weighting.md) (28 weighted channels) and
+[`LegacyFloatInputQuantization`](../../docs/agents/research/legacy-russian-float-input.md) (model-scaled float input).
 They pass 2,304 own arithmetic/range references, including Windows Native AOT.
-[`LegacyContextWindowScorer`](../../docs/legacy-russian-context-windows.md)
+[`LegacyContextWindowScorer`](../../docs/agents/research/legacy-russian-context-windows.md)
 composes fresh candidate windows, the initial context network, selection,
 weighting and fixed conversion for one explicit caller-supplied line. The real
 RU diagnostic now sends changing prior context into the directional classifier.
@@ -206,9 +206,9 @@ still required; these components do not enable full Russian handwriting in
 the app.
 
 The alternative spatial family now has checked
-[`LegacySpatialWindows`](../../docs/legacy-russian-spatial-windows.md) membership,
+[`LegacySpatialWindows`](../../docs/agents/research/legacy-russian-spatial-windows.md) membership,
 `LegacySpatialWindowStatistics`, `LegacySpatialFeatureAssembly` and
-[`LegacySpatialDirectionalFeatures`](../../docs/legacy-russian-spatial-model.md).
+[`LegacySpatialDirectionalFeatures`](../../docs/agents/research/legacy-russian-spatial-model.md).
 It composes a complete 313-column input using caller-supplied spatial calibration,
 baseline and prior context. The spatial probes pass 1,792 independent arithmetic
 controls in managed code and Windows Native AOT. Real model diagnostics on own
@@ -216,14 +216,14 @@ printed ink show different strengths from the temporal classifier, requiring
 the remaining ensemble, lexical/case handling and joined-word segmentation.
 This remains a headless experimental path, without Russian AI-pen integration.
 
-[`LegacyAcousticEnsemble`](../../docs/legacy-russian-acoustic-ensemble.md) restores
+[`LegacyAcousticEnsemble`](../../docs/agents/research/legacy-russian-acoustic-ensemble.md) restores
 the inspected mode1 per-family/per-class logistic calibration and native-order
 mean for explicitly active families. Caller-owned coefficients are required;
 raw probabilities are not averaged. Managed and Windows Native AOT pass 640
 independent arithmetic references. Native case policy and representative
 joined-word recognition remain unfinished.
 
-The [word diagnostic](../../docs/legacy-russian-directional-words.md) now runs
+The [word diagnostic](../../docs/agents/research/legacy-russian-directional-words.md) now runs
 all four inspected families with explicit caller line/baseline and context,
 using the shared baseline trajectory/raster APIs as well as the temporal/spatial
 composers. Own scaled/translated printed МАМА ranks мама first in all four
@@ -238,46 +238,46 @@ bounded ink, explicit source baseline and cancellable work. It returns word
 candidates and diagnostic counts. The original confidence-to-cost adapter
 remains separate from the native word-cost channel.
 
-[`LegacyWordLanguageModel`](../../docs/legacy-russian-word-language.md) restores
+[`LegacyWordLanguageModel`](../../docs/agents/research/legacy-russian-word-language.md) restores
 the stored Russian word classes and integer word/unigram/bigram lookup tables.
 The raw tables pass own format/boundary controls and 512 independent actual
 resource lookups. Native weighting and history policy still need restoration
 before using these values to rank recognized text.
 
-[`LegacyLexiconWordIndex`](../../docs/legacy-russian-word-index.md) now aligns
+[`LegacyLexiconWordIndex`](../../docs/agents/research/legacy-russian-word-index.md) now aligns
 dictionary terminals with the language model's stored word IDs using checked
 terminal preorder, preserving terminal prefixes before descendants. The real
 dictionary has 439,826 terminals; independent word-ID/cost controls distinguish
 this order from BFS node IDs.
 
-[`LegacyWordLanguageCostProfile`](../../docs/legacy-russian-word-cost-profile.md)
+[`LegacyWordLanguageCostProfile`](../../docs/agents/research/legacy-russian-word-cost-profile.md)
 restores the stored four-profile scalar word and class calibration with an
-explicit runtime scale. [`LegacyAcousticFixedLog`](../../docs/legacy-russian-acoustic-fixed-log.md)
+explicit runtime scale. [`LegacyAcousticFixedLog`](../../docs/agents/research/legacy-russian-acoustic-fixed-log.md)
 restores the separate integer acoustic log-cost conversion across all 32,769
 probability values without embedding a vendor table.
-[`LegacyAcousticCostEnsemble`](../../docs/legacy-russian-acoustic-cost-ensemble.md)
+[`LegacyAcousticCostEnsemble`](../../docs/agents/research/legacy-russian-acoustic-cost-ensemble.md)
 combines seven explicit weighted family slots with checked native scalar
 normalization; its integer costs remain separate from confidence probabilities.
 Automatic native profile selection,
 history generation and full acoustic/lexical search are still unfinished; these
 components do not enable Russian cursive recognition in the GUI.
 
-[`LegacyRussianModelBundle`](../../docs/legacy-russian-model-bundle.md) now loads
+[`LegacyRussianModelBundle`](../../docs/agents/research/legacy-russian-model-bundle.md) now loads
 the complete checked resource/profile data from `models/ru-RU` with no vendor
 DLL or private activation/calibration files. It exposes the experimental word
 recognizer and stored language components with copied caller buffers and bounded
-profile validation. [`LegacyLineScale` and `LegacyLineGeometry`](../../docs/legacy-line-geometry.md)
+profile validation. [`LegacyLineScale` and `LegacyLineGeometry`](../../docs/agents/research/legacy-line-geometry.md)
 restore scale estimation from prepared height records and prepared-cluster line
 materialization; producing those records/clusters from raw ink is still separate.
 
-[`LegacyInkRangeExtraction`](../../docs/legacy-russian-point-ranges.md) restores
+[`LegacyInkRangeExtraction`](../../docs/agents/research/legacy-russian-point-ranges.md) restores
 point ownership and clipped glyph boundary flags for supplied interior stroke
-ranges. [`LegacyWordAuxiliaryProfile`](../../docs/legacy-russian-word-auxiliary.md)
+ranges. [`LegacyWordAuxiliaryProfile`](../../docs/agents/research/legacy-russian-word-auxiliary.md)
 restores explicit boundary/category history costs and their checked resource
 factory. The bundle exposes all four auxiliary profiles. Automatic cut generation
 and total native search still need restoration.
 
-[`LegacyLineScaleSamples`](../../docs/legacy-line-scale-samples.md) extracts the
+[`LegacyLineScaleSamples`](../../docs/agents/research/legacy-line-scale-samples.md) extracts the
 checked extrema height samples from float32 ink, including plateau/endpoints and
 the explicit half-X profile. This supplies another upstream geometry component;
 automatic line clustering remains unfinished.
@@ -290,37 +290,37 @@ path now calls this same classifier. Sixteen model diagnostic results remain
 identical after the refactor. `LegacyRussianModelBundle.CreateGlyphClassifier`
 exposes it independently of word cuts or dictionary decoding.
 
-[`LegacyWordLanguageScorer`](../../docs/legacy-russian-word-scorer.md) combines
+[`LegacyWordLanguageScorer`](../../docs/agents/research/legacy-russian-word-scorer.md) combines
 the checked known-word lexical terms, including category/boundary flags and
 zero/one class history, with an explicit profile and runtime scale. The bundle
-exposes it through `CreateLanguageScorer`. [`LegacyCutBoundaryPolicy`](../../docs/legacy-russian-cut-policy.md)
+exposes it through `CreateLanguageScorer`. [`LegacyCutBoundaryPolicy`](../../docs/agents/research/legacy-russian-cut-policy.md)
 restores one sampler's threshold/geometry promotion and cut/join cost decisions;
 its prepared-ink positions are not automatically original-stroke point indices.
 
-[`LegacyCursiveInkAtoms`](../../docs/legacy-russian-cursive-atoms.md) restores the
+[`LegacyCursiveInkAtoms`](../../docs/agents/research/legacy-russian-cursive-atoms.md) restores the
 actual Russian sampler297 ownership/composition rules. Interior adjacent atoms
 share one endpoint; recombining them preserves a continuous physical stroke.
 Producing cut markers from raw ink remains a separate geometry pass.
 
-[`PreparedLineBoundaryClassifier`](../../docs/legacy-line-neural-classifier.md)
+[`PreparedLineBoundaryClassifier`](../../docs/agents/research/legacy-line-neural-classifier.md)
 loads the two embedded42-input affine/BLSTM networks from `models/line-geometry`
 directly, sharing the generic CPU executor with the ink recognizer. It consumes
 prepared pair features and does not infer font size or baseline. Existing
 float/int16/int8 golden controls still pass; independent NumPy controls verify
 both real and synthetic networks, repeated/concurrent runs and malformed data.
 
-[`LegacyLineStrokeStatistics` and `LegacyLinePairFeatures`](../../docs/legacy-line-pair-features.md)
+[`LegacyLineStrokeStatistics` and `LegacyLinePairFeatures`](../../docs/agents/research/legacy-line-pair-features.md)
 now connect raw float32 strokes to the checked 17 statistics and 42 neural inputs.
 Full group construction and automatic baseline selection remain separate.
-[`LegacyCursiveMarkerGeometry`](../../docs/legacy-russian-cursive-marker-geometry.md)
-and [`LegacyCursiveCategoryProfile`](../../docs/legacy-russian-cursive-category-profile.md)
+[`LegacyCursiveMarkerGeometry`](../../docs/agents/research/legacy-russian-cursive-marker-geometry.md)
+and [`LegacyCursiveCategoryProfile`](../../docs/agents/research/legacy-russian-cursive-category-profile.md)
 restore selected prepared-marker passes and the stored category graph. Cut indices
 address prepared ink, which may include interpolated points.
-[`LegacyCursivePreparedInk`](../../docs/legacy-russian-cursive-prepared-ink.md)
+[`LegacyCursivePreparedInk`](../../docs/agents/research/legacy-russian-cursive-prepared-ink.md)
 provides that owned buffer, exact forward deltas/lengths, explicit point insertion
 and source-index mapping. Candidate insertion locations remain caller supplied.
 
-[`LegacyWordCandidateScorer`](../../docs/legacy-russian-word-candidate.md) restores
+[`LegacyWordCandidateScorer`](../../docs/agents/research/legacy-russian-word-candidate.md) restores
 the ordinary known-word path's lexical budget and total-cost acceptance, including
 negative offsets and strict full-heap ties. `LegacyIntegerLexicalDecoder` provides
 an original bounded dictionary beam with a terminal scoring callback before final
@@ -332,197 +332,197 @@ Releases also attach three independent `.nupkg` libraries and the separate
 the model archive retains the same `models/` paths used by the repository.
 See [the package readme](PACKAGE.md) for loading the Russian model bundle.
 
-The checked [ordinary source-profile forwarding](../../docs/legacy-russian-word-source-profile.md)
+The checked [ordinary source-profile forwarding](../../docs/agents/research/legacy-russian-word-source-profile.md)
 reads source kind `0x135` from the acoustic resource and selects stored language
 profile2. `CreateResourceLanguageScorer` reproduces that branch while keeping
 runtime scale explicit. It does not infer global recognition modes or history.
 
-[`LegacyLineArcMoments`, `LegacyPreparedLineGroupCost` and `LegacyFreeLineGroupSearch`](../../docs/legacy-line-group-search.md)
+[`LegacyLineArcMoments`, `LegacyPreparedLineGroupCost` and `LegacyFreeLineGroupSearch`](../../docs/agents/research/legacy-line-group-search.md)
 add arc-weighted raw stroke moments, projected native group costs and free
 row-count dynamic programming over explicit prepared candidates. Independent
 exhaustive partition checks verify the search minima. Candidate merging,
 the supplied row-lattice branch and full cluster fitting remain unfinished.
 
-[`LegacyCursiveHorizontalCuts`](../../docs/legacy-russian-cursive-horizontal-cuts.md)
+[`LegacyCursiveHorizontalCuts`](../../docs/agents/research/legacy-russian-cursive-horizontal-cuts.md)
 restores the complete prepared horizontal-stage state machine and inserted-point
 ownership, including the stored Russian settings. Upstream loop tags, baseline
 crossings and the final marker controller remain separate missing stages.
-[`LegacyIntegerWordDecoder`](../../docs/legacy-russian-integer-word-pipeline.md)
+[`LegacyIntegerWordDecoder`](../../docs/agents/research/legacy-russian-integer-word-pipeline.md)
 connects supplied integer glyph choices to dictionary identity and ordinary
 lexical terminal scoring before final beam pruning. The bundle factory uses
 the verified stored source profile, with explicit runtime scale and flags.
 
-[`LegacyCursiveLoopCuts`](../../docs/legacy-russian-cursive-loop-cuts.md) restores
+[`LegacyCursiveLoopCuts`](../../docs/agents/research/legacy-russian-cursive-loop-cuts.md) restores
 finite-segment intersections, reversal spacing and inserted loop-tag ownership.
-[`LegacySparseLineEstimator`](../../docs/legacy-automatic-baseline.md) restores
+[`LegacySparseLineEstimator`](../../docs/agents/research/legacy-automatic-baseline.md) restores
 the automatic type24a branch for sparse input and explicitly declines geometry
-requiring the unfinished dense Gaussian fit. [`LegacyWordInitialLanguageBound`](../../docs/legacy-russian-word-initial-bound.md)
+requiring the unfinished dense Gaussian fit. [`LegacyWordInitialLanguageBound`](../../docs/agents/research/legacy-russian-word-initial-bound.md)
 exposes the native cache's first-codebook bound; it excludes boundary/category
 terms and is not used as a universal mathematical pruning bound.
 
-[`LegacyCursiveBaselineCuts`](../../docs/legacy-russian-cursive-baseline-cuts.md)
+[`LegacyCursiveBaselineCuts`](../../docs/agents/research/legacy-russian-cursive-baseline-cuts.md)
 restores the prepared baseline/loop-exit stage with explicit line metrics,
 including the native unknown-baseline branch. [`LegacyLineExtrema` and
-`LegacyGaussianLineFit`](../../docs/legacy-dense-line-fit.md) restore raw extrema
+`LegacyGaussianLineFit`](../../docs/agents/research/legacy-dense-line-fit.md) restore raw extrema
 and the default four-component Gaussian/shared-slope fit, bounded to20 iterations.
 
-[`LegacyAutomaticLineEstimator`](../../docs/legacy-class24a-prepared-line.md)
+[`LegacyAutomaticLineEstimator`](../../docs/agents/research/legacy-class24a-prepared-line.md)
 restores the stored class24a sparse/dense selection for a supplied line group.
-[`LegacyLineDeskew` and `LegacyLineGuidelineAdjustment`](../../docs/legacy-line-postcallback.md)
+[`LegacyLineDeskew` and `LegacyLineGuidelineAdjustment`](../../docs/agents/research/legacy-line-postcallback.md)
 restore postcallback metadata and rotation; automatic page grouping and final
 font metrics remain separate. The checked Russian bundle exposes three stored
 line profiles and both cursive category profiles.
 
-[`LegacyCursiveMarkerLimit`](../../docs/legacy-russian-cursive-marker-limit.md),
-[`LegacyCursiveStrokeOverride`](../../docs/legacy-russian-cursive-stroke-override.md)
-and [`LegacyCursiveControllerFilters`](../../docs/legacy-russian-cursive-controller-filters.md)
+[`LegacyCursiveMarkerLimit`](../../docs/agents/research/legacy-russian-cursive-marker-limit.md),
+[`LegacyCursiveStrokeOverride`](../../docs/agents/research/legacy-russian-cursive-stroke-override.md)
+and [`LegacyCursiveControllerFilters`](../../docs/agents/research/legacy-russian-cursive-controller-filters.md)
 restore further Russian106 marker stages, with owned prepared ink and explicit
-source geometry. [`LegacyCursiveCategoryMapper`](../../docs/legacy-russian-cursive-category-mapper.md)
+source geometry. [`LegacyCursiveCategoryMapper`](../../docs/agents/research/legacy-russian-cursive-category-mapper.md)
 preserves absent category mappings instead of guessing neural family IDs.
 
-[`LegacyDynamicAcousticWeights`](../../docs/legacy-russian-dynamic-acoustic-weights.md)
+[`LegacyDynamicAcousticWeights`](../../docs/agents/research/legacy-russian-dynamic-acoustic-weights.md)
 restores physical resampling, parallel-stroke overlap and configured weight
 resolution. `LegacyDirectionalAcousticWeightConfiguration` reads the actual
 Russian v110 prefix: four dynamic mode2 families and three inactive slots.
 `LegacyRussianModelBundle.AcousticWeights` exposes those resource settings.
 
-[`LegacyPreparedSequenceWordSearch`](../../docs/legacy-russian-prepared-sequence.md)
+[`LegacyPreparedSequenceWordSearch`](../../docs/agents/research/legacy-russian-prepared-sequence.md)
 connects supplied atom groups and scored normalized glyphs to integer costs and
 word language totals. Its caller-supplied fixed sequence and bounded prefix beam
 do not implement the native variable-cut search or enable Russian GUI recognition.
 
-[`LegacyCursiveCutProducer`](../../docs/legacy-russian-cursive-cut-producer.md)
+[`LegacyCursiveCutProducer`](../../docs/agents/research/legacy-russian-cursive-cut-producer.md)
 composes the checked whole-input Russian106 cut controller with explicit per-stroke
-service confidences. [`LegacyCursiveCandidateLattice`](../../docs/legacy-russian-cursive-candidate-lattice.md)
+service confidences. [`LegacyCursiveCandidateLattice`](../../docs/agents/research/legacy-russian-cursive-candidate-lattice.md)
 constructs the ordinary single-source variable-group DAG with explicit atom order,
 physical-boundary metadata and span cap. Full cross-source search remains separate.
-[`LegacyCursiveLatticeSpanProfile`](../../docs/legacy-russian-cursive-source-metadata.md)
+[`LegacyCursiveLatticeSpanProfile`](../../docs/agents/research/legacy-russian-cursive-source-metadata.md)
 reads the Russian resource span cap of eight atoms; the bundle exposes it through
 `CursiveSpanProfile`. Other fields in that resource node remain uninterpreted.
 
-[`LegacyPreparedGlyphNormalization`](../../docs/legacy-russian-prepared-normalization.md)
+[`LegacyPreparedGlyphNormalization`](../../docs/agents/research/legacy-russian-prepared-normalization.md)
 restores the checked FF/FF short-coordinate branch, and
-[`LegacyPreparedGlyphClassifier`](../../docs/legacy-russian-prepared-glyph-classifier.md)
+[`LegacyPreparedGlyphClassifier`](../../docs/agents/research/legacy-russian-prepared-glyph-classifier.md)
 connects that normalization to real acoustic families, resource weights and integer
 costs. The bundle provides `CreatePreparedGlyphClassifier()`; line frame, context,
 range order, family/class flags and multiplier remain explicit caller inputs.
-[`LegacyNormalizedPenUpMerge`](../../docs/legacy-russian-normalized-penup-merge.md)
+[`LegacyNormalizedPenUpMerge`](../../docs/agents/research/legacy-russian-normalized-penup-merge.md)
 preserves native boundary tie order. It is an explicit separate post-normalization
 operation, not automatically applied by the checked glyph factory.
 
-[`LegacyOrdinaryWordCategoryPolicy`](../../docs/legacy-russian-ordinary-word-category.md)
+[`LegacyOrdinaryWordCategoryPolicy`](../../docs/agents/research/legacy-russian-ordinary-word-category.md)
 restores the checked symbol/beam category choice with explicit special-label metadata.
-[`LegacyGlyphTypesetGeometry`](../../docs/legacy-rendered-glyph-typeset.md)
+[`LegacyGlyphTypesetGeometry`](../../docs/agents/research/legacy-rendered-glyph-typeset.md)
 restores baseline and x-height fractions from externally measured rendered glyphs;
 it does not claim a completed handwriting-to-font-size policy.
-[`LegacyGlyphGeometryPayload`](../../docs/legacy-glyph-payload.md) reproduces the
+[`LegacyGlyphGeometryPayload`](../../docs/agents/research/legacy-glyph-payload.md) reproduces the
 checked affine quad setter and normalized baseline/x-height presence fields.
 The type24a wrapper, final adjustments and raw-line candidate selection are separate.
 
-[`LegacySourcePointChronology`](../../docs/legacy-russian-source-point-chronology.md)
+[`LegacySourcePointChronology`](../../docs/agents/research/legacy-russian-source-point-chronology.md)
 preserves source point keys through inserted points and resampling and restores
 the checked signed range sort used by glyph normalization. It does not determine
 the initial line-DAG order.
-[`LegacyCursiveGroupSeparationCost`](../../docs/legacy-russian-cursive-group-separation.md)
+[`LegacyCursiveGroupSeparationCost`](../../docs/agents/research/legacy-russian-cursive-group-separation.md)
 restores the ordinary pen-up grouping penalty, with resource profile coefficients
 and an explicit native lookup table and resolved line height. Special-symbol
 bypass and the full acoustic/path scorer remain separate caller responsibilities.
-[`LegacyPreparedAcousticCandidateScorer`](../../docs/legacy-russian-acoustic-candidate-score.md)
+[`LegacyPreparedAcousticCandidateScorer`](../../docs/agents/research/legacy-russian-acoustic-candidate-score.md)
 restores the checked scalar class/geometry/prior-path total, strict budget and
 special-symbol bypasses. `LegacyAcousticCandidateThresholds` reads its real Russian
 kind gates. Class-cache production, lexical mapping and search orchestration remain
 separate; this adapter does not enable automatic connected-word recognition.
-[`LegacyHandwritingFontSizePolicy`](../../docs/legacy-handwriting-font-size-policy.md)
+[`LegacyHandwritingFontSizePolicy`](../../docs/agents/research/legacy-handwriting-font-size-policy.md)
 restores the checked `convert.match-text-size` value calculation from recognized
 range geometry and rendered `x` metrics, optional prepared math contributions,
 quantization and dirty tolerance. Its values use model units; recognition-range
 production, display conversion and final baseline placement remain separate.
 
-[`LegacyPreparedCharacterLineEquations`](../../docs/legacy-character-line-equations.md)
+[`LegacyPreparedCharacterLineEquations`](../../docs/agents/research/legacy-character-line-equations.md)
 restores the initial line fitter's weighted boundary/profile moments and
 constrained baseline/x-height/slope equations. It fits prepared observations
 rather than choosing the smallest or tallest character. The subsequent prepared
 fit/category producers are described below; this kernel is not yet
 used to size automatically recognized connected handwriting in the application.
 
-[`LegacyPreparedCharacterLineFit`](../../docs/legacy-prepared-character-line-fit.md)
+[`LegacyPreparedCharacterLineFit`](../../docs/agents/research/legacy-prepared-character-line-fit.md)
 restores the prepared C1A iterative boundary/profile fit, including the native
 251-pass limit and diagnostic affinity behavior. Its
-[category/item producer](../../docs/legacy-prepared-character-line-categories.md)
+[category/item producer](../../docs/agents/research/legacy-prepared-character-line-categories.md)
 uses actual resolved alphabet labels and preserves the source template's state.
-The [portable category model](../../docs/legacy-character-line-category-model.md)
+The [portable category model](../../docs/agents/research/legacy-character-line-category-model.md)
 ships3923 entries and45 profiles, including122 Cyrillic entries, with a pinned
 ordered-table checksum and no vendor DLL requirement. Per-symbol source geometry
 and actual decoded character source-line IDs remain necessary for integration.
 
-[`LegacyPreparedResultLineMetrics`](../../docs/legacy-prepared-result-line-metrics.md)
+[`LegacyPreparedResultLineMetrics`](../../docs/agents/research/legacy-prepared-result-line-metrics.md)
 now transports actual source-line x-height into the correct result-line owner,
 SDK binary32 metric and font-size sample. The native one-neighbor source-ID pass
 and exact cursor ranges remain intact. Actual decoded character source IDs,
 source geometry and application recognizer integration are still upstream.
 
-[`LegacyFreshFirstGlyphSession`](../../docs/legacy-fresh-first-session.md)
+[`LegacyFreshFirstGlyphSession`](../../docs/agents/research/legacy-fresh-first-session.md)
 connects an already-selected raw row to first-source frame/cuts/context/NN,
 constructor/resource cache policy and post-merge primitive scope. This is the
 acoustic-only class23f child, distinct from the main class240 dictionary decoder.
-Its [first-source shift-zero graph](../../docs/legacy-first-shift-zero-seeds.md)
+Its [first-source shift-zero graph](../../docs/agents/research/legacy-first-shift-zero-seeds.md)
 uses the actual first21b profile rather than the main source's shift-one policy.
-The [selector-specific connection accessor](../../docs/legacy-ordinary-candidate-connections.md)
+The [selector-specific connection accessor](../../docs/agents/research/legacy-ordinary-candidate-connections.md)
 preserves ordinary successor order and the special node-minus-one source root.
-Its [ranked cache accessor](../../docs/legacy-ordinary-ranked-acoustic-group.md)
+Its [ranked cache accessor](../../docs/agents/research/legacy-ordinary-ranked-acoustic-group.md)
 provides actual geometry-aware costs and top20-normalized likelihood, which must
 not be interpreted as recognition acceptance confidence.
 
-The [fresh word heap preparation](../../docs/legacy-native-word-heap-preparation.md)
+The [fresh word heap preparation](../../docs/agents/research/legacy-native-word-heap-preparation.md)
 supplies packed source flags, first-iteration count limits, source-weight quotas
 and explicit record allocations. Native word ordinals and
-[continuation alternatives](../../docs/legacy-native-word-continuation-alternatives.md)
+[continuation alternatives](../../docs/agents/research/legacy-native-word-continuation-alternatives.md)
 now consume stored parents; the
-[initial stored-parent branch](../../docs/legacy-native-word-initial-parent-alternatives.md)
-and [anchored continuation](../../docs/legacy-native-word-anchored-alternatives.md)
+[initial stored-parent branch](../../docs/agents/research/legacy-native-word-initial-parent-alternatives.md)
+and [anchored continuation](../../docs/agents/research/legacy-native-word-anchored-alternatives.md)
 preserve actual pool/context lineage and their distinct composition rules.
 Higher-arc branches, complete rejection-prepass scheduling and
 native winner/confidence remain separate unresolved stages.
 
-The [rejection ancestry collector](../../docs/legacy-native-word-rejection-collector.md)
+The [rejection ancestry collector](../../docs/agents/research/legacy-native-word-rejection-collector.md)
 now produces native 36-byte candidates from live owning rows, preserving actual
 marker/protected ancestry and anchored corrections. Its
-[sorting and row-repair consumers](../../docs/legacy-native-word-rejection-selection.md)
+[sorting and row-repair consumers](../../docs/agents/research/legacy-native-word-rejection-selection.md)
 mutate those same owning primary blocks before the next parent producer.
 Successful candidate-vector allocation and nontracing operation are explicit
 scope boundaries; source headers, marker mode and stack residue are not guessed.
 
-The [pass reset](../../docs/legacy-native-word-pass-reset.md) clears each heap's
+The [pass reset](../../docs/agents/research/legacy-native-word-pass-reset.md) clears each heap's
 active count before resizing to its phase quota, reuses retained allocation,
 and restores both native trace-vector reset/free decisions. The
-[first acoustic recurrence](../../docs/legacy-first-acoustic-recurrence.md)
+[first acoustic recurrence](../../docs/agents/research/legacy-first-acoustic-recurrence.md)
 adds native 40-byte records and compatible graph predecessors; mandatory
 geometry callbacks and final text merging/winner remain distinct producers.
 
-The [higher-arc reset branch](../../docs/legacy-native-word-higherarc-reset-alternatives.md)
+The [higher-arc reset branch](../../docs/agents/research/legacy-native-word-higherarc-reset-alternatives.md)
 is also restored, including its source-header predicate and raw secondary
 composition. The other higher-arc branch now has an executable persistent
-[incoming workspace](../../docs/legacy-native-secondary-recombination-workspace.md),
-[secondary merge](../../docs/legacy-native-secondary-recombination-merge.md)
-and [owning-parent context refresh](../../docs/legacy-native-secondary-recombination-projection.md).
+[incoming workspace](../../docs/agents/research/legacy-native-secondary-recombination-workspace.md),
+[secondary merge](../../docs/agents/research/legacy-native-secondary-recombination-merge.md)
+and [owning-parent context refresh](../../docs/agents/research/legacy-native-secondary-recombination-projection.md).
 Its eligibility, complete source request and adjusted-cost callbacks remain
 separate unresolved producers.
 
-The [fresh raw packet](../../docs/legacy-fresh-ordinary-raw-packet.md) now derives
+The [fresh raw packet](../../docs/agents/research/legacy-fresh-ordinary-raw-packet.md) now derives
 input descriptor ownership from physical strokes and carries that same ingress
 through the first fitted frame. Descriptor identity is separate from physical
 pen-up chronology. General semantic packet events and continuation geometry
 remain explicit boundaries.
 
-The [source-position range stage](../../docs/legacy-native-ink-position-ranges.md)
-and [actual cropped-stroke geometry](../../docs/legacy-native-decoded-stroke-geometry.md)
+The [source-position range stage](../../docs/agents/research/legacy-native-ink-position-ranges.md)
+and [actual cropped-stroke geometry](../../docs/agents/research/legacy-native-decoded-stroke-geometry.md)
 connect indexed raw points, fractional endpoint views and per-item bounds to
 the character catalog, iterative line fit and SDK x-height/font policy.
 Winning endpoints and labels must still come from a real decoder; these ports
 do not make the application's connected-word bounding-box fallback native.
 
 [`LegacyOrdinaryGraphAcousticPermissionSession` and
-`LegacyPreparedOrdinaryGraphAcousticProducer`](../../docs/legacy-ordinary-graph-acoustic-lifecycle.md)
+`LegacyPreparedOrdinaryGraphAcousticProducer`](../../docs/agents/research/legacy-ordinary-graph-acoustic-lifecycle.md)
 connect the immutable ordinary candidate graph to actual acoustic rows,
 permissions and dictionary maps. They preserve native span selection, computed
 and pool reuse, scoped invalidation and pooled buffer identity. Ordinary group
@@ -530,100 +530,100 @@ kind and physical primitive metadata come from their checked producers. Guide
 frames and remaining external cache policy are explicit; this is not a final
 native winner or a complete automatic Russian recognizer.
 
-[`LegacyRawLineCandidateProducer`](../../docs/legacy-raw-line-candidates.md)
+[`LegacyRawLineCandidateProducer`](../../docs/agents/research/legacy-raw-line-candidates.md)
 restores ordinary raw-stroke candidate costs, merge gates and suffix search
 before the prepared2e2 row search. Prior-row remapping, special temporal costs
 and complete source materialization still require separate verified stages.
 [`LegacyLineOrientationProfile`, `LegacyLineOrientationProjection` and
-`LegacyLineOrientationPolicy`](../../docs/legacy-line-orientation.md) restore
+`LegacyLineOrientationPolicy`](../../docs/agents/research/legacy-line-orientation.md) restore
 the optional2d0 scale, histogram, shortlist and decision policy.
 [`LegacyOrientationStrokePreparation` and
-`LegacyCubicStrokeSmoothing`](../../docs/legacy-orientation-stroke-smoothing.md)
+`LegacyCubicStrokeSmoothing`](../../docs/agents/research/legacy-orientation-stroke-smoothing.md)
 restore its actual265 spline/Bezier evaluation input. Source enablement/metric
 forwarding and primary249 native child costs remain explicit upstream boundaries.
-[`LegacySourceOrientationPreparation`](../../docs/legacy-source-orientation-preparation.md)
+[`LegacySourceOrientationPreparation`](../../docs/agents/research/legacy-source-orientation-preparation.md)
 now supplies fresh-source exact segment metrics to that265 producer and the
 projection consumer. This differs from265's tolerant negative-metric fallback.
 Orientation enablement and the primary249 decision remain separate.
 
-The [first geometry corrections](../../docs/legacy-first-acoustic-transition-geometry.md)
+The [first geometry corrections](../../docs/agents/research/legacy-first-acoustic-transition-geometry.md)
 now derive ordinary118/140 costs from actual first-source candidate groups,
 including the frontend kind2 whole-start guard. The
-[A8 shortlist](../../docs/legacy-first-acoustic-shortlist.md) retains fixed
+[A8 shortlist](../../docs/agents/research/legacy-first-acoustic-shortlist.md) retains fixed
 beam-width storage and opaque bytes. The
-[terminal scan](../../docs/legacy-first-terminal-selection.md) requires actual
+[terminal scan](../../docs/agents/research/legacy-first-terminal-selection.md) requires actual
 merged B8 contexts, preserves identity exclusion and native scalar channels;
 it does not materialize complete273 character/source results.
 
-The [legacy source line publication](../../docs/legacy-native-source-line-publication.md)
+The [legacy source line publication](../../docs/agents/research/legacy-native-source-line-publication.md)
 transports source218 prepared guide metrics through2DA and SDK narrowing.
-The [prepared source-reference projection](../../docs/legacy-native-text-source-projection.md)
+The [prepared source-reference projection](../../docs/agents/research/legacy-native-text-source-projection.md)
 connects actual source keys and fractional views to indexed raw points.
 Real decoded labels, group prefix production and winner materialization remain
 required. None of these component controls demonstrate improved English or
 finished Russian cursive recognition in the application.
 
-The [plain-label B0/B8 context passes](../../docs/legacy-first-acoustic-context-passes.md)
+The [plain-label B0/B8 context passes](../../docs/agents/research/legacy-first-acoustic-context-passes.md)
 now feed actual merged buffers to the terminal selection probe. Both explicit
 E0 modes are checked independently; automatic owner policy remains unfinished.
-The [higher-arc controller](../../docs/legacy-native-higher-arc-recombination.md)
+The [higher-arc controller](../../docs/agents/research/legacy-native-higher-arc-recombination.md)
 assembles exact80-byte requests and owns persistent workspace/secondary merges,
 but full frontend callbacks and lexical scheduling remain explicit inputs.
-The [final scalar publication](../../docs/legacy-first-result-score-publication.md)
+The [final scalar publication](../../docs/agents/research/legacy-first-result-score-publication.md)
 preserves the native pairwise first-anchor comparisons and acoustic expf.
 These checked stages still do not establish final Russian/English accuracy.
 
-The [fresh selected-child context policy](../../docs/legacy-fresh-first-text-context-policy.md)
+The [fresh selected-child context policy](../../docs/agents/research/legacy-fresh-first-text-context-policy.md)
 now proves preserved C4 through the new child configuration's complete binding
 chain, selects first E0 from the typed source and exact alphabet, and separates
 binding-time A8 from the source-frame flag copied at invocation. The scoped
 context API consumes this policy directly. The
-[glyph token/UTF8 producer](../../docs/legacy-native-glyph-utf8-tokens.md)
+[glyph token/UTF8 producer](../../docs/agents/research/legacy-native-glyph-utf8-tokens.md)
 expands prepared glyph records and preserves raw bytes from their distinct
 alphabet owners, before the remaining native canonical/circled processing.
 These additions do not complete the main word decoder or handwriting accuracy.
 
-The [portable native Unicode scalar data](../../docs/legacy-native-unicode-normalization-data.md)
+The [portable native Unicode scalar data](../../docs/agents/research/legacy-native-unicode-normalization-data.md)
 now supplies exact combining-class coverage, canonical mappings and composition
 pairs from a checked standalone model. Public Unicode9 references independently
 verify all assigned classes and eligible pairs; native gap/exception behavior
 is retained. This data is preparatory to the still-unfinished stream normalizer.
 
-The [direct first invocation](../../docs/legacy-source-frame-score-mode.md)
+The [direct first invocation](../../docs/agents/research/legacy-source-frame-score-mode.md)
 now derives source150/A8 for the sealed fresh packet/frame scope, retaining
 explicit overrides for general sources. Selected glyph cells can be traversed
 without confusing source graph arcs with physical stroke ordinals.
-The [main full-packet geometry](../../docs/legacy-main-word-transition-geometry.md)
+The [main full-packet geometry](../../docs/agents/research/legacy-main-word-transition-geometry.md)
 provides real118/140 corrections to the higher-arc controller, with an explicit
 main-source frame/facts contract. The
-[ordinary glyph emitter](../../docs/legacy-native-ordinary-glyph-utf8.md)
+[ordinary glyph emitter](../../docs/agents/research/legacy-native-ordinary-glyph-utf8.md)
 now includes the proven no-marker helper behavior, preserving original bytes.
 None of these stages supplies a complete Russian winner or app integration.
 
 
-The [owned first invocation](../../docs/legacy-fresh-first-owned-recognition.md)
+The [owned first invocation](../../docs/agents/research/legacy-fresh-first-owned-recognition.md)
 now derives its fresh masks and runs selection/publication over actual raw ink.
 Its printed MIR control still publishes mixed-script `MИP`; this is explicitly
 not a finished Russian recognizer. The optional
-[coordinate corpus](../../docs/legacy-russian-coordinate-corpus.md) retains all
+[coordinate corpus](../../docs/agents/research/legacy-russian-coordinate-corpus.md) retains all
 60 real recorded inputs and mismatches, with missing pen-up information stated
 as an adaptation limit rather than an accuracy claim.
 
-The [main single-line ingress](../../docs/legacy-main-single-line-ingress.md)
+The [main single-line ingress](../../docs/agents/research/legacy-main-single-line-ingress.md)
 connects actual first results, assigned main guides, main sampling, lazy context
 and four acoustic families for one descriptor with multiple physical strokes.
 Its 420-group fixture has matching managed/Native AOT output and an independent
 network/context audit. The
-[owned node recurrence](../../docs/legacy-main-node-recurrence.md) preserves
+[owned node recurrence](../../docs/agents/research/legacy-main-node-recurrence.md) preserves
 primary/language row storage and source versus retained extents. The complete
 ordered main loop, delimiter-wrapper lifecycle and final winner remain required.
 
-The case-aware path now has [stored alphabet preparation](../../docs/legacy-native-case-preparation.md),
-[ordered permissions](../../docs/legacy-native-case-permissions.md),
-[context rewriting](../../docs/legacy-native-case-context-rewrite.md),
-[normal queries](../../docs/legacy-case-query-source.md),
-[symbol binding](../../docs/legacy-case-symbol-binding.md) and a
-[shared dictionary session](../../docs/legacy-case-dictionary-session.md).
+The case-aware path now has [stored alphabet preparation](../../docs/agents/research/legacy-native-case-preparation.md),
+[ordered permissions](../../docs/agents/research/legacy-native-case-permissions.md),
+[context rewriting](../../docs/agents/research/legacy-native-case-context-rewrite.md),
+[normal queries](../../docs/agents/research/legacy-case-query-source.md),
+[symbol binding](../../docs/agents/research/legacy-case-symbol-binding.md) and a
+[shared dictionary session](../../docs/agents/research/legacy-case-dictionary-session.md).
 The session keeps normal/auxiliary queries, refreshed maps, metadata and restart
 routing over one owner. Prepared container options are explicit; this endpoint
 does not implement the complete source factory or replace the application's

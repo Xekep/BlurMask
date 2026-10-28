@@ -171,7 +171,7 @@ def query_expected(c,honor_native_root_prefix=True):
         #Account for EVERY packed root child first. Native source query093B50
         #calls091CE0 at093BF3, then cmp query.Node,0 at093BF8 /jne093BFB /
         #inc slot.start at093BFD..093C03. This happens BEFORE map filtering.
-        #See docs/legacy-prepared-dictionary-query.md. It is structural prefix
+        #See docs/agents/research/legacy-prepared-dictionary-query.md. It is structural prefix
         #suppression, not a guessed NUL or missing/denied-alphabet condition:
         #actual child1 is lexical0 ZWJ, mapped184 and notFFFF in every owner.
         if node==1 and honor_native_root_prefix:

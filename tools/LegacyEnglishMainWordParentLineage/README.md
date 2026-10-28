@@ -1,6 +1,6 @@
 # English word-parent static evidence and numeric diagnostics
 
-See [the ownership proposal](../../docs/english-main-word-parent-lineage-20261021.md).
+See [the ownership proposal](../../docs/agents/research/english-main-word-parent-lineage-20261021.md).
 These are static PE checks and prepared numerical projections, not an executable
 word decoder. No SDK DLL is loaded. Whole-word ownership and the outer290/case
 wrapper remain separate prerequisites.

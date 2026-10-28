@@ -27,9 +27,7 @@ internal static class AiMathLayout
             if (result is not { Completed: true, LaTex: { Length: > 0 } latex } || !float.IsFinite(result.Confidence) ||
                 result.Confidence < minimumConfidence || !MathTypesetting.Supported(latex)) continue;
             var calculated = calculate ? WithSolvedResult(latex, cancellationToken) : latex;
-            // Re-read geometry after numeric parsing. Undefined arithmetic is
-            // handled inside the parser; avoid carrying the Rect's floating
-            // locals across that exception path in the ARM64 AOT compiler.
+            // Re-read geometry after the external calculation completes.
             bounds = sources.Select(s => s.Bounds).Aggregate((a, b) => a.Union(b));
             var mark = new InkMark(InkTool.Text, first.Color, first.Width, bounds.TopLeft)
             { Id = first.Id, Text = calculated, Font = "STIX Two Math", FontSize = Math.Clamp(bounds.Height, 8, 300), FadeSeconds = first.FadeSeconds };
@@ -41,16 +39,6 @@ internal static class AiMathLayout
             });
         }
         return results;
-    }
-
-    internal static string WithNumericResult(string expression)
-    {
-        var equal = expression.IndexOf('=');
-        // An empty right-hand side explicitly requests a result. Recognition
-        // alone must not evaluate expressions or replace a written answer.
-        if (equal < 0 || expression[(equal + 1)..].Trim().Length > 0 ||
-            !NumericExpressionEvaluator.TryEvaluate(expression, out var value)) return expression;
-        return expression[..equal].TrimEnd() + "=" + value;
     }
 
     internal static double ResultWidth(string original, string calculated, double height)
@@ -85,8 +73,6 @@ internal static class AiMathLayout
         Func<string, CancellationToken, InkMath.Solver.MathSolution?>? solve = null)
     {
         token.ThrowIfCancellationRequested();
-        var numeric = WithNumericResult(expression);
-        if (numeric != expression) return numeric;
         var equal = expression.LastIndexOf('=');
         if (equal < 0 || expression[(equal + 1)..].Trim().Length != 0) return expression;
         var source = expression[..equal].TrimEnd();

@@ -795,13 +795,13 @@ internal static class DrawingSmokeTest
         var path = Path.Combine(directory, "settings.json");
         try
         {
-            Check(!settings.GiacEnabled, "Giac must be disabled by default.");
-            settings = settings with { Language = "de", HotkeysEnabled = false, GiacEnabled = true };
+            Check(settings.GiacEnabled, "Giac must be enabled for new settings.");
+            settings = settings with { Language = "de", HotkeysEnabled = false, GiacEnabled = false };
             settings.Shortcuts[ShortcutAction.Pen] = new(Key.F12, KeyModifiers.Control | KeyModifiers.Alt);
             settings.Shortcuts[ShortcutAction.Eraser] = ShortcutBinding.None;
             SettingsStore.Save(settings, path);
             var loaded = SettingsStore.Load(path);
-            Check(loaded.Language == "de" && !loaded.HotkeysEnabled && loaded.GiacEnabled && loaded.Shortcuts[ShortcutAction.Pen] == settings.Shortcuts[ShortcutAction.Pen] &&
+            Check(loaded.Language == "de" && !loaded.HotkeysEnabled && !loaded.GiacEnabled && loaded.Shortcuts[ShortcutAction.Pen] == settings.Shortcuts[ShortcutAction.Pen] &&
                 !loaded.Shortcuts[ShortcutAction.Eraser].Enabled, "AOT settings serialization lost customized/disabled shortcuts.");
             loaded.Shortcuts[ShortcutAction.Cursor] = loaded.Shortcuts[ShortcutAction.Pen];
             Check(loaded.Validate() is not null, "Duplicate shortcuts were accepted.");

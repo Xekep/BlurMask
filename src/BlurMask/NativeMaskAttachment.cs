@@ -40,23 +40,30 @@ internal sealed partial class WindowsWindowCatalog
     }
     public TrackedWindow? FindChildAt(PixelPoint point)
     {
-        var root = FindAt(point);
-        if (root is null) return null;
-        return FindChildRegion(root, point);
+        // Fill must respect every visible top-level occluder, including untitled
+        // popups. FindAt's caption filter is for ordinary mask attachment only.
+        var hwnd = GetTopWindow(0);
+        for (int i = 0; hwnd != 0 && i < 10000; i++, hwnd = GetWindow(hwnd, 2))
+        {
+            var root = Read((nuint)hwnd);
+            if (root is { Visible: true } && root.ProcessId != Environment.ProcessId && root.Bounds.Contains(point))
+                return FindChildRegion(root, point);
+        }
+        return null;
     }
     internal TrackedWindow FindChildRegion(TrackedWindow root, PixelPoint point)
     {
         var region = root;
         for (int depth = 0; depth < 32; depth++)
         {
-            TrackedWindow? next = null;
-            var child = GetTopWindow((nint)region.Id);
-            for (int i = 0; child != 0 && i < 4096; i++, child = GetWindow(child, 2))
-            {
-                var candidate = ReadRegion(new((nuint)child, root.ProcessId, default, true, root.Id));
-                if (candidate is { Visible: true } && candidate.Bounds.Contains(point)) { next = candidate; break; }
-            }
-            if (next is null) break;
+            var clientPoint = new FillPoint { X = point.X, Y = point.Y };
+            if (ScreenToClient((nint)region.Id, ref clientPoint) == 0) break;
+            // Native hit testing respects child z-order and transparent group-box
+            // areas; a rectangular scan can select the enclosing group instead.
+            var child = RealChildWindowFromPoint((nint)region.Id, clientPoint);
+            if (child == 0 || child == (nint)region.Id) break;
+            var next = ReadRegion(new((nuint)child, root.ProcessId, default, true, root.Id));
+            if (next is not { Visible: true } || !next.Bounds.Contains(point)) break;
             region = next;
         }
         return region;
@@ -113,6 +120,9 @@ internal sealed partial class WindowsWindowCatalog
         result.Reverse(); return result.ToArray();
     }
     [LibraryImport("user32.dll")] private static partial nint GetAncestor(nint window, uint flags);
+    [StructLayout(LayoutKind.Sequential)] private struct FillPoint { public int X, Y; }
+    [LibraryImport("user32.dll")] private static partial int ScreenToClient(nint window, ref FillPoint point);
+    [LibraryImport("user32.dll")] private static partial nint RealChildWindowFromPoint(nint parent, FillPoint point);
     [LibraryImport("user32.dll")] private static partial int GetClientRect(nint window, out NativeRect rectangle);
     [LibraryImport("user32.dll")] private static partial int ClientToScreen(nint window, ref NativeRect point);
     [LibraryImport("user32.dll", EntryPoint = "GetWindowLongPtrW")] private static partial nint GetMaskExStyle(nint window, int index);

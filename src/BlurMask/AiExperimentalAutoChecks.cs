@@ -55,7 +55,7 @@ internal static class AiExperimentalAutoChecks
         Need(AiExperimentalAutoLayout.Recognize(ink,(_,_)=>Classification(),(_,_)=>new("x^2=",null,3),solve:(_,_)=>{solves++;return null;}).Single().MathCalculationFailed&&solves==1,"trailing-equals-only-after-admission");
         _=AiExperimentalAutoLayout.Recognize(ink,(_,_)=>Classification(),(_,_)=>new("x=2",null,3),solve:(_,_)=>{solves++;return null;});Need(solves==1,"written-RHS-not-calculated");
         Need(AiExperimentalAutoLayout.Recognize(ink,(_,_)=>Classification(InkCategory.Text),(_,_)=>throw new Exception("Text went to math"),new Text()).All(r=>r.Admission==AiInkLayout.ResultAdmission.Scored),"text-region-remains-text");
-        var numericText=AiExperimentalAutoLayout.Recognize(ink,(_,_)=>Classification(InkCategory.Text),(_,_)=>throw new Exception("Numeric text went to Math2"),new Text("1+2="),solve:(_,_)=>throw new Exception("Numeric text started CAS process")).Single();
+        var numericText=AiExperimentalAutoLayout.Recognize(ink,(_,_)=>Classification(InkCategory.Text),(_,_)=>throw new Exception("Numeric text went to Math2"),new Text("1+2="),solve:(source,_)=>source=="1+2"?new("3",false):throw new Exception("Unexpected CAS input")).Single();
         Need(numericText.Text.Text=="1+2=3"&&numericText.Admission==AiInkLayout.ResultAdmission.Scored,"scored-numeric-text-calculation-preserved");
         using(var cancel=new CancellationTokenSource())
         {cancel.Cancel();try{AiExperimentalAutoLayout.Recognize(ink,(_,_)=>throw new Exception("Cancelled classifier entry"),token:cancel.Token);throw new Exception("Cancellation ignored");}catch(OperationCanceledException e){Need(e.CancellationToken==cancel.Token,"pre-cancel-token");}}

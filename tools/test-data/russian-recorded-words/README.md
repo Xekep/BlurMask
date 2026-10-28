@@ -15,7 +15,7 @@ outputs unchanged; its character outputs are omitted. The runtime loader
 changes the Y-axis direction, and does not supply the dataset's guide lines.
 This direction follows the recorder's upward Y axis. Original physical pen-up
 boundaries are unknown because its release handler records none; see
-[recorder provenance](../../../docs/russian-recording-coordinate-provenance.md).
+[recorder provenance](../../../docs/agents/research/russian-recording-coordinate-provenance.md).
 
 The three writers and words were selected before model evaluation. Overlap
 with the vendor model's training writers is unknown. These examples are

@@ -23,4 +23,4 @@ complete license texts, component notices, provenance and the matching
 source-archive SHA256. Corresponding source and the build recipe are supplied
 in the same release as BlurMask-Giac-corresponding-sources-bdbb1c41.tar.gz
 (Windows) or BlurMask-Giac-corresponding-sources-bdbb1c41-<RID>.tar.gz (POSIX).
-See docs/giac-runtime-build.md for pinned sources and build details.
+See docs/agents/tooling/giac-runtime-build.md for pinned sources and build details.

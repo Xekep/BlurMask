@@ -183,13 +183,15 @@ internal static class AiPenProbe
 
     private static void VerifySymbolicMath()
     {
-        foreach (var input in new[] { @"\int_{1}^{10}x^2dx=", @"\int\limits_{1}^{10}x^2\mathrm{dx}=", @"\int_1^{10}dx=" })
+        var saved = Program.Settings;
+        try
         {
-            var expected = input + (input.Contains("x^2", StringComparison.Ordinal) ? "333" : "9");
-            var result = AiMathLayout.WithSolvedResult(input);
-            if (result != expected || !MathTypesetting.Supported(result))
-                throw new InvalidOperationException("Built-in integral → application/typesetting failed: " + input + " → " + result);
+            Program.Settings = saved with { GiacEnabled = false };
+            foreach (var input in new[] { "1+1=", @"\int_1^{10} x^2 dx=" })
+                if (AiMathLayout.WithSolvedResult(input) != input)
+                    throw new InvalidOperationException("Disabled Giac used a fallback calculator.");
         }
+        finally { Program.Settings = saved; }
         var failure = new AiInkLayout.Result([], new InkMark(InkTool.Text, Avalonia.Media.Colors.Black, 1, new Avalonia.Point())
             { Text = @"\int_1^{10}dx^2=" });
         AiMathLayout.ApplySolvedResult(failure, default, (_, _) => null);
@@ -199,29 +201,30 @@ internal static class AiPenProbe
         InkMath.Solver.MathSolution? Calculate(string source, CancellationToken token)
         {
             token.ThrowIfCancellationRequested(); calls++;
+            if (source == "2+2") return new("4", false);
             if (source == @"\int x^2 dx") return new(@"\frac{x^{3}}{3}+C", false);
             if (source == "x^2-1=0") return new(@"x\in \left\{-1,1\right\}", true);
             return null;
         }
-        foreach (var original in new[] { @"\int x^2 dx", @"\int x^2 dx=123", "x^2-1=0", "2+2=", "2+2=5" })
+        foreach (var original in new[] { @"\int x^2 dx", @"\int x^2 dx=123", "x^2-1=0", "2+2=5" })
         {
             var result = AiMathLayout.WithSolvedResult(original, solve: Calculate);
-            if (result != (original == "2+2=" ? "2+2=4" : original)) throw new InvalidOperationException("CAS evaluated unsolicited input/written RHS.");
+            if (result != original) throw new InvalidOperationException("CAS evaluated unsolicited input/written RHS.");
         }
         if (calls != 0) throw new InvalidOperationException("CAS started without a symbolic calculation request.");
-        foreach (var original in new[] { @"\int x^2 dx=", "x^2-1=0=" })
+        foreach (var original in new[] { @"\int x^2 dx=", "x^2-1=0=", "2+2=" })
         {
             var result = AiMathLayout.WithSolvedResult(original, solve: Calculate);
             if (result == original || !MathTypesetting.Supported(result)) throw new InvalidOperationException("Explicit symbolic result lost/typesetting unsupported: " + original + " → " + result);
         }
-        if (calls != 2) throw new InvalidOperationException("Symbolic requests were not dispatched exactly once.");
+        if (calls != 3) throw new InvalidOperationException("Symbolic requests were not dispatched exactly once.");
         if (AiMathLayout.WithSolvedResult("x^2=", solve: (_, _) => new(@"\unsupported{x}", false)) != "x^2=")
             throw new InvalidOperationException("Unsupported CAS result replaced the source.");
         if (Environment.GetEnvironmentVariable("BLURMASK_TEST_GIAC") is { Length: > 0 } path)
         {
             var engine = new InkMath.Solver.SymbolicMathSolver(System.IO.Path.GetFullPath(path));
             InkMath.Solver.MathSolution? Real(string text, CancellationToken token) => engine.SolveAsync(text, token).GetAwaiter().GetResult();
-            foreach (var source in new[] { @"\int_0^1 x^2 dx=", @"\frac{d}{dx}\sin(x)=", @"\lim_{x\to 0}\frac{\sin x}{x}=", @"lim_{x\to 0}\frac{\sin x}{x}=", @"lim_{n\to \infty }\frac{1}{n}=", @"\det\begin{matrix}1&2\\3&4\end{matrix}=", "x^2-1=0=", @"\begin{cases}x+y=3\\x-y=1\end{cases}=", @"\inv\begin{matrix}1&2\\3&4\end{matrix}=", @"\left\{\begin{matrix}x+y=3\\x-y=1\end{matrix}\right.=", @"\left[\begin{matrix}1&2\\3&4\end{matrix}\right]^{-1}=", @"\log_{2}{8}=", "log_{2}(8)=", "sin^{2}(x)+cos^{2}(x)=", @"\frac{\partial^2}{\partial x \partial y}x^2y^3=", @"\int_0^\infty e^{-x} dx=" })
+            foreach (var source in new[] { "2+2=", @"\int_1^{10} x^2 dx=", @"\int_0^1 x^2 dx=", @"\frac{d}{dx}\sin(x)=", @"\lim_{x\to 0}\frac{\sin x}{x}=", @"lim_{x\to 0}\frac{\sin x}{x}=", @"lim_{n\to \infty }\frac{1}{n}=", @"\det\begin{matrix}1&2\\3&4\end{matrix}=", "x^2-1=0=", @"\begin{cases}x+y=3\\x-y=1\end{cases}=", @"\inv\begin{matrix}1&2\\3&4\end{matrix}=", @"\left\{\begin{matrix}x+y=3\\x-y=1\end{matrix}\right.=", @"\left[\begin{matrix}1&2\\3&4\end{matrix}\right]^{-1}=", @"\log_{2}{8}=", "log_{2}(8)=", "sin^{2}(x)+cos^{2}(x)=", @"\frac{\partial^2}{\partial x \partial y}x^2y^3=", @"\int_0^\infty e^{-x} dx=" })
                 if (AiMathLayout.WithSolvedResult(source, solve: Real) == source) throw new InvalidOperationException("Real CAS → application result unchanged: " + source);
             Console.WriteLine("Native Giac → trailing equals policy/typesetting: passed.");
         }
@@ -245,6 +248,8 @@ internal static class AiPenProbe
     }
     private static void VerifyAutomatic()
     {
+        InkMath.Solver.MathSolution? PreparedSolve(string source, CancellationToken token)
+        { token.ThrowIfCancellationRequested(); return source switch { "2+2" => new("4", false), @"\frac{1}{2}" => new("0.5", false), @"\sqrt{9}" => new("3", false), "2^{3}" => new("8", false), "42" => new("42", false), _ => null }; }
         var strokes = new[] { Stroke(10, 10), Stroke(32, 10) };
         var original = strokes.Select(InkDocument.ExportMark).ToArray();
         void Preserved()
@@ -287,7 +292,7 @@ internal static class AiPenProbe
                 token.ThrowIfCancellationRequested(); mathCalls++;
                 if (input.Count != 2) throw new InvalidOperationException("Automatic formula split original strokes.");
                 return new(latex, latex, [], .95f, 10, true);
-            });
+            }, mathSolver: PreparedSolve);
             if (textCalls != 1 || mathCalls != 1 || result.Count != 1 || result[0].Text.Text != expected || result[0].Text.Font != "STIX Two Math")
                 throw new InvalidOperationException($"Automatic formula/calculation mismatch for {latex}.");
             Preserved(); VerifyReplacement(result[0], grows);
@@ -297,7 +302,7 @@ internal static class AiPenProbe
         var ambiguous = AiAutomaticLayout.Recognize(strokes, uncertain, (_, _) => new("2+2", "2+2", [], .8f, 10, true));
         if (ambiguous.Count != 0) throw new InvalidOperationException("Both uncertain auto candidates replaced handwriting.");
         Preserved();
-        var fallback = AiAutomaticLayout.Recognize(strokes, new DelegateRecognizer((_, _) => new("2+2=", .99f, 6)), (_, _) => null);
+        var fallback = AiAutomaticLayout.Recognize(strokes, new DelegateRecognizer((_, _) => new("2+2=", .99f, 6)), (_, _) => null, mathSolver: PreparedSolve);
         if (fallback.Count != 1 || fallback[0].Text.Text != "2+2=4") throw new InvalidOperationException("Explicit numeric text fallback required a Math model.");
         Preserved(); VerifyReplacement(fallback[0], true);
         var unfinished = AiAutomaticLayout.Recognize(strokes, new DelegateRecognizer((_, _) => new("2+2", .99f, 6)), (_, _) => null);
@@ -343,17 +348,17 @@ internal static class AiPenProbe
         var ink = new[] { Stroke(10, 10), Stroke(32, 10) };
         var uncertainText = new DelegateRecognizer((_, _) => new("unclear", .2f, 6));
         var localIntegral = AiAutomaticLayout.Recognize(ink, uncertainText,
-            (_, _) => new(@"\int_{1}^{10}x^2dx=", @"\int_{1}^{10}x^2dx=", [], .99f, 10, true));
+            (_, _) => new(@"\int_{1}^{10}x^2dx=", @"\int_{1}^{10}x^2dx=", [], .99f, 10, true), mathSolver: (_, _) => new("333", false));
         if (localIntegral.Count != 1 || localIntegral[0].Text.Text != @"\int_{1}^{10}x^2dx=333" || localIntegral[0].MathCalculationFailed)
             throw new InvalidOperationException("Accepted definite integral did not calculate through the automatic route.");
         VerifyReplacement(localIntegral[0], grows: true);
         int calls = 0;
         InkMath.Solver.MathSolution? Solve(string source, CancellationToken token)
-        { token.ThrowIfCancellationRequested(); calls++; return source == "x^2" ? new("x^{2}", false) : null; }
+        { token.ThrowIfCancellationRequested(); calls++; return source switch { "x^2" => new("x^{2}", false), "2+2" => new("4", false), _ => null }; }
         foreach (var (latex, confidence, expectedCount, expectedCalls) in new[]
         {
             ("x^2=", .84f, 0, 0), ("2+2=", .84f, 0, 0), ("abc", .95f, 0, 0),
-            ("x^2=3", .95f, 1, 0), ("x^2=", .95f, 1, 1), ("2+2=", .95f, 1, 0)
+            ("x^2=3", .95f, 1, 0), ("x^2=", .95f, 1, 1), ("2+2=", .95f, 1, 1)
         })
         {
             calls = 0;
@@ -383,9 +388,9 @@ internal static class AiPenProbe
         calls = 0;
         var numeric = AiAutomaticLayout.Recognize(ink, new DelegateRecognizer((_, _) => new("2+2=", .99f, 6)),
             (_, _) => null, rawAnalyzer: (_, _) => new([], [new(InkCategory.Text, new[] { 0, 1 }, .99f)]), mathSolver: Solve);
-        if (numeric.Count != 1 || numeric[0].Text.Text != "2+2=4" || calls != 0)
-            throw new InvalidOperationException("Accepted raw-text numeric request lost the fast calculation route.");
-        Console.WriteLine("CAS only after accepted OCR/complete region; uncertainty, written RHS, numeric shortcut: passed.");
+        if (numeric.Count != 1 || numeric[0].Text.Text != "2+2=4" || calls != 1)
+            throw new InvalidOperationException("Accepted raw-text numeric request did not dispatch to the sole CAS adapter.");
+        Console.WriteLine("CAS only after accepted OCR/complete region; uncertainty, written RHS, numeric CAS dispatch: passed.");
     }
 
     private static void VerifyRawContentDispatch()
@@ -411,7 +416,7 @@ internal static class AiPenProbe
             token.ThrowIfCancellationRequested();
             if (input.Count != 5 || input.Any(s => s.Points.Count != 3)) throw new InvalidOperationException("Raw analyzer lost original strokes.");
             return classification;
-        });
+        }, mathSolver: (_, _) => new("4", false));
         if (results.Count != 2 || results[0].Text.Text != "hello" || results[1].Text.Text != "2+2=4" || textCalls != 1 || mathCalls != 1 ||
             results.SelectMany(r => r.Strokes).Contains(ink[4])) throw new InvalidOperationException("Mixed raw-content dispatch converted a drawing or merged text and math.");
         foreach (var result in results) VerifyReplacement(result, result.Text.Font == "STIX Two Math");

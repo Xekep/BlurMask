@@ -12,6 +12,8 @@ internal static class DesktopFeatureChecks
             $"{{\"draft\":{draft.ToString().ToLowerInvariant()},\"prerelease\":{preview.ToString().ToLowerInvariant()},\"tag_name\":\"{tag}\"}}");
         Require(AppUpdates.ReadNewVersion(Release("v1.2.8"), "1.2.7+abc") == "1.2.8", "New stable release was missed.");
         Require(AppUpdates.ReadNewVersion(Release("v1.2.8"), "1.2.8-rc.1+abc") == "1.2.8", "Stable replacement for RC was missed.");
+        Require(AppUpdates.ReadNewVersion(Release("v1.2.8.1"), "1.2.8+abc") == "1.2.8.1", "Four-component maintenance release was missed.");
+        Require(AppUpdates.ReadNewVersion(Release("v1.2.8.1"), "1.2.8.1+abc") is null, "Updater proposed the installed maintenance release.");
         foreach (var current in new[] { "1.2.8", "1.2.8.0", "1.2.9-rc.1", "invalid" })
             Require(AppUpdates.ReadNewVersion(Release("v1.2.8"), current) is null, "Updater proposed a duplicate, downgrade or unversioned build.");
         foreach (var metadata in new[] { Release("v1.2.9", draft: true), Release("v1.2.9-rc.1", preview: true), Release("bogus"), "[]"u8.ToArray(), "{}"u8.ToArray() })
@@ -22,6 +24,12 @@ internal static class DesktopFeatureChecks
         using (var picker = new WindowFillPicker(catalog))
         {
             Require(picker.Move(new(-60, 40), force: true) == child, "Child preview did not preserve its native identity/bounds.");
+            var adjacent = child with { Id = 3, Bounds = new(-20, 20, 80, 60) };
+            catalog.Next = adjacent;
+            Require(picker.Move(new(10, 40)) == adjacent, "Rapid movement left the previous child's preview under the pointer.");
+            Require(picker.Move(new(10, 40), force: true) == adjacent, "Click selected a different child from the last pointer preview.");
+            catalog.Next = null;
+            Require(picker.Move(new(200, 40)) is null, "Rapid movement outside windows left a stale black preview.");
             catalog.Next = child with { Bounds = new(-80, 30, 50, 40) };
             Require(picker.Move(new(-60, 40), force: true)?.Bounds == catalog.Next.Bounds, "Confirmation did not revalidate the resized child.");
             foreach (var bad in new TrackedWindow?[] { null, child with { Visible = false }, child with { ProcessId = Environment.ProcessId }, child with { Bounds = new(0, 0, 0, 0) } })

@@ -76,9 +76,9 @@ internal sealed class DrawingSession : IDisposable
     {
         if (_disposed) return;
         Toolbar.ShowMessage(UiText.T("Не удалось вычислить"), UiText.T(!Settings.GiacEnabled
-            ? "Для сложных вычислений включите Giac в настройках."
+            ? "Для вычислений включите Giac в настройках."
             : AiMathSolver.Executable is null
-            ? "Проверьте распознанную формулу. В этой сборке недоступны сложные вычисления."
+            ? "Проверьте распознанную формулу. В этой сборке недоступен Giac."
             : "Проверьте распознанную формулу: эта запись не поддерживается или результат не найден."));
     }
 

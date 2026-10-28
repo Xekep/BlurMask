@@ -1,0 +1,91 @@
+{
+  "status": "PASS_SOURCE_HELPER_FULL_BUILD_AND_PUBLIC_PATH_RESEARCH",
+  "recognitionReady": false,
+  "productionLibraryBuilt": false,
+  "productionConstructorExecuted": false,
+  "sourceControls": "PASS",
+  "gitApplyCheck": "PASS",
+  "build": {
+    "project": "probe/Probe.csproj",
+    "framework": "net10.0",
+    "sdk": "11.0.100-preview.7.26381.103",
+    "exitCode": 0
+  },
+  "probe": {
+    "artifact": "E:\\BlurMask-build-artifacts-20261014\\ru-cache-agent-20261028\\artifacts\\bin\\Probe\\release\\Probe.dll",
+    "sha256": "772e50d6c86a25ce04a1a7bb07ac117dc13d6e6584d3f879f5ad8558c4ea7e9d",
+    "runtime": "10.0.12",
+    "exitCode": 0,
+    "frozenStreams": 196,
+    "oldReads": 15158,
+    "newReads": 6026,
+    "keyPatternKeys": 4096,
+    "actualMixedHashColliders": 64,
+    "workspaceMaximumBytes": 131200
+  },
+  "maximumOwners": 4096,
+  "maximumSlots": 8192,
+  "expectedImmutableInputs": "source-identity.json",
+  "candidateLibraryBuilt": true,
+  "candidateConstructorExecuted": true,
+  "fullCandidate": {
+    "authoredLibraryDocuments": 936,
+    "helperDocuments": 1,
+    "diagnosticDocuments": 1,
+    "publicProbeDocuments": 1,
+    "librarySHA256": "fd7e1a364ee9a92bf00950959c658b96a5a72121d49857d3056c10d35a0a9b6a",
+    "portablePdb": "PASS",
+    "integratedHelper": "PASS",
+    "french389": {
+      "sameInput": true,
+      "sameNativeSelectedText": true,
+      "errors": [],
+      "candidateMs": 4137.001,
+      "historicalMs": 6788.0926
+    }
+  },
+  "public36": {
+    "runtime": "10.0.12",
+    "processorCount": 2,
+    "observedAffinity": 3,
+    "unchangedInputs": true,
+    "publicDeadlineSeconds": 2,
+    "accepted": 34,
+    "deadlines": 2,
+    "historicalAccepted": 22,
+    "historicalDeadlines": 14,
+    "commonCompleted": 22,
+    "structuralMismatches": 0,
+    "allAcceptedNNReuse": true,
+    "groups": {
+      "original": [
+        9,
+        0
+      ],
+      "w_4_1": [
+        9,
+        0
+      ],
+      "w_5_1": [
+        8,
+        1
+      ],
+      "w_6_1": [
+        8,
+        1
+      ]
+    }
+  },
+  "sameSessionOldOriginal9": {
+    "oldAccepted": 9,
+    "candidateAccepted": 9,
+    "structuralMismatches": 0,
+    "oldBatchWallSeconds": 7.041880400036462,
+    "candidateBatchWallSeconds": 7.504727700026706,
+    "oneBatchOnly": true
+  },
+  "establishedLatencyBenefit": false,
+  "establishedAcceptanceBenefit": false,
+  "productionAdmission": false,
+  "historicalEvidenceOnly": "E:\\BlurMask-build-artifacts-20261014\\ru-cache-full-20261028"
+}

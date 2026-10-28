@@ -4,6 +4,8 @@ using System.Text.Json;
 using InkRecognition;
 using InkRecognition.Math;
 using InkMath.Solver;
+var giacPath=Environment.GetEnvironmentVariable("BLURMASK_TEST_GIAC");
+var giac=string.IsNullOrEmpty(giacPath)?null:new SymbolicMathSolver(Path.GetFullPath(giacPath));
 if(args.Length<5)throw new ArgumentException("pack rawMath2 officialORT output.json manifest.json [...]");
 using var runtime=new OrtRuntime(Path.GetFullPath(args[2]));
 using var stream=File.OpenRead(args[0]);using var bundle=Math2Mode0ColdBundle.Read(runtime,stream,File.ReadAllBytes(args[1]));
@@ -42,10 +44,8 @@ foreach(string manifestPath in args.Skip(4))
      w.WriteString("diagnosticLatex",latex);bool requested=latex?.TrimEnd().EndsWith('=')==true;w.WriteBoolean("diagnosticTrailingEqualsRequested",requested);
      // Named library adapter diagnostic only, not the original native evaluator or app dispatch.
      string? expression=latex is null?null:requested?latex.TrimEnd()[..^1].TrimEnd():latex;
-     string? integral=expression is null?null:PolynomialIntegralSolver.Solve(expression)?.LaTex;
-     string? numeric=NumericExpressionEvaluator.TryEvaluate(expression,out var number)?number:null;
-     w.WriteString("diagnosticPolynomialIntegral",integral);w.WriteString("diagnosticNumeric",numeric);
-     w.WriteString("diagnosticEqualsGatedResult",requested?integral??numeric:null);w.WriteEndObject();
+     string? answer=requested&&expression is not null&&giac is not null?giac.SolveAsync(expression).GetAwaiter().GetResult()?.LaTex:null;
+     w.WriteString("diagnosticGiac",answer);w.WriteString("diagnosticEqualsGatedResult",answer);w.WriteEndObject();
     }w.WriteEndArray();stage="source attachment";var attached=output.AttachSourcePositions();stage="field copy";receipt=attached.CopySelectedMathField(field);
     stage="fresh publisher";using var publication=Math2Mode0FreshMathPublisher.Create(receipt);var published=publication.CopySnapshot();
     w.WriteStartArray("publishedNames");foreach(var node in published.Temporary)w.WriteStringValue(node.Name);w.WriteEndArray();w.WriteBoolean("publisherComplete",true);stage="completed bounded publisher";

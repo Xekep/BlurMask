@@ -4,6 +4,8 @@ using System.Runtime.CompilerServices;
 using InkRecognition;
 using InkRecognition.Math;
 using InkMath.Solver;
+var giacPath=Environment.GetEnvironmentVariable("BLURMASK_TEST_GIAC");
+var giac=string.IsNullOrEmpty(giacPath)?null:new SymbolicMathSolver(Path.GetFullPath(giacPath));
 if(args.Length<5)throw new ArgumentException("pack rawMath2 officialORT capture manifests...");
 using var runtime=new OrtRuntime(args[2]);using var stream=File.OpenRead(args[0]);using var bundle=Math2Mode0ColdBundle.Read(runtime,stream,File.ReadAllBytes(args[1]));
 using var owner=Load();using var file=File.Create(args[3]);using var writer=new Utf8JsonWriter(file,new(){Indented=true});
@@ -104,11 +106,11 @@ void Syntax(string[] texts,bool valid)
 }
 static ExperimentalMathToken[] Tokens(string[] texts)=>texts.Select((s,i)=>new ExperimentalMathToken((uint)i,Encoding.UTF8.GetBytes(s+'\0'),s,[])).ToArray();
 static void Collect(){GC.Collect();GC.WaitForPendingFinalizers();GC.Collect();}
-static string Project(ExperimentalMathResult result){using var m=new MemoryStream();using(var w=new Utf8JsonWriter(m)){Write(w,result);w.Flush();}return Encoding.UTF8.GetString(m.ToArray());}
-static void Write(Utf8JsonWriter w,ExperimentalMathResult r)
+string Project(ExperimentalMathResult result){using var m=new MemoryStream();using(var w=new Utf8JsonWriter(m)){Write(w,result);w.Flush();}return Encoding.UTF8.GetString(m.ToArray());}
+void Write(Utf8JsonWriter w,ExperimentalMathResult r)
 {
  w.WriteStartObject();w.WriteString("policy",r.Policy);w.WriteNumber("scoreBits",r.ScoreBits);w.WriteNumber("frames",r.Frames);w.WriteNumber("reservation",r.PayloadReservation);w.WriteNull("confidence");w.WriteString("admission",r.Admission.ToString());w.WriteString("latex",r.LaTex);w.WriteString("unsupported",r.UnsupportedReason);w.WriteBoolean("request",r.HasCalculationRequest);
- w.WriteString("explicitCalculation",ExperimentalMathCalculation.Calculate(r,(s,t)=>PolynomialIntegralSolver.Solve(s,t)?.LaTex));
+ w.WriteString("explicitCalculation",ExperimentalMathCalculation.Calculate(r,(s,t)=>giac?.SolveAsync(s,t).GetAwaiter().GetResult()?.LaTex));
  w.WriteStartArray("tokens");foreach(var t in r.Tokens){w.WriteStartObject();w.WriteNumber("unit",t.Unit);w.WriteString("utf8",Convert.ToBase64String(t.CopyUtf8()));w.WriteString("text",t.Text);w.WriteStartArray("ranges");foreach(var range in t.Ranges){w.WriteStartArray();w.WriteNumberValue(range.First);w.WriteNumberValue(range.Last);w.WriteEndArray();}w.WriteEndArray();w.WriteEndObject();}w.WriteEndArray();WriteNodes(w,r.Syntax);w.WriteEndObject();
 }
 static void WriteNodes(Utf8JsonWriter w,IReadOnlyList<ExperimentalMathSyntaxNode> nodes)

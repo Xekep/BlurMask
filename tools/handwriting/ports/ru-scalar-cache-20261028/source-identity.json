@@ -1,0 +1,30 @@
+{
+  "sourceOnly": true,
+  "releaseEligible": false,
+  "recognitionReady": false,
+  "packetManifestSHA256": "f29c41ddbcb290caae343aa91b1ba7e6920c4deeca5d77500d43277592d0a728",
+  "files": [
+    {
+      "path": "src/InkRecognition/LegacyFreshMainGlobalWordTextPublication.cs",
+      "preSHA256": "a6a09abd67c2ce7b96b3b84a71374f865a45d121e66820133c71107b7af5c564",
+      "postSHA256": "b87c4f3be8b36e881b08ec3b0b7f6eef5652d07cc7b8433783895521a9d420ab"
+    },
+    {
+      "path": "src/InkRecognition/LegacyWholeWordPreflightScalarCache.cs",
+      "preSHA256": null,
+      "postSHA256": "00edd373d699a27ce4ab5c4b217a8f7154666ebb668817aebb789e5e93a9792a"
+    },
+    {
+      "path": "tools/WholeWordPreflightCache.Probe/Program.cs",
+      "preSHA256": null,
+      "postSHA256": "34745b362e8dab76338beddd1299a6bc3e4fae5386d4d4fb891da3cbf46a75e9"
+    },
+    {
+      "path": "tools/WholeWordPreflightCache.Probe/WholeWordPreflightCache.Probe.csproj",
+      "preSHA256": null,
+      "postSHA256": "c7cdb94656939a5e380362dacf4fef8a63a8c4c2b7fe9f82cfe1ea8470c03faf"
+    }
+  ],
+  "expectedStreamsPath": "fake-streams.json",
+  "expectedStreamsSHA256": "13122e95aa1114894ea2bf23c92ed53d1e969addaa5ada64422c1ae12e7a034c"
+}

@@ -62,7 +62,7 @@ foreach (var forbidden in new[] { @"lim_{2\to 0}x", @"lim_{x 0}x", @"lim_{x\to 0
     catch (FormatException) { }
 }
 Console.WriteLine($"PASS math grammar: {fixtures.Length} translations, command injection and complexity guards");
-var polynomialFixtures = new (string Input, string Expected)[]
+var integralFixtures = new (string Input, string Expected)[]
 {
     (@"\int_{1}^{10} x^2 dx", "333"),
     (@"\int\limits_{1}^{10} x^2 \mathrm{dx}", "333"),
@@ -83,26 +83,35 @@ var polynomialFixtures = new (string Input, string Expected)[]
     (@"\int_0^3 2 dx", "6"),
     (@"\int_0^3 0 dx", "0"),
     (@"\int_1^{10} x^0 dx", "9"),
-    (@"\int_1^2 0.123x dx", @"\frac{369}{2000}")
+    (@"\int_1^2 0.123x dx", @"\frac{369}{2000}"),
+    (@"\int_0^{2^{-1}} x dx", @"\frac{1}{8}"),
+    (@"\int_0^1 \frac{x}{2^{-1}} dx", "1"),
+    (@"\int_0^1 (-2)^{-3}x dx", @"-\frac{1}{16}"),
+    (@"\int_0^1 \frac{1}{2}^{-2}x dx", "2"),
+    (@"\int_0^1 1^{-32}x dx", @"\frac{1}{2}")
 };
-foreach (var (input, expected) in polynomialFixtures)
-    if (PolynomialIntegralSolver.Solve(input)?.LaTex != expected) throw new Exception("Built-in exact integral differs: " + input);
-foreach (var input in new[] { @"\int_0^1 \sin x dx", @"\int_0^1 \frac{1}{x}dx", @"\int_0^a x dx", @"\int_0^1 xy dx", @"\int_0^1 0^0 dx", @"\int_0^1 x^{33} dx", @"\int_0^1 \frac{1}{0}dx", @"\int_1^{10} dx^2", @"\int_0^1 e^2 de", "1+1", @"\system{whoami}" })
-    if (PolynomialIntegralSolver.Solve(input) is not null) throw new Exception("Unsupported/ambiguous local integral computed: " + input);
-using (var canceled = new CancellationTokenSource())
-{
-    canceled.Cancel();
-    try { PolynomialIntegralSolver.Solve(polynomialFixtures[0].Input, canceled.Token); throw new Exception("Local integral cancellation lost."); }
-    catch (OperationCanceledException) { }
-}
-Console.WriteLine($"PASS built-in exact rational integrals: {polynomialFixtures.Length} fixtures, unsupported/ambiguous notation and cancellation");
 if (new MathExpressionParser("plot(x)").Parse().Cas.Contains("plot(", StringComparison.Ordinal)) throw new Exception("Arbitrary function name passed to CAS.");
-if (args.Length == 0) return;
+if (args.Length == 0) { Console.WriteLine("Giac not supplied: only adapter grammar checked; no fallback calculator exists."); return; }
 var solver = new SymbolicMathSolver(Path.GetFullPath(args[0]));
+// A previously discovered CLI can disappear before launch. No second engine
+// may produce an answer when the selected Giac executable is unavailable.
+var missingDirectory = Path.Combine(Path.GetTempPath(), "BlurMask-missing-Giac-" + Guid.NewGuid().ToString("N"));
+Directory.CreateDirectory(missingDirectory);
+var missingExecutable = Path.Combine(missingDirectory, OperatingSystem.IsWindows() ? "icas.exe" : "icas");
+try
+{
+    File.WriteAllText(missingExecutable, "");
+    var unavailable = new SymbolicMathSolver(missingExecutable);
+    File.Delete(missingExecutable);
+    if (await unavailable.SolveAsync("1+1") is not null || await unavailable.SolveAsync(@"\int_1^{10}x^2dx") is not null)
+        throw new Exception("Unavailable Giac produced a fallback answer.");
+}
+finally { if (File.Exists(missingExecutable)) File.Delete(missingExecutable); Directory.Delete(missingDirectory); }
 if (args.Length > 1) { Console.WriteLine((await solver.SolveAsync(args[1]))?.LaTex ?? "unsolved"); return; }
 var watch = Stopwatch.StartNew();
 var actualFixtures = new (string Input, string Expected)[]
 {
+    ("1+1", "2"), ("2+3*4", "14"), ("-2^2", "-4"), ("2^{-3}", @"\frac{1}{8}"),
     (@"\int x^2 dx", @"\frac{x^{3}}{3}+C"),
     (@"\int_0^1 x^2 dx", @"\frac{1}{3}"),
     (@"\int_{1}^{10} x^2 dx", "333"),
@@ -149,14 +158,14 @@ foreach (var (input, expected) in actualFixtures)
     var value = await solver.SolveAsync(input);
     if (!SameResult(value?.LaTex, expected, value?.IsEquation == false)) throw new Exception($"Native CAS differs: {input} → {value?.LaTex ?? "null"}; expected {expected}");
 }
-foreach (var (input, expected) in polynomialFixtures)
+foreach (var (input, expected) in integralFixtures)
 {
     // Giac treats decimal literals as floating point. Compare exact equivalent
-    // rational inputs against our decimal-as-rational integration path.
+    // rational inputs to assert exact Giac results.
     var exactInput = input.Replace("-0.5", "-1/2", StringComparison.Ordinal).Replace("0.5", "1/2", StringComparison.Ordinal)
         .Replace("0.123", @"\frac{123}{1000}", StringComparison.Ordinal);
     var actual = (await solver.SolveAsync(exactInput))?.LaTex;
-    if (actual != expected) throw new Exception($"Independent Giac/local polynomial comparison differs: {input} → {actual}; expected {expected}");
+    if (actual != expected) throw new Exception($"Giac exact integral differs: {input} → {actual}; expected {expected}");
 }
 using var cancel = new CancellationTokenSource(); cancel.Cancel();
 try { await solver.SolveAsync("1+1", cancel.Token); throw new Exception("Cancellation lost."); } catch (OperationCanceledException) { }
@@ -175,7 +184,7 @@ try { await cancellableSolver.SolveAsync("1+1", activeCancellation.Token); throw
 if (child is null || !child.HasExited) throw new Exception("Canceled CAS child was not reaped.");
 child.Dispose();
 if (cancellationWatch.Elapsed > TimeSpan.FromSeconds(2)) throw new Exception("Native child cancellation was slow.");
-Console.WriteLine($"PASS native Giac: {actualFixtures.Length} calculus/algebra fixtures, cancellation and undefined/injection guards; {watch.ElapsedMilliseconds} ms");
+Console.WriteLine($"PASS native Giac: {actualFixtures.Length} calculus/arithmetic/algebra fixtures, {integralFixtures.Length} exact integral fixtures, unavailable engine, cancellation and undefined/injection guards; {watch.ElapsedMilliseconds} ms");
 
 static bool SameResult(string? actual, string expected, bool allowStructural)
 {

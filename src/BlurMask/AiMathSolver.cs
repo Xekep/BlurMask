@@ -35,14 +35,20 @@ internal static class AiMathSolver
     {
         if (!File.Exists(BundledExecutable) || Executable != BundledExecutable)
             throw new InvalidOperationException("The bundled Giac solver was not discovered automatically.");
+        var savedOff = System.Text.Json.JsonSerializer.Serialize(new AppSettings { GiacEnabled = false }, SettingsJsonContext.Default.AppSettings);
+        if (System.Text.Json.JsonSerializer.Deserialize(savedOff, SettingsJsonContext.Default.AppSettings)?.GiacEnabled != false ||
+            System.Text.Json.JsonSerializer.Deserialize("{}", SettingsJsonContext.Default.AppSettings)?.GiacEnabled != true)
+            throw new InvalidOperationException("Giac settings must preserve saved off and enable new settings.");
         var originalSettings = Program.Settings;
         try
         {
+            Program.Settings = originalSettings with { GiacEnabled = false };
+            if (Calculate("1+1", default) is not null || Calculate(@"\int_1^{10} x^2 dx", default) is not null)
+                throw new InvalidOperationException("Disabled Giac must not use a fallback calculator.");
             Program.Settings = new();
-            if (Calculate(@"\frac{d}{dx}\sin(x)", default) is not null ||
+            if (!Program.Settings.GiacEnabled || Calculate("1+1", default)?.LaTex != "2" ||
                 Calculate(@"\int_1^{10} x^2 dx", default)?.LaTex != "333")
-                throw new InvalidOperationException("Disabled Giac must preserve built-in integrals without running advanced CAS.");
-            Program.Settings = originalSettings with { GiacEnabled = true };
+                throw new InvalidOperationException("New settings must route all calculations to bundled Giac.");
             if (!Equivalent(Calculate(@"\frac{d}{dx}\sin(x)", default)?.LaTex, @"\cos x"))
                 throw new InvalidOperationException("The Giac toggle did not enable the automatically discovered engine.");
         }
@@ -59,7 +65,7 @@ internal static class AiMathSolver
             if (!Equivalent((await solver.SolveAsync(formula))?.LaTex, expected))
                 throw new InvalidOperationException("Installed Giac calculation failed: " + formula);
         }
-        Console.WriteLine("PASS bundled Giac: default-off toggle, built-in fallback, automatic discovery, definite/improper integrals, derivative and limit.");
+        Console.WriteLine("PASS bundled Giac: default-on, disabled means no calculation, automatic discovery, arithmetic, definite/improper integrals, derivative and limit.");
         static bool Equivalent(string? actual, string expected)
         {
             if (actual == expected) return true;
@@ -71,7 +77,7 @@ internal static class AiMathSolver
     }
     internal static MathSolution? Calculate(string latex, CancellationToken token)
     {
-        if (PolynomialIntegralSolver.Solve(latex, token) is { } exact) return exact;
+        token.ThrowIfCancellationRequested();
         if (!Program.Settings.GiacEnabled) return null;
         try { return Executable is { } path ? new SymbolicMathSolver(path).SolveAsync(latex, token).GetAwaiter().GetResult() : null; }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException) { return null; }

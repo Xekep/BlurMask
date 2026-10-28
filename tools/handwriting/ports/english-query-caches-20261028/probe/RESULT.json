@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "rows": 494,
+  "cycles": 2,
+  "collisionPopulation": 81,
+  "interruptions": 162,
+  "syntheticGuardRows": 8,
+  "helperSha256": "a6ac300294eeebe03ebaa6d22e7232713e1856dd45bf60a8ccd726625f1dd6f8",
+  "fullCandidateSha256": "2f00b0b27eab29f8a075066ed1dce3f19c11a5a8f35eb996ce729860fdb50030",
+  "limitations": "Actual helper with minimal fake query objects; extracted Enroll/End with synthetic owner/ledger. No real scope/source/root execution."
+}

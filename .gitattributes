@@ -13,3 +13,7 @@ tools/LegacyGlobalTextSourceWrapper.Probe/audit_output.py -text
 
 # Preserve exact bytes consumed by the conditional-source contract.
 src/InkRecognition/LegacyFreshMainGlobalWordTextPublication.cs -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# Retain exact tested preimage/candidate hashes in the isolated RU work packet.
+tools/handwriting/ports/ru-scalar-cache-20261028/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+tools/handwriting/ports/english-query-caches-20261028/** -text whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol

@@ -1,0 +1,227 @@
+--- a/src/InkRecognition/LegacyFreshMainGlobalWordTextPublication.cs
++++ b/src/InkRecognition/LegacyFreshMainGlobalWordTextPublication.cs
+@@ -170,6 +170,8 @@
+         compactStorage=compact;activeCompactCount=compactCount;
+         if(compactCount<1||compactCount>compact.Length/40)throw new InvalidDataException("Actual active compact extent required.");
+         var pool=completion.Source.Session!.Ownership.GlyphPool;
++        var scalarPreflight=allWords is not null&&batchWords is null
++            ? LegacyWholeWordPreflightScalarCache.Create(allWords.TotalReferences,MaximumAllChoiceEnumeratedArrays,token) : null;
+         foreach(var entry in EnumerateAllReferences(token))
+         {
+             ulong reference=entry.Reference;
+@@ -181,31 +183,38 @@
+             var selectedRow=owner.Records.Span.Slice(ordinal*40,40);
+             ushort kind=BinaryPrimitives.ReadUInt16LittleEndian(selectedRow[4..]),run=BinaryPrimitives.ReadUInt16LittleEndian(selectedRow[8..]);
+             if((kind&7)==1&&(run&0x7ffc)!=0&&(run&3)==3)continue;
+-            for(int i=0;i<owner.Records.Length;i+=40)
+-                if((BinaryPrimitives.ReadUInt16LittleEndian(owner.Records.Span.Slice(i+4))&7)!=0)
+-                    throw new NotSupportedException("The bounded parent admits ordinary scalar alternatives only.");
+-            var higher=batchWords is null?default:ReserveHigherMetadata(entry.Span!,entry.Word,entry.Offset,reference,token);
+-            var source=wrapper.Choices.Refresh.SourceMetadata.Read(ownerKey,token);
+-            if(allWords is not null&&source.IsHigherSource)
++            int matchingCompact=0,sourceReferenceCount=0;
++            bool cached=scalarPreflight is not null&&scalarPreflight.TryGet(ownerKey,out matchingCompact,out sourceReferenceCount,token);
++            if(!cached)
+             {
+-                if(batchWords is null)throw new NotSupportedException("All275 publication currently requires ordinary base-source glyph owners.");
+-                RequireHigherMetadata(higher,source,token);
++                for(int i=0;i<owner.Records.Length;i+=40)
++                    if((BinaryPrimitives.ReadUInt16LittleEndian(owner.Records.Span.Slice(i+4))&7)!=0)
++                        throw new NotSupportedException("The bounded parent admits ordinary scalar alternatives only.");
++                var higher=batchWords is null?default:ReserveHigherMetadata(entry.Span!,entry.Word,entry.Offset,reference,token);
++                var source=wrapper.Choices.Refresh.SourceMetadata.Read(ownerKey,token);
++                if(allWords is not null&&source.IsHigherSource)
++                {
++                    if(batchWords is null)throw new NotSupportedException("All275 publication currently requires ordinary base-source glyph owners.");
++                    RequireHigherMetadata(higher,source,token);
++                }
++                matchingCompact=0;
++                for(int row=starts[source.BaseNode];row<starts[source.BaseNode+1];row++)
++                {
++                    token.ThrowIfCancellationRequested();var data=compact.AsSpan(row*40,40);byte traits=data[32];
++                    if((traits&0x20)==0||(traits&7)!=0||BinaryPrimitives.ReadUInt64LittleEndian(data[8..])!=source.BaseSourceKey)continue;
++                    matchingCompact++;
++                    ushort symbol=BinaryPrimitives.ReadUInt16LittleEndian(data[28..]);
++                    var resolved=completion.Source.Session!.OrdinaryProducer.ResolveForRefresh(source.BaseNode,source.BaseArc,symbol,token);
++                    if(resolved.ExternalVariant!=0||resolved.EmittedSymbol is>=0xfff9 and<=0xfffc)
++                        throw new NotSupportedException("Nonordinary compact replacement/control variants require a separate parent budget contract.");
++                }
++                //Both singleton and batch bindings use the same private refresh
++                //kernel/source interval and predicates above. Only matching rows
++                //can append; unrelated global compact rows cannot emit here.
++                sourceReferenceCount=source.ReferenceCount;
+             }
+-            int matchingCompact=0;
+-            for(int row=starts[source.BaseNode];row<starts[source.BaseNode+1];row++)
+-            {
+-                token.ThrowIfCancellationRequested();var data=compact.AsSpan(row*40,40);byte traits=data[32];
+-                if((traits&0x20)==0||(traits&7)!=0||BinaryPrimitives.ReadUInt64LittleEndian(data[8..])!=source.BaseSourceKey)continue;
+-                matchingCompact++;
+-                ushort symbol=BinaryPrimitives.ReadUInt16LittleEndian(data[28..]);
+-                var resolved=completion.Source.Session!.OrdinaryProducer.ResolveForRefresh(source.BaseNode,source.BaseArc,symbol,token);
+-                if(resolved.ExternalVariant!=0||resolved.EmittedSymbol is>=0xfff9 and<=0xfffc)
+-                    throw new NotSupportedException("Nonordinary compact replacement/control variants require a separate parent budget contract.");
+-            }
+-            //Both singleton and batch bindings use the same private refresh
+-            //kernel/source interval and predicates above. Only matching rows
+-            //can append; unrelated global compact rows cannot emit here.
+-            budget.AddSource(owner.Records.Length/40,matchingCompact,source.ReferenceCount,Scope.Document.ObjectCount);
++            budget.AddSource(owner.Records.Length/40,matchingCompact,sourceReferenceCount,Scope.Document.ObjectCount);
++            if(!cached)scalarPreflight?.Store(ownerKey,matchingCompact,sourceReferenceCount,token);
+             if(allWords is not null)
+             {
+                 if(allWordRefreshCandidates!.TryGetValue(ownerKey,out int prior)&&prior!=matchingCompact)throw new InvalidDataException("Same actual source owner must retain its compact candidate extent.");
+--- /dev/null
++++ b/src/InkRecognition/LegacyWholeWordPreflightScalarCache.cs
+@@ -0,0 +1,67 @@
++namespace InkRecognition;
++
++//Private constructor-local DATA cache: no source/context/pool/NN capability or callbacks.
++internal sealed class LegacyWholeWordPreflightScalarCache
++{
++    private struct Entry { internal ulong Key; internal int Matching,References; }
++    private readonly Entry[] slots;
++    private readonly int maximumOwners;
++    private int count;
++    internal int Count=>count;
++    internal int Capacity=>slots.Length;
++    internal long ReservedBytes{get;}
++    private LegacyWholeWordPreflightScalarCache(int capacity,int maximumOwners,long reserved)
++    {this.maximumOwners=maximumOwners;ReservedBytes=reserved;slots=new Entry[capacity];}
++    internal static LegacyWholeWordPreflightScalarCache Create(int referenceUses,long workspaceCeiling,CancellationToken token=default)
++    {
++        token.ThrowIfCancellationRequested();
++        if(referenceUses is <1 or >65536)throw new ArgumentOutOfRangeException(nameof(referenceUses));
++        int owners=Math.Min(referenceUses,4096),capacity=2;
++        while(capacity<2*owners)capacity*=2;
++        //16-byte unmanaged entry; generous128 bytes covers this object/array headers.
++        //Check BEFORE object/backing allocation; local workspace, not a cumulative debit.
++        long reserved=checked(16L*capacity+128);
++        if(reserved>workspaceCeiling)throw new NotSupportedException("Preflight scalar-cache workspace exceeds existing array ceiling.");
++        return new(capacity,owners,reserved);
++    }
++    internal bool TryGet(ulong key,out int matching,out int references,CancellationToken token)
++    {
++        token.ThrowIfCancellationRequested();matching=references=0;int at=Hash(key)&(slots.Length-1);
++        for(int work=0;work<slots.Length;work++,at=(at+1)&(slots.Length-1))
++        {
++            token.ThrowIfCancellationRequested();ref var entry=ref slots[at];
++            if(entry.References==0)return false;
++            if(entry.Key==key){matching=entry.Matching;references=entry.References;return true;}
++        }
++        throw new InvalidOperationException("Scalar cache has no empty slot.");
++    }
++    internal void Store(ulong key,int matching,int references,CancellationToken token)
++    {
++        token.ThrowIfCancellationRequested();if(matching<0||references<1)throw new ArgumentOutOfRangeException(nameof(references));
++        int at=Hash(key)&(slots.Length-1);
++        for(int work=0;work<slots.Length;work++,at=(at+1)&(slots.Length-1))
++        {
++            token.ThrowIfCancellationRequested();ref var entry=ref slots[at];
++            if(entry.References!=0)
++            {
++                if(entry.Key!=key)continue;
++                if(entry.Matching!=matching||entry.References!=references)throw new InvalidOperationException("Immutable preflight scalar changed.");
++                return;
++            }
++            if(count==maximumOwners)throw new InvalidOperationException("Preflight owner bound exceeded.");
++            entry.Key=key;entry.Matching=matching;entry.References=references;count++;return;
++        }
++        throw new InvalidOperationException("Scalar cache has no empty slot.");
++    }
++    //Canonical owner keys pack node24/arc16/flag56. Mix every field before
++    //masking: XOR-fold alone ignores arc low bits and clusters a node's arcs.
++    private static int Hash(ulong key)
++    {
++        unchecked
++        {
++            key^=key>>30;key*=0xbf58476d1ce4e5b9UL;
++            key^=key>>27;key*=0x94d049bb133111ebUL;
++            return (int)(key^(key>>31));
++        }
++    }
++}
+--- /dev/null
++++ b/tools/WholeWordPreflightCache.Probe/Program.cs
+@@ -0,0 +1,77 @@
++using InkRecognition;
++int controls=0;
++if(args.Length!=1)throw new ArgumentException("frozen fake-streams.json required");
++using var data=System.Text.Json.JsonDocument.Parse(File.ReadAllBytes(args[0]));
++foreach(var test in data.RootElement.EnumerateArray())
++{
++ var uses=test.GetProperty("uses").EnumerateArray().Select(u=>new Use(u[0].GetUInt64(),u[1].GetInt32(),u[2].GetBoolean())).ToArray();
++ Compare(uses,test.GetProperty("fault").GetInt32(),test.GetProperty("cancel").GetInt32(),test.GetProperty("quota").GetBoolean(),test);controls++;
++}
++if(controls!=196)throw new Exception("Incomplete frozen fake streams.");
++var collision=LegacyWholeWordPreflightScalarCache.Create(4096,128L*1024*1024);
++for(int i=0;i<4096;i++)collision.Store((ulong)i*8192,i%7,i+1,default);
++for(int i=0;i<4096;i++)if(!collision.TryGet((ulong)i*8192,out int m,out int r,default)||m!=i%7||r!=i+1)throw new Exception("Collision lost scalar.");
++if(collision.Count!=4096||collision.Capacity!=8192||collision.ReservedBytes!=131200)throw new Exception("Cache census differs.");
++try{LegacyWholeWordPreflightScalarCache.Create(4096,131199);throw new Exception("Workspace precharge ignored.");}catch(NotSupportedException){}
++try{collision.Store(7,0,0,default);throw new Exception("Zero source count accepted.");}catch(ArgumentOutOfRangeException){}
++try{collision.Store(0,999,1,default);throw new Exception("Changed immutable scalar accepted.");}catch(InvalidOperationException){}
++using(var c=new CancellationTokenSource()){c.Cancel();try{LegacyWholeWordPreflightScalarCache.Create(1,128L*1024*1024,c.Token);throw new Exception("Cancelled allocation accepted.");}catch(OperationCanceledException){}try{collision.TryGet(0,out _,out _,c.Token);throw new Exception("Cancelled hit accepted.");}catch(OperationCanceledException){}try{collision.Store(0,0,1,c.Token);throw new Exception("Cancelled store accepted.");}catch(OperationCanceledException){}}
++//Edge controls beyond the frozen stream corpus.
++foreach(int invalid in new[]{-1,0,65537})
++    Expect<ArgumentOutOfRangeException>(()=>LegacyWholeWordPreflightScalarCache.Create(invalid,long.MaxValue));
++var tiny=LegacyWholeWordPreflightScalarCache.Create(1,160);
++if(tiny.ReservedBytes!=160||tiny.Capacity!=2||tiny.Count!=0)throw new Exception("Minimum census differs.");
++Expect<NotSupportedException>(()=>LegacyWholeWordPreflightScalarCache.Create(1,159));
++if(tiny.TryGet(0,out int emptyM,out int emptyR,default)||emptyM!=0||emptyR!=0)throw new Exception("Empty key0 hit.");
++tiny.Store(0,0,1,default);tiny.Store(0,0,1,default);
++if(tiny.Count!=1||!tiny.TryGet(0,out int zeroM,out int zeroR,default)||zeroM!=0||zeroR!=1)throw new Exception("Key0/zero-match lost.");
++Expect<InvalidOperationException>(()=>tiny.Store(1,0,1,default));
++if(tiny.Count!=1||tiny.TryGet(1,out _,out _,default))throw new Exception("Failed insertion mutated cache.");
++Expect<ArgumentOutOfRangeException>(()=>tiny.Store(0,-1,1,default));
++foreach(int n in new[]{1,2,3,4095,4096,4097,65536})
++{
++ var c=LegacyWholeWordPreflightScalarCache.Create(n,long.MaxValue);
++ if(c.Capacity>8192||c.ReservedBytes>131200)throw new Exception("Workspace bound differs.");
++}
++//Ensure packed arc bits affect buckets: the old XOR-fold put all256 arcs in one.
++var hash=typeof(LegacyWholeWordPreflightScalarCache).GetMethod("Hash",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Static)!;
++int Bucket(ulong key)=>(int)hash.Invoke(null,new object[]{key})!&8191;
++if(Enumerable.Range(0,256).Select(a=>Bucket(7UL|((ulong)a<<24))).Distinct().Count()<200)throw new Exception("Packed owner arcs cluster.");
++//Exercise an actual64-key collision chain and its missing-key termination.
++var chain=LegacyWholeWordPreflightScalarCache.Create(4096,long.MaxValue);var colliders=new List<ulong>();
++for(ulong key=0;colliders.Count<65;key++)if(Bucket(key)==0)colliders.Add(key);
++for(int i=0;i<64;i++)chain.Store(colliders[i],i,i+1,default);
++for(int i=0;i<64;i++)if(!chain.TryGet(colliders[i],out int m,out int r,default)||m!=i||r!=i+1)throw new Exception("Collision chain lost scalar.");
++if(chain.TryGet(colliders[64],out _,out _,default))throw new Exception("Collision false positive.");
++Console.WriteLine($"PASS {controls} real-scalar-helper old/new per-use traces +4096 key-pattern/workspace/immutability/cancellation controls; no source authority/model/NN.");
++static void Expect<T>(Action action)where T:Exception
++{try{action();}catch(T){return;}throw new Exception($"Expected {typeof(T).Name}");}
++static void Compare(Use[] uses,int faultKey,int cancelAt,bool quota,System.Text.Json.JsonElement expected)
++{
++ var a=Run(false);var b=Run(true);if(!a.Events.SequenceEqual(b.Events)||a.Error!=b.Error||a.Rows!=b.Rows||a.Ranges!=b.Ranges)throw new Exception("Old/new use or failure prefix differs.");
++ if(b.Reads>a.Reads)throw new Exception("Cache increased pure reads.");
++ foreach(var pair in new[]{(Value:a,Name:"old"),(Value:b,Name:"new")})
++ {
++  var e=expected.GetProperty(pair.Name);var error=e.GetProperty("error");string? expectedError=error.ValueKind==System.Text.Json.JsonValueKind.Null?null:error.GetString();
++  if(pair.Value.Error!=expectedError||pair.Value.Rows!=e.GetProperty("rows").GetInt32()||pair.Value.Ranges!=e.GetProperty("ranges").GetInt32()||pair.Value.Reads!=e.GetProperty("reads").GetInt32()||!pair.Value.Events.SequenceEqual(e.GetProperty("events").EnumerateArray().Select(x=>x.GetString()!)))throw new Exception("Independent frozen scalar oracle differs.");
++ }
++
++ Result Run(bool enabled)
++ {
++  var cache=enabled?LegacyWholeWordPreflightScalarCache.Create(Math.Max(1,uses.Length),128L*1024*1024):null;
++  var budget=new LegacyGlobalWordTextWorkBudget();if(quota)budget.AddSource(65535,0,0,1);
++  var events=new List<string>();int reads=0;string? error=null;using var cancel=new CancellationTokenSource();
++  try{for(int i=0;i<uses.Length;i++)
++  {
++   if(i==cancelAt)cancel.Cancel();cancel.Token.ThrowIfCancellationRequested();var u=uses[i];events.Add($"marker:{i}:{u.Marker}");if(u.Marker<0)throw new ArgumentException("marker");
++   if(u.Skip){events.Add($"skip:{i}");continue;}
++   int matching=0,references=0;bool hit=cache is not null&&cache.TryGet(u.Key,out matching,out references,cancel.Token);
++   if(!hit){reads++;if((long)u.Key==faultKey)throw new InvalidOperationException("immutable metadata failure");matching=(int)(u.Key%7);references=1+(int)(u.Key%3);}
++   budget.AddSource(1,matching,references,1);events.Add($"debit:{i}:{matching}:{references}:{budget.Rows}:{budget.Ranges}");
++   if(!hit)cache?.Store(u.Key,matching,references,cancel.Token);
++  }}catch(Exception e)when(e is ArgumentException or InvalidOperationException or NotSupportedException or OperationCanceledException){error=e.GetType().Name+":"+(e is OperationCanceledException?"cancel":e.Message);}
++  return new(events.ToArray(),error,budget.Rows,budget.Ranges,reads);
++ }
++}
++readonly record struct Use(ulong Key,int Marker,bool Skip);
++readonly record struct Result(string[] Events,string? Error,int Rows,int Ranges,int Reads);
+--- /dev/null
++++ b/tools/WholeWordPreflightCache.Probe/WholeWordPreflightCache.Probe.csproj
+@@ -0,0 +1 @@
++<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><AssemblyName>InkRecognition.Probe</AssemblyName></PropertyGroup><ItemGroup Condition="'$(ReviewedLibraryPath)' == ''"><ProjectReference Include="../../src/InkRecognition/InkRecognition.csproj" /></ItemGroup><ItemGroup Condition="'$(ReviewedLibraryPath)' != ''"><Reference Include="InkRecognition"><HintPath>$(ReviewedLibraryPath)</HintPath><Private>true</Private></Reference></ItemGroup></Project>

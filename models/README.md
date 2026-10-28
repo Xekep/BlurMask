@@ -50,7 +50,7 @@ directly and verifies its source and full ordered-table SHA-256. It can be reuse
 with the prepared C1A fitter without a private vendor PE or research directory.
 It requires actual per-symbol geometry and recognized alphabet IDs; it does not
 recognize raw connected handwriting or replace whole-word bounds automatically.
-See [portable character-line catalog](../docs/legacy-character-line-category-model.md).
+See [portable character-line catalog](../docs/agents/research/legacy-character-line-category-model.md).
 
 Raw Content2 partitions ink into regions; it does not decode Russian text or
 solve equations. Export its checked profile into the application's model pack:
@@ -65,20 +65,20 @@ two Russian resources and matching engine profile without MyScript DLLs or
 private research files. Its reusable word path still requires an explicit source
 baseline; full connected cursive candidate generation and native search are unfinished.
 Known-word native lexical costs are available with explicit profiles and flags.
-See [portable Russian model loading](../docs/legacy-russian-model-bundle.md).
-See [the Russian word diagnostic](../docs/legacy-russian-directional-words.md) and
-[Raw Content installation](../docs/raw-content-engine.md).
+See [portable Russian model loading](../docs/agents/research/legacy-russian-model-bundle.md).
+See [the Russian word diagnostic](../docs/agents/research/legacy-russian-directional-words.md) and
+[Raw Content installation](../docs/agents/research/raw-content-engine.md).
 
 [text-unicode/legacy-normalization-data.json](text-unicode/legacy-normalization-data.json)
 is the portable default Unicode9 scalar table for native combining classes,
 canonical decomposition and composition. It is fingerprinted in the model
 manifest and read without a vendor DLL. Full stream ordering, marker handling
 and accepted text publication remain separate. See
-[normalization data](../docs/legacy-native-unicode-normalization-data.md).
+[normalization data](../docs/agents/research/legacy-native-unicode-normalization-data.md).
 
 [text-unicode/legacy-case-data.json](text-unicode/legacy-case-data.json) stores
 fingerprinted native scalar case alternatives and opaque contextual flags.
 Unicode9 is a comparison reference; native case behavior has retained
 reference differences. The independent loader and alphabet predicate require
 no vendor DLL. Full case292 query integration remains unfinished. See
-[case alternatives](../docs/legacy-native-case-alternatives.md).
+[case alternatives](../docs/agents/research/legacy-native-case-alternatives.md).
