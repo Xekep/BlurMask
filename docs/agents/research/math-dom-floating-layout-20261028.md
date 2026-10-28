@@ -1,5 +1,9 @@
 # DOM floating text: bounded layout port
 
+The subsequent [finite mode2 generator](math-dom-mode2-digits-20261028.md) closes
+the nonzero finite boundary described below for the actual precision9/17 caller.
+This file retains the earlier compositor-stage scope and verification evidence.
+
 This is development after 1.2.8.1. The full recognition engine, nonzero finite
 dtoa and prior-result ownership are not complete. This increment establishes
 text composition from a supplied digit tuple; it does not improve or measure

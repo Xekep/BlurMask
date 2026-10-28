@@ -4,6 +4,11 @@ Subsequent work implemented the [bounded compositor and zero/special branches](.
 The observations and proposed finite generator below remain the original static
 packet. Nonzero finite dtoa is still not implemented or admitted.
 
+The later [mode2 finite generator](../../../../docs/agents/research/math-dom-mode2-digits-20261028.md)
+now closes that finite boundary for precision9/17 at the actual DOM caller.
+The paragraphs below describe the earlier static-only packet, not current
+production admission.
+
 This packet contains documentation and export requests only. No floating
 formatter was implemented, no production source changed, and no vendor DLL
 was executed. The production floating service boundary remains necessary.

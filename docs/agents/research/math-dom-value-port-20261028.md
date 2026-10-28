@@ -87,8 +87,8 @@ are unchanged by these source commits.
 
 The floating text formatter C0 uses custom dtoa. The subsequent
 [bounded layout port](math-dom-floating-layout-20261028.md) implements composition
-and default signed-zero/special conversion. Nonzero finite dtoa still requires
-an explicit generator; `.NET ToString` is not substituted. True prior-result editing, nonfresh
+and default signed-zero/special conversion. The subsequent [mode2 digit generator](math-dom-mode2-digits-20261028.md)
+adds exact finite formatting for precision9/17; `.NET ToString` is not substituted. True prior-result editing, nonfresh
 owner construction and whole recognition integration remain unfinished. These
 controls establish neither handwriting accuracy nor full engine completion.
 

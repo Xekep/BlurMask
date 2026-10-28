@@ -33,8 +33,8 @@ internal interface IMath2DomFloatingFormatter
 
 internal static class Math2DomValueConversion
 {
-    // Document0078D0. The built-in floating formatter admits zero/specials;
-    // finite nonzero dtoa still requires an explicitly supplied digit service.
+    // Document0078D0. Built-in mode2 formatting uses exact integer nearest-even
+    // generation; the reviewed caller is precision9/17 and parameter-1.
     internal static Math2DomTextView Text(Math2DomValueView value, Span<byte> scratch,
         IMath2DomFloatingFormatter? floating = null)
     {
@@ -70,7 +70,7 @@ internal static class Math2DomValueConversion
     }
 
     private static IMath2DomFloatingFormatter RequireFloating(IMath2DomFloatingFormatter? service)
-        => service ?? Math2DomFloatingFormatter.SpecialValuesOnly;
+        => service ?? Math2DomFloatingFormatter.Default;
 
     // Document031E20. Unlike CB8's op7 callback, strings require FULL bounded
     // consumption here; trailing bytes and leading whitespace are not accepted.

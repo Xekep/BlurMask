@@ -1,6 +1,6 @@
 namespace InkRecognition.Math;
 
-// Mode2's digit producer is still a separate proof obligation. Implementations
+// Mode2's significant-digit producer is separate from string layout. Implementations
 // must preserve signbit, round to the requested significant precision, strip
 // trailing zeros, and return the native decimal position. No .NET G substitution.
 internal interface IMath2DomDigitGenerator
@@ -11,6 +11,7 @@ internal interface IMath2DomDigitGenerator
 internal sealed class Math2DomFloatingFormatter(IMath2DomDigitGenerator? generator = null) : IMath2DomFloatingFormatter
 {
     internal static readonly Math2DomFloatingFormatter SpecialValuesOnly = new();
+    internal static readonly Math2DomFloatingFormatter Default = new(Math2DomExactDigits.Instance);
 
     public int Format(double value, Span<byte> destination, int precision, int nativeParameter)
     {

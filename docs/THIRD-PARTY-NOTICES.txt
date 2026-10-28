@@ -24,3 +24,9 @@ source-archive SHA256. Corresponding source and the build recipe are supplied
 in the same release as BlurMask-Giac-corresponding-sources-bdbb1c41.tar.gz
 (Windows) or BlurMask-Giac-corresponding-sources-bdbb1c41-<RID>.tar.gz (POSIX).
 See docs/agents/tooling/giac-runtime-build.md for pinned sources and build details.
+
+Developer verification tooling only: tools/Math2DomValue.Probe/reference/dtoa.c
+is David M. Gay's Netlib dtoa reference. Copyright (c) 1991, 2000, 2001 Lucent
+Technologies. Its complete permission notice and disclaimer remain in that file;
+source URL and SHA256 are recorded in the adjacent PROVENANCE.md. It is not
+linked into the application or the managed recognition libraries.

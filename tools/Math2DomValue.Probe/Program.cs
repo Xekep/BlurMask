@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using InkRecognition.Math;
 
-if (args.Length != 2) throw new ArgumentException("DEFAULT_SERVICE_CONTROLS NUMERIC_READER_CONTROLS");
+if (args.Length is not (2 or 3)) throw new ArgumentException("DEFAULT_SERVICE_CONTROLS NUMERIC_READER_CONTROLS [FINITE_CONTROLS]");
 int controls = 0;
 using (var data = JsonDocument.Parse(File.ReadAllBytes(args[0])))
 {
@@ -54,6 +54,51 @@ using (var data = JsonDocument.Parse(File.ReadAllBytes(args[1])))
 byte[] scratch = Enumerable.Repeat((byte)0xcc, 64).ToArray();
 void Require(bool condition, string message)
 { if (!condition) throw new InvalidDataException(message + " at " + controls); controls++; }
+if (args.Length == 3)
+{
+    using var finite = JsonDocument.Parse(File.ReadAllBytes(args[2]));
+    byte[] digits = new byte[17];
+    var finiteFormatter = new Math2DomFloatingFormatter(Math2DomExactDigits.Instance);
+    foreach (var test in finite.RootElement.GetProperty("finite").EnumerateArray())
+    {
+        ulong bits = Convert.ToUInt64(test.GetProperty("bits").GetString()!, 16);
+        double value = BitConverter.Int64BitsToDouble(unchecked((long)bits));
+        int precision = test.GetProperty("precision").GetInt32();
+        digits.AsSpan().Fill(0xcc);
+        int count = Math2DomExactDigits.Instance.Generate(value, precision, digits, out int dp, out bool negative);
+        Require(Encoding.ASCII.GetString(digits.AsSpan(0, count)) == test.GetProperty("digits").GetString()
+            && dp == test.GetProperty("dp").GetInt32() && negative == test.GetProperty("negative").GetBoolean(), "finite Decimal tuple " + bits.ToString("x16"));
+        Require(digits.AsSpan(count).IndexOfAnyExcept((byte)0xcc) < 0, "finite digit write extent");
+        scratch.AsSpan().Fill(0xcc);
+        int written = finiteFormatter.Format(value, scratch, precision, -1);
+        Require(Encoding.ASCII.GetString(scratch.AsSpan(0, written)) == test.GetProperty("text").GetString(), "full finite text from independent Decimal tuple");
+        Require(scratch[written] == 0 && scratch.AsSpan(written + 1).IndexOfAnyExcept((byte)0xcc) < 0, "finite text extent");
+        if (precision == 17)
+        {
+            var actual = Math2DomValueConversion.Text(new(5, BitConverter.GetBytes(bits)), scratch);
+            Require(actual.Length == written && Encoding.ASCII.GetString(actual.BoundedBytes) == test.GetProperty("text").GetString(), "actual finite DOM dispatch");
+            double roundtrip = double.Parse(Encoding.ASCII.GetString(actual.BoundedBytes), System.Globalization.CultureInfo.InvariantCulture);
+            Require(unchecked((ulong)BitConverter.DoubleToInt64Bits(roundtrip)) == bits, "binary64 round trip");
+        }
+        else if ((double)(float)value == value)
+        {
+            var actual = Math2DomValueConversion.Text(new(10, BitConverter.GetBytes((float)value)), scratch);
+            Require(Encoding.ASCII.GetString(actual.BoundedBytes) == test.GetProperty("text").GetString(), "actual promoted binary32 DOM dispatch");
+        }
+    }
+    foreach (double value in new[] { 0d, -0d, double.NaN, double.PositiveInfinity, double.NegativeInfinity })
+    {
+        try { Math2DomExactDigits.Instance.Generate(value, 17, digits, out _, out _); throw new Exception("nonfinite/zero generator accepted"); }
+        catch (NotSupportedException) { controls++; }
+    }
+    foreach (int precision in new[] { -1, 0, 8, 10, 16, 18 })
+    {
+        try { Math2DomExactDigits.Instance.Generate(1d, precision, digits, out _, out _); throw new Exception("bad finite precision accepted"); }
+        catch (ArgumentException) { controls++; }
+    }
+    try { Math2DomExactDigits.Instance.Generate(1d, 17, new byte[16], out _, out _); throw new Exception("short finite digits accepted"); }
+    catch (ArgumentException) { controls++; }
+}
 void Text(byte tag, byte[] storage, string expected)
 {
     scratch.AsSpan().Fill(0xcc);
@@ -89,8 +134,9 @@ foreach (var (tag, payload, expected, precision) in new (byte, byte[], double, i
     var result = Math2DomValueConversion.Text(new(tag, payload), scratch, formatter);
     Require(formatter.Calls == 1 && formatter.Value == expected && formatter.Precision == precision && result.Length == 2 && result.BoundedBytes.SequenceEqual("fp"u8), "floating dispatch, not dtoa equivalence");
 }
-try { Math2DomValueConversion.Text(new(5, BitConverter.GetBytes(1.0)), scratch); throw new Exception("missing dtoa accepted"); }
-catch (NotSupportedException) { controls++; }
+Text(5, BitConverter.GetBytes(1d), "1");
+Text(5, BitConverter.GetBytes(-0.1d), "-0.10000000000000001");
+Text(10, BitConverter.GetBytes(0.1f), "0.100000001");
 try { Math2DomValueConversion.Text(new(4, BitConverter.GetBytes(1L)), new byte[49]); throw new Exception("short scratch accepted"); }
 catch (ArgumentException) { controls++; }
 try { Math2DomValueConversion.RegistrationTag(long.MaxValue); throw new Exception("registration sentinel accepted"); }
@@ -143,7 +189,13 @@ long allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
 for (int i = 0; i < 10000; i++)
     Math2DomFloatingFormatter.Compose("12345678901234567"u8, -323, true, 17, scratch);
 Require(GC.GetAllocatedBytesForCurrentThread() == allocatedBefore, "floating compositor allocation");
-Console.WriteLine($"PASS {controls} string/numeric/DOM/layout checks. Nonzero finite digit generation and CB8 prior-result ownership remain unproven.");
+byte[] integerDigits = new byte[17];
+Math2DomExactDigits.Instance.Generate(123456789d, 9, integerDigits, out _, out _);
+allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
+for (int i = 0; i < 10000; i++)
+    Math2DomExactDigits.Instance.Generate(123456789d, 9, integerDigits, out _, out _);
+Require(GC.GetAllocatedBytesForCurrentThread() == allocatedBefore, "finite exact integer allocation");
+Console.WriteLine($"PASS {controls} string/numeric/DOM/layout/mode2 checks. Full recognition and CB8 prior-result ownership remain unfinished.");
 
 sealed class DigitTuple : IMath2DomDigitGenerator
 {
