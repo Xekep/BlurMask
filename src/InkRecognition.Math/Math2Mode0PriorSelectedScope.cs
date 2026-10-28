@@ -9,12 +9,14 @@ internal abstract class Math2Mode0PriorInk
     internal abstract long Next { get; }
     internal abstract Math2Mode0OriginalRegistryRow[] Snapshot();
     internal abstract object SelectionIdentity(long id);
+    internal abstract int MaximumRangeCount { get; }
+    internal abstract ReadOnlySpan<LegacyNativeInkPositionRange> BorrowSelectionRanges(object selection);
 }
 
 internal sealed record Math2Mode0PriorSnapshot(long Epoch, long Reservation, long Next,
     Math2Mode0OriginalDomNode[] SelectedField, Math2Mode0OriginalRegistryRow[] Registry);
 
-internal sealed class Math2Mode0PriorSelectedScope : IDisposable
+internal sealed partial class Math2Mode0PriorSelectedScope : IDisposable
 {
     internal const long DefaultBudget = 16L * 1024 * 1024;
     private readonly object gate = new();
@@ -158,6 +160,9 @@ internal sealed partial class Math2Mode0OriginalMathFieldSource
         internal override LegacyLibraryOriginalDomNameOwner Names=>names;
         internal override long Next=>ink.Next;
         internal override object SelectionIdentity(long id)=>ink.Registry[id].C22;
+        internal override int MaximumRangeCount=>ink.Registry.Values.Max(e=>e.C22.Ranges.Length);
+        internal override ReadOnlySpan<LegacyNativeInkPositionRange> BorrowSelectionRanges(object selection)
+            =>selection is Selection actual&&ReferenceEquals(actual.Owner,ink)?actual.Ranges:throw new ArgumentException("Exact prior selected C22 required.");
         internal override Math2Mode0OriginalRegistryRow[] Snapshot()
         {
             var canonical=new Dictionary<object,int>(ReferenceEqualityComparer.Instance);
