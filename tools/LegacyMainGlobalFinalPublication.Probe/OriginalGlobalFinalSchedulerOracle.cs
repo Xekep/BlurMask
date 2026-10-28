@@ -50,17 +50,25 @@ internal static class OriginalGlobalFinalSchedulerOracle
         }
         ReadOnlyMemory<byte> Read(int node, ushort ordinal) => Stored(node, ordinal).Record;
         LegacyFreshMainGlobalCaseSession.LiveQueryLease? liveLease = null;
-        LegacyFreshMainGlobalCaseSession.ResultQueryLease? finalLease = null;
+        LegacyFreshMainGlobalWordPassResult? completedPass = null;
         var source = new LegacyNativeDelimiterQuerySource(owner.Model.AcousticAlphabet, owner.Contexts,
             (tag, request, token) => liveLease is { } lease
                 ? policy.Owner.ReadLiveQuery(lease, tag, request, false, token)
-                : finalLease is { } completed ? policy.Owner.ReadResultQuery(completed, tag, request, false, token)
+                : completedPass is { } completed ? completed.ReadResultQuery(tag, request, false, token)
                 : owner.Read(lastSelected!, tag, request, false, token),
             LegacyNativeDelimiterQuerySource.ReadV10dCoordinateMode(ak));
         byte[] compact = compactResidue.ToArray();
         int count = 0, nextNode = 0;
         int[] starts = new int[graph.NodeCount + 1], prefix = new int[graph.NodeCount + 1];
         var confidence = LegacyFreshMainGlobalGlyphConfidence.Prepare(ak, policy.Owner);
+        // Same controlled zero-residue allocator policy as this independent scheduler;
+        // the reference never borrows the actual scheduler's storage or row results.
+        ulong publicationAllocationIdentity=1;
+        var publicationStorage=new LegacyFreshMainGlobalPublicationStorage(policy,request =>
+        {
+            byte[] storage=new byte[request.RequiredBytes];request.PreviousStorage.Span.CopyTo(storage);
+            return new(storage,++publicationAllocationIdentity);
+        });
         var invocation = LegacyFreshMainGlobalTerminalInvocation.Prepare(policy);
         source.ResetForControllerNode();
         owner.AdvanceNodeEpoch(-1, default);
@@ -256,7 +264,8 @@ internal static class OriginalGlobalFinalSchedulerOracle
                     owner.Categories.Categories, invocation.Options.ContextSentinels24b8, invocation.LanguagePenalty2534,
                     false, nextNode, node, reach.Nodes, reach.LanguageProbe,
                     group => LegacyMainCompactGroupScores.FromGlobal(confidence.ReadGroup(group)),
-                    compact, count, starts, prefix, Validate, default, headers);
+                    compact, count, starts, prefix, Validate, default, headers,
+                    LegacyFreshMainGlobalPublicationContext.ForLive(policy,publicationStorage,liveLease,nextNode,default));
                 publications.Add(new(nextNode, node, before, reach, published));
                 for (int prior = nextNode; prior <= node; prior++) buffers[prior].ApplyCompactPublication(policy, published.Nodes[prior], default);
                 compact = published.Storage; count = published.Count; starts = published.Starts; prefix = published.PrefixOwners; nextNode = node + 1;
@@ -277,8 +286,10 @@ internal static class OriginalGlobalFinalSchedulerOracle
                 }
             return result with { Records = records, PrimaryAlternatives = buffer.CopyPrimaryStorage(), CumulativePathCost2520 = cumulative[result.EndingNode] };
         }).ToList().AsReadOnly();
-        finalLease = policy.Owner.CaptureResultQueryLease(default);
-        return new(completedRows, source, finalLease, compact, count, nextNode, starts, prefix);
+        // Construct once: capturing a second result lease would revoke the first.
+        // Only this original scheduler's own produced rows/policy/storage enter it.
+        completedPass = new LegacyFreshMainGlobalWordPassResult(policy,completedRows,default,publicationStorage:publicationStorage);
+        return new(completedRows, source, completedPass, compact, count, nextNode, starts, prefix);
 
         int Line(int node, int arc) => owner.Graph.GlobalSource!.ResolveGroupSource(
             graph.GetNode(node)[arc].GroupId, default).Primary.LineId;
@@ -299,7 +310,7 @@ internal static class OriginalGlobalFinalSchedulerOracle
     }
 
     internal sealed record Execution(IReadOnlyList<LegacyMainDirectWordNodeResult> Rows, LegacyNativeDelimiterQuerySource Reader,
-        LegacyFreshMainGlobalCaseSession.ResultQueryLease Lease, byte[] Compact, int Count, int NextNode, int[] Starts, int[] Prefix);
+        LegacyFreshMainGlobalWordPassResult Pass, byte[] Compact, int Count, int NextNode, int[] Starts, int[] Prefix);
     internal sealed record Publication(int Start, int End, LegacyMainDirectWordNodeResult[] Before,
         LegacyPreparedMainCompactReachability.Result Reachability, LegacyPreparedMainCompactPublication.Result Published);
 
