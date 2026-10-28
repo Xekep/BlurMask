@@ -5,6 +5,8 @@ namespace InkRecognition.Math;
 internal abstract class Math2Mode0PriorInk
 {
     internal abstract object Identity { get; }
+    internal abstract LegacyOwnedRawInkDocument Document { get; }
+    internal abstract Math2Mode0CurrentC23 SelectInput(long inputId,CancellationToken token);
     internal abstract LegacyLibraryOriginalDomNameOwner Names { get; }
     internal abstract long Next { get; }
     internal abstract Math2Mode0OriginalRegistryRow[] Snapshot();
@@ -154,9 +156,15 @@ internal sealed partial class Math2Mode0OriginalApplication
 
 internal sealed partial class Math2Mode0OriginalMathFieldSource
 {
-    private sealed class PriorInk(InkOwner ink,LegacyLibraryOriginalDomNameOwner names):Math2Mode0PriorInk
+    private sealed class PriorInk(InkOwner ink,LegacyLibraryOriginalDomNameOwner names,Math2Mode0OriginalMathFieldSource sourceField):Math2Mode0PriorInk
     {
         internal override object Identity=>ink;
+        internal override LegacyOwnedRawInkDocument Document=>ink.Document;
+        internal override Math2Mode0CurrentC23 SelectInput(long inputId,CancellationToken token)
+        {
+            if(!ink.Registry.TryGetValue(inputId,out var entry)||entry.Name!="INPUT"||entry.Category!=102||!ReferenceEquals(entry.Owner,ink)||!ReferenceEquals(entry.C22.Owner,ink))throw new InvalidOperationException("Actual current-selected INPUT102 required.");
+            return new CurrentC23(ink,entry,sourceField,token);
+        }
         internal override LegacyLibraryOriginalDomNameOwner Names=>names;
         internal override long Next=>ink.Next;
         internal override object SelectionIdentity(long id)=>ink.Registry[id].C22;
@@ -187,6 +195,6 @@ internal sealed partial class Math2Mode0OriginalMathFieldSource
         }
         if(originalInk.Next<=maximum)throw new InvalidOperationException("Current original Next must exceed all live IDs.");
         clone.Next=originalInk.Next;token.ThrowIfCancellationRequested();borrow.CheckSource(this,originalInk);
-        return new PriorInk(clone,OriginalNameOwner);
+        return new PriorInk(clone,OriginalNameOwner,this);
     }
 }

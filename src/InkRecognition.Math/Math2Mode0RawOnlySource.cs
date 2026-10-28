@@ -6,7 +6,7 @@ namespace InkRecognition.Math;
 
 /// <summary>Library-owned pen strokes only. C25, imported glyphs, external
 /// properties and a supplied existing-expression vector have no entry here.</summary>
-internal sealed class Math2Mode0RawOnlySource : IDisposable
+internal sealed partial class Math2Mode0RawOnlySource : IDisposable
 {
     private static readonly object Factory = new();
     private readonly object gate = new();

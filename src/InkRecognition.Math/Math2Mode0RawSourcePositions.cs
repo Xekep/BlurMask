@@ -27,7 +27,7 @@ internal static class Math2Mode0SourcePositionCoordinates
 
 /// <summary>Private original-source identity plus the SAME processed feature
 /// positions. No decoder labels, caller range matrix or external SDK page IDs.</summary>
-internal sealed class Math2Mode0RawSourcePositions
+internal sealed partial class Math2Mode0RawSourcePositions
 {
     internal LegacyOwnedRawInkDocument Document { get; }
     internal int InputFrameCount { get; }

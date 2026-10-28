@@ -50,7 +50,7 @@ internal sealed record Math2Mode0FreezeSnapshot(bool Complete,bool Failed,bool R
 
 // Document02A440's owning extraction only. Nonzero rows still need0290C0 and
 //02A830; no C23/F0/NN binding or nonfresh diff is issued here.
-internal sealed class Math2Mode0PriorFreezePreparation:IDisposable
+internal sealed partial class Math2Mode0PriorFreezePreparation:IDisposable
 {
     internal const long DefaultBudget=16L*1024*1024;
     private sealed class Claim {internal int Used;}
@@ -106,7 +106,7 @@ internal sealed class Math2Mode0PriorFreezePreparation:IDisposable
 internal sealed partial class Math2Mode0PriorSelectedScope
 {
     private FreezeBorrow? activeFreezeBorrow;
-    internal sealed class FreezeBorrow:IMath2Mode0FreezeServices
+    internal sealed partial class FreezeBorrow:IMath2Mode0FreezeServices
     {
         private readonly Math2Mode0PriorSelectedScope owner;
         private readonly Action check;
