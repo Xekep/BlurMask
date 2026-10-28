@@ -58,8 +58,43 @@ binding guards,6 status-marker guards and a valid-AST command cap that launches
 zero children. Tests preserve333 for integral[1,10] x^2 dx and refuse the
 ambiguous dx^2 syntax instead of inventing an integrand.
 
-Root evidence: `E:/BlurMask-build-artifacts-20261014/giac-ordinary-root-20261028/`.
-The actual current compiled Solver passes the permanent suite in managed and
+## Endpoint and infinity follow-up
+
+Additional root negatives found silent mode1 zeros at the endpoints too:
+tan(x) on[-pi/2,pi/2], x/(1-x^2) and x/(1-x^2)^2 on[-1,1]. They also found
+whole-line PV bypasses when infinity was written as -1*infinity,
+-infinity+1 or2*infinity. The earlier mode1/split checkpoint did not close these.
+
+The successor always requires an exact native endpoint-status1 line, even
+without a warning. Giac computes the primitive in mode0 and checks one-sided
+limits; unknown, nonfinite, missing or failed status refuses. Both directions
+at both endpoints are checked conservatively. Native finite-bound polynomial
+and nonsingular-primitive cases retain symbolic parameters. This remains a
+native finite diagnostic, not a universal proof or a host-side antiderivative.
+
+Infinity-containing bounds outside the admitted explicit signed forms refuse
+before creating a process. This also refuses convergent arithmetic equivalents;
+no host constant evaluator was added. Canonical opposite infinities retain the
+two-tail evaluation. The existing16384-character generated-command ceiling
+still applies.
+
+The permanent suite additionally checks6 divergent endpoints,2 integrable
+singular endpoints,6 endpoint-status guards,8 unsupported infinity AST forms
+with zero children and18 total generated-name binding cases. In particular,
+1/sqrt(x) and1/sqrt(abs(x)) on[0,1] remain2. Two independent oscillatory-endpoint
+controls also refuse.
+
+Root successor evidence is under
+`E:/BlurMask-build-artifacts-20261014/giac-endpoints-root-20261028/`:managed and
+Windows Native AOT permanent suites, all98 original adapter controls and13
+root endpoint/infinity controls pass against the actual current Solver DLL.
+Its SHA256 is
+`d238adc631bb95f7fb50122e8c35e2b539663782de9de649779e8db9bc5a94a8`.
+Earlier baseline/packet evidence above remains historical, with failed controls
+preserved under `giac-ordinary-root-20261028`.
+
+Initial checkpoint: `E:/BlurMask-build-artifacts-20261014/giac-ordinary-root-20261028/`.
+The initial compiled Solver passed the permanent suite in managed and
 Windows Native AOT. The98 adapter controls invoke the existing real
 AiMathLayout.WithSolvedResult with this exact compiled Solver and the bundled
 CLI. A separate run passes with inherited French locale. Authored Solver/probe

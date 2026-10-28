@@ -75,6 +75,9 @@ oracles and produced byte-identical paired captures. The three previous managed
 captures also remain byte-identical to the preceding retained-Ink increment.
 The reviewed Math DLL SHA256 is
 `9f49cf5d65da31a014d635dd46b3c21868f03d6536bf5f3d781f44c19cf0441c`.
+The four-probe managed/Native AOT matrix also passed on Windows, Linux and
+macOS for commit `4436c4f`:
+[run40753321233](https://github.com/Xekep/BlurMask/actions/runs/40753321233).
 
 Remaining: current-result freeze preparation, inference bound to this new scope,
 the second selected-to-retained clone, genuine old/new DOM diff and opcode7

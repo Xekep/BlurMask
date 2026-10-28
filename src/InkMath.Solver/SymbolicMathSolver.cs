@@ -34,6 +34,11 @@ public sealed class SymbolicMathSolver
         { equations = matrix.Rows.SelectMany(r => r).ToArray(); equation = true; }
         if (equation && variables.Length == 0) return null;
         bool checkedIntegral = ContainsDefiniteIntegral(expression);
+        // Arithmetic/function forms containing infinity have not established
+        // the explicit bound contract used by the whole-line split below.
+        // Refuse rather than letting an unrecognized whole line become a PV.
+        if (checkedIntegral && DefiniteIntegrals(expression).Any(c =>
+            c.Arguments.Skip(2).Any(bound => ContainsInfinity(bound) && InfinitySign(bound) == 0))) return null;
         // This generated name cannot be produced by the admitted math grammar.
         const string integralValue = "blurmaskintegraltemporary";
         string operand = checkedIntegral ? integralValue : expression.Cas;
@@ -54,7 +59,10 @@ public sealed class SymbolicMathSolver
             string certificate = "try_catch(print(\"BLURMASK_INTEGRAL_DOMAIN=\"+string(when(" +
                 string.Join(" && ", DefiniteIntegrals(expression).Select(IntegralCertificate)) +
                 ",1,0))),blurmaskdiagnosticerror,print(\"BLURMASK_INTEGRAL_DOMAIN=0\"))\n";
-            command = "calc_mode(1)\n" + certificate + preparation + integralValue + ":=(" + source + ")\ncalc_mode(0)\n" + command;
+            string endpoints = "try_catch(print(\"BLURMASK_INTEGRAL_ENDPOINTS=\"+string(" +
+                string.Join("*", DefiniteIntegrals(expression).Select(IntegralEndpointCertificate)) +
+                ")),blurmaskdiagnosticerror,print(\"BLURMASK_INTEGRAL_ENDPOINTS=0\"))\n";
+            command = "calc_mode(0)\n" + EndpointFiniteHelper + endpoints + "calc_mode(1)\n" + certificate + preparation + integralValue + ":=(" + source + ")\ncalc_mode(0)\n" + command;
             if (command.Length > 16384) return null;
         }
         string? result = await ExecuteAsync(command, cancellationToken, checkedIntegral).ConfigureAwait(false);
@@ -111,6 +119,42 @@ public sealed class SymbolicMathSolver
     internal static bool RejectsUnverifiedIntegralDiagnostics(string diagnostics)
         => diagnostics.Contains("No checks were made for singular points of antiderivative", StringComparison.Ordinal) &&
             !diagnostics.Split('\n').Any(line => line.Trim() == "BLURMASK_INTEGRAL_DOMAIN=1");
+
+    internal static bool RejectsUnverifiedEndpointDiagnostics(string diagnostics)
+        => !diagnostics.Split('\n').Any(line => line.Trim() == "BLURMASK_INTEGRAL_ENDPOINTS=1");
+
+    private const string EndpointFiniteHelper =
+        "blurmaskendpointfinite:=blurmasklimittemporary->when(type(evalf(blurmasklimittemporary))==DOM_FLOAT," +
+        "when(isfinite(blurmasklimittemporary),1,0),when(type(evalf(blurmasklimittemporary))==DOM_INT,1," +
+        "when(type(evalf(blurmasklimittemporary))==DOM_COMPLEX,when(isfinite(blurmasklimittemporary),1,0),0)))\n";
+
+    private static string IntegralEndpointCertificate(Call integral)
+    {
+        string body = integral.Arguments[0].Cas, variable = integral.Arguments[1].Cas;
+        string Bound(Expression bound) => InfinitySign(bound) switch
+        {
+            1 => "+infinity", -1 => "-infinity", _ => bound.Cas
+        };
+        string lower = Bound(integral.Arguments[2]), upper = Bound(integral.Arguments[3]);
+        string primitive = "integrate(" + body + "," + variable + ")";
+        // Native finite-bound polynomial / nonsingular-primitive cases retain
+        // symbolic parameters. Otherwise require finite numeric one-sided limits.
+        string regular = "try_catch(when(isfinite(" + lower + ") && isfinite(" + upper + ")," +
+            "when(is_polynomial(" + body + "," + variable + "),1,when(size(singular(" + primitive + "," + variable + "))==0,1,0)),0),blurmaskdiagnosticerror,0)";
+        string Limit(string bound, int direction) => "blurmaskendpointfinite(limit(" + primitive + "," + variable + "," + bound + "," + direction + "))";
+        // Checking both sides is conservative for reversed and unknown bounds;
+        // no host-side symbolic ordering or antiderivative is introduced.
+        return "when(" + regular + "==1,1,min(" + Limit(lower, 1) + "," + Limit(lower, -1) + "," + Limit(upper, 1) + "," + Limit(upper, -1) + "))";
+    }
+
+    private static bool ContainsInfinity(Expression expression) => expression switch
+    {
+        Variable { Name: "infinity" } => true,
+        Call call => call.Arguments.Any(ContainsInfinity),
+        Binary binary => ContainsInfinity(binary.Left) || ContainsInfinity(binary.Right),
+        Matrix matrix => matrix.Rows.SelectMany(row => row).Any(ContainsInfinity),
+        _ => false
+    };
 
     private static string NativeNumericTruth(string condition)
         => "when(type(" + condition + ")==DOM_INT,when(" + condition + ",1,0),0)";
@@ -239,7 +283,7 @@ public sealed class SymbolicMathSolver
             // A pinned native diagnostic reports unverified symbolic singularities.
             // Require a sufficient native diagnostic for EVERY checked integral;
             // do not publish an unconditional answer when Giac cannot check them.
-            if (guardIntegralWarnings && RejectsUnverifiedIntegralDiagnostics(stderr)) return null;
+            if (guardIntegralWarnings && (RejectsUnverifiedEndpointDiagnostics(stderr) || RejectsUnverifiedIntegralDiagnostics(stderr))) return null;
             if (process.ExitCode != 0) return null;
             string? value = null;
             foreach (var line in stdout.Split('\n'))

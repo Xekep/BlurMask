@@ -237,9 +237,61 @@ if (SymbolicMathSolver.RejectsUnverifiedIntegralDiagnostics(uncheckedWarning + "
     SymbolicMathSolver.RejectsUnverifiedIntegralDiagnostics("Warning, integration of abs or sign assumes constant sign by intervals"))
     throw new Exception("A proven integral diagnostic or unrelated warning was incorrectly rejected.");
 
+
+// Ordinary endpoint limits may diverge while Giac's direct definite call
+// returns a finite cancellation. The adapter requires its native endpoint
+// diagnostic unconditionally, not merely when a warning is present.
+var endpointDivergenceControls = new[]
+{
+    @"\int_{-\pi/2}^{\pi/2}\tan(x) dx",
+    @"\int_{-1}^{1}\frac{x}{1-x^2} dx",
+    @"\int_{-1}^{1}\frac{x}{(1-x^2)^2} dx",
+    @"\int_0^\pi \frac{\cos x}{\sin x} dx",
+    @"\int_0^1 \frac{1}{x(1-x)} dx",
+    @"\int_0^\infty \sin x dx"
+};
+foreach (var input in endpointDivergenceControls)
+    if (await solver.SolveAsync(input) is not null)
+        throw new Exception("Unverified/divergent native endpoint limits produced an ordinary answer: " + input);
+foreach (var (input, expected) in new[]
+{
+    (@"\int_0^1 \frac{1}{\sqrt{x}} dx", "2"),
+    (@"\int_0^1 \frac{1}{\sqrt{\abs{x}}} dx", "2")
+})
+    if (!SameResult((await solver.SolveAsync(input))?.LaTex, expected, true))
+        throw new Exception("Integrable singular endpoint was incorrectly rejected: " + input);
+
+foreach (var status in new[] { "", "BLURMASK_INTEGRAL_ENDPOINTS=0", "note: BLURMASK_INTEGRAL_ENDPOINTS=1", "BLURMASK_INTEGRAL_ENDPOINTS=unknown", "BLURMASK_INTEGRAL_DOMAIN=1" })
+    if (!SymbolicMathSolver.RejectsUnverifiedEndpointDiagnostics(status))
+        throw new Exception("Missing/unknown/spoofed native endpoint status was admitted.");
+if (SymbolicMathSolver.RejectsUnverifiedEndpointDiagnostics("BLURMASK_INTEGRAL_ENDPOINTS=1\n"))
+    throw new Exception("Exact native endpoint status was rejected.");
+
+// Unsupported arithmetic infinity forms must never bypass whole-line
+// splitting. This is a conservative refusal, including convergent equivalents;
+// no host constant evaluator is invented. Canonical +/-infinity cases above
+// still compute their exact results.
+var infinityBoundForms = new (string Lower, string Upper)[]
+{
+    (@"0-\infty", @"\infty"), (@"-1*\infty", @"\infty"),
+    (@"-\infty+1", @"\infty"), (@"-\infty", @"2*\infty")
+};
+int unsupportedInfinityStarts = 0;
+var infinityGuardSolver = new SymbolicMathSolver(Path.GetFullPath(args[0])) { ProcessStarted = _ => unsupportedInfinityStarts++ };
+foreach (var (lower, upper) in infinityBoundForms)
+    foreach (var numerator in new[] { "x", "1" })
+    {
+        string input = @"\int_{" + lower + "}^{" + upper + @"} \frac{" + numerator + @"}{1+x^2} dx";
+        _ = new MathExpressionParser(input).Parse();
+        if (await infinityGuardSolver.SolveAsync(input) is not null)
+            throw new Exception("Unsupported infinity AST produced a principal value or unverified answer: " + input);
+    }
+if (unsupportedInfinityStarts != 0) throw new Exception("Unsupported infinity AST reached a native child before refusal.");
+Console.WriteLine("PASS native endpoints: 6 divergent, 2 integrable, 6 status guards and 8 unsupported-infinity AST controls.");
+
 // Generated bindings are outside the input grammar; no input variable may
 // alias their names, including the native singular-point lambda argument.
-foreach (var name in new[] { "blurmaskintegraltemporary", "blurmaskintegrandtemporary0", "blurmaskpoletemporary", "blurmaskdiagnosticerror" })
+foreach (var name in new[] { "blurmaskintegraltemporary", "blurmaskintegrandtemporary0", "blurmaskpoletemporary", "blurmaskdiagnosticerror", "blurmaskendpointfinite", "blurmasklimittemporary" })
     foreach (var input in new[] { name, @"\mathrm{" + name + "}", @"\operatorname{" + name + "}" })
     {
         try
@@ -258,7 +310,7 @@ int commandCapStarts = 0;
 var commandCapSolver = new SymbolicMathSolver(Path.GetFullPath(args[0])) { ProcessStarted = _ => commandCapStarts++ };
 if (await commandCapSolver.SolveAsync(commandCapInput) is not null || commandCapStarts != 0)
     throw new Exception("Generated integral command limit failed before native process launch.");
-Console.WriteLine($"PASS ordinary-integral Giac boundary: {ordinaryIntegralControls.Length} exact/mode/nested controls, {divergentIntegralControls.Length} divergence/domain controls, 12 grammar binding guards, 6 diagnostic status guards and pre-launch command cap.");
+Console.WriteLine($"PASS ordinary-integral Giac boundary: {ordinaryIntegralControls.Length} exact/mode/nested controls, {divergentIntegralControls.Length} divergence/domain controls, 18 grammar binding guards, 6 diagnostic status guards and pre-launch command cap.");
 
 Console.WriteLine($"PASS native Giac: {actualFixtures.Length} calculus/arithmetic/algebra fixtures, {integralFixtures.Length} exact integral fixtures, unavailable engine, cancellation and undefined/injection guards; {watch.ElapsedMilliseconds} ms");
 
