@@ -245,7 +245,7 @@ public sealed class SymbolicMathSolver
 
     private async Task<string?> ExecuteAsync(string command, CancellationToken token, bool guardIntegralWarnings = false)
     {
-        var parent = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "BlurMask-Giac"));
+        var parent = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "NovaPen-Giac"));
         var directory = Path.GetFullPath(Path.Combine(parent, Guid.NewGuid().ToString("N")));
         if (!directory.StartsWith(parent + Path.DirectorySeparatorChar, StringComparison.Ordinal)) throw new IOException("Invalid solver working directory.");
         Directory.CreateDirectory(directory);

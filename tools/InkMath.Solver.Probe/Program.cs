@@ -95,7 +95,7 @@ if (args.Length == 0) { Console.WriteLine("Giac not supplied: only adapter gramm
 var solver = new SymbolicMathSolver(Path.GetFullPath(args[0]));
 // A previously discovered CLI can disappear before launch. No second engine
 // may produce an answer when the selected Giac executable is unavailable.
-var missingDirectory = Path.Combine(Path.GetTempPath(), "BlurMask-missing-Giac-" + Guid.NewGuid().ToString("N"));
+var missingDirectory = Path.Combine(Path.GetTempPath(), "NovaPen-missing-Giac-" + Guid.NewGuid().ToString("N"));
 Directory.CreateDirectory(missingDirectory);
 var missingExecutable = Path.Combine(missingDirectory, OperatingSystem.IsWindows() ? "icas.exe" : "icas");
 try

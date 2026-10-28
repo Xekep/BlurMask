@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Minimal stdin/stdout Giac transport for BlurMask. No GUI or prompt.
+// Minimal stdin/stdout Giac transport for NovaPen. No GUI or prompt.
 #include "giac.h"
 #include "tex.h"
 #include "vecteur.h"
@@ -63,7 +63,7 @@ static std::string format_math(const giac::gen &value, giac::context *context, u
 
 int main(int argc, char **argv) {
     if (argc == 2 && std::strcmp(argv[1], "--version") == 0) {
-        std::cout << "BlurMask Giac CLI (GeoGebra giac bdbb1c41fe52d8b4fb7c1d15c2deaea88fc3803c)\n";
+        std::cout << "NovaPen Giac CLI (GeoGebra giac bdbb1c41fe52d8b4fb7c1d15c2deaea88fc3803c)\n";
         return 0;
     }
     if (argc > 2 || (argc == 2 && std::strcmp(argv[1], "--sage") != 0)) {
