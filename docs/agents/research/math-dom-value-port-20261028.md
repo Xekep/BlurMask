@@ -77,6 +77,11 @@ dotnet run --project tools/Math2DomValue.Probe -c Release -- .artifacts/dom-stri
 
 The workflow `Math DOM value port` runs managed and Native AOT checks on Windows,
 Linux and macOS using the same controls frozen before compilation.
+All three managed/Native AOT jobs passed in
+[run40705184780](https://github.com/Xekep/BlurMask/actions/runs/40705184780)
+for code commit `15de9737c5d9c24635ccfa99553ad02d46d5f304`.
+This increment is development after release1.2.8.1; its published artifacts
+are unchanged by these source commits.
 
 ## Remaining boundary
 
