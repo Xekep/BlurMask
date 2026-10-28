@@ -85,13 +85,15 @@ are unchanged by these source commits.
 
 ## Remaining boundary
 
-The floating text formatter C0 uses custom dtoa. An explicit required service is
-retained; `.NET ToString` is not substituted. Unsupported floating text conversion
-without that service refuses explicitly. True prior-result editing, nonfresh
+The floating text formatter C0 uses custom dtoa. The subsequent
+[bounded layout port](math-dom-floating-layout-20261028.md) implements composition
+and default signed-zero/special conversion. Nonzero finite dtoa still requires
+an explicit generator; `.NET ToString` is not substituted. True prior-result editing, nonfresh
 owner construction and whole recognition integration remain unfinished. These
 controls establish neither handwriting accuracy nor full engine completion.
 
 The [next-dependency packet](../../../tools/handwriting/ports/dom-float-20261028/README.md)
 records the freshly exported dtoa/helpers, exact notation branches and rounding
 environment query. Its unusual NaN/Infinity outputs are static predictions,
-not vendor runtime observations; no floating implementation is admitted there.
+not vendor runtime observations. That original packet itself remains static
+evidence; the subsequent layout port documents the admitted implementation.

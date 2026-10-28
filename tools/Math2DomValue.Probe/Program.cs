@@ -33,6 +33,22 @@ using (var data = JsonDocument.Parse(File.ReadAllBytes(args[1])))
         long number = Math2DomValueConversion.Number(value, 12345, code => { if (code != 0x02000000) throw new Exception("error code"); logs++; });
         Require(number == test.GetProperty("value").GetInt64() && logs == (test.GetProperty("logged").GetBoolean() ? 1 : 0), "numeric attribute");
     }
+    byte[] output = new byte[64];
+    foreach (var test in data.RootElement.GetProperty("layouts").EnumerateArray())
+    {
+        output.AsSpan().Fill(0xcc);
+        int count = Math2DomFloatingFormatter.Compose(Encoding.ASCII.GetBytes(test.GetProperty("digits").GetString()!),
+            test.GetProperty("dp").GetInt32(), test.GetProperty("negative").GetBoolean(), test.GetProperty("precision").GetInt32(), output);
+        Require(Encoding.ASCII.GetString(output.AsSpan(0, count)) == test.GetProperty("text").GetString(), "native floating layout tuple");
+        Require(output[count] == 0 && output.AsSpan(count + 1).IndexOfAnyExcept((byte)0xcc) < 0, "floating layout extent");
+    }
+    foreach (var test in data.RootElement.GetProperty("specials").EnumerateArray())
+    {
+        output.AsSpan().Fill(0xcc);
+        var result = Math2DomValueConversion.Text(new(test.GetProperty("tag").GetByte(), Convert.FromHexString(test.GetProperty("storage").GetString()!)), output);
+        Require(Encoding.ASCII.GetString(result.BoundedBytes) == test.GetProperty("text").GetString(), "actual DOM zero/special conversion");
+        Require(output[result.Length] == 0 && output.AsSpan(result.Length + 1).IndexOfAnyExcept((byte)0xcc) < 0, "special extent");
+    }
 }
 
 byte[] scratch = Enumerable.Repeat((byte)0xcc, 64).ToArray();
@@ -82,7 +98,64 @@ catch (NotSupportedException) { controls++; }
 try { Math2DomValueConversion.CollectedTag(-1); throw new Exception("collection sentinel accepted"); }
 catch (NotSupportedException) { controls++; }
 Require(Math2DomValueConversion.RegistrationTag(-2) == -2 && Math2DomValueConversion.CollectedTag(0) == 0, "typed real caller scalar path");
-Console.WriteLine($"PASS {controls} string/numeric/DOM dispatch cases. Floating formatting remains explicit; no CB8 owner or recognition acceptance fabricated.");
+foreach (var (digits, dp, precision) in new (string, int, int)[] {
+    ("", 1, 17), ("1234567890", 1, 9), ("1", 1, 16), ("1", -324, 17), ("1", 310, 17),
+    ("00", 1, 17), ("0", 0, 17), ("1x", 1, 17), ("1\0", 1, 17), ("nan", 9999, 17), ("NaN", 1, 17), ("1", 9999, 17) })
+{
+    scratch.AsSpan().Fill(0xcc);
+    try { Math2DomFloatingFormatter.Compose(Encoding.ASCII.GetBytes(digits), dp, false, precision, scratch); throw new Exception("bad tuple accepted"); }
+    catch (NotSupportedException) { Require(scratch.AsSpan().IndexOfAnyExcept((byte)0xcc) < 0, "bad tuple must not write"); }
+}
+foreach (int capacity in new[] { 0, 1, 24, 49 })
+{
+    try { Math2DomFloatingFormatter.Compose("1"u8, 1, false, 17, new byte[capacity]); throw new Exception("short floating scratch accepted"); }
+    catch (ArgumentException) { controls++; }
+}
+scratch.AsSpan().Fill(0xcc); scratch[0] = (byte)'1';
+try { Math2DomFloatingFormatter.Compose(scratch.AsSpan(0, 1), 1, false, 17, scratch); throw new Exception("alias accepted"); }
+catch (ArgumentException) { controls++; }
+foreach (double value in new[] { double.Epsilon, -double.Epsilon, 1d, double.MaxValue })
+{
+    scratch.AsSpan().Fill(0xcc);
+    try { Math2DomFloatingFormatter.SpecialValuesOnly.Format(value, scratch, 17, -1); throw new Exception("unproven finite generator admitted"); }
+    catch (NotSupportedException) { Require(scratch.AsSpan().IndexOfAnyExcept((byte)0xcc) < 0, "finite refusal preserves output"); }
+}
+var tupleGenerator = new DigitTuple();
+var layoutFormatter = new Math2DomFloatingFormatter(tupleGenerator);
+var composed = Math2DomValueConversion.Text(new(5, BitConverter.GetBytes(1d)), scratch, layoutFormatter);
+Require(Encoding.ASCII.GetString(composed.BoundedBytes) == "1234567" && tupleGenerator.Calls == 1, "injected tuple composition only, not dtoa equivalence");
+tupleGenerator.Count = 18;
+try { layoutFormatter.Format(1d, scratch, 17, -1); throw new Exception("oversized helper result accepted"); }
+catch (NotSupportedException) { controls++; }
+tupleGenerator.Count = 7;
+tupleGenerator.Negative = true;
+try { layoutFormatter.Format(1d, scratch, 17, -1); throw new Exception("changed helper sign accepted"); }
+catch (NotSupportedException) { controls++; }
+tupleGenerator.Negative = false; tupleGenerator.Position = 9999;
+try { layoutFormatter.Format(1d, scratch, 17, -1); throw new Exception("changed helper classification accepted"); }
+catch (NotSupportedException) { controls++; }
+try { layoutFormatter.Format(1d, scratch, 17, 0); throw new Exception("fractional-limit branch admitted"); }
+catch (NotSupportedException) { controls++; }
+// The compositor is allocation-free after singleton/runtime warmup. This is
+// a local property, not a throughput or whole-recognizer performance claim.
+Math2DomFloatingFormatter.Compose("12345678901234567"u8, -323, true, 17, scratch);
+long allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
+for (int i = 0; i < 10000; i++)
+    Math2DomFloatingFormatter.Compose("12345678901234567"u8, -323, true, 17, scratch);
+Require(GC.GetAllocatedBytesForCurrentThread() == allocatedBefore, "floating compositor allocation");
+Console.WriteLine($"PASS {controls} string/numeric/DOM/layout checks. Nonzero finite digit generation and CB8 prior-result ownership remain unproven.");
+
+sealed class DigitTuple : IMath2DomDigitGenerator
+{
+    internal int Calls, Count = 7;
+    internal int Position = 7;
+    internal bool Negative;
+    public int Generate(double value, int precision, Span<byte> digits, out int decimalPosition, out bool negative)
+    {
+        if (value != 1d || precision != 17 || digits.Length != 17) throw new Exception("generator parameters");
+        Calls++; "1234567"u8.CopyTo(digits); decimalPosition = Position; negative = Negative; return Count;
+    }
+}
 
 sealed class Floating : IMath2DomFloatingFormatter
 {

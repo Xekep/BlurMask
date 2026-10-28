@@ -1,5 +1,9 @@
 # Default DOM floating text: static next-dependency packet
 
+Subsequent work implemented the [bounded compositor and zero/special branches](../../../../docs/agents/research/math-dom-floating-layout-20261028.md).
+The observations and proposed finite generator below remain the original static
+packet. Nonzero finite dtoa is still not implemented or admitted.
+
 This packet contains documentation and export requests only. No floating
 formatter was implemented, no production source changed, and no vendor DLL
 was executed. The production floating service boundary remains necessary.

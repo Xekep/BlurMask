@@ -33,8 +33,8 @@ internal interface IMath2DomFloatingFormatter
 
 internal static class Math2DomValueConversion
 {
-    // Document0078D0. Floating dtoa remains an explicitly required native-
-    // equivalent service; .NET general formatting is not a proven replacement.
+    // Document0078D0. The built-in floating formatter admits zero/specials;
+    // finite nonzero dtoa still requires an explicitly supplied digit service.
     internal static Math2DomTextView Text(Math2DomValueView value, Span<byte> scratch,
         IMath2DomFloatingFormatter? floating = null)
     {
@@ -70,7 +70,7 @@ internal static class Math2DomValueConversion
     }
 
     private static IMath2DomFloatingFormatter RequireFloating(IMath2DomFloatingFormatter? service)
-        => service ?? throw new NotSupportedException("Native DOM floating formatter is not yet connected.");
+        => service ?? Math2DomFloatingFormatter.SpecialValuesOnly;
 
     // Document031E20. Unlike CB8's op7 callback, strings require FULL bounded
     // consumption here; trailing bytes and leading whitespace are not accepted.
