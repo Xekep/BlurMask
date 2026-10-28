@@ -53,7 +53,12 @@ consumer, without tuning labels, thresholds or budgets to these answers.
 - Math: main contains 75 authored library documents. The staged 78-document
   candidate reaches real default DOM differences and CB8 filtering, but all
   observed operations are filtered. It does not prove actual document apply,
-  revision handling or repeat recognition.
+  revision handling or repeat recognition. Root authenticated its 78 authored
+  documents through the compiled PDB and independently published its probe as
+  Windows Native AOT against the corrected core. Six real NN pipelines, 961
+  frozen alignment cases, 1,257 controls and all three independent NN/candidate/
+  diff audits pass (`math78-root-native-20261029`, build 79.91 seconds,
+  actual run 1.43 seconds). This candidate is still staged, not in main.
 - Solver: Giac is the separate upstream CAS. Its tests with supplied expressions
   establish solver behavior, not correct recognition of handwritten integrals.
 - Automatic classification, Russian/English end-to-end quality and application
@@ -61,3 +66,22 @@ consumer, without tuning labels, thresholds or budgets to these answers.
 
 Historical reports retain their original names and hashes. Active engineering
 links point here so a deleted old release is not presented as the current build.
+
+## Publication CI after the rename
+
+Run `40779833550` reached the publication source gate on Linux/macOS and rejected
+the renamed project metadata. The existing project hash described the historical
+BlurMask package ID and repository URL. The gate now authenticates the exact
+NovaPen project bytes, inverses only those two metadata substitutions, then
+requires the original historical project hash and all existing diagnostic policy
+checks. The immutable source proof metadata is unchanged. Unknown project edits,
+including diagnostic defaults and distribution guards, remain rejected.
+
+Root reran the full `tools/ci/check-global-publication.py` gate with this change
+and the corrected Russian core: default 935 / diagnostic 937 authored PDB gates,
+both entries, all three actual publication calls and independent paired audit
+passed. Inputs remained unchanged. Evidence:
+`E:/BlurMask-build-artifacts-20261014/publication-branding-root-20261029`
+(226.71 seconds, CPU2). Four deliberately altered project variants were also
+rejected by the metadata authentication helper. This local result does not claim
+that the newly queued full GitHub CI run has already finished.
