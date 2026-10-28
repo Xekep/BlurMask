@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "description": "Reviewed stdlib-only checks; no inference, SDK, vendor engine or GUI execution.",
+  "steps": [
+    {
+      "id": "planner-controls",
+      "argv": ["{python}", "{root}/tools/handwriting/test_plan_port_checks.py"],
+      "inputs": [
+        "tools/handwriting/test_plan_port_checks.py",
+        "tools/handwriting/plan_port_checks.py"
+      ],
+      "timeoutSeconds": 45,
+      "cache": true,
+      "inputsComplete": true
+    },
+    {
+      "id": "auto-resource-controls",
+      "argv": ["{python}", "{root}/tools/test-experimental-auto-assets.py", "--output", "{out}"],
+      "inputs": [
+        "tools/test-experimental-auto-assets.py",
+        "tools/package-experimental-raw-content-model.py",
+        "tools/export-raw-content-model.py",
+        "tools/export-ink-math-model.py",
+        "models/raw-content/raw-content2.res",
+        "src/BlurMask/AiExperimentalMathModels.cs",
+        "src/BlurMask/AiExperimentalRawContentModels.cs"
+      ],
+      "outputs": [
+        "asset-controls.json",
+        "models/raw-content2.ikrraw",
+        "models/raw-content-model-provenance.json"
+      ],
+      "timeoutSeconds": 45,
+      "cache": true,
+      "inputsComplete": true
+    }
+  ]
+}

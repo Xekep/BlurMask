@@ -172,6 +172,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Verify recognition port automation without cached results
+        run: |
+          python -B tools/handwriting/test_plan_port_checks.py
+          python -B tools/handwriting/test_run_port_checks.py
+          python -B tools/handwriting/run_port_checks.py tools/handwriting/port-checks-static.json --output .artifacts/port-release-checks --cache .artifacts/port-release-cache --no-cache
       - name: Package independent recognition libraries and separate model assets
         env:
           RELEASE_VERSION: ${{ github.ref_name }}
