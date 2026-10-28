@@ -13,6 +13,7 @@ on:
       - 'tools/LegacyMathFreshPublisher.Probe/**'
       - 'tools/LegacyMathOutgoingTransfer.Probe/**'
       - 'tools/LegacyMathOriginalApplication.Probe/**'
+      - 'tools/LegacyMathPriorSelectedScope.Probe/**'
       - 'tools/export-ink-math-model.py'
       - 'tools/fetch-ink-math-runtime.py'
       - 'models/math2/**'
@@ -28,6 +29,7 @@ on:
       - 'tools/LegacyMathFreshPublisher.Probe/**'
       - 'tools/LegacyMathOutgoingTransfer.Probe/**'
       - 'tools/LegacyMathOriginalApplication.Probe/**'
+      - 'tools/LegacyMathPriorSelectedScope.Probe/**'
       - 'tools/export-ink-math-model.py'
       - 'tools/fetch-ink-math-runtime.py'
       - 'models/math2/**'
@@ -86,7 +88,7 @@ jobs:
       - name: Actual model through fresh publication, outgoing transfer and original application
         shell: pwsh
         run: |
-          $projects = @('LegacyMathFreshPublisher.Probe', 'LegacyMathOutgoingTransfer.Probe', 'LegacyMathOriginalApplication.Probe')
+          $projects = @('LegacyMathFreshPublisher.Probe', 'LegacyMathOutgoingTransfer.Probe', 'LegacyMathOriginalApplication.Probe', 'LegacyMathPriorSelectedScope.Probe')
           foreach ($project in $projects) {
             $managed = ".artifacts/math-retained/$project-managed.json"
             $native = ".artifacts/math-retained/$project-native.json"

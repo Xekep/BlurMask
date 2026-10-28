@@ -122,3 +122,8 @@ It fetches only the pinned official CPU ONNX Runtime and exports the already
 tracked repository resource locally. Uploaded evidence excludes the resource,
 model bundle and native binaries. This focused workflow does not establish all
 application/research gates or release eligibility.
+
+The initial three-probe matrix for commit `f25b2ca` passed on Windows, Linux and
+macOS: [run40750156609](https://github.com/Xekep/BlurMask/actions/runs/40750156609).
+The subsequent [current-result source scope](math-prior-selected-owner-20261028.md)
+adds a fourth probe and has its own verification boundary.

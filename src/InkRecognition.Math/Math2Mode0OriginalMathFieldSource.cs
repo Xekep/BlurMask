@@ -19,7 +19,7 @@ internal sealed record Math2Mode0MathFieldSnapshot(bool Complete, bool Failed, b
 
 /// <summary>One library original mathField/INPUT102, its selected clone and
 /// actual empty-first C23. No CBB/store, native history receiver or DOM acceptance.</summary>
-internal sealed class Math2Mode0OriginalMathFieldSource : IDisposable
+internal sealed partial class Math2Mode0OriginalMathFieldSource : IDisposable
 {
     internal const long DefaultPayloadBudget = 16 * 1024 * 1024;
     private const string PageNamespace = "http://www.myscript.com/ns/myscript/page";

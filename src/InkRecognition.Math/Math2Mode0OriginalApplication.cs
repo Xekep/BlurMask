@@ -32,7 +32,7 @@ internal sealed record Math2Mode0OriginalSnapshot(bool Prepared,bool Failed,bool
 
 /// <summary>Bounded original Math registry/journal + original FIELD publication.
 /// This is explicit library state, not native CBB/revisions/automatic rollback.</summary>
-internal sealed class Math2Mode0OriginalApplication:IDisposable
+internal sealed partial class Math2Mode0OriginalApplication:IDisposable
 {
     internal const long DefaultPayloadBudget=64L*1024*1024;
     private sealed class Claim {internal int Entered;}
@@ -143,7 +143,7 @@ internal sealed class Math2Mode0OriginalApplication:IDisposable
                 active.Attach(originalField,payload,transfer.Ordinal);trace.Add("original:DOM:insert2:after-INPUT");Observe(Math2Mode0OriginalStage.DomInserted,-1,input,transfer,observer,token);
                 if(refusePostcheck)throw new NotSupportedException("Prepared original postcheck refusal after mutation.");
                 Math2Mode0OriginalKernel.ValidateTags(active,originalField,registry,input.InputRanges,token);Observe(Math2Mode0OriginalStage.PostValidated,-1,input,transfer,observer,token);
-                epoch++;complete=true;trace.Add("library:DOM:epoch1");Observe(Math2Mode0OriginalStage.Complete,-1,input,transfer,observer,token);return 0;
+                epoch++;complete=true;trace.Add("library:DOM:epoch1");Observe(Math2Mode0OriginalStage.Complete,-1,input,transfer,observer,token);priorReady=true;return 0;
             }
             catch{failed=true;throw;}
         },token);
