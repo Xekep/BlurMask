@@ -2,7 +2,7 @@ using System.Text;
 
 namespace InkRecognition.Math;
 
-internal sealed class Math2Mode0OriginalArena(LegacyLibraryOriginalDomNameOwner names)
+internal sealed partial class Math2Mode0OriginalArena(LegacyLibraryOriginalDomNameOwner names)
 {
     internal sealed class Node(int id,byte kind,LegacyLibraryOriginalDomName name,int original,int payload)
     {

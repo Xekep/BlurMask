@@ -50,15 +50,12 @@ consumer, without tuning labels, thresholds or budgets to these answers.
 - English: the 949-document candidate and fresh selected/index continuation are
   still staged. A source-budget refusal is not a successful publication; neither
   the candidate nor diagnostic-only exports prove completed English recognition.
-- Math: main contains 75 authored library documents. The staged 78-document
-  candidate reaches real default DOM differences and CB8 filtering, but all
-  observed operations are filtered. It does not prove actual document apply,
-  revision handling or repeat recognition. Root authenticated its 78 authored
-  documents through the compiled PDB and independently published its probe as
-  Windows Native AOT against the corrected core. Six real NN pipelines, 961
-  frozen alignment cases, 1,257 controls and all three independent NN/candidate/
-  diff audits pass (`math78-root-native-20261029`, build 79.91 seconds,
-  actual run 1.43 seconds). This candidate is still staged, not in main.
+- Math: main now contains 79 authored library documents, including the
+  THIRD/candidate/default-diff path and typed temporary-writer kernel. Six real
+  neural pipelines reach actual differences and CB8 filtering; all observed
+  actions are filtered. This does not prove original-document application,
+  revision handling or repeat recognition. Verification and remaining ownership
+  boundaries are recorded in [the Math transfer](math-prior-default-diff-20261029.md).
 - Solver: Giac is the separate upstream CAS. Its tests with supplied expressions
   establish solver behavior, not correct recognition of handwritten integrals.
 - Automatic classification, Russian/English end-to-end quality and application

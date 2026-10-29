@@ -19,7 +19,7 @@ internal sealed record Math2Mode0CurrentC23Snapshot(long Reservation,long InputI
     LegacyNativeInkPositionRange[] C23Ranges,LegacyNativeInkPositionRange[] WorkRanges);
 internal enum Math2Mode0CurrentC23Stage { Claimed, Selected, Work, Complete }
 
-internal sealed class Math2Mode0PriorC23Preparation:IDisposable
+internal sealed partial class Math2Mode0PriorC23Preparation:IDisposable
 {
     internal const long DefaultBudget=16L*1024*1024;
     private sealed class Claim {internal int Used;}

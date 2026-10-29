@@ -9,7 +9,7 @@ internal sealed record Math2Mode0PriorNnSnapshot(bool Complete,bool Failed,bool 
 
 // Explicit new cold/single-F0 library request bound to a genuine current C23.
 // It does not replay old output, enter configured grouping, or authorize edits.
-internal sealed class Math2Mode0PriorRawOnlySource:IDisposable
+internal sealed partial class Math2Mode0PriorRawOnlySource:IDisposable
 {
     private readonly object gate=new();
     private readonly Math2Mode0PriorC23Preparation preparation;

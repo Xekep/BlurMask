@@ -5,6 +5,8 @@ namespace InkRecognition.Math;
 internal abstract class Math2Mode0PriorInk
 {
     internal abstract object Identity { get; }
+    internal abstract long PlanThird();
+    internal abstract Math2Mode0PriorRetainedInk CloneThird(CancellationToken token);
     internal abstract LegacyOwnedRawInkDocument Document { get; }
     internal abstract Math2Mode0CurrentC23 SelectInput(long inputId,CancellationToken token);
     internal abstract LegacyLibraryOriginalDomNameOwner Names { get; }
@@ -158,6 +160,8 @@ internal sealed partial class Math2Mode0OriginalMathFieldSource
 {
     private sealed class PriorInk(InkOwner ink,LegacyLibraryOriginalDomNameOwner names,Math2Mode0OriginalMathFieldSource sourceField):Math2Mode0PriorInk
     {
+        internal override long PlanThird()=>checked(8192L+ink.Registry.Count*512L+ink.Registry.Values.Sum(e=>e.C22.Ranges.LongLength)*128L);
+        internal override Math2Mode0PriorRetainedInk CloneThird(CancellationToken token)=>sourceField.ClonePriorThirdInk(ink,names,token);
         internal override object Identity=>ink;
         internal override LegacyOwnedRawInkDocument Document=>ink.Document;
         internal override Math2Mode0CurrentC23 SelectInput(long inputId,CancellationToken token)
