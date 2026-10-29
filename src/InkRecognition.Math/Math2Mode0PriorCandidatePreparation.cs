@@ -3,7 +3,9 @@ using System.Text;
 namespace InkRecognition.Math;
 
 internal abstract class Math2Mode0PriorRetainedInk:Math2Mode0RetainedInk
-{internal abstract Math2Mode0PriorCandidateRegistry[] CopyCandidateRegistry();}
+{internal abstract Math2Mode0PriorCandidateRegistry[] CopyCandidateRegistry();
+ internal abstract Math2Mode0PriorCandidateRegistry[] CopyLateRegistry(Math2DomDiffWork work);
+ internal abstract void PrepareLateRegistration(object selection,Math2DomDiffWork work);}
 
 internal sealed partial class Math2Mode0PriorRawOnlySource
 {
@@ -81,7 +83,7 @@ internal sealed partial class Math2Mode0PriorSelectedScope
 }
 internal sealed partial class Math2Mode0OriginalMathFieldSource
 {
-    private sealed class PriorThirdInk(Math2Mode0OriginalMathFieldSource sourceField, InkOwner ink, LegacyLibraryOriginalDomNameOwner actualNames, LegacyNativeInkPositionRange[]? changedDomain=null)
+    private sealed partial class PriorThirdInk(Math2Mode0OriginalMathFieldSource sourceField, InkOwner ink, LegacyLibraryOriginalDomNameOwner actualNames, LegacyNativeInkPositionRange[]? changedDomain=null)
         : Math2Mode0PriorRetainedInk
     {
         internal override Math2Mode0PriorCandidateRegistry[] CopyCandidateRegistry()
@@ -199,7 +201,7 @@ internal sealed partial class Math2Mode0PriorCandidatePreparation:IDisposable
     private sealed class Node(int id,byte kind,LegacyLibraryOriginalDomName name)
     {internal readonly int Id=id;internal readonly byte Kind=kind;internal readonly LegacyLibraryOriginalDomName Name=name;internal int Parent;internal byte Tag;internal string? Text;internal long? Number;}
     private sealed class Pending(long id,LegacyLibraryOriginalDomName name,object? selection)
-    {internal readonly long Id=id;internal readonly LegacyLibraryOriginalDomName Name=name;internal readonly object? Selection=selection;}
+    {internal readonly long Id=id;internal readonly LegacyLibraryOriginalDomName Name=name;internal readonly object? Selection=selection;internal long Resolved=-1;}
     private readonly object gate=new();
     private readonly Math2Mode0PriorRawOnlySource source;
     private readonly Math2Mode0FirstResultCopy actualCopy;
@@ -301,7 +303,7 @@ internal sealed partial class Math2Mode0PriorCandidatePreparation:IDisposable
             var registry=third is not null&&!released?third.CopyCandidateRegistry():[];
             return new(complete,ready,failed,released,reservation,temporaryNext,third?.SnapshotNext??-1,
                 candidate.Select(n=>new Math2Mode0PublishNode(n.Id,n.Kind,n.Name.Text,n.Parent,0,n.Tag,n.Text,n.Number,null,null)).ToArray(),temporary?.Snapshot()??[],registry,
-                pending.Select(p=>new Math2Mode0PublishPending(p.Id,p.Name.Text,-1,p.Selection is not null,p.Selection is null?[]:third!.CopySelectionRanges(p.Selection))).ToArray(),oldTags.ToArray());
+                pending.Select(p=>new Math2Mode0PublishPending(p.Id,p.Name.Text,p.Resolved,p.Selection is not null,p.Selection is null?[]:third!.CopySelectionRanges(p.Selection))).ToArray(),oldTags.ToArray());
         }
     }
     public void Dispose(){lock(gate){if(released)return;released=true;outer?.Dispose();third?.Dispose();}}

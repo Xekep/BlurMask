@@ -22,7 +22,7 @@ internal sealed partial class Math2Mode0PriorDomDiff
 {
     private int temporaryApplicationClaimed;
     private TemporaryApplyBorrow? activeTemporaryApplyBorrow;
-    internal sealed class TemporaryApplyBorrow
+    internal sealed partial class TemporaryApplyBorrow
     {
         private readonly Math2Mode0PriorDomDiff owner;
         private readonly Math2Mode0PriorCandidatePreparation.DiffBorrow input;
@@ -95,7 +95,7 @@ internal sealed partial class Math2Mode0PriorDomDiff
 internal enum Math2Mode0TemporaryApplyStage{Claimed,BeforeTraversal,ActionCompleted,HeaderConsumed,Completed}
 internal sealed record Math2Mode0TemporaryApplySnapshot(bool Complete,bool Ready,bool Failed,bool Released,long Reservation,long Visits,
     int CompletedActions,int ObservedAfterActions,bool HeaderConsumed,bool PartialActionMayExist,Math2Mode0OriginalDomNode[] ObservedTemporary);
-internal sealed class Math2Mode0PriorTemporaryApply:IDisposable
+internal sealed partial class Math2Mode0PriorTemporaryApply:IDisposable
 {
     private readonly object gate=new();
     private readonly Math2Mode0PriorDomDiff diff;

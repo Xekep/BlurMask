@@ -55,7 +55,7 @@ This is an exact test expectation update, not a handwriting quality improvement.
 - English: the 949-document candidate and fresh selected/index continuation are
   still staged. A source-budget refusal is not a successful publication; neither
   the candidate nor diagnostic-only exports prove completed English recognition.
-- Math: the current candidate contains 83 authored Math documents and 937 Core
+- Math: the current candidate contains 84 authored Math documents and 937 Core
   documents. Six real applied OLD results accept an appended raw curve, build a
   new selected/C23 owner and run genuine NEW neural inference. Their actual diff
   cohorts complete 31 kept mutations on the same temporary trees; independent
@@ -64,9 +64,12 @@ This is an exact test expectation update, not a handwriting quality improvement.
   [Math transfer](math-prior-default-diff-20261029.md) and
   [empty temporary traversal](math-temporary-apply-20261029.md) remain historical
   evidence for their narrower stages. Late registration, negative-tag resolution,
-  stale cleanup and original-document update are still incomplete. This is not
+  and stale cleanup are now independently checked on the same THIRD owner;
+  original-document update is still incomplete. This is not
   a completed general repeat-recognition path or application integration. See
   [the changed-input evidence](math-current-input-temporary-apply-20261029.md).
+  The [late registration evidence](math-late-registration-20261029.md) records
+  actual successes, failure prefixes and the corrected private mutation grant.
 - Solver: Giac is the separate upstream CAS. Its tests with supplied expressions
   establish solver behavior, not correct recognition of handwritten integrals.
 - Automatic classification, Russian/English end-to-end quality and application
