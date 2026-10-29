@@ -109,6 +109,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Independent temporary apply audit failed' }
           python -I -B "$oracle/audit_attention.py" "$root/managed.json.attention.json" "$root/managed.json" "$root/managed-repeat.json.attention.json" "$root/native.json.attention.json" | Out-File "$root/attention-audit.json" -Encoding utf8
           if ($LASTEXITCODE -ne 0) { throw 'Exact diagnostic attention SHA/replay audit failed' }
+          python -B "$oracle/test_attention.py" "$root/managed.json.attention.json" "$root/managed.json" | Out-File "$root/attention-negative-controls.json" -Encoding utf8
+          if ($LASTEXITCODE -ne 0) { throw 'Attention corruption controls failed' }
           python -B "$oracle/audit_unchanged.py" "$root/managed.json" "$oracle/fixtures/unchanged-prior-reference.json"
           if ($LASTEXITCODE -ne 0) { throw 'Exact frozen unchanged reference differs; inspect uploaded captures' }
       - name: Preserve numerical evidence on success and failure

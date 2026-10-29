@@ -15,6 +15,7 @@ internal sealed class RawAttentionSidecar
     private readonly string output,runtime;
     private readonly RawAttentionInputPin[] inputs;
     private readonly List<RawAttentionCase> cases=[];
+    private readonly List<RawAttentionCase> fresh=[];
     private RawAttentionSidecar(string output,string runtime,RawAttentionInputPin[] inputs)
     {this.output=output;this.runtime=runtime;this.inputs=inputs;}
     internal static RawAttentionSidecar? CreateIfEnabled(string output,string[] inputs,string runtime)
@@ -26,6 +27,35 @@ internal sealed class RawAttentionSidecar
     }
     private static string HashFile(string path)
     {using var stream=File.OpenRead(path);return Convert.ToHexStringLower(SHA256.HashData(stream));}
+
+    // Observe the fresh inference Pipeline.Create ALREADY ran. Do not run a
+    // second loop, infer encoder inputs from outputs, or supply hypotheses.
+    internal void CaptureFresh(int index,bool reversed,Math2Mode0RawOnlySource actual)
+    {
+        if(index is<0 or>5||fresh.Any(c=>c.Case==index))throw new InvalidOperationException("One actual fresh history per case required.");
+        var loop=actual.Loop;var before=loop.CopyRawAttentionStatistics();
+        var frames=actual.ReadHistoryForDiagnostic().CopyFramesForInspection();
+        int calls=loop.SuccessfulDecoderCalls,width=loop.BeamWidth;
+        if(!loop.IsFinishedRecording||loop.IsFailed||!before.Complete||before.Failed||before.Disposed||
+            frames.Length!=calls||before.RawFrameCount!=calls||before.RawFrameHashes.Length!=calls)
+            throw new InvalidDataException("Actual fresh recording is not complete.");
+        var retained=new RawAttentionFrame[frames.Length];
+        for(int i=0;i<frames.Length;i++)
+        {
+            var frame=frames[i];
+            if(frame.Segments<1||frame.Beams<1||frame.Beams>width||frame.Values.Length!=checked(frame.Segments*frame.Beams))
+                throw new InvalidDataException("Actual fresh frame dimensions differ.");
+            string sha=Convert.ToHexStringLower(SHA256.HashData(MemoryMarshal.AsBytes(frame.Values.AsSpan())));
+            if(sha!=before.RawFrameHashes[i])throw new InvalidDataException("Fresh float bytes differ from actual retained history SHA.");
+            var bits=new uint[frame.Values.Length];for(int j=0;j<bits.Length;j++)bits[j]=BitConverter.SingleToUInt32Bits(frame.Values[j]);
+            retained[i]=new(i,frame.Segments,frame.Beams,sha,bits);
+        }
+        var after=loop.CopyRawAttentionStatistics();
+        if(!after.Complete||after.Failed||after.Disposed||after.RawFrameCount!=calls||loop.SuccessfulDecoderCalls!=calls||
+            !after.RawFrameHashes.SequenceEqual(before.RawFrameHashes))throw new InvalidDataException("Fresh history changed during observation.");
+        fresh.Add(new("Fresh",index,width,reversed,actual.InputFrameCount,calls,retained));
+        Write(false,null);
+    }
 
     [DynamicDependency("source",typeof(Math2Mode0PriorRawOnlySource))]
     [DynamicDependency("history",typeof(Math2Mode0RawOnlySource))]
@@ -64,6 +94,8 @@ internal sealed class RawAttentionSidecar
     }
     internal void Seal(string capture)
     {
+        if(!fresh.Select(c=>c.Case).Order().SequenceEqual(Enumerable.Range(0,6)))
+            throw new InvalidDataException("Incomplete actual fresh diagnostic coverage.");
         foreach(string route in new[]{"Unchanged","Actual"})
             if(!cases.Where(c=>c.Route==route).Select(c=>c.Case).Order().SequenceEqual(Enumerable.Range(0,6)))
                 throw new InvalidDataException("Incomplete diagnostic route/case coverage.");
@@ -71,9 +103,9 @@ internal sealed class RawAttentionSidecar
     }
     private void Write(bool complete,string? captureHash)
     {
-        var value=new RawAttentionEvidence(1,"PROBE_DIAGNOSTIC_ONLY_NO_ENGINE_INGRESS_OR_NUMERIC_TOLERANCE",runtime,
+        var value=new RawAttentionEvidence(2,"PROBE_DIAGNOSTIC_ONLY_NO_ENGINE_INGRESS_OR_NUMERIC_TOLERANCE",runtime,
             RuntimeInformation.ProcessArchitecture.ToString(),RuntimeInformation.FrameworkDescription,BitConverter.IsLittleEndian,
-            complete,captureHash,inputs,cases.ToArray());
+            complete,captureHash,inputs,cases.ToArray(),fresh.ToArray());
         string temporary=output+".tmp";
         using(var file=File.Create(temporary))JsonSerializer.Serialize(file,value,AttentionJson.Default.RawAttentionEvidence);
         File.Move(temporary,output,true);
@@ -83,6 +115,6 @@ internal sealed record RawAttentionInputPin(int Argument,string FileName,long By
 internal sealed record RawAttentionFrame(int Frame,int Segments,int Beams,string Sha256,uint[] FloatBits);
 internal sealed record RawAttentionCase(string Route,int Case,int Width,bool Reversed,int InputFrames,int DecoderCalls,RawAttentionFrame[] Frames);
 internal sealed record RawAttentionEvidence(int Schema,string Scope,string Runtime,string Architecture,string Framework,bool LittleEndian,
-    bool Complete,string? CaptureSha256,RawAttentionInputPin[] Inputs,RawAttentionCase[] Cases);
+    bool Complete,string? CaptureSha256,RawAttentionInputPin[] Inputs,RawAttentionCase[] Cases,RawAttentionCase[] Fresh);
 [JsonSourceGenerationOptions][JsonSerializable(typeof(RawAttentionEvidence))]
 internal partial class AttentionJson:JsonSerializerContext;

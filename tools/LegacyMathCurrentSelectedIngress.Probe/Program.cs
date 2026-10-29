@@ -8,7 +8,9 @@ var rawAttention=RawAttentionSidecar.CreateIfEnabled(args[6],args.Take(6).ToArra
 for(int index=0;index<6;index++)
 {
  var e=expected.RootElement.GetProperty("cases")[index];int width=e.GetProperty("oldPipeline").GetProperty("Width").GetInt32();bool reverse=e.GetProperty("oldPipeline").GetProperty("Reversed").GetBoolean();
- using var p=Pipeline.Create(runtime,run,bundle,width,reverse);p.Application.RunSource();p.Application.ApplyDom();
+ using var p=Pipeline.Create(runtime,run,bundle,width,reverse);
+ rawAttention?.CaptureFresh(index,reverse,p.Source);
+ p.Application.RunSource();p.Application.ApplyDom();
  // Existing unchanged-input C23/NN route stays exact; these are real models.
  using(var oldScope=p.Application.CreatePriorSelectedScope())using(var oldFreeze=Math2Mode0PriorFreezePreparation.Create(oldScope))using(var oldCurrent=Math2Mode0PriorC23Preparation.Create(oldScope,oldFreeze))
  {

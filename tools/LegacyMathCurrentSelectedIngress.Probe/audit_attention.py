@@ -4,7 +4,7 @@ import array,hashlib,json,math,struct,sys
 
 def audit(sidecar_path,capture_path):
  raw=sidecar_path.read_bytes();s=json.loads(raw);capture_raw=capture_path.read_bytes();capture=json.loads(capture_raw)
- assert s['Schema']==1 and s['Scope']=='PROBE_DIAGNOSTIC_ONLY_NO_ENGINE_INGRESS_OR_NUMERIC_TOLERANCE'
+ assert s['Schema']==2 and s['Scope']=='PROBE_DIAGNOSTIC_ONLY_NO_ENGINE_INGRESS_OR_NUMERIC_TOLERANCE'
  assert s['Complete']and s['LittleEndian']and s['CaptureSha256']==hashlib.sha256(capture_raw).hexdigest()
  assert len(s['Inputs'])==6 and [p['Argument']for p in s['Inputs']]==list(range(6))
  assert len(s['Cases'])==12;seen=set();rows=[]
@@ -29,7 +29,18 @@ def audit(sidecar_path,capture_path):
    negative_zero+=bits.count(0x80000000);values+=len(bits)
   rows.append(dict(Route=route,Case=case['Case'],Width=case['Width'],Reversed=case['Reversed'],Frames=len(case['Frames']),FloatCount=values,Finite=finite,NaN=nan,Infinite=infinite,NegativeZero=negative_zero))
  assert seen=={(r,i)for r in('Unchanged','Actual')for i in range(6)}
- return s,dict(SidecarSha256=hashlib.sha256(raw).hexdigest(),CaptureSha256=s['CaptureSha256'],Architecture=s['Architecture'],Framework=s['Framework'],Runtime=s['Runtime'],Rows=rows)
+ # Fresh arrays are the already-executed source, not a recomputed baseline or
+ # supplied tensor. Equality with the fully rehashed unchanged cohort checks
+ # every bit/shape/hash and has no cross-platform numeric tolerance.
+ assert len(s['Fresh'])==6 and sorted(c['Case']for c in s['Fresh'])==list(range(6))
+ fresh_rows=[]
+ for case in s['Fresh']:
+  other=next(c for c in s['Cases']if c['Route']=='Unchanged'and c['Case']==case['Case'])
+  assert case['Route']=='Fresh'
+  for key in ['Width','Reversed','InputFrames','DecoderCalls','Frames']:
+   assert case[key]==other[key],('SAME_PROCESS_FRESH_UNCHANGED_MISMATCH',case['Case'],key)
+  fresh_rows.append(dict(Case=case['Case'],ExactFreshUnchanged=True,DecoderCalls=case['DecoderCalls']))
+ return s,dict(SidecarSha256=hashlib.sha256(raw).hexdigest(),CaptureSha256=s['CaptureSha256'],Architecture=s['Architecture'],Framework=s['Framework'],Runtime=s['Runtime'],Rows=rows,FreshUnchanged=fresh_rows)
 
 if __name__=='__main__':
  primary,report=audit(Path(sys.argv[1]),Path(sys.argv[2]));others=[]
@@ -37,6 +48,7 @@ if __name__=='__main__':
   path=Path(sidecar);assert path.name.endswith('.attention.json')
   other,receipt=audit(path,Path(str(path)[:-len('.attention.json')]))
   assert other['Cases']==primary['Cases'],'Same-platform actual float bits or dimensions differ'
+  assert other['Fresh']==primary['Fresh'],'Same-platform fresh float bits or dimensions differ'
   assert other['Inputs']==primary['Inputs']and other['CaptureSha256']==primary['CaptureSha256']
   assert other['Runtime']==primary['Runtime']and other['Architecture']==primary['Architecture']
   others.append(receipt)
