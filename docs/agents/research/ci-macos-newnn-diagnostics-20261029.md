@@ -23,8 +23,10 @@ failed the original assertion and produced the expected leaf diagnostic.
 Evidence: `E:/BlurMask-build-artifacts-20261014/ci-macos-prior-newnn-diagnostic-next-20261029`.
 The separate Build-job failure in this run is the stale`41268` expectation in
 `LegacyFirstOwnedRecognition.Probe`, whose actual result is`40843`. Its42-group
-fixture needs its own independent replay; the earlier35-group PlainWord proof
-must not be substituted for the whole owning fixture.
+fixture needed its own independent replay; the earlier35-group PlainWord proof
+must not be substituted for the whole owning fixture. The later
+[owning57 replay](ru-first-owned57-ci-20261029.md) supplies that separate proof
+and corrects its stale constant without changing the recognizer.
 
 The separate `Math current-input parity` workflow now exercises just this
 integration path on Windows, Linux and macOS. It fetches the existing pinned

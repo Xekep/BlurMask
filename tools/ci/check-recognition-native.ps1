@@ -1466,6 +1466,18 @@ foreach ($case in $cases) {
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
   }
 }
+#Reflection-based owning diagnostics run managed, outside the NativeAOT probe loop.
+dotnet run --project tools/LegacyFirstOwnedRecognition.Diagnostics/LegacyFirstOwnedRecognition.Diagnostics.csproj -c Release -- models/ru-RU/ru_RU-ak-cur.lite.res models/ru-RU/legacy-engine-profile.json models/ru-RU/legacy-separation-profile.json .artifacts/legacy-first-owned-managed-audit.json
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+python tools/LegacyFirstOwnedRecognition.Diagnostics/audit_model_replay.py . tools/LegacyFirstOwnedRecognition.Diagnostics/input-pins.json .artifacts/legacy-first-owned-managed-audit.json.owning-replay.json
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+python tools/LegacyFirstOwnedRecognition.Diagnostics/audit_primary_replay.py .artifacts/legacy-first-owned-managed-audit.json.owning-replay.json
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+python tools/LegacyFirstOwnedRecognition.Diagnostics/audit_context_replay.py .artifacts/legacy-first-owned-managed-audit.json.owning-replay.json
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+python tools/LegacyFirstOwnedRecognition.Diagnostics/audit_terminal_replay.py .artifacts/legacy-first-owned-managed-audit.json.owning-replay.json
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
 $suffix = if ($IsWindows) { '.exe' } else { '' }
 & "./.artifacts/LegacyIntegerWord-native/LegacyIntegerWord.Probe$suffix" models/ru-RU/ru_RU-lk-text.lite.res
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

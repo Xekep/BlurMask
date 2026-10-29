@@ -24,7 +24,8 @@ def wide(v):
     return {0x3000:0x20,0xff5f:0x2985,0xff60:0x2986,0xffe0:0xa2,0xffe1:0xa3,0xffe2:0xac,0xffe3:0xaf,0xffe4:0xa6,0xffe5:0xa5,0xffe6:0x20a9}.get(v)
 assert not [(label,labels.get(chr(base))) for label,text in texts.items() if len(text)==1 and (base:=wide(ord(text))) is not None and chr(base) in labels]
 own=[c for c in captures if not c['external']];assert len(own)==4
-assert [(c['groups'],c['cost'],c['labels'],c['glyphs']) for c in own]==[(42,41268,[22,70,25],3),(3,12111,[134,191],1),(6,14219,[24],1),(6,29007,[18,18,18],3)]
+#Authenticated Russian-first mixedQ15/all57group replay corrects stale41268; labels and other fixtures unchanged.
+assert [(c['groups'],c['cost'],c['labels'],c['glyphs']) for c in own]==[(42,40843,[22,70,25],3),(3,12111,[134,191],1),(6,14219,[24],1),(6,29007,[18,18,18],3)]
 for c in captures:
     if 'error' in c:continue
     assert bytes.fromhex(c['primaryMask'])==mask and bytes.fromhex(c['secondaryMask'])==mask and c['widePairs']==0
