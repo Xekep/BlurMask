@@ -88,4 +88,26 @@ class AdmissionTests(unittest.TestCase):
  def test_fixed_counts(self):
   manifest=copy.deepcopy(self.manifest);manifest['defaultCoreCount']=952
   with self.assertRaises(AssertionError):census._verify_sources(self.root,manifest)
+ def test_tampered_owned_frame_bodies(self):
+  for row in self.manifest['english951']['ownedFrameRevision']['sources']:
+   path=self.core/row['path']
+   with self.subTest(name=path.name),self.changed(path,path.read_bytes()+b'// altered\n'),self.assertRaisesRegex(AssertionError,'Tampered reviewed'):census.verify(self.root)
+ def test_wrong_owned_frame_checkpoint_preimages(self):
+  for i,row in enumerate(self.manifest['english951']['ownedFrameRevision']['sources']):
+   manifest=copy.deepcopy(self.manifest);manifest['english951']['ownedFrameRevision']['sources'][i]['preimageCanonicalLfSha256']='0'*64
+   with self.subTest(name=row['path']),self.assertRaises(AssertionError):census._verify_sources(self.root,manifest)
+ def test_owned_frame_old_baseline_body_rejected(self):
+  row=next(r for r in self.manifest['english951']['ownedFrameRevision']['sources']if r['path']=='LegacyPreparedCompactWordFrameProducer.cs')
+  raw=Path(__file__).with_name('fixtures').joinpath('publication-core-frame26-preimage.cs.txt').read_bytes().replace(b'\r\n',b'\n')
+  self.assertEqual(census.sha(raw),row['preimageCanonicalLfSha256'])
+  with self.changed(self.core/row['path'],raw),self.assertRaisesRegex(AssertionError,'Tampered reviewed'):census.verify(self.root)
+ def test_owned_frame_wrong_checkpoint(self):
+  manifest=copy.deepcopy(self.manifest);manifest['english951']['ownedFrameRevision']['checkpointManifestSha256']='0'*64
+  with self.assertRaises(AssertionError):census._verify_sources(self.root,manifest)
+ def test_owned_frame_missing_source(self):
+  manifest=copy.deepcopy(self.manifest);manifest['english951']['ownedFrameRevision']['sources'].pop()
+  with self.assertRaises(AssertionError):census._verify_sources(self.root,manifest)
+ def test_owned_frame_unknown_scope(self):
+  manifest=copy.deepcopy(self.manifest);manifest['english951']['ownedFrameRevision']['sources'][0]['path']='LegacyEnglishCaseNode0Ledger.cs'
+  with self.assertRaises(AssertionError):census._verify_sources(self.root,manifest)
 if __name__=='__main__':unittest.main(argv=[__file__],verbosity=2)

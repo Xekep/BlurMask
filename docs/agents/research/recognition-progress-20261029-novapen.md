@@ -58,6 +58,11 @@ a machine-specific runtime patch requirement from the raw append test project.
 
 ## Remaining boundaries
 
+The [private owned-frame optimization](english-owned-frame-20261029.md) is now
+admitted to Core951 after actual Main951/953, public compact, paired publication
+and EN/RU/Math regression checks. Its 12.1% work-ledger reduction applies to the
+recorded three-point control; public admission and handwriting quality are unchanged.
+
 - English: the historical isolated949 candidate completes the private source.V30
   control through both resets and outer phase2, on one stroke/three points.
   The preserved-main951 composition now passes the same control in Managed and

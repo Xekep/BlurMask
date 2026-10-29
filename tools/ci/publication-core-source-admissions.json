@@ -739,6 +739,59 @@
         "canonicalLfSha256": "48328302a0dfd724d97281d46569eadb1892db073ae9b4734b0eb071491c8537",
         "role": "RetainedMainDelta"
       }
-    ]
+    ],
+    "ownedFrameRevision": {
+      "id": "owned-last-frame26-v3",
+      "checkpointManifestSha256": "642414b98b2db5c3897600f808e92ca78dcf70e03570c08c2ea536259ad1c1cd",
+      "reviewedPacketManifestSha256": "040c4d2c4546dddee0d0eec3c6d1b49a52f60739455dccfc621a17dadbec30c8",
+      "evidenceSha256": {
+        "root-isolated/OWNING-FINAL.json": "92b6cddad9afe407877dc00d1b9911ea1f4e9d92c89a304217a8d3087940db86",
+        "root-isolated/NATIVE-FINAL.json": "73989a34326441c37dfec94f31a9efd28eed6d3f5b6bea7227e90fb668c641d3",
+        "root-faults/FINAL.json": "11798b210900fa755da67aea2b365d660e9f9b9f13b3d4b10b8dce9f2e02016d",
+        "root-regressions/FINAL.json": "1d1b511fb8783485287f6880c21ff41b6bf35b86b162bc624eb59c7d7feb285a"
+      },
+      "sources": [
+        {
+          "path": "LegacyEnglishCaseGraphPeriodicCompact.cs",
+          "preimageBasis": "english951-checkpoint",
+          "preimageCanonicalLfSha256": "273aee41943d87927820d2c362295fa78975a745ab9744c8e25233b393182ddc",
+          "preimageCanonicalLfBytes": 10387,
+          "canonicalLfSha256": "74b4507b27eef6bcbf166b004e1ae25f53f5ac5f949d47bc30048d6238b35d95",
+          "canonicalLfBytes": 13234
+        },
+        {
+          "path": "LegacyEnglishCaseGraphPeriodicContextBudget.cs",
+          "preimageBasis": "english951-checkpoint",
+          "preimageCanonicalLfSha256": "2ad260dc4482477e615699c3ffb0b7fb8913d1a9d274e3b4fd7ad6a0c9a20978",
+          "preimageCanonicalLfBytes": 6257,
+          "canonicalLfSha256": "d00d0ecec0ffa93b32d5f31703ad7104524619b567017ac1be9b81a312034a1d",
+          "canonicalLfBytes": 10450
+        },
+        {
+          "path": "LegacyPreparedCompactWordFrameProducer.cs",
+          "preimageBasis": "baseline935-aggregate",
+          "preimageCanonicalLfSha256": "3c238c9a3e7e03f51997331615f38c1009ff6f24405cb2d712ac09d197529bff",
+          "preimageCanonicalLfBytes": 6704,
+          "canonicalLfSha256": "6b15098c696aff103f9824b60ccb480499e3e0779255c238c4e6cb5d4e86080a",
+          "canonicalLfBytes": 8835
+        },
+        {
+          "path": "LegacyPreparedCompactWordSequence.cs",
+          "preimageBasis": "baseline935-aggregate",
+          "preimageCanonicalLfSha256": "118bcdf183cfaba227347ece8b55024f5ab3251ce9a73b770271a8927dde3d86",
+          "preimageCanonicalLfBytes": 10179,
+          "canonicalLfSha256": "05b6a43d7edc2d286935d6f93180dc4d5468cf38290370c478e08fa5dfe394eb",
+          "canonicalLfBytes": 12133
+        },
+        {
+          "path": "LegacyPreparedMainCompactPublication.EnglishPeriodic.cs",
+          "preimageBasis": "english951-checkpoint",
+          "preimageCanonicalLfSha256": "634a2ce7dbe0cae7877a4a17c7ad8dfafbe9de70ce242704a8600c888fb1615e",
+          "preimageCanonicalLfBytes": 18730,
+          "canonicalLfSha256": "ffbba2a5d809d73fefce22af460b4b7fb70b4c1185b0e2f891e5b740aed46dad",
+          "canonicalLfBytes": 18522
+        }
+      ]
+    }
   }
 }

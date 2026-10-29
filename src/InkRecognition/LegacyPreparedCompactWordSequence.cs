@@ -35,6 +35,25 @@ public static class LegacyPreparedCompactWordSequence
         ValidateFrame(preparedFrame);
         if (sourceRow88.Length != 88) throw new ArgumentException("Complete explicit88-byte source row required.");
         byte[] frame = preparedFrame.ToArray();
+        return AppendContextDifferenceCore(frame, contexts, currentContext, previousContext, sourceRow88, sourceNode, knowledgeSymbol0e, contextSentinels24b8, specialSymbol24de, cancellationToken);
+    }
+    //Caller owns this fresh temporary; no array view escapes before completion.
+    internal static byte[] AppendContextDifferenceOwned(byte[] frame,
+        LegacySymbolContextFactory contexts, ulong currentContext, ulong previousContext,
+        ReadOnlySpan<byte> sourceRow88, uint sourceNode, ushort knowledgeSymbol0e,
+        bool contextSentinels24b8, ushort specialSymbol24de, CancellationToken cancellationToken=default)
+    {
+        ArgumentNullException.ThrowIfNull(contexts);
+        cancellationToken.ThrowIfCancellationRequested();
+        ValidateFrame(frame);
+        if (sourceRow88.Length != 88) throw new ArgumentException("Complete explicit88-byte source row required.");
+        return AppendContextDifferenceCore(frame, contexts, currentContext, previousContext, sourceRow88, sourceNode, knowledgeSymbol0e, contextSentinels24b8, specialSymbol24de, cancellationToken);
+    }
+    private static byte[] AppendContextDifferenceCore(byte[] frame,
+        LegacySymbolContextFactory contexts, ulong currentContext, ulong previousContext,
+        ReadOnlySpan<byte> sourceRow88, uint sourceNode, ushort knowledgeSymbol0e,
+        bool contextSentinels24b8, ushort specialSymbol24de, CancellationToken cancellationToken)
+    {
         int count = I32(frame, 0);
         if (U16(sourceRow88, 0x18) != sourceNode && (sbyte)sourceRow88[5] < 0)
         {
@@ -101,6 +120,7 @@ public static class LegacyPreparedCompactWordSequence
         }
     }
 
+
     /// <summary>206960 over prepared symbol/coordinate/counter fields. Every
     /// unchanged byte, including inactive descriptors and padding, is retained.
     /// Native coordinate qwords are packed graph references, not XY positions.</summary>
@@ -110,6 +130,16 @@ public static class LegacyPreparedCompactWordSequence
         cancellationToken.ThrowIfCancellationRequested();
         ValidateFrame(preparedFrame);
         byte[] frame = preparedFrame.ToArray();
+        return NormalizeCore(frame,contextSentinels24b8,cancellationToken);
+    }
+    internal static byte[] NormalizeOwned(byte[] frame,bool contextSentinels24b8,CancellationToken cancellationToken=default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ValidateFrame(frame);
+        return NormalizeCore(frame,contextSentinels24b8,cancellationToken);
+    }
+    private static byte[] NormalizeCore(byte[] frame,bool contextSentinels24b8,CancellationToken cancellationToken)
+    {
         int count = I32(frame, 0);
         int ordinary = I32(frame, 0x3a0), extra = I32(frame, 0x3a8);
         if (ordinary < 0 || extra < 0 || ordinary > MaximumCoordinates - 1 - extra)
@@ -204,6 +234,7 @@ public static class LegacyPreparedCompactWordSequence
             count--;
         }
     }
+
 
     private static void ValidateFrame(ReadOnlySpan<byte> frame)
     {

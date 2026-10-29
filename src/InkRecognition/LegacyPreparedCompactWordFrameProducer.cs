@@ -114,4 +114,34 @@ public static class LegacyPreparedCompactWordFrameProducer
         cancellationToken.ThrowIfCancellationRequested();
         return new(contexts, rewritten, frame);
     }
+
+    //Only the authenticated periodic LAST store consumes this one fresh array.
+    //Keep BOTH row clones and public context-rewrite/callback semantics.
+    internal static byte[] CreateOrdinaryOwned(LegacySymbolContextFactory contexts,
+        ulong currentContext,ulong previousContext,ReadOnlySpan<byte> sourceRow88,uint sourceNode,
+        byte glyphDifference,LegacyPreparedCompactWordContextPolicy policy,
+        Func<ushort,byte> sourceSymbolCategory,ILegacyOwnedCompactFrameBudget budget,CancellationToken cancellationToken=default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();ArgumentNullException.ThrowIfNull(budget);
+        if(sourceRow88.Length!=88)throw new ArgumentException("Complete explicit88-byte source row required.");
+        byte[] row=sourceRow88.ToArray();
+        ulong rewritten=RewriteCurrentContext(contexts,currentContext,row,sourceNode,policy,sourceSymbolCategory,cancellationToken);
+        byte[] frame=LegacyPreparedCompactWordSequence.AppendContextDifferenceOwned(
+            new byte[LegacyPreparedCompactWordSequence.FrameBytes],contexts,rewritten,previousContext,
+            row,sourceNode,policy.KnowledgeSymbol0e,policy.ContextSentinels24b8,policy.Special24de,cancellationToken);
+        ushort sourceArc=BinaryPrimitives.ReadUInt16LittleEndian(row.AsSpan(0x1c));
+        int count=LegacyNativeMainSourceCoordinates.WriteSingle(sourceNode,sourceArc,frame.AsSpan(0x260,20*16));
+        BinaryPrimitives.WriteInt32LittleEndian(frame.AsSpan(0x25c),count);
+        LegacyNativeMainSourceCoordinates.WriteCallbackCounts(glyphDifference,frame);
+        budget.BeforeNormalize(frame,cancellationToken);
+        frame=LegacyPreparedCompactWordSequence.NormalizeOwned(frame,policy.ContextSentinels24b8,cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();return frame;
+    }
+}
+
+//Closed internal accounting continuation. The real LAST store authenticates
+//its actual source/lease before any normalization metadata is read.
+internal interface ILegacyOwnedCompactFrameBudget
+{
+    void BeforeNormalize(ReadOnlySpan<byte> frame,CancellationToken token);
 }

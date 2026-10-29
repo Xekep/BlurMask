@@ -60,6 +60,66 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             owner.ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,bytes);owner.ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,bytes*2);
             owner.ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(8192L+512L*length));
         }
+        internal void RequireMeterAuthority()=>Require(contexts);
+        internal void BeforeOwnedFrameEntryGate()=>VisitOwnedFrame(256,nameof(BeforeOwnedFrameEntryGate));
+        internal void BeforeOwnedFrame(ulong current,ulong previous,CancellationToken token)
+        {
+            int c=OwnedFrameLength(current,token),p=OwnedFrameLength(previous,token),length=checked(c+p+2);
+            long cb=Math.Min(50,Math.Max(1,c)),pb=Math.Min(50,p);
+            //Before constructor/append reads: two88-byte row clones, one944
+            //temporary, context lists/delegates/search; normalization is paid
+            //separately from its actual already-produced symbol count below.
+            owner.ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(1280L+64L*length));
+            owner.ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(2048L+64L*length));
+            VisitOwnedFrame(checked(2048L+128L*length+8*cb*pb),nameof(BeforeOwnedFrame));
+        }
+        private int OwnedFrameLength(ulong identity,CancellationToken token)
+        {
+            int count=0;while(identity!=0)
+            {
+                token.ThrowIfCancellationRequested();Require(contexts);
+                if(count==50)throw new NotSupportedException("Actual context ancestry exceeds the native fifty-symbol frame.");
+                owner.ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,16);
+                token.ThrowIfCancellationRequested();identity=contexts.ReadPeriodicParentLink(this,identity);count++;
+            }
+            token.ThrowIfCancellationRequested();return count;
+        }
+        internal void BeforeOwnedFrameNormalization(ReadOnlySpan<byte> frame,CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();Require(contexts);
+            VisitOwnedFrame(64,nameof(BeforeOwnedFrameNormalization));
+            if(frame.Length!=LegacyPreparedCompactWordSequence.FrameBytes)throw new InvalidDataException("Exact private owned compact frame required.");
+            int n=System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(frame);
+            if((uint)n>50||System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(frame[0x3a0..])!=0||
+                System.Buffers.Binary.BinaryPrimitives.ReadInt32LittleEndian(frame[0x3a8..])!=0)
+                throw new InvalidDataException("Ordinary WriteSingle count1 must produce zero callback-prefix counters.");
+            //Pay the bounded read-only classification BEFORE reading symbols.
+            //Only FFFD and the six merge-table symbols can be removed. The
+            //actual normalizer still executes; this does not pre-remove DATA.
+            VisitOwnedFrame(checked(128L+16L*n),nameof(BeforeOwnedFrameNormalization));
+            int removable=0;
+            for(int i=0;i<n;i++)
+            {
+                token.ThrowIfCancellationRequested();ushort symbol=System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(frame[(4+12*i)..]);
+                if(symbol==0xfffd||unchecked((uint)(0xfffc-symbol))<6)removable++;
+            }
+            //No coordinate insertion in the REAL WriteSingle count1 branch.
+            //At most r*(2n-r-1)/2 original pairs involve a removed left item;
+            //each is moved at most once.12-byte descriptors *read+write.
+            long moves=checked(12L*removable*(2L*n-removable-1));
+            owner.ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(128L+16L*n+moves));
+            VisitOwnedFrame(checked(256L+64L*n+moves),nameof(BeforeOwnedFrameNormalization));
+        }
+        internal void BeforeOwnedFrameNormalizationGate()=>VisitOwnedFrame(256,nameof(BeforeOwnedFrameNormalizationGate));
+        private void VisitOwnedFrame(long units,string caller)
+        {
+            try{owner.ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,units);}
+            catch(InvalidDataException error)
+            {
+                error.Data["EnglishVisitCaller"]=caller;error.Data["EnglishVisitSite"]="FinalImages";
+                error.Data["EnglishRequestedVisits"]=units;error.Data["EnglishVisitsBefore"]=owner.ledger.Visits;throw;
+            }
+        }
         internal void Close(){contexts.DetachPeriodicBudget(this);}
     }
 }

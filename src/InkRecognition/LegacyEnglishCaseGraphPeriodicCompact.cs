@@ -3,7 +3,7 @@ namespace InkRecognition;
 internal sealed partial class LegacyEnglishCaseNode0Completion
 {
     // Exact LAST-scope synchronous borrow. No Memory/array view of the ring is exported.
-    internal sealed class GraphPeriodicCompactStore
+    internal sealed class GraphPeriodicCompactStore:ILegacyOwnedCompactFrameBudget
     {
         private readonly LegacyEnglishCaseNode0Completion owner;
         private readonly GraphLanguageScope stage;
@@ -45,6 +45,34 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         internal int[] Starts(){Require(default);return starts;}
         internal int[] PrefixOwners(){Require(default);return prefix;}
         internal void BeforeFrame(ulong current,ulong previous){Require(default);contextBudget.BeforeFrame(current,previous);}
+        //Read-only fixed authority gate: reject escaped/revoked callers BEFORE
+        //the non-thread-safe ledger is touched. Full store validation remains
+        //after its explicit precharge; no structural proof is cached.
+        private void RequireMeterAuthority(CancellationToken token)
+        {
+            stage.RequireCompactMeterIdentity(token);contextBudget.RequireMeterAuthority();
+            if(!ReferenceEquals(owner.graphPeriodicContextBudget,contextBudget)||
+                !ReferenceEquals(stage.Ring,ring)||thread!=Environment.CurrentManagedThreadId||
+                ring.CurrentNode!=ring.ActualNodeCount-1)
+                throw new InvalidOperationException("Same current private LAST meter authority required.");
+            token.ThrowIfCancellationRequested();
+        }
+        internal byte[] CreateOrdinaryOwnedFrame(LegacySymbolContextFactory actualContexts,ulong current,ulong previous,
+            ReadOnlySpan<byte> row,uint sourceNode,byte difference,LegacyPreparedCompactWordContextPolicy policy,
+            Func<ushort,byte> category,CancellationToken token)
+        {
+            RequireMeterAuthority(token);contextBudget.Require(actualContexts);contextBudget.BeforeOwnedFrameEntryGate();
+            Require(token);contextBudget.Require(actualContexts);contextBudget.BeforeOwnedFrame(current,previous,token);
+            return LegacyPreparedCompactWordFrameProducer.CreateOrdinaryOwned(actualContexts,current,previous,row,sourceNode,difference,policy,category,this,token);
+        }
+        void ILegacyOwnedCompactFrameBudget.BeforeNormalize(ReadOnlySpan<byte> frame,CancellationToken token)
+        {
+            RequireMeterAuthority(token);contextBudget.BeforeOwnedFrameNormalizationGate();
+#if ENGLISH_FRESH_CONTINUATION_CONTROLS
+            LegacyFreshContinuationTestHooks.Checkpoint?.Invoke("before-owned-compact-normalize");
+#endif
+            Require(token);contextBudget.BeforeOwnedFrameNormalization(frame,token);
+        }
         internal void Allocate(long bytes){Require(default);stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,bytes);}
         internal void Copy(long bytes){Require(default);stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,bytes);}
         internal void Visit(long units){Require(default);stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,units);}
@@ -130,5 +158,20 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             },token);
         }
         finally{graphFinalCompactBusy=false;}
+    }
+    internal sealed partial class GraphLanguageScope
+    {
+        internal void RequireCompactMeterIdentity(CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+            owner.RequireNode1(lease.Root,lease.Pass);
+            if(!ReferenceEquals(owner.graphLanguageScope,this)||owner.ring is null||
+                owner.ring.CurrentNode!=node||acceptedClosed!=1||phase1Entered!=1||
+                compactPhaseReady!=1||nodeEndReset!=0||!owner.graphFinalCompactRequested||
+                !owner.graphFinalCompactBusy||node!=owner.ring.ActualNodeCount-1)
+                throw new InvalidOperationException("Same live compact phase meter identity required.");
+            lease.Root.RequireNode1ContinuationIdentity(lease,token);
+            token.ThrowIfCancellationRequested();
+        }
     }
 }

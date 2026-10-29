@@ -90,9 +90,8 @@ internal static partial class LegacyPreparedMainCompactPublication
                 if (!reset && previousNode >= 0 && previousOrdinal >= primary)
                     difference = unchecked((byte)(difference - (Row(previousNode, previousOrdinal)[0x21] & 0x3f)));
                 var row = store.Rows(node).Slice(candidate.Ordinal * 88, 88);
-                store.BeforeFrame(candidate.Context,previousContext);
-                var frame = LegacyPreparedCompactWordFrameProducer.CreateOrdinary(contexts, candidate.Context,
-                    previousContext, row, (uint)node, difference, policy, Category, cancellationToken).CopyFrame();
+                var frame = store.CreateOrdinaryOwnedFrame(contexts,candidate.Context,
+                    previousContext,row,(uint)node,difference,policy,Category,cancellationToken);
                 int parent = previousNode < 0 || reset ? -1 : CompactParent(previousNode,
                     U16(Alternative(previousNode, previousOrdinal, previousAlternative), 0x1c));
                 int terminalIndex = AppendFrame(frame, row, candidate.Tag, parent, cost, candidate.Increment,
@@ -138,9 +137,8 @@ internal static partial class LegacyPreparedMainCompactPublication
                     byte difference = (byte)(row[0x21] & 0x3f);
                     if (previousNode >= 0 && previousOrdinal >= primary)
                         difference = unchecked((byte)(difference - (Row(previousNode, previousOrdinal)[0x21] & 0x3f)));
-                    store.BeforeFrame(U64(row,8),0);
-                    var frame = LegacyPreparedCompactWordFrameProducer.CreateOrdinary(contexts, U64(row, 8), 0,
-                        row, (uint)node, difference, policy, Category, cancellationToken).CopyFrame();
+                    var frame = store.CreateOrdinaryOwnedFrame(contexts,U64(row,8),0,
+                        row,(uint)node,difference,policy,Category,cancellationToken);
                     terminalIndex = AppendFrame(frame, row, U64(row, 0), parent, I32(row, 0x10), I32(row, 0x14),
                         alternative, -1, false, false, ScoreByte(node, row), node);
                 }
