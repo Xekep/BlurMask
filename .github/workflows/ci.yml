@@ -1624,3 +1624,14 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Raw-content feature/segmentation checks failed.' }
           & $raw --runtime-native ".artifacts/formula-app/runtimes/$rid/native/$lib"
           if ($LASTEXITCODE -ne 0) { throw 'Raw-content native CPU ABI checks failed.' }
+      - name: Preserve failed formula ABI diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formula-abi-failure-${{ matrix.os }}-${{ github.run_attempt }}
+          path: |
+            .artifacts/LegacyMath*.Probe-managed.json
+            .artifacts/LegacyMath*.Probe-native.json
+            .artifacts/LegacyMath*.Probe-*.json.*.json
+          if-no-files-found: ignore
+          retention-days: 14

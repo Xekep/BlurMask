@@ -58,3 +58,42 @@ required. The older empty-root/ordinal0 helper cannot stand in for that join.
 The358 remaining work units cannot fund unexecuted later phases; further savings
 must remove actual work with proved bounds, rather than raising limits or issuing
 a result from incomplete state.
+
+## Composed951 publication regression
+
+Root rebuilt both composed flavors: ordinary951 and test-only diagnostic953,
+with authored PE/PDB and exact runtime checks before any model execution.
+All three publication invocations completed. The first independent audit stopped
+because the isolated staging script had omitted
+`LegacyRussianGlyphSymbol.Probe/audit_output.py`; it did not report a numerical
+failure. The failed report and logs remain unchanged. Root copied the exact
+repository dependency, verified all original input, compiled and capture pins,
+and reran only that independent audit, which passed in0.186 seconds.
+
+`PUBLICATION-AUDIT-COMPLETION.json` binds the preserved original report SHA256
+`d587c0b153c549aa53b32244b23326bdf0b2519c409a4b98d7f14f209fef355a`
+and the previously missing dependency SHA256
+`cce40412ba3a4c8d3f4f338dede9ac23e92962ef2bc202770f9c38c458c65263`.
+This closes the paired publication regression for the isolated composition;
+it does not admit Core951 to Main or establish recognition quality.
+
+`ENTRY-REFERENCE-HASH-CLARIFICATION.json` also records that the prior
+`ENTRY-FINAL.json.ReferenceCaptureSHA256` field hashes `json.dumps` of the
+decoded reference, rather than the original file bytes. The raw reference hash
+is `ee575ee85b20323093674fc4dc29777339d72c030531c1a941371ee2fd6928a1`.
+The whole-capture comparison and independent fresh-UUID checks are unchanged.
+
+## Native diagnostic attempt remains failed
+
+The unchanged diagnostic entry published as Windows Native AOT in63.183 seconds,
+with reflection/trimming warnings. Rooting its assemblies did not supply all
+generic serializer instantiations: runtime output reports missing native code
+or metadata for `JsonPropertyInfo<GraphGlyphAllocationSnapshot?>` while saving
+the report. Both output files are empty. The process then remained until the
+45-second watchdog terminated its job (exit124); that duration is not evidence
+of recognizer latency. No successful AOT result or algorithm parity is claimed.
+
+This is recorded in `native-entry-runs.json` and
+`native-entry-actual.stderr` in the same isolated evidence directory. Keep the
+failed attempt intact. An AOT-compatible diagnostic serializer and a new actual
+run are required before comparing native data with the managed capture.
