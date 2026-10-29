@@ -1,7 +1,8 @@
 # Recognition status after NovaPen 1.0.0
 
-NovaPen 1.0.0 is published from commit `571d310bcdc6bdd3639ee296ca69591ddf3b93fb`.
-It does not contain the Russian first-network correction described below.
+The current NovaPen 1.0.0 tag is `4a5c7aba700ec040641752777195715f9a12121c`.
+It contains the Russian first-network correction described below, but predates
+the later ordinary SourceInk factor200 composition repair.
 Russian cursive and the complete English MAIN publication path remain unfinished.
 Passing numerical probes is not evidence of complete handwriting recognition.
 
@@ -117,8 +118,11 @@ links point here so a deleted old release is not presented as the current build.
 The [exact fresh/prior math-history comparison](math-fresh-history-twin-20261029.md)
 passes on Windows/Linux/macOS, including Managed/repeat/Native parity and seven
 corruption controls. macOS still fails the separate frozen unchanged-reference
-hash check. The submitted encoder-input bytes and first divergent numerical
-boundary remain unobserved; no platform exception or fitted tolerance is admitted.
+hash check. The [encoder boundary diagnostic](../tooling/math-encoder-boundary.md)
+now proves all54 submitted input tensors bit-identical across the three platforms.
+The first fresh macOS encoder call already differs in two floating outputs;
+Windows/Linux outputs agree. A specific operator cause and numerical error bound
+remain unproved; no platform exception or fitted tolerance is admitted.
 
 ## Publication CI after the rename
 

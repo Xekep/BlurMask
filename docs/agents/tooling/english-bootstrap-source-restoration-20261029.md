@@ -25,6 +25,11 @@ then modifying each of the five sources independently. The controls run
 before the original contract check in `check-english-input-bootstrap.py`.
 Root evidence is under `E:/BlurMask-build-artifacts-20261014/english-bootstrap-failure-20261029/`.
 
-The complete bootstrap build and model-free helper jobs still require the
-next cross-platform CI run. No NN, vendor SDK or GUI is executed by these
-source restoration controls.
+Run `40850936369` at `b871ff8315981ed09a1b38753a4c87c1548433b0` subsequently
+passed the English input bootstrap job on Windows, Linux and macOS. Downloaded
+artifacts confirm all17 bootstrap stages and all6 original graph-parent stages
+succeeded on each platform. Every platform also reports the same17 positive
+and36 refusal controls. The separate overall source-geometry workflow may still
+be running; these are job-scoped results, not a claim about all CI or handwriting
+quality. `FIXED-CROSS-PLATFORM-FINAL.json` records the downloaded result pins.
+No NN, vendor SDK or GUI is executed by the source restoration controls themselves.
