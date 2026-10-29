@@ -155,7 +155,7 @@ internal sealed partial class Math2Mode0PriorTemporaryApply
 }
 internal sealed record Math2Mode0LateSnapshot(bool Complete,bool Ready,bool Failed,bool Released,long Reservation,long Visits,
     int Registrations,int TagsWritten,bool RegistrationInProgress,long[] NewTags,long[] Removed,Math2Mode0LateData? Observed);
-internal sealed class Math2Mode0PriorLateRegistration:IDisposable
+internal sealed partial class Math2Mode0PriorLateRegistration:IDisposable
 {
     private ActiveBorrow? activeBorrow;
     private Math2Mode0PriorDomDiff.TemporaryApplyBorrow? activeInput;

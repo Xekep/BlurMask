@@ -1,0 +1,5284 @@
+[
+  {
+    "case": 0,
+    "scope": "CLONE_PROVED_CONTENT_ONLY: actualoriginalIDs/authority notavailablein83; future85mustbindactualoriginalobservations",
+    "oldFieldContent": {
+      "Kind": 3,
+      "Name": "mathField",
+      "ValueTag": 0,
+      "Text": null,
+      "Number": null,
+      "NamespaceUri": null,
+      "NamespacePrefix": null,
+      "Attributes": [
+        {
+          "Kind": 0,
+          "Name": "id",
+          "ValueTag": 2,
+          "Text": "formula",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      ],
+      "Children": [
+        {
+          "Kind": 3,
+          "Name": "input",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [
+            {
+              "Kind": 0,
+              "Name": "tag",
+              "ValueTag": 4,
+              "Text": null,
+              "Number": 0,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ],
+          "Children": []
+        },
+        {
+          "Kind": 3,
+          "Name": "mathResult",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": [
+            {
+              "Kind": 3,
+              "Name": "sequence",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,0:4$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 1,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "M",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                },
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[1:0,1:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 2,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "I",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "symbolSegmentList",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbolSegment",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,1:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 3,
+                      "Name": "symbolCandidate",
+                      "ValueTag": 0,
+                      "Text": null,
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [
+                        {
+                          "Kind": 0,
+                          "Name": "nrs",
+                          "ValueTag": 10,
+                          "Text": null,
+                          "Number": 0,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": []
+                        }
+                      ],
+                      "Children": [
+                        {
+                          "Kind": 3,
+                          "Name": "char",
+                          "ValueTag": 0,
+                          "Text": null,
+                          "Number": null,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": [
+                            {
+                              "Kind": 1,
+                              "Name": "",
+                              "ValueTag": 2,
+                              "Text": "?",
+                              "Number": null,
+                              "NamespaceUri": null,
+                              "NamespacePrefix": null,
+                              "Attributes": [],
+                              "Children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "mathTerminalNode",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [
+                {
+                  "Kind": 0,
+                  "Name": "name",
+                  "ValueTag": 3,
+                  "Text": "",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "ref",
+                  "ValueTag": 2,
+                  "Text": "[0:0,1:1$]",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "selected",
+                  "ValueTag": 7,
+                  "Text": null,
+                  "Number": 0,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "tag",
+                  "ValueTag": 4,
+                  "Text": null,
+                  "Number": 3,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                }
+              ],
+              "Children": []
+            }
+          ]
+        }
+      ]
+    },
+    "newFieldContent": {
+      "Kind": 3,
+      "Name": "mathField",
+      "ValueTag": 0,
+      "Text": null,
+      "Number": null,
+      "NamespaceUri": null,
+      "NamespacePrefix": null,
+      "Attributes": [
+        {
+          "Kind": 0,
+          "Name": "id",
+          "ValueTag": 2,
+          "Text": "formula",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      ],
+      "Children": [
+        {
+          "Kind": 3,
+          "Name": "input",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [
+            {
+              "Kind": 0,
+              "Name": "tag",
+              "ValueTag": 4,
+              "Text": null,
+              "Number": 0,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ],
+          "Children": []
+        },
+        {
+          "Kind": 3,
+          "Name": "mathResult",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": [
+            {
+              "Kind": 3,
+              "Name": "sequence",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,0:4$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 1,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "M",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                },
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[1:0,1:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 2,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "|",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                },
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[2:0,2:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 4,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "-",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "symbolSegmentList",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbolSegment",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,2:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 3,
+                      "Name": "symbolCandidate",
+                      "ValueTag": 0,
+                      "Text": null,
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [
+                        {
+                          "Kind": 0,
+                          "Name": "nrs",
+                          "ValueTag": 10,
+                          "Text": null,
+                          "Number": 0,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": []
+                        }
+                      ],
+                      "Children": [
+                        {
+                          "Kind": 3,
+                          "Name": "char",
+                          "ValueTag": 0,
+                          "Text": null,
+                          "Number": null,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": [
+                            {
+                              "Kind": 1,
+                              "Name": "",
+                              "ValueTag": 2,
+                              "Text": "?",
+                              "Number": null,
+                              "NamespaceUri": null,
+                              "NamespacePrefix": null,
+                              "Attributes": [],
+                              "Children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "mathTerminalNode",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [
+                {
+                  "Kind": 0,
+                  "Name": "name",
+                  "ValueTag": 3,
+                  "Text": "",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "ref",
+                  "ValueTag": 2,
+                  "Text": "[0:0,2:1$]",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "selected",
+                  "ValueTag": 7,
+                  "Text": null,
+                  "Number": 0,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "tag",
+                  "ValueTag": 4,
+                  "Text": null,
+                  "Number": 5,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                }
+              ],
+              "Children": []
+            }
+          ]
+        }
+      ]
+    },
+    "expectedSemanticDom": [
+      {
+        "Operation": 4,
+        "Path": [
+          1,
+          0,
+          1
+        ],
+        "Ordinal": 0,
+        "Payload": null
+      },
+      {
+        "Operation": 2,
+        "Path": [
+          1,
+          0,
+          1
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 1,
+          "Name": "",
+          "ValueTag": 2,
+          "Text": "|",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      },
+      {
+        "Operation": 2,
+        "Path": [
+          1,
+          0
+        ],
+        "Ordinal": 2,
+        "Payload": {
+          "Kind": 3,
+          "Name": "symbol",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [
+            {
+              "Kind": 0,
+              "Name": "range",
+              "ValueTag": 2,
+              "Text": "[2:0,2:1$]",
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            },
+            {
+              "Kind": 0,
+              "Name": "tag",
+              "ValueTag": 4,
+              "Text": null,
+              "Number": 4,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ],
+          "Children": [
+            {
+              "Kind": 1,
+              "Name": "",
+              "ValueTag": 2,
+              "Text": "-",
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ]
+        }
+      },
+      {
+        "Operation": 7,
+        "Path": [
+          1,
+          1,
+          0
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 0,
+          "Name": "range",
+          "ValueTag": 2,
+          "Text": "[0:0,2:1$]",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      },
+      {
+        "Operation": 7,
+        "Path": [
+          1,
+          2
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 0,
+          "Name": "ref",
+          "ValueTag": 2,
+          "Text": "[0:0,2:1$]",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      },
+      {
+        "Operation": 7,
+        "Path": [
+          1,
+          2
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 0,
+          "Name": "tag",
+          "ValueTag": 4,
+          "Text": null,
+          "Number": 5,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      }
+    ],
+    "expectedSource": [
+      {
+        "Operation": 4,
+        "Id": 4,
+        "Name": "MATH_SYMBOL",
+        "Category": 102,
+        "Ranges": [
+          {
+            "First": {
+              "Value": 8589934595,
+              "SourceIndex": 2,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 8590065413,
+              "SourceIndex": 2,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "OldCounter20": -1,
+        "NewCounter18": -1,
+        "DetachedC22": true
+      },
+      {
+        "Operation": 4,
+        "Id": 5,
+        "Name": "MATH_NODE",
+        "Category": 102,
+        "Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 8590065413,
+              "SourceIndex": 2,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "OldCounter20": -1,
+        "NewCounter18": -1,
+        "DetachedC22": true
+      },
+      {
+        "Operation": 6,
+        "Id": 3,
+        "Name": "MATH_NODE",
+        "Category": 102,
+        "Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295098117,
+              "SourceIndex": 1,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "OldCounter20": -1,
+        "NewCounter18": -1,
+        "DetachedC22": true
+      },
+      {
+        "Operation": 7,
+        "Id": -1,
+        "Name": null,
+        "Category": 0,
+        "Ranges": [],
+        "OldCounter20": 4,
+        "NewCounter18": 6,
+        "DetachedC22": false
+      }
+    ],
+    "rawOperationSequence": [
+      4,
+      2,
+      2,
+      7,
+      7,
+      7
+    ]
+  },
+  {
+    "case": 1,
+    "scope": "CLONE_PROVED_CONTENT_ONLY: actualoriginalIDs/authority notavailablein83; future85mustbindactualoriginalobservations",
+    "oldFieldContent": {
+      "Kind": 3,
+      "Name": "mathField",
+      "ValueTag": 0,
+      "Text": null,
+      "Number": null,
+      "NamespaceUri": null,
+      "NamespacePrefix": null,
+      "Attributes": [
+        {
+          "Kind": 0,
+          "Name": "id",
+          "ValueTag": 2,
+          "Text": "formula",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      ],
+      "Children": [
+        {
+          "Kind": 3,
+          "Name": "input",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [
+            {
+              "Kind": 0,
+              "Name": "tag",
+              "ValueTag": 4,
+              "Text": null,
+              "Number": 0,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ],
+          "Children": []
+        },
+        {
+          "Kind": 3,
+          "Name": "mathResult",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": [
+            {
+              "Kind": 3,
+              "Name": "sequence",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[1:0,1:4$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 1,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "M",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                },
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,0:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 2,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "I",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "symbolSegmentList",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbolSegment",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,1:4$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 3,
+                      "Name": "symbolCandidate",
+                      "ValueTag": 0,
+                      "Text": null,
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [
+                        {
+                          "Kind": 0,
+                          "Name": "nrs",
+                          "ValueTag": 10,
+                          "Text": null,
+                          "Number": 0,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": []
+                        }
+                      ],
+                      "Children": [
+                        {
+                          "Kind": 3,
+                          "Name": "char",
+                          "ValueTag": 0,
+                          "Text": null,
+                          "Number": null,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": [
+                            {
+                              "Kind": 1,
+                              "Name": "",
+                              "ValueTag": 2,
+                              "Text": "?",
+                              "Number": null,
+                              "NamespaceUri": null,
+                              "NamespacePrefix": null,
+                              "Attributes": [],
+                              "Children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "mathTerminalNode",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [
+                {
+                  "Kind": 0,
+                  "Name": "name",
+                  "ValueTag": 3,
+                  "Text": "",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "ref",
+                  "ValueTag": 2,
+                  "Text": "[0:0,1:4$]",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "selected",
+                  "ValueTag": 7,
+                  "Text": null,
+                  "Number": 0,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "tag",
+                  "ValueTag": 4,
+                  "Text": null,
+                  "Number": 3,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                }
+              ],
+              "Children": []
+            }
+          ]
+        }
+      ]
+    },
+    "newFieldContent": {
+      "Kind": 3,
+      "Name": "mathField",
+      "ValueTag": 0,
+      "Text": null,
+      "Number": null,
+      "NamespaceUri": null,
+      "NamespacePrefix": null,
+      "Attributes": [
+        {
+          "Kind": 0,
+          "Name": "id",
+          "ValueTag": 2,
+          "Text": "formula",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      ],
+      "Children": [
+        {
+          "Kind": 3,
+          "Name": "input",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [
+            {
+              "Kind": 0,
+              "Name": "tag",
+              "ValueTag": 4,
+              "Text": null,
+              "Number": 0,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ],
+          "Children": []
+        },
+        {
+          "Kind": 3,
+          "Name": "mathResult",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": [
+            {
+              "Kind": 3,
+              "Name": "sequence",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[1:0,1:4$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 1,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "M",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                },
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 1,
+                      "Text": "[0:0,0:1$]U[2:0,2:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 4,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "t",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "symbolSegmentList",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbolSegment",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,2:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 3,
+                      "Name": "symbolCandidate",
+                      "ValueTag": 0,
+                      "Text": null,
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [
+                        {
+                          "Kind": 0,
+                          "Name": "nrs",
+                          "ValueTag": 10,
+                          "Text": null,
+                          "Number": 0,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": []
+                        }
+                      ],
+                      "Children": [
+                        {
+                          "Kind": 3,
+                          "Name": "char",
+                          "ValueTag": 0,
+                          "Text": null,
+                          "Number": null,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": [
+                            {
+                              "Kind": 1,
+                              "Name": "",
+                              "ValueTag": 2,
+                              "Text": "?",
+                              "Number": null,
+                              "NamespaceUri": null,
+                              "NamespacePrefix": null,
+                              "Attributes": [],
+                              "Children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "mathTerminalNode",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [
+                {
+                  "Kind": 0,
+                  "Name": "name",
+                  "ValueTag": 3,
+                  "Text": "",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "ref",
+                  "ValueTag": 2,
+                  "Text": "[0:0,2:1$]",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "selected",
+                  "ValueTag": 7,
+                  "Text": null,
+                  "Number": 0,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "tag",
+                  "ValueTag": 4,
+                  "Text": null,
+                  "Number": 5,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                }
+              ],
+              "Children": []
+            }
+          ]
+        }
+      ]
+    },
+    "expectedSemanticDom": [
+      {
+        "Operation": 7,
+        "Path": [
+          1,
+          0,
+          1
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 0,
+          "Name": "range",
+          "ValueTag": 1,
+          "Text": "[0:0,0:1$]U[2:0,2:1$]",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      },
+      {
+        "Operation": 7,
+        "Path": [
+          1,
+          0,
+          1
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 0,
+          "Name": "tag",
+          "ValueTag": 4,
+          "Text": null,
+          "Number": 4,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      },
+      {
+        "Operation": 4,
+        "Path": [
+          1,
+          0,
+          1
+        ],
+        "Ordinal": 0,
+        "Payload": null
+      },
+      {
+        "Operation": 2,
+        "Path": [
+          1,
+          0,
+          1
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 1,
+          "Name": "",
+          "ValueTag": 2,
+          "Text": "t",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      },
+      {
+        "Operation": 7,
+        "Path": [
+          1,
+          1,
+          0
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 0,
+          "Name": "range",
+          "ValueTag": 2,
+          "Text": "[0:0,2:1$]",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      },
+      {
+        "Operation": 7,
+        "Path": [
+          1,
+          2
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 0,
+          "Name": "ref",
+          "ValueTag": 2,
+          "Text": "[0:0,2:1$]",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      },
+      {
+        "Operation": 7,
+        "Path": [
+          1,
+          2
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 0,
+          "Name": "tag",
+          "ValueTag": 4,
+          "Text": null,
+          "Number": 5,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      }
+    ],
+    "expectedSource": [
+      {
+        "Operation": 4,
+        "Id": 4,
+        "Name": "MATH_SYMBOL",
+        "Category": 102,
+        "Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 130821,
+              "SourceIndex": 0,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          },
+          {
+            "First": {
+              "Value": 8589934595,
+              "SourceIndex": 2,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 8590065413,
+              "SourceIndex": 2,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "OldCounter20": -1,
+        "NewCounter18": -1,
+        "DetachedC22": true
+      },
+      {
+        "Operation": 4,
+        "Id": 5,
+        "Name": "MATH_NODE",
+        "Category": 102,
+        "Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 8590065413,
+              "SourceIndex": 2,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "OldCounter20": -1,
+        "NewCounter18": -1,
+        "DetachedC22": true
+      },
+      {
+        "Operation": 6,
+        "Id": 2,
+        "Name": "MATH_SYMBOL",
+        "Category": 102,
+        "Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 130821,
+              "SourceIndex": 0,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "OldCounter20": -1,
+        "NewCounter18": -1,
+        "DetachedC22": true
+      },
+      {
+        "Operation": 6,
+        "Id": 3,
+        "Name": "MATH_NODE",
+        "Category": 102,
+        "Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295294725,
+              "SourceIndex": 1,
+              "PointIndex": 4,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "OldCounter20": -1,
+        "NewCounter18": -1,
+        "DetachedC22": true
+      },
+      {
+        "Operation": 7,
+        "Id": -1,
+        "Name": null,
+        "Category": 0,
+        "Ranges": [],
+        "OldCounter20": 4,
+        "NewCounter18": 6,
+        "DetachedC22": false
+      }
+    ],
+    "rawOperationSequence": [
+      7,
+      7,
+      4,
+      2,
+      7,
+      7,
+      7
+    ]
+  },
+  {
+    "case": 2,
+    "scope": "CLONE_PROVED_CONTENT_ONLY: actualoriginalIDs/authority notavailablein83; future85mustbindactualoriginalobservations",
+    "oldFieldContent": {
+      "Kind": 3,
+      "Name": "mathField",
+      "ValueTag": 0,
+      "Text": null,
+      "Number": null,
+      "NamespaceUri": null,
+      "NamespacePrefix": null,
+      "Attributes": [
+        {
+          "Kind": 0,
+          "Name": "id",
+          "ValueTag": 2,
+          "Text": "formula",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      ],
+      "Children": [
+        {
+          "Kind": 3,
+          "Name": "input",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [
+            {
+              "Kind": 0,
+              "Name": "tag",
+              "ValueTag": 4,
+              "Text": null,
+              "Number": 0,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ],
+          "Children": []
+        },
+        {
+          "Kind": 3,
+          "Name": "mathResult",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": [
+            {
+              "Kind": 3,
+              "Name": "sequence",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,0:4$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 1,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "M",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                },
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[1:0,1:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 2,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "I",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "symbolSegmentList",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbolSegment",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,1:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 3,
+                      "Name": "symbolCandidate",
+                      "ValueTag": 0,
+                      "Text": null,
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [
+                        {
+                          "Kind": 0,
+                          "Name": "nrs",
+                          "ValueTag": 10,
+                          "Text": null,
+                          "Number": 0,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": []
+                        }
+                      ],
+                      "Children": [
+                        {
+                          "Kind": 3,
+                          "Name": "char",
+                          "ValueTag": 0,
+                          "Text": null,
+                          "Number": null,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": [
+                            {
+                              "Kind": 1,
+                              "Name": "",
+                              "ValueTag": 2,
+                              "Text": "?",
+                              "Number": null,
+                              "NamespaceUri": null,
+                              "NamespacePrefix": null,
+                              "Attributes": [],
+                              "Children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "mathTerminalNode",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [
+                {
+                  "Kind": 0,
+                  "Name": "name",
+                  "ValueTag": 3,
+                  "Text": "",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "ref",
+                  "ValueTag": 2,
+                  "Text": "[0:0,1:1$]",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "selected",
+                  "ValueTag": 7,
+                  "Text": null,
+                  "Number": 0,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "tag",
+                  "ValueTag": 4,
+                  "Text": null,
+                  "Number": 3,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                }
+              ],
+              "Children": []
+            }
+          ]
+        }
+      ]
+    },
+    "newFieldContent": {
+      "Kind": 3,
+      "Name": "mathField",
+      "ValueTag": 0,
+      "Text": null,
+      "Number": null,
+      "NamespaceUri": null,
+      "NamespacePrefix": null,
+      "Attributes": [
+        {
+          "Kind": 0,
+          "Name": "id",
+          "ValueTag": 2,
+          "Text": "formula",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      ],
+      "Children": [
+        {
+          "Kind": 3,
+          "Name": "input",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [
+            {
+              "Kind": 0,
+              "Name": "tag",
+              "ValueTag": 4,
+              "Text": null,
+              "Number": 0,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ],
+          "Children": []
+        },
+        {
+          "Kind": 3,
+          "Name": "mathResult",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": [
+            {
+              "Kind": 3,
+              "Name": "sequence",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,0:4$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 1,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "M",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                },
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[1:0,1:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 2,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "|",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                },
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[2:0,2:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 4,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "|",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "symbolSegmentList",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbolSegment",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,2:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 3,
+                      "Name": "symbolCandidate",
+                      "ValueTag": 0,
+                      "Text": null,
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [
+                        {
+                          "Kind": 0,
+                          "Name": "nrs",
+                          "ValueTag": 10,
+                          "Text": null,
+                          "Number": 0,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": []
+                        }
+                      ],
+                      "Children": [
+                        {
+                          "Kind": 3,
+                          "Name": "char",
+                          "ValueTag": 0,
+                          "Text": null,
+                          "Number": null,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": [
+                            {
+                              "Kind": 1,
+                              "Name": "",
+                              "ValueTag": 2,
+                              "Text": "?",
+                              "Number": null,
+                              "NamespaceUri": null,
+                              "NamespacePrefix": null,
+                              "Attributes": [],
+                              "Children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "mathTerminalNode",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [
+                {
+                  "Kind": 0,
+                  "Name": "name",
+                  "ValueTag": 3,
+                  "Text": "",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "ref",
+                  "ValueTag": 2,
+                  "Text": "[0:0,2:1$]",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "selected",
+                  "ValueTag": 7,
+                  "Text": null,
+                  "Number": 0,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "tag",
+                  "ValueTag": 4,
+                  "Text": null,
+                  "Number": 5,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                }
+              ],
+              "Children": []
+            }
+          ]
+        }
+      ]
+    },
+    "expectedSemanticDom": [
+      {
+        "Operation": 4,
+        "Path": [
+          1,
+          0,
+          1
+        ],
+        "Ordinal": 0,
+        "Payload": null
+      },
+      {
+        "Operation": 2,
+        "Path": [
+          1,
+          0,
+          1
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 1,
+          "Name": "",
+          "ValueTag": 2,
+          "Text": "|",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      },
+      {
+        "Operation": 2,
+        "Path": [
+          1,
+          0
+        ],
+        "Ordinal": 2,
+        "Payload": {
+          "Kind": 3,
+          "Name": "symbol",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [
+            {
+              "Kind": 0,
+              "Name": "range",
+              "ValueTag": 2,
+              "Text": "[2:0,2:1$]",
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            },
+            {
+              "Kind": 0,
+              "Name": "tag",
+              "ValueTag": 4,
+              "Text": null,
+              "Number": 4,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ],
+          "Children": [
+            {
+              "Kind": 1,
+              "Name": "",
+              "ValueTag": 2,
+              "Text": "|",
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ]
+        }
+      },
+      {
+        "Operation": 7,
+        "Path": [
+          1,
+          1,
+          0
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 0,
+          "Name": "range",
+          "ValueTag": 2,
+          "Text": "[0:0,2:1$]",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      },
+      {
+        "Operation": 7,
+        "Path": [
+          1,
+          2
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 0,
+          "Name": "ref",
+          "ValueTag": 2,
+          "Text": "[0:0,2:1$]",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      },
+      {
+        "Operation": 7,
+        "Path": [
+          1,
+          2
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 0,
+          "Name": "tag",
+          "ValueTag": 4,
+          "Text": null,
+          "Number": 5,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      }
+    ],
+    "expectedSource": [
+      {
+        "Operation": 4,
+        "Id": 4,
+        "Name": "MATH_SYMBOL",
+        "Category": 102,
+        "Ranges": [
+          {
+            "First": {
+              "Value": 8589934595,
+              "SourceIndex": 2,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 8590065413,
+              "SourceIndex": 2,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "OldCounter20": -1,
+        "NewCounter18": -1,
+        "DetachedC22": true
+      },
+      {
+        "Operation": 4,
+        "Id": 5,
+        "Name": "MATH_NODE",
+        "Category": 102,
+        "Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 8590065413,
+              "SourceIndex": 2,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "OldCounter20": -1,
+        "NewCounter18": -1,
+        "DetachedC22": true
+      },
+      {
+        "Operation": 6,
+        "Id": 3,
+        "Name": "MATH_NODE",
+        "Category": 102,
+        "Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295098117,
+              "SourceIndex": 1,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "OldCounter20": -1,
+        "NewCounter18": -1,
+        "DetachedC22": true
+      },
+      {
+        "Operation": 7,
+        "Id": -1,
+        "Name": null,
+        "Category": 0,
+        "Ranges": [],
+        "OldCounter20": 4,
+        "NewCounter18": 6,
+        "DetachedC22": false
+      }
+    ],
+    "rawOperationSequence": [
+      4,
+      2,
+      2,
+      7,
+      7,
+      7
+    ]
+  },
+  {
+    "case": 3,
+    "scope": "CLONE_PROVED_CONTENT_ONLY: actualoriginalIDs/authority notavailablein83; future85mustbindactualoriginalobservations",
+    "oldFieldContent": {
+      "Kind": 3,
+      "Name": "mathField",
+      "ValueTag": 0,
+      "Text": null,
+      "Number": null,
+      "NamespaceUri": null,
+      "NamespacePrefix": null,
+      "Attributes": [
+        {
+          "Kind": 0,
+          "Name": "id",
+          "ValueTag": 2,
+          "Text": "formula",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      ],
+      "Children": [
+        {
+          "Kind": 3,
+          "Name": "input",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [
+            {
+              "Kind": 0,
+              "Name": "tag",
+              "ValueTag": 4,
+              "Text": null,
+              "Number": 0,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ],
+          "Children": []
+        },
+        {
+          "Kind": 3,
+          "Name": "mathResult",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": [
+            {
+              "Kind": 3,
+              "Name": "sequence",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[1:0,1:4$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 1,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "M",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                },
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,0:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 2,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "I",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "symbolSegmentList",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbolSegment",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,1:4$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 3,
+                      "Name": "symbolCandidate",
+                      "ValueTag": 0,
+                      "Text": null,
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [
+                        {
+                          "Kind": 0,
+                          "Name": "nrs",
+                          "ValueTag": 10,
+                          "Text": null,
+                          "Number": 0,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": []
+                        }
+                      ],
+                      "Children": [
+                        {
+                          "Kind": 3,
+                          "Name": "char",
+                          "ValueTag": 0,
+                          "Text": null,
+                          "Number": null,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": [
+                            {
+                              "Kind": 1,
+                              "Name": "",
+                              "ValueTag": 2,
+                              "Text": "?",
+                              "Number": null,
+                              "NamespaceUri": null,
+                              "NamespacePrefix": null,
+                              "Attributes": [],
+                              "Children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "mathTerminalNode",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [
+                {
+                  "Kind": 0,
+                  "Name": "name",
+                  "ValueTag": 3,
+                  "Text": "",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "ref",
+                  "ValueTag": 2,
+                  "Text": "[0:0,1:4$]",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "selected",
+                  "ValueTag": 7,
+                  "Text": null,
+                  "Number": 0,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "tag",
+                  "ValueTag": 4,
+                  "Text": null,
+                  "Number": 3,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                }
+              ],
+              "Children": []
+            }
+          ]
+        }
+      ]
+    },
+    "newFieldContent": {
+      "Kind": 3,
+      "Name": "mathField",
+      "ValueTag": 0,
+      "Text": null,
+      "Number": null,
+      "NamespaceUri": null,
+      "NamespacePrefix": null,
+      "Attributes": [
+        {
+          "Kind": 0,
+          "Name": "id",
+          "ValueTag": 2,
+          "Text": "formula",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      ],
+      "Children": [
+        {
+          "Kind": 3,
+          "Name": "input",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [
+            {
+              "Kind": 0,
+              "Name": "tag",
+              "ValueTag": 4,
+              "Text": null,
+              "Number": 0,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ],
+          "Children": []
+        },
+        {
+          "Kind": 3,
+          "Name": "mathResult",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": [
+            {
+              "Kind": 3,
+              "Name": "sequence",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[1:0,1:4$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 1,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "M",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                },
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,0:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 2,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "I",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                },
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[2:0,2:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 4,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "I",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "symbolSegmentList",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbolSegment",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,2:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 3,
+                      "Name": "symbolCandidate",
+                      "ValueTag": 0,
+                      "Text": null,
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [
+                        {
+                          "Kind": 0,
+                          "Name": "nrs",
+                          "ValueTag": 10,
+                          "Text": null,
+                          "Number": 0,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": []
+                        }
+                      ],
+                      "Children": [
+                        {
+                          "Kind": 3,
+                          "Name": "char",
+                          "ValueTag": 0,
+                          "Text": null,
+                          "Number": null,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": [
+                            {
+                              "Kind": 1,
+                              "Name": "",
+                              "ValueTag": 2,
+                              "Text": "?",
+                              "Number": null,
+                              "NamespaceUri": null,
+                              "NamespacePrefix": null,
+                              "Attributes": [],
+                              "Children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "mathTerminalNode",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [
+                {
+                  "Kind": 0,
+                  "Name": "name",
+                  "ValueTag": 3,
+                  "Text": "",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "ref",
+                  "ValueTag": 2,
+                  "Text": "[0:0,2:1$]",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "selected",
+                  "ValueTag": 7,
+                  "Text": null,
+                  "Number": 0,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "tag",
+                  "ValueTag": 4,
+                  "Text": null,
+                  "Number": 5,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                }
+              ],
+              "Children": []
+            }
+          ]
+        }
+      ]
+    },
+    "expectedSemanticDom": [
+      {
+        "Operation": 2,
+        "Path": [
+          1,
+          0
+        ],
+        "Ordinal": 2,
+        "Payload": {
+          "Kind": 3,
+          "Name": "symbol",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [
+            {
+              "Kind": 0,
+              "Name": "range",
+              "ValueTag": 2,
+              "Text": "[2:0,2:1$]",
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            },
+            {
+              "Kind": 0,
+              "Name": "tag",
+              "ValueTag": 4,
+              "Text": null,
+              "Number": 4,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ],
+          "Children": [
+            {
+              "Kind": 1,
+              "Name": "",
+              "ValueTag": 2,
+              "Text": "I",
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ]
+        }
+      },
+      {
+        "Operation": 7,
+        "Path": [
+          1,
+          1,
+          0
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 0,
+          "Name": "range",
+          "ValueTag": 2,
+          "Text": "[0:0,2:1$]",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      },
+      {
+        "Operation": 7,
+        "Path": [
+          1,
+          2
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 0,
+          "Name": "ref",
+          "ValueTag": 2,
+          "Text": "[0:0,2:1$]",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      },
+      {
+        "Operation": 7,
+        "Path": [
+          1,
+          2
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 0,
+          "Name": "tag",
+          "ValueTag": 4,
+          "Text": null,
+          "Number": 5,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      }
+    ],
+    "expectedSource": [
+      {
+        "Operation": 4,
+        "Id": 4,
+        "Name": "MATH_SYMBOL",
+        "Category": 102,
+        "Ranges": [
+          {
+            "First": {
+              "Value": 8589934595,
+              "SourceIndex": 2,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 8590065413,
+              "SourceIndex": 2,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "OldCounter20": -1,
+        "NewCounter18": -1,
+        "DetachedC22": true
+      },
+      {
+        "Operation": 4,
+        "Id": 5,
+        "Name": "MATH_NODE",
+        "Category": 102,
+        "Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 8590065413,
+              "SourceIndex": 2,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "OldCounter20": -1,
+        "NewCounter18": -1,
+        "DetachedC22": true
+      },
+      {
+        "Operation": 6,
+        "Id": 3,
+        "Name": "MATH_NODE",
+        "Category": 102,
+        "Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295294725,
+              "SourceIndex": 1,
+              "PointIndex": 4,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "OldCounter20": -1,
+        "NewCounter18": -1,
+        "DetachedC22": true
+      },
+      {
+        "Operation": 7,
+        "Id": -1,
+        "Name": null,
+        "Category": 0,
+        "Ranges": [],
+        "OldCounter20": 4,
+        "NewCounter18": 6,
+        "DetachedC22": false
+      }
+    ],
+    "rawOperationSequence": [
+      2,
+      7,
+      7,
+      7
+    ]
+  },
+  {
+    "case": 4,
+    "scope": "CLONE_PROVED_CONTENT_ONLY: actualoriginalIDs/authority notavailablein83; future85mustbindactualoriginalobservations",
+    "oldFieldContent": {
+      "Kind": 3,
+      "Name": "mathField",
+      "ValueTag": 0,
+      "Text": null,
+      "Number": null,
+      "NamespaceUri": null,
+      "NamespacePrefix": null,
+      "Attributes": [
+        {
+          "Kind": 0,
+          "Name": "id",
+          "ValueTag": 2,
+          "Text": "formula",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      ],
+      "Children": [
+        {
+          "Kind": 3,
+          "Name": "input",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [
+            {
+              "Kind": 0,
+              "Name": "tag",
+              "ValueTag": 4,
+              "Text": null,
+              "Number": 0,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ],
+          "Children": []
+        },
+        {
+          "Kind": 3,
+          "Name": "mathResult",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": [
+            {
+              "Kind": 3,
+              "Name": "sequence",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,0:4$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 1,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "M",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                },
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[1:0,1:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 2,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "I",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "symbolSegmentList",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbolSegment",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,1:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 3,
+                      "Name": "symbolCandidate",
+                      "ValueTag": 0,
+                      "Text": null,
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [
+                        {
+                          "Kind": 0,
+                          "Name": "nrs",
+                          "ValueTag": 10,
+                          "Text": null,
+                          "Number": 0,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": []
+                        }
+                      ],
+                      "Children": [
+                        {
+                          "Kind": 3,
+                          "Name": "char",
+                          "ValueTag": 0,
+                          "Text": null,
+                          "Number": null,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": [
+                            {
+                              "Kind": 1,
+                              "Name": "",
+                              "ValueTag": 2,
+                              "Text": "?",
+                              "Number": null,
+                              "NamespaceUri": null,
+                              "NamespacePrefix": null,
+                              "Attributes": [],
+                              "Children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "mathTerminalNode",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [
+                {
+                  "Kind": 0,
+                  "Name": "name",
+                  "ValueTag": 3,
+                  "Text": "",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "ref",
+                  "ValueTag": 2,
+                  "Text": "[0:0,1:1$]",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "selected",
+                  "ValueTag": 7,
+                  "Text": null,
+                  "Number": 0,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "tag",
+                  "ValueTag": 4,
+                  "Text": null,
+                  "Number": 3,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                }
+              ],
+              "Children": []
+            }
+          ]
+        }
+      ]
+    },
+    "newFieldContent": {
+      "Kind": 3,
+      "Name": "mathField",
+      "ValueTag": 0,
+      "Text": null,
+      "Number": null,
+      "NamespaceUri": null,
+      "NamespacePrefix": null,
+      "Attributes": [
+        {
+          "Kind": 0,
+          "Name": "id",
+          "ValueTag": 2,
+          "Text": "formula",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      ],
+      "Children": [
+        {
+          "Kind": 3,
+          "Name": "input",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [
+            {
+              "Kind": 0,
+              "Name": "tag",
+              "ValueTag": 4,
+              "Text": null,
+              "Number": 0,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ],
+          "Children": []
+        },
+        {
+          "Kind": 3,
+          "Name": "mathResult",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": [
+            {
+              "Kind": 3,
+              "Name": "sequence",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,0:4$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 1,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "M",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                },
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[1:0,1:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 2,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "I",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                },
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[2:0,2:4$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 4,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "O",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "symbolSegmentList",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbolSegment",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,2:4$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 3,
+                      "Name": "symbolCandidate",
+                      "ValueTag": 0,
+                      "Text": null,
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [
+                        {
+                          "Kind": 0,
+                          "Name": "nrs",
+                          "ValueTag": 10,
+                          "Text": null,
+                          "Number": 0,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": []
+                        }
+                      ],
+                      "Children": [
+                        {
+                          "Kind": 3,
+                          "Name": "char",
+                          "ValueTag": 0,
+                          "Text": null,
+                          "Number": null,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": [
+                            {
+                              "Kind": 1,
+                              "Name": "",
+                              "ValueTag": 2,
+                              "Text": "?",
+                              "Number": null,
+                              "NamespaceUri": null,
+                              "NamespacePrefix": null,
+                              "Attributes": [],
+                              "Children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "mathTerminalNode",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [
+                {
+                  "Kind": 0,
+                  "Name": "name",
+                  "ValueTag": 3,
+                  "Text": "",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "ref",
+                  "ValueTag": 2,
+                  "Text": "[0:0,2:4$]",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "selected",
+                  "ValueTag": 7,
+                  "Text": null,
+                  "Number": 0,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "tag",
+                  "ValueTag": 4,
+                  "Text": null,
+                  "Number": 5,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                }
+              ],
+              "Children": []
+            }
+          ]
+        }
+      ]
+    },
+    "expectedSemanticDom": [
+      {
+        "Operation": 2,
+        "Path": [
+          1,
+          0
+        ],
+        "Ordinal": 2,
+        "Payload": {
+          "Kind": 3,
+          "Name": "symbol",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [
+            {
+              "Kind": 0,
+              "Name": "range",
+              "ValueTag": 2,
+              "Text": "[2:0,2:4$]",
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            },
+            {
+              "Kind": 0,
+              "Name": "tag",
+              "ValueTag": 4,
+              "Text": null,
+              "Number": 4,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ],
+          "Children": [
+            {
+              "Kind": 1,
+              "Name": "",
+              "ValueTag": 2,
+              "Text": "O",
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ]
+        }
+      },
+      {
+        "Operation": 7,
+        "Path": [
+          1,
+          1,
+          0
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 0,
+          "Name": "range",
+          "ValueTag": 2,
+          "Text": "[0:0,2:4$]",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      },
+      {
+        "Operation": 7,
+        "Path": [
+          1,
+          2
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 0,
+          "Name": "ref",
+          "ValueTag": 2,
+          "Text": "[0:0,2:4$]",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      },
+      {
+        "Operation": 7,
+        "Path": [
+          1,
+          2
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 0,
+          "Name": "tag",
+          "ValueTag": 4,
+          "Text": null,
+          "Number": 5,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      }
+    ],
+    "expectedSource": [
+      {
+        "Operation": 4,
+        "Id": 4,
+        "Name": "MATH_SYMBOL",
+        "Category": 102,
+        "Ranges": [
+          {
+            "First": {
+              "Value": 8589934595,
+              "SourceIndex": 2,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 8590262021,
+              "SourceIndex": 2,
+              "PointIndex": 4,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "OldCounter20": -1,
+        "NewCounter18": -1,
+        "DetachedC22": true
+      },
+      {
+        "Operation": 4,
+        "Id": 5,
+        "Name": "MATH_NODE",
+        "Category": 102,
+        "Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 8590262021,
+              "SourceIndex": 2,
+              "PointIndex": 4,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "OldCounter20": -1,
+        "NewCounter18": -1,
+        "DetachedC22": true
+      },
+      {
+        "Operation": 6,
+        "Id": 3,
+        "Name": "MATH_NODE",
+        "Category": 102,
+        "Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295098117,
+              "SourceIndex": 1,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "OldCounter20": -1,
+        "NewCounter18": -1,
+        "DetachedC22": true
+      },
+      {
+        "Operation": 7,
+        "Id": -1,
+        "Name": null,
+        "Category": 0,
+        "Ranges": [],
+        "OldCounter20": 4,
+        "NewCounter18": 6,
+        "DetachedC22": false
+      }
+    ],
+    "rawOperationSequence": [
+      2,
+      7,
+      7,
+      7
+    ]
+  },
+  {
+    "case": 5,
+    "scope": "CLONE_PROVED_CONTENT_ONLY: actualoriginalIDs/authority notavailablein83; future85mustbindactualoriginalobservations",
+    "oldFieldContent": {
+      "Kind": 3,
+      "Name": "mathField",
+      "ValueTag": 0,
+      "Text": null,
+      "Number": null,
+      "NamespaceUri": null,
+      "NamespacePrefix": null,
+      "Attributes": [
+        {
+          "Kind": 0,
+          "Name": "id",
+          "ValueTag": 2,
+          "Text": "formula",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      ],
+      "Children": [
+        {
+          "Kind": 3,
+          "Name": "input",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [
+            {
+              "Kind": 0,
+              "Name": "tag",
+              "ValueTag": 4,
+              "Text": null,
+              "Number": 0,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ],
+          "Children": []
+        },
+        {
+          "Kind": 3,
+          "Name": "mathResult",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": [
+            {
+              "Kind": 3,
+              "Name": "sequence",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[1:0,1:4$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 1,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "M",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                },
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,0:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 2,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "I",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "symbolSegmentList",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbolSegment",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,1:4$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 3,
+                      "Name": "symbolCandidate",
+                      "ValueTag": 0,
+                      "Text": null,
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [
+                        {
+                          "Kind": 0,
+                          "Name": "nrs",
+                          "ValueTag": 10,
+                          "Text": null,
+                          "Number": 0,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": []
+                        }
+                      ],
+                      "Children": [
+                        {
+                          "Kind": 3,
+                          "Name": "char",
+                          "ValueTag": 0,
+                          "Text": null,
+                          "Number": null,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": [
+                            {
+                              "Kind": 1,
+                              "Name": "",
+                              "ValueTag": 2,
+                              "Text": "?",
+                              "Number": null,
+                              "NamespaceUri": null,
+                              "NamespacePrefix": null,
+                              "Attributes": [],
+                              "Children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "mathTerminalNode",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [
+                {
+                  "Kind": 0,
+                  "Name": "name",
+                  "ValueTag": 3,
+                  "Text": "",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "ref",
+                  "ValueTag": 2,
+                  "Text": "[0:0,1:4$]",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "selected",
+                  "ValueTag": 7,
+                  "Text": null,
+                  "Number": 0,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "tag",
+                  "ValueTag": 4,
+                  "Text": null,
+                  "Number": 3,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                }
+              ],
+              "Children": []
+            }
+          ]
+        }
+      ]
+    },
+    "newFieldContent": {
+      "Kind": 3,
+      "Name": "mathField",
+      "ValueTag": 0,
+      "Text": null,
+      "Number": null,
+      "NamespaceUri": null,
+      "NamespacePrefix": null,
+      "Attributes": [
+        {
+          "Kind": 0,
+          "Name": "id",
+          "ValueTag": 2,
+          "Text": "formula",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      ],
+      "Children": [
+        {
+          "Kind": 3,
+          "Name": "input",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [
+            {
+              "Kind": 0,
+              "Name": "tag",
+              "ValueTag": 4,
+              "Text": null,
+              "Number": 0,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ],
+          "Children": []
+        },
+        {
+          "Kind": 3,
+          "Name": "mathResult",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": [
+            {
+              "Kind": 3,
+              "Name": "sequence",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[1:0,1:4$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 1,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "M",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                },
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,0:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 2,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "I",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                },
+                {
+                  "Kind": 3,
+                  "Name": "symbol",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[2:0,2:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    },
+                    {
+                      "Kind": 0,
+                      "Name": "tag",
+                      "ValueTag": 4,
+                      "Text": null,
+                      "Number": 4,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 1,
+                      "Name": "",
+                      "ValueTag": 2,
+                      "Text": "\u22c5",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "symbolSegmentList",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": [
+                {
+                  "Kind": 3,
+                  "Name": "symbolSegment",
+                  "ValueTag": 0,
+                  "Text": null,
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [
+                    {
+                      "Kind": 0,
+                      "Name": "range",
+                      "ValueTag": 2,
+                      "Text": "[0:0,2:1$]",
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [],
+                      "Children": []
+                    }
+                  ],
+                  "Children": [
+                    {
+                      "Kind": 3,
+                      "Name": "symbolCandidate",
+                      "ValueTag": 0,
+                      "Text": null,
+                      "Number": null,
+                      "NamespaceUri": null,
+                      "NamespacePrefix": null,
+                      "Attributes": [
+                        {
+                          "Kind": 0,
+                          "Name": "nrs",
+                          "ValueTag": 10,
+                          "Text": null,
+                          "Number": 0,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": []
+                        }
+                      ],
+                      "Children": [
+                        {
+                          "Kind": 3,
+                          "Name": "char",
+                          "ValueTag": 0,
+                          "Text": null,
+                          "Number": null,
+                          "NamespaceUri": null,
+                          "NamespacePrefix": null,
+                          "Attributes": [],
+                          "Children": [
+                            {
+                              "Kind": 1,
+                              "Name": "",
+                              "ValueTag": 2,
+                              "Text": "?",
+                              "Number": null,
+                              "NamespaceUri": null,
+                              "NamespacePrefix": null,
+                              "Attributes": [],
+                              "Children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Kind": 3,
+              "Name": "mathTerminalNode",
+              "ValueTag": 0,
+              "Text": null,
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [
+                {
+                  "Kind": 0,
+                  "Name": "name",
+                  "ValueTag": 3,
+                  "Text": "",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "ref",
+                  "ValueTag": 2,
+                  "Text": "[0:0,2:1$]",
+                  "Number": null,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "selected",
+                  "ValueTag": 7,
+                  "Text": null,
+                  "Number": 0,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                },
+                {
+                  "Kind": 0,
+                  "Name": "tag",
+                  "ValueTag": 4,
+                  "Text": null,
+                  "Number": 5,
+                  "NamespaceUri": null,
+                  "NamespacePrefix": null,
+                  "Attributes": [],
+                  "Children": []
+                }
+              ],
+              "Children": []
+            }
+          ]
+        }
+      ]
+    },
+    "expectedSemanticDom": [
+      {
+        "Operation": 2,
+        "Path": [
+          1,
+          0
+        ],
+        "Ordinal": 2,
+        "Payload": {
+          "Kind": 3,
+          "Name": "symbol",
+          "ValueTag": 0,
+          "Text": null,
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [
+            {
+              "Kind": 0,
+              "Name": "range",
+              "ValueTag": 2,
+              "Text": "[2:0,2:1$]",
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            },
+            {
+              "Kind": 0,
+              "Name": "tag",
+              "ValueTag": 4,
+              "Text": null,
+              "Number": 4,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ],
+          "Children": [
+            {
+              "Kind": 1,
+              "Name": "",
+              "ValueTag": 2,
+              "Text": "\u22c5",
+              "Number": null,
+              "NamespaceUri": null,
+              "NamespacePrefix": null,
+              "Attributes": [],
+              "Children": []
+            }
+          ]
+        }
+      },
+      {
+        "Operation": 7,
+        "Path": [
+          1,
+          1,
+          0
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 0,
+          "Name": "range",
+          "ValueTag": 2,
+          "Text": "[0:0,2:1$]",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      },
+      {
+        "Operation": 7,
+        "Path": [
+          1,
+          2
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 0,
+          "Name": "ref",
+          "ValueTag": 2,
+          "Text": "[0:0,2:1$]",
+          "Number": null,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      },
+      {
+        "Operation": 7,
+        "Path": [
+          1,
+          2
+        ],
+        "Ordinal": 0,
+        "Payload": {
+          "Kind": 0,
+          "Name": "tag",
+          "ValueTag": 4,
+          "Text": null,
+          "Number": 5,
+          "NamespaceUri": null,
+          "NamespacePrefix": null,
+          "Attributes": [],
+          "Children": []
+        }
+      }
+    ],
+    "expectedSource": [
+      {
+        "Operation": 4,
+        "Id": 4,
+        "Name": "MATH_SYMBOL",
+        "Category": 102,
+        "Ranges": [
+          {
+            "First": {
+              "Value": 8589934595,
+              "SourceIndex": 2,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 8590065413,
+              "SourceIndex": 2,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "OldCounter20": -1,
+        "NewCounter18": -1,
+        "DetachedC22": true
+      },
+      {
+        "Operation": 4,
+        "Id": 5,
+        "Name": "MATH_NODE",
+        "Category": 102,
+        "Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 8590065413,
+              "SourceIndex": 2,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "OldCounter20": -1,
+        "NewCounter18": -1,
+        "DetachedC22": true
+      },
+      {
+        "Operation": 6,
+        "Id": 3,
+        "Name": "MATH_NODE",
+        "Category": 102,
+        "Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295294725,
+              "SourceIndex": 1,
+              "PointIndex": 4,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "OldCounter20": -1,
+        "NewCounter18": -1,
+        "DetachedC22": true
+      },
+      {
+        "Operation": 7,
+        "Id": -1,
+        "Name": null,
+        "Category": 0,
+        "Ranges": [],
+        "OldCounter20": 4,
+        "NewCounter18": 6,
+        "DetachedC22": false
+      }
+    ],
+    "rawOperationSequence": [
+      2,
+      7,
+      7,
+      7
+    ]
+  }
+]

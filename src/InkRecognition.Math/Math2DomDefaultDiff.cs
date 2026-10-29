@@ -137,11 +137,22 @@ internal static class Math2DomDefaultDiff
     }
     internal static List<Math2DomDiffAction> Produce(Math2DomDiffNode oldRoot,Math2DomDiffNode newRoot,
         Func<Math2DomDiffNode,Math2DomDiffNode> cloneIntoOldWriter,Math2DomDiffWork work,Action<Math2DomDiffAction>? linked=null)
+        =>ProduceCore(oldRoot,newRoot,cloneIntoOldWriter,oldRoot.Writer,false,work,linked);
+    // E2250 may retain a distinct FOURTH payload writer. This prepared overload
+    // does not grant an original-field/receipt/publication capability.
+    internal static List<Math2DomDiffAction> ProduceExport(Math2DomDiffNode oldRoot,Math2DomDiffNode newRoot,
+        object fourthWriter,Func<Math2DomDiffNode,Math2DomDiffNode> cloneIntoFourth,Math2DomDiffWork work,Action<Math2DomDiffAction>? linked=null)
+    {
+        if(ReferenceEquals(fourthWriter,oldRoot.Writer)||ReferenceEquals(fourthWriter,newRoot.Writer))throw new InvalidOperationException("Distinct fourth export writer required.");
+        return ProduceCore(oldRoot,newRoot,cloneIntoFourth,fourthWriter,true,work,linked);
+    }
+    private static List<Math2DomDiffAction> ProduceCore(Math2DomDiffNode oldRoot,Math2DomDiffNode newRoot,
+        Func<Math2DomDiffNode,Math2DomDiffNode> clone,object payloadWriter,bool cloneOldOperands,Math2DomDiffWork work,Action<Math2DomDiffAction>? linked)
     {
         if(oldRoot.Kind!=3||newRoot.Kind!=3||!ReferenceEquals(oldRoot.Name,newRoot.Name)||ReferenceEquals(oldRoot.Writer,newRoot.Writer))throw new NotSupportedException("Distinct owned writers/same canonical Math root required.");
         var actions=new List<Math2DomDiffAction>();
         void Link(Math2DomDiffAction action){work.Visit();if(actions.Count>=65536)throw new NotSupportedException("Bounded produced action count.");actions.Add(action);linked?.Invoke(action);}
-        Math2DomDiffNode Clone(Math2DomDiffNode value){work.Visit();var copy=cloneIntoOldWriter(value);if(!ReferenceEquals(copy.Writer,oldRoot.Writer))throw new InvalidOperationException("Actual payload clone must belong to retained OLD writer.");return copy;}
+        Math2DomDiffNode Clone(Math2DomDiffNode value){work.Visit();var copy=clone(value);if(!ReferenceEquals(copy.Writer,payloadWriter))throw new InvalidOperationException("Actual payload clone must belong to retained OLD writer.");return copy;}
         void Walk(Math2DomDiffNode old,Math2DomDiffNode next,int depth)
         {
             work.Visit();if(depth>64)throw new NotSupportedException("Bounded actual default Math DOM depth required.");
@@ -152,7 +163,7 @@ internal static class Math2DomDefaultDiff
             foreach(var attr in old.Attributes)
             {
                 work.Visit();Math2DomDiffNode? found=null;foreach(var other in next.Attributes){work.Visit();if(ReferenceEquals(attr.Name,other.Name)){found=other;break;}}
-                if(found is null)Link(new(6,old,attr));
+                if(found is null)Link(new(6,old,cloneOldOperands?Clone(attr):attr));
                 else if(!attr.Scalar.Equal(found.Scalar,work))Link(new(7,attr,sourceCandidate:found.Id,oldValue:attr.Scalar.Clone(work),newValue:found.Scalar.Clone(work)));
             }
             foreach(var attr in next.Attributes)
@@ -160,7 +171,7 @@ internal static class Math2DomDefaultDiff
             int cursor=-1;foreach(var pair in Align(old.Children,next.Children,work))
             {
                 work.Visit();if(pair.Old<0){cursor=cursor<0?0:cursor+1;var value=next.Children[pair.New];Link(new(2,old,Clone(value),cursor,value.Id));}
-                else if(pair.New<0){var value=old.Children[pair.Old];Link(new(4,old,value,cursor<0?0:cursor+1));}
+                else if(pair.New<0){var value=old.Children[pair.Old];Link(new(4,old,cloneOldOperands?Clone(value):value,cursor<0?0:cursor+1));}
                 else {Walk(old.Children[pair.Old],next.Children[pair.New],depth+1);cursor=cursor<0?0:cursor+1;}
             }
         }

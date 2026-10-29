@@ -5,9 +5,16 @@ param(
 $ErrorActionPreference = 'Stop'
 dotnet run --project tools/LegacyOwnedRawInkAppend.Probe -c Release -- tools/LegacyOwnedRawInkAppend.Probe/append-fixtures.json
 if ($LASTEXITCODE -ne 0) { throw 'Raw append ownership regression failed.' }
+dotnet run --project tools/LegacyMathRepeatExportKernel.Probe -c Release
+if ($LASTEXITCODE -ne 0) { throw 'Repeat export kernel managed controls failed.' }
+dotnet publish tools/LegacyMathRepeatExportKernel.Probe -c Release -r $RuntimeIdentifier -p:PublishAot=true -o .artifacts/repeat-export-kernel-native
+if ($LASTEXITCODE -ne 0) { throw 'Repeat export kernel Native AOT publish failed.' }
+$kernelSuffix = if ($IsWindows) { '.exe' } else { '' }
+& ".artifacts/repeat-export-kernel-native/LegacyMathFreshPublisher.Probe$kernelSuffix"
+if ($LASTEXITCODE -ne 0) { throw 'Repeat export kernel native controls failed.' }
 # The friend assembly name is shared with the existing Math publisher probes;
 # each project and publish directory remains separate.
-foreach ($probeName in @('LegacyMathTemporaryWriter.Probe', 'LegacyMathPriorDomDiff.Probe', 'LegacyMathTemporaryApply.Probe', 'LegacyMathCurrentSelectedIngress.Probe', 'LegacyMathPriorLateRegistration.Probe')) {
+foreach ($probeName in @('LegacyMathTemporaryWriter.Probe', 'LegacyMathPriorDomDiff.Probe', 'LegacyMathTemporaryApply.Probe', 'LegacyMathCurrentSelectedIngress.Probe', 'LegacyMathPriorLateRegistration.Probe', 'LegacyMathRepeatOutgoing.Probe')) {
   $folder = "tools/$probeName"
   $project = "$folder/$probeName.csproj"
   foreach ($mode in @('managed', 'native')) {
@@ -16,7 +23,7 @@ foreach ($probeName in @('LegacyMathTemporaryWriter.Probe', 'LegacyMathPriorDomD
       @("$folder/fixtures.json", $capture)
     } elseif ($probeName -eq 'LegacyMathPriorDomDiff.Probe') {
       @('.artifacts/math-mode0.ikrmath', 'models/math2/math2-unwrapped.res', $Runtime, "$folder/alignment-fixtures.json", $capture)
-    } elseif ($probeName -in @('LegacyMathCurrentSelectedIngress.Probe', 'LegacyMathPriorLateRegistration.Probe')) {
+    } elseif ($probeName -in @('LegacyMathCurrentSelectedIngress.Probe', 'LegacyMathPriorLateRegistration.Probe', 'LegacyMathRepeatOutgoing.Probe')) {
       $fixtures = 'tools/LegacyMathCurrentSelectedIngress.Probe/fixtures'
       @('.artifacts/math-mode0.ikrmath', 'models/math2/math2-unwrapped.res', $Runtime,
         "$fixtures/append-geometries.json", "$fixtures/unchanged-prior-reference.json",
@@ -45,7 +52,7 @@ foreach ($probeName in @('LegacyMathTemporaryWriter.Probe', 'LegacyMathPriorDomD
       if ($LASTEXITCODE -ne 0) { throw "Prior candidate $mode independent audit failed." }
       python -I -B "$folder/audit_diff.py" $capture
       if ($LASTEXITCODE -ne 0) { throw "Prior diff $mode independent audit failed." }
-    } elseif ($probeName -in @('LegacyMathCurrentSelectedIngress.Probe', 'LegacyMathPriorLateRegistration.Probe')) {
+    } elseif ($probeName -in @('LegacyMathCurrentSelectedIngress.Probe', 'LegacyMathPriorLateRegistration.Probe', 'LegacyMathRepeatOutgoing.Probe')) {
       $auditors = 'tools/LegacyMathCurrentSelectedIngress.Probe'
       python -I -B "$auditors/audit_nn.py" $capture models/math2/math2-unwrapped.res
       if ($LASTEXITCODE -ne 0) { throw "Current selected $mode NN audit failed." }
@@ -58,9 +65,13 @@ foreach ($probeName in @('LegacyMathTemporaryWriter.Probe', 'LegacyMathPriorDomD
       # This auditor imports the independently frozen sibling replay module.
       python -B "$auditors/audit_temporary_apply.py" $capture "$capture.apply.json"
       if ($LASTEXITCODE -ne 0) { throw "Current selected $mode temporary apply audit failed." }
-      if ($probeName -eq 'LegacyMathPriorLateRegistration.Probe') {
-        python -B "$folder/audit_output.py" $capture "$capture.late.json"
+      if ($probeName -in @('LegacyMathPriorLateRegistration.Probe', 'LegacyMathRepeatOutgoing.Probe')) {
+        python -B tools/LegacyMathPriorLateRegistration.Probe/audit_output.py $capture "$capture.late.json"
         if ($LASTEXITCODE -ne 0) { throw "Late registration $mode independent audit failed." }
+      }
+      if ($probeName -eq 'LegacyMathRepeatOutgoing.Probe') {
+        python -B "$folder/audit_output.py" $capture "$capture.repeat.json"
+        if ($LASTEXITCODE -ne 0) { throw "Repeat outgoing $mode independent audit failed." }
       }
     } else {
       python -I -B "$folder/audit_output.py" $capture

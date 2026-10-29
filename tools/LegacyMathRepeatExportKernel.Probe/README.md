@@ -1,0 +1,3 @@
+# Prepared repeat-export kernel controls
+
+Run this project with no arguments. It checks42 prepared cases: old-writer versus distinct fourth-writer cloning of old delete operands, insert/add payload ownership, unchanged original-kernel behavior, field-relative ancestry/sibling paths, distinct-writer refusal and preclone cancellation/work refusal. These are synthetic numeric/tree operands only. They provide no original arena, current receipt, owning NN/export or original-application proof. Core friends/public constructors are unchanged; the internal Math prepared-name adapter mints name-data tokens only.

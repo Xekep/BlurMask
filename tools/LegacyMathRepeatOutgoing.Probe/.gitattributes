@@ -1,0 +1,5 @@
+ROOT83-LATEV6-CONTENT-PREDICTIONS.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+reference/default_diff.py -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+repeat_export_oracle.py -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+audit_repeat85.py -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+audit_failure_prefixes.py -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

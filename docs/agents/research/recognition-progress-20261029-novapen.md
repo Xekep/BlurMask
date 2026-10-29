@@ -58,10 +58,13 @@ a machine-specific runtime patch requirement from the raw append test project.
 
 ## Remaining boundaries
 
-- English: the 949-document candidate and fresh selected/index continuation are
-  still staged. A source-budget refusal is not a successful publication; neither
-  the candidate nor diagnostic-only exports prove completed English recognition.
-- Math: the current candidate contains 84 authored Math documents and 937 Core
+- English: the isolated949 candidate completes the current private source.V30
+  control through both resets and outer phase2, on one stroke/three points.
+  The preserved-main951 composition also passes that same control in isolation.
+  [Checkpoint details](english-private-source24-20261029.md) distinguish this
+  result from BE2 application, public admission and real-word/cursive quality,
+  which remain incomplete. Main Core937 is not replaced by this checkpoint.
+- Math: the current candidate contains 85 authored Math documents and 937 Core
   documents. Six real applied OLD results accept an appended raw curve, build a
   new selected/C23 owner and run genuine NEW neural inference. Their actual diff
   cohorts complete 31 kept mutations on the same temporary trees; independent
@@ -76,6 +79,9 @@ a machine-specific runtime patch requirement from the raw append test project.
   [the changed-input evidence](math-current-input-temporary-apply-20261029.md).
   The [late registration evidence](math-late-registration-20261029.md) records
   actual successes, failure prefixes and the corrected private mutation grant.
+  [Repeat outgoing export](math-repeat-outgoing-20261029.md) now serializes the
+  actual original-to-late diff and source additions/removals/counter packet.
+  Both original owners remain unchanged; receiver/application is still missing.
 - Solver: Giac is the separate upstream CAS. Its tests with supplied expressions
   establish solver behavior, not correct recognition of handwritten integrals.
 - Automatic classification, Russian/English end-to-end quality and application

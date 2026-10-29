@@ -4,6 +4,7 @@ namespace InkRecognition.Math;
 
 internal abstract class Math2Mode0PriorRetainedInk:Math2Mode0RetainedInk
 {internal abstract Math2Mode0PriorCandidateRegistry[] CopyCandidateRegistry();
+ internal abstract LegacyOwnedRawInkDocument RepeatDocument {get;}
  internal abstract Math2Mode0PriorCandidateRegistry[] CopyLateRegistry(Math2DomDiffWork work);
  internal abstract void PrepareLateRegistration(object selection,Math2DomDiffWork work);}
 
