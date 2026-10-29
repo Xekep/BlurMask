@@ -26,10 +26,10 @@ for x in e['constants']:
 def restored_source(repo,path,expected):
  import runpy
  helper=repo/'tools/LegacyEnglishCharacters.Probe/source_preimage.py'
- assert hashlib.sha256(helper.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='fe7a8baf44ea5b7509f60070140066ae4dc73d970e4ac0b7898b9a68267dca8d'
+ assert hashlib.sha256(helper.read_bytes().replace(b'\r\n',b'\n')).hexdigest()=='f76cc8d09e11210fc529078a4fdf612be5052a26a72c8e4d78c3880da6af5e54'
  return runpy.run_path(str(helper))['restore'](Path(path).name,(repo/path).read_bytes(),expected)
 for name,h in e['sharedSources'].items():
  data=(a.repo/'src/InkRecognition'/name).read_text(encoding='utf-8-sig').encode()
- if name in ('LegacyOrdinaryCursiveSeedGraph.cs','LegacyNativeWordBuilder.cs','LegacyNativePlainWordPublisher.cs'):data=restored_source(a.repo,'src/InkRecognition/'+name,h)
+ if name in ('LegacyOrdinaryCursiveSeedGraph.cs','LegacyNativeWordBuilder.cs','LegacyNativePlainWordPublisher.cs','LegacyNativeGlyphRecordPool.cs','LegacyNativeGlyphSymbolUpdate.cs'):data=restored_source(a.repo,'src/InkRecognition/'+name,h)
  assert sha(data)==h
 r=dict(status='PASS',fullFunctions=len(set(r['function']for r in e['regions'])),fullRegions=len(e['regions']),closedUnregistered=len(e['closedUnregistered']),closedInstructions=closedInstructions,instructionPins=len(e['instructions']),bindings=len(e['bindings']),sharedSources=len(e['sharedSources']),vendorExecuted=False,scope='Native bytes and owned pure-kernel contracts only; no B6 production/nativeABI/WORD720/guide completion claim');a.output.write_text(json.dumps(r,indent=2)+'\n');print(json.dumps(r))

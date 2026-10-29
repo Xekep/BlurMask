@@ -13,9 +13,11 @@ for row in steps.values():
  expected=row['to']
  if expected not in g['ALLOWED_EXPECTED'][name]:
   #Internal default-body transition is not a new final expected authority.
-  assert name=='LegacyNativePlainWordPublisher.cs' and expected=='2f7144e49daa2bf36939db91fd48697769696e82ebe73d604c040d87a5aae08d'
+  assert (name,expected)in{
+   ('LegacyNativePlainWordPublisher.cs','2f7144e49daa2bf36939db91fd48697769696e82ebe73d604c040d87a5aae08d'),
+   ('LegacyOrdinaryGraphSourceRanges.cs','aa8a7de87951050c1312e2b84218a6eb2300fdec7842ec8cf46c680c56a6f5ab')}
   refuses(lambda:restore(name,live,expected))
-  expected='9d6736eb716317d70640082cbd5c09a431819ca14e31664326f0aa9c3c957935'
+  expected='9d6736eb716317d70640082cbd5c09a431819ca14e31664326f0aa9c3c957935'if name=='LegacyNativePlainWordPublisher.cs'else'8d4014764d0bc03ed30b3ee9180f2d4fee682e4690ba58be8bfdcecaf3e5f6ff'
  # Recover every approved historical endpoint from its exact canonical successor.
  restored=restore(name,live,expected);assert hashlib.sha256(restored).hexdigest()==expected;positive+=1
  assert restore(name,restored,expected)==restored;positive+=1
@@ -25,6 +27,18 @@ for row in steps.values():
  refuses(lambda:restore(name,live,'0'*64));refuses(lambda:restore('Other.cs',live,expected))
  # Successor hash is not a historical expected authority.
  if row['from']not in g['ALLOWED_EXPECTED'][name]:refuses(lambda:restore(name,live,row['from']))
+# Meter/body alterations must not acquire the exact reviewed historical inverse.
+name='LegacyOrdinaryGraphSourceRanges.cs';live=(repo/'src/InkRecognition'/name).read_bytes().replace(b'\r\n',b'\n')
+endpoint='c84a663dcbea60b08f104fc7fd6be712f451058003a6b9c03a27600f5b7c1aef'
+for old,new in [(b'meter?.Before(256)',b'meter?.Before(257)'),(b'if(meter is null)rows=',b'if(meter is not null)rows='),(b'if(!found)throw',b'if(found)throw')]:
+ assert old in live
+ refuses(lambda old=old,new=new:restore(name,live.replace(old,new,1),endpoint))
+# A corrupt cyclic intermediate remains bounded and cannot satisfy an endpoint.
+key=name+':'+hashlib.sha256(live).hexdigest();original=steps[key]
+try:
+ steps[key]=dict(original,to=original['from'],edits=[])
+ refuses(lambda:restore(name,live,endpoint))
+finally:steps[key]=original
 # Exact full-FIRST source loop using the original per-file encoding contract.
 pins=json.loads((repo/'tools/handwriting/full-english-first-plain-text-pins.json').read_bytes())
 for name,want in pins['sharedSources'].items():
