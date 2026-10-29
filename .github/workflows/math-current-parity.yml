@@ -1,0 +1,120 @@
+name: Math current-input parity
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/math-current-parity.yml'
+      - 'tools/LegacyMathCurrentSelectedIngress.Probe/**'
+      - 'src/InkRecognition.Math/Math2Mode0*.cs'
+      - 'src/InkRecognition/LegacyOwnedRawInk*.cs'
+      - 'tools/export-ink-math-model.py'
+      - 'tools/fetch-ink-math-runtime.py'
+      - 'models/math2/**'
+      - 'global.json'
+  pull_request:
+    paths:
+      - '.github/workflows/math-current-parity.yml'
+      - 'tools/LegacyMathCurrentSelectedIngress.Probe/**'
+      - 'src/InkRecognition.Math/Math2Mode0*.cs'
+      - 'src/InkRecognition/LegacyOwnedRawInk*.cs'
+      - 'tools/export-ink-math-model.py'
+      - 'tools/fetch-ink-math-runtime.py'
+      - 'models/math2/**'
+      - 'global.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: math-current-parity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  parity:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    env:
+      DOTNET_PROCESSOR_COUNT: 2
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_CLI_USE_MSBUILD_SERVER: 0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            11.0.100-preview.7.26381.103
+            10.0.x
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install independent oracle
+        run: python -m pip install numpy==2.3.3
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
+      - name: Collect repeated Managed and Native AOT results before comparison
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = '.artifacts/math-current'
+          New-Item -ItemType Directory -Path $root -Force | Out-Null
+          dotnet --info | Out-File "$root/dotnet-info.txt" -Encoding utf8
+          $rid = switch ("$env:RUNNER_OS/$env:RUNNER_ARCH") {
+            'Windows/X64' { 'win-x64' }
+            'Linux/X64' { 'linux-x64' }
+            'macOS/ARM64' { 'osx-arm64' }
+            'macOS/X64' { 'osx-x64' }
+            default { throw 'Unsupported runner platform' }
+          }
+          $lib = if ($IsWindows) { 'onnxruntime.dll' } elseif ($IsMacOS) { 'libonnxruntime.dylib' } else { 'libonnxruntime.so' }
+          python tools/fetch-ink-math-runtime.py $rid --output "$root/runtime"
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned official runtime fetch failed' }
+          python tools/export-ink-math-model.py models/math2/math2-unwrapped.res --output "$root/model.ikrmath"
+          if ($LASTEXITCODE -ne 0) { throw 'Model export failed' }
+          $project = 'tools/LegacyMathCurrentSelectedIngress.Probe'
+          $fixtures = "$project/fixtures"
+          $inputs = @("$root/model.ikrmath", 'models/math2/math2-unwrapped.res',
+            "$root/runtime/runtimes/$rid/native/$lib", "$fixtures/append-geometries.json",
+            "$fixtures/unchanged-prior-reference.json", "$fixtures/frozen-actual-math6.json")
+          dotnet run --project $project -c Release -- @inputs "$root/managed.json"
+          if ($LASTEXITCODE -ne 0) { throw 'Managed owning run failed' }
+          dotnet run --project $project -c Release --no-build -- @inputs "$root/managed-repeat.json"
+          if ($LASTEXITCODE -ne 0) { throw 'Repeated Managed owning run failed' }
+          dotnet publish $project -c Release -r $rid -p:PublishAot=true -m:1 --disable-build-servers -p:UseSharedCompilation=false -o "$root/native"
+          if ($LASTEXITCODE -ne 0) { throw 'Native AOT publish failed' }
+          $suffix = if ($IsWindows) { '.exe' } else { '' }
+          & "$root/native/LegacyMathFreshPublisher.Probe$suffix" @inputs "$root/native.json"
+          if ($LASTEXITCODE -ne 0) { throw 'Native owning run failed' }
+      - name: Require exact repetition, native parity and unchanged reference
+        shell: pwsh
+        run: |
+          $root = '.artifacts/math-current'
+          $oracle = 'tools/LegacyMathCurrentSelectedIngress.Probe'
+          python -B "$oracle/audit_nn.py" "$root/managed.json" models/math2/math2-unwrapped.res "$root/managed-repeat.json"
+          if ($LASTEXITCODE -ne 0) { throw 'Repeated Managed result differs' }
+          python -B "$oracle/audit_nn.py" "$root/managed.json" models/math2/math2-unwrapped.res "$root/native.json"
+          if ($LASTEXITCODE -ne 0) { throw 'Managed/Native result differs' }
+          python -B "$oracle/audit_candidate.py" "$root/managed.json"
+          if ($LASTEXITCODE -ne 0) { throw 'Independent candidate audit failed' }
+          python -B "$oracle/audit_diff.py" "$root/managed.json" "$root/diff.json"
+          if ($LASTEXITCODE -ne 0) { throw 'Independent diff audit failed' }
+          python -B "$oracle/audit_temporary_apply.py" "$root/managed.json" "$root/apply.json"
+          if ($LASTEXITCODE -ne 0) { throw 'Independent temporary apply audit failed' }
+          python -B "$oracle/audit_unchanged.py" "$root/managed.json" "$oracle/fixtures/unchanged-prior-reference.json"
+          if ($LASTEXITCODE -ne 0) { throw 'Exact frozen unchanged reference differs; inspect uploaded captures' }
+      - name: Preserve numerical evidence on success and failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: math-current-parity-${{ matrix.os }}-${{ github.run_attempt }}
+          path: |
+            .artifacts/math-current/*.json
+            .artifacts/math-current/dotnet-info.txt
+            .artifacts/math-current/runtime/**/runtime-provenance.json
+          if-no-files-found: ignore
+          retention-days: 14

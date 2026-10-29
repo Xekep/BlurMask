@@ -25,3 +25,13 @@ The separate Build-job failure in this run is the stale`41268` expectation in
 `LegacyFirstOwnedRecognition.Probe`, whose actual result is`40843`. Its42-group
 fixture needs its own independent replay; the earlier35-group PlainWord proof
 must not be substituted for the whole owning fixture.
+
+The separate `Math current-input parity` workflow now exercises just this
+integration path on Windows, Linux and macOS. It fetches the existing pinned
+official CPU runtime and exports the repository model directly, without waiting
+for the full application/native-ABI job chain. Two fresh Managed processes and
+one Native AOT process run before the exact comparisons. Captures, runtime
+provenance and .NET host information upload on success and failure. Repetition,
+Managed/native equality and the frozen unchanged reference remain exact.
+This is an additional diagnostic workflow; it does not replace the full CI or
+prove the cause before the platform captures have been inspected.
