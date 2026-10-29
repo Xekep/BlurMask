@@ -4,6 +4,7 @@ void Require(bool yes){if(!yes)throw new InvalidDataException($"Current selected
 void Reject(Action a){try{a();}catch(Exception e)when(e is ArgumentException or InvalidOperationException or NotSupportedException or OperationCanceledException){controls++;return;}throw new InvalidDataException($"Current selected refusal{controls}");}
 var fixtures=JsonSerializer.Deserialize(File.ReadAllText(args[3]),Json.Default.FixtureArray)!;using var oldReference=JsonDocument.Parse(File.ReadAllText(args[4]));using var expected=JsonDocument.Parse(File.ReadAllText(args[5]));
 using var runtime=new OrtRuntime(args[2]);using var run=runtime.CreateRun(default);using var stream=File.OpenRead(args[0]);using var bundle=Math2Mode0ColdBundle.Read(runtime,stream,File.ReadAllBytes(args[1]));var actual=new List<Actual>();var unchanged=new List<Regression>();
+var rawAttention=RawAttentionSidecar.CreateIfEnabled(args[6],args.Take(6).ToArray(),runtime.Version);
 for(int index=0;index<6;index++)
 {
  var e=expected.RootElement.GetProperty("cases")[index];int width=e.GetProperty("oldPipeline").GetProperty("Width").GetInt32();bool reverse=e.GetProperty("oldPipeline").GetProperty("Reversed").GetBoolean();
@@ -13,6 +14,7 @@ for(int index=0;index<6;index++)
  {
   var prepared=oldCurrent.CopyResult();using var oldNn=width==1?Math2Mode0PriorRawOnlySource.PrepareCold(runtime,bundle,run,oldCurrent):Math2Mode0PriorRawOnlySource.PrepareDiagnostic(runtime,bundle,run,oldCurrent,width);oldNn.RunToFirstCopy();
   unchanged.Add(new(width,reverse,oldScope.CopySnapshot(),prepared,oldCurrent.CopyResult(),oldNn.CopyResult()));
+  rawAttention?.Capture("Unchanged",index,reverse,oldNn);
  }
  var receipt=p.Application.AppendCurrentInput(new(fixtures[index].Append.Select(v=>new InkPoint(v[0],v[1])).ToArray()));
  var ownerSnapshot=p.Application.WithChangedInput(receipt,b=>b.CopySnapshot());var child=p.Application.WithChangedInput(receipt,b=>b.Document);var originalInk=p.Application.WithChangedInput(receipt,b=>b.OriginalInkIdentity);
@@ -36,6 +38,7 @@ for(int index=0;index<6;index++)
  Require(ReferenceEquals(current.InputC22Identity,scope.SelectedC22Identity(0))&&ReferenceEquals(current.SelectedInkIdentity,scope.SelectedInkIdentity));Reject(()=>Math2Mode0PriorC23Preparation.Create(scope,freeze));
  using var next=width==1?Math2Mode0PriorRawOnlySource.PrepareCold(runtime,bundle,run,current):Math2Mode0PriorRawOnlySource.PrepareDiagnostic(runtime,bundle,run,current,width);
  Reject(()=>Math2Mode0PriorRawOnlySource.PrepareCold(runtime,bundle,run,current));next.RunToFirstCopy();var nn=next.CopyResult();Require(nn.Complete&&nn.FirstCopy is not null&&nn.DecoderCalls>0&&nn.Frames>0);Require(nn.Positions.Any(v=>(v>>32)==2));Require(nn.Order.Order().SequenceEqual(new[]{0,1,2}));Require(ReferenceEquals(next.SourceDocument,child));Reject(()=>next.RunToFirstCopy());
+ rawAttention?.Capture("Actual",index,reverse,next);
  using var candidate=Math2Mode0PriorCandidatePreparation.Create(next);var c=candidate.CopyResult();Require(c.RegistryNext==4&&c.Registry.Length==4&&c.Registry.Select(r=>r.CanonicalSelection).SequenceEqual(new[]{1,2,3,4}));Require(c.OldTags.SequenceEqual(new long[]{1,2,3}));Require(candidate.HasCanonicalNames&&!ReferenceEquals(candidate.ThirdInkIdentity,scope.SelectedInkIdentity));
  for(int k=0;k<4;k++){Require(!ReferenceEquals(candidate.ThirdSelectionIdentity(k),scope.SelectedC22Identity(k)));Require(c.Registry[k].Ranges.SequenceEqual(prior.Registry[k].Ranges));}
  using var diff=Math2Mode0PriorDomDiff.Create(candidate);var d=diff.CopyResult();Require(d.Complete&&d.Ready&&d.Produced==d.Kept+d.Filtered&&d.HeaderLive);Require(d.Actions.Length==d.Produced);Require(d.Kept>=0); // No predicted keep count or fake action.
@@ -52,6 +55,7 @@ for(int index=0;index<6;index++)
  if(index<5)Reject(()=>current.CopyResult());Reject(()=>next.CopyResult());Reject(()=>candidate.CopyResult());Reject(()=>diff.CopyResult());Reject(()=>temporary.CopyResult());
 }
 File.WriteAllText(args[6],JsonSerializer.Serialize(new Capture(controls,runtime.Version,unchanged.ToArray(),actual.ToArray()),Json.Default.Capture));Console.WriteLine($"PASS6 genuine current-selected/identity/C23/NEWNN/candidate/diff, plus6 unchanged regressions; {controls} controls; actual kept actions applied to temporary arena, no original update.");
+rawAttention?.Seal(args[6]);
 TreeNode[] ReadTree(Math2Mode0PriorCandidatePreparation candidate)=>candidate.WithDiffInput(b=>
 {
  var work=new Math2DomDiffWork(default);b.Views(work,out var root,out _);var rows=new List<TreeNode>();
