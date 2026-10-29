@@ -1,6 +1,9 @@
 from pathlib import Path
-import argparse,copy,hashlib,json
+import argparse,copy,hashlib,json,importlib.util
 HERE=Path(__file__).resolve().parent
+_spec=importlib.util.spec_from_file_location('bootstrap_preimage',HERE/'bootstrap_preimage.py')
+_module=importlib.util.module_from_spec(_spec);_spec.loader.exec_module(_module)
+restore_bootstrap_source=_module.restore
 TABLE_LF_SHA='6a356fff98abd80e2b060fedf5388c8ad92bc36706feb6b8850c7ab1c61df6ab'
 def digest(b):return hashlib.sha256(b).hexdigest()
 def require(x):
@@ -16,7 +19,7 @@ def restore(rec,raw):
 p=argparse.ArgumentParser();p.add_argument('repo',type=Path);p.add_argument('output',type=Path);a=p.parse_args()
 raw=(HERE/'source-contracts.json').read_bytes();require(digest(lf(raw))==TABLE_LF_SHA);table=json.loads(raw);restored=0;neg=0
 for rec in table['Sources']:
- b=(a.repo/rec['Relative']).read_bytes();require(digest(lf(b))==rec['SuccessorLF'])
+ b=restore_bootstrap_source(rec['Relative'],(a.repo/rec['Relative']).read_bytes(),rec['SuccessorLF']);require(digest(lf(b))==rec['SuccessorLF'])
  if rec['Kind']=='OLD':
   reference=lf((HERE/rec['HistoricalReference']).read_bytes());require(digest(reference)==rec['PreimageLF']);require(restore(rec,b)==reference);require(restore(rec,reference)==reference);restored+=1
   for malformed in (b'!'+b[1:],b[:-1],b+b'!'):

@@ -27,6 +27,10 @@ def run(stage, command, timeout):
         raise SystemExit(f"{stage} failed; see {output / (stage + '.log')}")
 
 
+run("bootstrap-source-restoration-controls", [sys.executable, "-I", "-B", str(root / "tools" /
+    "LegacyEnglishOriginalInput.ActualEntry" / "test_bootstrap_preimage.py"), str(root),
+    str(output / "bootstrap-source-restoration-controls.json")], 45)
+
 run("original-input-source-contracts", [sys.executable, "-I", "-B", str(root / "tools" /
     "LegacyEnglishOriginalInput.ActualEntry" / "source_contract.py"), str(root),
     str(output / "original-input-source-contracts.json")], 45)
