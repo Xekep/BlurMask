@@ -33,3 +33,24 @@ Windows fingerprints. No tolerance, platform-specific expected hash or reference
 waiver is added. The existing frozen-reference audit remains a release gate;
 the new Linux/macOS CI observations are required before changing its contract.
 No full repeat application, handwriting quality or release readiness follows.
+
+## Three-platform result
+
+GitHub run `40836983243` from `ea5c37b` completed. Windows and Linux pass the
+whole workflow. macOS passes all new exact fresh/prior, repeated Managed,
+Managed/Native, eighteen-history audits and seven corruption controls, then
+fails the retained frozen unchanged-reference check. Independently rehashing
+all three downloaded artifacts reproduces those results.
+
+Windows/Linux main captures are byte-identical. macOS retains the same42
+unchanged `NewNn.RawHashes` differences; every other historical unchanged field
+is exact. The full macOS capture has84 differing leaves, including changed-input
+attention hashes and four copied score-bit fields. These arrays are not
+beam-identity aligned across platforms: their largest same-index difference
+must not be called a numerical error bound. Encoder-input tensor bytes were
+not observed. The next diagnostic boundary is the live encoder input and output,
+not a tolerance fitted to these captures.
+
+`CROSS-PLATFORM-FINAL.json` SHA256 under the same evidence root:
+`a0f86abb1ffb43402edb2a49e8b5f5209a3b9c68a1c44f18bf02a87b8610e450`.
+The workflow remains failing on macOS; no reference assertion was removed.

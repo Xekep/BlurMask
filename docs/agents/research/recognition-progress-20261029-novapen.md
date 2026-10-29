@@ -95,11 +95,24 @@ recorded three-point control; public admission and handwriting quality are uncha
   the original receiver and successor remain incomplete.
 - Solver: Giac is the separate upstream CAS. Its tests with supplied expressions
   establish solver behavior, not correct recognition of handwritten integrals.
+  A fresh current-source Managed/Native AOT run on29 October authenticates the
+  bundled `icas.exe` against its manifest and reruns47 grammar translations,
+  44 calculus/algebra examples,25 exact integral fixtures and all existing
+  endpoint, divergence/domain, cancellation and process-boundary controls.
+  The valid integral `int(x^2,x,1,10)` yields333. Evidence:
+  `E:/BlurMask-build-artifacts-20261014/current-solver-verification-20261029/FINAL.json`,
+  SHA256 `f7ae21c9285332c540e2253a81002d161f6685044fffe42a11fdf46b65c23a8b`.
 - Automatic classification, Russian/English end-to-end quality and application
   integration still require broader real-ink checks before declaring completion.
 
 Historical reports retain their original names and hashes. Active engineering
 links point here so a deleted old release is not presented as the current build.
+
+The [exact fresh/prior math-history comparison](math-fresh-history-twin-20261029.md)
+passes on Windows/Linux/macOS, including Managed/repeat/Native parity and seven
+corruption controls. macOS still fails the separate frozen unchanged-reference
+hash check. The submitted encoder-input bytes and first divergent numerical
+boundary remain unobserved; no platform exception or fitted tolerance is admitted.
 
 ## Publication CI after the rename
 
