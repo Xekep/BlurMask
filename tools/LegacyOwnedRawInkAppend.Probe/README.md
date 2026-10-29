@@ -13,4 +13,6 @@ dotnet exec --fx-version 10.0.12 --roll-forward Disable <output>/bin/LegacyOwned
 
 Use CPU2, a 600-second build watchdog and a 45-second execution watchdog. The fixture SHA256 is 80b88eb48371bf74e19c048f8b8de61ad8ac0a20873093aba6b90cf8d7262a1e. Its original CRLF bytes are intentionally retained by this folder's `.gitattributes`; source files use ordinary repository LF policy. Do not regenerate fixtures from observed recognition output.
 
+The project targets `net10.0` without requiring a particular runtime patch on every CI host. Local authenticated runs select `10.0.12` explicitly through `dotnet exec --fx-version ... --roll-forward Disable`; that runner policy is not a project-wide installation requirement.
+
 This probe verifies raw-state authority and projection only. It does not prove public incoming addItems/request ownership, native revisions/A8 rollback, C51/INPUT update, changed C23, candidate/diff application or recognition quality. Those have separate owning integration probes and native evidence.

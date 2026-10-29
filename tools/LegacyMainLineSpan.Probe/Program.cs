@@ -137,7 +137,7 @@ LegacyMainSelectedFirstWord Build(LegacyMainFirstSubmission submission)
             glyph=>policy.CreateContext(scope.Evaluate(ranges,glyph.MergedGeometry.Strokes.Count),[]),[]);
     }
     var plan=LegacyFreshFirstProtocolOwnership.Create(factory).PreparePrimary(ak,cuts,prepared,scores,table);
-    var primary=plan.Run();var context=plan.RunSupportedNonSkippedContext();
+    var primary=plan.Run();var context=LegacyFirstBlankContextPasses.Run(ak,factory,cuts,prepared,plan,table);
     var word=new LegacyFirstPlainWordMaterializer(ak,6120,factory,table).Materialize(cuts,graph,primary,context,scores);
     return new(submission.DescriptorOrdinal,word,prepared.SourceRanges);
 }

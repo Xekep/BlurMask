@@ -62,7 +62,7 @@ internal sealed record MainLineWordFixture(LegacyFreshMainSingleLineSampled Sour
             }
             var primaryPlan = LegacyFreshFirstProtocolOwnership.Create(factory).PreparePrimary(ak, cuts, prepared, scores, table);
             var primary = primaryPlan.Run();
-            var contextPass = primaryPlan.RunSupportedNonSkippedContext();
+            var contextPass = LegacyFirstBlankContextPasses.Run(ak,factory,cuts,prepared,primaryPlan,table);
             var word = new LegacyFirstPlainWordMaterializer(ak, 6120, factory, table)
                 .Materialize(cuts, graph, primary, contextPass, scores);
             return new(submission.DescriptorOrdinal, word, prepared.SourceRanges);

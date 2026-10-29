@@ -42,13 +42,19 @@ All nine public calls completed in both versions. Exact words remain **4/9**;
 the correction changes intermediate probabilities, costs and one final score /
 geometry result, but does not improve this small corpus's word accuracy.
 These continuous-stroke samples do not establish general cursive accuracy.
-The next investigation must follow the actual downstream MAIN/linguistic
-consumer, without tuning labels, thresholds or budgets to these answers.
+Separate analysis of these inputs checked all 269 retained terminal language
+rows against raw LK words/classes and costs for empty first-word history, with
+no discrepancy found. Pruned candidate formation and caller contexts outside
+that path remain unproved. Labels, thresholds and budgets are not tuned to these
+answers.
 
 The historical PlainWord CI cost is separately corrected using independent
 model/recurrence/terminal replay: `41268 → 40843`, with the same literal mixed-script
 path and unchanged geometry contribution. See the [CI evidence](ru-first-plainword-ci-20261029.md).
 This is an exact test expectation update, not a handwriting quality improvement.
+The [later CI consumer repair](ci-first-context-runtime-20261029.md) routes ten
+integration probes through the existing full blank-context handler and removes
+a machine-specific runtime patch requirement from the raw append test project.
 
 ## Remaining boundaries
 
