@@ -45,22 +45,28 @@ internal sealed partial class WindowsWindowCatalog
         var root = FindAt(point);
         return root is null ? null : FindChildRegion(root, point);
     }
-    internal TrackedWindow FindChildRegion(TrackedWindow root, PixelPoint point)
+    internal TrackedWindow? FindChildRegion(TrackedWindow root, PixelPoint point)
     {
-        var region = root;
-        for (int depth = 0; depth < 32; depth++)
+        var result = NativeWindowHierarchy.FindDeepest(root, point, (region, _) =>
         {
             var clientPoint = new FillPoint { X = point.X, Y = point.Y };
-            if (ScreenToClient((nint)region.Id, ref clientPoint) == 0) break;
+            if (ScreenToClient((nint)region.Id, ref clientPoint) == 0) return NativeChildHit.Invalid;
             // Native hit testing respects child z-order and transparent group-box
             // areas; a rectangular scan can select the enclosing group instead.
             var child = RealChildWindowFromPoint((nint)region.Id, clientPoint);
-            if (child == 0 || child == (nint)region.Id) break;
-            var next = ReadRegion(new((nuint)child, root.ProcessId, default, true, root.Id));
-            if (next is not { Visible: true } || !next.Bounds.Contains(point)) break;
-            region = next;
-        }
-        return region;
+            if (child == 0 || child == (nint)region.Id) return NativeChildHit.End;
+            if (GetAncestor(child, 1) != (nint)region.Id || Read((nuint)child) is not { } next ||
+                !TryClientBounds((nint)region.Id, out var clip)) return NativeChildHit.Invalid;
+            return new NativeChildHit(true, next with
+            {
+                ProcessId = root.ProcessId, ParentId = root.Id,
+                Bounds = next.Bounds.Intersect(region.Bounds).Intersect(clip)
+            });
+        });
+        // Recheck actual ancestry once. Rechecking every prefix at every
+        // level made native queries quadratic in nesting depth.
+        var current = result is null ? null : ReadRegion(result);
+        return current is { Visible: true } && current.Bounds.Contains(point) ? current : null;
     }
     public TrackedWindow? ReadRegion(TrackedWindow region)
     {
@@ -69,18 +75,22 @@ internal sealed partial class WindowsWindowCatalog
         var root = Read(region.ParentId);
         var child = Read(region.Id);
         if (root is null || child is null || GetAncestor(hwnd, 2) != (nint)root.Id || root.ProcessId != region.ProcessId) return null;
-        var bounds = child.Bounds; bool visible = root.Visible && child.Visible;
-        for (int i = 0; hwnd != (nint)root.Id && i < 32; i++)
+        if (!NativeWindowHierarchy.TryClipToRoot(region.Id, root.Id, child.Bounds, id =>
         {
-            hwnd = GetAncestor(hwnd, 1);
-            if (hwnd == 0 || GetClientRect(hwnd, out var rect) == 0 || ClientToScreen(hwnd, ref rect) == 0) return null;
-            // ClientToScreen maps the first POINT; preserve the client size.
-            int width = rect.Right, height = rect.Bottom;
-            bounds = bounds.Intersect(new PixelRect(rect.Left, rect.Top, width, height));
-            visible &= IsWindowVisible(hwnd) != 0;
-        }
-        if (hwnd != (nint)root.Id) return null;
-        return child with { ProcessId = root.ProcessId, Bounds = bounds, Visible = visible && bounds.Width > 0 && bounds.Height > 0, ParentId = root.Id };
+            var parent = GetAncestor((nint)id, 1);
+            return parent != 0 && TryClientBounds(parent, out var clip)
+                ? new NativeParentClip((nuint)parent, clip, IsWindowVisible(parent) != 0) : null;
+        }, out var bounds, out var visible)) return null;
+        return child with { ProcessId = root.ProcessId, Bounds = bounds, Visible = visible && root.Visible && child.Visible && bounds.Width > 0 && bounds.Height > 0, ParentId = root.Id };
+    }
+    private static bool TryClientBounds(nint hwnd, out PixelRect bounds)
+    {
+        bounds = default;
+        if (GetClientRect(hwnd, out var rect) == 0) return false;
+        int width = rect.Right - rect.Left, height = rect.Bottom - rect.Top;
+        if (ClientToScreen(hwnd, ref rect) == 0) return false;
+        bounds = new(rect.Left, rect.Top, Math.Max(0, width), Math.Max(0, height));
+        return true;
     }
     public bool PlaceAbove(Window mask, TrackedWindow target)
     {
@@ -157,15 +167,21 @@ internal sealed partial class MacWindowCatalog
 
 internal sealed partial class XcbWindowCatalog
 {
-    private uint[] Children(uint window)
+    private uint[] Children(uint window) => TryChildren(window, out var result) ? result : [];
+    private bool TryChildren(uint window, out uint[] result)
     {
+        result = [];
         var reply = xcb_query_tree_reply(_connection, xcb_query_tree(_connection, window), out var error);
         try
         {
-            if (reply == 0) return [];
-            int count = Math.Min(4096, xcb_query_tree_children_length(reply)); var data = xcb_query_tree_children(reply);
-            var result = new uint[count]; for (int i = 0; i < count; i++) result[i] = unchecked((uint)Marshal.ReadInt32(data, i * 4));
-            return result;
+            if (reply == 0) return false;
+            int count = xcb_query_tree_children_length(reply);
+            // Do not truncate bottom-to-top stacking data and then select an
+            // older child as if it were the topmost window under the pointer.
+            if (count < 0 || count > WindowTraversalBudget.MaximumWindows) return false;
+            var data = xcb_query_tree_children(reply);
+            result = new uint[count]; for (int i = 0; i < count; i++) result[i] = unchecked((uint)Marshal.ReadInt32(data, i * 4));
+            return true;
         }
         finally { Free(reply, error); }
     }
@@ -180,17 +196,25 @@ internal sealed partial class XcbWindowCatalog
         var root = FindAt(point); if (root is null) return null;
         return FindChildRegion(root, point);
     }
-    internal TrackedWindow FindChildRegion(TrackedWindow root, PixelPoint point)
+    internal TrackedWindow? FindChildRegion(TrackedWindow root, PixelPoint point)
     {
-        var region = root;
-        for (int depth = 0; depth < 32; depth++)
+        var result = NativeWindowHierarchy.FindDeepest(root, point, (region, budget) =>
         {
-            var next = Children((uint)region.Id).Reverse().Select(id => ReadRegion(new(id, root.ProcessId, default, true, root.Id)))
-                .FirstOrDefault(child => child is { Visible: true } && child.Bounds.Contains(point));
-            if (next is null) break;
-            region = next;
-        }
-        return region;
+            if (!TryChildren((uint)region.Id, out var children)) return NativeChildHit.Invalid;
+            foreach (var id in children.Reverse())
+            {
+                if (!budget.Spend()) return NativeChildHit.Invalid;
+                var child = Read(id);
+                if (child is null) return NativeChildHit.Invalid;
+                if (!child.Visible) continue;
+                var bounds = child.Bounds.Intersect(region.Bounds);
+                if (bounds.Contains(point)) return new NativeChildHit(true,
+                    child with { ProcessId = root.ProcessId, Bounds = bounds, ParentId = root.Id });
+            }
+            return NativeChildHit.End;
+        });
+        var current = result is null ? null : ReadRegion(result);
+        return current is { Visible: true } && current.Bounds.Contains(point) ? current : null;
     }
     internal nuint[] StackingWindows()
     {
@@ -203,16 +227,13 @@ internal sealed partial class XcbWindowCatalog
         if (region.ParentId == 0) return Read(region.Id);
         var root = Read(region.ParentId); var child = Read(region.Id);
         if (root is null || child is null || root.ProcessId != region.ProcessId) return null;
-        uint current = (uint)region.Id; var bounds = child.Bounds; bool visible = child.Visible && root.Visible;
-        for (int depth = 0; current != (uint)root.Id && depth < 32; depth++)
+        if (!NativeWindowHierarchy.TryClipToRoot(region.Id, root.Id, child.Bounds, id =>
         {
-            current = Parent(current);
-            var parent = Read(current);
-            if (parent is null || current == _root) return null;
-            bounds = bounds.Intersect(parent.Bounds); visible &= parent.Visible;
-        }
-        if (current != (uint)root.Id) return null;
-        return child with { ProcessId = root.ProcessId, Bounds = bounds, Visible = visible && bounds.Width > 0 && bounds.Height > 0, ParentId = root.Id };
+            var parentId = Parent((uint)id);
+            var parent = parentId == 0 || parentId == _root ? null : Read(parentId);
+            return parent is null ? null : new NativeParentClip(parentId, parent.Bounds, parent.Visible);
+        }, out var bounds, out var visible)) return null;
+        return child with { ProcessId = root.ProcessId, Bounds = bounds, Visible = visible && root.Visible && child.Visible && bounds.Width > 0 && bounds.Height > 0, ParentId = root.Id };
     }
     private uint Frame(uint window)
     {

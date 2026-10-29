@@ -9,6 +9,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia.Headless" Version="12.1.2" />
-    <Compile Include="$(MaskSourceRoot)/NativeWindowCatalog.cs;$(MaskSourceRoot)/NativeMaskAttachment.cs;$(MaskSourceRoot)/AttachedMaskWindows.cs;$(MaskSourceRoot)/WindowsWindowEvents.cs;$(MaskSourceRoot)/MaskWindowAttachment.cs;$(MaskSourceRoot)/MaskAttachmentCoverage.cs;$(MaskSourceRoot)/WindowFillPicker.cs" Link="Production/%(Filename)%(Extension)" />
+    <Compile Include="$(MaskSourceRoot)/NativeWindowCatalog.cs;$(MaskSourceRoot)/NativeMaskAttachment.cs;$(MaskSourceRoot)/NativeWindowHierarchy.cs;$(MaskSourceRoot)/AttachedMaskWindows.cs;$(MaskSourceRoot)/WindowsWindowEvents.cs;$(MaskSourceRoot)/MaskWindowAttachment.cs;$(MaskSourceRoot)/MaskAttachmentCoverage.cs;$(MaskSourceRoot)/WindowFillPicker.cs" Link="Production/%(Filename)%(Extension)" />
   </ItemGroup>
 </Project>

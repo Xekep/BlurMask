@@ -39,7 +39,7 @@ internal static partial class NativeMaskSmokeTest
                 child = CreateWindowExW(0, "STATIC", "Privacy region", 0x50000000, 40, 70, 110, 60, (nint)target.Id, 0, 0, 0);
                 Require(child != 0, "Native child probe creation failed.");
                 await Task.Delay(50);
-                var region = win.FindChildRegion(target, point);
+                var region = win.FindChildRegion(target, point) ?? throw new InvalidOperationException("Native child selection failed.");
                 Require(region.Id == (nuint)child && region.ParentId == target.Id, "Point selection did not locate the native child.");
                 catalog.ReleaseMask(mask);
                 mask.AttachFilledRegion(new WindowsWindowCatalog(), region); mask.RefreshAttachment(); await Task.Delay(50);
@@ -99,7 +99,7 @@ internal static partial class NativeMaskSmokeTest
             else
             {
                 var xcb = (XcbWindowCatalog)catalog;
-                var region = xcb.FindChildRegion(target, point);
+                var region = xcb.FindChildRegion(target, point) ?? throw new InvalidOperationException("X11 child selection failed.");
                 Require(region.Bounds.Contains(point), "X11 child/client lookup missed its selected point.");
                 var fillCatalog = XcbWindowCatalog.TryCreate()!;
                 mask.AttachFilledRegion(fillCatalog, region); mask.RefreshAttachment(); await Task.Delay(40);
