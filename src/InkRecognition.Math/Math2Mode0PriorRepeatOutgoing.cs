@@ -8,7 +8,7 @@ internal sealed record Math2Mode0RepeatCohort(Math2Mode0OriginalArena Original,
     Math2Mode0OriginalArena.Node OriginalField,Math2Mode0OriginalArena Late,
     Math2Mode0OriginalArena.Node LateField,LegacyLibraryOriginalDomNameOwner Names,
     object OriginalInk,object ThirdInk,LegacyOwnedRawInkDocument Document,
-    Math2Mode0CurrentInputReceipt Receipt,long Epoch,long OldNext,long NewNext,
+    Math2Mode0CurrentInputReceipt Receipt,Math2Mode0OriginalApplication Application,Math2Mode0CurrentInputHandle Handle,long Epoch,long OldNext,long NewNext,
     Math2Mode0OriginalRegistry[] OldRegistry,Math2Mode0PublishRegistry[] NewRegistry,
     Math2Mode0CurrentIdentitySnapshot Identity,Action Check);
 internal sealed partial class Math2Mode0OriginalMathFieldSource
@@ -68,7 +68,7 @@ internal sealed partial class Math2Mode0PriorCandidatePreparation
                 throw new InvalidOperationException("Same actual completed late field required.");
             void CohortCheck(){authority.CheckFor(caller,this);current.Check();}
             CohortCheck();return new(old.Arena,old.Field,temp,next,owner.names,current.OriginalInkIdentity,owner.third.Identity,
-                current.Document,current.Receipt,current.AppliedEpoch,old.Next,owner.third.SnapshotNext,old.Registry,rows,old.Geometry,CohortCheck);
+                current.Document,current.Receipt,current.Owner,current.RequireHandleForApply(this,caller,authority),current.AppliedEpoch,old.Next,owner.third.SnapshotNext,old.Registry,rows,old.Geometry,CohortCheck);
         }
     }
 }
@@ -85,7 +85,7 @@ internal sealed partial class Math2Mode0PriorDomDiff
 internal sealed partial class Math2Mode0PriorLateRegistration
 {
     private RepeatBorrow? activeRepeatBorrow;private bool repeatClaimed;private Math2Mode0PriorRepeatOutgoing? claimedRepeat;
-    internal sealed class RepeatBorrow
+    internal sealed partial class RepeatBorrow
     {
         private readonly Math2Mode0PriorLateRegistration owner;private readonly Math2Mode0PriorDomDiff.TemporaryApplyBorrow input;
         private RepeatBorrow(Math2Mode0PriorLateRegistration owner,Math2Mode0PriorDomDiff.TemporaryApplyBorrow input){this.owner=owner;this.input=input;}
@@ -195,7 +195,7 @@ internal sealed partial class Math2Mode0OriginalArena
 }
 // Owning repeat export only. It never calls an original receiver, changes an
 // original registry/arena/counter, or accepts action arrays/snapshots as inputs.
-internal sealed class Math2Mode0PriorRepeatOutgoing:IDisposable
+internal sealed partial class Math2Mode0PriorRepeatOutgoing:IDisposable
 {
     internal const long DefaultBudget=64L*1024*1024;
     private sealed class DetachedC22(LegacyNativeInkPositionRange[] ranges){internal readonly LegacyNativeInkPositionRange[] Ranges=ranges;}
@@ -365,7 +365,7 @@ internal sealed class Math2Mode0PriorRepeatOutgoing:IDisposable
             fourth.Snapshot(),releasedScratch.ToArray(),sourceNames is not null&&!ReferenceEquals(names,sourceNames),oldNext,newNext,epoch,document is not null,geometry,
             raw.Select(a=>a with{OldStorage=a.OldStorage.ToArray(),NewStorage=a.NewStorage.ToArray(),OldHeap=a.OldHeap.ToArray(),NewHeap=a.NewHeap.ToArray()}).ToArray(),originalBefore.ToArray(),lateBefore.ToArray(),originalAfter.ToArray(),lateAfter.ToArray(),originalTree.Select(t=>t with{Storage=t.Storage.ToArray(),Heap=t.Heap.ToArray(),Attributes=t.Attributes.ToArray(),Children=t.Children.ToArray()}).ToArray(),lateTree.Select(t=>t with{Storage=t.Storage.ToArray(),Heap=t.Heap.ToArray(),Attributes=t.Attributes.ToArray(),Children=t.Children.ToArray()}).ToArray());
     }
-    public void Dispose(){lock(gate){if(released)return;released=true;dom.Clear();source.Clear();raw.Clear();fourth.ClearRepeatOwned();originalBefore=[];lateBefore=[];originalAfter=[];lateAfter=[];originalTree=[];lateTree=[];}}
+    public void Dispose(){lock(gate){if(released)return;released=true;if(activeApplyLease is null)ClearRepeatApplyPayloads();}}
 }
 internal sealed partial class Math2Mode0OriginalArena
 {

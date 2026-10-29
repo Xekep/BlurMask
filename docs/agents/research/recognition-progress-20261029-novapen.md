@@ -66,7 +66,7 @@ a machine-specific runtime patch requirement from the raw append test project.
   [Checkpoint details](english-private-source24-20261029.md) distinguish this
   result from BE2 application, public admission and real-word/cursive quality,
   which remain incomplete. Public English admission is unchanged.
-- Math: the current candidate contains 85 authored Math documents and 951 Core
+- Math: the current candidate contains 87 authored Math documents and 951 Core
   documents. Six real applied OLD results accept an appended raw curve, build a
   new selected/C23 owner and run genuine NEW neural inference. Their actual diff
   cohorts complete 31 kept mutations on the same temporary trees; independent
@@ -84,6 +84,10 @@ a machine-specific runtime patch requirement from the raw append test project.
   [Repeat outgoing export](math-repeat-outgoing-20261029.md) now serializes the
   actual original-to-late diff and source additions/removals/counter packet.
   Both original owners remain unchanged; receiver/application is still missing.
+  [Apply preparation](math-repeat-apply-preparation-20261029.md) now retains the
+  actual outgoing payload through disposal and supplies a tested prepared DOM
+  kernel. It does not consume old authority or mutate the original document;
+  the original receiver and successor remain incomplete.
 - Solver: Giac is the separate upstream CAS. Its tests with supplied expressions
   establish solver behavior, not correct recognition of handwritten integrals.
 - Automatic classification, Russian/English end-to-end quality and application
