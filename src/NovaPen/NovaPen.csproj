@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyName>NovaPen</AssemblyName>
-    <Version>1.0.0</Version>
+    <Version>1.0.1-rc.1</Version>
     <RootNamespace>NovaPen</RootNamespace>
 
     <!-- Native AOT is the release/deployment model for this app. -->
