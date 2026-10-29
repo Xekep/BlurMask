@@ -7,14 +7,23 @@
   <meta name="color-scheme" content="light">
   <title>NovaPen</title>
   <link rel="icon" href="/chalk.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/style.css?v=20261029-novapen">
-  <script type="module" src="/download.js?v=20261029-novapen"></script>
+  <link rel="stylesheet" href="/style.css?v=20261029-languages-toolbar">
+  <script type="module" src="/download.js?v=20261029-languages-toolbar"></script>
 </head>
 <body>
   <div class="page">
     <header>
       <a class="brand" href="/" aria-label="NovaPen"><span class="logo"><img src="/chalk.svg" width="30" height="30" alt=""></span>NovaPen</a>
-      <a class="source" href="https://github.com/Xekep/NovaPen" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+      <div class="header-actions">
+        <select class="language" id="language" aria-label="Language">
+          <option value="en" lang="en">English</option>
+          <option value="ru" lang="ru">Русский</option>
+          <option value="zh-Hans" lang="zh-Hans">简体中文</option>
+          <option value="fr" lang="fr">Français</option>
+          <option value="de" lang="de">Deutsch</option>
+        </select>
+        <a class="source" href="https://github.com/Xekep/NovaPen" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+      </div>
     </header>
     <main>
       <div class="hero-copy">
@@ -50,9 +59,9 @@
         <button id="copy-invite" type="button" data-text="copy">Copy invitation</button>
       </section>
       </div>
-      <div class="app-preview" aria-hidden="true"><img src="/app-preview.png?v=20261029-novapen" width="1100" height="760" alt="" fetchpriority="high"></div>
+      <div class="app-preview" aria-hidden="true"><img src="/app-preview.png?v=20261029-languages-toolbar" width="1100" height="760" alt="" fetchpriority="high"></div>
     </main>
-    <footer><span>NovaPen</span><a href="https://github.com/Xekep/NovaPen/blob/main/LICENSE" rel="noopener noreferrer">MIT License</a></footer>
+    <footer><span>NovaPen</span><a href="https://github.com/Xekep/NovaPen/blob/main/LICENSE" rel="noopener noreferrer" data-text="license">MIT License</a></footer>
   </div>
 </body>
 </html>
