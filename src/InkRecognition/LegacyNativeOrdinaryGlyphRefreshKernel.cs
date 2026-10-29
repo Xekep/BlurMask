@@ -26,24 +26,52 @@ internal static class LegacyNativeOrdinaryGlyphRefreshKernel
                 byte traits = row[0x20];
                 if ((traits & 0x20) == 0 || (traits & 7) != 0 ||
                     BinaryPrimitives.ReadUInt64LittleEndian(row[8..]) != baseSourceKey) continue;
-                var inserted = pool.AppendDescriptor(canonicalOwnerKey, index - first, false, allocatedRecordStorage40, token);
+                ApplyRow(pool,canonicalOwnerKey,index-first,row,traits,operations,allocatedRecordStorage40,token);visited++;
+            }
+        token.ThrowIfCancellationRequested();return visited;
+    }
+    // Prepared ordinal DATA is issued only by the private same-owner rich compact index.
+    // Callback order and descriptor ordinals remain the original ascending compact order.
+    internal static int ApplyIndexed(LegacyNativeGlyphRecordPool pool,ulong canonicalOwnerKey,
+        ReadOnlySpan<byte> compact,int first,int end,ulong baseSourceKey,ReadOnlySpan<int> ordinals,
+        LegacyOrdinaryGlyphRefreshOperations operations,ReadOnlySpan<byte> allocatedRecordStorage40,CancellationToken token,
+        LegacyNativeGlyphRecordPool.DescriptorBatch? descriptorBatch=null)
+    {
+        if(first<0||end<first||end>compact.Length/40)throw new InvalidDataException("Actual compact-node interval required.");
+        int previous=first-1,visited=0;
+        foreach(int index in ordinals)
+        {
+            token.ThrowIfCancellationRequested();
+            if(index<=previous||index<first||index>=end)throw new InvalidDataException("Ascending same-interval refresh ordinals required.");
+            var row=compact.Slice(index*40,40);byte traits=row[0x20];
+            if((traits&0x20)==0||(traits&7)!=0||BinaryPrimitives.ReadUInt64LittleEndian(row[8..])!=baseSourceKey)
+                throw new InvalidDataException("Immutable indexed compact predicate changed.");
+            ApplyRow(pool,canonicalOwnerKey,index-first,row,traits,operations,allocatedRecordStorage40,token,descriptorBatch);visited++;previous=index;
+        }
+        token.ThrowIfCancellationRequested();return visited;
+    }
+    private static void ApplyRow(LegacyNativeGlyphRecordPool pool,ulong canonicalOwnerKey,int descriptor,
+        ReadOnlySpan<byte> row,byte traits,LegacyOrdinaryGlyphRefreshOperations operations,
+        ReadOnlySpan<byte> allocatedRecordStorage40,CancellationToken token,LegacyNativeGlyphRecordPool.DescriptorBatch? descriptorBatch=null)
+    {
+                var inserted = descriptorBatch is null
+                    ?pool.AppendDescriptor(canonicalOwnerKey, descriptor, false, allocatedRecordStorage40, token)
+                    :descriptorBatch.Append(descriptor,allocatedRecordStorage40,token);
                 ushort symbol = BinaryPrimitives.ReadUInt16LittleEndian(row[0x1c..]);
                 var resolved = operations.ResolveSymbol(symbol, token);
                 ushort emitted = resolved.EmittedSymbol, normalized = resolved.NormalizedOriginal;
                 byte variant = resolved.ExternalVariant;
-                if (!LegacyNativeGlyphSymbolUpdate.Apply(pool, inserted.Reference, emitted, 1, 0, variant != 0, token))
+                if (!(descriptorBatch is null?LegacyNativeGlyphSymbolUpdate.Apply(pool, inserted.Reference, emitted, 1, 0, variant != 0, token):LegacyNativeGlyphSymbolUpdate.ApplyUsingBatch(pool,descriptorBatch,inserted.Reference,emitted,1,0,variant!=0,token)))
                     throw new NotSupportedException("Actual ordinary scalar symbol update did not complete.");
-                byte[] record = pool.CopyRecord(inserted.Reference, token);
+                byte[] record = descriptorBatch is null?pool.CopyRecord(inserted.Reference, token):descriptorBatch.CopyRecord(pool,inserted.Reference,token);
                 uint symbolScore = operations.ReadSymbolScoreBits(normalized, token);
                 BinaryPrimitives.WriteUInt32LittleEndian(record.AsSpan(0x10), symbolScore);
-                pool.ReplaceRecord(inserted.Reference, record, token);
+                if(descriptorBatch is null)pool.ReplaceRecord(inserted.Reference, record, token);else descriptorBatch.ReplaceRecord(pool,inserted.Reference,record,token);
                 var scores = operations.ReadPreparedSymbol(normalized, (traits & 0x40) != 0, token);
                 BinaryPrimitives.WriteInt32LittleEndian(record.AsSpan(0x14), scores.Cost);
                 BinaryPrimitives.WriteSingleLittleEndian(record.AsSpan(0x0c), row[0x21] / 255f);
                 ushort flags = BinaryPrimitives.ReadUInt16LittleEndian(record.AsSpan(4));
                 BinaryPrimitives.WriteUInt16LittleEndian(record.AsSpan(4), (ushort)((flags & 0xfff7) | ((traits & 0x40) != 0 ? 8 : 0)));
-                pool.ReplaceRecord(inserted.Reference, record, token); visited++;
-            }
-        token.ThrowIfCancellationRequested();return visited;
+                if(descriptorBatch is null)pool.ReplaceRecord(inserted.Reference, record, token);else descriptorBatch.ReplaceRecord(pool,inserted.Reference,record,token);
     }
 }

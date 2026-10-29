@@ -120,4 +120,53 @@ public sealed class LegacyNativeGlyphScoreCache
             throw new ArgumentException("Signed request geometryA escapes the actual group geometry cache.");
         return unchecked(cost + geometry[signedIndex]);
     }
+
+    // Opt-in numerical acceleration only. No source/WORD authority and no new
+    // instance field on the public/default cache. The caller prepays before this factory.
+    internal FirstOrdinalIndex CreateFirstOrdinalIndex(int labelCount,CancellationToken token)
+        =>new(this,labelCount,token);
+
+    internal sealed class FirstOrdinalIndex
+    {
+        private readonly LegacyNativeGlyphScoreCache cache;
+        private readonly int[] first;
+        internal FirstOrdinalIndex(LegacyNativeGlyphScoreCache cache,int labelCount,CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+            if(labelCount is<1 or>256)throw new ArgumentOutOfRangeException(nameof(labelCount));
+            this.cache=cache;int count=cache.vectors.Length;
+            first=new int[labelCount];Array.Fill(first,count);
+            for(int i=0;i<count;i++)
+            {
+                token.ThrowIfCancellationRequested();ushort label=cache.Label(i);
+                if(label<first.Length&&first[label]==count)first[label]=i;
+            }
+        }
+        internal float ReadSymbolScore(ushort symbol,byte channel,CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+            if(symbol>=first.Length)return cache.ReadSymbolScore(symbol,channel,token);
+            int ordinal=first[symbol];
+            if(ordinal==cache.vectors.Length)return 0;
+            if(channel>=cache.vectors[ordinal].Length)
+                throw new ArgumentException("Owner88 channel escapes the actual confidence vector.");
+            return cache.vectors[ordinal][channel];
+        }
+        internal int ReadRequestCost(ReadOnlySpan<byte> request,CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+            // Preserve the public validator and all non-search branches verbatim.
+            if(request.Length!=16)return cache.ReadRequestCost(request,token);
+            ushort symbol=BinaryPrimitives.ReadUInt16LittleEndian(request[8..]);
+            ushort ordinal=BinaryPrimitives.ReadUInt16LittleEndian(request[6..]);
+            if(symbol>=first.Length||ordinal!=ushort.MaxValue||request[12]!=0||symbol==cache.blank)
+                return cache.ReadRequestCost(request,token);
+            Span<byte> indexed=stackalloc byte[16];request.CopyTo(indexed);
+            BinaryPrimitives.WriteUInt16LittleEndian(indexed[6..],checked((ushort)first[symbol]));
+            // Missing sentinel equals CandidateCount, exactly the old completed scan.
+            // All cost/IMP/top20/bypass/signed-geometry/overflow arithmetic stays in
+            // the actual existing public method; no English arithmetic is recopied.
+            return cache.ReadRequestCost(indexed,token);
+        }
+    }
 }

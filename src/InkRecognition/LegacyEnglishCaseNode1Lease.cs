@@ -80,3 +80,17 @@ internal sealed partial class LegacyEnglishCaseInitializationPlan
         var result=normal!.Read(query,token);lease.Root.ValidateNode1(lease);token.ThrowIfCancellationRequested();return result;
     }
 }
+
+public sealed partial class LegacyEnglishFreshCaseMainSource
+{
+    //Only the private lexical fresh continuation uses this revocation gate.
+    //The full parent/phase proof was established immediately before entry;
+    //these are the independently mutable opaque-lease fields, under the same lock.
+    internal void RequireNode1ContinuationIdentity(Node1QueryLease lease,CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        lock(gate)if(faulted||!busy||!ReferenceEquals(node1Lease,lease)||!ReferenceEquals(node1Owner,lease.Full)||
+            !ReferenceEquals(queryOwner,lease.Pass)||lease.Version!=version||!ReferenceEquals(lease.Map,working))
+            throw new InvalidOperationException("Fresh continuation lease was revoked.");
+    }
+}

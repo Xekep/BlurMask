@@ -23,6 +23,110 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             BeforeWords=data.BeforeWords.Select(w=>w with{Word275=w.Word275.ToArray(),FlatReferences=w.FlatReferences.ToArray()}).ToArray(),
             Owners=data.Owners.Select(n=>n with{Records=n.Records.ToArray()}).ToArray(),SelectedOrdinals=data.SelectedOrdinals.ToArray()});
     }
+    internal GraphWordSourceResult RunGraphFirstPeriodicWordSourceCompletion(CancellationToken token=default)
+    {
+        primary.RequireGraphLoop(this,token,true);ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.Export,32);ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.Export,32);graphWordSourceRequested=true;graphWordSourceDiagnosticInputs=false;
+        RunGraphFirstPeriodicWordSourceExecution(token);
+        if(Volatile.Read(ref phase)!=2||graphRawWord is not{} raw||graphWordSourceData is not{} data)
+            throw new InvalidOperationException("Same completed periodic RAW/WORD-source DATA required.");
+        // All joins completed before sourceV80. These final detached DATA owners are returned once; no diagnostic clone cohort.
+        return new(raw,data);
+    }
+    // Detached pending-TEXT DATA only: no selected Unicode flattening, positioned adapter or admission.
+    internal sealed record GraphPeriodicPendingTextResult(GraphWordSourceResult Source,GraphTopData Top,
+        GraphWordPublicationData Word,GraphTextPublicationData Text,GraphPostTextCoverageData Coverage,
+        GraphEarlySelectedInputData? Bootstrap,string Scope);
+    internal GraphPeriodicPendingTextResult RunGraphFirstPeriodicPendingText(LegacyNativeUnicodeNormalizationData normalization,CancellationToken token=default,bool completeSourceIndices=false)
+    {
+        ArgumentNullException.ThrowIfNull(normalization);primary.RequireGraphLoop(this,token,true);
+        if(graphOriginalSelectedRequested||graphPostTextCoverageRequested||graphTextPublicationRequested||
+            graphWordPublicationRequested||graphCharactersRequested||graphGlyphGeometryRequested||graphGlyphNormalization is not null||
+            graphGlyphChoicesRequested||graphTopRequested||graphTopOwner is not null||graphWordSourceRequested||
+            graphSelectedSourcesRequested||graphSourceIndicesRequested)
+            throw new InvalidOperationException("Fresh private periodic pending-TEXT route required.");
+        // Optional old RequireOriginalInputContext is insufficient for this explicit pre-NN route.
+        ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.Export,512); // BEFORE new original-input identity reads.
+        primary.RequirePreNeuralOriginalInputContext(token);
+        try
+        {
+            // One56-semantic-byte reference holder plus fixed coordination work; no array clones or cap changes.
+            ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.Export,128);
+            ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.Export,256);
+            graphOriginalSelectedRequested=true;graphPostTextCoverageRequested=true;graphTextPublicationRequested=true;
+            graphSelectedSourcesRequested=completeSourceIndices;graphSourceIndicesRequested=completeSourceIndices;
+            graphWordPublicationRequested=true;graphCharactersRequested=true;graphGlyphGeometryRequested=true;
+            graphGlyphNormalization=normalization;graphGlyphChoicesRequested=true;graphTopRequested=true;
+            var source=RunGraphFirstPeriodicWordSourceCompletion(token);
+            token.ThrowIfCancellationRequested();
+            if(Volatile.Read(ref phase)!=2)throw new InvalidOperationException("Same completed periodic publication required.");
+            var top=graphTopOwner??throw new InvalidOperationException("No completed periodic TOP owner.");
+            return new(source,top.CopyCompleted(token),
+                graphWordPublicationData??throw new InvalidOperationException("No complete all275 WORD publication."),
+                graphTextPublicationData??throw new InvalidOperationException("No complete pending TEXT registration."),
+                graphPostTextCoverageData??throw new InvalidOperationException("No complete same-owner post-TEXT coverage."),
+                completeSourceIndices?null:graphEarlySelectedInputData??throw new InvalidOperationException("No authentic pre-NN original-selected receipt."),
+                completeSourceIndices?"PERIODIC_FRESH_TAIL_LIVE_CHAR_PAYLOADS_NO_CHAR_DATA_NO_POSITIONED_ADMISSION":
+                "PERIODIC_PRE_NN_ORIGINAL_SELECTED_ALL275_CHAR_WORD_PENDING_TEXT_COVERAGE_NO_POSITIONED_ADMISSION");
+        }
+        finally
+        {
+            try{graphCharacterContext?.Dispose();}
+            finally{primary.ReleaseOriginalInputContext();}
+        }
+    }
+
+    // Distinct detached execution result. Existing named RAW/periodic DATA APIs
+    // above retain their complete RAW snapshots and exact export reservations.
+    internal sealed record GraphPeriodicPendingTextExecutionResult(GraphWordSourceData Source,GraphTopData Top,
+        GraphWordPublicationData Word,GraphPostTextCoverageData Coverage,string Scope);
+    internal GraphPeriodicPendingTextExecutionResult RunGraphFirstPeriodicPendingTextExecution(
+        LegacyNativeUnicodeNormalizationData normalization,CancellationToken token=default)
+    {
+        ArgumentNullException.ThrowIfNull(normalization);primary.RequireGraphLoop(this,token,true);
+        if(graphOriginalSelectedRequested||graphPostTextCoverageRequested||graphTextPublicationRequested||
+            graphWordPublicationRequested||graphCharactersRequested||graphGlyphGeometryRequested||graphGlyphNormalization is not null||
+            graphGlyphChoicesRequested||graphTopRequested||graphTopOwner is not null||graphWordSourceRequested||
+            graphSelectedSourcesRequested||graphSourceIndicesRequested)
+            throw new InvalidOperationException("Fresh private periodic pending-TEXT route required.");
+        // Optional old RequireOriginalInputContext is insufficient for this explicit pre-NN route.
+        ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.Export,512); // BEFORE new original-input identity reads.
+        primary.RequirePreNeuralOriginalInputContext(token);
+        try
+        {
+            // One56-semantic-byte reference holder plus fixed coordination work; no array clones or cap changes.
+            ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.Export,128);
+            ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.Export,256);
+            ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.Authentication,128); //new private-mode/output cohort flags before reads
+            graphOriginalSelectedRequested=true;graphPostTextCoverageRequested=true;graphTextPublicationRequested=true;
+            graphSelectedSourcesRequested=true;graphSourceIndicesRequested=true;
+            graphWordPublicationRequested=true;graphCharactersRequested=true;graphGlyphGeometryRequested=true;
+            graphGlyphNormalization=normalization;graphGlyphChoicesRequested=true;graphTopRequested=true;
+            ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.Export,32);ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.Export,32);
+            graphWordSourceRequested=true;graphWordSourceDiagnosticInputs=false;
+            graphRawWordOutput=GraphRawWordOutputKind.PrivatePendingTextExecution;
+            RunGraphFirstPeriodicWordSourceExecution(token);
+            ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.Export,128); //new phase/stamp/source completion scalar comparison before reads
+            if(Volatile.Read(ref phase)!=2||graphRawWord is not null||
+                graphRawWordExecutionStamp is not{} completed||completed.Output!=GraphRawWordOutputKind.PrivatePendingTextExecution||
+                completed.CompletedNode!=graphLoopMetrics.Nodes-1||graphWordSourceData is not{} source)
+                throw new InvalidOperationException("Same completed private RAW execution stamp/source producer required.");
+            token.ThrowIfCancellationRequested();
+            if(Volatile.Read(ref phase)!=2)throw new InvalidOperationException("Same completed periodic publication required.");
+            var top=graphTopOwner??throw new InvalidOperationException("No completed periodic TOP owner.");
+            return new(source,top.CopyCompleted(token),
+                graphWordPublicationData??throw new InvalidOperationException("No complete all275 WORD publication."),
+                graphPostTextCoverageData??throw new InvalidOperationException("No complete same-owner post-TEXT coverage."),
+                "PERIODIC_PRIVATE_PENDING_TEXT_SOURCE_INDICES_EXECUTION_NO_RAW_SNAPSHOT_OR_POSITIONED_ADMISSION");
+        }
+        finally
+        {
+            try{graphCharacterContext?.Dispose();}
+            finally{primary.ReleaseOriginalInputContext();}
+        }
+    }
+
+    internal void RequireGraphPeriodicEquality(GraphLanguageScope stage,LegacyNativeGlyphRecordPool pool,CancellationToken token)
+    {RequireGraphPublication(stage,token);if(!graphPeriodicActive||graphWordSourceSession is null)throw new InvalidOperationException("Actual periodic WORD source session required.");graphWordSourceSession.RequireEqualityPool(pool,token);}
     private void CompleteGraphWordSource(GraphLanguageScope stage,LegacyPreparedMainCompactPublication.Result compact,
         LegacyNativeGlyphRecordPool pool,LegacyNativePlainWordPublisher publisher,
         LegacyMainOrdinaryGlyphProductionOperations ordinary,LegacyMainProtocolGlyphProductionOperations protocol,CancellationToken token)
@@ -56,7 +160,9 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             LegacyMainOrdinaryGlyphProductionOperations ordinary,LegacyMainProtocolGlyphProductionOperations protocol)
         {
             this.owner=owner;this.stage=stage;this.compact=compact;this.pool=pool;this.publisher=publisher;this.ordinary=ordinary;this.protocol=protocol;
-            usedCompact=compact.Storage.AsSpan(0,checked(compact.Count*40)).ToArray();
+            // Periodic publication/session are synchronous private owners. All compact consumers are read-only.
+            // Keep the legacy default detached owner; periodic uses the already charged live pool directly.
+            usedCompact=owner.graphPeriodicActive?compact.Storage:compact.Storage.AsSpan(0,checked(compact.Count*40)).ToArray();
             graph=stage.Lease.Pass.Initializer.PlanForAudit.BindingForAudit.Graph;alphabet=stage.Lease.Root.Source.Alphabet;
             ushort Label(string text)=>alphabet.TryGetLabel(text,out ushort x)?x:ushort.MaxValue;
             marker=Label("\u0003");joiner=Label("\u200d");closed=Label("\U000f0001");soft=Label("\u00ad");
@@ -77,15 +183,17 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                 throw new NotSupportedException("This source stage admits one actual forward WORD/span.");
             var scope=stage.Lease.Root.Knowledge.Owner.RetainGraphWordRanges(stage,token);
             var sourceBounds=scope.Preflight(span.Span.First,span.Span.Last,token);
-            var estimate=LegacyGlobalWordAugmentationEnvelope.Prepare(usedCompact.AsSpan(),compact.Starts,
+            var estimate=LegacyGlobalWordAugmentationEnvelope.Prepare(usedCompact.AsSpan(0,checked(compact.Count*40)),compact.Starts,
                 graph.NodeCount,sourceBounds.SourcePoints,token,span.Word.FlatReferences.Count,span.Span.Last);
             long payload=checked(sourceBounds.Payload+131072L+estimate.Bounds.Rows*2048L+(estimate.Bounds.Candidates+2L)*256L);
             long copies=checked(sourceBounds.Copies+estimate.Bounds.CopyBytes+payload*2);
             stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,payload);
             stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,copies);
+            if(owner.graphPeriodicActive)stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,
+                checked(256L+sourceBounds.Depth*(long)sourceBounds.Depth*256L+compact.Count*64L+(estimate.Bounds.Candidates+2L)*(estimate.Bounds.Candidates+2L)*256L+sourceBounds.SourcePoints*8L));
             // Model-neutral structural64Mi/128Mi envelope remains additional
             // finite-work validation. Existing parent9Mi/64Mi/16Mi ceilings are
-            // not widened. Complete transitive Visit coefficients stay unproved.
+            // not widened. Periodic source DFS/walk/equality debits use the same parent ledger; see the successor readset/ledger for remaining source proof limits.
             if(Interlocked.CompareExchange(ref state,1,0)!=0)throw new InvalidOperationException("Word source stage cannot retry.");
             try
             {
@@ -117,11 +225,16 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                     if(counted.Length>sourceBounds.Depth||!counted.AsSpan().SequenceEqual(filled))
                         throw new InvalidDataException("Actual source188 count/fill chronology changed.");
                     source26=GraphWordSourceNumerics.Encode26(filled,token);estimate.Copy(checked(filled.Length*104L));
-                    var walker=new LegacyGlobalSpanAlternativeWalkKernel(usedCompact,compact.Count,graph.NodeCount,
-                        marker,joiner,closed,unit,soft,new byte[64],First,Last,(request,cursor,ct)=>
-                        {Require(ct,true);var result=protocol.ReadDelimiter(request,cursor,ct);Require(ct,true);return new(result.RemainingCursor,result.Symbols.Length,result.NativeFlag0C,0);},estimate);
+                    LegacyGlobalSpanAlternativeWalkKernel.Delimiter Delimiter(byte[] request,int cursor,CancellationToken ct)
+                    {Require(ct,true);var result=protocol.ReadDelimiter(request,cursor,ct);Require(ct,true);return new(result.RemainingCursor,result.Symbols.Length,result.NativeFlag0C,0);}
+                    var walker=owner.graphPeriodicActive?null:new LegacyGlobalSpanAlternativeWalkKernel(usedCompact,compact.Count,graph.NodeCount,
+                        marker,joiner,closed,unit,soft,new byte[64],First,Last,Delimiter,estimate);
+                    var periodicWalker=owner.graphPeriodicActive?new LegacyEnglishPeriodicSpanAlternativeWalkKernel(stage,usedCompact,compact.Count,graph.NodeCount,
+                        marker,joiner,closed,unit,soft,new byte[64],First,Last,Delimiter,estimate):null;
+                    LegacyGlobalSpanAlternativeWalkKernel.Result Walk(int index,int minimum,bool emit,ushort flags,ReadOnlySpan<byte> residue,CancellationToken ct)
+                        =>owner.graphPeriodicActive?periodicWalker!.Run(index,minimum,emit,flags,residue,ct):walker!.Run(index,minimum,emit,flags,residue,ct);
                     scan=LegacyPreparedMainWordAugmentationCandidates.Scan(usedCompact,compact.Count,compact.Starts,span.Span.First,span.Span.Last,false,
-                        First,Last,(index,minimum)=>{Require(token,true);var dry=walker.Run(index,minimum,false,ushort.MaxValue,[],token);controllerRows=0;return new(dry.Status,dry.LastSourceKey);},token);
+                        First,Last,(index,minimum)=>{Require(token,true);var dry=Walk(index,minimum,false,ushort.MaxValue,[],token);controllerRows=0;return new(dry.Status,dry.LastSourceKey);},token);
                     int originalCount=publisher.CaptureSpan(span,[span],token).Words.Count;
                     var working=LegacyNativeWordBuilder.CreateEmpty(pool,new byte[120],token);
                     foreach(int candidate in scan.CompactIndices)
@@ -131,7 +244,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                             throw new NotSupportedException("Reached candidate auxiliary dictionary payload requires actual fiveDWORD issuer.");
                         working.ResetPlain(token);working.ApplyAugmentationFlag32((usedCompact[candidate*40+32]&16)!=0,token);
                         int minimum=LegacyPreparedMainWordAugmentationCandidates.DecodeContextNode(span.Span.First);
-                        var emission=walker.Run(candidate,minimum,true,65534,new byte[72],token);controllerRows=emission.Rows72.Length/72;
+                        var emission=Walk(candidate,minimum,true,65534,new byte[72],token);controllerRows=emission.Rows72.Length/72;
                         if(emission.Status is 1 or -1)throw new InvalidDataException("Included actual direct-parent candidate failed emission.");
                         if(emission.ResidualReferences.Length!=0)throw new NotSupportedException("Reached residual association requires its genuine source overlay.");
                         for(int at=0;at<emission.Rows72.Length;at+=72)if(emission.Rows72[at+60]!=0)
@@ -182,10 +295,16 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             }
             catch{Volatile.Write(ref state,3);throw;}
             bool Equal(ReadOnlySpan<byte> a,ReadOnlySpan<byte> b)
-            {estimate.Equality();return LegacyNativeMainWordEquality.Compare(pool,a,b,new byte[4],new byte[4],joiner,static label=>label,null,token);}
+            {
+                estimate.Equality();if(owner.graphPeriodicActive)
+                {stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,8);return LegacyEnglishPeriodicWordEquality.Compare(stage,pool,a,b,new byte[4],new byte[4],joiner,static label=>label,null,token);}
+                return LegacyNativeMainWordEquality.Compare(pool,a,b,new byte[4],new byte[4],joiner,static label=>label,null,token);
+            }
             int First(int n,ushort a){estimate.Request();Require(token,true);return unchecked((int)graph.GetNode(n)[a].StartContextId);}
             int Last(int n,ushort a){estimate.Request();Require(token,true);return unchecked((int)graph.GetNode(n)[a].EndContextId);}
         }
+        internal void RequireEqualityPool(LegacyNativeGlyphRecordPool actual,CancellationToken token)
+        {Require(token,true);if(!ReferenceEquals(pool,actual)||!owner.graphPeriodicActive)throw new InvalidOperationException("Same actual periodic source equality pool required.");}
         internal void RequireCompletedForTop(LegacyNativePlainWordPublisher expectedPublisher,LegacyNativeGlyphRecordPool expectedPool,CancellationToken token)
         {
             owner.RequireGraphPublication(stage,token);

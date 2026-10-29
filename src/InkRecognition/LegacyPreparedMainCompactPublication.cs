@@ -4,7 +4,7 @@ namespace InkRecognition;
 
 //Shared numeric207CB0 expansion. Typed adapters provide the exact source graph,
 //post-V80 reachability, model policies and cached candidate-weight owner.
-internal static class LegacyPreparedMainCompactPublication
+internal static partial class LegacyPreparedMainCompactPublication
 {
     internal sealed record Result(byte[] Storage,int Count,int[] Starts,int[] PrefixOwners,LegacyMainDirectWordNodeResult[] Nodes);
     internal static Result Run(LegacyNativeWordControllerConfiguration configuration,LegacyOrdinaryRecognitionGraph graph,

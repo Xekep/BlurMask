@@ -57,6 +57,69 @@ public sealed partial class LegacyPreparedMainTextGlyphReuse
             token.ThrowIfCancellationRequested();return Array.AsReadOnly(copy);
         }
     }
+    internal (uint[] Flags,byte[][] Utf8) CopyFreshEnglishDomRows(
+        LegacyEnglishCaseNode0Completion.GraphWordPublicationContext parent,
+        LegacyEnglishCaseNode0Completion.GraphCharacterPayload payload,int expectedRows,
+        ILegacyFreshSourceIndexGuard guard,CancellationToken token)
+    {
+        parent.RequireFreshDomRowOwner(payload,this,guard,token);
+        lock(gate)
+        {
+            if(failed||rows.Count!=expectedRows)throw new InvalidOperationException("Actual complete same-owner DOM rows required.");
+            var flags=new uint[expectedRows];var utf8=new byte[expectedRows][];
+            for(int i=0;i<expectedRows;i++)
+            {
+                parent.RequireFreshDomRowOwner(payload,this,guard,token);
+                var text=rows[i].Text??throw new InvalidOperationException("Actual ordinary UTF8 owner required.");
+                strings.Validate(text);int bytes=text.ByteCount;
+                parent.PrechargeFreshDomTextCopy(bytes,token);
+                uint bits=BinaryPrimitives.ReadUInt32LittleEndian(rows[i].Storage.AsSpan(8));
+                LegacyFreshMainDetachedTextDom.ValidateOrdinaryFlags(bits);
+                var copy=text.ReadBytes();
+#if ENGLISH_FRESH_CONTINUATION_CONTROLS
+                LegacyFreshContinuationTestHooks.Checkpoint?.Invoke("after-dom-text-copy");
+#endif
+                parent.RequireFreshDomRowOwner(payload,this,guard,token);
+                flags[i]=bits;utf8[i]=copy;
+            }
+            return(flags,utf8);
+        }
+    }
+    internal int ReadEnglishSnapshotByteCount(LegacyEnglishCaseNode0Completion.GraphCharacterPayload payload,int expectedRows,CancellationToken token)
+    {
+        payload.Context.Require(token);
+        if(!ReferenceEquals(payload.Reuse,this)||!ReferenceEquals(strings,payload.Context.Strings)||!payload.Complete)
+            throw new InvalidOperationException("Actual same-context initialized CHAR records required.");
+        lock(gate)
+        {
+            if(failed||rows.Count!=expectedRows)throw new InvalidOperationException("Same complete CHAR snapshot extent required.");
+            int total=0;
+            foreach(var row in rows)
+            {
+                token.ThrowIfCancellationRequested();
+                var text=row.Text??throw new InvalidOperationException("Complete CHAR text required.");
+                strings.Validate(text);total=checked(total+text.ByteCount);
+            }
+            token.ThrowIfCancellationRequested();return total;
+        }
+    }
+    // Scalar read from the SAME live private row backing, never an imported snapshot.
+    internal uint ReadEnglishCurrentMarkerFlags(LegacyEnglishCaseNode0Completion.GraphCharacterSource source,
+        LegacyEnglishCaseNode0Completion.GraphCharacterPayload payload,int marker,CancellationToken token)
+    {
+        source.Context.RequireCurrent(source,token);
+        if(!ReferenceEquals(source.Context,payload.Context)||!ReferenceEquals(payload.Reuse,this)||
+            !ReferenceEquals(strings,payload.Context.Strings)||!payload.Complete)
+            throw new InvalidOperationException("Actual same-current-source completed CHAR flags required.");
+        lock(gate)
+        {
+            if(failed)throw new InvalidOperationException("Failed CHAR prefix is not a complete snapshot.");
+            token.ThrowIfCancellationRequested();
+            if((uint)marker>=(uint)rows.Count)throw new NotSupportedException("Actual selected CHAR marker unavailable.");
+            uint flags=BinaryPrimitives.ReadUInt32LittleEndian(rows[marker].Storage.AsSpan(8));
+            token.ThrowIfCancellationRequested();return flags;
+        }
+    }
     internal LegacyPreparedTextGlyphReuseResult ApplyEnglish(LegacyEnglishCaseNode0Completion.GraphCharacterPayload payload,
         LegacyEnglishCaseNode0Completion.GraphCharacterSource actual,CancellationToken token)
     {
@@ -69,7 +132,7 @@ public sealed partial class LegacyPreparedMainTextGlyphReuse
             ushort ordinal=BinaryPrimitives.ReadUInt16LittleEndian(selected.AsSpan(i*4));
             var glyph=actual.Glyphs.Resolve(key|((ulong)ordinal<<40));
             return new(glyph.PublicationFlags,actual.Context.EmitReuse(actual,glyph,token));
-        },token);
+        },token,actual.Context);
     }
 }
 internal sealed partial class LegacyEnglishCaseNode1Geometry

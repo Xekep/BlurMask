@@ -20,6 +20,21 @@ public sealed partial class LegacyOrdinaryGraphSourceRanges
         long pass=checked(4096L+starts*(256L+24L*capacity)+depth*1024L);
         return new(starts,depth,keys.Length,checked(pass*2+depth*26L),checked(pass*4+depth*52L));
     }
+    internal GraphWordForwardBounds PreflightGraphPeriodicWordForward(LegacyEnglish119MainLocalCandidates.GraphWordRangeReceipt receipt,uint first,uint last,CancellationToken token)
+    {
+        receipt.RequirePeriodicSource(this,token);token.ThrowIfCancellationRequested();
+        if(first>int.MaxValue||last>int.MaxValue||first>last||(last>>7)>=(uint)seedGraph.NodeCount)
+            throw new NotSupportedException("Actual ordinary forward source interval required.");
+        int node=(int)(first>>7),depth=checked((int)((last>>7)-(first>>7)+1));int starts=seedGraph.GetNode(node).Count;
+        if(depth is<1 or>120||starts is<1 or>128||keys.Length is<1 or>4096)
+            throw new NotSupportedException("Bounded source188 graph layers/points required before DFS allocations.");
+        int capacity=4;while(capacity<checked(depth*2+2))capacity=checked(capacity*2);
+        // Both count/fill passes: frames list, every possible starting DFS
+        // Stack's geometric growth/backing+metadata, path Select array,
+        // projection list, sort/merge copies and final references array.
+        long pass=checked(4096L+starts*(256L+24L*capacity)+depth*1024L);
+        return new(starts,depth,keys.Length,checked(pass*2+depth*26L),checked(pass*4+depth*52L));
+    }
 }
 public sealed partial class LegacyEnglish119MainLocalCandidates
 {
@@ -50,8 +65,11 @@ public sealed partial class LegacyEnglish119MainLocalCandidates
             {token.ThrowIfCancellationRequested();if(!owner.complete||owner.faulted||!ReferenceEquals(owner.ranges,source))
                 throw new InvalidOperationException("Retained immutable original source range owner changed.");}
         }
+        internal void ChargeVisits(long units){Require(default);stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,units);}
+        internal void RequirePeriodicSource(LegacyOrdinaryGraphSourceRanges actual,CancellationToken token)
+        {Require(token);if(!stage.PeriodicEnabled||!ReferenceEquals(source,actual)||stage.Ring.ActualNodeCount>120)throw new InvalidOperationException("Same private periodic source188 receipt required.");}
         internal LegacyOrdinaryGraphSourceRanges.GraphWordForwardBounds Preflight(int first,int last,CancellationToken token)
-        {Require(token);if(first<0||last<first)throw new NotSupportedException("Forward owned span required.");return source.PreflightGraphWordForward((uint)first,(uint)last,token);}
+        {Require(token);if(first<0||last<first)throw new NotSupportedException("Forward owned span required.");return stage.PeriodicEnabled?source.PreflightGraphPeriodicWordForward(this,(uint)first,(uint)last,token):source.PreflightGraphWordForward((uint)first,(uint)last,token);}
         internal LegacyOrdinaryGraphSourceRanges.GraphWordDiagnosticInputs CopyDiagnosticInputs(CancellationToken token)
         {Require(token);var data=source.CopyGraphWordDiagnosticInputs(token);Require(token);return data;}
         //Direct1AA470 ordinary branch: preserve the same canonical source arc
@@ -59,8 +77,24 @@ public sealed partial class LegacyEnglish119MainLocalCandidates
         internal LegacyOrdinaryGraphSourceReference[] ReadOrdinary140(int node,ushort arc,CancellationToken token)
         {
             Require(token);
-            var result=source.ResolveCandidateWithResiduals(node,arc,token);
+            LegacyOrdinaryGraphSourceReference[] result;
+            if(stage.PeriodicEnabled)
+            {
+                //Typed same-stage private call only: holder, optional comparer,
+                //and exception-dispatch holder prepaid before their allocation.
+                stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,256);
+                stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,512);
+                stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,512);
+                result=source.ResolveCandidateWithResidualsMetered(node,arc,token,new SourceTraversalMeter(stage.Ledger));
+            }
+            else result=source.ResolveCandidateWithResiduals(node,arc,token);
             Require(token);return result;
+        }
+        private sealed class SourceTraversalMeter:LegacyOrdinarySourceTraversalMeter
+        {
+            private readonly LegacyEnglishCaseNode0Ledger ledger;
+            internal SourceTraversalMeter(LegacyEnglishCaseNode0Ledger ledger){this.ledger=ledger;}
+            protected override void Charge(long units)=>ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,units);
         }
         internal LegacyOrdinaryGraphSourceReference[] ReadMode2(int first,int last,CancellationToken token)
         {
@@ -69,7 +103,7 @@ public sealed partial class LegacyEnglish119MainLocalCandidates
             // vector/custom input. Native1A9AE0 mode2's only extra pending-tail
             // branch is therefore absent. Mode0 forward scalar kernel is reused
             // ONLY under this private typed producer, never generalized mode2.
-            var result=source.ResolveForwardWithResiduals((uint)first,(uint)last,token);
+            var result=stage.PeriodicEnabled?source.ResolvePeriodicForwardWithResiduals(this,(uint)first,(uint)last,token):source.ResolveForwardWithResiduals((uint)first,(uint)last,token);
             Require(token);return result;
         }
     }

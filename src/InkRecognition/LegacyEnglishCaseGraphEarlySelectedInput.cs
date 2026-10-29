@@ -40,8 +40,22 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             //SOURCE envelope for one library-created field: view XY, original
             //PAGE/INPUT/C51, selected raw+DOM clone, identity exports/snapshots,
             //binding and pending owner. No ledger cap is raised or refunded.
-            Reserve(checked(70656+n*1216L+points*32L),checked(141312+n*2432L+points*96L),
-                checked(352256+n*1344L+points*128L+4L*n*n+TotalReferences*1024L));
+            if(owner.graphPeriodicActive&&owner.graphTextPublicationRequested)
+            {
+                Reserve(LegacyEnglishPeriodicPublicationBudget.PreNeuralAuthenticationPayload,LegacyEnglishPeriodicPublicationBudget.PreNeuralAuthenticationCopies,LegacyEnglishPeriodicPublicationBudget.PreNeuralAuthenticationVisits); // BEFORE fetching the existing pre-NN owner; no late bootstrap/import is performed here.
+                var sourceParent=Stage.Lease.Root.Knowledge.Owner.Owner.Owner.Parent;
+                var pre=sourceParent.OriginalInputContext??throw new InvalidOperationException("Existing pre-NN original-selected owner required.");
+                pre.Require(sourceParent,token);
+                if(!ReferenceEquals(pre.Document,Document)||pre.Points!=points)
+                    throw new InvalidOperationException("Exact retained pre-NN document required before reuse reservation.");
+                var budget=LegacyEnglishPeriodicPublicationBudget.PreNeuralReuse(n,points);
+                Reserve(budget.Payload,budget.Copies,budget.Visits);
+            }
+            else
+            {
+                Reserve(checked(70656+n*1216L+points*32L),checked(141312+n*2432L+points*96L),
+                    checked(352256+n*1344L+points*128L+4L*n*n+TotalReferences*1024L));
+            }
             earlySelected=GraphEarlySelectedInputReceipt.Issue(this,points,token);
             return earlySelected.Pending;
         }

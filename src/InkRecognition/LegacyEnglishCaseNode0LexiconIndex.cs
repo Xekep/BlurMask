@@ -58,6 +58,22 @@ internal sealed class LegacyEnglishCaseNode0LexiconIndex
             if(terminal&&map[label]!=ushort.MaxValue)throw new NotSupportedException("Auxiliary map admits a terminal edge outside empty-output subset.");
         }
     }
+    // Only the existing exact same-model index and authenticated EMPTY auxiliary callers use this work debit.
+    // This reads immutable metadata, not a source query, and never manufactures an empty page.
+    internal void ChargeEmptyAuxiliaryRead(ulong sourceTag)
+    {
+        ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.AuxiliaryOuter,512); // BEFORE the new bounded packed metadata lookup.
+        var range=Lexicon.GetChildRange(unchecked((int)(uint)sourceTag));
+        int children=checked(range.End-range.Start);
+        // Whole same-model index preparation already checked <=81 at every node before publishing PreparedData.
+        ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.AuxiliaryOuter,EmptyAuxiliaryReadVisits(children));
+    }
+    // Pure scalar bound only. No caller count grants a query/owner/source capability.
+    internal static long EmptyAuxiliaryReadVisits(int children)
+    {
+        if((uint)children>81)throw new InvalidDataException("Same prepared English index child-count premise changed.");
+        return checked(16384L+256L*children);
+    }
     internal void ChargeBindingChecks()=>ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.AuxiliaryMapProof,16);
     internal int ReadTerminalWordId(int node)
     {

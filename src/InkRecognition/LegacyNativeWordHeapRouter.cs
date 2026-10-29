@@ -10,7 +10,7 @@ public readonly record struct LegacyNativeWordHeapAllocation(
 /// live descriptor buckets and heaps. Heap capacity and descriptor construction
 /// are inputs; this is not the language controller or final word selection.
 /// </summary>
-public sealed class LegacyNativeWordHeapRouter
+public sealed partial class LegacyNativeWordHeapRouter
 {
     private readonly LegacyNativeWordRecordHeap[] heaps;
     private readonly byte[] sourceStateBuckets;

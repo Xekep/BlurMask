@@ -97,11 +97,9 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             plan.BindingForAudit.Dictionary.RequireNode0EmptyAuxiliary(index,stage);
             if(query.Capacity!=128||query.ContextRoot!=contexts.ContainerIdentity)throw new InvalidOperationException("Exact privately prepared auxiliary request required.");
             ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.AuxiliaryOuter,4096);
-            // Conditional source closure: two real raw Fetch scans plus the
-            // higher wrapper/plan and two ASCII64 comparisons. Three direct
-            // Stage.Require calls and map checks are charged at their sites.
-            // This is not a runtime-pack, metadata-allocation or CPU bound.
-            ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.AuxiliaryOuter,32768);
+            // Same immutable-empty branch: bounded metadata lookup then itemized fixed/child work.
+            // The real source still performs its exact two-Fetch/skip/cache chronology below.
+            index.ChargeEmptyAuxiliaryRead(tag);
             // Raw reader explicit fields/cache-label stores: <=139+4*81 per
             // Fetch, at most two Fetch calls. Wrapper object fields remain a
             // separately unresolved allocation/copy frontier.

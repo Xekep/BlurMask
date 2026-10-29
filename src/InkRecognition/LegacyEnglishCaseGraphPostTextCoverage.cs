@@ -26,7 +26,10 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
 
     internal sealed partial class GraphWordPublicationContext
     {
-        private sealed record PostTextLink(GraphCharacterPayload Payload,int Marker);
+        private record PostTextLink(GraphCharacterPayload Payload,int Marker);
+        // Carry-only CURRENT input provenance. Canonical adjusted Marker remains separate.
+        private sealed record RichPostTextLink(GraphCharacterPayload Payload,int Marker,ulong CurrentSourceReference,
+            uint SelectedInputOrdinal,ushort SelectedGlyphOrdinal):PostTextLink(Payload,Marker);
         private sealed record PostTextChoice(LegacyNativeInkPositionRange[] Ordinary,PostTextLink[] Links);
         private PostTextChoice?[]? postTextChoices;
         private List<PostTextLink>? postTextLinks;
@@ -50,14 +53,26 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                 throw new InvalidOperationException("Next private post-TEXT choice required.");
             postTextLinks=new(CurrentReferences(token).Count);
         }
-        private void RetainPostTextLink(GraphCharacterPayload payload,int marker,CancellationToken token)
+        private void RetainPostTextLink(GraphCharacterSource source,GraphCharacterPayload payload,int marker,byte[] currentSelectionRows,CancellationToken token)
         {
             Require(token);
             if(postTextLinks is null||links is null||postTextLinks.Count+1!=links.Count||
                 !ReferenceEquals(payload.Context,owner.graphCharacterContext)||!ReferenceEquals(payload.Context.Document,Document)||
                 !ReferenceEquals(payload.Context.Selections,Selections)||!payload.Complete)
                 throw new InvalidOperationException("Exact just-appended live CHAR required.");
-            postTextLinks.Add(new(payload,marker));
+            if(owner.graphPeriodicActive&&owner.graphOriginalSelectedRequested&&owner.graphTextPublicationRequested)
+            {
+                // BEFORE any new source/selection reads or derived-record allocation.
+                Reserve(128,256,1024);
+                if(!ReferenceEquals(source.Context,payload.Context)||source.Index!=postTextLinks.Count)
+                    throw new InvalidOperationException("Exact CURRENT source/link position required.");
+                uint input=source.Selection.SelectedMarker??throw new InvalidOperationException("Actual selected input position required.");
+                if(currentSelectionRows.Length%4!=0||input>=(uint)(currentSelectionRows.Length/4))
+                    throw new InvalidDataException("Same CURRENT selected input row extent required.");
+                ushort ordinal=System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(currentSelectionRows.AsSpan(checked((int)input*4),2));
+                postTextLinks.Add(new RichPostTextLink(payload,marker,source.Reference,input,ordinal));
+            }
+            else postTextLinks.Add(new(payload,marker));
         }
         private void SealPostTextChoice(CancellationToken token)
         {
@@ -76,7 +91,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             //Copy(target), List backing and growth/Split, final ToArray, key
             //clone and exported pair arrays. Each cut can add at most one row.
             //The n*cuts terms cover repeated searches/shifts, not CPU cycles.
-            Reserve(checked(2048+128*n),checked(4096+256*n+32*n*cuts),checked(4096+512*n*(cuts+1L)));
+            Reserve(checked(2048+128*n),checked(4096+256*n+32*n*cuts),GraphCharacterVisitCharge.RangeCall(rows,cuts));
         }
         private void RequirePostTextPayload(PostTextLink link,GraphCharacterContext context,CancellationToken token)
         {
@@ -127,25 +142,30 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             ReservePostTextRangeCall(union.Length,textKey.Length);
             if(!LegacyOwnedRawInkRangeOperations.Equal(union,textKey))
                 throw new NotSupportedException("Unequal WORD/TEXT source union requires native0238B0.");
-            var data=new GraphPostTextChoiceData[Count];
+            bool executionOnly=owner.graphPeriodicActive&&owner.graphSourceIndicesRequested;
+            var data=executionOnly?Array.Empty<GraphPostTextChoiceData>():new GraphPostTextChoiceData[Count];
             //Native01C740 visits choices in reverse, CHAR links forward.
             for(int c=Count-1;c>=0;c--)
             {
                 token.ThrowIfCancellationRequested();var choice=postTextChoices[c]!;
                 var start=choice.Ordinary.Length==0?originalKey:choice.Ordinary;
-                ReservePostTextRangeCall(start.Length,0);var remaining=start.ToArray();
-                var initial=Pairs(start);var nodes=new int[choice.Links.Length];
+                //Subtract copies its target before any mutation. The execution
+                //route consumes neither this clone nor diagnostic pair/node
+                //exports; retain the immutable start directly until Subtract.
+                LegacyNativeInkPositionRange[] remaining;ulong[]? initial=null;int[]? nodes=null;
+                if(executionOnly)remaining=start;
+                else{ReservePostTextRangeCall(start.Length,0);remaining=start.ToArray();initial=Pairs(start);nodes=new int[choice.Links.Length];}
                 for(int i=0;i<choice.Links.Length;i++)
                 {
                     var link=choice.Links[i];RequirePostTextPayload(link,context,token);
                     int cuts=link.Payload.RetainedRangeCount;ReservePostTextRangeCall(remaining.Length,cuts);
                     var key=link.Payload.CopyRetainedRanges();
                     if(key.Length!=cuts)throw new InvalidOperationException("Private CHAR key changed.");
-                    remaining=operations.Subtract(remaining,key,token);nodes[i]=link.Payload.Node.Identity;
+                    remaining=operations.Subtract(remaining,key,token);if(nodes is not null)nodes[i]=link.Payload.Node.Identity;
                 }
                 if(remaining.Length!=0&&Count>1)
                     throw new NotSupportedException("Residual choice removal requires native024A90 transaction handling.");
-                ReservePostTextRangeCall(remaining.Length,0);data[c]=new(c,nodes,initial,Pairs(remaining));
+                if(!executionOnly){ReservePostTextRangeCall(remaining.Length,0);data[c]=new(c,nodes!,initial!,Pairs(remaining));}
             }
             Require(token);context.RequireCompleted(token);textLineFrame.Require(Stage,token);
             var pendingAfter=Selections.CopyPendingSelections();
@@ -159,8 +179,10 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             }
             //No source command is appended and no public DATA can become an issuer.
             postTextFinished=true;
+            if(owner.graphPeriodicActive&&owner.graphSourceIndicesRequested)CompleteFreshSelectedAndIndices(context,token);
             return new(SelectedOrdinal,1,Count,checkedLinks,Pairs(union),data,Selections.NextSelectionId,
                 pendingAfter.Count,false,"SAME_EN_LIVE_POST_TEXT_025E40_027670_0248D0_01C740_ORDINARY_LINE0",
+                owner.graphPeriodicActive&&owner.graphSourceIndicesRequested?"Actual fresh01FD40/020000/020920/023260/037E80/026EF0 completed;Actual ordinary source.V30 DOM completed;BE2 insertion/export/application remain unissued.":
                 owner.graphOriginalSelectedRequested?"Original-selected bootstrap retained;01FD40/020000 and document apply remain unissued.":
                 "Original-selected INPUT/C20 bootstrap,01FD40/020000 and document apply remain unissued.");
         }

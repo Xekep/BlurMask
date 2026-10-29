@@ -39,6 +39,14 @@ public sealed class LegacyLibraryOriginalSelectedFieldContext
     public static LegacyLibraryOriginalSelectedFieldContext Prepare(
         LegacyLibraryOriginalTextFieldBootstrap actualOriginal,
         LegacyLibraryOriginalFieldSelection actualChosenInput, CancellationToken token = default)
+        =>PrepareCore(actualOriginal,actualChosenInput,out _,token);
+    internal static LegacyLibraryOriginalSelectedFieldContext PrepareRetainingActualGeometry(
+        LegacyLibraryOriginalTextFieldBootstrap actualOriginal,LegacyLibraryOriginalFieldSelection actualChosenInput,
+        out LegacyOwnedRawInkIdentityExport verifiedGeometry,CancellationToken token)
+        =>PrepareCore(actualOriginal,actualChosenInput,out verifiedGeometry,token);
+    private static LegacyLibraryOriginalSelectedFieldContext PrepareCore(
+        LegacyLibraryOriginalTextFieldBootstrap actualOriginal,LegacyLibraryOriginalFieldSelection actualChosenInput,
+        out LegacyOwnedRawInkIdentityExport verifiedGeometry,CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(actualOriginal); ArgumentNullException.ThrowIfNull(actualChosenInput);
         token.ThrowIfCancellationRequested(); var s = actualOriginal.State;
@@ -55,7 +63,7 @@ public sealed class LegacyLibraryOriginalSelectedFieldContext
                 input.Name != "INPUT" || input.Category != 100 || !input.CopyRanges().AsSpan().SequenceEqual(selected))
                 throw new NotSupportedException("Only native fresh equal full-domain INPUTs without auxiliary payload are supported.");
         // Resolves actual current-view membership, never a supplied no-transform flag.
-        _ = actualOriginal.ExportInputGeometry(actualChosenInput, token);
+        verifiedGeometry = actualOriginal.ExportInputGeometry(actualChosenInput, token);
         return new(actualOriginal, actualChosenInput, s);
     }
 

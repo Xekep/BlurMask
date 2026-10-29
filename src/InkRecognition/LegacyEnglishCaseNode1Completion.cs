@@ -41,6 +41,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         thread=Environment.CurrentManagedThreadId;LegacyEnglishFreshCaseMainSource? root=null;
         try
         {
+            ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.Reset,576);ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.Reset,576);
             _=primary.Run(token:token);token.ThrowIfCancellationRequested();
             if(!pending||ring is null||completedBacking is null||activeStage is not null)throw new InvalidOperationException("Actual after-FIRST/phase1 node0 state required.");
             node1Pass=primary.Node1Pass(this);var pass=node1Pass;root=pass.Root;
@@ -83,6 +84,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                 if(BinaryPrimitives.ReadInt32LittleEndian(parent[16..])>=0x4000000)continue;
                 // No omitted flag/soft-hyphen prepass is silently claimed.
                 if((parent[6]&1)!=0||(parent[33]&128)!=0)throw new NotSupportedException("Reached special/disabled parent requires separate native branch.");
+                ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,8);ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,8);
                 var q=new LegacyPreparedDictionaryQuery{Capacity=128,ContextRoot=contexts.ContainerIdentity};
                 var tag=LegacyOrdinaryDictionaryQueryPreparation.ApplyContinuation(q,new(0,0,false,false,120),parent,1,0,0,false,token);
                 if(tag is null)continue;
@@ -130,6 +132,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                 selected=selected.Concat(wholeSelected).ToArray();
                 var wholeQualifier=new LegacyNativeWordSymbolQualifier(217,wholeCosts.Values.ToArray(),cancellationToken:token);
                 lease=root.BeginNode1WholeStart(this,pass,wholeD0,token);
+                ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,8);ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,8);
                 var q=new LegacyPreparedDictionaryQuery{Capacity=128,ContextRoot=contexts.ContainerIdentity};
                 ulong tag=LegacyOrdinaryDictionaryQueryPreparation.ApplyInitial(q,new(0,0,false,false,120),1,1,0,false,token)
                     ??throw new InvalidDataException("Owned ordinary whole-start initialization refused.");

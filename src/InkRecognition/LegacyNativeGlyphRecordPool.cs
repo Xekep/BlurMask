@@ -45,6 +45,13 @@ public sealed partial class LegacyNativeGlyphRecordPool
                 cancellationToken.ThrowIfCancellationRequested();
                 if (ReadI32(node.Rows[ordinal], 0) == descriptorId) return new(ownerKey | ((ulong)ordinal << 40), true);
             }
+        return AppendNewDescriptor(ownerKey,descriptorId,forceDuplicate,initialRowStorage40,node,cancellationToken);
+    }
+
+    // Shared original allocation/mutation tail; callers perform their own original search or private first-ordinal lookup.
+    private LegacyNativeGlyphRecordInsertion AppendNewDescriptor(ulong ownerKey,int descriptorId,bool forceDuplicate,
+        ReadOnlySpan<byte> initialRowStorage40,Node? node,CancellationToken cancellationToken)
+    {
         //13a670 grows capacity by ten and refuses the next growth above7FE.
         //Thus a fresh native node can hold2040 rows, not2046 or2047.
         int count = node?.Rows.Count ?? 0, capacity = node?.Capacity ?? 0;
@@ -107,6 +114,10 @@ public sealed partial class LegacyNativeGlyphRecordPool
         return Snapshot(canonicalKey, node, cancellationToken);
     }
 
+    // Numeric private-pool observation only. The caller authenticates its SAME live pool before reading/exporting.
+    // No rows, query/source handle, mutation, callback or owner capability is returned.
+    internal (int Owners,int Records) ReadRawExportCounts() => (nodes.Count,totalRecords);
+
     /// <summary>Lookup snapshots for the existing13ae90 resolver. Low2 AVL
     /// balance bits are portablezero; count extraction discards those bits.
     /// This is not a byte-for-byte dump of native64-byte AVL nodes.</summary>
@@ -134,6 +145,92 @@ public sealed partial class LegacyNativeGlyphRecordPool
         if (!nodes.TryGetValue(key, out Node? node) || ordinal < 0 || ordinal >= node.Rows.Count)
             throw new ArgumentException("Glyph record reference is outside this actual owned pool.");
         return node.Rows[ordinal];
+    }
+
+    // Only the private rich refresh caller supplies this optional optimization to the kernel.
+    // No field is added to the pool or its default Node; no batch is globally installed.
+    internal DescriptorBatch CreateRichDescriptorBatch(ulong key,int length,CancellationToken token)
+        =>new(this,key,length,token);
+    internal sealed class DescriptorBatch:IDisposable
+    {
+        private readonly LegacyNativeGlyphRecordPool pool;
+        private readonly ulong key;
+        private readonly int[] first;
+        private readonly int length;
+        private Node? expectedNode;
+        private int expectedCount;
+        private bool expectedNoDedup,disposed;
+        private byte[]? expectedLast;
+        internal DescriptorBatch(LegacyNativeGlyphRecordPool pool,ulong key,int length,CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+            if(key!=LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(key)||length is<0 or>4096)
+                throw new ArgumentException("Bounded actual rich owner interval required.");
+            this.pool=pool;this.key=key;this.length=length;pool.nodes.TryGetValue(key,out expectedNode);Remember();
+            // No map is needed for the authentic sticky bypass branch.
+            first=expectedNoDedup?Array.Empty<int>():new int[length];
+            if(!expectedNoDedup)
+            {
+                Array.Fill(first,-1);
+                for(int i=0;i<expectedCount;i++)
+                {
+                    token.ThrowIfCancellationRequested();int descriptor=ReadI32(expectedNode!.Rows[i],0);
+                    if((uint)descriptor<(uint)length&&first[descriptor]<0)first[descriptor]=i;
+                }
+            }
+        }
+        private void Remember()
+        {expectedCount=expectedNode?.Rows.Count??0;expectedNoDedup=expectedNode?.NoDescriptorDedup??false;expectedLast=expectedCount==0?null:expectedNode!.Rows[expectedCount-1];}
+        private void Require(CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+            // The dictionary is private readonly and append-only: an issued nonnull
+            // Node cannot be detached/rebound. Preserve the lookup for the null case,
+            // where external creation of this key must still invalidate the batch.
+            var actual=expectedNode;
+            if(actual is null)pool.nodes.TryGetValue(key,out actual);
+            if(disposed||!ReferenceEquals(actual,expectedNode)||(actual?.Rows.Count??0)!=expectedCount||
+                (actual?.NoDescriptorDedup??false)!=expectedNoDedup||
+                !ReferenceEquals(expectedCount==0?null:actual!.Rows[expectedCount-1],expectedLast))
+                throw new InvalidOperationException("Private rich descriptor batch invalidated by external pool mutation.");
+        }
+        internal LegacyNativeGlyphRecordInsertion Append(int descriptor,ReadOnlySpan<byte> residue,CancellationToken token)
+        {
+            Require(token);
+            if(residue.Length!=40||descriptor<0||descriptor>=length)
+                throw new ArgumentException("Actual same-interval descriptor and complete row required.");
+            if(!expectedNoDedup&&first[descriptor]>=0)return new(key|((ulong)first[descriptor]<<40),true);
+            var inserted=pool.AppendNewDescriptor(key,descriptor,false,residue,expectedNode,token);
+            if(expectedNode is null)pool.nodes.TryGetValue(key,out expectedNode);Remember();
+            if(!expectedNoDedup)first[descriptor]=expectedCount-1;
+            return inserted;
+        }
+        // Actual pool/key fallback preserves the old generic kernel behavior for
+        // foreign bindings. The closed English producer always takes the Node path.
+        // Epoch checks stay at Append/Complete, not newly between callbacks: this
+        // preserves partial-mutation chronology after reentrant append/cleanup.
+        private byte[] ResolveBoundRow(LegacyNativeGlyphRecordPool actualPool,ulong reference)
+        {
+            var node=expectedNode;
+            if(!ReferenceEquals(pool,actualPool)||node is null||
+                LegacyNativeGlyphRecordOwner.NormalizeOwnerKey(reference)!=key)
+                return actualPool.ResolveRow(reference);
+            int ordinal=unchecked((short)(reference>>40));
+            if(ordinal<0||ordinal>=node.Rows.Count)
+                throw new ArgumentException("Glyph record reference is outside this actual owned pool.");
+            return node.Rows[ordinal];
+        }
+        internal byte[] CopyRecord(LegacyNativeGlyphRecordPool actualPool,ulong reference,CancellationToken token)
+        {token.ThrowIfCancellationRequested();return ResolveBoundRow(actualPool,reference).ToArray();}
+        internal void ReplaceRecord(LegacyNativeGlyphRecordPool actualPool,ulong reference,ReadOnlySpan<byte> record,CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();byte[] row=ResolveBoundRow(actualPool,reference);
+            if(record.Length!=40||ReadI32(record,0)!=ReadI32(row,0))
+                throw new ArgumentException("Complete actual record with unchanged descriptor identity required.");
+            record.CopyTo(row);
+        }
+        internal void Complete(CancellationToken token)=>Require(token);
+        public void Dispose(){disposed=true;}
     }
 
     private sealed class Node

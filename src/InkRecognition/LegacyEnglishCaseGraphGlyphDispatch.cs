@@ -33,4 +33,122 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             if(ready.Count>=capacity||!ready.TryAdd(key,receipt))throw new InvalidOperationException("One successful refresh per canonical owner required.");
         }
     }
+    // Private acceleration DATA over one exact live final compact. It never issues a source/query owner.
+    private sealed class GraphCompactRefreshIndex
+    {
+        private readonly GraphLanguageScope stage;
+        private readonly LegacyPreparedMainCompactPublication.Result compact;
+        private readonly LegacyNativeGlyphRecordPool pool;
+        private readonly GraphWordPublicationContext parent;
+        private readonly LegacyOrdinaryRecognitionGraph graph;
+        private readonly NodeIndex?[] nodes;
+        internal static GraphCompactRefreshIndex Issue(GraphLanguageScope stage,LegacyPreparedMainCompactPublication.Result compact,
+            LegacyNativeGlyphRecordPool pool,GraphWordPublicationContext parent,CancellationToken token)
+        {
+            stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,2048);
+            stage.Owner.RequireGraphPublication(stage,token);parent.RequireCompactRefreshIndex(stage,pool,token);
+            var graph=stage.Lease.Pass.Initializer.PlanForAudit.BindingForAudit.Graph;
+            if(graph.NodeCount is<2 or>120||compact.Count is<1 or>4096||compact.Starts.Length!=graph.NodeCount+1)
+                throw new NotSupportedException("Bounded actual rich compact index required.");
+            stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(1024+8L*graph.NodeCount));
+            stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(2048+16L*graph.NodeCount));
+            stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(1024+32L*graph.NodeCount));
+            int prior=0;
+            foreach(int start in compact.Starts){if(start<prior||start>compact.Count)throw new InvalidDataException("Monotonic actual compact partition required.");prior=start;}
+            token.ThrowIfCancellationRequested();return new(stage,compact,pool,parent,graph);
+        }
+        private GraphCompactRefreshIndex(GraphLanguageScope stage,LegacyPreparedMainCompactPublication.Result compact,
+            LegacyNativeGlyphRecordPool pool,GraphWordPublicationContext parent,LegacyOrdinaryRecognitionGraph graph)
+        {
+            // Entire object+node-array payload/copy/work was admitted by Issue before this allocation.
+            this.stage=stage;this.compact=compact;this.pool=pool;this.parent=parent;this.graph=graph;
+            nodes=new NodeIndex?[graph.NodeCount];
+        }
+        private void Require(GraphLanguageScope actual,LegacyNativeGlyphRecordPool actualPool,CancellationToken token)
+        {
+            stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,1024);
+            stage.Owner.RequireGraphPublication(stage,token);parent.RequireCompactRefreshIndex(stage,pool,token);
+            if(!ReferenceEquals(stage,actual)||!ReferenceEquals(pool,actualPool))throw new InvalidOperationException("Same private index stage/pool required.");
+        }
+        private NodeIndex ReadNode(int node,CancellationToken token)
+        {
+            if((uint)node>=(uint)nodes.Length)throw new ArgumentOutOfRangeException(nameof(node));
+            var value=nodes[node];if(value is not null)return value;
+            int first=compact.Starts[node],end=compact.Starts[node+1],arcs=graph.GetNode(node).Count;
+            if(first<0||end<first||end>compact.Count||compact.Count>compact.Storage.Length/40||arcs is<1 or>1024)
+                throw new InvalidDataException("Exact compact-node and actual source arc extent required.");
+            int length=end-first;
+            stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(1024+8L*length+12L*arcs));
+            stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(2048+32L*length+32L*arcs));
+            stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(1024+16L*arcs));
+            value=new NodeIndex(first,end,arcs);nodes[node]=value;
+            byte[] data=compact.Storage;
+            for(int at=first;at<end;at++)
+            {
+                token.ThrowIfCancellationRequested();
+                // Source row/ordinal/extent frame and one traits-byte read.
+                stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,32);
+                var row=data.AsSpan(at*40,40);byte traits=row[32];
+                if((traits&0x20)==0||(traits&7)!=0)continue;
+                // Raw key read plus bounded int-list heads/tails/count and six scalar stores.
+                stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,96);
+                ulong key=System.Buffers.Binary.BinaryPrimitives.ReadUInt64LittleEndian(row[8..]);
+                int arc=(ushort)(key>>24);
+                if(arc>=arcs||key!=(((uint)node&0xffffffUL)|((ulong)arc<<24)))continue;
+                value.Append(arc,at);
+            }
+            return value;
+        }
+        internal int ReadCount(GraphLanguageScope actual,LegacyNativeGlyphRecordPool actualPool,int node,ushort arc,ulong key,CancellationToken token)
+        {
+            Require(actual,actualPool,token);
+            if(key!=(((uint)node&0xffffffUL)|((ulong)arc<<24)))throw new InvalidOperationException("Exact ordinary owner key required.");
+            var value=ReadNode(node,token);return value.Count(arc);
+        }
+        internal int Refresh(GraphLanguageScope actual,LegacyNativeGlyphRecordPool actualPool,int node,ushort arc,ulong key,
+            LegacyOrdinaryGlyphRefreshOperations operations,ReadOnlySpan<byte> residue,CancellationToken token)
+        {
+            Require(actual,actualPool,token);
+            if(key!=(((uint)node&0xffffffUL)|((ulong)arc<<24)))throw new InvalidOperationException("Exact ordinary owner key required.");
+            var value=ReadNode(node,token);int count=value.Count(arc);
+            stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(24+4L*count));
+            stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(48+8L*count));
+            stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(128+32L*count));
+            var ordinals=value.Copy(arc);
+            // Before the new count observation; no traversal/model query is repeated.
+            stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,2048);
+            int existing=pool.ReadGraphRefreshOwnerCount(key,token),length=value.End-value.First;
+            // Holder/map initialization, original descriptor scan, every lookup/store and final guard.
+            stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(2048+4L*length));
+            stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(4096+8L*length));
+            stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(4096+64L*length+128L*existing+256L*count));
+            using var descriptorBatch=pool.CreateRichDescriptorBatch(key,length,token);
+            int visited=LegacyNativeOrdinaryGlyphRefreshKernel.ApplyIndexed(pool,key,compact.Storage,value.First,value.End,key,
+                ordinals,operations,residue,token,descriptorBatch);
+            descriptorBatch.Complete(token);return visited;
+        }
+        private sealed class NodeIndex
+        {
+            internal readonly int First,End;
+            private readonly int[] heads,tails,counts,indices,next;
+            private int used;
+            internal NodeIndex(int first,int end,int arcs)
+            {First=first;End=end;heads=new int[arcs];tails=new int[arcs];counts=new int[arcs];indices=new int[end-first];next=new int[end-first];Array.Fill(heads,-1);Array.Fill(tails,-1);}
+            internal int Count(ushort arc)
+            {if(arc>=counts.Length)throw new ArgumentOutOfRangeException(nameof(arc));return counts[arc];}
+            internal void Append(int arc,int ordinal)
+            {
+                int slot=used++;indices[slot]=ordinal;next[slot]=-1;
+                if(tails[arc]<0)heads[arc]=slot;else next[tails[arc]]=slot;
+                tails[arc]=slot;counts[arc]++;
+            }
+            internal int[] Copy(ushort arc)
+            {
+                int count=Count(arc);var result=new int[count];int at=heads[arc];
+                for(int i=0;i<count;i++)
+                {if((uint)at>=(uint)used)throw new InvalidDataException("Private compact index chain changed.");result[i]=indices[at];at=next[at];}
+                if(at!=-1)throw new InvalidDataException("Private compact index count changed.");return result;
+            }
+        }
+    }
 }

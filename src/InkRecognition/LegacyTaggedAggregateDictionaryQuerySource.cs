@@ -75,7 +75,9 @@ public sealed class LegacyTaggedDictionaryChild
             if(extra!=extraCostSideTable)
                 throw new ArgumentException("Caller side-cost extent must match the prepared case source flag.");
             if(aux)return auxiliary.Read(tag,query,extra,token); //V48: copy only case bits.
-            var owned=queries.GetValue(query,static request=>new(){Request=request});
+            // Default weak-key adapter stays exact. The typed periodic route uses one bounded actual-request cache within the authenticated normal V80 epoch.
+            query.PeriodicQuery?.Allocate(512);query.PeriodicQuery?.Copy(512);query.PeriodicQuery?.Visit(128);
+            var owned=query.PeriodicQuery is{} periodic?periodic.CaseWrapper(query):queries.GetValue(query,static request=>new(){Request=request});
             owned.SourceTag=tag;
             var page=normal.Read(owned,token); //V40: stateful forms/cost/context expansion.
             return new(page.ReturnedCount,page.Records,page.SlotIndex,page.BackendOffset,page.AcceptedCount,page.ExtraCosts);
@@ -91,7 +93,7 @@ public sealed class LegacyTaggedDictionaryChild
     {
         token.ThrowIfCancellationRequested();
         if((uint)query.Node!=(uint)tag)throw new ArgumentException("Full tag and child node differ.");
-        LastSourceTag=tag;LastMethodOffset=auxiliary?0x48:0x40;
+        query.PeriodicQuery?.Allocate(128);query.PeriodicQuery?.Copy(128);query.PeriodicQuery?.Visit(128);LastSourceTag=tag;LastMethodOffset=auxiliary?0x48:0x40;
         return reader(tag,query,auxiliary,extraCosts,token);
     }
 }
@@ -145,7 +147,7 @@ public sealed class LegacyTaggedAggregateDictionaryQuerySource
         try
         {
             if(!valid)throw new InvalidOperationException("Failed tagged aggregate requires a fresh session.");
-            activeSourceTag=sourceTag;
+            query.PeriodicQuery?.Copy(32);query.PeriodicQuery?.Visit(64);activeSourceTag=sourceTag;
             return aggregate.Read(sourceTag,query,auxiliary,clearExtraCosts,cancellationToken);
         }
         catch{valid=false;throw;}

@@ -73,14 +73,20 @@ public sealed partial class LegacyOwnedFreshTextSourceContext
             return AppendCounterCore(actualTransforms.Seed.InputBinding.Next,next,false,token);
         }
     }
+    internal LegacyPendingCounterAppend AppendOwnedEnglishFreshCounter(
+        LegacyEnglishCaseNode0Completion.GraphWordPublicationContext actual,CancellationToken token)
+    {
+        var stamp=actual.RequireFreshCounterOwner(this,token);
+        return AppendCounterCore(stamp.Old,stamp.Next,false,token,stamp.Guard);
+    }
     //Explicit scalar/fault controls, not a public choice of caller counters.
     internal LegacyPendingCounterAppend AppendPreparedCounter(long oldCounter,long newCounter,bool allocationFailure=false,
         CancellationToken token=default)=>AppendCounterCore(oldCounter,newCounter,allocationFailure,token);
-    private LegacyPendingCounterAppend AppendCounterCore(long oldCounter,long newCounter,bool allocationFailure,CancellationToken token)
+    private LegacyPendingCounterAppend AppendCounterCore(long oldCounter,long newCounter,bool allocationFailure,CancellationToken token,ILegacyFreshSourceIndexGuard? guard=null)
     {
         lock(gate)
         {
-            token.ThrowIfCancellationRequested();
+            token.ThrowIfCancellationRequested();guard?.Require(token);
             if(failed||counterHandoffEntered)throw new InvalidOperationException("This pending counter handoff retains an entered prefix and is single-use.");
             counterHandoffEntered=true;
             if(oldCounter==newCounter)return new(true,null);
@@ -89,7 +95,11 @@ public sealed partial class LegacyOwnedFreshTextSourceContext
             if(allocationFailure){failed=true;return new(false,null);}
             try
             {
-                counterCommand=new(this,checked(commands.Count+1),oldCounter,newCounter);
+                var created=new LegacyOwnedFreshTextCounterCommand(this,checked(commands.Count+1),oldCounter,newCounter);
+#if ENGLISH_FRESH_CONTINUATION_CONTROLS
+                LegacyFreshContinuationTestHooks.Checkpoint?.Invoke("after-counter-allocation");
+#endif
+                token.ThrowIfCancellationRequested();guard?.Require(token);counterCommand=created;
                 return new(true,counterCommand);
             }
             catch{failed=true;throw;}

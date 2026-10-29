@@ -66,7 +66,7 @@ public sealed class LegacyOrdinarySourceInk
             strokes[s]=new(retained.ToArray());rawIndices[s]=indices.ToArray();
         }
         int[] counts=strokes.Select(s=>s.Points.Count).ToArray();
-        var chronology=LegacySourcePointChronology.CreatePrepared(counts,keys.ToArray(),Enumerable.Range(0,keys.Count).ToArray(),sourceFactor:200);
+        var chronology=LegacySourcePointChronology.CreatePrepared(counts,keys.ToArray(),Enumerable.Range(0,keys.Count).ToArray());
         float[] probabilities=profile.EnclosureEnabled?LegacySourceStrokeEnclosure.Extract(strokes,cancellationToken):new float[strokes.Length];
         return new(strokes,rawIndices,probabilities,chronology,profile,originalCounts);
     }
@@ -78,10 +78,15 @@ public sealed class LegacyOrdinarySourceInk
     /// resolve this source's actual retained metadata; duplicate runs are not
     /// collapsed to their starting ordinal.</summary>
     public LegacySourcePointIdentity ResolveEndingMetadata(LegacySourcePointIdentity actualPreparedIdentity,
-        CancellationToken cancellationToken=default)
+        CancellationToken cancellationToken=default)=>ResolveEndingMetadataCore(actualPreparedIdentity,cancellationToken,null);
+    internal LegacySourcePointIdentity ResolveEndingMetadataMetered(LegacySourcePointIdentity actualPreparedIdentity,
+        CancellationToken cancellationToken,LegacyOrdinarySourceTraversalMeter meter)
+        =>ResolveEndingMetadataCore(actualPreparedIdentity,cancellationToken,meter);
+    private LegacySourcePointIdentity ResolveEndingMetadataCore(LegacySourcePointIdentity actualPreparedIdentity,
+        CancellationToken cancellationToken,LegacyOrdinarySourceTraversalMeter? meter)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        if(originalMetadataOwner is{} owner)return owner.ResolveEndingMetadata(actualPreparedIdentity,cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();meter?.Before(256);
+        if(originalMetadataOwner is{} owner)return owner.ResolveEndingMetadataCore(actualPreparedIdentity,cancellationToken,meter);
         int physical=actualPreparedIdentity.Key.Second;
         if(actualPreparedIdentity.Key.First!=0||(uint)physical>=(uint)rawIndices.Length)
             throw new ArgumentException("Actual ordinary source metadata required.");

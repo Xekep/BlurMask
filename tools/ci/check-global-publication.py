@@ -1,4 +1,4 @@
-"""Build/PDB-gated default937 and test-only939 publication comparison; no quality claim."""
+"""Build/PDB-gated default951 and test-only953 publication comparison; no quality claim."""
 from pathlib import Path
 import argparse,hashlib,importlib.util,json,os,re,subprocess,sys
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('output',type=Path);p.add_argument('default_capture',type=Path);a=p.parse_args()
@@ -24,7 +24,7 @@ MODELS={'ru-RU/ru_RU-ak-cur.lite.res': {'bytes': 572763, 'sha256': '7a5f08809e81
 files=set((root/'src/InkRecognition').glob('*.cs'))
 for folder in ['LegacyGlobalTextPublication.Probe','LegacyGlobalTextPublication.ScoreDiagnostic']:
  files.update(q for q in(root/'tools'/folder).rglob('*.cs')if not{'obj','bin'}&set(q.relative_to(root/'tools'/folder).parts));files.add(root/'tools'/folder/(folder+'.csproj'))
-files.add(root/'src/InkRecognition/InkRecognition.csproj');files.add(root/'global.json');files.update((root/'tools/handwriting').glob('*.py'));files.update((root/'tools/handwriting').glob('*.json'));files.update([Path(__file__),Path(__file__).with_name('publication_portable_pdb.py'),Path(__file__).with_name('publication_core_source_census.py'),Path(__file__).with_name('publication-core-source-admissions.json'),Path(__file__).with_name('test_publication_source_census.py')])
+files.add(root/'src/InkRecognition/InkRecognition.csproj');files.add(root/'global.json');files.update((root/'tools/handwriting').glob('*.py'));files.update((root/'tools/handwriting').glob('*.json'));files.update([Path(__file__),Path(__file__).with_name('publication_portable_pdb.py'),Path(__file__).with_name('publication_core_source_census.py'),Path(__file__).with_name('publication-core-source-admissions.json'),Path(__file__).with_name('test_publication_source_census.py'),Path(__file__).with_name('fixtures')/'publication-core-951-preimage.cs.txt'])
 for name,pinvalue in MODELS.items():
  path=root/'models'/name;assert path.stat().st_size==pinvalue['bytes']and sha(path)==pinvalue['sha256'];files.add(path)
 inputs=[pin(path)for path in sorted(files)];report['InputPins']=inputs;save()
@@ -70,4 +70,4 @@ try:
 finally:
  verify_execution_inputs()
  report['InputsUnchanged']=True;save()
-print('PASS default937/test-only939 PDB/runtime gates and3 paired publication calls; full producer operands remain explicit; no quality claim.')
+print('PASS default951/test-only953 PDB/runtime gates and3 paired publication calls; full producer operands remain explicit; no quality claim.')

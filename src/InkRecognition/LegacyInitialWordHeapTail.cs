@@ -6,7 +6,7 @@ namespace InkRecognition;
 /// Nontracing1f8d60 heap-tail consumer of initialized prefix and explicit
 /// native word-row references. It never creates a previous record or context.
 /// </summary>
-public static class LegacyInitialWordHeapTail
+public static partial class LegacyInitialWordHeapTail
 {
     public static void Initialize(Span<byte> heapSlot, bool suppressPreviousContext2609,
         Func<int, ushort, ReadOnlyMemory<byte>>? lookupWordRecord = null)

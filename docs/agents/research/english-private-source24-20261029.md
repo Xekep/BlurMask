@@ -48,13 +48,14 @@ The isolated951 library and entry were rebuilt and raw-PDB authenticated. The
 same diagnostic owning case passes with identical metrics, source completion and
 full capture after independently validating the two fresh UUIDs. The proposed
 951/953 source gate passes20 tamper controls and preserves historical flavor,
-project metadata inverse and meterV2 checks. None of this has replaced Main's
-Core937 or admitted public English recognition.
+project metadata inverse and meterV2 checks. At that isolated checkpoint Main's
+Core937 and public English recognition were unchanged.
 
 Evidence: `E:/BlurMask-build-artifacts-20261014/english-951-isolated-root-20261029`.
-Native AOT, broader regressions, BE2 actual ordinal1 queue/export/application,
-public positioned words and representative real-word/multistroke testing remain
-required. The older empty-root/ordinal0 helper cannot stand in for that join.
+Native AOT and composition regressions were still pending at that checkpoint;
+their subsequent results follow below. BE2 actual ordinal1 queue/export/
+application, public positioned words and representative real-word/multistroke
+testing remain required. The older empty-root/ordinal0 helper cannot stand in for that join.
 The358 remaining work units cannot fund unexecuted later phases; further savings
 must remove actual work with proved bounds, rather than raising limits or issuing
 a result from incomplete state.
@@ -97,3 +98,70 @@ This is recorded in `native-entry-runs.json` and
 `native-entry-actual.stderr` in the same isolated evidence directory. Keep the
 failed attempt intact. An AOT-compatible diagnostic serializer and a new actual
 run are required before comparing native data with the managed capture.
+
+## Second native attempt and composition regressions
+
+The second entry replaces only the diagnostic `Save` call. A bounded
+`Utf8JsonWriter` observer emits the same public-property/array/byte-storage JSON
+without creating generic serializer instances dynamically. It still preserves
+reflection metadata for observation, so this is not a production trimming-size
+or warning-free AOT claim. The recognizer assembly and all951 source pins remain
+unchanged; the first failed attempt remains intact.
+
+Before native execution, Root built and PDB-authenticated both diagnostic source
+files and ran the modified writer in Managed. The whole capture matches the
+original writer after validating each fresh UUID against its own gen attribute.
+Native AOT publication then passed in56.799 seconds, and the actual native run
+passed in0.223 seconds with the same complete logical capture. The three-point,
+one-stroke scope remains unchanged. Receipt: `NATIVE-ENTRY2-FINAL.json`.
+
+Two additional composition checks passed:
+
+- The independently PDB-authenticated Math85 module and its two-source owning
+  probe were reused with Core951. Its1156 controls and all seven independent
+  audits pass; the capture is byte-identical to the Core937 baseline. This tests
+  runtime integration of the existing Math binary, not a Math rebuild or general
+  original-document application. Receipt: `MATH85-COMPOSITION-FINAL.json`.
+- The original Russian public-call entry was PDB-authenticated and reused with
+  Core951 and the same19 pinned resource/input files. Each of nine recordings
+  receives its original single public call with its unchanged two-second host
+  budget. Full text, score bits, glyphs, diagnostics and exceptions match the
+  corrected Core935 baseline; only measured wall time is excluded. These
+  recordings lack pen-up metadata and do not prove cursive quality. Receipt:
+  `RU-PUBLIC9-FINAL.json`.
+
+The prepared81-file Core admission patch has14 additions and67 changed bodies;
+it preserves both Main raw-input additions and the entire ledger byte-for-byte.
+Its SHA256 is `8cf1d458ec8485cf35173cb5000e7ddac3caed8f6bec9bcae148e3ea85d89ad1`.
+Preparing this patch is not itself Main admission. The strict source-census
+update must accompany it and admission still requires checking the current
+preimages, independent source review and the resulting repository gate.
+
+## Reviewed admission to Main
+
+The independent admission review reauthenticated all949 checkpoint sources,
+all951 composed sources, all937 Main preimages and the complete81-file patch.
+The twelve retained Main policy bodies, unchanged ledger, both Main raw-input
+additions and strict source/flavor/project gates remain protected. Review SHA256:
+`30be774925d9aa2d80e4534f8791891774a18e5cace8a967f5b4d90a6b51a104`.
+
+Root applied the paired Core81/source-census5 patches, then rebuilt and
+PDB-authenticated actual Main default951 and diagnostic953 plus both entries.
+All20 source tamper controls, three actual publication calls and the independent
+paired audit pass. The275.889-second run kept all pinned inputs unchanged.
+`MAIN-ADMISSION-FINAL.json` SHA256:
+`b84b1894c848a86660d0be155f393c12e2e594f19166a9e1442937834d19ff75`.
+
+The resulting actual Main DLL also ran the original owning English entry, Math85
+with1156 controls/seven independent audits, and all nine original public Russian
+calls. EN full data agrees after the independently checked UUID; Math is
+byte-identical to its Core937 baseline; RU full data agrees except measured wall
+time. Existing entry/library DLL and PDB hashes and the Main gate inputs remain
+verified throughout. `main-runtime-regressions/FINAL.json` SHA256:
+`a30740fb1f1be75de3500ccbf9e121dcf52c89be2d94757b22e0f5504e2c68c7`.
+
+This admits internal implementation, not public positioned English results or
+recognition quality. The Native AOT parity evidence above is the isolated
+diagnostic executable; it is not a new release build. The known macOS unchanged
+`NewNn` CI mismatch and owning42-group stale-cost assertion remain separate
+unresolved release gates. No release or full engine completion is claimed.

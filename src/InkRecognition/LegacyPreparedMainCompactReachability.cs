@@ -4,7 +4,7 @@ namespace InkRecognition;
 
 //Shared numeric207CB0 marking/query walk. Only typed publication owners supply
 //the actual snapshots, post-V80 reader, context root and epoch validator.
-internal static class LegacyPreparedMainCompactReachability
+internal static partial class LegacyPreparedMainCompactReachability
 {
     internal sealed class QueryCounters {public int Checks,Calls;}
     internal sealed record Result(LegacyMainDirectWordNodeResult[] Nodes,byte[] SelectedNodes,int PrefixEnd,

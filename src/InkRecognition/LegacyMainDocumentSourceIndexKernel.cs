@@ -22,23 +22,28 @@ internal sealed class LegacyMainDocumentSourceIndexKernel<T> where T:notnull
         internal List<Node> Nodes {get;}=[];
         private readonly int slots;
         internal Tree(int slots){this.slots=slots;}
-        internal (Node Node,bool Inserted) Intern(ReadOnlySpan<LegacyNativeInkPositionRange> key)
+        internal (Node Node,bool Inserted) Intern(ReadOnlySpan<LegacyNativeInkPositionRange> key,CancellationToken token=default,ILegacyFreshSourceIndexGuard? guard=null)
         {
-            var path=new List<(Node Node,bool Right)>();var cursor=Root;
+            token.ThrowIfCancellationRequested();guard?.Require(token);var path=new List<(Node Node,bool Right)>();var cursor=Root;
             while(cursor is not null)
             {
-                int compare=LegacyOwnedMainTextSourceInterner.Compare(key,cursor.Key);
+                token.ThrowIfCancellationRequested();guard?.Require(token);int compare=LegacyOwnedMainTextSourceInterner.Compare(key,cursor.Key);
+                token.ThrowIfCancellationRequested();guard?.Require(token);
                 if(compare==0)return(cursor,false);
                 if(path.Count==32)throw new NotSupportedException("Native32-bit AVL insertion path exceeded.");
                 bool right=compare>0;path.Add((cursor,right));cursor=right?cursor.Right:cursor.Left;
             }
             if(Nodes.Count==65536)throw new NotSupportedException("Portable fresh index-node budget exceeded.");
-            var added=new Node(Nodes.Count+1,slots,key);Nodes.Add(added);
+            var added=new Node(Nodes.Count+1,slots,key);
+#if ENGLISH_FRESH_CONTINUATION_CONTROLS
+            LegacyFreshContinuationTestHooks.Checkpoint?.Invoke("after-index-key-copy");
+#endif
+            token.ThrowIfCancellationRequested();guard?.Require(token);Nodes.Add(added);
             if(path.Count==0){Root=added;return(added,true);}
             var parent=path[^1];if(parent.Right)parent.Node.Right=added;else parent.Node.Left=added;
             for(int i=path.Count-1;i>=0;i--)
             {
-                var p=path[i];p.Node.Balance=(sbyte)(p.Node.Balance+(p.Right?1:-1));
+                token.ThrowIfCancellationRequested();guard?.Require(token);var p=path[i];p.Node.Balance=(sbyte)(p.Node.Balance+(p.Right?1:-1));
                 if(p.Node.Balance==0)break;
                 if(p.Node.Balance is not(-2 or 2))continue;
                 var rotated=Rotate(p.Node);
@@ -82,25 +87,29 @@ internal sealed class LegacyMainDocumentSourceIndexKernel<T> where T:notnull
     internal bool Dirty {get;private set;}
     internal int SourcesAdded {get;private set;}
     private int rangeCount;
-    internal void Add(T source,ReadOnlySpan<LegacyNativeInkPositionRange> key,CancellationToken token=default)
+    internal void Add(T source,ReadOnlySpan<LegacyNativeInkPositionRange> key,CancellationToken token=default,ILegacyFreshSourceIndexGuard? guard=null)
     {
-        token.ThrowIfCancellationRequested();
+        token.ThrowIfCancellationRequested();guard?.Require(token);
         if(key.Length>65536||key.Length>1_048_576-rangeCount)throw new NotSupportedException("Portable source-index range budget exceeded.");
         bool insertedAny=false;
         foreach(var range in key)
         {
-            token.ThrowIfCancellationRequested();
-            var (node,inserted)=Intervals.Intern([range]);
+            token.ThrowIfCancellationRequested();guard?.Require(token);
+            var (node,inserted)=Intervals.Intern([range],token,guard);
             insertedAny|=inserted;
-            int id=Memberships.Count+1;
-            Memberships.Add(new(id,(id-1)/256+1,(id-1)%256,source,node.MembershipHead));
-            node.MembershipHead=id;rangeCount++;
+            token.ThrowIfCancellationRequested();guard?.Require(token);int id=Memberships.Count+1;
+            var member=new Membership(id,(id-1)/256+1,(id-1)%256,source,node.MembershipHead);
+            token.ThrowIfCancellationRequested();guard?.Require(token);Memberships.Add(member);node.MembershipHead=id;rangeCount++;
         }
         //0184E0 commits dirty only after the entire membership loop succeeds.
         Dirty|=insertedAny;
-        var vector=Vectors.Intern(key).Node;
+        var vector=Vectors.Intern(key,token,guard).Node;
         //0207A0/020860 replaces source20, clears cache-vector count28+8,
         //and retains/updates the exact key-header owner18 on both paths.
-        vector.CurrentSource=source;SourcesAdded++;
+        token.ThrowIfCancellationRequested();guard?.Require(token);vector.CurrentSource=source;SourcesAdded++;
     }
 }
+
+//Optional private owning revocation gate. Default/prepared callers retain null.
+internal interface ILegacyFreshSourceIndexGuard
+{void Require(CancellationToken token);}

@@ -18,41 +18,78 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
     // >=120 also need intermediate publication before physical ring reuse.
     // Those services are not silently omitted from this bounded successor.
     internal LegacyEnglishCaseGraphNodeSnapshot RunGraphFirstLoop(CancellationToken token=default)=>RunGraphFirstLoopCore(false,token);
-    private LegacyEnglishCaseGraphNodeSnapshot RunGraphFirstLoopCore(bool finalCompact,CancellationToken token,bool captureMainConfidence=false)
+    internal LegacyEnglishCaseGraphNodeSnapshot RunGraphFirstPeriodicLoop(CancellationToken token=default)=>RunGraphFirstLoopCore(false,token,false,true);
+    private enum GraphLoopOutput { FinalSnapshot, PeriodicWordSourceOnly }
+    // Detached execution receipt only; never a source/query/result issuer.
+    private readonly record struct GraphLoopExecutionResult(GraphLoopOutput Output,int CompletedNode,LegacyEnglishCaseGraphNodeSnapshot? Snapshot)
     {
-        token.ThrowIfCancellationRequested();primary.RequireGraphLoop(this,token);
+        internal LegacyEnglishCaseGraphNodeSnapshot RequireSnapshot()=>Output==GraphLoopOutput.FinalSnapshot&&Snapshot is{} value
+            ?value:throw new InvalidOperationException("Actual detached final-node snapshot required.");
+        internal void RequireWordSourceOnly()
+        {if(Output!=GraphLoopOutput.PeriodicWordSourceOnly||CompletedNode<1||Snapshot is not null)throw new InvalidOperationException("Actual periodic WORD-source execution completion required.");}
+    }
+    private LegacyEnglishCaseGraphNodeSnapshot RunGraphFirstLoopCore(bool finalCompact,CancellationToken token,bool captureMainConfidence=false,bool periodic=false)
+        =>RunGraphFirstLoopExecution(finalCompact,token,captureMainConfidence,periodic,GraphLoopOutput.FinalSnapshot).RequireSnapshot();
+    private void RunGraphFirstPeriodicWordSourceExecution(CancellationToken token)
+        =>RunGraphFirstLoopExecution(true,token,true,true,GraphLoopOutput.PeriodicWordSourceOnly).RequireWordSourceOnly();
+    private GraphLoopExecutionResult RunGraphFirstLoopExecution(bool finalCompact,CancellationToken token,bool captureMainConfidence,bool periodic,GraphLoopOutput output)
+    {
+        token.ThrowIfCancellationRequested();ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.Authentication,16); //new output-mode read/branch
+        if(graphRawWordOutput==GraphRawWordOutputKind.PrivatePendingTextExecution&&
+            (output!=GraphLoopOutput.PeriodicWordSourceOnly||!periodic||!finalCompact||!captureMainConfidence||
+             !graphWordSourceRequested||!graphOriginalSelectedRequested||!graphPostTextCoverageRequested||
+             !graphTextPublicationRequested||!graphWordPublicationRequested||!graphCharactersRequested||
+             !graphGlyphGeometryRequested||graphGlyphNormalization is null||!graphTopRequested||
+             !graphSelectedSourcesRequested||!graphSourceIndicesRequested))
+            throw new InvalidOperationException("Private complete pending-TEXT/source-index execution output required.");
+        if(output==GraphLoopOutput.PeriodicWordSourceOnly&&(!periodic||!finalCompact||!captureMainConfidence||!graphWordSourceRequested))
+            throw new InvalidOperationException("Private periodic WORD-source-only execution required.");
+        token.ThrowIfCancellationRequested();if(periodic&&!graphPeriodicPrepared)throw new InvalidOperationException("Periodic loop requires its typed complete D0 preparation.");primary.RequireGraphLoop(this,token,periodic);
         if(Interlocked.CompareExchange(ref phase,1,0)!=0)throw new InvalidOperationException("One owning graph run required.");
-        thread=Environment.CurrentManagedThreadId;graphLoopActive=true;graphFinalCompactRequested=finalCompact;
+        thread=Environment.CurrentManagedThreadId;graphPeriodicActive=periodic;graphPeriodicInvalidationFirst=-1;graphPeriodicCompletedNode=-1;graphLoopActive=true;graphFinalCompactRequested=finalCompact;
         LegacyEnglishFreshCaseMainSource? root=null;
         try
         {
             if(captureMainConfidence)graphConfidenceScorer=primary.AttachGraphMainConfidence(this,ledger,token);
+            // Initial sourceV80(-1):72 newly allocated requests,8 added semantic bytes each.
+            ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.Reset,576);ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.Reset,576);
             _=primary.Run(token:token);
             if(!pending||ring is null||completedBacking is null||activeStage is not null)throw new InvalidOperationException("Same completed node0 private state required.");
             node1Pass=primary.Node1Pass(this);var pass=node1Pass;root=pass.Root;
             var graph=pass.Initializer.PlanForAudit.BindingForAudit.Graph;
-            if(graph.NodeCount is <2 or >49)throw new NotSupportedException("Current graph loop admits2..49 nodes; native50-node normalization and120-slot publication remain separate.");
+            if(graph.NodeCount<2||graph.NodeCount>(periodic?120:49))throw new NotSupportedException("Default graph loop2..49; explicit fresh distinct-slot periodic loop2..120 only.");
             var geometry=LegacyEnglishCaseNode1Geometry.Prepare(LegacyEnglishCaseNode1GeometryProfile.Prepare(root.Knowledge,token),token);
             graphLoopGeometry=geometry;var categories=geometry.Categories;var contexts=pass.Initializer.PlanForAudit.BindingForAudit.Contexts;
             var sourcePolicy=LegacyEnglishCaseInitialSourcePolicy.Prepare(root.Knowledge,root.NumericOwner,128L*1024*1024,token);
             graphLoopSourcePolicy=sourcePolicy;
             var scorer=LegacyNativeWordAcousticRequestScorer.ForAlphabet(ReadNode1Thresholds(root.Knowledge),root.Source.Alphabet);
             var cell=new LegacyNativeWordTransitionCostCell(1,0);
+            if(periodic){ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,checked(8192L+graph.RequireSameSource().CandidateCount*32L+graph.NodeCount*64L));ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,checked(8192L+graph.RequireSameSource().CandidateCount*32L+graph.NodeCount*64L));}
             var ordinary=LegacyNativeOrdinaryParentWordCandidates.ForEnglishNode1(geometry,contexts,scorer,cell);
             var startup=new LegacyNativeOrdinaryWordStartup(geometry.ActualGraph,root.Source.Alphabet,categories,contexts,scorer,cell,new byte[80]);
             InitializeGraphController(pass,token);ring.EnableGraphCursor(token);root.ClaimNode1(this,pass,token);
             long totalQueries=0,totalRows=0,totalScores=0,totalAllocations=0,totalSelected=0;
-            var ownedHistory=new Dictionary<int,LegacyNativeStoredWordRecord[]>();
+            var ownedHistory=periodic?null:new Dictionary<int,LegacyNativeStoredWordRecord[]>();
+            GraphPeriodicWorkspace? workspace=null;LegacyNativeWordHeapRouter? periodicRouter=null;
+            if(periodic)
+            {
+                _=GraphPeriodicContextBudget.Issue(this,contexts,token);workspace=GraphPeriodicWorkspace.Issue(this,sourcePolicy.Heaps.Limits[0],token);
+                ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,512);ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,512);
+                periodicRouter=new([workspace.Heap],sourcePolicy.Heaps.CopySourceBuckets().Span,sourcePolicy.Heaps.Sources.OverrideSourceIndex22f0,sourcePolicy.Heaps.Configuration.OverrideHeap2458);
+            }
             LegacyEnglishCaseGraphNodeSnapshot? last=null;
             for(int node=1;node<graph.NodeCount;node++)
             {
                 graphLoopNode=node;token.ThrowIfCancellationRequested();
-                var arcs=graph.GetNode(node);int maximum=LegacyEnglishCaseGraphSchedule.MaximumSpan(node,arcs,token);
-                var heap=new LegacyNativeWordRecordHeap(250);var prep=sourcePolicy.Heaps;
-                var router=new LegacyNativeWordHeapRouter([heap],prep.CopySourceBuckets().Span,prep.Sources.OverrideSourceIndex22f0,prep.Configuration.OverrideHeap2458);
+                var arcs=graph.GetNode(node);
+                if(periodic)workspace!.BeginNode(node,token);
+                int maximum=periodic?workspace!.MaximumSpan(token):LegacyEnglishCaseGraphSchedule.MaximumSpan(node,arcs,token);
+                var periodicRows=periodic?GraphPeriodicRows.Issue(this,node,workspace!,token):null;
+                var heap=periodic?workspace!.Heap:new LegacyNativeWordRecordHeap(250);var prep=sourcePolicy.Heaps;
+                var router=periodic?periodicRouter!:new LegacyNativeWordHeapRouter([heap],prep.CopySourceBuckets().Span,prep.Sources.OverrideSourceIndex22f0,prep.Configuration.OverrideHeap2458);
                 for(byte span=0;span<=maximum;span++)
                 {
-                    graphLoopSpan=span;graphLoopPrevious=LegacyEnglishCaseGraphSchedule.PreviousNode(node,span);graphLoopParent=-2;graphLoopQuery=null;
+                    graphLoopSpan=span;graphLoopPrevious=periodic?workspace!.PreviousNode(span,token):LegacyEnglishCaseGraphSchedule.PreviousNode(node,span);graphLoopParent=-2;graphLoopQuery=null;
                     var d0=pass.SpanSession.PrepareSpanCore(node,span,false,null,token);
                     var costs=new Dictionary<ushort,LegacyNativeWordAcousticGroupCosts>();
                     foreach(var selected in d0.CopySelectedRows())
@@ -76,30 +113,42 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                             _=LegacyEnglishCaseNode1ParentMasks.Require(parent,ring.OwnedRowMaskAt(graphLoopPrevious).Slice(ordinal*88,88),
                                 ring.OwnedPrimaryAt(graphLoopPrevious).Slice(ordinal*80,80),ring.OwnedPrimaryMaskAt(graphLoopPrevious).Slice(ordinal*80,80),token);
                             if((parent[6]&1)!=0||(parent[33]&128)!=0)throw new NotSupportedException("Reached flag/soft-hyphen prepass must not be omitted.");
-                            ReadPages(ordinal,parent.ToArray());
+                            ReadPages(ordinal,periodic?ReadOnlyMemory<byte>.Empty:parent.ToArray());
                         }
                     }
                     graphLoopQuery=null;graphLoopParent=-2;
                     if(span==maximum)
                     {
-                        var images=LegacyEnglishCaseNode1Materialization.BuildGraph(heap,prep,categories,contexts,node,OwnedRows,root.Source.Alphabet,token);
-                        _=PrepareGraphLanguageInputs(lease,node,images,categories,true,token);
-                        last=graphCompletedNode??throw new InvalidDataException("Same live graph node did not complete.");
+                        int primaryMinimum=0x4000000;
+                        if(periodic)ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.Descriptor,125*8);
+                        var images=periodic?workspace!.Materialize(prep,contexts,periodicRows!,out primaryMinimum,token):
+                            LegacyEnglishCaseNode1Materialization.BuildGraph(heap,prep,categories,contexts,node,OwnedRows,root.Source.Alphabet,token);
+                        _=PrepareGraphLanguageInputs(lease,node,images,categories,true,token,primaryMinimum,output);
+                        if(periodic)graphPeriodicInvalidationFirst=-1; // No history DATA cache exists on this span-reader branch.
+                        if(periodic&&(node<graph.NodeCount-1||output==GraphLoopOutput.PeriodicWordSourceOnly))
+                        {if(graphPeriodicCompletedNode!=node||graphCompletedNode is not null)throw new InvalidDataException("Same live periodic intermediate reset required.");}
+                        else last=graphCompletedNode??throw new InvalidDataException("Same live graph node did not complete.");
                     }
-                    root.EndGraphSpan(lease,span==maximum);graphLoopLease=null;
+                    root.EndGraphSpan(lease,span==maximum);graphLoopLease=null;graphPeriodicQueryPage=null;
+                    if(periodic&&span==maximum)workspace!.EndNode(token);
 
                     void ReadPages(int ordinal,ReadOnlyMemory<byte> parent)
                     {
+                        ReadOnlySpan<byte> actualParent=periodic&&ordinal>=0?periodicRows!.Record(graphLoopPrevious,(ushort)ordinal,token):parent.Span;
+                        if(periodic){ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,160);ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,160);}
+                        ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,8);ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,8);
                         var request=new LegacyPreparedDictionaryQuery{Capacity=128,ContextRoot=contexts.ContainerIdentity};
                         ulong? tag=ordinal<0?LegacyOrdinaryDictionaryQueryPreparation.ApplyInitial(request,new(0,0,false,false,120),checked((uint)node),span,0,false,token):
-                            LegacyOrdinaryDictionaryQueryPreparation.ApplyContinuation(request,new(0,0,false,false,120),parent.Span,checked((uint)node),span,0,false,token);
+                            LegacyOrdinaryDictionaryQueryPreparation.ApplyContinuation(request,new(0,0,false,false,120),actualParent,checked((uint)node),span,0,false,token);
                         if(tag is null)return;
                         graphLoopParent=ordinal;graphLoopSkip=0;graphLoopQuery=new(){SourceTag=tag.Value,Request=request};int pages=0;
                         while(true)
                         {
                             token.ThrowIfCancellationRequested();
                             if(++pages>5||++totalQueries>1048576)throw new InvalidDataException("Whole graph query-page bound exceeded before read.");
+                            if(periodic){ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.PageCopies,9216);ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.PageCopies,18432);}
                             var page=pass.Initializer.PlanForAudit.ReadGraphSpan(lease,graphLoopQuery,token);
+                            if(periodic){ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,8);graphPeriodicQueryPage=page;}
                             if(page.ReturnedCount is <0 or >128||page.Records.Length!=page.ReturnedCount*32||page.ReturnedCount>400-graphLoopSkip||totalRows+page.ReturnedCount>1048576)
                                 throw new InvalidDataException("Actual finite graph query prefix required.");
                             ObserveGraphControllerWrite(page.Records.Span,token);
@@ -112,7 +161,15 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                             if((long)page.ReturnedCount*2*costs.Count>1048576-totalScores)throw new InvalidDataException("Whole graph scoring bound exceeded before callback.");
                             var headers=new Dictionary<byte,uint>{{1,0xc0e}};
                             LegacyNativeWordAcousticGroupCosts Lookup(int n,ushort a)=>n==node&&costs.TryGetValue(a,out var c)?c:throw new InvalidDataException("Foreign graph span cost lookup.");
+                            if(periodic&&ordinal<0)
+                            {
+                                long requests=checked((long)page.ReturnedCount*2*costs.Count);
+                                ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,checked(256L+page.Records.Length+requests*512L));
+                                ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,checked(512L+page.Records.Length*2L+requests*1024L));
+                            }
                             var result=ordinal<0?startup.ProcessPage(page.Records.Span,checked((ushort)node),span,0,qualifier,headers,Lookup,router,0,sourcePolicy.SuppressHeaderFlag,0,false,false,null,token):
+                                periodic?ordinary.ProcessPeriodicPage(page.Records.Span,checked((ushort)node),span,graphLoopPrevious,(ushort)ordinal,actualParent,0,qualifier,headers,Lookup,
+                                    periodicRows!,router,0,false,sourcePolicy.SuppressHeaderFlag,0,false,false,null,token):
                                 ordinary.ProcessPage(page.Records.Span,checked((ushort)node),span,graphLoopPrevious,(ushort)ordinal,parent.Span,0,qualifier,headers,Lookup,
                                     (n,a)=>OwnedRows(n)[a].Record,router,0,false,sourcePolicy.SuppressHeaderFlag,0,false,false,null,token);
                             if(!result.Succeeded)throw new InvalidDataException("Actual ordinary graph page failed.");
@@ -122,12 +179,17 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                     }
                 }
             }
+            if(output==GraphLoopOutput.PeriodicWordSourceOnly&&
+                (graphPeriodicCompletedNode!=graph.NodeCount-1||last is not null||graphCompletedNode is not null))
+                throw new InvalidDataException("Same final periodic execution stamp without detached snapshot required.");
             token.ThrowIfCancellationRequested();graphLoopMetrics=new(graph.NodeCount,graph.NodeCount,totalRows,totalQueries,totalScores,totalAllocations,totalSelected);pending=false;completedBacking=null;Volatile.Write(ref phase,2);
-            return last??throw new InvalidDataException("No completed graph node.");
+            return output==GraphLoopOutput.PeriodicWordSourceOnly
+                ?new(output,graph.NodeCount-1,null)
+                :new(output,graph.NodeCount-1,last??throw new InvalidDataException("No completed graph node."));
 
             IReadOnlyList<LegacyNativeStoredWordRecord> OwnedRows(int node)
             {
-                token.ThrowIfCancellationRequested();if(ownedHistory.TryGetValue(node,out var saved))return saved;int count=ring.SourceEndAt(node);var rows=ring.OwnedRowsAt(node);var alternatives=ring.OwnedPrimaryAt(node);
+                token.ThrowIfCancellationRequested();if(ownedHistory!.TryGetValue(node,out var saved))return saved;int count=ring.SourceEndAt(node);var rows=ring.OwnedRowsAt(node);var alternatives=ring.OwnedPrimaryAt(node);
                 if(count is <125 or >156)throw new InvalidDataException("Exact retained SourceEnd required.");
                 ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,checked(count*256L));ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,checked(count*176L));
                 var result=new LegacyNativeStoredWordRecord[count];
@@ -140,7 +202,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             if(root is not null)root.FaultNode1(this);pending=false;completedBacking=null;pendingReceipt=null;activeStage=null;
             primary.FaultNode0Completion(this);Volatile.Write(ref phase,3);throw;
         }
-        finally{graphLoopSourcePolicy=null;graphLoopGeometry=null;graphLoopActive=false;graphLoopQuery=null;graphLoopLease=null;graphLanguageScope=null;graphControllerValues=null;graphControllerMask=null;graphCompletedNode=null;node1Pass=null;thread=0;}
+        finally{graphPeriodicQueryScope?.Close();graphPeriodicQueryScope=null;graphPeriodicQueryPage=null;graphPeriodicWorkspace?.Close();graphPeriodicWorkspace=null;graphPeriodicContextBudget?.Close();graphPeriodicContextBudget=null;graphPeriodicCompletedNode=-1;graphPeriodicActive=false;graphPeriodicInvalidationFirst=-1;graphLoopSourcePolicy=null;graphLoopGeometry=null;graphLoopActive=false;graphLoopQuery=null;graphLoopLease=null;graphLanguageScope=null;graphControllerValues=null;graphControllerMask=null;graphCompletedNode=null;node1Pass=null;thread=0;}
     }
     internal void RequireGraphLoopSpan(int node,byte span)
     {if(!graphLoopActive||graphLoopNode!=node||graphLoopSpan!=span||Volatile.Read(ref phase)!=1||thread!=Environment.CurrentManagedThreadId)throw new InvalidOperationException("Same active graph loop/node/span required.");}

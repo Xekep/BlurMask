@@ -18,6 +18,7 @@ internal sealed partial class LegacyMainCompactGroupScores
         // <=150 candidate12 + cost4 + symbol2 + weight4, frames/headers.
         ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,4096);
         ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,4096);
+        if(stage.PeriodicEnabled)ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked(8192L+32L*stage.Lease.Pass.Initializer.PlanForAudit.BindingForAudit.Graph.RequireSameSource().CandidateCount));
         var row=stage.Lease.Pass.SpanSession.Scorer.ReadCachedGraphPublication(stage,group,token);
         var actual=row.CopyCandidates();
         if(actual.Length>150)throw new InvalidDataException("Same bounded English shortlist required.");

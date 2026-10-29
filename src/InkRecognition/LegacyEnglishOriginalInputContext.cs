@@ -64,11 +64,13 @@ internal sealed class LegacyEnglishOriginalInputContext : IDisposable
     internal readonly LegacyLibraryOriginalSelectedFieldContext Selected;
     internal readonly LegacyLibraryOriginalSelectedFieldState SelectedState;
     internal readonly LegacyLibrarySelectedInputBinding Binding;
+    private readonly LegacyLibraryPreparedDomNames preparedDomNames;
+    private readonly LegacyOwnedRawInkIdentityExport verifiedOriginalGeometry;
     private readonly LegacyLibraryTextProcessingContext processing;
     private readonly LegacyLibraryTextInputRequest request;
     private readonly LegacyLibraryTextProcessingLease lease;
     private LegacyEnglish119ParentSubmission? parent;
-    private bool publication,disposed;
+    private bool publication,disposed,identifierClaimed;
     internal int Points{get;}
     private LegacyEnglishOriginalInputContext(InkStroke[] raw,LegacyEnglishOriginalInputBudget.Reservation preparation,CancellationToken token)
     {
@@ -81,13 +83,13 @@ internal sealed class LegacyEnglishOriginalInputContext : IDisposable
         if(!OriginalState.Succeeded||OriginalState.IsFaulted||OriginalState.Inputs.Count!=1)
             throw new InvalidOperationException("Original input bootstrap failed.");
         Input=OriginalState.Inputs[0];
-        Selected=LegacyLibraryOriginalSelectedFieldContext.Prepare(Original,Input,token);
+        Selected=LegacyLibraryOriginalSelectedFieldContext.PrepareRetainingActualGeometry(Original,Input,out verifiedOriginalGeometry,token);
         SelectedState=Selected.Run(token);
         if(!SelectedState.Succeeded||SelectedState.IsFaulted||SelectedState.Registry.Count!=1)
             throw new InvalidOperationException("Selected original input clone failed.");
         processing=LegacyLibraryTextProcessingContext.CreateForOriginalSelected(Selected,token);
         Binding=processing.InputBinding;
-        try{request=processing.PrepareInput(token);lease=processing.RetainForPublication();}
+        try{var prepared=processing.PrepareInputRetainingDomNames(token);request=prepared.Request;preparedDomNames=prepared.Names;lease=processing.RetainForPublication();}
         catch{processing.Dispose();throw;}
     }
     internal static LegacyEnglishOriginalInputContext Create(InkStroke[] raw,LegacyEnglishOriginalInputBudget.Reservation preparation,CancellationToken token)=>new(raw,preparation,token);
@@ -113,6 +115,51 @@ internal sealed class LegacyEnglishOriginalInputContext : IDisposable
             !ReferenceEquals(processing.PreparedRequest,request)||!request.Succeeded||
             !ReferenceEquals(processing.Result.BoundInputBinding,processing.InputBinding))
             throw new InvalidOperationException("Same live pre-NN original-selected/imported2DA cohort required.");
+    }
+    internal LegacyLibraryTextResultIdentifier InitializeGraphPublicationIdentifier(LegacyEnglish119ParentSubmission actual,CancellationToken token)
+    {
+        Require(actual,token);
+        if(!publication||identifierClaimed||processing.Result.PublicationSeed is not null)
+            throw new InvalidOperationException("One fresh English publication identifier required.");
+        identifierClaimed=true;
+        var previous=processing.Result.CopyIdentifier38();
+        //01C010's actual constructor zeroed38/40; no accepted/adopted result
+        //can enter this fresh private context. UUID version bits prove that
+        //NextDistinct needs exactly one generation against this actual value.
+        if(previous.Length!=16||previous.Any(b=>b!=0))throw new NotSupportedException("Actual fresh constructor identifier required.");
+        var value=LegacyLibraryUuidGenerator.Create().NextDistinct(previous,token);
+        processing.Result.CaptureEnglishIdentifier(this,actual,value,token);return value;
+    }
+    internal (LegacyLibraryTextInputRequest Request,LegacyLibraryTextDomArena Reader,LegacyDomNode Field,LegacyLibraryPreparedDomNames Names) BorrowFreshDomTarget(
+        LegacyEnglish119ParentSubmission actual,CancellationToken token)
+    {
+        Require(actual,token);
+        if(!publication||!identifierClaimed)throw new InvalidOperationException("Live actual fresh result identifier required.");
+        var target=request.BorrowEnglishDomTarget(this,actual,token);
+        return(target.Request,target.Reader,target.Field,preparedDomNames);
+    }
+    internal void RequireProcessingResult(LegacyLibraryTextProcessingResult result,LegacyEnglish119ParentSubmission actual,CancellationToken token)
+    {Require(actual,token);if(!publication||!identifierClaimed||!ReferenceEquals(processing.Result,result))throw new InvalidOperationException("Exact live English processing result required.");}
+    //This is the actual export produced before Selected.Run, not a supplied
+    //identity flag. CurrentView/C49/ranges are immutable; exact selected C22
+    //cloning and both retained selection owners are rechecked before reuse.
+    internal LegacyOwnedRawInkIdentityExport BorrowFreshTransformGeometry(LegacyEnglish119ParentSubmission actual,
+        LegacyLibrarySelectedInputBinding actualBinding,out long sourceTag,out int oldTextCount,CancellationToken token)
+    {
+        Require(actual,token);
+        if(!publication||!ReferenceEquals(actualBinding,Binding)||!ReferenceEquals(verifiedOriginalGeometry.Owner,View))
+            throw new InvalidOperationException("Exact live retained original geometry required.");
+        var entry=Binding.OriginalSelectedEntry??throw new InvalidOperationException("Actual selected INPUT required.");
+        if(!ReferenceEquals(entry.Owner,Selected)||!ReferenceEquals(entry.OriginalEntry,Input)||
+            !ReferenceEquals(entry.RetainedSelection.Owner,Selected)||!ReferenceEquals(Input.RetainedSelection.Owner,Original))
+            throw new InvalidOperationException("Exact cloned selection lineage required.");
+        var ranges=entry.CopyRanges();var verified=verifiedOriginalGeometry.CopyRanges();
+        if(ranges.Length!=1||verified.Length!=1||!ranges.AsSpan().SequenceEqual(verified))
+            throw new NotSupportedException("The actual preverified full C22 changed.");
+        sourceTag=processing.Result.SourceTag30;oldTextCount=processing.Result.TextCountD8;
+        if(sourceTag!=entry.RegistryId||oldTextCount!=0)
+            throw new NotSupportedException("Actual fresh imported source tag and empty old result required.");
+        token.ThrowIfCancellationRequested();return verifiedOriginalGeometry;
     }
     internal void BeginPublication(LegacyEnglish119ParentSubmission actual,CancellationToken token)
     {Require(actual,token);publication=true;}
@@ -146,6 +193,13 @@ internal sealed partial class LegacyEnglishCasePrimaryCompletion
     {
         var parent=knowledge.Owner.Owner.Owner.Parent;
         parent.OriginalInputContext?.Require(parent,token);
+    }
+    // This new explicit route may NOT replace a missing pre-NN context with a late bootstrap.
+    internal void RequirePreNeuralOriginalInputContext(CancellationToken token)
+    {
+        var parent=knowledge.Owner.Owner.Owner.Parent;
+        var input=parent.OriginalInputContext??throw new InvalidOperationException("Authentic pre-NN original-selected input required.");
+        input.Require(parent,token);
     }
     internal void ReleaseOriginalInputContext()=>knowledge.Owner.Owner.Owner.Parent.ReleaseOriginalInputContext();
 }

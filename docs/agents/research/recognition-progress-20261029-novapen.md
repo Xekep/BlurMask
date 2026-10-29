@@ -58,13 +58,15 @@ a machine-specific runtime patch requirement from the raw append test project.
 
 ## Remaining boundaries
 
-- English: the isolated949 candidate completes the current private source.V30
+- English: the historical isolated949 candidate completes the private source.V30
   control through both resets and outer phase2, on one stroke/three points.
-  The preserved-main951 composition also passes that same control in isolation.
+  The preserved-main951 composition now passes the same control in Managed and
+  diagnostic Native AOT. Its reviewed code is admitted to Main after actual Main
+  951/953 build/PDB/publication gates and runtime EN/RU/Math regressions.
   [Checkpoint details](english-private-source24-20261029.md) distinguish this
   result from BE2 application, public admission and real-word/cursive quality,
-  which remain incomplete. Main Core937 is not replaced by this checkpoint.
-- Math: the current candidate contains 85 authored Math documents and 937 Core
+  which remain incomplete. Public English admission is unchanged.
+- Math: the current candidate contains 85 authored Math documents and 951 Core
   documents. Six real applied OLD results accept an appended raw curve, build a
   new selected/C23 owner and run genuine NEW neural inference. Their actual diff
   cohorts complete 31 kept mutations on the same temporary trees; independent

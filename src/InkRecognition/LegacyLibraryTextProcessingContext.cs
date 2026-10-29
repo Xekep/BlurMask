@@ -61,9 +61,17 @@ public sealed class LegacyLibraryTextProcessingContext : IDisposable
         int preparationFailure = -1, int cancellationStage = -1, CancellationToken token = default)
         => PrepareCore(domFailure, preparationFailure, cancellationStage, token);
 
-    private LegacyLibraryTextInputRequest PrepareCore(int domFailure, int preparationFailure,
-        int cancellationStage, CancellationToken token)
+    internal (LegacyLibraryTextInputRequest Request,LegacyLibraryPreparedDomNames Names) PrepareInputRetainingDomNames(CancellationToken token)
     {
+        var result=PrepareCore(-1,-1,-1,token,true,out var names);
+        return(result,names??throw new InvalidOperationException("Actual prepared DOM name frame required."));
+    }
+    private LegacyLibraryTextInputRequest PrepareCore(int domFailure,int preparationFailure,int cancellationStage,CancellationToken token)
+        =>PrepareCore(domFailure,preparationFailure,cancellationStage,token,false,out _);
+    private LegacyLibraryTextInputRequest PrepareCore(int domFailure,int preparationFailure,
+        int cancellationStage,CancellationToken token,bool retainNames,out LegacyLibraryPreparedDomNames? preparedNames)
+    {
+        preparedNames=null;
         lock (gate)
         {
             Check(); token.ThrowIfCancellationRequested();
@@ -82,7 +90,13 @@ public sealed class LegacyLibraryTextProcessingContext : IDisposable
                 var snapshot = new InputOnlySnapshot(request);
                 try
                 {
-                    foreach (string name in ImportNames) arena.NamePool.Intern(name);
+                    (string Name,int Identity)[]? retained=retainNames?new (string,int)[ImportNames.Length]:null;
+                    for(int i=0;i<ImportNames.Length;i++)
+                    {
+                        string name=ImportNames[i];var actual=arena.NamePool.Intern(name);
+                        if(retained is not null)retained[i]=(name,actual.Identity);
+                    }
+                    if(retained is not null)preparedNames=new(request,arena.NamePool,retained);
                     result.ResetForImport(); request.Record("result:reset");
                     result.BindRequest(request); request.Record("result:bind");
                     Stage(1); // Literal range-vector allocation refusal.
@@ -211,6 +225,12 @@ public sealed class LegacyLibraryTextProcessingResult
             publicationSeed=new(seed);return 0;
         });
     }
+    internal void CaptureEnglishIdentifier(LegacyEnglishOriginalInputContext context,LegacyEnglish119ParentSubmission actual,
+        LegacyLibraryTextResultIdentifier value,CancellationToken token)
+    {
+        context.RequireProcessingResult(this,actual,token);
+        Owner.Read(()=>{token.ThrowIfCancellationRequested();if(publicationSeed is not null)throw new InvalidOperationException("Foreign publication seed.");identifier38=value.CopyRawStorage16();return 0;});
+    }
     internal void CapturePublicationIdentifier(LegacyFreshMainTextDocumentSeed seed)
     {
         Owner.Read(()=>
@@ -298,8 +318,38 @@ public sealed class LegacyLibraryTextInputRequest
         if (tag.Tag != 4 || tag.Value.Length != 8) throw new InvalidDataException("Exact signed64 input.tag required.");
         return BinaryPrimitives.ReadInt64LittleEndian(tag.Value);
     }
+    internal (LegacyLibraryTextInputRequest Request,LegacyLibraryTextDomArena Reader,LegacyDomNode Field) BorrowEnglishDomTarget(
+        LegacyEnglishOriginalInputContext context,LegacyEnglish119ParentSubmission actual,CancellationToken token)
+    {
+        context.RequireProcessingResult(Owner.Result,actual,token);token.ThrowIfCancellationRequested();
+        if(released||!succeeded||root is null||root.Released||fieldNode is null||fieldNode.Released||fieldNode.Kind!=3||
+            !ReferenceEquals(Owner.PreparedRequest,this)||!ReferenceEquals(Owner.Result.BoundRequest,this)||
+            !ReferenceEquals(Arena.Document,Owner.Document)||!ReferenceEquals(OriginalSelectedInput,Owner.InputBinding.OriginalSelected))
+            throw new InvalidOperationException("The actual imported request reader and field are required.");
+        return(this,Arena,fieldNode);
+    }
     internal void Record(string value) => trace.Add(value);
     internal string[] CopyPreparationTrace() => trace.ToArray();
     internal void Complete() => succeeded = true;
     internal void ReleaseOwnedTree() { if (root is not null && !root.Released) Arena.Release(root); released = true; }
+}
+
+//Immutable actual outputs of the original import-name producer. No caller IDs
+//or substitute name owner enter the English lexical continuation.
+internal sealed class LegacyLibraryPreparedDomNames(LegacyLibraryTextInputRequest request,
+    LegacyLibraryTextDomNamePool pool,(string Name,int Identity)[] entries)
+{
+    private readonly LegacyLibraryTextInputRequest request=request;
+    private readonly LegacyLibraryTextDomNamePool pool=pool;
+    private readonly (string Name,int Identity)[] entries=entries;
+    internal (string Name,int Identity) Require(LegacyLibraryTextInputRequest actual,
+        LegacyLibraryTextDomNamePool actualPool,int slot,string expected)
+    {
+        if(!ReferenceEquals(request,actual)||!ReferenceEquals(pool,actualPool)||(uint)slot>=(uint)entries.Length)
+            throw new InvalidOperationException("Exact prepared DOM name frame required.");
+        var value=entries[slot];
+        if(value.Identity<1||!string.Equals(value.Name,expected,StringComparison.Ordinal))
+            throw new InvalidOperationException("Exact native import-name slot required.");
+        return value;
+    }
 }

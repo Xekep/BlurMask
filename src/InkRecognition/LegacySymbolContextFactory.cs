@@ -1,4 +1,4 @@
-﻿namespace InkRecognition;
+namespace InkRecognition;
 
 /// <summary>Portable context identity and exact native symbolic fields. IDs are not addresses.</summary>
 public sealed record LegacySymbolContextNode(ulong Identity, ulong ParentLink, ulong ChildTreeRoot,
@@ -26,9 +26,10 @@ public sealed class LegacySymbolContextSnapshot
 /// Instances require serialized caller access. Cancellation precedes insertion;
 /// a committed bounded insertion completes its rotations without interruption.
 /// </summary>
-public sealed class LegacySymbolContextFactory
+public sealed partial class LegacySymbolContextFactory
 {
     private static long nextIdentity;
+    private LegacyEnglishCaseNode0Completion.GraphPeriodicContextBudget? periodicBudget; // Default null;8 semantic bytes.
     private readonly Dictionary<ulong, Node> nodes = [];
     private readonly List<int> used = [];
     private readonly int maximumNodes;
@@ -92,7 +93,8 @@ public sealed class LegacySymbolContextFactory
         return result;
     }
 
-    public LegacySymbolContextNode ReadNode(ulong identity) => View(Get(identity));
+    public LegacySymbolContextNode ReadNode(ulong identity)
+    {periodicBudget?.BeforeView(this);return View(Get(identity));}
     public IReadOnlyList<LegacySymbolContextNode> CopyNodes()
         => Array.AsReadOnly(nodes.Values.OrderBy(n=>n.Page).ThenBy(n=>n.Slot).Select(View).ToArray());
     public int[] CopyPageUsedCounts() => used.ToArray();
@@ -167,6 +169,7 @@ public sealed class LegacySymbolContextFactory
 
     private Node Allocate(ushort symbol, ulong owner)
     {
+        periodicBudget?.BeforeInsert(this,nodes.Count,nodes.EnsureCapacity(0),used.Count,used.Capacity);
         int page=-1;
         if(cursor<used.Count&&used[cursor]<NodesPerPage)page=cursor;
         else for(int i=used.Count-1;i>=0;i--)if(used[i]<NodesPerPage){page=i;break;}

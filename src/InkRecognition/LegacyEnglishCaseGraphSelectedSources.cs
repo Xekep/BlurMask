@@ -134,8 +134,13 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             //private context retains no actual field40 backing. Preserve -1
             //only as an explicitly unknown DATA template; no guard, lookup,
             //selector or downstream issuer may consume these template bytes.
-            var wordBefore=new byte[8];BinaryPrimitives.WriteInt64LittleEndian(wordBefore,-1);
-            var wordBeforeKnown=new byte[8];var wordAfter=wordBefore.ToArray();var wordAfterKnown=new byte[8];
+            if(!wordScalarsAssigned||wordField48!=-1)throw new InvalidOperationException("Actual fresh WORD028EB7/028EBF stores required.");
+            var wordBefore=new byte[8];BinaryPrimitives.WriteInt64LittleEndian(wordBefore,wordField40);
+            var wordBeforeKnown=new byte[8];
+            //Historical diagnostic routes retain their previous mask contract;
+            //the explicit fresh periodic index route owns the new scalar stores.
+            if(owner.graphPeriodicActive&&owner.graphSourceIndicesRequested)wordBeforeKnown.AsSpan().Fill(255);
+            var wordAfter=wordBefore.ToArray();var wordAfterKnown=wordBeforeKnown.ToArray();
             var writes=new GraphSelectedLinkWrite[selected.Links.Length];
             //020000 inner CHAR loop precedes its outer WORD stores. Repeated
             //canonical keys retain the last raw marker, no dedup/reordering.
@@ -147,6 +152,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             }
             //Native200BE/200CD run only after inner CHAR loop2009F/200AE.
             flags|=0x08000000u;WriteSelectedIndex44(wordAfter,wordAfterKnown,SelectedOrdinal);
+            wordField40=BinaryPrimitives.ReadInt64LittleEndian(wordAfter);
             Require(token);context.RequireCompleted(token);earlySelected.RequireRawOwner(this,token);
             var after=Selections.CopyPendingSelections();
             if(Selections.NextSelectionId!=pendingNext||after.Count!=pending.Count||context.Interner.Count!=n||context.Interner.RootIdentity!=root||

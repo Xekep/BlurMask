@@ -118,4 +118,16 @@ internal sealed class LegacyEnglishCaseNode0NativeFreshPolicy
         return (tag&(1UL<<40))!=0&&kind==8?7:kind==9?8:expansion.Policy.ReadWordCategory(state);
     }
 
+    internal void RequireGraphPeriodicSource(LegacyEnglishCaseNode0Completion.GraphLanguageScope stage,CancellationToken token)
+    {
+        stage.RequirePhase1();token.ThrowIfCancellationRequested();
+        ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FreshSelectedField,64);
+        if(Volatile.Read(ref bound)!=1||!ReferenceEquals(stage.Lease.Root,root)||!ReferenceEquals(stage.Lease.Pass.Initializer,initializer)||
+            !ReferenceEquals(root!.Knowledge,knowledge)||!ReferenceEquals(root.NumericOwner,numeric)||current54!=120||ignoreCaseC4||knowledgeF5||
+            stage.Lease.Pass.Initializer.PlanForAudit.BindingForAudit.Graph.MaximumAtoms!=8)
+            throw new InvalidOperationException("Same private fresh no-property English periodic source required.");
+        // NEW00C860 clears98..9F andA4..AB. This private direct fresh source has
+        // no external/property/copy ingress; it is NOT child249 invocation A8.
+        // Native trace2368=0 and secondary2404=1 were authenticated by BindInitialization.
+    }
 }

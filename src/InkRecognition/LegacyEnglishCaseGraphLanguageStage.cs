@@ -7,8 +7,10 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
     // Connected SOURCE checkpoint: invoked before EndNode1 and before phase2,
     // from SAME freshly produced heap rows, never caller-returned snapshots.
     private LegacyEnglishCaseGraphLanguageInput[] PrepareGraphLanguageInputs(LegacyEnglishFreshCaseMainSource.Node1QueryLease lease,int node,
-        LegacyEnglishCaseNode1Materialization.Images images,LegacyCursiveCategoryProfile categories,bool executeFirst,CancellationToken token)
+        LegacyEnglishCaseNode1Materialization.Images images,LegacyCursiveCategoryProfile categories,bool executeFirst,CancellationToken token,int primaryMinimum=0x4000000,GraphLoopOutput output=GraphLoopOutput.FinalSnapshot)
     {
+        if(output==GraphLoopOutput.PeriodicWordSourceOnly&&(!graphPeriodicActive||!graphLoopActive||!graphWordSourceRequested||!graphFinalCompactRequested))
+            throw new InvalidOperationException("Private running periodic WORD-source execution required.");
         RequireNode1(lease.Root,lease.Pass);lease.Root.ValidateNode1(lease);token.ThrowIfCancellationRequested();
         if(ring is null||node!=ring.CurrentNode+1||node>=ring.ActualNodeCount||images.Count is <0 or >125||images.Rows88.Length!=125*88||images.Alternatives80.Length!=125*80||images.LiveDescriptor is null||images.LiveDescriptor.AllocatedCapacity!=250||images.LiveDescriptor.Count!=images.Count||images.LivePrimaryOrdinals is null||images.LivePrimaryOrdinals.Length!=156||graphLanguageScope is not null)
             throw new InvalidOperationException("Exact same running producer/ring/current-node language boundary required.");
@@ -23,31 +25,43 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         LegacyEnglishCaseGraphPrimaryDefinedness.Fill(images.Count,images.Alternatives80,ring.CurrentRowMask.AsSpan(0,125*88),ring.CurrentPrimaryMask);
         ring.ClearNode0Counters(125,125);
         if(graphLoopActive)ring.ClearCurrent3e(token); // actual21558D store even inactive primary rows
-        ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,64);ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,128);
-        var scope=new GraphLanguageScope(this,lease,node,images.LiveDescriptor,images.InitialCount,images.LivePrimaryOrdinals);graphLanguageScope=scope;
+        ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,72);ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,136);
+        var scope=new GraphLanguageScope(this,lease,node,images.LiveDescriptor,images.InitialCount,images.LivePrimaryOrdinals,primaryMinimum);graphLanguageScope=scope;
         try
         {
             if(System.Runtime.CompilerServices.RuntimeHelpers.IsReferenceOrContainsReferences<LegacyEnglishCaseGraphLanguageInput>()||System.Runtime.CompilerServices.Unsafe.SizeOf<LegacyEnglishCaseGraphLanguageInput>()>48)throw new NotSupportedException("Reference-free bounded language diagnostic slot required.");
-            ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,checked(images.Count*48L));ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,checked(images.Count*48L));
-            var result=new LegacyEnglishCaseGraphLanguageInput[images.Count];
+            if(!graphPeriodicActive){ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,checked(images.Count*48L));ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,checked(images.Count*48L));}
+            var result=graphPeriodicActive?Array.Empty<LegacyEnglishCaseGraphLanguageInput>():new LegacyEnglishCaseGraphLanguageInput[images.Count];
             for(int ordinal=0;ordinal<images.Count;ordinal++)
             {
                 scope.Require(token);var row=ring.CurrentRows.Slice(ordinal*88,88);
                 var anchor=LegacyEnglishCaseLanguageAnchor.Resolve(ring,node,ordinal,token);
                 // CURRENT00 feeds source70; anchorTag is never substituted.
-                result[ordinal]=new(node,ordinal,BinaryPrimitives.ReadUInt64LittleEndian(row),BinaryPrimitives.ReadUInt16LittleEndian(row[36..]),
+                if(!graphPeriodicActive)result[ordinal]=new(node,ordinal,BinaryPrimitives.ReadUInt64LittleEndian(row),BinaryPrimitives.ReadUInt16LittleEndian(row[36..]),
                     anchor.AnchorNode,anchor.AnchorOrdinal,anchor.PreviousWordNode,(row[5]&2)!=0&&(row[7]&1)==0);
             }
             if(executeFirst)
             {
-                if(!graphLoopActive||GraphLanguageRequired(scope,images.Count,token))RunGraphLanguageFirstOnly(scope,images.Count,categories,token);
+                if(!graphLoopActive||GraphLanguageRequired(scope,images.Count,token))
+                {ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,8);ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,8);RunGraphLanguageFirstOnly(scope,images.Count,categories,token);}
                 else SealGraphEmptyLanguage(scope,token);
                 _=CompleteGraphPhase1(scope,scope.Ordinals,token);
                 // Native215DDE207CB0 precedes the following215E92 sourceV80.
                 if(graphFinalCompactRequested&&node==ring.ActualNodeCount-1)
-                {scope.SealCompactPhase();RunGraphFinalCompact(scope,token);}
+                {scope.SealCompactPhase();if(graphPeriodicActive)RunGraphPeriodicFinalCompact(scope,token);else RunGraphFinalCompact(scope,token);}
                 scope.Lease.Pass.Initializer.PlanForAudit.ResetGraphNode(scope,token);
-                graphCompletedNode=LegacyEnglishCaseGraphNodeSnapshot.Capture(scope,token);
+                if(!graphPeriodicActive||node==ring.ActualNodeCount-1&&output==GraphLoopOutput.FinalSnapshot)graphCompletedNode=LegacyEnglishCaseGraphNodeSnapshot.Capture(scope,token);
+                else
+                {
+                    scope.RequireCompletedNode();
+                    if(node==ring.ActualNodeCount-1)
+                    {
+                        // Preserve final Capture's owner/pattern/cancellation guards, without allocating discarded DATA.
+                        scope.RequireFirstOnlyPattern();token.ThrowIfCancellationRequested();
+                        scope.RequireCompletedNode();token.ThrowIfCancellationRequested();
+                    }
+                    graphPeriodicCompletedNode=node;
+                } // This typed execution path consumes no detached node DATA.
             }
             scope.Require(token);return result; // historical value-only diagnostics
         }
@@ -61,6 +75,10 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         private readonly LegacyEnglishFreshCaseMainSource.Node1QueryLease lease;
         private readonly int node;
         private int acceptedClosed,phase1Entered,initializedN=-1,nodeEndReset;
+        private int materializedMinimum;
+        internal bool PeriodicEnabled=>owner.graphPeriodicActive;
+        internal int MaterializedMinimum{get{Require();return materializedMinimum;}}
+        internal void PublishMaterializedMinimum(int value){RequirePhase1();materializedMinimum=value;}
         private int firstOnlyPatternSealed=0;
 
         internal LegacyEnglishCaseNode0Completion Owner=>owner;
@@ -72,8 +90,8 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         internal int OriginalCountT{get;}
         internal int[] Ordinals{get;}
         internal int InitializedCountN=>initializedN;
-        internal GraphLanguageScope(LegacyEnglishCaseNode0Completion owner,LegacyEnglishFreshCaseMainSource.Node1QueryLease lease,int node,LegacyNativeWordHeapDescriptor descriptor,int t,int[] ordinals)
-        {this.owner=owner;this.lease=lease;this.node=node;Descriptor=descriptor;OriginalCountT=t;Ordinals=ordinals;}
+        internal GraphLanguageScope(LegacyEnglishCaseNode0Completion owner,LegacyEnglishFreshCaseMainSource.Node1QueryLease lease,int node,LegacyNativeWordHeapDescriptor descriptor,int t,int[] ordinals,int primaryMinimum)
+        {this.owner=owner;this.lease=lease;this.node=node;Descriptor=descriptor;OriginalCountT=t;Ordinals=ordinals;materializedMinimum=primaryMinimum;}
         internal void Require(CancellationToken token=default)
         {
             token.ThrowIfCancellationRequested();owner.RequireNode1(lease.Root,lease.Pass);lease.Root.ValidateNode1(lease);
@@ -113,7 +131,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         internal void ClaimEndReset(LegacyEnglishCaseInitializationPlan plan)
         {RequirePhase1();if(!ReferenceEquals(lease.Pass.Initializer.PlanForAudit,plan)||Interlocked.CompareExchange(ref nodeEndReset,1,0)!=0)throw new InvalidOperationException("One same-owner generic current-node reset required.");}
         internal void ChargeReset()
-        {RequirePhase1();owner.ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.Reset,5632);owner.ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.Reset,3888);owner.ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.Reset,3076);}
+        {RequirePhase1();owner.ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.Reset,5632);owner.ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.Reset,4464);owner.ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.Reset,3076+576);}
         internal void RequirePhase1()
         {Require();if(acceptedClosed!=1||phase1Entered!=1)throw new InvalidOperationException("Active generic phase1 required.");}
         internal void ChargeHeapVisit(long count)=>owner.ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.Phase1Working,count);

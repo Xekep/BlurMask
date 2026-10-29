@@ -16,7 +16,12 @@ public sealed partial class LegacyNativeWordHeapDescriptor
         // not CLR header/padding/RSS or whole-owner allocation certification.
         stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,48);
         stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,48);
-        return CompleteGraphFirstPhase1Core(stage.Ring,stage.Ledger,ordinals,stage.InitializedCountN,stage.RequirePhase1,token);
+        int minimum=stage.MaterializedMinimum;
+        var workspace=stage.PeriodicEnabled?stage.Owner.RequirePeriodicWorkspace(stage):null;
+        var result=CompleteGraphFirstPhase1Core(stage.Ring,stage.Ledger,ordinals,stage.InitializedCountN,stage.RequirePhase1,ref minimum,stage.PeriodicEnabled,token,
+            workspace?.Phase1Pivot(stage),workspace?.Phase1Temporary(stage),workspace?.Phase1Partitions(stage));
+        if(stage.PeriodicEnabled)stage.PublishMaterializedMinimum(minimum);
+        return result;
     }
 
     // Pure numeric prepared-data entry only: no GraphLanguageScope/lease or
@@ -25,19 +30,19 @@ public sealed partial class LegacyNativeWordHeapDescriptor
     // kernels likewise accept explicit synthetic arrays without source authority.
     internal Node0Phase1Result CompletePreparedGraphFirstPhase1(LegacyEnglishCaseNode0Ring ring,
         LegacyEnglishCaseNode0Ledger ledger,int[] ordinals,int n,CancellationToken token)
-        =>CompleteGraphFirstPhase1Core(ring,ledger,ordinals,n,PreparedNumericCheckpoint,token);
+        {int minimum=0x4000000;return CompleteGraphFirstPhase1Core(ring,ledger,ordinals,n,PreparedNumericCheckpoint,ref minimum,false,token);}
     private static void PreparedNumericCheckpoint() { }
 
     private Node0Phase1Result CompleteGraphFirstPhase1Core(LegacyEnglishCaseNode0Ring ring,
-        LegacyEnglishCaseNode0Ledger ledger,int[] ordinals,int n,Action requirePhase1,CancellationToken token)
+        LegacyEnglishCaseNode0Ledger ledger,int[] ordinals,int n,Action requirePhase1,ref int materializedMinimum,bool collectMinimum,CancellationToken token,byte[]? reusedPivot=null,byte[]? reusedTemporary=null,int[]? reusedPartitions=null)
     {
         token.ThrowIfCancellationRequested();requirePhase1();
         if(ordinals.Length!=156||(uint)n>124||Capacity!=124||AllocatedCapacity!=250||Count!=n||resizing||mutating)
             throw new InvalidOperationException("Sealed finite124/retained250 phase1 and156 ordinal storage required.");
         ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.Phase1Working,16);
-        var pivot=ledger.Bytes(LegacyEnglishCaseNode0Ledger.Site.Phase1Working,128);
-        var temporary=ledger.Bytes(LegacyEnglishCaseNode0Ledger.Site.Phase1Working,128);
-        var partitions=ledger.Ints(LegacyEnglishCaseNode0Ledger.Site.Phase1Working,248);
+        var pivot=reusedPivot??ledger.Bytes(LegacyEnglishCaseNode0Ledger.Site.Phase1Working,128);
+        var temporary=reusedTemporary??ledger.Bytes(LegacyEnglishCaseNode0Ledger.Site.Phase1Working,128);
+        var partitions=reusedPartitions??ledger.Ints(LegacyEnglishCaseNode0Ledger.Site.Phase1Working,248);
         for(int i=0;i<n;i++)
         {
             token.ThrowIfCancellationRequested();ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.Phase1Sort,64);
@@ -101,6 +106,8 @@ public sealed partial class LegacyNativeWordHeapDescriptor
         {
             token.ThrowIfCancellationRequested();requirePhase1();ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,2048);
             int at=(125+i)*88;var source=Node0Slot(i,ledger);
+            // Native local160 includes every post-quota language row BEFORE stored sorting/dedup.
+            if(collectMinimum){ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.Descriptor,8);materializedMinimum=Math.Min(materializedMinimum,BinaryPrimitives.ReadInt32LittleEndian(source[16..]));}
             ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,176);source[..88].CopyTo(store[at..]);
             for(int j=0;j<88;j++)masks[at+j]=j is >=65 and <=67 or >=76 and <=79?(byte)0:(byte)255;
             if(BinaryPrimitives.ReadUInt16LittleEndian(store[(at+60)..])==ushort.MaxValue)

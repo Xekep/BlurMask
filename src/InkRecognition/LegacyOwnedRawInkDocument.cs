@@ -41,6 +41,11 @@ public sealed class LegacyOwnedRawInkDocument
 
     public LegacyNativeSelectedInkRange[] CopySelectedInputs() => selections.ToArray();
 
+    // Immutable numerical map/root, already built and validated by this SAME
+    // document. No selected input/row array or source authority is exported.
+    internal LegacyNativeTextSourceInputMap GraphPublicationMap=>map;
+    internal LegacyNativeInkPositionRange GraphPublicationRoot=>originalRange;
+
     /// <summary>05AFA0 ordinary projection into this exact raw root document.
     /// Ranges retain native C21.V80 append order;024F30 source-node
     /// interning remains a later stage. Sampled ordinals are never used as raw document IDs.</summary>

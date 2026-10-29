@@ -71,6 +71,7 @@ public sealed class LegacyLibraryTextDomArena
     public LegacyLibraryTextDomNamePool NamePool {get;}
     private readonly List<LegacyDomNode> nodes=[];
     private readonly List<string> trace=[];
+    private readonly bool traceEnabled=true;
     private int failAt,cancelAt;
     private int attempts;
     internal LegacyLibraryTextDomArena(LegacyFreshMainTextDocumentSeed seed,int failAt=-1,int cancelAt=-1)
@@ -81,6 +82,10 @@ public sealed class LegacyLibraryTextDomArena
     {Document=input.Document;NamePool=new(input);this.failAt=failAt;this.cancelAt=cancelAt;}
     internal LegacyLibraryTextDomArena(LegacyOwnedRawInkDocument document,int failAt=-1,int cancelAt=-1)
     {Document=document;NamePool=new(document);this.failAt=failAt;this.cancelAt=cancelAt;}
+    //The fresh English owner supplies its authenticated actual request, never
+    //a new empty parent, a source registry ID or a replacement name pool.
+    internal LegacyLibraryTextDomArena(LegacyLibraryTextInputRequest actualRequest)
+    {Document=actualRequest.Owner.Document;NamePool=actualRequest.Arena.NamePool;failAt=cancelAt=-1;traceEnabled=false;}
     internal IReadOnlyList<(int Identity,string Prefix,string Uri)> CopyNamespacePairs() =>
         nodes.Where(n=>n.Kind==2).Select(n=>(n.Identity,n.NamespacePrefix!,n.NamespaceUri!)).ToArray();
     internal (LegacyDomNode Root,LegacyDomNode Field,LegacyDomNode Input) ImportSelectedPage(
@@ -107,7 +112,7 @@ public sealed class LegacyLibraryTextDomArena
                 if(n.NativeValueTag is 1 or 2 or 3)
                 {if(!SetString(copy,n.CopyValueBytes()))throw new InvalidOperationException("Selected attribute-facade copy refusal.");}
                 else if(n.NativeValueTag is 4 or 5 or 6 or 7 or 8)
-                {copy.Tag=n.NativeValueTag;copy.Value=n.CopyValueBytes();trace.Add("value:"+copy.Identity+":"+copy.Tag+":"+Convert.ToBase64String(copy.Value));}
+                {copy.Tag=n.NativeValueTag;copy.Value=n.CopyValueBytes();if(traceEnabled)trace.Add("value:"+copy.Identity+":"+copy.Tag+":"+Convert.ToBase64String(copy.Value));}
                 else throw new NotSupportedException("Exact selected attribute lane required.");
             }
         }
@@ -115,7 +120,7 @@ public sealed class LegacyLibraryTextDomArena
         {
             var parent=map[n.Identity];
             foreach(int id in n.Attributes)
-            {var a=map[id];if(parent.Kind!=3||a.Kind!=0||a.Parent is not null)throw new InvalidDataException("Selected attribute ownership lost.");a.Parent=parent;parent.Attributes.Add(a);trace.Add("attr:"+parent.Identity+":"+a.Identity);}
+            {var a=map[id];if(parent.Kind!=3||a.Kind!=0||a.Parent is not null)throw new InvalidDataException("Selected attribute ownership lost.");a.Parent=parent;parent.Attributes.Add(a);if(traceEnabled)trace.Add("attr:"+parent.Identity+":"+a.Identity);}
             foreach(int id in n.Children)Append(parent,map[id]);
         }
         return(map[snapshot.RootIdentity],map[snapshot.SelectedFieldIdentity],map[snapshot.SelectedInputIdentity]);
@@ -126,15 +131,54 @@ public sealed class LegacyLibraryTextDomArena
     internal int Attempts=>attempts;
     internal bool Allow(string operation)
     {
-        int ordinal=attempts++;trace.Add("try:"+operation);
+        int ordinal=attempts++;if(traceEnabled)trace.Add("try:"+operation);
         if(ordinal==cancelAt)throw new OperationCanceledException("Prepared native-service cancellation prefix.");
-        if(ordinal==failAt){trace.Add("fail:"+operation);return false;}return true;
+        if(ordinal==failAt){if(traceEnabled)trace.Add("fail:"+operation);return false;}return true;
     }
-    private LegacyDomNode? Allocate(byte kind,string name="")
+    private LegacyDomNode? Allocate(byte kind,string name="",int resolvedName=-1)
     {
-        int named=0;if(name.Length!=0){var result=NamePool.Intern(name);named=result.Identity;if(result.Added)trace.Add("name:"+named+":"+name);}
+        int named=resolvedName;
+        if(named<0){named=0;if(name.Length!=0){var result=NamePool.Intern(name);named=result.Identity;if(result.Added)if(traceEnabled)trace.Add("name:"+named+":"+name);}}
         if(!Allow("node"+kind))return null;
-        var node=new LegacyDomNode(nodes.Count+1,kind,name,named);nodes.Add(node);trace.Add("new:"+node.Identity+":"+kind+":"+name);return node;
+        var node=new LegacyDomNode(nodes.Count+1,kind,name,named);nodes.Add(node);if(traceEnabled)trace.Add("new:"+node.Identity+":"+kind+":"+name);return node;
+    }
+    internal (int Nodes,int NodeCapacity,int Attributes,int AttributeCapacity) ReadEnglishLayout(LegacyDomNode? element)
+        =>(nodes.Count,nodes.Capacity,element?.Attributes.Count??0,element?.Attributes.Capacity??0);
+    internal LegacyDomNode? EnglishElement(LegacyEnglishCaseNode0Completion.GraphWordPublicationContext parent,int slot,string expected,CancellationToken token)
+    {var name=parent.PrepareFreshDomNode(this,slot,expected,null,0,token);return Allocate(3,name.Name,name.Identity);}
+    internal LegacyDomNode? EnglishText(LegacyEnglishCaseNode0Completion.GraphWordPublicationContext parent,byte[] raw,CancellationToken token)
+    {
+        parent.PrepareFreshDomNode(this,-1,"",null,raw.Length,token);var node=Allocate(1);
+        if(node is null)return null;
+        if(!SetString(node,raw,parent,token)){node.Released=true;return null;}return node;
+    }
+    internal bool EnglishStringAttribute(LegacyEnglishCaseNode0Completion.GraphWordPublicationContext parent,LegacyDomNode node,
+        int slot,string expected,byte[] value,CancellationToken token)
+    {
+        var name=parent.PrepareFreshDomNode(this,slot,expected,node,value.Length,token);ValidateElement(node);
+        var attribute=node.Attributes.FirstOrDefault(a=>a.NameIdentity==name.Identity);bool created=attribute is null;
+        attribute??=Allocate(0,name.Name,name.Identity);if(attribute is null)return false;
+        if(!SetString(attribute,value,parent,token)){if(created)Release(attribute);return false;}
+        if(created){attribute.Parent=node;node.Attributes.Add(attribute);}return true;
+    }
+    internal bool EnglishNumericAttribute(LegacyEnglishCaseNode0Completion.GraphWordPublicationContext parent,LegacyDomNode node,
+        int slot,string expected,byte tag,long raw,CancellationToken token)
+    {
+        int width=tag is 4 or 5?8:tag is 7 or 8?4:throw new ArgumentOutOfRangeException(nameof(tag));
+        var name=parent.PrepareFreshDomNode(this,slot,expected,node,width,token);ValidateElement(node);
+        var attribute=node.Attributes.FirstOrDefault(a=>a.NameIdentity==name.Identity);bool created=attribute is null;
+        attribute??=Allocate(0,name.Name,name.Identity);if(attribute is null)return false;
+        var value=new byte[width];if(width==8)BinaryPrimitives.WriteInt64LittleEndian(value,raw);else BinaryPrimitives.WriteInt32LittleEndian(value,unchecked((int)raw));
+        parent.RequireFreshDomPublication(this,token);attribute.Tag=tag;attribute.Value=value;
+        if(created){attribute.Parent=node;node.Attributes.Add(attribute);}return true;
+    }
+    internal void EnglishAppend(LegacyEnglishCaseNode0Completion.GraphWordPublicationContext owner,LegacyDomNode parent,LegacyDomNode child,CancellationToken token)
+    {
+        owner.PrepareFreshDomAppend(this,parent,token);Validate(parent);Validate(child);
+        if(parent.Kind is not(3 or 4)||child.Kind==0||child.Parent is not null||ReferenceEquals(parent,child))throw new ArgumentException("Actual unattached English DOM child required.");
+        int depth=0;for(var cursor=parent.Parent;cursor is not null;cursor=cursor.Parent)
+        {token.ThrowIfCancellationRequested();if(++depth>8||ReferenceEquals(cursor,child))throw new InvalidDataException("Bounded acyclic fresh DOM parent chain required.");}
+        child.Parent=parent;parent.Children.Add(child);
     }
     internal LegacyDomNode? Element(string name)=>Allocate(3,name);
     internal LegacyDomNode? TryConstructorRoot()=>Allocate(4);
@@ -142,23 +186,27 @@ public sealed class LegacyLibraryTextDomArena
     internal LegacyDomNode? Text(ReadOnlySpan<byte> raw)
     {
         var node=Allocate(1);if(node is null)return null;
-        if(!SetString(node,raw)){node.Released=true;trace.Add("release-bare:"+node.Identity);return null;}return node;
+        if(!SetString(node,raw)){node.Released=true;if(traceEnabled)trace.Add("release-bare:"+node.Identity);return null;}return node;
     }
     internal static byte[] Literal(ReadOnlySpan<byte> raw)
     {int zero=raw.IndexOf((byte)0);return(zero<0?raw:raw[..zero]).ToArray();}
-    private bool SetString(LegacyDomNode node,ReadOnlySpan<byte> raw)
+    private bool SetString(LegacyDomNode node,ReadOnlySpan<byte> raw,LegacyEnglishCaseNode0Completion.GraphWordPublicationContext? english=null,CancellationToken token=default)
     {
         Validate(node);byte[] value=Literal(raw);
         if(value.Length>=16&&!Allow("value-bytes"))return false;
+#if ENGLISH_FRESH_CONTINUATION_CONTROLS
+        if(english is not null)LegacyFreshContinuationTestHooks.Checkpoint?.Invoke("after-dom-arena-string-copy");
+#endif
+        english?.RequireFreshDomPublication(this,token);
         node.Tag=value.Length==0?(byte)3:value.Length<16?(byte)2:(byte)1;node.Value=value;
-        trace.Add("value:"+node.Identity+":"+node.Tag+":"+Convert.ToBase64String(value));return true;
+        if(traceEnabled)trace.Add("value:"+node.Identity+":"+node.Tag+":"+Convert.ToBase64String(value));return true;
     }
     internal bool StringAttribute(LegacyDomNode node,string name,ReadOnlySpan<byte> value)
     {
         ValidateElement(node);var attribute=node.Attributes.FirstOrDefault(a=>a.Name==name);bool created=attribute is null;
         attribute??=Allocate(0,name);if(attribute is null)return false;
         if(!SetString(attribute,value)){if(created)Release(attribute);return false;}
-        if(created){attribute.Parent=node;node.Attributes.Add(attribute);trace.Add("attr:"+node.Identity+":"+attribute.Identity);}return true;
+        if(created){attribute.Parent=node;node.Attributes.Add(attribute);if(traceEnabled)trace.Add("attr:"+node.Identity+":"+attribute.Identity);}return true;
     }
     internal bool NumericAttribute(LegacyDomNode node,string name,byte tag,ReadOnlySpan<byte> raw)
     {
@@ -166,8 +214,8 @@ public sealed class LegacyLibraryTextDomArena
         if(raw.Length!=width)throw new ArgumentException("Exact native numeric lane required.");
         var attribute=node.Attributes.FirstOrDefault(a=>a.Name==name);bool created=attribute is null;
         attribute??=Allocate(0,name);if(attribute is null)return false;
-        attribute.Tag=tag;attribute.Value=raw.ToArray();trace.Add("value:"+attribute.Identity+":"+tag+":"+Convert.ToBase64String(raw));
-        if(created){attribute.Parent=node;node.Attributes.Add(attribute);trace.Add("attr:"+node.Identity+":"+attribute.Identity);}return true;
+        attribute.Tag=tag;attribute.Value=raw.ToArray();if(traceEnabled)trace.Add("value:"+attribute.Identity+":"+tag+":"+Convert.ToBase64String(raw));
+        if(created){attribute.Parent=node;node.Attributes.Add(attribute);if(traceEnabled)trace.Add("attr:"+node.Identity+":"+attribute.Identity);}return true;
     }
     internal bool I32(LegacyDomNode n,string name,int value){byte[] b=new byte[4];BinaryPrimitives.WriteInt32LittleEndian(b,value);return NumericAttribute(n,name,7,b);}
     internal bool U32(LegacyDomNode n,string name,uint value){byte[] b=new byte[4];BinaryPrimitives.WriteUInt32LittleEndian(b,value);return NumericAttribute(n,name,8,b);}
@@ -178,10 +226,10 @@ public sealed class LegacyLibraryTextDomArena
     {
         Validate(parent);if(parent.Kind is not(3 or 4))throw new ArgumentException("A native container required.");Validate(child);if(child.Kind==0||child.Parent is not null||ReferenceEquals(parent,child))throw new ArgumentException("An unattached same-arena child is required.");
         for(var current=parent.Parent;current is not null;current=current.Parent)if(ReferenceEquals(current,child))throw new ArgumentException("Cyclic DOM append.");
-        child.Parent=parent;parent.Children.Add(child);trace.Add("append:"+parent.Identity+":"+child.Identity);
+        child.Parent=parent;parent.Children.Add(child);if(traceEnabled)trace.Add("append:"+parent.Identity+":"+child.Identity);
     }
     internal void DetachAndRelease(LegacyDomNode parent,LegacyDomNode child)
-    {Validate(parent);Validate(child);if(!ReferenceEquals(child.Parent,parent)||!parent.Children.Remove(child))throw new ArgumentException("Exact attached target child required.");child.Parent=null;trace.Add("remove:"+parent.Identity+":"+child.Identity);Release(child);}
+    {Validate(parent);Validate(child);if(!ReferenceEquals(child.Parent,parent)||!parent.Children.Remove(child))throw new ArgumentException("Exact attached target child required.");child.Parent=null;if(traceEnabled)trace.Add("remove:"+parent.Identity+":"+child.Identity);Release(child);}
     internal LegacyDomNode? CloneFrom(LegacyLibraryTextDomArena sourceArena,LegacyDomNode source,CancellationToken token)
     {
         token.ThrowIfCancellationRequested();sourceArena.Validate(source);
@@ -193,10 +241,10 @@ public sealed class LegacyLibraryTextDomArena
             token.ThrowIfCancellationRequested();var a=Allocate(0,attribute.Name);if(a is null){Release(copy);return null;}
             bool ok=true;
             if(attribute.Tag is 1 or 2 or 3)ok=SetString(a,attribute.Value);
-            else if(attribute.Tag is 4 or 5 or 6 or 7 or 8){a.Tag=attribute.Tag;a.Value=attribute.Value.ToArray();trace.Add("value:"+a.Identity+":"+a.Tag+":"+Convert.ToBase64String(a.Value));}
+            else if(attribute.Tag is 4 or 5 or 6 or 7 or 8){a.Tag=attribute.Tag;a.Value=attribute.Value.ToArray();if(traceEnabled)trace.Add("value:"+a.Identity+":"+a.Tag+":"+Convert.ToBase64String(a.Value));}
             else throw new NotSupportedException("Unsupported native attribute lane.");
-            if(!ok){a.Released=true;trace.Add("release-bare:"+a.Identity);Release(copy);return null;}
-            a.Parent=copy;copy.Attributes.Add(a);trace.Add("attr:"+copy.Identity+":"+a.Identity);
+            if(!ok){a.Released=true;if(traceEnabled)trace.Add("release-bare:"+a.Identity);Release(copy);return null;}
+            a.Parent=copy;copy.Attributes.Add(a);if(traceEnabled)trace.Add("attr:"+copy.Identity+":"+a.Identity);
         }
         foreach(var child in source.Children)
         {var cloned=CloneFrom(sourceArena,child,token);if(cloned is null){Release(copy);return null;}Append(copy,cloned);}
@@ -204,19 +252,19 @@ public sealed class LegacyLibraryTextDomArena
     }
     internal void ClearChildren(LegacyDomNode node)
     {
-        Validate(node);trace.Add("clear:"+node.Identity);
+        Validate(node);if(traceEnabled)trace.Add("clear:"+node.Identity);
         foreach(var child in node.Children.ToArray()){child.Parent=null;Release(child);}node.Children.Clear();
     }
     internal void Release(LegacyDomNode node)
     {
         Validate(node);
         foreach(var attribute in node.Attributes.ToArray()){attribute.Parent=null;Release(attribute);}node.Attributes.Clear();
-        ClearChildren(node);node.Released=true;trace.Add("release:"+node.Identity);
+        ClearChildren(node);node.Released=true;if(traceEnabled)trace.Add("release:"+node.Identity);
     }
     private void Validate(LegacyDomNode node)
     {if(node.Released||node.Identity<1||node.Identity>nodes.Count||!ReferenceEquals(nodes[node.Identity-1],node))throw new ArgumentException("A live node from this exact arena required.");}
     private void ValidateElement(LegacyDomNode node){Validate(node);if(node.Kind!=3)throw new ArgumentException("An element node required.");}
-    internal void Record(string value)=>trace.Add(value);
+    internal void Record(string value){if(traceEnabled)trace.Add(value);}
     internal LegacyLibraryTextDomNode Snapshot(LegacyDomNode node){Validate(node);return new(this,node);}
     internal LegacyDomNodeState[] CopyStates()=>nodes.Select(n=>new LegacyDomNodeState(n.Identity,n.Kind,n.Name,n.NameIdentity,n.Tag,
         n.Value.ToArray(),n.Parent?.Identity??0,n.Released,n.Attributes.Select(a=>a.Identity).ToArray(),n.Children.Select(c=>c.Identity).ToArray())).ToArray();

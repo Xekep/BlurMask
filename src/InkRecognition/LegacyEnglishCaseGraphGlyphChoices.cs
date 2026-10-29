@@ -38,7 +38,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
     }
     private void CompleteGraphGlyphChoiceRows(GraphLanguageScope stage,LegacyPreparedMainCompactPublication.Result compact,
         LegacyNativePlainWordPublisher publisher,LegacyNativeGlyphRecordPool pool,LegacyMainOrdinaryGlyphProductionOperations ordinary,
-        IReadOnlyList<ulong> refs,CancellationToken token)
+        IReadOnlyList<ulong> refs,CancellationToken token,GraphCharacterOutput characterOutput=GraphCharacterOutput.FullCanonical,GraphCompactRefreshIndex? refreshIndex=null)
     {
         RequireGraphPublication(stage,token);graphWordSourceSession!.RequireCompletedForTop(publisher,pool,token);
         var head=publisher.Head??throw new InvalidDataException("Actual selected WORD required.");publisher.RequireSoleActiveSourceHead(head);
@@ -62,6 +62,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             graphGlyphDispatch=new GraphGlyphRefreshDispatch(pool,128,token);
         }
         var dispatch=graphGlyphDispatch;
+        bool indexedWork=stage.PeriodicEnabled&&refreshIndex is not null&&ordinary.AlphabetCount is>=1 and<=256;
         long payload=0,copies=0,work=0;int cold=0,matchedTotal=0;
         for(int i=0;i<refs.Count;i++)
         {
@@ -78,10 +79,15 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             var arc=arcs[address.Arc];var bounds=ranges.Preflight(checked((int)arc.StartContextId),checked((int)arc.EndContextId),token);
             int first=compact.Starts[address.Node],end=compact.Starts[address.Node+1],matched=0;
             if(first<0||end<first||end>compact.Storage.Length/40)throw new InvalidDataException("Complete private compact interval required.");
-            //Predicate scan is charged BEFORE its first row access; never inferred from its result.
-            stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked((long)(end-first)*128));
-            for(int at=first;at<end;at++){token.ThrowIfCancellationRequested();if(GraphRefreshMatches(compact.Storage.AsSpan(checked(at*40),40),key))matched++;}
-            var charge=GraphRefreshCharge(bounds.Payload,bounds.Copies,matched,originalRows);
+            if(refreshIndex is not null)matched=refreshIndex.ReadCount(stage,pool,address.Node,address.Arc,key,token);
+            else
+            {
+                //Predicate scan is charged BEFORE its first row access; never inferred from its result.
+                stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,checked((long)(end-first)*128));
+                for(int at=first;at<end;at++){token.ThrowIfCancellationRequested();if(GraphRefreshMatches(compact.Storage.AsSpan(checked(at*40),40),key))matched++;}
+            }
+            var charge=indexedWork?GraphIndexedRefreshCharge(bounds.Payload,bounds.Copies,matched,originalRows,bounds.Depth):
+                GraphRefreshCharge(bounds.Payload,bounds.Copies,matched,originalRows);
             payload=checked(payload+charge.Payload);copies=checked(copies+charge.Copies);work=checked(work+charge.Visits);
             cold++;matchedTotal=checked(matchedTotal+matched);
         }
@@ -117,12 +123,23 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             int group=ordinary.ReadGroup(address.Node,address.Arc,token);
             var cache=ordinary.ReadCache(group,token);
             uint bits=BitConverter.SingleToUInt32Bits(cache.ReadFirstCandidateScore(token));
-            var operations=new LegacyOrdinaryGlyphRefreshOperations(
+            LegacyOrdinaryGlyphRefreshOperations operations;
+            if(refreshIndex is not null&&ordinary.AlphabetCount is>=1 and<=256)
+            {
+                // Before entering the helper: its compiler-generated closure may allocate at entry.
+                stage.Ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.FinalImages,4096);
+                stage.Ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.FinalImages,8192);
+                stage.Ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.FinalImages,32768);
+                operations=CreateIndexedRefreshOperations(stage,ordinary,address.Node,address.Arc,cache,token);
+            }
+            else operations=new LegacyOrdinaryGlyphRefreshOperations(
                 (symbol,ct)=>{RequireGraphPublication(stage,ct);if(symbol>=ordinary.AlphabetCount)throw new NotSupportedException("Refresh macro labels need their actual conversion issuer.");return ordinary.ResolveSymbol(symbol,0,address.Node,address.Arc,ct);},
                 (symbol,ct)=>{RequireGraphPublication(stage,ct);return BitConverter.SingleToUInt32Bits(cache.ReadSymbolScore(symbol,0,ct));},
                 (symbol,end,ct)=>{RequireGraphPublication(stage,ct);return new(cache.ReadRequestCost(ordinary.CreateRequest(address.Node,address.Arc,symbol,end),ct));});
-            int visited=LegacyNativeOrdinaryGlyphRefreshKernel.Apply(pool,key,compact.Storage,
-                compact.Starts[address.Node],compact.Starts[address.Node+1],key,operations,new byte[40],token);
+            int visited=refreshIndex is null
+                ?LegacyNativeOrdinaryGlyphRefreshKernel.Apply(pool,key,compact.Storage,
+                    compact.Starts[address.Node],compact.Starts[address.Node+1],key,operations,new byte[40],token)
+                :refreshIndex.Refresh(stage,pool,address.Node,address.Arc,key,operations,new byte[40],token);
             RequireGraphPublication(stage,token);
             //024F30 first pass: own refresh precedes projection/WORD clipping;
             //ALL references finish these steps before the selection loop below.
@@ -137,7 +154,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         if(graphGlyphGeometryRequested)graphGlyphGeometryData=graphGlyphGeometryContext!.Finish(refs.Count,token);
         if(graphCharactersRequested)
         {
-            CompleteGraphCharacterPass(stage,pool,refs,progress,token);
+            CompleteGraphCharacterPass(stage,pool,refs,progress,token,characterOutput);
             return;
         }
         var output=new GraphGlyphChoiceData[refs.Count];
@@ -158,5 +175,18 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                 selected.CopyOwnerStorage40(),selected.CopySelectionRows4(),selected.SelectedMarker);
         }
         RequireGraphPublication(stage,token);graphGlyphChoices=output;
+    }
+
+    private LegacyOrdinaryGlyphRefreshOperations CreateIndexedRefreshOperations(GraphLanguageScope stage,
+        LegacyMainOrdinaryGlyphProductionOperations ordinary,int node,ushort arc,LegacyNativeGlyphScoreCache cache,CancellationToken token)
+    {
+        // Only the private rich compact route reaches this separate closure scope.
+        // Larger alphabets use original callbacks, not a new refusal or changed cap.
+        // Caller prepays BEFORE helper entry, including this separate captured closure.
+        var index=cache.CreateFirstOrdinalIndex(ordinary.AlphabetCount,token);
+        return new(
+            (symbol,ct)=>{RequireGraphPublication(stage,ct);if(symbol>=ordinary.AlphabetCount)throw new NotSupportedException("Refresh macro labels need their actual conversion issuer.");return ordinary.ResolveSymbol(symbol,0,node,arc,ct);},
+            (symbol,ct)=>{RequireGraphPublication(stage,ct);return BitConverter.SingleToUInt32Bits(index.ReadSymbolScore(symbol,0,ct));},
+            (symbol,end,ct)=>{RequireGraphPublication(stage,ct);return new(index.ReadRequestCost(ordinary.CreateRequest(node,arc,symbol,end),ct));});
     }
 }

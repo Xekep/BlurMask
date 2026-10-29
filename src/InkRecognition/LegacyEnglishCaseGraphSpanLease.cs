@@ -24,7 +24,7 @@ public sealed partial class LegacyEnglishFreshCaseMainSource
         lock(gate)
         {
             if(graphSpanNode!=lease.Node||graphSpan!=lease.Span)throw new InvalidOperationException("Same graph span must close.");
-            var next=LegacyEnglishCaseGraphSchedule.AfterSpan(lease.Node,lease.Span,lastSpan);graphExpectedNode=next.Node;graphExpectedSpan=next.Span;
+            var next=lease.Full.NextActualGraphSpan(lease,lastSpan);graphExpectedNode=next.Node;graphExpectedSpan=next.Span;
             node1Lease=null;busy=false;
         }
     }

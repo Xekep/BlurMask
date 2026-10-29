@@ -14,6 +14,7 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         var result=stage.Descriptor.CompleteGraphFirstPhase1(stage,ordinals,token);
         _=stage.Ring.Cleanup(token);
         stage.Ring.ClearNode0Counters(result.SourceEnd,result.RetainedEnd);
+        if(graphPeriodicActive)CompleteGraphPeriodicCost(stage,stage.MaterializedMinimum,token);
         token.ThrowIfCancellationRequested();stage.RequirePhase1();
         return result;
     }

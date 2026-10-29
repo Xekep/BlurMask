@@ -55,11 +55,13 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         // Additional node0 attachment field on the existing OLD primary type.
         // OLD standalone guards/reservations are not changed.
         ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,8);
+        //81 request instances:64 normal levels +8 auxiliary levels +8 case-inner slots +1 initial pass. The nullable field costs8 even when null.
+        ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,648);ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,648);
         var primary=LegacyEnglishCasePrimaryCompletion.Prepare(knowledge,numeric,cases,publication,maximumLogicalBytes,token);
         try
         {
-            ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,264+48+9); //source-index request bool+DATAref, before object allocation.
-            ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,264+8+9);
+            ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,264+48+9+12+64+13); //private RAW output enum4/nullable stamp9; source-index request bool+DATAref, before object allocation.
+            ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.OwnerMetadata,264+8+9+12+64+13);
             var result=new LegacyEnglishCaseNode0Completion(primary,ledger,index,fresh);token.ThrowIfCancellationRequested();primary.AttachNode0Completion(result);return result;
         }
         catch{primary.FaultUnattachedNode0Preparation();throw;}
@@ -83,6 +85,8 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         try
         {
             ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.Authentication,256); //DRAFT entry/publication/fault reservation
+            // Initial sourceV80(-1) creates72 additional request instances before node0 D0.
+            ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.Reset,576);ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.Reset,576);
             var primaryDiagnostic=primary.Run(observer,token);
             // This checkpoint remains AFTER every OLD Run/publication/lease
             // close. A failure here must fault the closed exact original pass.
@@ -163,12 +167,12 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
                 // Precharge BEFORE RunAux enters: its compiler display frame
                 // is allocated at method entry. Conditional64bit CoreCLR
                 // instance-field envelopes, not CLR headers/padding/RSS.
-                ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.AuxiliaryMetadata,105541);
+                ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.AuxiliaryMetadata,105541+8);
                 // Constructor fields plus Case.with ROM setters16000,
                 // helper query4750, List firstAdd extra1000 and captured
                 // activeOrdinal1000. Higher delimiter/state copy closure
                 // remains explicitly unproved; this is not whole sufficiency.
-                ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.AuxiliaryMetadata,128291);
+                ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.AuxiliaryMetadata,128291+8);
                 auxiliaryState=RunAuxiliaryPrefixDraft(stage,primaryCount,token);
                 n=stage.InitializedCountN;
                 phase1Result=descriptor.CompleteNode0Phase1(stage,ring,ledger,storedOrdinals,token);
@@ -253,11 +257,11 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
         {
             owner.ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.Reset,5632);
             // Additional ENDreset only, not OLD initialV80(-1): normal64 +
-            // auxiliary8 new query objects,54 semantic bytes each. Match new
-            // array policy: allocation initialization is not an extra Copy;
-            // charge all3076 explicit reset field writes separately first.
-            owner.ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.Reset,3888);
-            owner.ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.Reset,3076);
+            // auxiliary8 new query objects,62 semantic bytes each (including the nullable8-byte PeriodicQuery reference). Match new
+            // Keep the old3076 explicit reset stores plus a conservative576-byte
+            // allowance for the new request-reference metadata; no CLR/RSS write count is claimed.
+            owner.ledger.Allocate(LegacyEnglishCaseNode0Ledger.Site.Reset,4464);
+            owner.ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.Reset,3076+576);
         }
         internal void ChargeHeapVisit(int units)=>owner.ledger.Visit(LegacyEnglishCaseNode0Ledger.Site.Descriptor,units);
         internal void ChargeHeapCopy(int bytes)=>owner.ledger.Copy(LegacyEnglishCaseNode0Ledger.Site.Descriptor,bytes);

@@ -2,6 +2,9 @@ namespace InkRecognition;
 
 public sealed partial class LegacyNativePlainWordPublisher
 {
+    // Scalar read-only audit sizes; no source/WORD handles or authority.
+    internal int ReadPublicationHistoryCount()=>interning.Publishers.Count;
+
     //Read-only. No apply/claim or payload clone. Only NEW private span factory supplies its snapshot.
     internal void RequireLiveSpanRows(LegacyNativePlainWordSpanSnapshot snapshot,CancellationToken token)
     {

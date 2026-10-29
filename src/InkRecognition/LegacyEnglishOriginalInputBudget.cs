@@ -12,9 +12,9 @@ internal static class LegacyEnglishOriginalInputBudget
         }
     }
     private const long N=256,P=4096;
-    internal const long MaximumPayload=190792L+1408L*N+48L*P+0L*N*N;
-    internal const long MaximumCopy=381072L+2816L*N+160L*P+0L*N*N;
-    internal const long MaximumSourceVisits=11340156L+2752L*N+416L*P+4L*N*N;
+    internal const long MaximumPayload=191442L+1408L*N+48L*P+0L*N*N;
+    internal const long MaximumCopy=382362L+2816L*N+160L*P+0L*N*N;
+    internal const long MaximumSourceVisits=11342224L+2752L*N+416L*P+4L*N*N;
     internal static Reservation PrechargeCompleteRawDomain(CancellationToken token)
     {
         token.ThrowIfCancellationRequested();

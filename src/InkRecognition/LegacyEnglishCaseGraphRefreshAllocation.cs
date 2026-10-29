@@ -32,6 +32,18 @@ internal sealed partial class LegacyEnglishCaseNode0Completion
             checked(sourceCopies+8192+182L*512+128L*32+matched*1024L+rows*128),
             checked(4096+matched*8192L+32*rows*rows));
     }
+    // Only the private periodic compact+cache-index route uses this bound.
+    // Original P/C and refusal domains stay unchanged; traversal, compact index,
+    // batch initialization and cache construction are separately prepaid.
+    internal static GraphRefreshAllocation GraphIndexedRefreshCharge(long sourcePayload,long sourceCopies,int matched,int ownerRows,int depth)
+    {
+        if(depth is<1 or>120)throw new ArgumentOutOfRangeException(nameof(depth));
+        var original=GraphRefreshCharge(sourcePayload,sourceCopies,matched,ownerRows);
+        long rows=checked((long)ownerRows+matched);
+        // No repeated descriptor scan or global owner lookup in issued-Node row access.
+        // Remaining private-row work7200 fits7680; List backing and source26 are separate.
+        return original with{Visits=checked(4096L+matched*7680L+64L*rows+256L*depth)};
+    }
     internal static bool GraphCharacterEntryAllowed(bool requested,bool previousContext,bool wordOwner,bool sameCounts,bool geometry)
         =>requested&&(!previousContext||wordOwner)&&sameCounts&&geometry;
 }
