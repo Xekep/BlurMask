@@ -50,3 +50,32 @@ to uninstrumented Main. `FINAL.json` SHA256:
 `TOOLS-FINAL.json` additionally verifies source reproduction, eight trace
 corruptions and two prepared-source corruptions. The first build's missing
 generated-source PDB failure and its binaries/logs remain preserved.
+
+## Three-platform observed boundary
+
+Run `40843964502` at `3c374f4` passed on Windows, Linux and macOS. All1042
+prepared authored sources are byte-equal between platforms and PE/PDB-proved
+before execution. Model/resource/fixture pins match; runtime binaries retain
+their distinct official platform hashes. Two Managed runs and Native AOT agree
+exactly within each platform. On every platform the full recognition capture
+also equals its earlier uninstrumented owning capture.
+
+All54 input tensors (18 existing calls ×3 inputs) are bit-identical across the
+three platforms. Windows/Linux also agree on all90 encoder output tensors.
+macOS differs on40 float output tensors, with every type/shape/count unchanged;
+integer outputs remain exact. The first existing fresh call already differs in
+`output_seg` and `counting_output`. Thus the first observed difference is inside
+the actual encoder execution, before the later C23/prior/history machinery.
+This does not identify a specific ONNX operator or establish an error bound.
+
+`CI-BOUNDARY-FINAL.json` SHA256 under the evidence root:
+`5740bf0fcdd4c110dd4aa5f9a863aa165751254ea2217c697a11e77218d7d5d3`.
+The separate historical Windows-hash gate remains unchanged.
+
+The current runtime requests optimization level99. ONNX Runtime documents
+[graph fusion and hardware-dependent layout optimization](https://onnxruntime.ai/docs/performance/model-optimizations/graph-optimizations.html);
+this is context, not proof that a particular optimization caused these results.
+The [pinned1.23.2 configuration definitions](https://github.com/microsoft/onnxruntime/blob/v1.23.2/include/onnxruntime/core/session/onnxruntime_session_options_config_keys.h)
+describe optional approximations/precision changes separately. No such setting,
+new tolerance, platform hash exception or library numerical behavior was changed
+by this diagnostic.
