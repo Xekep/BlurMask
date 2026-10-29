@@ -12,7 +12,7 @@ internal sealed partial class Math2Mode0OriginalArena
 internal sealed partial class Math2Mode0PriorCandidatePreparation
 {
     private DiffBorrow? activeDiffBorrow;
-    internal sealed class DiffBorrow
+    internal sealed partial class DiffBorrow
     {
         private readonly Math2Mode0PriorCandidatePreparation owner;
         private readonly Action check;
@@ -107,7 +107,7 @@ internal sealed partial class Math2Mode0PriorCandidatePreparation
 internal enum Math2Mode0DomDiffStage{Claimed,RootsBound,ActionLinked,Produced,Filtered,Completed}
 internal sealed record Math2Mode0DomDiffSnapshot(bool Complete,bool Ready,bool Failed,bool Released,long Reservation,long Visits,long MatrixCells,
     int Produced,int Kept,int Filtered,bool HeaderLive,Math2DomDiffActionSnapshot[] Actions);
-internal sealed class Math2Mode0PriorDomDiff:IDisposable
+internal sealed partial class Math2Mode0PriorDomDiff:IDisposable
 {
     private sealed class Claim{internal int Used;}
     private static readonly ConditionalWeakTable<Math2Mode0PriorCandidatePreparation,Claim> Claims=new();
