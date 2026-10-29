@@ -110,4 +110,28 @@ class AdmissionTests(unittest.TestCase):
  def test_owned_frame_unknown_scope(self):
   manifest=copy.deepcopy(self.manifest);manifest['english951']['ownedFrameRevision']['sources'][0]['path']='LegacyEnglishCaseNode0Ledger.cs'
   with self.assertRaises(AssertionError):census._verify_sources(self.root,manifest)
+ def test_ordinary_factor_old_checkpoint_body_rejected(self):
+  row=self.manifest['english951']['ordinarySourceFactorRevision']['sources'][0]
+  raw=Path(__file__).with_name('fixtures').joinpath('publication-core-ordinary-factor-preimage.cs.txt').read_bytes().replace(b'\r\n',b'\n')
+  self.assertEqual(census.sha(raw),row['preimageCanonicalLfSha256'])
+  self.assertNotIn(b'sourceFactor:200',raw)
+  with self.changed(self.core/row['path'],raw),self.assertRaisesRegex(AssertionError,'Tampered reviewed'):census.verify(self.root)
+ def test_ordinary_factor_wrong_preimage(self):
+  manifest=copy.deepcopy(self.manifest);manifest['english951']['ordinarySourceFactorRevision']['sources'][0]['preimageCanonicalLfSha256']='0'*64
+  with self.assertRaisesRegex(AssertionError,'Wrong revision checkpoint preimage'):census._verify_sources(self.root,manifest)
+ def test_ordinary_factor_wrong_preimage_size(self):
+  manifest=copy.deepcopy(self.manifest);manifest['english951']['ordinarySourceFactorRevision']['sources'][0]['preimageCanonicalLfBytes']+=1
+  with self.assertRaisesRegex(AssertionError,'Wrong revision checkpoint size'):census._verify_sources(self.root,manifest)
+ def test_ordinary_factor_wrong_scope(self):
+  manifest=copy.deepcopy(self.manifest);manifest['english951']['ordinarySourceFactorRevision']['sources'][0]['path']='LegacySourcePointChronology.cs'
+  with self.assertRaisesRegex(AssertionError,'Unreviewed ordinary factor revision scope'):census._verify_sources(self.root,manifest)
+ def test_ordinary_factor_wrong_checkpoint(self):
+  manifest=copy.deepcopy(self.manifest);manifest['english951']['ordinarySourceFactorRevision']['checkpointManifestSha256']='0'*64
+  with self.assertRaises(AssertionError):census._verify_sources(self.root,manifest)
+ def test_ordinary_factor_duplicate_revision_source(self):
+  manifest=copy.deepcopy(self.manifest);sources=manifest['english951']['ordinarySourceFactorRevision']['sources'];sources.append(copy.deepcopy(sources[0]))
+  with self.assertRaises(AssertionError):census._verify_sources(self.root,manifest)
+ def test_ordinary_factor_tampered_actual_constructor(self):
+  path=self.core/'LegacyOrdinarySourceInk.cs';raw=path.read_bytes();self.assertIn(b'sourceFactor:200',raw)
+  with self.changed(path,raw.replace(b'sourceFactor:200',b'sourceFactor:201')),self.assertRaisesRegex(AssertionError,'Tampered reviewed'):census.verify(self.root)
 if __name__=='__main__':unittest.main(argv=[__file__],verbosity=2)

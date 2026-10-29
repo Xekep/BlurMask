@@ -58,6 +58,12 @@ a machine-specific runtime patch requirement from the raw append test project.
 
 ## Remaining boundaries
 
+The [ordinary chronology repair](ordinary-source-geometry-corrections.md#core951-composition-regression-and-repair)
+restores an argument lost in Core951 composition: both actual ordinary factories
+again retain native200, while generic prepared sources retain default1. Actual
+Main951/953 and original numeric/owning regressions pass. This is a post1.0.0
+correctness repair, without a handwriting accuracy claim.
+
 The [private owned-frame optimization](english-owned-frame-20261029.md) is now
 admitted to Core951 after actual Main951/953, public compact, paired publication
 and EN/RU/Math regression checks. Its 12.1% work-ledger reduction applies to the

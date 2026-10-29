@@ -1,7 +1,7 @@
 """Strict reviewed Core source admission; canonical LF census, not raw PDB proof."""
 from pathlib import Path
 import hashlib,json
-MANIFEST_SHA256='85b13bd4db65d7efb820423ad7da810a4bd1beb6aef02664e3d393e74294f359'
+MANIFEST_SHA256='5a0e339be50c0d247879ecfac47683fc6285381c7fba697ed458957c7d78827c'
 DEFAULT_CORE_COUNT=951
 DIAGNOSTIC_CORE_COUNT=953
 sha=lambda raw:hashlib.sha256(raw).hexdigest()
@@ -39,6 +39,15 @@ def _verify_sources(root,manifest):
         'LegacyPreparedCompactWordFrameProducer.cs',
         'LegacyPreparedCompactWordSequence.cs',
         'LegacyPreparedMainCompactPublication.EnglishPeriodic.cs'}
+    # The ordinary source-unit correction is separately authenticated against
+    # its checkpoint body; never rewrite the checkpoint or Frame26 metadata.
+    factor_revision=english['ordinarySourceFactorRevision']
+    assert factor_revision['id']=='ordinary-source-factor200-v1'
+    assert factor_revision['checkpointManifestSha256']==english['checkpointManifestSha256']
+    factor_rows=_rows(factor_revision['sources'],1)
+    assert set(factor_rows)=={'LegacyOrdinarySourceInk.cs'},'Unreviewed ordinary factor revision scope'
+    assert not(set(factor_rows)&set(revised)),'Overlapping source revisions'
+    revised=revised|factor_rows
     checkpoint=english_additions|overrides
     for name,row in revised.items():
         assert name not in protected and name not in additions,'Unreviewed revision scope'
@@ -81,6 +90,7 @@ def _verify_sources(root,manifest):
                 ReviewedAdditions=manifest['additions'],EnglishReviewedAdditions=english['additions'],EnglishReviewedOverrides=english['overrides'],
                 ProtectedUnchanged=english['protected'],EnglishCheckpointManifestSHA256=english['checkpointManifestSha256'],
                 EnglishOwnedFrameRevision=revision,
+                OrdinarySourceFactorRevision=factor_revision,
                 DefaultCoreCount=DEFAULT_CORE_COUNT,DiagnosticCoreCount=DIAGNOSTIC_CORE_COUNT,
                 Canonicalization=manifest['canonicalization'],RawPdbProof=False)
 

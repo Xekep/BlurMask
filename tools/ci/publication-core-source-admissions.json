@@ -792,6 +792,22 @@
           "canonicalLfBytes": 18522
         }
       ]
+    },
+    "ordinarySourceFactorRevision": {
+      "id": "ordinary-source-factor200-v1",
+      "checkpointManifestSha256": "642414b98b2db5c3897600f808e92ca78dcf70e03570c08c2ea536259ad1c1cd",
+      "nativeSourcePacketManifestSha256": "0f529cac1e2075f628bb32111738937bd54b05dca3c702dddbcfd77149a43181",
+      "nativeSourceReviewSha256": "9306040d6e15e6c62121c6bd453ab3e208f3cd2b764334923d0b59d02ae26c0d",
+      "sources": [
+        {
+          "path": "LegacyOrdinarySourceInk.cs",
+          "preimageBasis": "english951-checkpoint",
+          "preimageCanonicalLfSha256": "d4439824067a79d1563c1feb9d6000f582ddc1c39cb447363c7fc0d3e0a9bcaf",
+          "preimageCanonicalLfBytes": 12905,
+          "canonicalLfSha256": "4acecbd2dfb380ea9995cccc57776ea346a710736fffad4016fb525006d79d3d",
+          "canonicalLfBytes": 12922
+        }
+      ]
     }
   }
 }

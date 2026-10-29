@@ -10,6 +10,21 @@ def restore_ordinary_chronology_source(name,data,expected):
    b'Enumerable.Range(0,keys.Count).ToArray(),sourceFactor:200);',b'Enumerable.Range(0,keys.Count).ToArray());')}
  current,historical,after,before=rows[name]
  assert expected==historical,('Unreviewed historical target',name,expected)
+ # Exact private-meter inverses precede the independent factor-unit inverse.
+ # The corrected4ace body keeps explicit200 until it reaches unmetered34bdda;
+ # the prior d443 checkpoint maps separately to the old factor1 body36abe3.
+ # Neither source body is authority for the historical budget or live runtime.
+ if name=='LegacyOrdinarySourceInk.cs':
+  meter_sources={
+   '4acecbd2dfb380ea9995cccc57776ea346a710736fffad4016fb525006d79d3d':'34bdda6179be10f2f6de2213b0cf6c230e6e48c81ab818859a4dcaacddcb8708',
+   'd4439824067a79d1563c1feb9d6000f582ddc1c39cb447363c7fc0d3e0a9bcaf':'36abe3c77a43a16072fb005bb2fd1eae7331978a08d48e74efacfc8c0d9456e8'}
+  digest=hashlib.sha256(data).hexdigest()
+  if digest in meter_sources:
+   metered=b'        CancellationToken cancellationToken=default)=>ResolveEndingMetadataCore(actualPreparedIdentity,cancellationToken,null);\n    internal LegacySourcePointIdentity ResolveEndingMetadataMetered(LegacySourcePointIdentity actualPreparedIdentity,\n        CancellationToken cancellationToken,LegacyOrdinarySourceTraversalMeter meter)\n        =>ResolveEndingMetadataCore(actualPreparedIdentity,cancellationToken,meter);\n    private LegacySourcePointIdentity ResolveEndingMetadataCore(LegacySourcePointIdentity actualPreparedIdentity,\n        CancellationToken cancellationToken,LegacyOrdinarySourceTraversalMeter? meter)\n    {\n        cancellationToken.ThrowIfCancellationRequested();meter?.Before(256);\n        if(originalMetadataOwner is{} owner)return owner.ResolveEndingMetadataCore(actualPreparedIdentity,cancellationToken,meter);'
+   original=b'        CancellationToken cancellationToken=default)\n    {\n        cancellationToken.ThrowIfCancellationRequested();\n        if(originalMetadataOwner is{} owner)return owner.ResolveEndingMetadata(actualPreparedIdentity,cancellationToken);'
+   assert data.count(metered)==1
+   data=data.replace(metered,original)
+   assert hashlib.sha256(data).hexdigest()==meter_sources[digest],('Wrong private-meter inverse',name)
  if hashlib.sha256(data).hexdigest()==historical:return data
  assert hashlib.sha256(data).hexdigest()==current,('Unreviewed chronology successor',name)
  assert data.count(after)==1
