@@ -49,7 +49,8 @@ internal sealed class DrawingSession : IDisposable
     public DrawingTarget Target { get; private set; }
     public CanvasWindow? Canvas { get; private set; }
     public InkTool Tool { get; private set; } = InkTool.Cursor;
-    internal bool MiddleButtonErases => Tool is InkTool.Pen or InkTool.AiPen or InkTool.Highlighter or InkTool.Eraser;
+    internal bool MiddleButtonErases => Tool is InkTool.Pen or InkTool.AiPen or InkTool.Highlighter or InkTool.Eraser
+        or InkTool.Line or InkTool.Arrow or InkTool.Rectangle or InkTool.Ellipse;
     internal InkTool LastDrawingTool { get; private set; } = InkTool.Pen;
     internal InkTool LastShapeTool { get; private set; } = InkTool.Line;
     internal InkTool LastCursorTool { get; private set; } = InkTool.Cursor;

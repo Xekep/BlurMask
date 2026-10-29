@@ -68,8 +68,23 @@ internal static partial class WebsitePreview
         }
         else
         {
-            using var bitmap = new RenderTargetBitmap(new PixelSize((int)window.Bounds.Width, (int)window.Bounds.Height), new Vector(96, 96));
-            bitmap.Render(window); bitmap.Save(path, new PngBitmapEncoderOptions());
+            var size = new PixelSize((int)Math.Ceiling(window.Bounds.Width), (int)Math.Ceiling(window.Bounds.Height));
+            using var canvas = new RenderTargetBitmap(size, new Vector(96, 96));
+            canvas.Render(window);
+            // The drawing tools are a separate top-level window. Rendering the
+            // canvas alone omits them, even when they are visibly above it.
+            var toolbar = session.Toolbar;
+            var origin = window.PointToClient(toolbar.PointToScreen(default));
+            using var tools = new RenderTargetBitmap(new PixelSize((int)Math.Ceiling(toolbar.Bounds.Width),
+                (int)Math.Ceiling(toolbar.Bounds.Height)), new Vector(96, 96));
+            tools.Render(toolbar);
+            using var bitmap = new RenderTargetBitmap(size, new Vector(96, 96));
+            using (var drawing = bitmap.CreateDrawingContext())
+            {
+                drawing.DrawImage(canvas, new Rect(window.Bounds.Size));
+                drawing.DrawImage(tools, new Rect(origin, toolbar.Bounds.Size));
+            }
+            bitmap.Save(path, new PngBitmapEncoderOptions());
         }
         session.Toolbar.Position = original;
     }
