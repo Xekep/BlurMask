@@ -11,7 +11,7 @@ internal abstract class Math2Mode0CurrentC23
     internal abstract long InputId { get; }
     internal abstract LegacyOwnedRawInkDocument Document { get; }
     internal abstract ReadOnlySpan<LegacyNativeInkPositionRange> Ranges { get; }
-    internal abstract LegacyOwnedRawInkIdentityExport IdentityTransforms { get; }
+    internal abstract Math2Mode0IdentityTransforms IdentityTransforms { get; }
     internal abstract bool FullDomain { get; }
 }
 internal sealed record Math2Mode0CurrentC23Snapshot(long Reservation,long InputId,bool Complete,bool Failed,bool Released,
@@ -34,7 +34,7 @@ internal sealed partial class Math2Mode0PriorC23Preparation:IDisposable
     {
         internal readonly Math2Mode0CurrentC23 Selection=actual;
         internal readonly LegacyNativeInkPositionRange[] Ranges=actual.Ranges.ToArray();
-        internal readonly LegacyOwnedRawInkIdentityExport Transforms=actual.IdentityTransforms;
+        internal readonly Math2Mode0IdentityTransforms Transforms=actual.IdentityTransforms;
         internal readonly byte InitialComputeFlag=1;
         internal bool Completed;
     }
@@ -146,7 +146,8 @@ internal sealed partial class Math2Mode0PriorSelectedScope
             var input=owner.selectedArena.Children(field.Id).FirstOrDefault(n=>n.Kind==3&&n.Name.Text=="input")??throw new InvalidOperationException("Current field INPUT missing.");
             var tag=owner.selectedArena.Children(input.Id).FirstOrDefault(n=>n.Kind==0&&n.Name.Text=="tag");
             if(tag?.Tag!=4||tag.Number is not long id||id==-1)throw new NotSupportedException("Actual current typed INPUT tag required.");
-            var selection=owner.selectedInk.SelectInput(id,token);
+            var selection=owner.changedReceipt is null?owner.selectedInk.SelectInput(id,token):
+                owner.selectedInk.SelectChangedInput(id,owner.activeChangedBorrow??throw new InvalidOperationException("Current ancestor borrow required."),token);
             if(!ReferenceEquals(selection.InkIdentity,owner.selectedInk.Identity)||!ReferenceEquals(selection.InputC22Identity,owner.selectedInk.SelectionIdentity(id)))throw new InvalidOperationException("Current C23 lost its same selected Ink/INPUT.");
             return selection;
         }
@@ -172,7 +173,7 @@ internal sealed partial class Math2Mode0OriginalMathFieldSource
         private readonly InkOwner ink;
         private readonly RegistryEntry input;
         private readonly LegacyNativeInkPositionRange[] ranges;
-        private readonly LegacyOwnedRawInkIdentityExport transforms;
+        private readonly Math2Mode0IdentityTransforms transforms;
         private readonly bool full;
         internal CurrentC23(InkOwner ink,RegistryEntry input,Math2Mode0OriginalMathFieldSource source,CancellationToken token)
         {
@@ -182,7 +183,7 @@ internal sealed partial class Math2Mode0OriginalMathFieldSource
             ranges=input.C22.Storage is null&&input.C22.Ranges.Length==0?[]:
                 LegacyOwnedRawInkRangeOperations.Prepare(ink.Document).Intersect(source.domain,input.C22.Ranges,token);
             full=ranges.AsSpan().SequenceEqual(source.domain);
-            transforms=source.CurrentView.ExportIdentityTransforms(ranges,token);
+            transforms=Math2Mode0IdentityTransforms.Fresh(source.CurrentView.ExportIdentityTransforms(ranges,token));
         }
         internal override object Identity=>this;
         internal override object InkIdentity=>ink;
@@ -190,7 +191,7 @@ internal sealed partial class Math2Mode0OriginalMathFieldSource
         internal override long InputId=>input.Id;
         internal override LegacyOwnedRawInkDocument Document=>ink.Document;
         internal override ReadOnlySpan<LegacyNativeInkPositionRange> Ranges=>ranges;
-        internal override LegacyOwnedRawInkIdentityExport IdentityTransforms=>transforms;
+        internal override Math2Mode0IdentityTransforms IdentityTransforms=>transforms;
         internal override bool FullDomain=>full;
     }
 }

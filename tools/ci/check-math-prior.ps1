@@ -3,9 +3,11 @@ param(
   [Parameter(Mandatory = $true)][string]$RuntimeIdentifier
 )
 $ErrorActionPreference = 'Stop'
+dotnet run --project tools/LegacyOwnedRawInkAppend.Probe -c Release -- tools/LegacyOwnedRawInkAppend.Probe/append-fixtures.json
+if ($LASTEXITCODE -ne 0) { throw 'Raw append ownership regression failed.' }
 # The friend assembly name is shared with the existing Math publisher probes;
 # each project and publish directory remains separate.
-foreach ($probeName in @('LegacyMathTemporaryWriter.Probe', 'LegacyMathPriorDomDiff.Probe', 'LegacyMathTemporaryApply.Probe')) {
+foreach ($probeName in @('LegacyMathTemporaryWriter.Probe', 'LegacyMathPriorDomDiff.Probe', 'LegacyMathTemporaryApply.Probe', 'LegacyMathCurrentSelectedIngress.Probe')) {
   $folder = "tools/$probeName"
   $project = "$folder/$probeName.csproj"
   foreach ($mode in @('managed', 'native')) {
@@ -14,6 +16,10 @@ foreach ($probeName in @('LegacyMathTemporaryWriter.Probe', 'LegacyMathPriorDomD
       @("$folder/fixtures.json", $capture)
     } elseif ($probeName -eq 'LegacyMathPriorDomDiff.Probe') {
       @('.artifacts/math-mode0.ikrmath', 'models/math2/math2-unwrapped.res', $Runtime, "$folder/alignment-fixtures.json", $capture)
+    } elseif ($probeName -eq 'LegacyMathCurrentSelectedIngress.Probe') {
+      @('.artifacts/math-mode0.ikrmath', 'models/math2/math2-unwrapped.res', $Runtime,
+        "$folder/fixtures/append-geometries.json", "$folder/fixtures/unchanged-prior-reference.json",
+        "$folder/fixtures/frozen-actual-math6.json", $capture)
     } else {
       @('.artifacts/math-mode0.ikrmath', 'models/math2/math2-unwrapped.res', $Runtime, $capture)
     }
@@ -38,6 +44,18 @@ foreach ($probeName in @('LegacyMathTemporaryWriter.Probe', 'LegacyMathPriorDomD
       if ($LASTEXITCODE -ne 0) { throw "Prior candidate $mode independent audit failed." }
       python -I -B "$folder/audit_diff.py" $capture
       if ($LASTEXITCODE -ne 0) { throw "Prior diff $mode independent audit failed." }
+    } elseif ($probeName -eq 'LegacyMathCurrentSelectedIngress.Probe') {
+      python -I -B "$folder/audit_nn.py" $capture models/math2/math2-unwrapped.res
+      if ($LASTEXITCODE -ne 0) { throw "Current selected $mode NN audit failed." }
+      python -I -B "$folder/audit_candidate.py" $capture
+      if ($LASTEXITCODE -ne 0) { throw "Current selected $mode candidate audit failed." }
+      python -I -B "$folder/audit_diff.py" $capture "$capture.diff.json"
+      if ($LASTEXITCODE -ne 0) { throw "Current selected $mode diff audit failed." }
+      python -I -B "$folder/audit_unchanged.py" $capture "$folder/fixtures/unchanged-prior-reference.json"
+      if ($LASTEXITCODE -ne 0) { throw "Current selected $mode unchanged route audit failed." }
+      # This auditor imports the independently frozen sibling replay module.
+      python -B "$folder/audit_temporary_apply.py" $capture "$capture.apply.json"
+      if ($LASTEXITCODE -ne 0) { throw "Current selected $mode temporary apply audit failed." }
     } else {
       python -I -B "$folder/audit_output.py" $capture
       if ($LASTEXITCODE -ne 0) { throw "Temporary application $mode header/owner audit failed." }

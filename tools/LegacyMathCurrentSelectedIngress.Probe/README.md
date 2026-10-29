@@ -1,0 +1,11 @@
+# Current selected/C23/NEWNN ingress probe
+
+This source-generated-JSON probe owns six actual OLD completed/applied Math results, appends one raw curve on the SAME original Ink, clones the current registry/old field into a new selected owner, resolves full current identity/C23/F0 and runs genuine NEW NN. It constructs actual third/candidate/defaultdiff/CB8 cohorts and applies their kept actions to the same temporary tree. It also runs six unchanged prior/C23/NN regressions and tests escaped/reentrant/exception-finally borrows and ancestor disposal (473 controls).
+
+Run output with seven arguments: pack, raw math resource, official ONNX Runtime, fixtures/append-geometries.json, fixtures/unchanged-prior-reference.json, fixtures/frozen-actual-math6.json, capture output. The old-reference argument is diagnostic data, never an ownership constructor.
+
+Run audit_nn.py <capture> <rawresource>, audit_candidate.py <capture>, audit_diff.py <capture> <report>, and audit_unchanged.py <capture> fixtures/unchanged-prior-reference.json. The old6 reference was captured/authenticated before the append/current producer. New labels, scores and kept counts are not fixture inputs or expectations.
+
+Run `python -B audit_temporary_apply.py <capture> <report>` without isolated mode: it imports the independently frozen sibling `temporary_replay.py`. That oracle independently applies operations 2/4/7, checks scalar storage/heap bytes, detached payloads, the complete observed node set and ordered reachable tree. The six actual cases complete 6/7/6/4/4/4 kept actions (31 total), consume their headers, and retain the original registry/arena. These counts are observations, not recognition inputs. This applies only the temporary result; negative pending tags still need late registration and resolution before any original-document update.
+
+This route supports only privately committed full ordinary C49 views with no nonidentity transforms and zero freeze rows. It keeps the old fresh guards/domain intact. Native SDK task/history/observer ABI, nonzero-freeze scale/terminal ownership, original-document apply/receiver and general edit/repeat recognition are not supplied. No opcode7 or old selection was fabricated.

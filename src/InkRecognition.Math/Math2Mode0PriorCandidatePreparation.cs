@@ -81,7 +81,7 @@ internal sealed partial class Math2Mode0PriorSelectedScope
 }
 internal sealed partial class Math2Mode0OriginalMathFieldSource
 {
-    private sealed class PriorThirdInk(Math2Mode0OriginalMathFieldSource sourceField, InkOwner ink, LegacyLibraryOriginalDomNameOwner actualNames)
+    private sealed class PriorThirdInk(Math2Mode0OriginalMathFieldSource sourceField, InkOwner ink, LegacyLibraryOriginalDomNameOwner actualNames, LegacyNativeInkPositionRange[]? changedDomain=null)
         : Math2Mode0PriorRetainedInk
     {
         internal override Math2Mode0PriorCandidateRegistry[] CopyCandidateRegistry()
@@ -125,7 +125,7 @@ internal sealed partial class Math2Mode0OriginalMathFieldSource
                 foreach (var range in ranges)
                 {
                     LegacyNativeSourceRangeUtf8.ValidatePosition(range.First); LegacyNativeSourceRangeUtf8.ValidatePosition(range.Last);
-                    if (!LegacyOwnedRawInkRangeOperations.Contains(sourceField.domain, range)) throw new ArgumentException("C22 range lies outside the retained source INPUT.");
+                    if (!LegacyOwnedRawInkRangeOperations.Contains(changedDomain??sourceField.domain, range)) throw new ArgumentException("C22 range lies outside the retained source INPUT.");
                 }
                 return new Selection(ink, ranges.ToArray());
             }

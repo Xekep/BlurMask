@@ -1,4 +1,4 @@
-"""Build/PDB-gated default935 and test-only937 publication comparison; no quality claim."""
+"""Build/PDB-gated default937 and test-only939 publication comparison; no quality claim."""
 from pathlib import Path
 import argparse,hashlib,importlib.util,json,os,re,subprocess,sys
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('output',type=Path);p.add_argument('default_capture',type=Path);a=p.parse_args()
@@ -24,7 +24,7 @@ MODELS={'ru-RU/ru_RU-ak-cur.lite.res': {'bytes': 572763, 'sha256': '7a5f08809e81
 files=set((root/'src/InkRecognition').glob('*.cs'))
 for folder in ['LegacyGlobalTextPublication.Probe','LegacyGlobalTextPublication.ScoreDiagnostic']:
  files.update(q for q in(root/'tools'/folder).rglob('*.cs')if not{'obj','bin'}&set(q.relative_to(root/'tools'/folder).parts));files.add(root/'tools'/folder/(folder+'.csproj'))
-files.add(root/'src/InkRecognition/InkRecognition.csproj');files.add(root/'global.json');files.update((root/'tools/handwriting').glob('*.py'));files.update((root/'tools/handwriting').glob('*.json'));files.update([Path(__file__),Path(__file__).with_name('publication_portable_pdb.py')])
+files.add(root/'src/InkRecognition/InkRecognition.csproj');files.add(root/'global.json');files.update((root/'tools/handwriting').glob('*.py'));files.update((root/'tools/handwriting').glob('*.json'));files.update([Path(__file__),Path(__file__).with_name('publication_portable_pdb.py'),Path(__file__).with_name('publication_core_source_census.py'),Path(__file__).with_name('publication-core-source-admissions.json'),Path(__file__).with_name('test_publication_source_census.py')])
 for name,pinvalue in MODELS.items():
  path=root/'models'/name;assert path.stat().st_size==pinvalue['bytes']and sha(path)==pinvalue['sha256'];files.add(path)
 inputs=[pin(path)for path in sorted(files)];report['InputPins']=inputs;save()
@@ -33,7 +33,9 @@ try:
  assert re.search(r'^Microsoft\.NETCore\.App 10\.0\.12 \[',runtime_log.read_text(encoding='utf8'),re.M),'Provision SDK10.0.401 test runtime before this gate; no roll-forward substitution'
  proof=load('publication_portable_pdb',Path(__file__).with_name('publication_portable_pdb.py'))
  contract=load('publication_flavor_source_contract',root/'tools/handwriting/publication_diagnostic_flavor_source_contract.py');report['SourceFlavor']=contract.verify(root,require_meter_v2=True)
- ordinary_authors={p.resolve()for p in(root/'src/InkRecognition').glob('*.cs')};assert len(ordinary_authors)==935
+ census=load('publication_core_source_census',Path(__file__).with_name('publication_core_source_census.py'));report['CoreSourceCensus']=census.verify(root)
+ run('core-source-census-controls',[sys.executable,'-B',str(Path(__file__).with_name('test_publication_source_census.py')),'--root',str(root)],45)
+ ordinary_authors={p.resolve()for p in(root/'src/InkRecognition').glob('*.cs')};assert len(ordinary_authors)==census.DEFAULT_CORE_COUNT
  compiled={}
  for mode,enabled,project,assembly in [('default','false','LegacyGlobalTextPublication.Probe','LegacyGlobalTextPublication.Probe'),('diagnostic','true','LegacyGlobalTextPublication.ScoreDiagnostic','InkRecognition.Probe')]:
   art=out/mode;assert not art.exists();flags=['-c','Release','--artifacts-path',str(art),'-m:1','--disable-build-servers','-nodeReuse:false','-p:UseSharedCompilation=false','-p:DebugType=portable','-p:DebugSymbols=true','-p:Optimize=true','-p:ContinuousIntegrationBuild=false','-p:DeterministicSourcePaths=false','-p:PathMap=','-p:RuntimeFrameworkVersion=10.0.12','-p:RollForward=Disable','-p:BlurMaskPublicationDiagnostics='+enabled]
@@ -43,7 +45,7 @@ try:
    run('build-'+mode+'-'+name,['dotnet','build',str(src/(name+'.csproj'))]+flags+([]if name=='InkRecognition'else['-p:BuildProjectReferences=false']),600)
    dll=art/'bin'/name/'release'/(dllname+'.dll');authors=ordinary_authors.copy()if name=='InkRecognition'else{q.resolve()for q in src.glob('*.cs')}
    if name=='InkRecognition'and enabled=='true':authors.update(q.resolve()for q in(root/'tools/LegacyGlobalTextPublication.ScoreDiagnostic/Source').glob('*.cs'))
-   expected=935+(2 if enabled=='true'else 0)if name=='InkRecognition'else 1;assert len(authors)==expected
+   expected=(census.DIAGNOSTIC_CORE_COUNT if enabled=='true'else census.DEFAULT_CORE_COUNT)if name=='InkRecognition'else 1;assert len(authors)==expected
    result=proof.audit_pdb(dll.with_suffix('.pdb'),dll,authors,art/'obj'/name);assert result['authoredDocuments']==expected;mode_report[name]=result
    for q in dll.parent.iterdir():
     if q.is_file():compiled_inputs[str(q)]=pin(q)
@@ -68,4 +70,4 @@ try:
 finally:
  verify_execution_inputs()
  report['InputsUnchanged']=True;save()
-print('PASS default935/test-only937 PDB/runtime gates and3 paired publication calls; full producer operands remain explicit; no quality claim.')
+print('PASS default937/test-only939 PDB/runtime gates and3 paired publication calls; full producer operands remain explicit; no quality claim.')

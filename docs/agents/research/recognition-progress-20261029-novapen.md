@@ -55,15 +55,18 @@ This is an exact test expectation update, not a handwriting quality improvement.
 - English: the 949-document candidate and fresh selected/index continuation are
   still staged. A source-budget refusal is not a successful publication; neither
   the candidate nor diagnostic-only exports prove completed English recognition.
-- Math: main now contains 80 authored library documents, including the
-  THIRD/candidate/default-diff path and typed temporary-writer kernel. Six real
-  neural pipelines reach actual differences and CB8 filtering; all observed
-  actions are filtered. This does not prove original-document application,
-  revision handling or repeat recognition. Verification and remaining ownership
-  boundaries are recorded in [the Math transfer](math-prior-default-diff-20261029.md).
-  The [typed temporary application](math-temporary-apply-20261029.md) additionally
-  verifies owning empty traversal/header consumption; actual kept mutations and
-  original-document updates remain unproved.
+- Math: the current candidate contains 83 authored Math documents and 937 Core
+  documents. Six real applied OLD results accept an appended raw curve, build a
+  new selected/C23 owner and run genuine NEW neural inference. Their actual diff
+  cohorts complete 31 kept mutations on the same temporary trees; independent
+  replay checks the whole node set, scalar bytes and ordered reachable tree.
+  The unchanged-input route retains its six prior results. The existing
+  [Math transfer](math-prior-default-diff-20261029.md) and
+  [empty temporary traversal](math-temporary-apply-20261029.md) remain historical
+  evidence for their narrower stages. Late registration, negative-tag resolution,
+  stale cleanup and original-document update are still incomplete. This is not
+  a completed general repeat-recognition path or application integration. See
+  [the changed-input evidence](math-current-input-temporary-apply-20261029.md).
 - Solver: Giac is the separate upstream CAS. Its tests with supplied expressions
   establish solver behavior, not correct recognition of handwritten integrals.
 - Automatic classification, Russian/English end-to-end quality and application

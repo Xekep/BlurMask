@@ -157,7 +157,9 @@ internal sealed partial class Math2Mode0PriorSelectedScope
         }
     }
     internal T WithFreezeInput<T>(Func<FreezeBorrow,T> consume,CancellationToken token=default)
-        =>parent.WithCompletedOriginalInput(prior=>
+    {
+        if(changedReceipt is not null)return WithChangedFreezeInput(consume,token);
+        return parent.WithCompletedOriginalInput(prior=>
         {
             lock(gate)
             {
@@ -172,4 +174,5 @@ internal sealed partial class Math2Mode0PriorSelectedScope
                 finally{activeFreezeBorrow=null;}
             }
         },token);
+    }
 }

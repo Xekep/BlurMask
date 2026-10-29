@@ -1,0 +1,1140 @@
+{
+  "scope": "Frozen actual OLD completed/applied owner -> rawappend+existingINPUT replacement; no NEWNN/C23/THIRD yet",
+  "oldEvidencePath": "E:\\BlurMask-build-artifacts-20261014\\prior-dom-diff-next-20261029\\evidence-v4.json",
+  "oldEvidenceSha256": "e0379263d7c85d71ca3e2a44715d9a4880601e912024895b45c63d832c337114",
+  "appendFixtureSha256": "80b88eb48371bf74e19c048f8b8de61ad8ac0a20873093aba6b90cf8d7262a1e",
+  "mathSourceDraftSha256": "9d3e668b56ddda4196a3d7fef826e6f2e54ab70ea29124ae1785a45b4e7cbce3",
+  "geometryNote": "Raw-only six used canonical original order; actualMath case i uses exact historical width/reverse order i with same Case i appended curve. This is an explicit pre-inference contract, not retroactive raw-test coverage.",
+  "cases": [
+    {
+      "case": 0,
+      "oldPipeline": {
+        "Width": 1,
+        "Reversed": false
+      },
+      "oldCaptureArrayIndex": 0,
+      "expectedOriginalXY": [
+        "000000000000f041000000000000000000002041000090410000a041000000000000a0410000f041",
+        "00000c420000000000000c420000f041"
+      ],
+      "expectedProjectionXY": [
+        "000000000000f041000000000000000000002041000090410000a041000000000000a0410000f041",
+        "00000c420000000000000c420000f041",
+        "000048420000704100008c4200007041"
+      ],
+      "expectedSourceIds": [
+        0,
+        1,
+        2
+      ],
+      "appendSourceId": 2,
+      "oldRegistry": [
+        {
+          "Id": 0,
+          "Name": "INPUT",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 3,
+                "SourceIndex": 0,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 4295098117,
+                "SourceIndex": 1,
+                "PointIndex": 1,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 1
+        },
+        {
+          "Id": 1,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 3,
+                "SourceIndex": 0,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 327429,
+                "SourceIndex": 0,
+                "PointIndex": 4,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 2
+        },
+        {
+          "Id": 2,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 4294967299,
+                "SourceIndex": 1,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 4295098117,
+                "SourceIndex": 1,
+                "PointIndex": 1,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 3
+        },
+        {
+          "Id": 3,
+          "Name": "MATH_NODE",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 3,
+                "SourceIndex": 0,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 4295098117,
+                "SourceIndex": 1,
+                "PointIndex": 1,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 1
+        }
+      ],
+      "expectedChangedRegistry": [
+        {
+          "Id": 0,
+          "Name": "INPUT",
+          "Category": 102,
+          "CanonicalC22Id": 1,
+          "Ranges": [
+            [
+              "0x3",
+              "0x20001ff05"
+            ]
+          ]
+        },
+        {
+          "Id": 1,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "CanonicalC22Id": 2,
+          "Ranges": [
+            [
+              "0x3",
+              "0x4ff05"
+            ]
+          ]
+        },
+        {
+          "Id": 2,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "CanonicalC22Id": 3,
+          "Ranges": [
+            [
+              "0x100000003",
+              "0x10001ff05"
+            ]
+          ]
+        },
+        {
+          "Id": 3,
+          "Name": "MATH_NODE",
+          "Category": 102,
+          "CanonicalC22Id": 4,
+          "Ranges": [
+            [
+              "0x3",
+              "0x10001ff05"
+            ]
+          ]
+        }
+      ],
+      "expectedNext": 4,
+      "expectedAppliedEpochUnchanged": 1,
+      "expectedInputSequence": 1,
+      "identityAssertions": [
+        "same stable originalInk authority",
+        "prefix Curve/View0/1 ReferenceEquals original objects",
+        "new INPUT0 entry and C22; oldterminal3 Entry/C22 identity retained",
+        "oldINPUT0 C22 ReferenceEquals oldMATH_NODE3 C22 before; different afterward",
+        "ID1/2 Entry/C22 unchanged",
+        "same OriginalNameOwner and each name/category unchanged",
+        "old appliedArenaWitness ReferenceEquals current borrow AppliedArenaIdentity",
+        "old actualActivePage bytes/structure unchanged; old captured application registry remainsold",
+        "childDocument is actual rawstate-minted projection; source2 exactappendbytes"
+      ],
+      "expectedNewNn": null,
+      "expectedKept": null
+    },
+    {
+      "case": 1,
+      "oldPipeline": {
+        "Width": 1,
+        "Reversed": true
+      },
+      "oldCaptureArrayIndex": 1,
+      "expectedOriginalXY": [
+        "00000c420000000000000c420000f041",
+        "000000000000f041000000000000000000002041000090410000a041000000000000a0410000f041"
+      ],
+      "expectedProjectionXY": [
+        "00000c420000000000000c420000f041",
+        "000000000000f041000000000000000000002041000090410000a041000000000000a0410000f041",
+        "0000c841000070410000344200007041"
+      ],
+      "expectedSourceIds": [
+        0,
+        1,
+        2
+      ],
+      "appendSourceId": 2,
+      "oldRegistry": [
+        {
+          "Id": 0,
+          "Name": "INPUT",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 3,
+                "SourceIndex": 0,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 4295294725,
+                "SourceIndex": 1,
+                "PointIndex": 4,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 1
+        },
+        {
+          "Id": 1,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 4294967299,
+                "SourceIndex": 1,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 4295294725,
+                "SourceIndex": 1,
+                "PointIndex": 4,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 2
+        },
+        {
+          "Id": 2,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 3,
+                "SourceIndex": 0,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 130821,
+                "SourceIndex": 0,
+                "PointIndex": 1,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 3
+        },
+        {
+          "Id": 3,
+          "Name": "MATH_NODE",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 3,
+                "SourceIndex": 0,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 4295294725,
+                "SourceIndex": 1,
+                "PointIndex": 4,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 1
+        }
+      ],
+      "expectedChangedRegistry": [
+        {
+          "Id": 0,
+          "Name": "INPUT",
+          "Category": 102,
+          "CanonicalC22Id": 1,
+          "Ranges": [
+            [
+              "0x3",
+              "0x20001ff05"
+            ]
+          ]
+        },
+        {
+          "Id": 1,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "CanonicalC22Id": 2,
+          "Ranges": [
+            [
+              "0x100000003",
+              "0x10004ff05"
+            ]
+          ]
+        },
+        {
+          "Id": 2,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "CanonicalC22Id": 3,
+          "Ranges": [
+            [
+              "0x3",
+              "0x1ff05"
+            ]
+          ]
+        },
+        {
+          "Id": 3,
+          "Name": "MATH_NODE",
+          "Category": 102,
+          "CanonicalC22Id": 4,
+          "Ranges": [
+            [
+              "0x3",
+              "0x10004ff05"
+            ]
+          ]
+        }
+      ],
+      "expectedNext": 4,
+      "expectedAppliedEpochUnchanged": 1,
+      "expectedInputSequence": 1,
+      "identityAssertions": [
+        "same stable originalInk authority",
+        "prefix Curve/View0/1 ReferenceEquals original objects",
+        "new INPUT0 entry and C22; oldterminal3 Entry/C22 identity retained",
+        "oldINPUT0 C22 ReferenceEquals oldMATH_NODE3 C22 before; different afterward",
+        "ID1/2 Entry/C22 unchanged",
+        "same OriginalNameOwner and each name/category unchanged",
+        "old appliedArenaWitness ReferenceEquals current borrow AppliedArenaIdentity",
+        "old actualActivePage bytes/structure unchanged; old captured application registry remainsold",
+        "childDocument is actual rawstate-minted projection; source2 exactappendbytes"
+      ],
+      "expectedNewNn": null,
+      "expectedKept": null
+    },
+    {
+      "case": 2,
+      "oldPipeline": {
+        "Width": 3,
+        "Reversed": false
+      },
+      "oldCaptureArrayIndex": 2,
+      "expectedOriginalXY": [
+        "000000000000f041000000000000000000002041000090410000a041000000000000a0410000f041",
+        "00000c420000000000000c420000f041"
+      ],
+      "expectedProjectionXY": [
+        "000000000000f041000000000000000000002041000090410000a041000000000000a0410000f041",
+        "00000c420000000000000c420000f041",
+        "00005c420000000000005c420000f041"
+      ],
+      "expectedSourceIds": [
+        0,
+        1,
+        2
+      ],
+      "appendSourceId": 2,
+      "oldRegistry": [
+        {
+          "Id": 0,
+          "Name": "INPUT",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 3,
+                "SourceIndex": 0,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 4295098117,
+                "SourceIndex": 1,
+                "PointIndex": 1,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 1
+        },
+        {
+          "Id": 1,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 3,
+                "SourceIndex": 0,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 327429,
+                "SourceIndex": 0,
+                "PointIndex": 4,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 2
+        },
+        {
+          "Id": 2,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 4294967299,
+                "SourceIndex": 1,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 4295098117,
+                "SourceIndex": 1,
+                "PointIndex": 1,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 3
+        },
+        {
+          "Id": 3,
+          "Name": "MATH_NODE",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 3,
+                "SourceIndex": 0,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 4295098117,
+                "SourceIndex": 1,
+                "PointIndex": 1,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 1
+        }
+      ],
+      "expectedChangedRegistry": [
+        {
+          "Id": 0,
+          "Name": "INPUT",
+          "Category": 102,
+          "CanonicalC22Id": 1,
+          "Ranges": [
+            [
+              "0x3",
+              "0x20001ff05"
+            ]
+          ]
+        },
+        {
+          "Id": 1,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "CanonicalC22Id": 2,
+          "Ranges": [
+            [
+              "0x3",
+              "0x4ff05"
+            ]
+          ]
+        },
+        {
+          "Id": 2,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "CanonicalC22Id": 3,
+          "Ranges": [
+            [
+              "0x100000003",
+              "0x10001ff05"
+            ]
+          ]
+        },
+        {
+          "Id": 3,
+          "Name": "MATH_NODE",
+          "Category": 102,
+          "CanonicalC22Id": 4,
+          "Ranges": [
+            [
+              "0x3",
+              "0x10001ff05"
+            ]
+          ]
+        }
+      ],
+      "expectedNext": 4,
+      "expectedAppliedEpochUnchanged": 1,
+      "expectedInputSequence": 1,
+      "identityAssertions": [
+        "same stable originalInk authority",
+        "prefix Curve/View0/1 ReferenceEquals original objects",
+        "new INPUT0 entry and C22; oldterminal3 Entry/C22 identity retained",
+        "oldINPUT0 C22 ReferenceEquals oldMATH_NODE3 C22 before; different afterward",
+        "ID1/2 Entry/C22 unchanged",
+        "same OriginalNameOwner and each name/category unchanged",
+        "old appliedArenaWitness ReferenceEquals current borrow AppliedArenaIdentity",
+        "old actualActivePage bytes/structure unchanged; old captured application registry remainsold",
+        "childDocument is actual rawstate-minted projection; source2 exactappendbytes"
+      ],
+      "expectedNewNn": null,
+      "expectedKept": null
+    },
+    {
+      "case": 3,
+      "oldPipeline": {
+        "Width": 3,
+        "Reversed": true
+      },
+      "oldCaptureArrayIndex": 3,
+      "expectedOriginalXY": [
+        "00000c420000000000000c420000f041",
+        "000000000000f041000000000000000000002041000090410000a041000000000000a0410000f041"
+      ],
+      "expectedProjectionXY": [
+        "00000c420000000000000c420000f041",
+        "000000000000f041000000000000000000002041000090410000a041000000000000a0410000f041",
+        "000048420000f04100008c4200000000"
+      ],
+      "expectedSourceIds": [
+        0,
+        1,
+        2
+      ],
+      "appendSourceId": 2,
+      "oldRegistry": [
+        {
+          "Id": 0,
+          "Name": "INPUT",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 3,
+                "SourceIndex": 0,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 4295294725,
+                "SourceIndex": 1,
+                "PointIndex": 4,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 1
+        },
+        {
+          "Id": 1,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 4294967299,
+                "SourceIndex": 1,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 4295294725,
+                "SourceIndex": 1,
+                "PointIndex": 4,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 2
+        },
+        {
+          "Id": 2,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 3,
+                "SourceIndex": 0,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 130821,
+                "SourceIndex": 0,
+                "PointIndex": 1,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 3
+        },
+        {
+          "Id": 3,
+          "Name": "MATH_NODE",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 3,
+                "SourceIndex": 0,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 4295294725,
+                "SourceIndex": 1,
+                "PointIndex": 4,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 1
+        }
+      ],
+      "expectedChangedRegistry": [
+        {
+          "Id": 0,
+          "Name": "INPUT",
+          "Category": 102,
+          "CanonicalC22Id": 1,
+          "Ranges": [
+            [
+              "0x3",
+              "0x20001ff05"
+            ]
+          ]
+        },
+        {
+          "Id": 1,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "CanonicalC22Id": 2,
+          "Ranges": [
+            [
+              "0x100000003",
+              "0x10004ff05"
+            ]
+          ]
+        },
+        {
+          "Id": 2,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "CanonicalC22Id": 3,
+          "Ranges": [
+            [
+              "0x3",
+              "0x1ff05"
+            ]
+          ]
+        },
+        {
+          "Id": 3,
+          "Name": "MATH_NODE",
+          "Category": 102,
+          "CanonicalC22Id": 4,
+          "Ranges": [
+            [
+              "0x3",
+              "0x10004ff05"
+            ]
+          ]
+        }
+      ],
+      "expectedNext": 4,
+      "expectedAppliedEpochUnchanged": 1,
+      "expectedInputSequence": 1,
+      "identityAssertions": [
+        "same stable originalInk authority",
+        "prefix Curve/View0/1 ReferenceEquals original objects",
+        "new INPUT0 entry and C22; oldterminal3 Entry/C22 identity retained",
+        "oldINPUT0 C22 ReferenceEquals oldMATH_NODE3 C22 before; different afterward",
+        "ID1/2 Entry/C22 unchanged",
+        "same OriginalNameOwner and each name/category unchanged",
+        "old appliedArenaWitness ReferenceEquals current borrow AppliedArenaIdentity",
+        "old actualActivePage bytes/structure unchanged; old captured application registry remainsold",
+        "childDocument is actual rawstate-minted projection; source2 exactappendbytes"
+      ],
+      "expectedNewNn": null,
+      "expectedKept": null
+    },
+    {
+      "case": 4,
+      "oldPipeline": {
+        "Width": 16,
+        "Reversed": false
+      },
+      "oldCaptureArrayIndex": 4,
+      "expectedOriginalXY": [
+        "000000000000f041000000000000000000002041000090410000a041000000000000a0410000f041",
+        "00000c420000000000000c420000f041"
+      ],
+      "expectedProjectionXY": [
+        "000000000000f041000000000000000000002041000090410000a041000000000000a0410000f041",
+        "00000c420000000000000c420000f041",
+        "000048420000000000008c420000000000008c420000f041000048420000f0410000484200000000"
+      ],
+      "expectedSourceIds": [
+        0,
+        1,
+        2
+      ],
+      "appendSourceId": 2,
+      "oldRegistry": [
+        {
+          "Id": 0,
+          "Name": "INPUT",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 3,
+                "SourceIndex": 0,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 4295098117,
+                "SourceIndex": 1,
+                "PointIndex": 1,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 1
+        },
+        {
+          "Id": 1,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 3,
+                "SourceIndex": 0,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 327429,
+                "SourceIndex": 0,
+                "PointIndex": 4,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 2
+        },
+        {
+          "Id": 2,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 4294967299,
+                "SourceIndex": 1,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 4295098117,
+                "SourceIndex": 1,
+                "PointIndex": 1,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 3
+        },
+        {
+          "Id": 3,
+          "Name": "MATH_NODE",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 3,
+                "SourceIndex": 0,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 4295098117,
+                "SourceIndex": 1,
+                "PointIndex": 1,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 1
+        }
+      ],
+      "expectedChangedRegistry": [
+        {
+          "Id": 0,
+          "Name": "INPUT",
+          "Category": 102,
+          "CanonicalC22Id": 1,
+          "Ranges": [
+            [
+              "0x3",
+              "0x20004ff05"
+            ]
+          ]
+        },
+        {
+          "Id": 1,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "CanonicalC22Id": 2,
+          "Ranges": [
+            [
+              "0x3",
+              "0x4ff05"
+            ]
+          ]
+        },
+        {
+          "Id": 2,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "CanonicalC22Id": 3,
+          "Ranges": [
+            [
+              "0x100000003",
+              "0x10001ff05"
+            ]
+          ]
+        },
+        {
+          "Id": 3,
+          "Name": "MATH_NODE",
+          "Category": 102,
+          "CanonicalC22Id": 4,
+          "Ranges": [
+            [
+              "0x3",
+              "0x10001ff05"
+            ]
+          ]
+        }
+      ],
+      "expectedNext": 4,
+      "expectedAppliedEpochUnchanged": 1,
+      "expectedInputSequence": 1,
+      "identityAssertions": [
+        "same stable originalInk authority",
+        "prefix Curve/View0/1 ReferenceEquals original objects",
+        "new INPUT0 entry and C22; oldterminal3 Entry/C22 identity retained",
+        "oldINPUT0 C22 ReferenceEquals oldMATH_NODE3 C22 before; different afterward",
+        "ID1/2 Entry/C22 unchanged",
+        "same OriginalNameOwner and each name/category unchanged",
+        "old appliedArenaWitness ReferenceEquals current borrow AppliedArenaIdentity",
+        "old actualActivePage bytes/structure unchanged; old captured application registry remainsold",
+        "childDocument is actual rawstate-minted projection; source2 exactappendbytes"
+      ],
+      "expectedNewNn": null,
+      "expectedKept": null
+    },
+    {
+      "case": 5,
+      "oldPipeline": {
+        "Width": 16,
+        "Reversed": true
+      },
+      "oldCaptureArrayIndex": 5,
+      "expectedOriginalXY": [
+        "00000c420000000000000c420000f041",
+        "000000000000f041000000000000000000002041000090410000a041000000000000a0410000f041"
+      ],
+      "expectedProjectionXY": [
+        "00000c420000000000000c420000f041",
+        "000000000000f041000000000000000000002041000090410000a041000000000000a0410000f041",
+        "00005c420000704100005e4200007841"
+      ],
+      "expectedSourceIds": [
+        0,
+        1,
+        2
+      ],
+      "appendSourceId": 2,
+      "oldRegistry": [
+        {
+          "Id": 0,
+          "Name": "INPUT",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 3,
+                "SourceIndex": 0,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 4295294725,
+                "SourceIndex": 1,
+                "PointIndex": 4,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 1
+        },
+        {
+          "Id": 1,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 4294967299,
+                "SourceIndex": 1,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 4295294725,
+                "SourceIndex": 1,
+                "PointIndex": 4,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 2
+        },
+        {
+          "Id": 2,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 3,
+                "SourceIndex": 0,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 130821,
+                "SourceIndex": 0,
+                "PointIndex": 1,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 3
+        },
+        {
+          "Id": 3,
+          "Name": "MATH_NODE",
+          "Category": 102,
+          "Ranges": [
+            {
+              "First": {
+                "Value": 3,
+                "SourceIndex": 0,
+                "PointIndex": 0,
+                "Fraction": 0,
+                "Mode": 3
+              },
+              "Last": {
+                "Value": 4295294725,
+                "SourceIndex": 1,
+                "PointIndex": 4,
+                "Fraction": 255,
+                "Mode": 5
+              }
+            }
+          ],
+          "CanonicalC22Id": 1
+        }
+      ],
+      "expectedChangedRegistry": [
+        {
+          "Id": 0,
+          "Name": "INPUT",
+          "Category": 102,
+          "CanonicalC22Id": 1,
+          "Ranges": [
+            [
+              "0x3",
+              "0x20001ff05"
+            ]
+          ]
+        },
+        {
+          "Id": 1,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "CanonicalC22Id": 2,
+          "Ranges": [
+            [
+              "0x100000003",
+              "0x10004ff05"
+            ]
+          ]
+        },
+        {
+          "Id": 2,
+          "Name": "MATH_SYMBOL",
+          "Category": 102,
+          "CanonicalC22Id": 3,
+          "Ranges": [
+            [
+              "0x3",
+              "0x1ff05"
+            ]
+          ]
+        },
+        {
+          "Id": 3,
+          "Name": "MATH_NODE",
+          "Category": 102,
+          "CanonicalC22Id": 4,
+          "Ranges": [
+            [
+              "0x3",
+              "0x10004ff05"
+            ]
+          ]
+        }
+      ],
+      "expectedNext": 4,
+      "expectedAppliedEpochUnchanged": 1,
+      "expectedInputSequence": 1,
+      "identityAssertions": [
+        "same stable originalInk authority",
+        "prefix Curve/View0/1 ReferenceEquals original objects",
+        "new INPUT0 entry and C22; oldterminal3 Entry/C22 identity retained",
+        "oldINPUT0 C22 ReferenceEquals oldMATH_NODE3 C22 before; different afterward",
+        "ID1/2 Entry/C22 unchanged",
+        "same OriginalNameOwner and each name/category unchanged",
+        "old appliedArenaWitness ReferenceEquals current borrow AppliedArenaIdentity",
+        "old actualActivePage bytes/structure unchanged; old captured application registry remainsold",
+        "childDocument is actual rawstate-minted projection; source2 exactappendbytes"
+      ],
+      "expectedNewNn": null,
+      "expectedKept": null
+    }
+  ],
+  "requiredRefusals": [
+    "foreign and forged currentInputReceipt even with identical geometry",
+    "rawcopy pre/midcancel/budget refusal leaves original registry/prefix/Next and current readyreceipt unchanged",
+    "old fresh/prior access after committed changedINPUT rejects ratherthan loosening exact guard",
+    "currentborrow escaped/reentrant/exception/cancel/disposal access revokes",
+    "provisional publication must not provide ready successor after ancestorunwind failure; committedfailureprefix retained, never called rollback"
+  ],
+  "publicOwnership": "Actual incoming native addItems/request join remainsopen; portable ownermodel only"
+}

@@ -1,0 +1,33 @@
+{
+  "format": 1,
+  "scope": "STRICT_CORE_FILENAME_SET_AND_CANONICAL_LF_CONTENT_ADMISSION_NOT_PDB_PROOF",
+  "baseline": {
+    "commit": "49045312b2934c96ffa2867f39a3f9f5568e6907",
+    "sourceDirectory": "src/InkRecognition",
+    "count": 935,
+    "filenameSetSha256": "214ee573a3c99a6bc1a9f1366ec2bb272d74bc6820643fcd69097d73a9e8f4c5",
+    "canonicalLfContentSetSha256": "2fac7c01d9dfb5cd20680a13827ab1fc31e1875531ab4f3dde76371901c654bc"
+  },
+  "additions": [
+    {
+      "path": "LegacyOwnedRawInkAppendState.cs",
+      "canonicalLfSha256": "77ee4ce1c92a6295b9a7b397ce39fb635a62a7d77cf9b53a2c04e72c66489f28",
+      "reviewedStageRawSha256": "687250f30549dda5a8c3583ef3fc996725f43dd32f4a9ff72db42cea37cbdf12",
+      "reviewedStageRawBytes": 12213,
+      "canonicalLfBytes": 12004
+    },
+    {
+      "path": "LegacyOwnedCurrentRawIdentityExport.cs",
+      "canonicalLfSha256": "8f9664e480eb6a1e460a08243e22d8f3adeb2551ecfdc1ca06678c47774838e7",
+      "reviewedStageRawSha256": "2a2cff05ba1327f25b02b4424015ae7ba770636ddc234290b5aec5be9330adcd",
+      "reviewedStageRawBytes": 4004,
+      "canonicalLfBytes": 3943
+    }
+  ],
+  "defaultCoreCount": 937,
+  "diagnosticCoreCount": 939,
+  "diagnosticAdditionalSources": 2,
+  "filenameEncoding": "UTF8 sorted relative POSIX paths, LF separated, final LF",
+  "contentEncoding": "sorted path UTF8 + NUL + canonicalLF SHA256 ASCII + LF",
+  "canonicalization": "CRLF to LF only; BOM and lone CR preserved"
+}

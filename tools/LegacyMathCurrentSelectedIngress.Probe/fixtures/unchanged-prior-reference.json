@@ -1,0 +1,4007 @@
+{
+  "OriginalCaptureSha256": "e0379263d7c85d71ca3e2a44715d9a4880601e912024895b45c63d832c337114",
+  "Actual": [
+    {
+      "Width": 1,
+      "Reversed": false,
+      "Prior": {
+        "Epoch": 1,
+        "Reservation": 38896,
+        "Next": 4,
+        "SelectedField": [
+          {
+            "Id": 1,
+            "Kind": 3,
+            "Name": "mathField",
+            "Parent": 0,
+            "OriginalId": 7,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 2,
+            "Kind": 0,
+            "Name": "id",
+            "Parent": 1,
+            "OriginalId": 8,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "formula",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 3,
+            "Kind": 3,
+            "Name": "input",
+            "Parent": 1,
+            "OriginalId": 9,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 4,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 3,
+            "OriginalId": 10,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 0,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 5,
+            "Kind": 3,
+            "Name": "mathResult",
+            "Parent": 1,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 6,
+            "Kind": 3,
+            "Name": "sequence",
+            "Parent": 5,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 7,
+            "Kind": 3,
+            "Name": "symbol",
+            "Parent": 6,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 8,
+            "Kind": 0,
+            "Name": "range",
+            "Parent": 7,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[0:0,0:4$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 9,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 7,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 1,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 10,
+            "Kind": 1,
+            "Name": "",
+            "Parent": 7,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "M",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 11,
+            "Kind": 3,
+            "Name": "symbol",
+            "Parent": 6,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 12,
+            "Kind": 0,
+            "Name": "range",
+            "Parent": 11,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[1:0,1:1$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 13,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 11,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 2,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 14,
+            "Kind": 1,
+            "Name": "",
+            "Parent": 11,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "I",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 15,
+            "Kind": 3,
+            "Name": "symbolSegmentList",
+            "Parent": 5,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 16,
+            "Kind": 3,
+            "Name": "symbolSegment",
+            "Parent": 15,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 17,
+            "Kind": 0,
+            "Name": "range",
+            "Parent": 16,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[0:0,1:1$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 18,
+            "Kind": 3,
+            "Name": "symbolCandidate",
+            "Parent": 16,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 19,
+            "Kind": 0,
+            "Name": "nrs",
+            "Parent": 18,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 10,
+            "Text": null,
+            "Number": 0,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 20,
+            "Kind": 3,
+            "Name": "char",
+            "Parent": 18,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 21,
+            "Kind": 1,
+            "Name": "",
+            "Parent": 20,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "?",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 22,
+            "Kind": 3,
+            "Name": "mathTerminalNode",
+            "Parent": 5,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 23,
+            "Kind": 0,
+            "Name": "name",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 3,
+            "Text": "",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 24,
+            "Kind": 0,
+            "Name": "ref",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[0:0,1:1$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 25,
+            "Kind": 0,
+            "Name": "selected",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 7,
+            "Text": null,
+            "Number": 0,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 26,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 3,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          }
+        ],
+        "Registry": [
+          {
+            "Id": 0,
+            "Name": "INPUT",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295098117,
+                  "SourceIndex": 1,
+                  "PointIndex": 1,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 1
+          },
+          {
+            "Id": 1,
+            "Name": "MATH_SYMBOL",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 327429,
+                  "SourceIndex": 0,
+                  "PointIndex": 4,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 2
+          },
+          {
+            "Id": 2,
+            "Name": "MATH_SYMBOL",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 4294967299,
+                  "SourceIndex": 1,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295098117,
+                  "SourceIndex": 1,
+                  "PointIndex": 1,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 3
+          },
+          {
+            "Id": 3,
+            "Name": "MATH_NODE",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295098117,
+                  "SourceIndex": 1,
+                  "PointIndex": 1,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 1
+          }
+        ]
+      },
+      "Prepared": {
+        "Reservation": 56664,
+        "InputId": 0,
+        "Complete": true,
+        "Failed": false,
+        "Released": false,
+        "InferenceClaimed": false,
+        "SourcePrepared": false,
+        "WorkCount": 1,
+        "InitialComputeFlag": 1,
+        "WorkCompleted": false,
+        "TransformCount": 0,
+        "FreezeCount": 0,
+        "C23Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295098117,
+              "SourceIndex": 1,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "WorkRanges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295098117,
+              "SourceIndex": 1,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ]
+      },
+      "Finished": {
+        "Reservation": 56664,
+        "InputId": 0,
+        "Complete": true,
+        "Failed": false,
+        "Released": false,
+        "InferenceClaimed": true,
+        "SourcePrepared": true,
+        "WorkCount": 1,
+        "InitialComputeFlag": 1,
+        "WorkCompleted": true,
+        "TransformCount": 0,
+        "FreezeCount": 0,
+        "C23Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295098117,
+              "SourceIndex": 1,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "WorkRanges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295098117,
+              "SourceIndex": 1,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ]
+      },
+      "NewNn": {
+        "Complete": true,
+        "Failed": false,
+        "Released": false,
+        "DecoderReleased": false,
+        "Width": 1,
+        "Frames": 13,
+        "DecoderCalls": 7,
+        "Positions": [
+          3,
+          21507,
+          43267,
+          85253,
+          131077,
+          162565,
+          204549,
+          226309,
+          327429,
+          4294967299,
+          4294984451,
+          4295001347,
+          4295098117
+        ],
+        "Separators": [
+          9,
+          13
+        ],
+        "Order": [
+          0,
+          1
+        ],
+        "RawHashes": [
+          "b00686de5faf5e428824e262473a01c749571fe358bd60daadc8bfb2c6070a67",
+          "84812f240a9e803a9de5373e895213132901ab5a0136e32d01bd42f44fb6c63c",
+          "9dd6ca63408bb4bdf0a6eeb522756cc83bc00b111ba09e49bb5145ff4852c3ad",
+          "1bbae62ef061a0e21d2b8d9ce4b7e1bb3288bcd7f23c507f054f64b00bf59068",
+          "b0d458faeea4fb909c40b8c0f7bca44d370f6355f16dbfeb92e0f2d808085cce",
+          "32074f1ecf467ffa49598c8b63496835daf392e7443e35e3c1a0522969f61854",
+          "e421cfc04ad33780b94b5c349d10dbaf38e8c7a4807d2f94530f080a6c5ddc26"
+        ],
+        "FirstCopy": {
+          "ScoreBits": 1043850896,
+          "Frontier": 2,
+          "Parent": 0,
+          "Primary": [
+            45,
+            41
+          ],
+          "Secondary": [
+            45,
+            41
+          ],
+          "Units": [
+            16777261,
+            16777257
+          ],
+          "Runs": [
+            {
+              "PrimaryIndex": 0,
+              "EndSegmentExclusive": 9
+            },
+            {
+              "PrimaryIndex": 1,
+              "EndSegmentExclusive": 13
+            }
+          ],
+          "Text": [
+            {
+              "Unit": 16777261,
+              "Identity": 1,
+              "ByteCount": 1,
+              "Bytes": "TQ=="
+            },
+            {
+              "Unit": 16777257,
+              "Identity": 2,
+              "ByteCount": 1,
+              "Bytes": "SQ=="
+            }
+          ],
+          "Ranges": [
+            [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 327429,
+                  "SourceIndex": 0,
+                  "PointIndex": 4,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            [
+              {
+                "First": {
+                  "Value": 4294967299,
+                  "SourceIndex": 1,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295098117,
+                  "SourceIndex": 1,
+                  "PointIndex": 1,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "Width": 1,
+      "Reversed": true,
+      "Prior": {
+        "Epoch": 1,
+        "Reservation": 38896,
+        "Next": 4,
+        "SelectedField": [
+          {
+            "Id": 1,
+            "Kind": 3,
+            "Name": "mathField",
+            "Parent": 0,
+            "OriginalId": 7,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 2,
+            "Kind": 0,
+            "Name": "id",
+            "Parent": 1,
+            "OriginalId": 8,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "formula",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 3,
+            "Kind": 3,
+            "Name": "input",
+            "Parent": 1,
+            "OriginalId": 9,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 4,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 3,
+            "OriginalId": 10,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 0,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 5,
+            "Kind": 3,
+            "Name": "mathResult",
+            "Parent": 1,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 6,
+            "Kind": 3,
+            "Name": "sequence",
+            "Parent": 5,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 7,
+            "Kind": 3,
+            "Name": "symbol",
+            "Parent": 6,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 8,
+            "Kind": 0,
+            "Name": "range",
+            "Parent": 7,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[1:0,1:4$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 9,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 7,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 1,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 10,
+            "Kind": 1,
+            "Name": "",
+            "Parent": 7,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "M",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 11,
+            "Kind": 3,
+            "Name": "symbol",
+            "Parent": 6,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 12,
+            "Kind": 0,
+            "Name": "range",
+            "Parent": 11,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[0:0,0:1$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 13,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 11,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 2,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 14,
+            "Kind": 1,
+            "Name": "",
+            "Parent": 11,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "I",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 15,
+            "Kind": 3,
+            "Name": "symbolSegmentList",
+            "Parent": 5,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 16,
+            "Kind": 3,
+            "Name": "symbolSegment",
+            "Parent": 15,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 17,
+            "Kind": 0,
+            "Name": "range",
+            "Parent": 16,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[0:0,1:4$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 18,
+            "Kind": 3,
+            "Name": "symbolCandidate",
+            "Parent": 16,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 19,
+            "Kind": 0,
+            "Name": "nrs",
+            "Parent": 18,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 10,
+            "Text": null,
+            "Number": 0,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 20,
+            "Kind": 3,
+            "Name": "char",
+            "Parent": 18,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 21,
+            "Kind": 1,
+            "Name": "",
+            "Parent": 20,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "?",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 22,
+            "Kind": 3,
+            "Name": "mathTerminalNode",
+            "Parent": 5,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 23,
+            "Kind": 0,
+            "Name": "name",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 3,
+            "Text": "",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 24,
+            "Kind": 0,
+            "Name": "ref",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[0:0,1:4$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 25,
+            "Kind": 0,
+            "Name": "selected",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 7,
+            "Text": null,
+            "Number": 0,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 26,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 3,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          }
+        ],
+        "Registry": [
+          {
+            "Id": 0,
+            "Name": "INPUT",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295294725,
+                  "SourceIndex": 1,
+                  "PointIndex": 4,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 1
+          },
+          {
+            "Id": 1,
+            "Name": "MATH_SYMBOL",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 4294967299,
+                  "SourceIndex": 1,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295294725,
+                  "SourceIndex": 1,
+                  "PointIndex": 4,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 2
+          },
+          {
+            "Id": 2,
+            "Name": "MATH_SYMBOL",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 130821,
+                  "SourceIndex": 0,
+                  "PointIndex": 1,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 3
+          },
+          {
+            "Id": 3,
+            "Name": "MATH_NODE",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295294725,
+                  "SourceIndex": 1,
+                  "PointIndex": 4,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 1
+          }
+        ]
+      },
+      "Prepared": {
+        "Reservation": 56664,
+        "InputId": 0,
+        "Complete": true,
+        "Failed": false,
+        "Released": false,
+        "InferenceClaimed": false,
+        "SourcePrepared": false,
+        "WorkCount": 1,
+        "InitialComputeFlag": 1,
+        "WorkCompleted": false,
+        "TransformCount": 0,
+        "FreezeCount": 0,
+        "C23Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295294725,
+              "SourceIndex": 1,
+              "PointIndex": 4,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "WorkRanges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295294725,
+              "SourceIndex": 1,
+              "PointIndex": 4,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ]
+      },
+      "Finished": {
+        "Reservation": 56664,
+        "InputId": 0,
+        "Complete": true,
+        "Failed": false,
+        "Released": false,
+        "InferenceClaimed": true,
+        "SourcePrepared": true,
+        "WorkCount": 1,
+        "InitialComputeFlag": 1,
+        "WorkCompleted": true,
+        "TransformCount": 0,
+        "FreezeCount": 0,
+        "C23Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295294725,
+              "SourceIndex": 1,
+              "PointIndex": 4,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "WorkRanges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295294725,
+              "SourceIndex": 1,
+              "PointIndex": 4,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ]
+      },
+      "NewNn": {
+        "Complete": true,
+        "Failed": false,
+        "Released": false,
+        "DecoderReleased": false,
+        "Width": 1,
+        "Frames": 13,
+        "DecoderCalls": 7,
+        "Positions": [
+          4294967299,
+          4294988803,
+          4295010563,
+          4295052549,
+          4295098373,
+          4295129861,
+          4295171845,
+          4295193605,
+          4295294725,
+          3,
+          17155,
+          34051,
+          130821
+        ],
+        "Separators": [
+          9,
+          13
+        ],
+        "Order": [
+          1,
+          0
+        ],
+        "RawHashes": [
+          "b00686de5faf5e428824e262473a01c749571fe358bd60daadc8bfb2c6070a67",
+          "84812f240a9e803a9de5373e895213132901ab5a0136e32d01bd42f44fb6c63c",
+          "9dd6ca63408bb4bdf0a6eeb522756cc83bc00b111ba09e49bb5145ff4852c3ad",
+          "1bbae62ef061a0e21d2b8d9ce4b7e1bb3288bcd7f23c507f054f64b00bf59068",
+          "b0d458faeea4fb909c40b8c0f7bca44d370f6355f16dbfeb92e0f2d808085cce",
+          "32074f1ecf467ffa49598c8b63496835daf392e7443e35e3c1a0522969f61854",
+          "e421cfc04ad33780b94b5c349d10dbaf38e8c7a4807d2f94530f080a6c5ddc26"
+        ],
+        "FirstCopy": {
+          "ScoreBits": 1043850896,
+          "Frontier": 2,
+          "Parent": 0,
+          "Primary": [
+            45,
+            41
+          ],
+          "Secondary": [
+            45,
+            41
+          ],
+          "Units": [
+            16777261,
+            16777257
+          ],
+          "Runs": [
+            {
+              "PrimaryIndex": 0,
+              "EndSegmentExclusive": 9
+            },
+            {
+              "PrimaryIndex": 1,
+              "EndSegmentExclusive": 13
+            }
+          ],
+          "Text": [
+            {
+              "Unit": 16777261,
+              "Identity": 1,
+              "ByteCount": 1,
+              "Bytes": "TQ=="
+            },
+            {
+              "Unit": 16777257,
+              "Identity": 2,
+              "ByteCount": 1,
+              "Bytes": "SQ=="
+            }
+          ],
+          "Ranges": [
+            [
+              {
+                "First": {
+                  "Value": 4294967299,
+                  "SourceIndex": 1,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295294725,
+                  "SourceIndex": 1,
+                  "PointIndex": 4,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 130821,
+                  "SourceIndex": 0,
+                  "PointIndex": 1,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "Width": 3,
+      "Reversed": false,
+      "Prior": {
+        "Epoch": 1,
+        "Reservation": 38896,
+        "Next": 4,
+        "SelectedField": [
+          {
+            "Id": 1,
+            "Kind": 3,
+            "Name": "mathField",
+            "Parent": 0,
+            "OriginalId": 7,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 2,
+            "Kind": 0,
+            "Name": "id",
+            "Parent": 1,
+            "OriginalId": 8,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "formula",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 3,
+            "Kind": 3,
+            "Name": "input",
+            "Parent": 1,
+            "OriginalId": 9,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 4,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 3,
+            "OriginalId": 10,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 0,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 5,
+            "Kind": 3,
+            "Name": "mathResult",
+            "Parent": 1,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 6,
+            "Kind": 3,
+            "Name": "sequence",
+            "Parent": 5,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 7,
+            "Kind": 3,
+            "Name": "symbol",
+            "Parent": 6,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 8,
+            "Kind": 0,
+            "Name": "range",
+            "Parent": 7,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[0:0,0:4$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 9,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 7,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 1,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 10,
+            "Kind": 1,
+            "Name": "",
+            "Parent": 7,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "M",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 11,
+            "Kind": 3,
+            "Name": "symbol",
+            "Parent": 6,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 12,
+            "Kind": 0,
+            "Name": "range",
+            "Parent": 11,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[1:0,1:1$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 13,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 11,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 2,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 14,
+            "Kind": 1,
+            "Name": "",
+            "Parent": 11,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "I",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 15,
+            "Kind": 3,
+            "Name": "symbolSegmentList",
+            "Parent": 5,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 16,
+            "Kind": 3,
+            "Name": "symbolSegment",
+            "Parent": 15,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 17,
+            "Kind": 0,
+            "Name": "range",
+            "Parent": 16,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[0:0,1:1$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 18,
+            "Kind": 3,
+            "Name": "symbolCandidate",
+            "Parent": 16,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 19,
+            "Kind": 0,
+            "Name": "nrs",
+            "Parent": 18,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 10,
+            "Text": null,
+            "Number": 0,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 20,
+            "Kind": 3,
+            "Name": "char",
+            "Parent": 18,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 21,
+            "Kind": 1,
+            "Name": "",
+            "Parent": 20,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "?",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 22,
+            "Kind": 3,
+            "Name": "mathTerminalNode",
+            "Parent": 5,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 23,
+            "Kind": 0,
+            "Name": "name",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 3,
+            "Text": "",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 24,
+            "Kind": 0,
+            "Name": "ref",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[0:0,1:1$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 25,
+            "Kind": 0,
+            "Name": "selected",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 7,
+            "Text": null,
+            "Number": 0,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 26,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 3,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          }
+        ],
+        "Registry": [
+          {
+            "Id": 0,
+            "Name": "INPUT",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295098117,
+                  "SourceIndex": 1,
+                  "PointIndex": 1,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 1
+          },
+          {
+            "Id": 1,
+            "Name": "MATH_SYMBOL",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 327429,
+                  "SourceIndex": 0,
+                  "PointIndex": 4,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 2
+          },
+          {
+            "Id": 2,
+            "Name": "MATH_SYMBOL",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 4294967299,
+                  "SourceIndex": 1,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295098117,
+                  "SourceIndex": 1,
+                  "PointIndex": 1,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 3
+          },
+          {
+            "Id": 3,
+            "Name": "MATH_NODE",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295098117,
+                  "SourceIndex": 1,
+                  "PointIndex": 1,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 1
+          }
+        ]
+      },
+      "Prepared": {
+        "Reservation": 56664,
+        "InputId": 0,
+        "Complete": true,
+        "Failed": false,
+        "Released": false,
+        "InferenceClaimed": false,
+        "SourcePrepared": false,
+        "WorkCount": 1,
+        "InitialComputeFlag": 1,
+        "WorkCompleted": false,
+        "TransformCount": 0,
+        "FreezeCount": 0,
+        "C23Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295098117,
+              "SourceIndex": 1,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "WorkRanges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295098117,
+              "SourceIndex": 1,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ]
+      },
+      "Finished": {
+        "Reservation": 56664,
+        "InputId": 0,
+        "Complete": true,
+        "Failed": false,
+        "Released": false,
+        "InferenceClaimed": true,
+        "SourcePrepared": true,
+        "WorkCount": 1,
+        "InitialComputeFlag": 1,
+        "WorkCompleted": true,
+        "TransformCount": 0,
+        "FreezeCount": 0,
+        "C23Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295098117,
+              "SourceIndex": 1,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "WorkRanges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295098117,
+              "SourceIndex": 1,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ]
+      },
+      "NewNn": {
+        "Complete": true,
+        "Failed": false,
+        "Released": false,
+        "DecoderReleased": false,
+        "Width": 3,
+        "Frames": 13,
+        "DecoderCalls": 7,
+        "Positions": [
+          3,
+          21507,
+          43267,
+          85253,
+          131077,
+          162565,
+          204549,
+          226309,
+          327429,
+          4294967299,
+          4294984451,
+          4295001347,
+          4295098117
+        ],
+        "Separators": [
+          9,
+          13
+        ],
+        "Order": [
+          0,
+          1
+        ],
+        "RawHashes": [
+          "b00686de5faf5e428824e262473a01c749571fe358bd60daadc8bfb2c6070a67",
+          "445c90328ae131ff77946cc9acd5a7a75ddd054bd8f7f4115471f1ec9eeb314c",
+          "12834c9b84572fdc5d266bae6dd1aac630c39574ef2647746bb4797972308921",
+          "63a55ec0ad582575fe38f5c7a52fb8c1d8e9482d4fc272db15b06c6172acddbe",
+          "43ed8d7db55bd59046df0756472a44b7c256308a54e9e0f4ee6edb7813bf9391",
+          "2799f039356ab467629b0790eb18a73345d72161494bf3428080eb4b13e7afdd",
+          "87c7a945823dd2a62517b6b639da9467d244e939106838f3d7b6131f0f368b43"
+        ],
+        "FirstCopy": {
+          "ScoreBits": 1043790648,
+          "Frontier": 2,
+          "Parent": 0,
+          "Primary": [
+            45,
+            41
+          ],
+          "Secondary": [
+            45,
+            41
+          ],
+          "Units": [
+            16777261,
+            16777257
+          ],
+          "Runs": [
+            {
+              "PrimaryIndex": 0,
+              "EndSegmentExclusive": 9
+            },
+            {
+              "PrimaryIndex": 1,
+              "EndSegmentExclusive": 13
+            }
+          ],
+          "Text": [
+            {
+              "Unit": 16777261,
+              "Identity": 1,
+              "ByteCount": 1,
+              "Bytes": "TQ=="
+            },
+            {
+              "Unit": 16777257,
+              "Identity": 2,
+              "ByteCount": 1,
+              "Bytes": "SQ=="
+            }
+          ],
+          "Ranges": [
+            [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 327429,
+                  "SourceIndex": 0,
+                  "PointIndex": 4,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            [
+              {
+                "First": {
+                  "Value": 4294967299,
+                  "SourceIndex": 1,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295098117,
+                  "SourceIndex": 1,
+                  "PointIndex": 1,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "Width": 3,
+      "Reversed": true,
+      "Prior": {
+        "Epoch": 1,
+        "Reservation": 38896,
+        "Next": 4,
+        "SelectedField": [
+          {
+            "Id": 1,
+            "Kind": 3,
+            "Name": "mathField",
+            "Parent": 0,
+            "OriginalId": 7,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 2,
+            "Kind": 0,
+            "Name": "id",
+            "Parent": 1,
+            "OriginalId": 8,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "formula",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 3,
+            "Kind": 3,
+            "Name": "input",
+            "Parent": 1,
+            "OriginalId": 9,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 4,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 3,
+            "OriginalId": 10,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 0,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 5,
+            "Kind": 3,
+            "Name": "mathResult",
+            "Parent": 1,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 6,
+            "Kind": 3,
+            "Name": "sequence",
+            "Parent": 5,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 7,
+            "Kind": 3,
+            "Name": "symbol",
+            "Parent": 6,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 8,
+            "Kind": 0,
+            "Name": "range",
+            "Parent": 7,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[1:0,1:4$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 9,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 7,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 1,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 10,
+            "Kind": 1,
+            "Name": "",
+            "Parent": 7,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "M",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 11,
+            "Kind": 3,
+            "Name": "symbol",
+            "Parent": 6,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 12,
+            "Kind": 0,
+            "Name": "range",
+            "Parent": 11,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[0:0,0:1$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 13,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 11,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 2,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 14,
+            "Kind": 1,
+            "Name": "",
+            "Parent": 11,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "I",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 15,
+            "Kind": 3,
+            "Name": "symbolSegmentList",
+            "Parent": 5,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 16,
+            "Kind": 3,
+            "Name": "symbolSegment",
+            "Parent": 15,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 17,
+            "Kind": 0,
+            "Name": "range",
+            "Parent": 16,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[0:0,1:4$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 18,
+            "Kind": 3,
+            "Name": "symbolCandidate",
+            "Parent": 16,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 19,
+            "Kind": 0,
+            "Name": "nrs",
+            "Parent": 18,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 10,
+            "Text": null,
+            "Number": 0,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 20,
+            "Kind": 3,
+            "Name": "char",
+            "Parent": 18,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 21,
+            "Kind": 1,
+            "Name": "",
+            "Parent": 20,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "?",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 22,
+            "Kind": 3,
+            "Name": "mathTerminalNode",
+            "Parent": 5,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 23,
+            "Kind": 0,
+            "Name": "name",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 3,
+            "Text": "",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 24,
+            "Kind": 0,
+            "Name": "ref",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[0:0,1:4$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 25,
+            "Kind": 0,
+            "Name": "selected",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 7,
+            "Text": null,
+            "Number": 0,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 26,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 3,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          }
+        ],
+        "Registry": [
+          {
+            "Id": 0,
+            "Name": "INPUT",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295294725,
+                  "SourceIndex": 1,
+                  "PointIndex": 4,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 1
+          },
+          {
+            "Id": 1,
+            "Name": "MATH_SYMBOL",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 4294967299,
+                  "SourceIndex": 1,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295294725,
+                  "SourceIndex": 1,
+                  "PointIndex": 4,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 2
+          },
+          {
+            "Id": 2,
+            "Name": "MATH_SYMBOL",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 130821,
+                  "SourceIndex": 0,
+                  "PointIndex": 1,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 3
+          },
+          {
+            "Id": 3,
+            "Name": "MATH_NODE",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295294725,
+                  "SourceIndex": 1,
+                  "PointIndex": 4,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 1
+          }
+        ]
+      },
+      "Prepared": {
+        "Reservation": 56664,
+        "InputId": 0,
+        "Complete": true,
+        "Failed": false,
+        "Released": false,
+        "InferenceClaimed": false,
+        "SourcePrepared": false,
+        "WorkCount": 1,
+        "InitialComputeFlag": 1,
+        "WorkCompleted": false,
+        "TransformCount": 0,
+        "FreezeCount": 0,
+        "C23Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295294725,
+              "SourceIndex": 1,
+              "PointIndex": 4,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "WorkRanges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295294725,
+              "SourceIndex": 1,
+              "PointIndex": 4,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ]
+      },
+      "Finished": {
+        "Reservation": 56664,
+        "InputId": 0,
+        "Complete": true,
+        "Failed": false,
+        "Released": false,
+        "InferenceClaimed": true,
+        "SourcePrepared": true,
+        "WorkCount": 1,
+        "InitialComputeFlag": 1,
+        "WorkCompleted": true,
+        "TransformCount": 0,
+        "FreezeCount": 0,
+        "C23Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295294725,
+              "SourceIndex": 1,
+              "PointIndex": 4,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "WorkRanges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295294725,
+              "SourceIndex": 1,
+              "PointIndex": 4,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ]
+      },
+      "NewNn": {
+        "Complete": true,
+        "Failed": false,
+        "Released": false,
+        "DecoderReleased": false,
+        "Width": 3,
+        "Frames": 13,
+        "DecoderCalls": 7,
+        "Positions": [
+          4294967299,
+          4294988803,
+          4295010563,
+          4295052549,
+          4295098373,
+          4295129861,
+          4295171845,
+          4295193605,
+          4295294725,
+          3,
+          17155,
+          34051,
+          130821
+        ],
+        "Separators": [
+          9,
+          13
+        ],
+        "Order": [
+          1,
+          0
+        ],
+        "RawHashes": [
+          "b00686de5faf5e428824e262473a01c749571fe358bd60daadc8bfb2c6070a67",
+          "445c90328ae131ff77946cc9acd5a7a75ddd054bd8f7f4115471f1ec9eeb314c",
+          "12834c9b84572fdc5d266bae6dd1aac630c39574ef2647746bb4797972308921",
+          "63a55ec0ad582575fe38f5c7a52fb8c1d8e9482d4fc272db15b06c6172acddbe",
+          "43ed8d7db55bd59046df0756472a44b7c256308a54e9e0f4ee6edb7813bf9391",
+          "2799f039356ab467629b0790eb18a73345d72161494bf3428080eb4b13e7afdd",
+          "87c7a945823dd2a62517b6b639da9467d244e939106838f3d7b6131f0f368b43"
+        ],
+        "FirstCopy": {
+          "ScoreBits": 1043790648,
+          "Frontier": 2,
+          "Parent": 0,
+          "Primary": [
+            45,
+            41
+          ],
+          "Secondary": [
+            45,
+            41
+          ],
+          "Units": [
+            16777261,
+            16777257
+          ],
+          "Runs": [
+            {
+              "PrimaryIndex": 0,
+              "EndSegmentExclusive": 9
+            },
+            {
+              "PrimaryIndex": 1,
+              "EndSegmentExclusive": 13
+            }
+          ],
+          "Text": [
+            {
+              "Unit": 16777261,
+              "Identity": 1,
+              "ByteCount": 1,
+              "Bytes": "TQ=="
+            },
+            {
+              "Unit": 16777257,
+              "Identity": 2,
+              "ByteCount": 1,
+              "Bytes": "SQ=="
+            }
+          ],
+          "Ranges": [
+            [
+              {
+                "First": {
+                  "Value": 4294967299,
+                  "SourceIndex": 1,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295294725,
+                  "SourceIndex": 1,
+                  "PointIndex": 4,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 130821,
+                  "SourceIndex": 0,
+                  "PointIndex": 1,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "Width": 16,
+      "Reversed": false,
+      "Prior": {
+        "Epoch": 1,
+        "Reservation": 38896,
+        "Next": 4,
+        "SelectedField": [
+          {
+            "Id": 1,
+            "Kind": 3,
+            "Name": "mathField",
+            "Parent": 0,
+            "OriginalId": 7,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 2,
+            "Kind": 0,
+            "Name": "id",
+            "Parent": 1,
+            "OriginalId": 8,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "formula",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 3,
+            "Kind": 3,
+            "Name": "input",
+            "Parent": 1,
+            "OriginalId": 9,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 4,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 3,
+            "OriginalId": 10,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 0,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 5,
+            "Kind": 3,
+            "Name": "mathResult",
+            "Parent": 1,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 6,
+            "Kind": 3,
+            "Name": "sequence",
+            "Parent": 5,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 7,
+            "Kind": 3,
+            "Name": "symbol",
+            "Parent": 6,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 8,
+            "Kind": 0,
+            "Name": "range",
+            "Parent": 7,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[0:0,0:4$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 9,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 7,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 1,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 10,
+            "Kind": 1,
+            "Name": "",
+            "Parent": 7,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "M",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 11,
+            "Kind": 3,
+            "Name": "symbol",
+            "Parent": 6,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 12,
+            "Kind": 0,
+            "Name": "range",
+            "Parent": 11,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[1:0,1:1$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 13,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 11,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 2,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 14,
+            "Kind": 1,
+            "Name": "",
+            "Parent": 11,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "I",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 15,
+            "Kind": 3,
+            "Name": "symbolSegmentList",
+            "Parent": 5,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 16,
+            "Kind": 3,
+            "Name": "symbolSegment",
+            "Parent": 15,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 17,
+            "Kind": 0,
+            "Name": "range",
+            "Parent": 16,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[0:0,1:1$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 18,
+            "Kind": 3,
+            "Name": "symbolCandidate",
+            "Parent": 16,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 19,
+            "Kind": 0,
+            "Name": "nrs",
+            "Parent": 18,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 10,
+            "Text": null,
+            "Number": 0,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 20,
+            "Kind": 3,
+            "Name": "char",
+            "Parent": 18,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 21,
+            "Kind": 1,
+            "Name": "",
+            "Parent": 20,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "?",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 22,
+            "Kind": 3,
+            "Name": "mathTerminalNode",
+            "Parent": 5,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 23,
+            "Kind": 0,
+            "Name": "name",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 3,
+            "Text": "",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 24,
+            "Kind": 0,
+            "Name": "ref",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[0:0,1:1$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 25,
+            "Kind": 0,
+            "Name": "selected",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 7,
+            "Text": null,
+            "Number": 0,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 26,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 3,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          }
+        ],
+        "Registry": [
+          {
+            "Id": 0,
+            "Name": "INPUT",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295098117,
+                  "SourceIndex": 1,
+                  "PointIndex": 1,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 1
+          },
+          {
+            "Id": 1,
+            "Name": "MATH_SYMBOL",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 327429,
+                  "SourceIndex": 0,
+                  "PointIndex": 4,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 2
+          },
+          {
+            "Id": 2,
+            "Name": "MATH_SYMBOL",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 4294967299,
+                  "SourceIndex": 1,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295098117,
+                  "SourceIndex": 1,
+                  "PointIndex": 1,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 3
+          },
+          {
+            "Id": 3,
+            "Name": "MATH_NODE",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295098117,
+                  "SourceIndex": 1,
+                  "PointIndex": 1,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 1
+          }
+        ]
+      },
+      "Prepared": {
+        "Reservation": 56664,
+        "InputId": 0,
+        "Complete": true,
+        "Failed": false,
+        "Released": false,
+        "InferenceClaimed": false,
+        "SourcePrepared": false,
+        "WorkCount": 1,
+        "InitialComputeFlag": 1,
+        "WorkCompleted": false,
+        "TransformCount": 0,
+        "FreezeCount": 0,
+        "C23Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295098117,
+              "SourceIndex": 1,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "WorkRanges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295098117,
+              "SourceIndex": 1,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ]
+      },
+      "Finished": {
+        "Reservation": 56664,
+        "InputId": 0,
+        "Complete": true,
+        "Failed": false,
+        "Released": false,
+        "InferenceClaimed": true,
+        "SourcePrepared": true,
+        "WorkCount": 1,
+        "InitialComputeFlag": 1,
+        "WorkCompleted": true,
+        "TransformCount": 0,
+        "FreezeCount": 0,
+        "C23Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295098117,
+              "SourceIndex": 1,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "WorkRanges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295098117,
+              "SourceIndex": 1,
+              "PointIndex": 1,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ]
+      },
+      "NewNn": {
+        "Complete": true,
+        "Failed": false,
+        "Released": false,
+        "DecoderReleased": false,
+        "Width": 16,
+        "Frames": 13,
+        "DecoderCalls": 7,
+        "Positions": [
+          3,
+          21507,
+          43267,
+          85253,
+          131077,
+          162565,
+          204549,
+          226309,
+          327429,
+          4294967299,
+          4294984451,
+          4295001347,
+          4295098117
+        ],
+        "Separators": [
+          9,
+          13
+        ],
+        "Order": [
+          0,
+          1
+        ],
+        "RawHashes": [
+          "b00686de5faf5e428824e262473a01c749571fe358bd60daadc8bfb2c6070a67",
+          "e88d247ad8e2bffd657ab936194bb9cd9df44d1579259dfb8b9f2539e75fd742",
+          "15c021ab28a542c42deeb2a7373e0254c8d551d6a12abc3ae4cc0858fd33c017",
+          "e2d839e007dfc9c250cead174a9faefeb4329b4a75f6b46b637ad09efb0dca23",
+          "9ec4dfb10d5dce6049b4289478346dabcbc3160438d054538be268105c06be2a",
+          "f64bd8f26bb995eac1a8c5e908c815b6b3176f190a0f315dae42a593d248dd3c",
+          "67354760769c0a005ae7af79f659255285a44efedf772456a98a75c29f2f728b"
+        ],
+        "FirstCopy": {
+          "ScoreBits": 1043873414,
+          "Frontier": 1,
+          "Parent": 0,
+          "Primary": [
+            45,
+            41
+          ],
+          "Secondary": [
+            45,
+            41
+          ],
+          "Units": [
+            16777261,
+            16777257
+          ],
+          "Runs": [
+            {
+              "PrimaryIndex": 0,
+              "EndSegmentExclusive": 9
+            },
+            {
+              "PrimaryIndex": 1,
+              "EndSegmentExclusive": 13
+            }
+          ],
+          "Text": [
+            {
+              "Unit": 16777261,
+              "Identity": 1,
+              "ByteCount": 1,
+              "Bytes": "TQ=="
+            },
+            {
+              "Unit": 16777257,
+              "Identity": 2,
+              "ByteCount": 1,
+              "Bytes": "SQ=="
+            }
+          ],
+          "Ranges": [
+            [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 327429,
+                  "SourceIndex": 0,
+                  "PointIndex": 4,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            [
+              {
+                "First": {
+                  "Value": 4294967299,
+                  "SourceIndex": 1,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295098117,
+                  "SourceIndex": 1,
+                  "PointIndex": 1,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "Width": 16,
+      "Reversed": true,
+      "Prior": {
+        "Epoch": 1,
+        "Reservation": 38896,
+        "Next": 4,
+        "SelectedField": [
+          {
+            "Id": 1,
+            "Kind": 3,
+            "Name": "mathField",
+            "Parent": 0,
+            "OriginalId": 7,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 2,
+            "Kind": 0,
+            "Name": "id",
+            "Parent": 1,
+            "OriginalId": 8,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "formula",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 3,
+            "Kind": 3,
+            "Name": "input",
+            "Parent": 1,
+            "OriginalId": 9,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 4,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 3,
+            "OriginalId": 10,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 0,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 5,
+            "Kind": 3,
+            "Name": "mathResult",
+            "Parent": 1,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 6,
+            "Kind": 3,
+            "Name": "sequence",
+            "Parent": 5,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 7,
+            "Kind": 3,
+            "Name": "symbol",
+            "Parent": 6,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 8,
+            "Kind": 0,
+            "Name": "range",
+            "Parent": 7,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[1:0,1:4$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 9,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 7,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 1,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 10,
+            "Kind": 1,
+            "Name": "",
+            "Parent": 7,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "M",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 11,
+            "Kind": 3,
+            "Name": "symbol",
+            "Parent": 6,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 12,
+            "Kind": 0,
+            "Name": "range",
+            "Parent": 11,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[0:0,0:1$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 13,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 11,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 2,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 14,
+            "Kind": 1,
+            "Name": "",
+            "Parent": 11,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "I",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 15,
+            "Kind": 3,
+            "Name": "symbolSegmentList",
+            "Parent": 5,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 16,
+            "Kind": 3,
+            "Name": "symbolSegment",
+            "Parent": 15,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 17,
+            "Kind": 0,
+            "Name": "range",
+            "Parent": 16,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[0:0,1:4$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 18,
+            "Kind": 3,
+            "Name": "symbolCandidate",
+            "Parent": 16,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 19,
+            "Kind": 0,
+            "Name": "nrs",
+            "Parent": 18,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 10,
+            "Text": null,
+            "Number": 0,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 20,
+            "Kind": 3,
+            "Name": "char",
+            "Parent": 18,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 21,
+            "Kind": 1,
+            "Name": "",
+            "Parent": 20,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "?",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 22,
+            "Kind": 3,
+            "Name": "mathTerminalNode",
+            "Parent": 5,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 0,
+            "Text": null,
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 23,
+            "Kind": 0,
+            "Name": "name",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 3,
+            "Text": "",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 24,
+            "Kind": 0,
+            "Name": "ref",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 2,
+            "Text": "[0:0,1:4$]",
+            "Number": null,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 25,
+            "Kind": 0,
+            "Name": "selected",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 7,
+            "Text": null,
+            "Number": 0,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          },
+          {
+            "Id": 26,
+            "Kind": 0,
+            "Name": "tag",
+            "Parent": 22,
+            "OriginalId": 0,
+            "PayloadOrigin": 0,
+            "ValueTag": 4,
+            "Text": null,
+            "Number": 3,
+            "NamespaceUri": null,
+            "NamespacePrefix": null
+          }
+        ],
+        "Registry": [
+          {
+            "Id": 0,
+            "Name": "INPUT",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295294725,
+                  "SourceIndex": 1,
+                  "PointIndex": 4,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 1
+          },
+          {
+            "Id": 1,
+            "Name": "MATH_SYMBOL",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 4294967299,
+                  "SourceIndex": 1,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295294725,
+                  "SourceIndex": 1,
+                  "PointIndex": 4,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 2
+          },
+          {
+            "Id": 2,
+            "Name": "MATH_SYMBOL",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 130821,
+                  "SourceIndex": 0,
+                  "PointIndex": 1,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 3
+          },
+          {
+            "Id": 3,
+            "Name": "MATH_NODE",
+            "Category": 102,
+            "Ranges": [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295294725,
+                  "SourceIndex": 1,
+                  "PointIndex": 4,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            "CanonicalC22Id": 1
+          }
+        ]
+      },
+      "Prepared": {
+        "Reservation": 56664,
+        "InputId": 0,
+        "Complete": true,
+        "Failed": false,
+        "Released": false,
+        "InferenceClaimed": false,
+        "SourcePrepared": false,
+        "WorkCount": 1,
+        "InitialComputeFlag": 1,
+        "WorkCompleted": false,
+        "TransformCount": 0,
+        "FreezeCount": 0,
+        "C23Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295294725,
+              "SourceIndex": 1,
+              "PointIndex": 4,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "WorkRanges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295294725,
+              "SourceIndex": 1,
+              "PointIndex": 4,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ]
+      },
+      "Finished": {
+        "Reservation": 56664,
+        "InputId": 0,
+        "Complete": true,
+        "Failed": false,
+        "Released": false,
+        "InferenceClaimed": true,
+        "SourcePrepared": true,
+        "WorkCount": 1,
+        "InitialComputeFlag": 1,
+        "WorkCompleted": true,
+        "TransformCount": 0,
+        "FreezeCount": 0,
+        "C23Ranges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295294725,
+              "SourceIndex": 1,
+              "PointIndex": 4,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ],
+        "WorkRanges": [
+          {
+            "First": {
+              "Value": 3,
+              "SourceIndex": 0,
+              "PointIndex": 0,
+              "Fraction": 0,
+              "Mode": 3
+            },
+            "Last": {
+              "Value": 4295294725,
+              "SourceIndex": 1,
+              "PointIndex": 4,
+              "Fraction": 255,
+              "Mode": 5
+            }
+          }
+        ]
+      },
+      "NewNn": {
+        "Complete": true,
+        "Failed": false,
+        "Released": false,
+        "DecoderReleased": false,
+        "Width": 16,
+        "Frames": 13,
+        "DecoderCalls": 7,
+        "Positions": [
+          4294967299,
+          4294988803,
+          4295010563,
+          4295052549,
+          4295098373,
+          4295129861,
+          4295171845,
+          4295193605,
+          4295294725,
+          3,
+          17155,
+          34051,
+          130821
+        ],
+        "Separators": [
+          9,
+          13
+        ],
+        "Order": [
+          1,
+          0
+        ],
+        "RawHashes": [
+          "b00686de5faf5e428824e262473a01c749571fe358bd60daadc8bfb2c6070a67",
+          "e88d247ad8e2bffd657ab936194bb9cd9df44d1579259dfb8b9f2539e75fd742",
+          "15c021ab28a542c42deeb2a7373e0254c8d551d6a12abc3ae4cc0858fd33c017",
+          "e2d839e007dfc9c250cead174a9faefeb4329b4a75f6b46b637ad09efb0dca23",
+          "9ec4dfb10d5dce6049b4289478346dabcbc3160438d054538be268105c06be2a",
+          "f64bd8f26bb995eac1a8c5e908c815b6b3176f190a0f315dae42a593d248dd3c",
+          "67354760769c0a005ae7af79f659255285a44efedf772456a98a75c29f2f728b"
+        ],
+        "FirstCopy": {
+          "ScoreBits": 1043873414,
+          "Frontier": 1,
+          "Parent": 0,
+          "Primary": [
+            45,
+            41
+          ],
+          "Secondary": [
+            45,
+            41
+          ],
+          "Units": [
+            16777261,
+            16777257
+          ],
+          "Runs": [
+            {
+              "PrimaryIndex": 0,
+              "EndSegmentExclusive": 9
+            },
+            {
+              "PrimaryIndex": 1,
+              "EndSegmentExclusive": 13
+            }
+          ],
+          "Text": [
+            {
+              "Unit": 16777261,
+              "Identity": 1,
+              "ByteCount": 1,
+              "Bytes": "TQ=="
+            },
+            {
+              "Unit": 16777257,
+              "Identity": 2,
+              "ByteCount": 1,
+              "Bytes": "SQ=="
+            }
+          ],
+          "Ranges": [
+            [
+              {
+                "First": {
+                  "Value": 4294967299,
+                  "SourceIndex": 1,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 4295294725,
+                  "SourceIndex": 1,
+                  "PointIndex": 4,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ],
+            [
+              {
+                "First": {
+                  "Value": 3,
+                  "SourceIndex": 0,
+                  "PointIndex": 0,
+                  "Fraction": 0,
+                  "Mode": 3
+                },
+                "Last": {
+                  "Value": 130821,
+                  "SourceIndex": 0,
+                  "PointIndex": 1,
+                  "Fraction": 255,
+                  "Mode": 5
+                }
+              }
+            ]
+          ]
+        }
+      }
+    }
+  ]
+}

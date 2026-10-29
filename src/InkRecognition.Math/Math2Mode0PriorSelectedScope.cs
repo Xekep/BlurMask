@@ -9,6 +9,7 @@ internal abstract class Math2Mode0PriorInk
     internal abstract Math2Mode0PriorRetainedInk CloneThird(CancellationToken token);
     internal abstract LegacyOwnedRawInkDocument Document { get; }
     internal abstract Math2Mode0CurrentC23 SelectInput(long inputId,CancellationToken token);
+    internal virtual Math2Mode0CurrentC23 SelectChangedInput(long inputId,Math2Mode0OriginalApplication.CurrentInputBorrow borrow,CancellationToken token)=>throw new NotSupportedException("Changed-input selection requires its real current owner.");
     internal abstract LegacyLibraryOriginalDomNameOwner Names { get; }
     internal abstract long Next { get; }
     internal abstract Math2Mode0OriginalRegistryRow[] Snapshot();
@@ -53,7 +54,9 @@ internal sealed partial class Math2Mode0PriorSelectedScope : IDisposable
     }
     // No own gate is held when entering the ancestor chain.
     internal T WithCurrent<T>(Func<T> inspect,CancellationToken token=default)
-        =>parent.WithCompletedOriginalInput(borrow=>
+    {
+        if(changedReceipt is not null)return WithChangedCurrent(inspect,token);
+        return parent.WithCompletedOriginalInput(borrow=>
         {
             lock(gate)
             {
@@ -65,6 +68,7 @@ internal sealed partial class Math2Mode0PriorSelectedScope : IDisposable
                 return inspect();
             }
         },token);
+    }
     internal Math2Mode0PriorSnapshot CopySnapshot(CancellationToken token=default)
         =>WithCurrent(()=>new Math2Mode0PriorSnapshot(epoch,reservation,selectedInk.Next,selectedArena.Snapshot(),selectedInk.Snapshot()),token);
     internal object SelectedInkIdentity=>WithCurrent(()=>selectedInk.Identity);
