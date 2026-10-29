@@ -81,7 +81,10 @@ if(args.Length==4)
  var symbols=result.GlyphReferences.Select(reference=>BinaryPrimitives.ReadUInt16LittleEndian(result.Result.GlyphPool.CopyRecord(reference).AsSpan(8))).ToArray();Require(symbols.SequenceEqual(cells.Select(cell=>cell.Symbol)),"Literal first labels changed through materialization.");
  byte[] header=result.PublishedWord.Word.CopyStorage();Require(BinaryPrimitives.ReadSingleLittleEndian(header.AsSpan(16))==-5f*result.Selection.TotalCost/8192f&&BinaryPrimitives.ReadSingleLittleEndian(header.AsSpan(20))==1&&BinaryPrimitives.ReadSingleLittleEndian(header.AsSpan(24))==(float)result.Selection.TotalCost/(grid.NodeCount*8192)&&BinaryPrimitives.ReadSingleLittleEndian(header.AsSpan(28))==(float)result.Selection.AcousticCost/8192,"Actual unadjusted WORD scalar mapping differs.");
  Require(BinaryPrimitives.ReadSingleLittleEndian(header.AsSpan(24))!=result.Selection.Score.NormalizedCost10&&result.Selection.Score.NormalizedCost10==0,"TOP relative cost was conflated with WORD's unadjusted cost.");
- string actual=string.Concat(symbols.Select(s=>scorer.Alphabet.TryGetText(s,out string text)?text:"?"));Require(actual=="MИP"&&result.Selection.TotalCost==41268,"Existing real plain first fixture changed; this is a mixed-script diagnostic, not Russian success.");
+ // Native first AL178 mixed EXP/sigmoid: independently replayed selected costs
+ // [6172,15877,18951] + separation7100 + transitions[-3780,-3477] =40843.
+ Require(cells.Select(c=>c.Node).SequenceEqual(new[]{3,6,8})&&cells.Select(c=>(int)c.Arc).SequenceEqual(new[]{3,2,1})&&symbols.SequenceEqual(new ushort[]{22,70,25}),"Existing mixed-script fixture source path differs from native first-model reference.");
+ string actual=string.Concat(symbols.Select(s=>scorer.Alphabet.TryGetText(s,out string text)?text:"?"));Require(actual=="MИP"&&result.Selection.TotalCost==40843,"Existing real plain first fixture changed; this is a mixed-script diagnostic, not Russian success.");
  for(int i=0;i<cells.Count;i++)
  {
   byte[] glyph=result.Result.GlyphPool.CopyRecord(result.GlyphReferences[i]);var cell=cells[i];var source=primary.GetRowCopy(cell.Node);var cache=scores[graph.GetNode(cell.Node)[cell.Arc].GroupId];
