@@ -1,0 +1,84 @@
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace InkRecognition.Math;
+
+// ISOLATED diagnostic assembly only. No tensor or owner leaves this collector.
+// It reads the actual arguments/outputs of the existing Encoder.Run call.
+internal static class Math2EncoderDiagnostic
+{
+    [ThreadStatic] private static Session? current;
+    internal static Session Start(string output,string runtime)
+    {
+        if(current is not null||File.Exists(output)||File.Exists(output+".tmp")||!BitConverter.IsLittleEndian)
+            throw new InvalidOperationException("Fresh single-thread encoder diagnostic required.");
+        return current=new Session(output,runtime);
+    }
+    internal static void Before(OrtTensor source,OrtTensor downsampling,OrtTensor ends)
+        =>(current??throw new InvalidOperationException("No diagnostic session.")).Before([source,downsampling,ends]);
+    internal static void After(OrtTensor[] outputs)
+        =>(current??throw new InvalidOperationException("No diagnostic session.")).After(outputs);
+
+    internal sealed class Session(string output,string runtime):IDisposable
+    {
+        private readonly List<EncoderTuple> calls=[];
+        private long readBytes;
+        private bool pending,complete,disposed;
+        private void Check()
+        {if(disposed||complete||!ReferenceEquals(current,this))throw new InvalidOperationException("Same live diagnostic session required.");}
+        private TensorHash Read(OrtTensor actual)
+        {
+            var description=actual.Describe();
+            if(description.Type is not(1 or 7)||description.Shape.Length>8)throw new InvalidDataException("Bounded encoder tensor type required.");
+            long count=1;foreach(long dimension in description.Shape)
+            {if(dimension<1)throw new InvalidDataException("Positive encoder dimensions required.");count=checked(count*dimension);}
+            long bytes=checked(count*(description.Type==1?4:8));
+            if(count>4*1024*1024||bytes>128L*1024*1024-readBytes)throw new InvalidDataException("Encoder observation budget exceeded before copy.");
+            readBytes+=bytes;
+            string sha;
+            if(description.Type==1)
+            {
+                var copied=actual.Floats();
+                if(copied.Values.LongLength!=count||!copied.Shape.SequenceEqual(description.Shape))throw new InvalidDataException("Actual float tensor shape changed.");
+                sha=Convert.ToHexStringLower(SHA256.HashData(MemoryMarshal.AsBytes(copied.Values.AsSpan())));
+            }
+            else
+            {
+                var copied=actual.Int64s();
+                if(copied.Values.LongLength!=count||!copied.Shape.SequenceEqual(description.Shape))throw new InvalidDataException("Actual int64 tensor shape changed.");
+                sha=Convert.ToHexStringLower(SHA256.HashData(MemoryMarshal.AsBytes(copied.Values.AsSpan())));
+            }
+            return new(description.Type,description.Shape,count,bytes,sha);
+        }
+        internal void Before(OrtTensor[] inputs)
+        {
+            Check();if(pending||calls.Count>=24||inputs.Length!=3)throw new InvalidOperationException("Exact single pending encoder call required.");
+            var hashes=inputs.Select(Read).ToArray();calls.Add(new(calls.Count,hashes,[]));pending=true;Write(null);
+        }
+        internal void After(OrtTensor[] outputs)
+        {
+            Check();if(!pending||outputs.Length!=5)throw new InvalidOperationException("Actual pending encoder output tuple required.");
+            calls[^1]=calls[^1]with{Outputs=outputs.Select(Read).ToArray()};pending=false;Write(null);
+        }
+        internal void Complete(string originalCapture)
+        {
+            Check();if(pending||calls.Count!=18)throw new InvalidDataException("All six fresh/unchanged/current encoder cohorts required.");
+            complete=true;using var stream=File.OpenRead(originalCapture);Write(Convert.ToHexStringLower(SHA256.HashData(stream)));
+        }
+        private void Write(string? captureSha)
+        {
+            var value=new EncoderTrace(1,"ISOLATED_ACTUAL_ENCODER_INPUT_OUTPUT_HASHES_NO_EXTRA_INFERENCE",runtime,complete,pending,readBytes,captureSha,calls.ToArray());
+            using(var file=File.Create(output+".tmp"))JsonSerializer.Serialize(file,value,EncoderTraceJson.Default.EncoderTrace);
+            File.Move(output+".tmp",output,true);
+        }
+        public void Dispose()
+        {if(disposed)return;try{if(!complete)Write(null);}finally{disposed=true;if(ReferenceEquals(current,this))current=null;}}
+    }
+}
+internal sealed record TensorHash(int Type,long[] Shape,long Elements,long Bytes,string Sha256);
+internal sealed record EncoderTuple(int Ordinal,TensorHash[] Inputs,TensorHash[] Outputs);
+internal sealed record EncoderTrace(int Schema,string Scope,string Runtime,bool Complete,bool Pending,long ReadBytes,string? CaptureSha256,EncoderTuple[] Calls);
+[JsonSourceGenerationOptions][JsonSerializable(typeof(EncoderTrace))]
+internal partial class EncoderTraceJson:JsonSerializerContext;

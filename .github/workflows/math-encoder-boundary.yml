@@ -1,0 +1,84 @@
+name: Math encoder boundary diagnostics
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  observe:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    env:
+      DOTNET_PROCESSOR_COUNT: '2'
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_CLI_USE_MSBUILD_SERVER: '0'
+      NOVAPEN_MATH_RAW_ATTENTION: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            11.0.100-preview.7.26381.103
+            10.0.401
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
+      - name: Prepare and authenticate isolated observer before inference
+        shell: pwsh
+        run: |
+          $root = '.artifacts/math-encoder'
+          python -B tools/ci/prepare_math_encoder_boundary.py $root
+          if ($LASTEXITCODE -ne 0) { throw 'Isolated preparation failed' }
+          $project = "$root/stage/tools/LegacyMathCurrentSelectedIngress.Probe/LegacyMathCurrentSelectedIngress.Probe.csproj"
+          dotnet build $project -c Release --artifacts-path "$root/build" --disable-build-servers -m:1 -nodeReuse:false -p:UseSharedCompilation=false -p:EmitCompilerGeneratedFiles=true -p:DebugType=portable -p:DebugSymbols=true -p:RuntimeFrameworkVersion=10.0.12 -p:RollForward=Disable
+          if ($LASTEXITCODE -ne 0) { throw 'Diagnostic build failed' }
+          python -B tools/ci/audit_math_encoder_boundary.py --prove-build "$root/stage" "$root/build" "$root/pdb-proof.json"
+          if ($LASTEXITCODE -ne 0) { throw 'Authored source/PDB proof failed' }
+      - name: Observe actual encoder calls in repeated Managed and Native AOT
+        shell: pwsh
+        run: |
+          $root = '.artifacts/math-encoder'
+          $rid = switch ("${{ runner.os }}/${{ runner.arch }}") {
+            'Windows/X64' { 'win-x64' }
+            'Linux/X64' { 'linux-x64' }
+            'macOS/ARM64' { 'osx-arm64' }
+            'macOS/X64' { 'osx-x64' }
+            default { throw 'Unsupported architecture' }
+          }
+          $lib = if ($IsWindows) { 'onnxruntime.dll' } elseif ($IsMacOS) { 'libonnxruntime.dylib' } else { 'libonnxruntime.so' }
+          python tools/fetch-ink-math-runtime.py $rid --output "$root/runtime"
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned runtime fetch failed' }
+          python tools/export-ink-math-model.py models/math2/math2-unwrapped.res --output "$root/model.ikrmath"
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned model export failed' }
+          $fixtures = 'tools/LegacyMathCurrentSelectedIngress.Probe/fixtures'
+          $inputs = @("$root/model.ikrmath", 'models/math2/math2-unwrapped.res', "$root/runtime/runtimes/$rid/native/$lib", "$fixtures/append-geometries.json", "$fixtures/unchanged-prior-reference.json", "$fixtures/frozen-actual-math6.json")
+          $entry = "$root/build/bin/LegacyMathCurrentSelectedIngress.Probe/release/LegacyMathFreshPublisher.Probe.dll"
+          dotnet exec --fx-version 10.0.12 --roll-forward Disable $entry @inputs "$root/managed.json"
+          if ($LASTEXITCODE -ne 0) { throw 'Managed observation failed' }
+          dotnet exec --fx-version 10.0.12 --roll-forward Disable $entry @inputs "$root/managed-repeat.json"
+          if ($LASTEXITCODE -ne 0) { throw 'Repeated observation failed' }
+          $project = "$root/stage/tools/LegacyMathCurrentSelectedIngress.Probe/LegacyMathCurrentSelectedIngress.Probe.csproj"
+          dotnet publish $project -c Release -r $rid --artifacts-path "$root/build" -p:PublishAot=true -p:EmitCompilerGeneratedFiles=true -m:1 --disable-build-servers -p:UseSharedCompilation=false -o "$root/native"
+          if ($LASTEXITCODE -ne 0) { throw 'Diagnostic Native AOT publish failed' }
+          $suffix = if ($IsWindows) { '.exe' } else { '' }
+          & "$root/native/LegacyMathFreshPublisher.Probe$suffix" @inputs "$root/native.json"
+          if ($LASTEXITCODE -ne 0) { throw 'Native observation failed' }
+          python -B tools/ci/audit_math_encoder_boundary.py "$root/managed.json.encoder.json" "$root/managed.json" "$root/managed-repeat.json.encoder.json" "$root/native.json.encoder.json" | Out-File "$root/encoder-audit.json" -Encoding utf8
+          if ($LASTEXITCODE -ne 0) { throw 'Encoder tuple consistency failed' }
+          python -B tools/LegacyMathCurrentSelectedIngress.Probe/audit_attention.py "$root/managed.json.attention.json" "$root/managed.json" "$root/managed-repeat.json.attention.json" "$root/native.json.attention.json" | Out-File "$root/attention-audit.json" -Encoding utf8
+          if ($LASTEXITCODE -ne 0) { throw 'Retained actual histories differ' }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: math-encoder-${{ matrix.os }}
+          path: |
+            .artifacts/math-encoder/*.json
+            .artifacts/math-encoder/runtime/**/runtime-provenance.json
